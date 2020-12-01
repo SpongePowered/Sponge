@@ -87,7 +87,7 @@ public abstract class SpongeScheduler implements Scheduler {
      * @param task The task to add
      */
     protected void addTask(final SpongeScheduledTask task) {
-        task.setTimestamp(getTimestamp(task));
+        task.setTimestamp(this.getTimestamp(task));
         this.taskMap.put(task.getUniqueId(), task);
     }
 
@@ -112,7 +112,7 @@ public abstract class SpongeScheduler implements Scheduler {
     public Set<ScheduledTask> getTasksByName(String pattern) {
         checkNotNull(pattern, "pattern");
         final Pattern searchPattern = Pattern.compile(pattern);
-        final Set<ScheduledTask> matchingTasks = getTasks();
+        final Set<ScheduledTask> matchingTasks = this.getTasks();
 
         final Iterator<ScheduledTask> it = matchingTasks.iterator();
         while (it.hasNext()) {
@@ -137,7 +137,7 @@ public abstract class SpongeScheduler implements Scheduler {
         checkNotNull(plugin, "plugin");
         final String testOwnerId = plugin.getMetadata().getId();
 
-        final Set<ScheduledTask> allTasks = getTasks();
+        final Set<ScheduledTask> allTasks = this.getTasks();
         final Iterator<ScheduledTask> it = allTasks.iterator();
 
         while (it.hasNext()) {
@@ -295,12 +295,12 @@ public abstract class SpongeScheduler implements Scheduler {
 
     public <V> Future<V> execute(Callable<V> callable) {
         final FutureTask<V> runnable = new FutureTask<>(callable);
-        submit(new SpongeTaskBuilder().execute(runnable).plugin(SpongeCommon.getPlugin()).build());
+        this.submit(new SpongeTaskBuilder().execute(runnable).plugin(SpongeCommon.getPlugin()).build());
         return runnable;
     }
 
     public Future<?> execute(Runnable runnable) {
-        return execute(() -> {
+        return this.execute(() -> {
             runnable.run();
             return null;
         });

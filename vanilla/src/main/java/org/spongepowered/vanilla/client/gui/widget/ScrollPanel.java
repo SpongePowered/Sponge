@@ -92,7 +92,7 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
     }
 
     private void applyScrollLimits() {
-        int max = Math.max(0, getMaxScroll());
+        int max = Math.max(0, this.getMaxScroll());
 
         if (this.scrollDistance < 0.0F) {
             this.scrollDistance = 0.0F;
@@ -106,8 +106,8 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
     @Override
     public boolean mouseScrolled(final double mouseX, final double mouseY, final double scroll) {
         if (scroll != 0) {
-            this.scrollDistance += -scroll * getScrollAmount();
-            applyScrollLimits();
+            this.scrollDistance += -scroll * this.getScrollAmount();
+            this.applyScrollLimits();
             return true;
         }
         return false;
@@ -166,10 +166,10 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
     @Override
     public boolean mouseDragged(final double mouseX, final double mouseY, final int button, final double deltaX, final double deltaY) {
         if (this.scrolling) {
-            final int maxScroll = this.height - getBarHeight();
+            final int maxScroll = this.height - this.getBarHeight();
             final double moved = deltaY / maxScroll;
-            this.scrollDistance += getMaxScroll() * moved;
-            applyScrollLimits();
+            this.scrollDistance += this.getMaxScroll() * moved;
+            this.applyScrollLimits();
             return true;
         }
         return false;
@@ -210,7 +210,7 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
 
         final int extraHeight = (this.getContentHeight() + this.border) - this.height;
         if (extraHeight > 0) {
-            final int barHeight = getBarHeight();
+            final int barHeight = this.getBarHeight();
 
             int barTop = (int) this.scrollDistance * (this.height - barHeight) / extraHeight + this.top;
             if (barTop < this.top) {

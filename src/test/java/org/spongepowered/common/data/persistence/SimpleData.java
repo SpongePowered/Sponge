@@ -88,7 +88,7 @@ final class SimpleData implements DataSerializable {
         if (this == other) {
             return true;
         }
-        if (other == null || getClass() != other.getClass()) {
+        if (other == null || this.getClass() != other.getClass()) {
             return false;
         }
         final SimpleData that = (SimpleData) other;

@@ -28,17 +28,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.potion.Effect;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
-import net.minecraft.potion.Effect;
 
 public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> implements PotionEffect.Builder {
 
@@ -51,7 +51,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
 
     public SpongePotionBuilder() {
         super(PotionEffect.class, Constants.Sponge.Potion.CURRENT_VERSION);
-        reset();
+        this.reset();
     }
 
     @Override

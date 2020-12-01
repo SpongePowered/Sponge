@@ -67,12 +67,12 @@ public final class SpongeDataRegistration implements DataRegistration {
 
     @Override
     public Optional<DataStore> getDataStore(final TypeToken<? extends DataHolder> token) {
-        return getDataStore0(token.getType());
+        return this.getDataStore0(token.getType());
     }
 
     @Override
     public Optional<DataStore> getDataStore(final Class<? extends DataHolder> token) {
-        return getDataStore0(token);
+        return this.getDataStore0(token);
     }
 
     private Optional<DataStore> getDataStore0(final Type type) {

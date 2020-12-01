@@ -120,7 +120,7 @@ public abstract class AbstractPacketChannel extends SpongeChannel implements Tra
     protected SpongePacketBinding<Packet> requireBinding(final int opcode) {
         final SpongePacketBinding<Packet> binding = (SpongePacketBinding<Packet>) this.byOpcode.get(opcode);
         if (binding == null) {
-            throw new ChannelException("Unknown opcode " + opcode + " for channel " + getKey());
+            throw new ChannelException("Unknown opcode " + opcode + " for channel " + this.getKey());
         }
         return binding;
     }
@@ -128,7 +128,7 @@ public abstract class AbstractPacketChannel extends SpongeChannel implements Tra
     protected SpongePacketBinding<Packet> requireBinding(final Class<? extends Packet> packet) {
         final SpongePacketBinding<Packet> binding = (SpongePacketBinding<Packet>) this.byType.get(packet);
         if (binding == null) {
-            throw new ChannelException("Unknown packet type " + packet + " for channel " + getKey());
+            throw new ChannelException("Unknown packet type " + packet + " for channel " + this.getKey());
         }
         return binding;
     }

@@ -32,11 +32,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.ConfigurationOptions;
-import org.spongepowered.configurate.gson.GsonConfigurationLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
@@ -45,8 +40,13 @@ import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.event.advancement.CriterionEvent;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.gson.GsonConfigurationLoader;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
@@ -150,7 +150,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> typeSerializableConfig(final Class<T> configClass,
             final UnaryOperator<ConfigurationOptions> transformer) {
         requireNonNull(transformer, "transformer");
-        return typeSerializableConfig(configClass, transformer.apply(SpongeTriggerBuilder.defaultOptions()));
+        return this.typeSerializableConfig(configClass, transformer.apply(SpongeTriggerBuilder.defaultOptions()));
     }
 
     private static class ConfigurateConstructor<C extends FilteredTriggerConfiguration> implements Function<JsonObject, C> {

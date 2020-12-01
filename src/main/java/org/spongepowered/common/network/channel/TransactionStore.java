@@ -49,7 +49,7 @@ public final class TransactionStore {
             .removalListener((RemovalListener<Integer, Entry>) (key, value, cause) -> {
                 if (cause == RemovalCause.EXPIRED && value != null) {
                     value.getChannel().handleTransactionResponse(
-                            getConnection(), value.getData(), TransactionResult.failure(new TimeoutException()));
+                        this.getConnection(), value.getData(), TransactionResult.failure(new TimeoutException()));
                 }
             })
             .build().asMap();

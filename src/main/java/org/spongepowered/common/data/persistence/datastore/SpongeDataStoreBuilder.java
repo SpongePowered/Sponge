@@ -99,7 +99,8 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
             throw new UnsupportedOperationException("Collection deserialization is not supported. Provide the deserializer for it.");
         } else if (Types.isArray(elementType)) {
             final Class arrayType = GenericTypeReflector.erase(GenericTypeReflector.getArrayComponentType(elementType));
-            deserializer = (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) arrayType, view, dataQuery).map(list -> listToArray(arrayType, list));
+            deserializer = (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) arrayType, view, dataQuery).map(list -> this
+                .listToArray(arrayType, list));
         } else if (Map.class.isAssignableFrom(rawType)) {
             final Type[] parameterTypes = ((ParameterizedType) elementType).getActualTypeArguments();
             final Type keyType = parameterTypes[0];

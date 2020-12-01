@@ -365,7 +365,7 @@ public class DataProviderRegistrator {
                         return registration.deleteAndGet.apply(dataHolder);
                     }
                     if (registration.resetOnDelete != null) {
-                        return setAndGetResult(dataHolder, registration.resetOnDelete.apply(dataHolder));
+                        return this.setAndGetResult(dataHolder, registration.resetOnDelete.apply(dataHolder));
                     }
                     return super.deleteAndGetResult(dataHolder);
                 }

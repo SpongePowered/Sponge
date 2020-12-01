@@ -60,7 +60,7 @@ public final class ParticleTest {
         final Command.Parameterized myCommand = Command.builder()
                 .parameter(particleType)
                 .setExecutor(context -> {
-                    spawnParticles(context.getCause().first(ServerPlayer.class).get(), context.requireOne(particleType));
+                    this.spawnParticles(context.getCause().first(ServerPlayer.class).get(), context.requireOne(particleType));
                     return CommandResult.success();
                 })
                 .build();

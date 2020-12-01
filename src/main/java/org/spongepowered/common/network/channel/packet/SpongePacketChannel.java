@@ -312,12 +312,12 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                     @Override
                     protected void fail0(final ChannelException exception) {
                         // TODO: Use response failure?
-                        sendResponsePacketTo(connection, null, null, transactionId);
+                        SpongePacketChannel.this.sendResponsePacketTo(connection, null, null, transactionId);
                     }
 
                     @Override
                     protected void success0(final Packet response) {
-                        sendResponsePacketTo(connection, (SpongeTransactionalPacketBinding) binding, response, transactionId);
+                        SpongePacketChannel.this.sendResponsePacketTo(connection, (SpongeTransactionalPacketBinding) binding, response, transactionId);
                     }
                 };
                 try {

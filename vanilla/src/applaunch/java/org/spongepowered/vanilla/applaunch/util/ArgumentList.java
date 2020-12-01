@@ -126,7 +126,7 @@ public class ArgumentList {
     public void putLazy(final String key, final String value) {
         final EntryValue ent = this.values.get(key);
         if (ent == null) {
-            addArg(true, "--" + key, value);
+            this.addArg(true, "--" + key, value);
         } else if (ent.getValue() == null) {
             ent.setValue(value);
         }
@@ -175,7 +175,7 @@ public class ArgumentList {
             if (this.split) {
                 return new String[]{this.prefix + this.getKey(), this.getValue()};
             }
-            return new String[]{this.prefix + getKey() + '=' + this.getValue()};
+            return new String[]{this.prefix + this.getKey() + '=' + this.getValue()};
         }
 
         @Override

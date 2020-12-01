@@ -137,7 +137,7 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
     @SuppressWarnings("unchecked")
     public void populateOffers(final Merchant merchant, final List<MerchantOffer> currentOffers,
         final VillagerData data, final Random random) {
-        populateOffers(merchant, (List<TradeOffer>) (List<?>) currentOffers, (ProfessionType) data.getProfession(),
+        this.populateOffers(merchant, (List<TradeOffer>) (List<?>) currentOffers, (ProfessionType) data.getProfession(),
             data.getLevel(), random);
     }
 

@@ -37,6 +37,7 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.client.gui.screen.PluginScreen;
 import org.spongepowered.vanilla.util.Bounds;
 
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -47,8 +48,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public final class MetadataPanel extends ScrollPanel {
 
@@ -138,7 +137,7 @@ public final class MetadataPanel extends ScrollPanel {
                 final int valueX = separatorX + this.minecraft.fontRenderer.getStringWidth(":") + 4;
                 final int maxWidth = this.width - valueX - 8;
                 if (maxWidth >= 0) {
-                    final List<String> lines = Arrays.asList(efficientWrapper(entry.rawValue, maxWidth).split("\n"));
+                    final List<String> lines = Arrays.asList(this.efficientWrapper(entry.rawValue, maxWidth).split("\n"));
                     newEntries.add(new Entry(entry.rawKey, lines.get(0), entry.level, entry.rawValue));
                     newEntries.addAll(lines.stream().skip(1).map(l -> new Entry(null, l, entry.level, entry.rawValue)).collect(Collectors.toList()));
                 }

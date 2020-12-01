@@ -27,16 +27,16 @@ package org.spongepowered.common.applaunch.config.core;
 import static java.util.Objects.requireNonNull;
 
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.NodePath;
-import org.spongepowered.configurate.loader.ConfigurationLoader;
-import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.NodePath;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.Iterator;
@@ -178,7 +178,7 @@ public class ConfigHandle<T extends Config> {
             ConfigHandle.saveQueue.add(this);
         } else {
             try {
-                doSave();
+                this.doSave();
             } catch (final ConfigurateException ex) {
                 LOGGER.error("Unable to save configuration to {}", this.loader, ex);
             }
