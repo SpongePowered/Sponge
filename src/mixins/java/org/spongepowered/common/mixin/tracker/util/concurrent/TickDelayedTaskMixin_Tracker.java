@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 @Mixin(TickDelayedTask.class)
-public class TickDelayedTaskMixin_Tracker implements TrackedTickDelayedTaskBridge {
+public abstract class TickDelayedTaskMixin_Tracker implements TrackedTickDelayedTaskBridge {
 
     private @MonotonicNonNull BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame> impl$stackFramePopulator;
 

@@ -64,7 +64,7 @@ Are you a talented programmer looking to contribute some code? We'd love the hel
 [Gradle]: https://gradle.org/
 [Homepage]: https://spongepowered.org/
 [IntelliJ]: http://www.jetbrains.com/idea/
-[Issues]: https://github.com/SpongePowered/SpongeCommon/issues
+[Issues]: https://github.com/SpongePowered/Sponge/issues
 [Documentation]: https://docs.spongepowered.org/
 [Java]: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 [Source]: https://github.com/SpongePowered/Sponge/

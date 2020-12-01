@@ -1,4 +1,4 @@
-rootProject.name = "SpongeCommon"
+rootProject.name = "Sponge"
 
 include("SpongeAPI")
 include(":SpongeVanilla")
@@ -29,7 +29,7 @@ if (spongeForge.exists()) {
     apply(from = spongeForge)
 } else {
     spongeForge.writeText("// Uncomment to enable SpongeForge module.\n" +
-            "// By default only SpongeCommon and SpongeVanilla are made available\n" +
+            "// By default only Sponge and SpongeVanilla are made available\n" +
             "//include(\":SpongeForge\")\n" +
             "//project(\":SpongeForge\").projectDir = file(\"forge\")\n")
 }

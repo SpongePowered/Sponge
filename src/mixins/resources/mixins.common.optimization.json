@@ -1,7 +1,7 @@
 {
     "minVersion": "0.8",
     "package": "org.spongepowered.common.mixin.optimization",
-    "refmap": "mixins.common.refmap.json",
+    "refmap": "sponge.mixins.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",

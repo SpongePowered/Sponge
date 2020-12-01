@@ -45,7 +45,7 @@ tasks {
     jar {
         manifest {
             attributes(mapOf(
-                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Title" to "Sponge",
                     "Specification-Vendor" to "SpongePowered",
                     "Specification-Version" to apiProject.version,
                     "Implementation-Title" to project.name,
@@ -59,7 +59,7 @@ tasks {
         getArchiveClassifier().set("mixins")
         manifest {
             attributes(mapOf(
-                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Title" to "Sponge",
                     "Specification-Vendor" to "SpongePowered",
                     "Specification-Version" to apiProject.version,
                     "Implementation-Title" to project.name,
@@ -74,7 +74,7 @@ tasks {
         getArchiveClassifier().set("accessors")
         manifest {
             attributes(mapOf(
-                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Title" to "Sponge",
                     "Specification-Vendor" to "SpongePowered",
                     "Specification-Version" to apiProject.version,
                     "Implementation-Title" to project.name,
@@ -89,7 +89,7 @@ tasks {
         getArchiveClassifier().set("launch")
         manifest {
             attributes(mapOf(
-                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Title" to "Sponge",
                     "Specification-Vendor" to "SpongePowered",
                     "Specification-Version" to apiProject.version,
                     "Implementation-Title" to project.name,
@@ -104,7 +104,7 @@ tasks {
         getArchiveClassifier().set("applaunch")
         manifest {
             attributes(mapOf(
-                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Title" to "Sponge",
                     "Specification-Vendor" to "SpongePowered",
                     "Specification-Version" to apiProject.version,
                     "Implementation-Title" to project.name,
@@ -266,8 +266,8 @@ dependencies {
 }
 val extraSrgs = file("extra.srgs")
 mixin {
-    add("mixins", "spongecommon.mixins.refmap.json")
-    add("accessors", "spongecommon.accessors.refmap.json")
+    add("mixins", "sponge.mixins.refmap.json")
+    add("accessors", "sponge.accessors.refmap.json")
 }
 fun debug(logger: Logger, messsage: String) {
     println(message = messsage)
@@ -428,7 +428,7 @@ tasks {
             attributes(mapOf(
                     "AT" to "common_at.cfg",
                     "Multi-Release" to true,
-                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Title" to "Sponge",
                     "Specification-Vendor" to "SpongePowered",
                     "Specification-Version" to apiProject.version,
                     "Implementation-Title" to project.name,
@@ -475,8 +475,8 @@ publishing {
                     }
                 }
                 scm {
-                    connection.set("scm:git:git://github.com/SpongePowered/SpongeCommon.git")
-                    developerConnection.set("scm:git:ssh://github.com/SpongePowered/SpongeCommon.git")
+                    connection.set("scm:git:git://github.com/SpongePowered/Sponge.git")
+                    developerConnection.set("scm:git:ssh://github.com/SpongePowered/Sponge.git")
                     this.url.set(projectUrl)
                 }
             }
@@ -755,7 +755,7 @@ project("SpongeVanilla") {
             getArchiveClassifier().set("installer")
             manifest {
                 attributes(mapOf(
-                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Title" to "Sponge",
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
@@ -769,7 +769,7 @@ project("SpongeVanilla") {
             getArchiveClassifier().set("applaunch")
             manifest {
                 attributes(mapOf(
-                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Title" to "Sponge",
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
@@ -783,7 +783,7 @@ project("SpongeVanilla") {
             getArchiveClassifier().set("launch")
             manifest {
                 attributes(mapOf(
-                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Title" to "Sponge",
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
@@ -797,7 +797,7 @@ project("SpongeVanilla") {
             getArchiveClassifier().set("mixins")
             manifest {
                 attributes(mapOf(
-                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Title" to "Sponge",
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
@@ -811,7 +811,7 @@ project("SpongeVanilla") {
             getArchiveClassifier().set("accessors")
             manifest {
                 attributes(mapOf(
-                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Title" to "Sponge",
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
@@ -931,8 +931,8 @@ project("SpongeVanilla") {
                         }
                     }
                     scm {
-                        connection.set("scm:git:git://github.com/SpongePowered/SpongeCommon.git")
-                        developerConnection.set("scm:git:ssh://github.com/SpongePowered/SpongeCommon.git")
+                        connection.set("scm:git:git://github.com/SpongePowered/Sponge.git")
+                        developerConnection.set("scm:git:ssh://github.com/SpongePowered/Sponge.git")
                         this.url.set(projectUrl)
                     }
                 }
