@@ -360,7 +360,7 @@ allprojects {
         withType<PublishToMavenRepository>().configureEach {
             onlyIf {
                 (repository == publishing.repositories["GitHubPackages"] &&
-                        !publication.version.endsWith("-SNAPSHOT")) ||
+                        !(rootProject.version as String).endsWith("-SNAPSHOT")) ||
                         (!spongeSnapshotRepo.isNullOrBlank()
                                 && !spongeReleaseRepo.isNullOrBlank()
                                 && repository == publishing.repositories["spongeRepo"]
@@ -388,7 +388,7 @@ allprojects {
             repositories {
                 maven {
                     name = "GitHubPackages"
-                    this.url = uri("https://maven.pkg.github.com/spongepowered/${project.name}")
+                    this.url = uri("https://maven.pkg.github.com/SpongePowered/${rootProject.name}")
                     credentials {
                         username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USERNAME")
                         password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
