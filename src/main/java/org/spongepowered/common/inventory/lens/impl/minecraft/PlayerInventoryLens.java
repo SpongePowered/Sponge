@@ -90,12 +90,12 @@ public class PlayerInventoryLens extends AbstractLens {
             equipmentLenses.put(EquipmentTypes.CHEST.get(), slots.getSlotLens(base + 1));
             equipmentLenses.put(EquipmentTypes.LEGS.get(), slots.getSlotLens(base + 2));
             equipmentLenses.put(EquipmentTypes.FEET.get(), slots.getSlotLens(base + 3));
-            base += ARMOR; // 4
+            base += PlayerInventoryLens.ARMOR; // 4
             this.primary = new PrimaryPlayerInventoryLens(base, slots, true);
             base += this.primary.slotCount();
             this.offhand = slots.getSlotLens(base);
 
-            base += OFFHAND;
+            base += PlayerInventoryLens.OFFHAND;
             equipmentLenses.put(EquipmentTypes.OFF_HAND.get(), this.offhand);
         } else {
             this.primary = new PrimaryPlayerInventoryLens(base, slots, false);
@@ -107,10 +107,10 @@ public class PlayerInventoryLens extends AbstractLens {
             equipmentLenses.put(EquipmentTypes.CHEST.get(), slots.getSlotLens(base + 2));
             equipmentLenses.put(EquipmentTypes.HEAD.get(), slots.getSlotLens(base + 3));
 
-            base += ARMOR;
+            base += PlayerInventoryLens.ARMOR;
             this.offhand = slots.getSlotLens(base);
 
-            base += OFFHAND;
+            base += PlayerInventoryLens.OFFHAND;
             equipmentLenses.put(EquipmentTypes.OFF_HAND.get(), this.offhand);
         }
 

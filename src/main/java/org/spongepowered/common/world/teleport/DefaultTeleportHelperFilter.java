@@ -62,7 +62,7 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return !NOT_SAFE_FLOOR.contains(((net.minecraft.block.BlockState) blockState).getMaterial());
+        return !DefaultTeleportHelperFilter.NOT_SAFE_FLOOR.contains(((net.minecraft.block.BlockState) blockState).getMaterial());
     }
 
     @Override

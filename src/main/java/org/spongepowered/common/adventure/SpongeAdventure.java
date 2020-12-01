@@ -25,10 +25,6 @@
 package org.spongepowered.common.adventure;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
-import java.util.ArrayList;
-import java.util.EnumSet;
-
 import io.netty.util.AttributeKey;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
@@ -45,7 +41,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
-import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.Codec;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
@@ -60,8 +55,8 @@ import net.minecraft.world.BossInfo;
 import net.minecraft.world.server.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.adventure.SpongeComponents;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
@@ -69,6 +64,8 @@ import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -102,7 +99,7 @@ public final class SpongeAdventure {
     };
 
     public static final ConfigurateComponentSerializer CONFIGURATE = ConfigurateComponentSerializer.builder()
-            .scalarSerializer(GSON)
+            .scalarSerializer(SpongeAdventure.GSON)
             .build();
 
     private static final Set<ServerBossInfo> ACTIVE_BOSS_BARS = ConcurrentHashMap.newKeySet();
@@ -132,11 +129,11 @@ public final class SpongeAdventure {
     }
 
     public static Component json(final String string) {
-        return GSON.deserialize(string);
+        return SpongeAdventure.GSON.deserialize(string);
     }
 
     public static String json(final Component string) {
-        return GSON.serialize(string);
+        return SpongeAdventure.GSON.serialize(string);
     }
 
     public static String plain(final Component component) {
@@ -307,7 +304,7 @@ public final class SpongeAdventure {
     public static List<Component> json(final List<String> strings) {
         final List<Component> components = new ArrayList<>();
         for (final String string : strings) {
-            components.add(json(string));
+            components.add(SpongeAdventure.json(string));
         }
         return components;
     }
@@ -315,7 +312,7 @@ public final class SpongeAdventure {
     public static ListNBT listTagJson(final List<Component> components) {
         final ListNBT nbt = new ListNBT();
         for (final Component component : components) {
-            nbt.add(StringNBT.valueOf(json(component)));
+            nbt.add(StringNBT.valueOf(SpongeAdventure.json(component)));
         }
         return nbt;
     }
@@ -421,7 +418,7 @@ public final class SpongeAdventure {
             return null;
         }
         try {
-            return BinaryTagHolder.encode(tag, NBT_CODEC);
+            return BinaryTagHolder.encode(tag, SpongeAdventure.NBT_CODEC);
         } catch (final IOException e) {
             return null;
         }
@@ -440,7 +437,7 @@ public final class SpongeAdventure {
         if (key == null) {
             return null;
         }
-        return asVanilla(key);
+        return SpongeAdventure.asVanilla(key);
     }
 
     // Sound
@@ -481,7 +478,7 @@ public final class SpongeAdventure {
         if (source == null) {
             return null;
         }
-        return asVanilla(source);
+        return SpongeAdventure.asVanilla(source);
     }
 
     public static class Factory implements SpongeComponents.Factory {
@@ -499,14 +496,14 @@ public final class SpongeAdventure {
     // So we can update viewed bars for players when their locales change
 
     public static void registerBossBar(final ServerBossInfo mcBar) {
-        ACTIVE_BOSS_BARS.add(mcBar);
+        SpongeAdventure.ACTIVE_BOSS_BARS.add(mcBar);
     }
 
     public static void unregisterBossBar(final ServerBossInfo mcBar) {
-        ACTIVE_BOSS_BARS.remove(mcBar);
+        SpongeAdventure.ACTIVE_BOSS_BARS.remove(mcBar);
     }
 
     public static void forEachBossBar(final Consumer<ServerBossInfo> info) {
-        ACTIVE_BOSS_BARS.forEach(info);
+        SpongeAdventure.ACTIVE_BOSS_BARS.forEach(info);
     }
 }

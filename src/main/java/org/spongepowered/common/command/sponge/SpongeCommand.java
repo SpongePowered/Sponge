@@ -49,9 +49,9 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.SpongeHooks;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
-import org.spongepowered.common.hooks.SpongeHooks;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginContributor;
 import org.spongepowered.plugin.metadata.PluginMetadata;
@@ -282,7 +282,7 @@ public class SpongeCommand {
         for (final PluginContainer specificContainer : plugins) {
             final PluginMetadata metadata = specificContainer.getMetadata();
             final TextComponent.Builder builder = Component.text();
-            this.createShortContainerMeta(builder.append(INDENT_COMPONENT), metadata);
+            this.createShortContainerMeta(builder.append(SpongeCommand.INDENT_COMPONENT), metadata);
             // builder.clickEvent(SpongeComponents.executeCallback(cause ->
             //         cause.sendMessage(this.createContainerMeta(metadata))));
             context.sendMessage(Identity.nil(), builder.build());
@@ -419,9 +419,9 @@ public class SpongeCommand {
 
     private TextComponent.Builder appendTickTime(final long[] tickTimes, final TextComponent.Builder builder) {
         final double averageTickTime = MathHelper.average(tickTimes) * 1.0E-6D;
-        builder.append(Component.text(THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (averageTickTime), 20)), NamedTextColor.LIGHT_PURPLE))
+        builder.append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (averageTickTime), 20)), NamedTextColor.LIGHT_PURPLE))
                 .append(Component.text(", Mean: "))
-                .append(Component.text(THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime) + "ms", NamedTextColor.RED));
+                .append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime) + "ms", NamedTextColor.RED));
         return builder;
     }
 

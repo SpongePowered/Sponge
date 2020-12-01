@@ -65,7 +65,7 @@ public abstract class LeavesBlockMixin_DisablePersistentScheduledUpdate {
      */
     @Overwrite
     public BlockState updatePostPlacement(final BlockState stateIn, final Direction facing, final BlockState facingState, final IWorld worldIn, final BlockPos currentPos, final BlockPos facingPos) {
-        final int i = shadow$getDistance(facingState) + 1;
+        final int i = LeavesBlockMixin_DisablePersistentScheduledUpdate.shadow$getDistance(facingState) + 1;
 
         if (i != 1 || stateIn.get(LeavesBlockMixin_DisablePersistentScheduledUpdate.DISTANCE) != i) {
             // Sponge Start - Directly provide the updated distance instead of scheduling an update

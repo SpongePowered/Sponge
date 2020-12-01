@@ -35,8 +35,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
@@ -57,9 +57,8 @@ import org.spongepowered.common.service.server.permission.SpongePermissions;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.function.Supplier;
-
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 @Mixin(CommandSource.class)
 public abstract class CommandSourceMixin implements CommandSourceBridge {
@@ -68,7 +67,7 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
             + "Lnet/minecraft/util/math/Vec2f;Lnet/minecraft/world/server/ServerWorld;ILjava/lang/String;Lnet/minecraft/util/text/ITextComponent;"
             + "Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/entity/Entity;ZLcom/mojang/brigadier/ResultConsumer;"
             + "Lnet/minecraft/command/arguments/EntityAnchorArgument$Type;)";
-    private static final String PROTECTED_CTOR_METHOD = "<init>" + PROTECTED_CTOR + "V";
+    private static final String PROTECTED_CTOR_METHOD = "<init>" + CommandSourceMixin.PROTECTED_CTOR + "V";
 
     @Shadow @Final private ICommandSource source;
     @Shadow @Final @Mutable private Vec3d pos;
@@ -79,7 +78,7 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
     private Cause impl$cause;
     @Nullable private Supplier<String> impl$potentialPermissionNode = null;
 
-    @Inject(method = PROTECTED_CTOR_METHOD, at = @At("RETURN"))
+    @Inject(method = CommandSourceMixin.PROTECTED_CTOR_METHOD, at = @At("RETURN"))
     private void impl$setCauseOnConstruction(
             final ICommandSource p_i49553_1_,
             final Vec3d p_i49553_2_,

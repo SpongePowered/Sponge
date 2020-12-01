@@ -33,9 +33,9 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NBTCollectors;
 import org.spongepowered.common.util.NBTStreams;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
 import java.util.Set;
@@ -51,11 +51,11 @@ public final class BlockTypeItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.BREAKABLE_BLOCK_TYPES)
-                        .get(h -> get(h, Constants.Item.ITEM_BREAKABLE_BLOCKS))
-                        .set((h, v) -> set(h, Constants.Item.ITEM_BREAKABLE_BLOCKS, v))
+                        .get(h -> BlockTypeItemStackData.get(h, Constants.Item.ITEM_BREAKABLE_BLOCKS))
+                        .set((h, v) -> BlockTypeItemStackData.set(h, Constants.Item.ITEM_BREAKABLE_BLOCKS, v))
                     .create(Keys.PLACEABLE_BLOCK_TYPES)
-                        .get(h -> get(h, Constants.Item.ITEM_PLACEABLE_BLOCKS))
-                        .set((h, v) -> set(h, Constants.Item.ITEM_PLACEABLE_BLOCKS, v));
+                        .get(h -> BlockTypeItemStackData.get(h, Constants.Item.ITEM_PLACEABLE_BLOCKS))
+                        .set((h, v) -> BlockTypeItemStackData.set(h, Constants.Item.ITEM_PLACEABLE_BLOCKS, v));
     }
     // @formatter:on
 

@@ -33,11 +33,11 @@ import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.config.ConfigRoot;
+import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
-import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.objectmapping.guice.GuiceObjectMapperProvider;
 import org.spongepowered.configurate.reference.ConfigurationReference;
@@ -77,22 +77,22 @@ public final class PluginConfigurationModule extends AbstractModule {
                 .in(Scopes.SINGLETON);
 
         // Loader for shared-directory config file
-        this.bind(COMMENTED_CONFIGURATION_NODE_LOADER)
+        this.bind(PluginConfigurationModule.COMMENTED_CONFIGURATION_NODE_LOADER)
                 .annotatedWith(DefaultConfigAnnotation.SHARED)
                 .toProvider(SharedCommentedConfigurationNode.class);
 
         // Loader for plugin-private directory config file
-        this.bind(COMMENTED_CONFIGURATION_NODE_LOADER)
+        this.bind(PluginConfigurationModule.COMMENTED_CONFIGURATION_NODE_LOADER)
                 .annotatedWith(DefaultConfigAnnotation.NON_SHARED)
                 .toProvider(PrivateCommentedConfigurationNode.class);
 
         // Auto-reloading reference for shared-directory config files
-        this.bind(COMMENTED_CONFIGURATION_NODE_REFERENCE)
+        this.bind(PluginConfigurationModule.COMMENTED_CONFIGURATION_NODE_REFERENCE)
                 .annotatedWith(DefaultConfigAnnotation.SHARED)
                 .toProvider(SharedCommentedConfigurationNodeReference.class);
 
         // Auto-reloading reference for plugin-private directory config files
-        this.bind(COMMENTED_CONFIGURATION_NODE_REFERENCE)
+        this.bind(PluginConfigurationModule.COMMENTED_CONFIGURATION_NODE_REFERENCE)
                 .annotatedWith(DefaultConfigAnnotation.NON_SHARED)
                 .toProvider(PrivateCommentedConfigurationNodeReference.class);
 

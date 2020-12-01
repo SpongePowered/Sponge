@@ -182,7 +182,7 @@ public final class VecHelper {
     }
 
     public static boolean inBounds(Vector3d pos, Vector3i min, Vector3i max) {
-        return inBounds(pos.getX(), pos.getY(), pos.getZ(), min, max);
+        return VecHelper.inBounds(pos.getX(), pos.getY(), pos.getZ(), min, max);
     }
 
     public static boolean inBounds(double x, double y, double z, Vector3i min, Vector3i max) {

@@ -30,6 +30,7 @@ import com.google.common.hash.Hashing;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeCommon;
 
+import javax.annotation.Nullable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,8 +40,6 @@ import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 public abstract class SpongeResourcePack implements ResourcePack {
 
@@ -74,7 +73,7 @@ public abstract class SpongeResourcePack implements ResourcePack {
         if (uri.startsWith(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL)) {
             return new SpongeWorldResourcePack(uri, hash);
         }
-        if (hash != null && hash.length() != HASH_SIZE) {
+        if (hash != null && hash.length() != SpongeResourcePack.HASH_SIZE) {
             hash = null;
         }
         return new SpongeURIResourcePack(uri, hash);
@@ -93,7 +92,7 @@ public abstract class SpongeResourcePack implements ResourcePack {
             Objects.requireNonNull(uri);
             try {
                 Hasher hasher = Hashing.sha1().newHasher();
-                try (InputStream in = openStream(uri)) {
+                try (InputStream in = Factory.openStream(uri)) {
                     byte[] buf = new byte[256];
                     while (true) {
                         int read = in.read(buf);

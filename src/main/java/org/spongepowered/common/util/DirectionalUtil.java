@@ -42,7 +42,7 @@ public final class DirectionalUtil {
                 Direction.WEST, west,
                 Direction.NORTH, north,
                 Direction.SOUTH, south);
-        return getFrom(holder, sides);
+        return DirectionalUtil.getFrom(holder, sides);
     }
 
     public static Set<Direction> getHorizontalUpFrom(final BlockState holder,
@@ -55,7 +55,7 @@ public final class DirectionalUtil {
                 .put(Direction.SOUTH, south)
                 .put(Direction.UP, up)
                 .build();
-        return getFrom(holder, sides);
+        return DirectionalUtil.getFrom(holder, sides);
     }
 
     public static Set<Direction> getHorizontalUpDownFrom(final BlockState holder,
@@ -69,7 +69,7 @@ public final class DirectionalUtil {
                 .put(Direction.UP, up)
                 .put(Direction.DOWN, down)
                 .build();
-        return getFrom(holder, sides);
+        return DirectionalUtil.getFrom(holder, sides);
     }
 
     public static Set<Direction> getFrom(final BlockState holder, final Map<Direction, BooleanProperty> sides) {
@@ -91,7 +91,7 @@ public final class DirectionalUtil {
                 .put(Direction.NORTH, north)
                 .put(Direction.SOUTH, south)
                 .build();
-        return set(holder, value, sides);
+        return DirectionalUtil.set(holder, value, sides);
     }
 
     public static BlockState setHorizontalUpFor(final BlockState holder, final Set<Direction> value,
@@ -104,7 +104,7 @@ public final class DirectionalUtil {
                 .put(Direction.SOUTH, south)
                 .put(Direction.UP, up)
                 .build();
-        return set(holder, value, sides);
+        return DirectionalUtil.set(holder, value, sides);
     }
 
     public static BlockState setHorizontalUpDownFor(final BlockState holder, final Set<Direction> value,
@@ -118,7 +118,7 @@ public final class DirectionalUtil {
                 .put(Direction.UP, up)
                 .put(Direction.DOWN, down)
                 .build();
-        return set(holder, value, sides);
+        return DirectionalUtil.set(holder, value, sides);
     }
 
     public static BlockState set(BlockState holder, final Set<Direction> value, final Map<Direction, BooleanProperty> sides) {

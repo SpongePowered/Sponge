@@ -72,7 +72,6 @@ import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
@@ -85,14 +84,13 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 public class InventoryEventFactory {
 
@@ -137,7 +135,7 @@ public class InventoryEventFactory {
                 }
                 return false;
             }
-            if (!callPlayerChangeInventoryPickupEvent(player, capture)) {
+            if (!InventoryEventFactory.callPlayerChangeInventoryPickupEvent(player, capture)) {
                 return false;
             }
             itemToPickup.getItem().setCount(0);
@@ -155,7 +153,7 @@ public class InventoryEventFactory {
                 inventory.bridge$getCapturedSlotTransactions());
         SpongeCommon.postEvent(event);
         PhaseTracker.getCauseStackManager().popCause();
-        applyTransactions(event);
+        InventoryEventFactory.applyTransactions(event);
         inventory.bridge$getCapturedSlotTransactions().clear();
         return !event.isCancelled();
     }
@@ -201,13 +199,13 @@ public class InventoryEventFactory {
                     return stack;
                 }
 
-                if (callInventoryPickupEvent(inventory, prevInventory)) {
+                if (InventoryEventFactory.callInventoryPickupEvent(inventory, prevInventory)) {
                     return ItemStack.EMPTY;
                 }
                 return stack;
             } else {
                 final ItemStack remainder = HopperTileEntity.putStackInInventoryAllSlots(null, inventory, stack, null);
-                if (callInventoryPickupEvent(inventory, prevInventory)) {
+                if (InventoryEventFactory.callInventoryPickupEvent(inventory, prevInventory)) {
                     return remainder;
                 }
                 return stack;
@@ -217,13 +215,13 @@ public class InventoryEventFactory {
 
     private static boolean callInventoryPickupEvent(final IInventory inventory, final ItemStack[] prevInventory) {
         final Inventory spongeInventory = InventoryUtil.toInventory(inventory, null);
-        final List<SlotTransaction> trans = generateTransactions(spongeInventory, inventory, prevInventory);
+        final List<SlotTransaction> trans = InventoryEventFactory.generateTransactions(spongeInventory, inventory, prevInventory);
         if (trans.isEmpty()) {
             return true;
         }
         final ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(PhaseTracker.getCauseStackManager().getCurrentCause(), spongeInventory, trans);
         SpongeCommon.postEvent(event);
-        applyTransactions(event);
+        InventoryEventFactory.applyTransactions(event);
         return !event.isCancelled();
     }
 
@@ -359,7 +357,7 @@ public class InventoryEventFactory {
             return null;
         }
 
-        if (!callInteractContainerOpenEvent(player)) {
+        if (!InventoryEventFactory.callInteractContainerOpenEvent(player)) {
             return null;
         }
 

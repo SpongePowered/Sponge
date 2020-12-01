@@ -48,23 +48,23 @@ public final class HideFlagsItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.HIDE_ATTRIBUTES)
-                        .get(h -> get(h, NBTKeyHideAttributesFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideAttributesFlag))
+                        .get(h -> HideFlagsItemStackData.get(h, HideFlagsItemStackData.NBTKeyHideAttributesFlag))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, v, HideFlagsItemStackData.NBTKeyHideAttributesFlag))
                     .create(Keys.HIDE_CAN_DESTROY)
-                        .get(h -> get(h, NBTKeyHideCanDestroyFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideCanDestroyFlag))
+                        .get(h -> HideFlagsItemStackData.get(h, HideFlagsItemStackData.NBTKeyHideCanDestroyFlag))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, v, HideFlagsItemStackData.NBTKeyHideCanDestroyFlag))
                     .create(Keys.HIDE_CAN_PLACE)
-                        .get(h -> get(h, NBTKeyHideCanPlaceFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideCanPlaceFlag))
+                        .get(h -> HideFlagsItemStackData.get(h, HideFlagsItemStackData.NBTKeyHideCanPlaceFlag))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, v, HideFlagsItemStackData.NBTKeyHideCanPlaceFlag))
                     .create(Keys.HIDE_ENCHANTMENTS)
-                        .get(h -> get(h, NBTKeyHideEnchantmentsFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideEnchantmentsFlag))
+                        .get(h -> HideFlagsItemStackData.get(h, HideFlagsItemStackData.NBTKeyHideEnchantmentsFlag))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, v, HideFlagsItemStackData.NBTKeyHideEnchantmentsFlag))
                     .create(Keys.HIDE_MISCELLANEOUS)
-                        .get(h -> get(h, NBTKeyHideMiscellaneousFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideMiscellaneousFlag))
+                        .get(h -> HideFlagsItemStackData.get(h, HideFlagsItemStackData.NBTKeyHideMiscellaneousFlag))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, v, HideFlagsItemStackData.NBTKeyHideMiscellaneousFlag))
                     .create(Keys.HIDE_UNBREAKABLE)
-                        .get(h -> get(h, NBTKeyHideUnbreakableFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideUnbreakableFlag));
+                        .get(h -> HideFlagsItemStackData.get(h, HideFlagsItemStackData.NBTKeyHideUnbreakableFlag))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, v, HideFlagsItemStackData.NBTKeyHideUnbreakableFlag));
     }
     // @formatter:on
 

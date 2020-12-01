@@ -46,19 +46,19 @@ public final class HorseData {
                     .create(Keys.HORSE_COLOR)
                         .get(h -> {
                             final MappedRegistry<HorseColor, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(HorseColor.class);
-                            return registry.getReverseMapping(getHorseColor(h));
+                            return registry.getReverseMapping(HorseData.getHorseColor(h));
                         })
                         .set((h, v) -> {
-                            final int style = getHorseStyle(h);
+                            final int style = HorseData.getHorseStyle(h);
                             h.setHorseVariant(((SpongeHorseColor) v).getMetadata() | style);
                         })
                     .create(Keys.HORSE_STYLE)
                         .get(h -> {
                             final MappedRegistry<HorseStyle, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(HorseStyle.class);
-                            return registry.getReverseMapping(getHorseStyle(h));
+                            return registry.getReverseMapping(HorseData.getHorseStyle(h));
                         })
                         .set((h, v) -> {
-                            final int color = getHorseColor(h);
+                            final int color = HorseData.getHorseColor(h);
                             h.setHorseVariant((color | ((SpongeHorseStyle) v).getBitMask()));
                         });
     }

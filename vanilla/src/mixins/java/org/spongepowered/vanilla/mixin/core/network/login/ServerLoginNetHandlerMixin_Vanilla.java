@@ -30,9 +30,9 @@ import net.minecraft.network.login.client.CCustomPayloadLoginPacket;
 import net.minecraft.network.login.client.CLoginStartPacket;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.ServerSideConnection;
@@ -63,7 +63,7 @@ public abstract class ServerLoginNetHandlerMixin_Vanilla implements IServerLogin
     private static final int HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS = 2;
     private static final int HANDSHAKE_SYNC_PLUGIN_DATA = 3;
 
-    private int impl$handshakeState = HANDSHAKE_NOT_STARTED;
+    private int impl$handshakeState = ServerLoginNetHandlerMixin_Vanilla.HANDSHAKE_NOT_STARTED;
 
     @Inject(method = "processCustomPayloadLogin", at = @At(value = "HEAD"), cancellable = true)
     private void onResponsePayload(final CCustomPayloadLoginPacket packet, final CallbackInfo ci) {
@@ -77,22 +77,22 @@ public abstract class ServerLoginNetHandlerMixin_Vanilla implements IServerLogin
     private void impl$onTick(final CallbackInfo ci) {
         if (this.currentLoginState == ServerLoginNetHandler.State.NEGOTIATING) {
             final ServerSideConnection connection = (ServerSideConnection) this;
-            if (this.impl$handshakeState == HANDSHAKE_NOT_STARTED) {
-                this.impl$handshakeState = HANDSHAKE_CLIENT_TYPE;
+            if (this.impl$handshakeState == ServerLoginNetHandlerMixin_Vanilla.HANDSHAKE_NOT_STARTED) {
+                this.impl$handshakeState = ServerLoginNetHandlerMixin_Vanilla.HANDSHAKE_CLIENT_TYPE;
 
                 ((SpongeChannelRegistry) Sponge.getChannelRegistry()).requestClientType(connection).thenAccept(result -> {
-                    this.impl$handshakeState = HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS;
+                    this.impl$handshakeState = ServerLoginNetHandlerMixin_Vanilla.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS;
                 });
 
-            } else if (this.impl$handshakeState == HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS) {
+            } else if (this.impl$handshakeState == ServerLoginNetHandlerMixin_Vanilla.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS) {
                 ((SpongeChannelRegistry) Sponge.getChannelRegistry()).sendLoginChannelRegistry(connection).thenAccept(result -> {
                     final Cause cause = Cause.of(EventContext.empty(), this);
                     final ServerSideConnectionEvent.Handshake event =
                             SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection);
                     SpongeCommon.postEvent(event);
-                    this.impl$handshakeState = HANDSHAKE_SYNC_PLUGIN_DATA;
+                    this.impl$handshakeState = ServerLoginNetHandlerMixin_Vanilla.HANDSHAKE_SYNC_PLUGIN_DATA;
                 });
-            } else if (this.impl$handshakeState == HANDSHAKE_SYNC_PLUGIN_DATA) {
+            } else if (this.impl$handshakeState == ServerLoginNetHandlerMixin_Vanilla.HANDSHAKE_SYNC_PLUGIN_DATA) {
                 final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
                 if (store.isEmpty()) {
                     this.currentLoginState = ServerLoginNetHandler.State.READY_TO_ACCEPT;

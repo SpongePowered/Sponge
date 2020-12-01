@@ -94,9 +94,9 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
         this.logger.info("Transitioning to Sponge launcher, please wait...");
 
         launchClassLoader.addTargetPackageFilter(klass -> {
-            exclusions: for (final String pkg : EXCLUDED_PACKAGES) {
+            exclusions: for (final String pkg : AbstractVanillaLaunchHandler.EXCLUDED_PACKAGES) {
                 if (klass.startsWith(pkg)) {
-                    for (final String bypass : EXCLUDED_EXCEPTIONS) {
+                    for (final String bypass : AbstractVanillaLaunchHandler.EXCLUDED_EXCEPTIONS) {
                         if (klass.startsWith(bypass)) {
                             continue exclusions;
                         }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.storage;
 
 
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import org.spongepowered.api.Server;
@@ -36,6 +35,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
+import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.DirectoryIteratorException;
@@ -52,8 +52,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Nullable;
-
 public final class SpongePlayerDataManager {
 
     private static final String SPONGE_DATA = "sponge";
@@ -68,7 +66,8 @@ public final class SpongePlayerDataManager {
 
     public void load() {
         try {
-            this.playersDirectory = ((SpongeWorldManager) this.server.getWorldManager()).getSavesDirectory().resolve("data").resolve(SPONGE_DATA);
+            this.playersDirectory = ((SpongeWorldManager) this.server.getWorldManager()).getSavesDirectory().resolve("data").resolve(
+                SpongePlayerDataManager.SPONGE_DATA);
             Files.createDirectories(this.playersDirectory);
 
             final List<Path> playerFiles = new ArrayList<>();

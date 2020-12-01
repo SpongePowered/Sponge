@@ -65,12 +65,12 @@ public final class ArmorStandData {
                             return values;
                         })
                         .set((h, v) -> {
-                            apply(v, BodyParts.HEAD.get(), h::setHeadRotation);
-                            apply(v, BodyParts.CHEST.get(), h::setBodyRotation);
-                            apply(v, BodyParts.LEFT_ARM.get(), h::setLeftArmRotation);
-                            apply(v, BodyParts.RIGHT_ARM.get(), h::setRightArmRotation);
-                            apply(v, BodyParts.LEFT_LEG.get(), h::setLeftLegRotation);
-                            apply(v, BodyParts.RIGHT_LEG.get(), h::setRightLegRotation);
+                            ArmorStandData.apply(v, BodyParts.HEAD.get(), h::setHeadRotation);
+                            ArmorStandData.apply(v, BodyParts.CHEST.get(), h::setBodyRotation);
+                            ArmorStandData.apply(v, BodyParts.LEFT_ARM.get(), h::setLeftArmRotation);
+                            ArmorStandData.apply(v, BodyParts.RIGHT_ARM.get(), h::setRightArmRotation);
+                            ArmorStandData.apply(v, BodyParts.LEFT_LEG.get(), h::setLeftLegRotation);
+                            ArmorStandData.apply(v, BodyParts.RIGHT_LEG.get(), h::setRightLegRotation);
                         })
                     .create(Keys.CHEST_ROTATION)
                         .get(h -> VecHelper.toVector3d(h.getBodyRotation()))

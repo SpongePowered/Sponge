@@ -30,10 +30,10 @@ import org.spongepowered.math.vector.Vector3i;
 public final class SpongeChunkLayout implements ChunkLayout {
 
     public static final Vector3i CHUNK_SIZE = new Vector3i(16, 256, 16);
-    private static final Vector3i CHUNK_MASK = CHUNK_SIZE.sub(1, 1, 1);
-    private static final Vector3i SPACE_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1).div(CHUNK_SIZE);
-    private static final Vector3i SPACE_MIN = new Vector3i(-30000000, 0, -30000000).div(CHUNK_SIZE);
-    private static final Vector3i SPACE_SIZE = SPACE_MAX.sub(SPACE_MIN).add(1, 1, 1);
+    private static final Vector3i CHUNK_MASK = SpongeChunkLayout.CHUNK_SIZE.sub(1, 1, 1);
+    private static final Vector3i SPACE_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1).div(SpongeChunkLayout.CHUNK_SIZE);
+    private static final Vector3i SPACE_MIN = new Vector3i(-30000000, 0, -30000000).div(SpongeChunkLayout.CHUNK_SIZE);
+    private static final Vector3i SPACE_SIZE = SpongeChunkLayout.SPACE_MAX.sub(SpongeChunkLayout.SPACE_MIN).add(1, 1, 1);
     public static final SpongeChunkLayout instance = new SpongeChunkLayout();
 
     private SpongeChunkLayout() {
@@ -41,22 +41,22 @@ public final class SpongeChunkLayout implements ChunkLayout {
 
     @Override
     public Vector3i getChunkSize() {
-        return CHUNK_SIZE;
+        return SpongeChunkLayout.CHUNK_SIZE;
     }
 
     @Override
     public Vector3i getSpaceMax() {
-        return SPACE_MAX;
+        return SpongeChunkLayout.SPACE_MAX;
     }
 
     @Override
     public Vector3i getSpaceMin() {
-        return SPACE_MIN;
+        return SpongeChunkLayout.SPACE_MIN;
     }
 
     @Override
     public Vector3i getSpaceSize() {
-        return SPACE_SIZE;
+        return SpongeChunkLayout.SPACE_SIZE;
     }
 
     @Override
@@ -67,7 +67,8 @@ public final class SpongeChunkLayout implements ChunkLayout {
     @Override
     public boolean isInChunk(int x, int y, int z) {
         // no bits allowed outside the mask!
-        return (x & ~CHUNK_MASK.getX()) == 0 && (y & ~CHUNK_MASK.getY()) == 0 && (z & ~CHUNK_MASK.getZ()) == 0;
+        return (x & ~SpongeChunkLayout.CHUNK_MASK.getX()) == 0 && (y & ~SpongeChunkLayout.CHUNK_MASK.getY()) == 0 && (z & ~SpongeChunkLayout.CHUNK_MASK
+            .getZ()) == 0;
     }
 
     @Override

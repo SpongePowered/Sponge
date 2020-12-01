@@ -55,7 +55,7 @@ public class FireworkUtil {
         if (tag == null) {
             return null;
         }
-        return fromCompound(tag);
+        return FireworkUtil.fromCompound(tag);
     }
 
     public static FireworkEffect fromCompound(final CompoundNBT compound) {
@@ -116,15 +116,15 @@ public class FireworkUtil {
 
     public static boolean setFireworkEffects(final Object object, final List<? extends FireworkEffect> effects) {
         if (effects.isEmpty()) {
-            return removeFireworkEffects(object);
+            return FireworkUtil.removeFireworkEffects(object);
         }
-        final ItemStack item = getItem(object);
+        final ItemStack item = FireworkUtil.getItem(object);
         if (item.isEmpty()) {
             return false;
         }
 
         if (item.getItem() == Items.FIREWORK_STAR) {
-            item.setTagInfo(Constants.Entity.Firework.EXPLOSION, toCompound(effects.get(0)));
+            item.setTagInfo(Constants.Entity.Firework.EXPLOSION, FireworkUtil.toCompound(effects.get(0)));
             return true;
         } else if (item.getItem() == Items.FIREWORK_ROCKET) {
             final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
@@ -137,7 +137,7 @@ public class FireworkUtil {
     }
 
     public static Optional<List<FireworkEffect>> getFireworkEffects(final Object object) {
-        final ItemStack item = getItem(object);
+        final ItemStack item = FireworkUtil.getItem(object);
         if (item.isEmpty()) {
             return Optional.empty();
         }
@@ -154,7 +154,7 @@ public class FireworkUtil {
                     .map(FireworkUtil::fromCompound)
                     .collect(Collectors.toList());
         } else {
-            @Nullable final FireworkEffect effect = getStarEffect(item);
+            @Nullable final FireworkEffect effect = FireworkUtil.getStarEffect(item);
             if (effect == null) {
                 return Optional.empty();
             }
@@ -165,7 +165,7 @@ public class FireworkUtil {
     }
 
     public static boolean removeFireworkEffects(final Object object) {
-        final ItemStack item = getItem(object);
+        final ItemStack item = FireworkUtil.getItem(object);
         if (item.isEmpty()) {
             return false;
         }
@@ -199,7 +199,7 @@ public class FireworkUtil {
             return (ItemStack) object;
         }
         if (object instanceof FireworkRocketEntity) {
-            return getItem((FireworkRocketEntity) object);
+            return FireworkUtil.getItem((FireworkRocketEntity) object);
         }
         return ItemStack.EMPTY;
     }

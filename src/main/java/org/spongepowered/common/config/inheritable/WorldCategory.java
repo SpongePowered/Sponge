@@ -25,10 +25,9 @@
 package org.spongepowered.common.config.inheritable;
 
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
 @ConfigSerializable
 public class WorldCategory {
@@ -118,8 +117,8 @@ public class WorldCategory {
     @Setting("view-distance")
     @Comment("Override world distance per world/dimension \n"
              + "The value must be greater than or equal to 3 and less than or equal to 32 \n"
-             + "The server-wide view distance will be used when the value is " + USE_SERVER_VIEW_DISTANCE + ".")
-    private int viewDistance = USE_SERVER_VIEW_DISTANCE;
+             + "The server-wide view distance will be used when the value is " + WorldCategory.USE_SERVER_VIEW_DISTANCE + ".")
+    private int viewDistance = WorldCategory.USE_SERVER_VIEW_DISTANCE;
 
     public int getAutoSaveInterval() {
         return this.autoSaveInterval;

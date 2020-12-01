@@ -50,7 +50,7 @@ public final class NetworkUtil {
         if (address instanceof InetSocketAddress) {
             return ((InetSocketAddress) address).getHostString();
         } else if (address instanceof LocalAddress) {
-            return LOCAL_ADDRESS;
+            return NetworkUtil.LOCAL_ADDRESS;
         }
 
         return address.toString();
@@ -64,7 +64,7 @@ public final class NetworkUtil {
      */
     public static String cleanVirtualHost(String host) {
         // FML appends a marker to the host to recognize FML clients (\0FML\0)
-        host = substringBefore(host, '\0');
+        host = NetworkUtil.substringBefore(host, '\0');
 
         // When clients connect with a SRV record, their host contains a trailing '.'
         if (host.endsWith(".")) {

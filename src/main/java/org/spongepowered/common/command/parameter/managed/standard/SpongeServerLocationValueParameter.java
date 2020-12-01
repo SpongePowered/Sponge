@@ -121,7 +121,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
 
         try {
             reader.skipWhitespace();
-            final Vec3d vec3d = VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context.getCause());
+            final Vec3d vec3d = SpongeServerLocationValueParameter.VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context.getCause());
             final ResourceKey key = worldProperties.getKey();
             return Optional.of(
                     worldProperties.getWorld()

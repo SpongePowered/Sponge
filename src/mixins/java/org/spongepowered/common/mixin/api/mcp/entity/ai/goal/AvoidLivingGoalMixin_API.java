@@ -51,7 +51,7 @@ public abstract class AvoidLivingGoalMixin_API extends GoalMixin_API<Creature> i
     @Override
     public Predicate<Living> getTargetSelector() {
         final Predicate<LivingEntity> predicate = ((EntityPredicateAccessor) this.builtTargetSelector).accessor$getCustomPredicate();
-        return (Predicate<Living>) (Object) (predicate == null ? ALWAYS_TRUE : predicate);
+        return (Predicate<Living>) (Object) (predicate == null ? AvoidLivingGoalMixin_API.ALWAYS_TRUE : predicate);
     }
 
     @Override

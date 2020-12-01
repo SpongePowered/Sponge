@@ -44,13 +44,13 @@ public enum AppLaunchTargets {
 
         switch (launchTarget) {
             case "sponge_client_dev":
-                return CLIENT_DEVELOPMENT;
+                return AppLaunchTargets.CLIENT_DEVELOPMENT;
             case "sponge_client_prod":
-                return CLIENT_PRODUCTION;
+                return AppLaunchTargets.CLIENT_PRODUCTION;
             case "sponge_server_dev":
-                return SERVER_DEVELOPMENT;
+                return AppLaunchTargets.SERVER_DEVELOPMENT;
             case "sponge_server_prod":
-                return SERVER_PRODUCTION;
+                return AppLaunchTargets.SERVER_PRODUCTION;
         }
 
         return null;

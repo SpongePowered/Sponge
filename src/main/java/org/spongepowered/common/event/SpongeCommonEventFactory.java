@@ -383,12 +383,12 @@ public final class SpongeCommonEventFactory {
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos) {
 
-        return callChangeBlockEventPre(worldIn, ImmutableList.of(
+        return SpongeCommonEventFactory.callChangeBlockEventPre(worldIn, ImmutableList.of(
             ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
     }
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos, final Object source) {
-        return callChangeBlockEventPre(worldIn, ImmutableList.of(
+        return SpongeCommonEventFactory.callChangeBlockEventPre(worldIn, ImmutableList.of(
             ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
     }
 
@@ -474,7 +474,7 @@ public final class SpongeCommonEventFactory {
 
     public static ChangeBlockEvent callChangeBlockEventModifyLiquidBreak(
         final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState targetState) {
-        return callChangeBlockEventModifyLiquidBreak(worldIn, pos, worldIn.getBlockState(pos), targetState);
+        return SpongeCommonEventFactory.callChangeBlockEventModifyLiquidBreak(worldIn, pos, worldIn.getBlockState(pos), targetState);
     }
 
     public static ChangeBlockEvent callChangeBlockEventModifyLiquidBreak(
@@ -642,7 +642,7 @@ public final class SpongeCommonEventFactory {
 
     public static InteractBlockEvent.Primary callInteractBlockEventPrimary(
         final PlayerEntity player, final ItemStack heldItem, final Hand hand, @Nullable final Vector3d hitVec) {
-        return callInteractBlockEventPrimary(player, heldItem, BlockSnapshot.empty(), hand, null, hitVec);
+        return SpongeCommonEventFactory.callInteractBlockEventPrimary(player, heldItem, BlockSnapshot.empty(), hand, null, hitVec);
     }
 
     public static InteractBlockEvent.Primary callInteractBlockEventPrimary(final PlayerEntity player, final ItemStack heldItem, final BlockSnapshot blockSnapshot, final Hand hand,
@@ -678,7 +678,7 @@ public final class SpongeCommonEventFactory {
     public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(
         final PlayerEntity player, final ItemStack heldItem, @Nullable final Vector3d hitVec,
             final BlockSnapshot targetBlock, final Direction targetSide, final Hand hand) {
-        return callInteractBlockEventSecondary(player, heldItem, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED,
+        return SpongeCommonEventFactory.callInteractBlockEventSecondary(player, heldItem, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED,
                 hitVec, targetBlock, targetSide, hand);
     }
 

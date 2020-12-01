@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
 public final class ServicesCategory {
@@ -55,23 +55,23 @@ public final class ServicesCategory {
 
         @Setting("ban-service")
         @Comment("Specifies the plugin that will provide the ban service")
-        private String banService = UNSPECIFIED;
+        private String banService = ServicesCategory.UNSPECIFIED;
 
         @Setting("economy-service")
         @Comment("Specifies the plugin that will provide the economy service")
-        private String economyService = UNSPECIFIED;
+        private String economyService = ServicesCategory.UNSPECIFIED;
 
         @Setting("pagination-service")
         @Comment("Specifies the plugin that will provide the pagination service")
-        private String paginationService = UNSPECIFIED;
+        private String paginationService = ServicesCategory.UNSPECIFIED;
 
         @Setting("permission-service")
         @Comment("Specifies the plugin that will provide the permission service")
-        private String permissionService = UNSPECIFIED;
+        private String permissionService = ServicesCategory.UNSPECIFIED;
 
         @Setting("whitelist-service")
         @Comment("Specifies the plugin that will provide the whitelist service")
-        private String whitelistService = UNSPECIFIED;
+        private String whitelistService = ServicesCategory.UNSPECIFIED;
 
         public String getBanService() {
             return this.banService;

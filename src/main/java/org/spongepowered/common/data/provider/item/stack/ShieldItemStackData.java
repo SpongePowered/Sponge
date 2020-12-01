@@ -37,8 +37,8 @@ import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.NBTCollectors;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.NBTCollectors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +51,7 @@ public final class ShieldItemStackData {
 
     static {
         for (final BannerPattern pattern : BannerPattern.values()) {
-            SHAPE_BY_HASHNAME.put(pattern.getHashname(), (BannerPatternShape) (Object) pattern);
+            ShieldItemStackData.SHAPE_BY_HASHNAME.put(pattern.getHashname(), (BannerPatternShape) (Object) pattern);
         }
     }
 
@@ -84,7 +84,7 @@ public final class ShieldItemStackData {
                             }
                             final ListNBT layersList = tag.getList(Constants.TileEntity.Banner.BANNER_PATTERNS, Constants.NBT.TAG_COMPOUND);
                             return layersList.stream()
-                                    .map(layer -> layerFromNbt((CompoundNBT) layer))
+                                    .map(layer -> ShieldItemStackData.layerFromNbt((CompoundNBT) layer))
                                     .collect(Collectors.toList());
                         })
                         .set((h, v) -> {
@@ -106,7 +106,7 @@ public final class ShieldItemStackData {
     // @formatter:on
 
     public static BannerPatternLayer layerFromNbt(final CompoundNBT nbt) {
-        final BannerPatternShape shape = SHAPE_BY_HASHNAME.get(nbt.getString(Constants.TileEntity.Banner.BANNER_PATTERN_ID));
+        final BannerPatternShape shape = ShieldItemStackData.SHAPE_BY_HASHNAME.get(nbt.getString(Constants.TileEntity.Banner.BANNER_PATTERN_ID));
         final net.minecraft.item.DyeColor dyeColor = net.minecraft.item.DyeColor.byId(nbt.getInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR));
         return BannerPatternLayer.of(shape, (org.spongepowered.api.data.type.DyeColor) (Object) dyeColor);
     }

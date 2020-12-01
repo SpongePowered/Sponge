@@ -56,10 +56,10 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.common.util.generator.GeneratorUtils;
 import org.spongepowered.common.event.filter.EventFilter;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
+import org.spongepowered.common.util.generator.GeneratorUtils;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -102,9 +102,9 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
         }
         if (filter != null) {
             filter.newInstance();
-            return this.classLoader.defineClass(name, generateClass(name, handle, method, eventClass, filter));
+            return this.classLoader.defineClass(name, ClassEventListenerFactory.generateClass(name, handle, method, eventClass, filter));
         }
-        return this.classLoader.defineClass(name, generateClass(name, handle, method, eventClass));
+        return this.classLoader.defineClass(name, ClassEventListenerFactory.generateClass(name, handle, method, eventClass));
     }
 
     private static final String BASE_HANDLER = Type.getInternalName(AnnotatedEventListener.class);
@@ -126,7 +126,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
         MethodVisitor mv;
         FieldVisitor fv;
 
-        cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, BASE_HANDLER, null);
+        cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, ClassEventListenerFactory.BASE_HANDLER, null);
         {
             fv = cw.visitField(ACC_PRIVATE + ACC_STATIC, "FILTER", "L" + filterName + ";", null, null);
             fv.visitEnd();
@@ -147,17 +147,19 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
-            mv.visitMethodInsn(INVOKESPECIAL, BASE_HANDLER, "<init>", "(Ljava/lang/Object;)V", false);
+            mv.visitMethodInsn(INVOKESPECIAL, ClassEventListenerFactory.BASE_HANDLER, "<init>", "(Ljava/lang/Object;)V", false);
             mv.visitInsn(RETURN);
             mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
         {
-            mv = cw.visitMethod(ACC_PUBLIC, "handle", HANDLE_METHOD_DESCRIPTOR, null, new String[] { "java/lang/Exception" });
+            mv = cw.visitMethod(ACC_PUBLIC, "handle",
+                ClassEventListenerFactory.HANDLE_METHOD_DESCRIPTOR, null, new String[] { "java/lang/Exception" });
             mv.visitCode();
             mv.visitFieldInsn(GETSTATIC, name, "FILTER", "L" + filterName + ";");
             mv.visitVarInsn(ALOAD, 1);
-            mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(EventFilter.class), "filter", FILTER_DESCRIPTOR, true);
+            mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(EventFilter.class), "filter",
+                ClassEventListenerFactory.FILTER_DESCRIPTOR, true);
             mv.visitVarInsn(ASTORE, 2);
             mv.visitVarInsn(ALOAD, 2);
             Label l2 = new Label();
@@ -192,20 +194,20 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
 
-        cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, BASE_HANDLER, null);
+        cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, ClassEventListenerFactory.BASE_HANDLER, null);
 
         {
             mv = cw.visitMethod(ACC_PUBLIC, "<init>", '(' + handleDescriptor + ")V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
-            mv.visitMethodInsn(INVOKESPECIAL, BASE_HANDLER, "<init>", "(Ljava/lang/Object;)V", false);
+            mv.visitMethodInsn(INVOKESPECIAL, ClassEventListenerFactory.BASE_HANDLER, "<init>", "(Ljava/lang/Object;)V", false);
             mv.visitInsn(RETURN);
             mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
         {
-            mv = cw.visitMethod(ACC_PUBLIC, "handle", HANDLE_METHOD_DESCRIPTOR, null, null);
+            mv = cw.visitMethod(ACC_PUBLIC, "handle", ClassEventListenerFactory.HANDLE_METHOD_DESCRIPTOR, null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, name, "handle", "Ljava/lang/Object;");

@@ -73,9 +73,9 @@ import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.service.server.permission.BridgeSubject;
 import org.spongepowered.common.service.server.permission.SubjectHelper;
-import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.server.SpongeWorldManager;
@@ -158,7 +158,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.enderChest = null;
 
         ((CustomDataHolderBridge) (Object) this).bridge$getFailedData().clear();
-        initializedUsers.remove(this);
+        SpongeUser.initializedUsers.remove(this);
     }
 
     public void initializeIfRequired() {
@@ -168,7 +168,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     public void initialize() {
-        initializedUsers.add(this);
+        SpongeUser.initializedUsers.add(this);
         this.compound = new CompoundNBT();
         final ServerWorld world = ((SpongeWorldManager) Sponge.getServer().getWorldManager()).getDefaultWorld();
         if (world == null) {
@@ -496,7 +496,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
                     .warn("Unable to mark user data for [{}] as dirty, data is not initialized! Any changes may be lost.",
                             this.profile.getId());
         } else {
-            dirtyUsers.add(this);
+            SpongeUser.dirtyUsers.add(this);
         }
     }
 
@@ -514,7 +514,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.writeToNbt(compound);
         try (final FileOutputStream out = new FileOutputStream(dataFile)) {
             CompressedStreamTools.writeCompressed(compound, out);
-            dirtyUsers.remove(this);
+            SpongeUser.dirtyUsers.remove(this);
             this.invalidate();
         } catch (final IOException e) {
             SpongeCommon.getLogger().warn("Failed to save user file [{}]!", dataFile, e);

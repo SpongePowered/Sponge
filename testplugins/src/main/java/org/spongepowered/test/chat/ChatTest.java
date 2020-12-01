@@ -92,9 +92,9 @@ public class ChatTest implements LoadableModule {
                 .setPermission("chattest.togglebossbar")
                 .setExecutor(ctx -> {
                     if (this.barVisible) {
-                        this.game.getServer().hideBossBar(INFO_BAR);
+                        this.game.getServer().hideBossBar(ChatTest.INFO_BAR);
                     } else {
-                        this.game.getServer().showBossBar(INFO_BAR);
+                        this.game.getServer().showBossBar(ChatTest.INFO_BAR);
                     }
                     this.barVisible = !this.barVisible;
                     return CommandResult.success();

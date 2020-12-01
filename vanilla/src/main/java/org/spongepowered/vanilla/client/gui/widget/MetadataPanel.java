@@ -295,7 +295,7 @@ public final class MetadataPanel extends ScrollPanel {
         // Matches an ip (xx.xxx.xx.xxx) or a domain (something.com) with or
         // without a protocol or path.
         ITextComponent ichat = null;
-        final Matcher matcher = URL_PATTERN.matcher(string);
+        final Matcher matcher = MetadataPanel.URL_PATTERN.matcher(string);
         int lastEnd = 0;
 
         // Find all urls
@@ -424,7 +424,7 @@ public final class MetadataPanel extends ScrollPanel {
 
                 // Account for text components that were split to new lines
                 if (originalValue != null) {
-                    final ITextComponent linkComponent = newChatWithLinks(originalValue, false);
+                    final ITextComponent linkComponent = MetadataPanel.newChatWithLinks(originalValue, false);
                     if (linkComponent.getStyle().getClickEvent() != null) {
                         this.value.setStyle(linkComponent.getStyle());
                     }

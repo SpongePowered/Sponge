@@ -53,7 +53,7 @@ import java.util.regex.Pattern;
 public abstract class SpongeScheduler implements Scheduler {
 
     private static final int TICK_DURATION_MS = 50;
-    static final long TICK_DURATION_NS = TimeUnit.NANOSECONDS.convert(TICK_DURATION_MS, TimeUnit.MILLISECONDS);
+    static final long TICK_DURATION_NS = TimeUnit.NANOSECONDS.convert(SpongeScheduler.TICK_DURATION_MS, TimeUnit.MILLISECONDS);
 
     private final String tag;
 

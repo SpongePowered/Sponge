@@ -61,7 +61,7 @@ public abstract class NativeComponentRenderer<C> {
      * @see TranslationRegistry
      */
     public static @NonNull NativeComponentRenderer<Locale> get() {
-        return INSTANCE;
+        return NativeComponentRenderer.INSTANCE;
     }
 
     /**

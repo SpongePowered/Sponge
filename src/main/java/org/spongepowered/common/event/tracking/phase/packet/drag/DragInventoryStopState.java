@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.crafting.ICraftingRecipe;
@@ -56,7 +55,7 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
 
     @Override
     public void unwind(InventoryPacketContext context) {
-        unwindCraftPreview(context);
+        DragInventoryStopState.unwindCraftPreview(context);
         super.unwind(context);
     }
 

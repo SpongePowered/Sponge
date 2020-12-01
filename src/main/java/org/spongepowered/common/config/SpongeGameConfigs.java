@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.config;
 
-import org.spongepowered.common.config.inheritable.GlobalConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.customdata.CustomDataConfig;
+import org.spongepowered.common.config.inheritable.GlobalConfig;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.common.world.server.SpongeWorldManager;
@@ -79,7 +79,7 @@ public final class SpongeGameConfigs {
     }
 
     public static InheritableConfigHandle<WorldConfig> getForWorld(final org.spongepowered.api.world.World<?> spongeWorld) {
-        return getForWorld((net.minecraft.world.World) spongeWorld);
+        return SpongeGameConfigs.getForWorld((net.minecraft.world.World) spongeWorld);
     }
 
     public static InheritableConfigHandle<WorldConfig> getForWorld(final net.minecraft.world.World mcWorld) {
@@ -148,28 +148,28 @@ public final class SpongeGameConfigs {
     }
 
     private static InheritableConfigHandle<GlobalConfig> getGlobalInheritable() {
-        if (global == null) {
+        if (SpongeGameConfigs.global == null) {
             SpongeGameConfigs.initLock.lock();
             try {
-                if (global == null) {
+                if (SpongeGameConfigs.global == null) {
                     try {
-                        global = new InheritableConfigHandle<>(new GlobalConfig(),
+                        SpongeGameConfigs.global = new InheritableConfigHandle<>(new GlobalConfig(),
                                 SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(GlobalConfig.FILE_NAME)), null);
-                        global.load();
+                        SpongeGameConfigs.global.load();
                     } catch (final ConfigurateException e) {
                         SpongeGameConfigs.LOGGER.error("Unable to load global world configuration in {}. Sponge will run with default settings",
                                             GlobalConfig.FILE_NAME, e);
-                        global = new InheritableConfigHandle<>(new GlobalConfig(), null);
+                        SpongeGameConfigs.global = new InheritableConfigHandle<>(new GlobalConfig(), null);
                     }
                 }
             } finally {
                 SpongeGameConfigs.initLock.unlock();
             }
         }
-        return global;
+        return SpongeGameConfigs.global;
     }
 
     public static InheritableConfigHandle<WorldConfig> createDetached() {
-        return new InheritableConfigHandle<>(new WorldConfig(), getGlobalInheritable());
+        return new InheritableConfigHandle<>(new WorldConfig(), SpongeGameConfigs.getGlobalInheritable());
     }
 }

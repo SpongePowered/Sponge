@@ -53,7 +53,7 @@ public final class EndermiteData {
                                 return false;
                             }
                             final int ticks = (int) v.getTicks();
-                            if (ticks < 0 || ticks > DESPAWN_DELAY_MAX) {
+                            if (ticks < 0 || ticks > EndermiteData.DESPAWN_DELAY_MAX) {
                                 return false;
                             }
                             ((EndermiteEntityAccessor) h).accessor$setLifetime(ticks);

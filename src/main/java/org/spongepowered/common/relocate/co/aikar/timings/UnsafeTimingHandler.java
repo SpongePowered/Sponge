@@ -40,14 +40,14 @@ class UnsafeTimingHandler extends TimingHandler {
 
     @Override
     public TimingHandler startTiming() {
-        checkThread();
+        UnsafeTimingHandler.checkThread();
         super.startTiming();
         return this;
     }
 
     @Override
     public void stopTiming() {
-        checkThread();
+        UnsafeTimingHandler.checkThread();
         super.stopTiming();
     }
 }

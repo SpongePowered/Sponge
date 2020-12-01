@@ -29,10 +29,9 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.applaunch.config.common.OptimizationCategory;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
+import org.spongepowered.common.applaunch.config.common.OptimizationCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
 import java.util.List;
 import java.util.Map;
@@ -54,7 +53,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         final CommonConfig globalConfig = SpongeConfigs.getCommon().get();
         if (globalConfig.getModules().useOptimizations()) {
-            final Function<OptimizationCategory, Boolean> optimizationCategoryBooleanFunction = mixinEnabledMappings.get(mixinClassName);
+            final Function<OptimizationCategory, Boolean> optimizationCategoryBooleanFunction = OptimizationPlugin.mixinEnabledMappings.get(mixinClassName);
             if (optimizationCategoryBooleanFunction == null) {
                 new PrettyPrinter(50).add("Could not find function for optimization patch").centre().hr()
                         .add("Missing function for class: " + mixinClassName)

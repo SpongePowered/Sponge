@@ -51,19 +51,18 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> implements ItemStack.Builder {
     @Nullable private Set<Mutable<?, ?>> itemDataSet;
@@ -279,7 +278,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final CompoundNBT compound = NbtTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (!compound.isEmpty()) {
-                fixEnchantmentData(itemType, compound);
+                SpongeItemStackBuilder.fixEnchantmentData(itemType, compound);
                 itemStack.setTag(compound);
             }
         }

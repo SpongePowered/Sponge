@@ -69,7 +69,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     protected static void processSpawnedEntities(final ServerPlayerEntity player, final SpawnEntityEvent event) {
         final List<Entity> entities = event.getEntities();
-        processEntities(player, entities);
+        PacketState.processEntities(player, entities);
     }
 
     protected static void processEntities(final ServerPlayerEntity player, final Collection<Entity> entities) {

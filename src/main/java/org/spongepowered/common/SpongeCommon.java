@@ -107,7 +107,7 @@ public final class SpongeCommon {
     }
 
     public static AsyncScheduler getAsyncScheduler() {
-        return getGame().getAsyncScheduler();
+        return SpongeCommon.getGame().getAsyncScheduler();
     }
 
     public static Path getGameDirectory() {

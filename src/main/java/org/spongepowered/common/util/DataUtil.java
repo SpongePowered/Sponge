@@ -43,6 +43,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -60,8 +61,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 public final class DataUtil {
 
@@ -105,13 +104,13 @@ public final class DataUtil {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <E> Collection<E> ensureMutable(Collection<E> collection) {
         if (collection instanceof List) {
-            return ensureMutable((List<E>) collection);
+            return DataUtil.ensureMutable((List<E>) collection);
         }
         if (collection instanceof Set) {
-            return ensureMutable((Set<E>) collection);
+            return DataUtil.ensureMutable((Set<E>) collection);
         }
         if (collection instanceof WeightedTable) {
-            return ensureMutable((WeightedTable) collection);
+            return DataUtil.ensureMutable((WeightedTable) collection);
         }
         return new ArrayList<>(collection);
     }

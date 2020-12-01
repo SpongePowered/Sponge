@@ -85,7 +85,7 @@ public abstract class ChestTileEntityMixin_Optimization_TileEntity extends Locka
         int j = this.pos.getY();
         int k = this.pos.getZ();
 
-        this.numPlayersUsing = shadow$calculatePlayersUsingSync(this.world, (LockableTileEntity) (Object) this, this.ticksSinceSync, i, j, k, this.numPlayersUsing);
+        this.numPlayersUsing = ChestTileEntityMixin_Optimization_TileEntity.shadow$calculatePlayersUsingSync(this.world, (LockableTileEntity) (Object) this, this.ticksSinceSync, i, j, k, this.numPlayersUsing);
         this.prevLidAngle = this.lidAngle;
         float f = 0.1F;
         if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F) {

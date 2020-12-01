@@ -119,7 +119,7 @@ public final class PhaseTracker implements CauseStackManager {
     }
 
     public static CauseStackManager getCauseStackManager() {
-        return getInstance();
+        return PhaseTracker.getInstance();
     }
 
     public static Block validateBlockForNeighborNotification(final ServerWorld worldServer, final BlockPos pos, @Nullable Block blockIn,
@@ -185,28 +185,28 @@ public final class PhaseTracker implements CauseStackManager {
         int initialPoolSize = 50;
         int maxPoolSize = 100;
         try {
-            initialPoolSize = Integer.parseInt(System.getProperty(INITIAL_POOL_SIZE_PROPERTY, "50"));
+            initialPoolSize = Integer.parseInt(System.getProperty(PhaseTracker.INITIAL_POOL_SIZE_PROPERTY, "50"));
         } catch (final NumberFormatException ex) {
             SpongeCommon.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 50.",
-                INITIAL_POOL_SIZE_PROPERTY,
-                System.getProperty(INITIAL_POOL_SIZE_PROPERTY));
+                PhaseTracker.INITIAL_POOL_SIZE_PROPERTY,
+                System.getProperty(PhaseTracker.INITIAL_POOL_SIZE_PROPERTY));
         }
         try {
-            maxPoolSize = Integer.parseInt(System.getProperty(MAX_POOL_SIZE_PROPERTY, "100"));
+            maxPoolSize = Integer.parseInt(System.getProperty(PhaseTracker.MAX_POOL_SIZE_PROPERTY, "100"));
         } catch (final NumberFormatException ex) {
             SpongeCommon.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 100.",
-                MAX_POOL_SIZE_PROPERTY,
-                System.getProperty(MAX_POOL_SIZE_PROPERTY));
+                PhaseTracker.MAX_POOL_SIZE_PROPERTY,
+                System.getProperty(PhaseTracker.MAX_POOL_SIZE_PROPERTY));
         }
         MAX_POOL_SIZE = Math.max(0, maxPoolSize);
-        INITIAL_POOL_SIZE = Math.max(0, Math.min(MAX_POOL_SIZE, initialPoolSize));
+        INITIAL_POOL_SIZE = Math.max(0, Math.min(PhaseTracker.MAX_POOL_SIZE, initialPoolSize));
     }
 
     private final Deque<Object> cause = Queues.newArrayDeque();
     // Frames in use
     private final Deque<CauseStackFrameImpl> frames = Queues.newArrayDeque();
     // Frames not currently in use
-    private final Deque<CauseStackFrameImpl> framePool = new ArrayDeque<>(MAX_POOL_SIZE);
+    private final Deque<CauseStackFrameImpl> framePool = new ArrayDeque<>(PhaseTracker.MAX_POOL_SIZE);
     private final Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
     private int min_depth = 0;
     private int[] duplicateCauses = new int[100];
@@ -225,7 +225,7 @@ public final class PhaseTracker implements CauseStackManager {
 
 
     PhaseTracker() {
-        for (int i = 0; i < INITIAL_POOL_SIZE; i++) {
+        for (int i = 0; i < PhaseTracker.INITIAL_POOL_SIZE; i++) {
             this.framePool.push(new CauseStackFrameImpl(this));
         }
     }
@@ -608,7 +608,7 @@ public final class PhaseTracker implements CauseStackManager {
 
         this.frames.push(frame);
         this.min_depth = size;
-        if (DEBUG_CAUSE_FRAMES) {
+        if (PhaseTracker.DEBUG_CAUSE_FRAMES) {
             // Attach an exception to the frame so that if there is any frame
             // corruption we can print out the stack trace of when the frames
             // were created.
@@ -639,7 +639,7 @@ public final class PhaseTracker implements CauseStackManager {
                 }
                 i++;
             }
-            if (!DEBUG_CAUSE_FRAMES && offset == -1) {
+            if (!PhaseTracker.DEBUG_CAUSE_FRAMES && offset == -1) {
                 // if we're not debugging the cause frames then throw an error
                 // immediately otherwise let the pretty printer output the frame
                 // that was erroneously popped.
@@ -647,7 +647,7 @@ public final class PhaseTracker implements CauseStackManager {
             }
             final PrettyPrinter printer = new PrettyPrinter(100).add("Cause Stack Frame Corruption!").centre().hr()
                                               .add("Found %n frames left on the stack. Clearing them all.", new Object[]{offset + 1});
-            if (!DEBUG_CAUSE_FRAMES) {
+            if (!PhaseTracker.DEBUG_CAUSE_FRAMES) {
                 printer.add()
                     .add("Please add -Dsponge.debugcauseframes=true to your startup flags to enable further debugging output.");
                 SpongeCommon.getLogger().warn("  Add -Dsponge.debugcauseframes to your startup flags to enable further debugging output.");
@@ -662,7 +662,7 @@ public final class PhaseTracker implements CauseStackManager {
 
             while (offset >= 0) {
                 @Nullable final CauseStackFrameImpl f = this.frames.peek();
-                if (DEBUG_CAUSE_FRAMES && offset > 0) {
+                if (PhaseTracker.DEBUG_CAUSE_FRAMES && offset > 0) {
                     printer.add("   Stack frame in position %n :", offset);
                     printer.add(f.stack_debug);
                 }
@@ -714,7 +714,7 @@ public final class PhaseTracker implements CauseStackManager {
         }
 
         // finally, return the frame to the pool
-        if (this.framePool.size() < MAX_POOL_SIZE) {
+        if (this.framePool.size() < PhaseTracker.MAX_POOL_SIZE) {
             // cache it, but also call clear so we remove references to
             // other objects that may go out of scope
             frame.clear();

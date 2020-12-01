@@ -193,7 +193,7 @@ public interface CustomDataHolderBridge {
         manipulator.set(key, value);
         builder.success(manipulator.getValue(key).get().asImmutable());
 
-        syncCustomToTag(this);
+        CustomDataHolderBridge.syncCustomToTag(this);
 
         return builder.result(DataTransactionResult.Type.SUCCESS).build();
     }
@@ -204,7 +204,7 @@ public interface CustomDataHolderBridge {
         if (value.isPresent()) {
             manipulator.remove(key);
         }
-        syncCustomToTag(this);
+        CustomDataHolderBridge.syncCustomToTag(this);
         return value.map(Value::asImmutable).map(DataTransactionResult::successRemove)
                 .orElseGet(DataTransactionResult::successNoData);
     }

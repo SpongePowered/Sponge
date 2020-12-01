@@ -30,7 +30,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.arguments.ResourceLocationArgument;
 import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -134,7 +133,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     @NonNull
     public String parseString() throws ArgumentParseException {
         try {
-            if (this.canRead() && this.peek() == SYNTAX_QUOTE) {
+            if (this.canRead() && this.peek() == SpongeStringReader.SYNTAX_QUOTE) {
                 return this.readQuotedString();
             } else {
                 return this.readUnquotedString();

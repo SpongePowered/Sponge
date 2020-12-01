@@ -27,15 +27,15 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import io.leangen.geantyref.GenericTypeReflector;
-import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.event.Cancellable;
@@ -247,7 +247,7 @@ public final class SpongeEventManager implements EventManager {
         for (final Method method : handle.getMethods()) {
             final Listener listener = method.getAnnotation(Listener.class);
             if (listener != null) {
-                final String error = getHandlerErrorOrNull(method);
+                final String error = SpongeEventManager.getHandlerErrorOrNull(method);
                 if (error == null) {
                     final Type eventType = method.getGenericParameterTypes()[0];
                     final AnnotatedEventListener handler;
@@ -258,7 +258,7 @@ public final class SpongeEventManager implements EventManager {
                         continue;
                     }
 
-                    handlers.add(createRegistration(plugin, eventType, listener, handler));
+                    handlers.add(SpongeEventManager.createRegistration(plugin, eventType, listener, handler));
                 } else {
                     methodErrors.put(method, error);
                 }
@@ -270,7 +270,7 @@ public final class SpongeEventManager implements EventManager {
         for (Class<?> handleParent = handle; handleParent != Object.class; handleParent = handleParent.getSuperclass()) {
             for (final Method method : handleParent.getDeclaredMethods()) {
                 if (method.getAnnotation(Listener.class) != null && !methodErrors.containsKey(method)) {
-                    final String error = getHandlerErrorOrNull(method);
+                    final String error = SpongeEventManager.getHandlerErrorOrNull(method);
                     if (error != null) {
                         methodErrors.put(method, error);
                     }
@@ -289,7 +289,7 @@ public final class SpongeEventManager implements EventManager {
 
     private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final Type eventClass,
             final Listener listener, final EventListener<? super T> handler) {
-        return createRegistration(plugin, eventClass, listener.order(), listener.beforeModifications(), handler);
+        return SpongeEventManager.createRegistration(plugin, eventClass, listener.order(), listener.beforeModifications(), handler);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -340,7 +340,7 @@ public final class SpongeEventManager implements EventManager {
     @Override
     public <T extends Event> void registerListener(final PluginContainer plugin, final TypeToken<T> eventType, final Order order,
             final boolean beforeModifications, final EventListener<? super T> listener) {
-        this.register(createRegistration(plugin, eventType.getType(), order, beforeModifications, listener));
+        this.register(SpongeEventManager.createRegistration(plugin, eventType.getType(), order, beforeModifications, listener));
     }
 
     private void unregister(final Predicate<RegisteredListener<?>> unregister) {

@@ -66,7 +66,7 @@ public final class BlockItemStackData {
                         })
                         .set((h, v) -> {
                             if (v.isEmpty()) {
-                                deleteLockToken(h);
+                                BlockItemStackData.deleteLockToken(h);
                                 return;
                             }
                             new LockCode(v).write(h.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG));

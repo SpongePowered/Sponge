@@ -33,7 +33,6 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.command.arguments.NBTCompoundTagArgument;
 import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.DoubleNBT;
@@ -41,10 +40,7 @@ import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.GameRules;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.type.ArtType;
@@ -65,25 +61,17 @@ import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.data.type.ParrotType;
 import org.spongepowered.api.data.type.ParrotTypes;
-import org.spongepowered.api.data.type.PickupRule;
-import org.spongepowered.api.data.type.PickupRules;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.StructureModes;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.living.animal.Pig;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
-import org.spongepowered.common.world.storage.SpongeChunkLayout;
-import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.net.InetSocketAddress;
@@ -133,13 +121,13 @@ public final class Constants {
         public static final String FAILED_CUSTOM_DATA = "FailedData";
         // These are Sponge's NBT tag keys
         public static final String SPONGE_DATA = "SpongeData";
-        public static final DataQuery SPONGE_ROOT = of(SPONGE_DATA);
+        public static final DataQuery SPONGE_ROOT = of(Sponge.SPONGE_DATA);
         public static final String SPONGE_ENTITY_CREATOR = "Creator";
         public static final String SPONGE_ENTITY_NOTIFIER = "Notifier";
         public static final String SPONGE_BLOCK_POS_TABLE = "BlockPosTable";
         public static final String SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
         public static final String CUSTOM_MANIPULATOR_TAG_LIST = "CustomManipulators";
-        public static final DataQuery CUSTOM_MANIPULATOR_LIST = of(CUSTOM_MANIPULATOR_TAG_LIST);
+        public static final DataQuery CUSTOM_MANIPULATOR_LIST = of(Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
         public static final String MANIPULATOR_ID = "ManipulatorId";
         // General DataQueries
         public static final DataQuery UNSAFE_NBT = of("UnsafeData");
@@ -152,7 +140,7 @@ public final class Constants {
         public static final DataQuery SNAPSHOT_TILE_DATA = of("TileEntityData");
         public static final int CLASS_BASED_CUSTOM_DATA = 1;
         public static final int CUSTOM_DATA_WITH_DATA_IDS = 2;
-        public static final int CURRENT_CUSTOM_DATA = CUSTOM_DATA_WITH_DATA_IDS;
+        public static final int CURRENT_CUSTOM_DATA = Sponge.CUSTOM_DATA_WITH_DATA_IDS;
 
         /**
          * Modifies bits in an integer.
@@ -171,9 +159,9 @@ public final class Constants {
          * Serialize this BlockPos into a short value
          */
         public static short blockPosToShort(final BlockPos pos) {
-            short serialized = (short) setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
-            serialized = (short) setNibble(serialized, pos.getY() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
-            serialized = (short) setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
+            short serialized = (short) Sponge.setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+            serialized = (short) Sponge.setNibble(serialized, pos.getY() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
+            serialized = (short) Sponge.setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
             return serialized;
         }
 
@@ -181,9 +169,9 @@ public final class Constants {
          * Serialize this BlockPos into an int value
          */
         public static int blockPosToInt(final BlockPos pos) {
-            int serialized = setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
-            serialized = setNibble(serialized, pos.getY() & Constants.Chunk.Y_INT_MASK, 1, Constants.Chunk.NUM_INT_Y_BITS);
-            serialized = setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 7, Constants.Chunk.NUM_XZ_BITS);
+            int serialized = Sponge.setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+            serialized = Sponge.setNibble(serialized, pos.getY() & Constants.Chunk.Y_INT_MASK, 1, Constants.Chunk.NUM_INT_Y_BITS);
+            serialized = Sponge.setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 7, Constants.Chunk.NUM_XZ_BITS);
             return serialized;
         }
 
@@ -351,14 +339,14 @@ public final class Constants {
         public static final class Potion {
 
             public static final int POTION_V2 = 2;
-            public static final int CURRENT_VERSION = POTION_V2;
+            public static final int CURRENT_VERSION = Potion.POTION_V2;
         }
 
         public static final class ItemStackSnapshot {
 
             public static final int DUPLICATE_MANIPULATOR_DATA_VERSION = 1;
             public static final int REMOVED_DUPLICATE_DATA = 2;
-            public static final int CURRENT_VERSION = REMOVED_DUPLICATE_DATA;
+            public static final int CURRENT_VERSION = ItemStackSnapshot.REMOVED_DUPLICATE_DATA;
         }
 
         public static final class BlockState {
@@ -434,13 +422,13 @@ public final class Constants {
         public static final int MASK_DRAGDATA = 0x001F8;
         public static final int MASK_BUTTON = 0x00007;
         // Mask presets
-        public static final int MASK_ALL = MASK_OUTSIDE | MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
-        public static final int MASK_NORMAL = MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
-        public static final int MASK_DRAG = MASK_OUTSIDE | MASK_NORMAL;
+        public static final int MASK_ALL = Networking.MASK_OUTSIDE | Networking.MASK_MODE | Networking.MASK_BUTTON | Networking.MASK_DRAGDATA;
+        public static final int MASK_NORMAL = Networking.MASK_MODE | Networking.MASK_BUTTON | Networking.MASK_DRAGDATA;
+        public static final int MASK_DRAG = Networking.MASK_OUTSIDE | Networking.MASK_NORMAL;
         // Click location semaphore flags
         public static final int CLICK_INSIDE_WINDOW = 0x01 << 16; // << 0
         public static final int CLICK_OUTSIDE_WINDOW = 0x01 << 16 << 1;
-        public static final int CLICK_ANYWHERE = CLICK_INSIDE_WINDOW | CLICK_OUTSIDE_WINDOW;
+        public static final int CLICK_ANYWHERE = Networking.CLICK_INSIDE_WINDOW | Networking.CLICK_OUTSIDE_WINDOW;
         // Modes flags
         public static final int MODE_CLICK = 0x01 << 9 << ClickType.PICKUP.ordinal();
         public static final int MODE_SHIFT_CLICK = 0x01 << 9 << ClickType.QUICK_MOVE.ordinal();
@@ -453,7 +441,7 @@ public final class Constants {
         public static final int DRAG_MODE_PRIMARY_BUTTON = 0x01 << 6; // << 0
         public static final int DRAG_MODE_SECONDARY_BUTTON = 0x01 << 6 << 1;
         public static final int DRAG_MODE_MIDDLE_BUTTON = 0x01 << 6 << 2;
-        public static final int DRAG_MODE_ANY = DRAG_MODE_PRIMARY_BUTTON | DRAG_MODE_SECONDARY_BUTTON | DRAG_MODE_MIDDLE_BUTTON;
+        public static final int DRAG_MODE_ANY = Networking.DRAG_MODE_PRIMARY_BUTTON | Networking.DRAG_MODE_SECONDARY_BUTTON | Networking.DRAG_MODE_MIDDLE_BUTTON;
         // Drag status flags, bitmasked from button and only set if MODE_DRAG
         public static final int DRAG_STATUS_STARTED = 0x01 << 3; // << 0;
         public static final int DRAG_STATUS_ADD_SLOT = 0x01 << 3 << 1;
@@ -975,16 +963,16 @@ public final class Constants {
         public static final byte TAG_ANY_NUMERIC = 99;
 
         public static CompoundNBT filterSpongeCustomData(final CompoundNBT rootCompound) {
-            if (rootCompound.contains(Forge.FORGE_DATA, TAG_COMPOUND)) {
+            if (rootCompound.contains(Forge.FORGE_DATA, NBT.TAG_COMPOUND)) {
                 final CompoundNBT forgeCompound = rootCompound.getCompound(Forge.FORGE_DATA);
-                if (forgeCompound.contains(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
-                    cleanseInnerCompound(forgeCompound);
+                if (forgeCompound.contains(Sponge.SPONGE_DATA, NBT.TAG_COMPOUND)) {
+                    NBT.cleanseInnerCompound(forgeCompound);
                 }
                 if (forgeCompound.isEmpty()) {
                     rootCompound.remove(Forge.FORGE_DATA);
                 }
-            } else if (rootCompound.contains(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
-                cleanseInnerCompound(rootCompound);
+            } else if (rootCompound.contains(Sponge.SPONGE_DATA, NBT.TAG_COMPOUND)) {
+                NBT.cleanseInnerCompound(rootCompound);
             }
             return rootCompound;
         }
@@ -1047,7 +1035,7 @@ public final class Constants {
 
         public static final String PERSISTED_NBT_TAG = "PlayerPersisted";
         public static final String FORGE_DATA = "ForgeData";
-        public static final DataQuery ROOT = of(FORGE_DATA);
+        public static final DataQuery ROOT = of(Forge.FORGE_DATA);
         public static final String FORGE_CAPS = "ForgeCaps";
         /**
          * Cross compatibility so that Sponge's multi-world format is in sync
@@ -1403,12 +1391,12 @@ public final class Constants {
     public static final class TickConversions {
 
         public static final int TICK_DURATION_MS = 50;
-        public static final Duration EFFECTIVE_MINIMUM_DURATION = Duration.ofMillis(TICK_DURATION_MS);
+        public static final Duration EFFECTIVE_MINIMUM_DURATION = Duration.ofMillis(TickConversions.TICK_DURATION_MS);
 
         public static final int MINECRAFT_DAY_TICKS = 24000;
-        public static final int MINECRAFT_HOUR_TICKS = MINECRAFT_DAY_TICKS / 24;
-        public static final double MINECRAFT_MINUTE_TICKS = MINECRAFT_HOUR_TICKS / 60.0;
-        public static final double MINECRAFT_SECOND_TICKS = MINECRAFT_MINUTE_TICKS / 60.0;
+        public static final int MINECRAFT_HOUR_TICKS = TickConversions.MINECRAFT_DAY_TICKS / 24;
+        public static final double MINECRAFT_MINUTE_TICKS = TickConversions.MINECRAFT_HOUR_TICKS / 60.0;
+        public static final double MINECRAFT_SECOND_TICKS = TickConversions.MINECRAFT_MINUTE_TICKS / 60.0;
         public static final int MINECRAFT_EPOCH_OFFSET = 6000;
 
     }

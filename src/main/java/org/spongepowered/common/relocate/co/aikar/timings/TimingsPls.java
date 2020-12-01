@@ -39,27 +39,27 @@ final class TimingsPls {
     private static int nextTileEntityId = 13221456; // Some random number
 
     static {
-        ENTITY_IDS.defaultReturnValue(NOT_FOUND);
+        TimingsPls.ENTITY_IDS.defaultReturnValue(TimingsPls.NOT_FOUND);
         int count = -1;
         for (BlockEntityType tileEntityType : Sponge.getGame().getRegistry().getCatalogRegistry().getAllOf(CatalogTypes.BLOCK_ENTITY_TYPE)) {
-            TILE_ENTITY_IDS.put(tileEntityType, count++);
+            TimingsPls.TILE_ENTITY_IDS.put(tileEntityType, count++);
         }
     }
 
     public static int getEntityId(final EntityType<?> type) {
         int fake;
-        if ((fake = ENTITY_IDS.getInt(type)) == NOT_FOUND) {
-            fake = nextEntityId++;
-            ENTITY_IDS.put(type, fake);
+        if ((fake = TimingsPls.ENTITY_IDS.getInt(type)) == TimingsPls.NOT_FOUND) {
+            fake = TimingsPls.nextEntityId++;
+            TimingsPls.ENTITY_IDS.put(type, fake);
         }
         return fake;
     }
 
     public static int getTileEntityId(final BlockEntityType type) {
         int fake;
-        if ((fake = TILE_ENTITY_IDS.getInt(type)) == NOT_FOUND) {
-            fake = nextTileEntityId++;
-            TILE_ENTITY_IDS.put(type, fake);
+        if ((fake = TimingsPls.TILE_ENTITY_IDS.getInt(type)) == TimingsPls.NOT_FOUND) {
+            fake = TimingsPls.nextTileEntityId++;
+            TimingsPls.TILE_ENTITY_IDS.put(type, fake);
         }
         return fake;
     }

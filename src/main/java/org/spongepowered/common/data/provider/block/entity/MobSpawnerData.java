@@ -65,8 +65,8 @@ public final class MobSpawnerData {
                         .get(h -> new SpongeTicks(((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getMinSpawnDelay()))
                         .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setMinSpawnDelay((int) v.getTicks()))
                     .create(Keys.NEXT_ENTITY_TO_SPAWN)
-                        .get(h -> getNextEntity((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()))
-                        .set((h, v) -> setNextEntity(h.accessor$getSpawnerLogic(), v))
+                        .get(h -> MobSpawnerData.getNextEntity((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()))
+                        .set((h, v) -> MobSpawnerData.setNextEntity(h.accessor$getSpawnerLogic(), v))
                     .create(Keys.REMAINING_SPAWN_DELAY)
                         .get(h -> new SpongeTicks(((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getSpawnDelay()))
                         .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setSpawnDelay((int) v.getTicks()))
@@ -80,11 +80,11 @@ public final class MobSpawnerData {
                         .get(h -> (double) ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getSpawnRange())
                         .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setSpawnRange(v.intValue()))
                     .create(Keys.SPAWNABLE_ENTITIES)
-                        .get(h -> getEntities(h.accessor$getSpawnerLogic()))
+                        .get(h -> MobSpawnerData.getEntities(h.accessor$getSpawnerLogic()))
                         .set((h, v) -> {
                             final AbstractSpawnerAccessor logic = (AbstractSpawnerAccessor) h.accessor$getSpawnerLogic();
-                            setEntities(logic, v);
-                            setNextEntity((AbstractSpawner) logic, getNextEntity(logic));
+                            MobSpawnerData.setEntities(logic, v);
+                            MobSpawnerData.setNextEntity((AbstractSpawner) logic, MobSpawnerData.getNextEntity(logic));
                         });
     }
     // @formatter:on

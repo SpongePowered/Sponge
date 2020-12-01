@@ -74,13 +74,13 @@ public final class SpongeTransform implements Transform {
     public Transform withRotation(final Quaterniond rotation) {
         Objects.requireNonNull(rotation);
 
-        return this.withRotation(toAxesAngles(rotation));
+        return this.withRotation(SpongeTransform.toAxesAngles(rotation));
     }
 
     @Override
     public Quaterniond getRotationAsQuaternion() {
         if (this.rotationQuaternion == null) {
-            this.rotationQuaternion = fromAxesAngles(this.rotation);
+            this.rotationQuaternion = SpongeTransform.fromAxesAngles(this.rotation);
         }
         return this.rotationQuaternion;
     }
@@ -118,7 +118,7 @@ public final class SpongeTransform implements Transform {
 
         return new SpongeTransform(
                 this.position.add(other.getPosition()),
-                toAxesAngles(this.getRotationAsQuaternion().mul(other.getRotationAsQuaternion())),
+            SpongeTransform.toAxesAngles(this.getRotationAsQuaternion().mul(other.getRotationAsQuaternion())),
                 this.scale.add(other.getScale())
         );
     }
@@ -138,7 +138,7 @@ public final class SpongeTransform implements Transform {
     public Transform rotate(final Vector3d rotation) {
         Objects.requireNonNull(rotation);
 
-        return this.rotate(fromAxesAngles(rotation));
+        return this.rotate(SpongeTransform.fromAxesAngles(rotation));
     }
 
     @Override
@@ -147,7 +147,7 @@ public final class SpongeTransform implements Transform {
 
         return new SpongeTransform(
                 this.position,
-                toAxesAngles(this.getRotationAsQuaternion().mul(rotation)),
+            SpongeTransform.toAxesAngles(this.getRotationAsQuaternion().mul(rotation)),
                 this.scale
         );
     }

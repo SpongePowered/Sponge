@@ -63,7 +63,7 @@ public abstract class DropperBlockMixin_Inventory {
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
             // Transfer worked if remainder is one less than the original stack
             if (itemstack1.getCount() == itemstack.getCount() - 1) {
-                final TrackedInventoryBridge capture = impl$forCapture(dispensertileentity);
+                final TrackedInventoryBridge capture = DropperBlockMixin_Inventory.impl$forCapture(dispensertileentity);
                 final Inventory sourceInv = ((Inventory) dispensertileentity);
                 SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
                 InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
@@ -84,7 +84,7 @@ public abstract class DropperBlockMixin_Inventory {
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
             // Transfer worked if remainder is one less than the original stack
             if (itemstack1.getCount() == itemstack.getCount() - 1) {
-                final TrackedInventoryBridge capture = impl$forCapture(dispensertileentity);
+                final TrackedInventoryBridge capture = DropperBlockMixin_Inventory.impl$forCapture(dispensertileentity);
                 final Inventory sourceInv = ((Inventory) dispensertileentity);
                 SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
                 final Direction enumfacing = worldIn.getBlockState(pos).get(DispenserBlock.FACING);

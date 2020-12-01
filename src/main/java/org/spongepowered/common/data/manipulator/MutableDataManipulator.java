@@ -120,9 +120,9 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
         if (valueContainer instanceof SpongeDataManipulator) {
             // Do this to prevent unnecessary object allocations
             final SpongeDataManipulator manipulator = (SpongeDataManipulator) valueContainer;
-            copyFrom(this.values, overlap, keys, manipulator.values::get);
+            MutableDataManipulator.copyFrom(this.values, overlap, keys, manipulator.values::get);
         } else {
-            copyFrom(this.values, overlap, keys, key -> valueContainer.get((Key) key).orElse(null));
+            MutableDataManipulator.copyFrom(this.values, overlap, keys, key -> valueContainer.get((Key) key).orElse(null));
         }
         return this;
     }
@@ -131,7 +131,7 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
     public Mutable copyFrom(final ValueContainer valueContainer, final MergeFunction overlap) {
         checkNotNull(valueContainer, "valueContainer");
         checkNotNull(overlap, "overlap");
-        copyFrom(this.values, valueContainer, overlap);
+        MutableDataManipulator.copyFrom(this.values, valueContainer, overlap);
         return this;
     }
 
@@ -140,9 +140,9 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
         if (valueContainer instanceof SpongeDataManipulator) {
             // Do this to prevent unnecessary object allocations
             final SpongeDataManipulator manipulator = (SpongeDataManipulator) valueContainer;
-            copyFrom(values, overlap, manipulator.values.keySet(), manipulator.values::get);
+            MutableDataManipulator.copyFrom(values, overlap, manipulator.values.keySet(), manipulator.values::get);
         } else {
-            copyFrom(values, overlap, valueContainer.getKeys(), key -> valueContainer.get((Key) key).orElse(null));
+            MutableDataManipulator.copyFrom(values, overlap, valueContainer.getKeys(), key -> valueContainer.get((Key) key).orElse(null));
         }
     }
 

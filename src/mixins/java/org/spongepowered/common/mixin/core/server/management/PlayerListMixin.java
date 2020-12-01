@@ -32,7 +32,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.ServerPlayNetHandler;
-import net.minecraft.network.play.server.SChangeGameStatePacket;
 import net.minecraft.network.play.server.SDisconnectPacket;
 import net.minecraft.network.play.server.SJoinGamePacket;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -53,9 +52,9 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
@@ -69,7 +68,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.network.play.server.SRespawnPacketAccessor;
@@ -86,11 +84,10 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.net.SocketAddress;
 import java.time.Instant;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin implements PlayerListBridge {
@@ -338,12 +335,12 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final ITextComponent reason = SpongeAdventure.asVanilla(disconnectMessage);
 
         try {
-            LOGGER.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" :
+            PlayerListMixin.LOGGER.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" :
                     netManager.getRemoteAddress() + ": " + reason.getUnformattedComponentText()));
             netManager.sendPacket(new SDisconnectPacket(reason));
             netManager.closeChannel(reason);
         } catch (final Exception exception) {
-            LOGGER.error("Error whilst disconnecting player", exception);
+            PlayerListMixin.LOGGER.error("Error whilst disconnecting player", exception);
         }
     }
 }

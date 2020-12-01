@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.properties.Property;
-import io.netty.buffer.Unpooled;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
@@ -56,14 +55,14 @@ public final class SpongeGameProfile implements GameProfile {
     public static final UUID EMPTY_UUID = new UUID(0, 0);
 
     public static SpongeGameProfile of(final com.mojang.authlib.GameProfile mcProfile) {
-        final UUID uniqueId = mcProfile.getId() == null ? EMPTY_UUID : mcProfile.getId();
+        final UUID uniqueId = mcProfile.getId() == null ? SpongeGameProfile.EMPTY_UUID : mcProfile.getId();
         final String name = mcProfile.getName();
         final List<ProfileProperty> properties = (List) ImmutableList.copyOf(mcProfile.getProperties().values());
         return new SpongeGameProfile(uniqueId, name, properties);
     }
 
     public static SpongeGameProfile basicOf(final com.mojang.authlib.GameProfile mcProfile) {
-        final UUID uniqueId = mcProfile.getId() == null ? EMPTY_UUID : mcProfile.getId();
+        final UUID uniqueId = mcProfile.getId() == null ? SpongeGameProfile.EMPTY_UUID : mcProfile.getId();
         final String name = mcProfile.getName();
         return new SpongeGameProfile(uniqueId, name);
     }
@@ -92,10 +91,10 @@ public final class SpongeGameProfile implements GameProfile {
         if (!property.hasSignature()) {
             return property;
         }
-        final String decoded = decodeBase64(property.getValue());
+        final String decoded = SpongeGameProfile.decodeBase64(property.getValue());
         final JsonObject json;
         try {
-            json = GSON.fromJson(decoded, JsonObject.class);
+            json = SpongeGameProfile.GSON.fromJson(decoded, JsonObject.class);
         } catch (final Throwable t) {
             // Not valid json, we can't do anything about this
             return property;
@@ -104,7 +103,7 @@ public final class SpongeGameProfile implements GameProfile {
             return property;
         }
         json.remove("signatureRequired");
-        final String encoded = encodeBase64(GSON.toJson(json));
+        final String encoded = SpongeGameProfile.encodeBase64(SpongeGameProfile.GSON.toJson(json));
         return ProfileProperty.of(property.getName(), encoded);
     }
 
@@ -128,7 +127,7 @@ public final class SpongeGameProfile implements GameProfile {
     }
 
     public com.mojang.authlib.GameProfile toMcProfile() {
-        final UUID uniqueId = this.uniqueId.equals(EMPTY_UUID) ? null : this.uniqueId;
+        final UUID uniqueId = this.uniqueId.equals(SpongeGameProfile.EMPTY_UUID) ? null : this.uniqueId;
         final String name = this.name;
         final com.mojang.authlib.GameProfile mcProfile = new com.mojang.authlib.GameProfile(uniqueId, name);
         for (final ProfileProperty property : this.properties) {

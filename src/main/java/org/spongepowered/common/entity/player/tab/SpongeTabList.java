@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
-import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SPlayerListHeaderFooterPacket;
@@ -44,16 +43,15 @@ import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.common.accessor.network.play.server.SPlayerListHeaderFooterPacketAccessor;
 import org.spongepowered.common.accessor.network.play.server.SPlayerListItemPacketAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.profile.SpongeGameProfile;
 
 public final class SpongeTabList implements TabList {
 
@@ -115,8 +113,8 @@ public final class SpongeTabList implements TabList {
     private void refreshClientHeaderFooter() {
         final SPlayerListHeaderFooterPacket packet = new SPlayerListHeaderFooterPacket();
         // MC-98180 - Sending null as header or footer will cause an exception on the client
-        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setHeader(this.header == null ? EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.header));
-        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setFooter(this.footer == null ? EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.footer));
+        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setHeader(this.header == null ? SpongeTabList.EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.header));
+        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setFooter(this.footer == null ? SpongeTabList.EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.footer));
         this.player.connection.sendPacket(packet);
     }
 

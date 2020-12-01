@@ -70,7 +70,7 @@ public final class TileEntityPipeline implements BlockPipeline {
         final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld de-referenced");
         final Supplier<Chunk> chunkSupplier = () -> Objects.requireNonNull(chunkRef.get(), "Chunk de-referenced");
         final Supplier<ChunkSection> chunkSectionSupplier = () -> Objects.requireNonNull(sectionRef.get(), "ChunkSection de-referenced");
-        return builder()
+        return TileEntityPipeline.builder()
             .chunk(chunkSupplier)
             .world(worldSupplier)
             .chunkSection(chunkSectionSupplier);

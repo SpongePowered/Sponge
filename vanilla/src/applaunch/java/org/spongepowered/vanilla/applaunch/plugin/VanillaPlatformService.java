@@ -36,14 +36,12 @@ import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
 import org.spongepowered.vanilla.applaunch.Main;
 import org.spongepowered.vanilla.installer.Constants;
 
+import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.jar.Attributes;
-
-import javax.annotation.Nonnull;
 
 public final class VanillaPlatformService implements ITransformationService {
 
@@ -74,7 +72,7 @@ public final class VanillaPlatformService implements ITransformationService {
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
-        for (final Map.Entry<String, List<PluginResource>> resourcesEntry : pluginEngine.getResources().entrySet()) {
+        for (final Map.Entry<String, List<PluginResource>> resourcesEntry : VanillaPlatformService.pluginEngine.getResources().entrySet()) {
             final List<PluginResource> resources = resourcesEntry.getValue();
             for (final PluginResource resource : resources) {
 

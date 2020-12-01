@@ -68,8 +68,8 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.network.ServerPlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -103,6 +103,7 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -113,8 +114,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(ServerPlayerEntity.class)
 @Implements(@Interface(iface = Player.class, prefix = "player$"))
@@ -443,7 +442,9 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         Objects.requireNonNull(title, "title");
         final Title.Times times = title.times();
         if (times != null) {
-            this.connection.sendPacket(new STitlePacket(ticks(times.fadeIn()), ticks(times.stay()), ticks(times.fadeOut())));
+            this.connection.sendPacket(new STitlePacket(
+                ServerPlayerEntityMixin_API.ticks(times.fadeIn()),
+                ServerPlayerEntityMixin_API.ticks(times.stay()), ServerPlayerEntityMixin_API.ticks(times.fadeOut())));
         }
         this.connection.sendPacket(new STitlePacket(STitlePacket.Type.SUBTITLE, SpongeAdventure.asVanilla(title.subtitle())));
         this.connection.sendPacket(new STitlePacket(STitlePacket.Type.TITLE, SpongeAdventure.asVanilla(title.title())));

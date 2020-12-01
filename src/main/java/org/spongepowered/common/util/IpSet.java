@@ -71,7 +71,7 @@ public final class IpSet implements Predicate<InetAddress> {
     }
 
     public static IpSet fromAddrPrefix(final InetAddress address, final int prefixLen) {
-        validatePrefixLength(checkNotNull(address, "address"), checkNotNull(prefixLen, "prefixLen"));
+        IpSet.validatePrefixLength(checkNotNull(address, "address"), checkNotNull(prefixLen, "prefixLen"));
         return new IpSet(address, prefixLen);
     }
 
@@ -99,14 +99,14 @@ public final class IpSet implements Predicate<InetAddress> {
             throw new IllegalArgumentException(addrString + " does not contain a valid IP address");
         }
 
-        return fromAddrPrefix(addr, prefixLen);
+        return IpSet.fromAddrPrefix(addr, prefixLen);
     }
 
     private static void validatePrefixLength(final InetAddress address, final int prefixLen) throws IllegalArgumentException {
         if (prefixLen < 0) {
             throw new IllegalArgumentException("Minimum prefix length for an IP address is 0!");
         }
-        final int maxLen = getMaxPrefixLength(address);
+        final int maxLen = IpSet.getMaxPrefixLength(address);
         if (prefixLen > maxLen) {
             throw new IllegalArgumentException("Maximum prefix length for a " + address.getClass().getSimpleName() + " is " + maxLen);
         }

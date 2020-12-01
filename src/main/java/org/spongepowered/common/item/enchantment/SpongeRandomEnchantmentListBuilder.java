@@ -35,11 +35,11 @@ import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public final class SpongeRandomEnchantmentListBuilder implements Enchantment.RandomListBuilder {
 
@@ -102,7 +102,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
             enchantments = this.basedOfFixedPool(new Random(this.seed + this.option), this.pool);
         }
 
-        return fromNative(enchantments);
+        return SpongeRandomEnchantmentListBuilder.fromNative(enchantments);
     }
 
     /**
@@ -111,7 +111,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     private List<EnchantmentData> basedOfFixedPool(Random randomIn, List<Enchantment> pool) {
         List<EnchantmentData> list = Lists.<EnchantmentData>newArrayList();
 
-        List<EnchantmentData> list1 = toNative(pool);
+        List<EnchantmentData> list1 = SpongeRandomEnchantmentListBuilder.toNative(pool);
 
         // Same code as net.minecraft.enchantment.EnchantmentHelper#buildEnchantmentList
         if (!list1.isEmpty())

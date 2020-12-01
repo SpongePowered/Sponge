@@ -46,16 +46,16 @@ public final class SlotData {
         registrator
                 .asImmutable(Slot.class)
                     .create(Keys.EQUIPMENT_TYPE)
-                        .get(h -> getter(h, Keys.EQUIPMENT_TYPE))
+                        .get(h -> SlotData.getter(h, Keys.EQUIPMENT_TYPE))
                         .set((h, v) -> null)
                     .create(Keys.SLOT_INDEX)
-                        .get(h -> getter(h, Keys.SLOT_INDEX))
+                        .get(h -> SlotData.getter(h, Keys.SLOT_INDEX))
                         .set((h, v) -> null)
                     .create(Keys.SLOT_POSITION)
-                        .get(h -> getter(h, Keys.SLOT_POSITION))
+                        .get(h -> SlotData.getter(h, Keys.SLOT_POSITION))
                         .set((h, v) -> null)
                     .create(Keys.SLOT_SIDE)
-                        .get(h -> getter(h, Keys.SLOT_SIDE))
+                        .get(h -> SlotData.getter(h, Keys.SLOT_SIDE))
                         .set((h, v) -> null);
     }
     // @formatter:on

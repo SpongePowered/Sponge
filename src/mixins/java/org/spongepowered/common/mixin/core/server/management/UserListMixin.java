@@ -53,7 +53,7 @@ public abstract class UserListMixin {
     @Inject(method = "readSavedFile", at = @At("HEAD"), cancellable = true)
     private void onReadSavedFile(final CallbackInfo ci) {
         if (!this.saveFile.exists()) {
-            LOGGER.warn("{} does not exist, creating it.", this.saveFile.getName());
+            UserListMixin.LOGGER.warn("{} does not exist, creating it.", this.saveFile.getName());
             ci.cancel();
         }
     }

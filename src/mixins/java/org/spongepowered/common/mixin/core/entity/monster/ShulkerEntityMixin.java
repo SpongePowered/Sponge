@@ -45,7 +45,7 @@ public abstract class ShulkerEntityMixin extends MobEntityMixin implements Shulk
 
     @Override
     public @Nullable DyeColor bridge$getColor() {
-        final int color = this.dataManager.get(COLOR);
+        final int color = this.dataManager.get(ShulkerEntityMixin.COLOR);
         // The non colored variant
         if (color > 15) {
             return null;
@@ -56,17 +56,17 @@ public abstract class ShulkerEntityMixin extends MobEntityMixin implements Shulk
     @Override
     public void bridge$setColor(final @Nullable DyeColor color) {
         final int value = color == null ? 16 : ((net.minecraft.item.DyeColor) (Object) color).getId();
-        this.dataManager.set(COLOR, (byte) value);
+        this.dataManager.set(ShulkerEntityMixin.COLOR, (byte) value);
     }
 
     @Override
     public Direction bridge$getDirection() {
-        return Constants.DirectionFunctions.getFor(this.dataManager.get(ATTACHED_FACE));
+        return Constants.DirectionFunctions.getFor(this.dataManager.get(ShulkerEntityMixin.ATTACHED_FACE));
     }
 
     @Override
     public void bridge$setDirection(final Direction direction) {
-        this.dataManager.set(ATTACHED_FACE, Constants.DirectionFunctions.getFor(direction));
+        this.dataManager.set(ShulkerEntityMixin.ATTACHED_FACE, Constants.DirectionFunctions.getFor(direction));
     }
 
 }

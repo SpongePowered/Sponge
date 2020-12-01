@@ -34,13 +34,12 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.spongepowered.api.command.exception.CommandException;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 /**
  * Holds logic for an active pagination that is occurring.
@@ -167,9 +166,9 @@ abstract class ActivePagination {
 
         final TextComponent.Builder ret = Component.text();
         if (hasPrevious) {
-            ret.append(this.prevPageText).append(DIVIDER_TEXT);
+            ret.append(this.prevPageText).append(ActivePagination.DIVIDER_TEXT);
         } else {
-            ret.append(Component.text("«")).append(DIVIDER_TEXT);
+            ret.append(Component.text("«")).append(ActivePagination.DIVIDER_TEXT);
         }
         boolean needsDiv = false;
         final int totalPages = this.getTotalPages();
@@ -180,7 +179,7 @@ abstract class ActivePagination {
                     .hoverEvent(HoverEvent.showText(Component.text("/page " + currentPage)))
                     .insertion("/sponge:page " + currentPage)
                     .build());
-            ret.append(SLASH_TEXT);
+            ret.append(ActivePagination.SLASH_TEXT);
             ret.append(Component.text()
                     .content(String.valueOf(totalPages))
                     .clickEvent(ClickEvent.runCommand("/sponge:pagination " + this.id + ' ' + totalPages))
@@ -191,7 +190,7 @@ abstract class ActivePagination {
         }
 
         if (needsDiv) {
-            ret.append(DIVIDER_TEXT);
+            ret.append(ActivePagination.DIVIDER_TEXT);
         }
 
         if (hasNext) {
@@ -211,7 +210,7 @@ abstract class ActivePagination {
         final int maxContentLinesPerPage = this.getMaxContentLinesPerPage();
         for (int i = currentPageLines; i < maxContentLinesPerPage; i++) {
             if (addContinuation && i == maxContentLinesPerPage - 1) {
-                currentPage.add(CONTINUATION_TEXT);
+                currentPage.add(ActivePagination.CONTINUATION_TEXT);
             } else {
                 currentPage.add(0, Component.empty());
             }

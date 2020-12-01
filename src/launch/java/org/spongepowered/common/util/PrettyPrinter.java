@@ -422,14 +422,14 @@ public class PrettyPrinter {
      */
     protected int kvKeyWidth = 10;
 
-    protected String kvFormat = makeKvFormat(this.kvKeyWidth);
+    protected String kvFormat = PrettyPrinter.makeKvFormat(this.kvKeyWidth);
 
     public PrettyPrinter() {
         this(100);
     }
 
     public PrettyPrinter(final int width) {
-        this.width = Math.max(MIN_WIDTH, width);
+        this.width = Math.max(PrettyPrinter.MIN_WIDTH, width);
         this.wrapWidth = this.width - 20;
     }
 
@@ -805,7 +805,7 @@ public class PrettyPrinter {
         final List<String> lines = new ArrayList<String>();
 
         while (line.length() > width) {
-            int wrapPoint = lastBreakIndex(line, width);
+            int wrapPoint = PrettyPrinter.lastBreakIndex(line, width);
             if (wrapPoint < 10) {
                 wrapPoint = width;
             }
@@ -859,7 +859,7 @@ public class PrettyPrinter {
     public PrettyPrinter kvWidth(final int width) {
         if (width > this.kvKeyWidth) {
             this.kvKeyWidth = width;
-            this.kvFormat = makeKvFormat(width);
+            this.kvFormat = PrettyPrinter.makeKvFormat(width);
         }
         this.recalcWidth = true;
         return this;
@@ -930,7 +930,7 @@ public class PrettyPrinter {
      * @return fluent interface
      */
     public PrettyPrinter trace() {
-        return this.trace(getDefaultLoggerName());
+        return this.trace(PrettyPrinter.getDefaultLoggerName());
     }
 
     /**
@@ -941,7 +941,7 @@ public class PrettyPrinter {
      * @return fluent interface
      */
     public PrettyPrinter trace(final Level level) {
-        return this.trace(getDefaultLoggerName(), level);
+        return this.trace(PrettyPrinter.getDefaultLoggerName(), level);
     }
 
     /**
@@ -998,7 +998,7 @@ public class PrettyPrinter {
      * @return fluent interface
      */
     public PrettyPrinter trace(final PrintStream stream) {
-        return this.trace(stream, getDefaultLoggerName());
+        return this.trace(stream, PrettyPrinter.getDefaultLoggerName());
     }
 
     /**
@@ -1010,7 +1010,7 @@ public class PrettyPrinter {
      * @return fluent interface
      */
     public PrettyPrinter trace(final PrintStream stream, final Level level) {
-        return this.trace(stream, getDefaultLoggerName(), level);
+        return this.trace(stream, PrettyPrinter.getDefaultLoggerName(), level);
     }
 
     /**
@@ -1121,7 +1121,7 @@ public class PrettyPrinter {
      * @return fluent interface
      */
     public PrettyPrinter log(final Level level) {
-        return this.log(LogManager.getLogger(getDefaultLoggerName()), level);
+        return this.log(LogManager.getLogger(PrettyPrinter.getDefaultLoggerName()), level);
     }
 
     /**

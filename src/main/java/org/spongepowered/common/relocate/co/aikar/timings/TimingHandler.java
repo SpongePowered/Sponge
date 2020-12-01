@@ -34,7 +34,7 @@ import org.spongepowered.common.relocate.co.aikar.util.LoadingIntMap;
 class TimingHandler implements Timing {
 
     private static int idPool = 1;
-    final int id = idPool++;
+    final int id = TimingHandler.idPool++;
 
     final String name;
     private final boolean verbose;

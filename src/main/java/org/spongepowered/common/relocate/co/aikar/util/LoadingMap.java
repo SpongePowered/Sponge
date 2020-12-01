@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.relocate.co.aikar.util;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -32,8 +33,6 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 /**
  * Allows you to pass a Loader function that when a key is accessed that doesn't
@@ -119,7 +118,7 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
      */
     public static <K, V> Map<K, V> newAutoMap(Map<K, V> backingMap,
             final Class<? extends V> valueClass) {
-        return newAutoMap(backingMap, null, valueClass);
+        return LoadingMap.newAutoMap(backingMap, null, valueClass);
     }
 
     /**
@@ -134,7 +133,7 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
      * @return Map that auto instantiates on .get()
      */
     public static <K, V> Map<K, V> newHashAutoMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass) {
-        return newAutoMap(new HashMap<>(), keyClass, valueClass);
+        return LoadingMap.newAutoMap(new HashMap<>(), keyClass, valueClass);
     }
 
     /**
@@ -148,7 +147,7 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
      * @return Map that auto instantiates on .get()
      */
     public static <K, V> Map<K, V> newHashAutoMap(final Class<? extends V> valueClass) {
-        return newHashAutoMap(null, valueClass);
+        return LoadingMap.newHashAutoMap(null, valueClass);
     }
 
     /**
@@ -166,7 +165,7 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
      */
     public static <K, V> Map<K, V> newHashAutoMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass, int initialCapacity,
             float loadFactor) {
-        return newAutoMap(new HashMap<>(initialCapacity, loadFactor), keyClass, valueClass);
+        return LoadingMap.newAutoMap(new HashMap<>(initialCapacity, loadFactor), keyClass, valueClass);
     }
 
     /**
@@ -182,7 +181,7 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
      * @return  Map that auto instantiates on .get()
      */
     public static <K, V> Map<K, V> newHashAutoMap(final Class<? extends V> valueClass, int initialCapacity, float loadFactor) {
-        return newHashAutoMap(null, valueClass, initialCapacity, loadFactor);
+        return LoadingMap.newHashAutoMap(null, valueClass, initialCapacity, loadFactor);
     }
 
     /**

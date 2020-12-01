@@ -120,7 +120,7 @@ public final class InventoryTest implements LoadableModule {
             final Optional<Component> component = event.getContainer().get(Keys.DISPLAY_NAME);
             final String title = component.map(c -> PlainComponentSerializer.plain().serialize(c)).orElse("No Title");
             if (title.equals("Foobar")) {
-                doFancyStuff(event.getCause().first(Player.class).get());
+                InventoryTest.doFancyStuff(event.getCause().first(Player.class).get());
             }
         }
 

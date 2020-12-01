@@ -35,8 +35,8 @@ import net.minecraft.nbt.StringNBT;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.NBTCollectors;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.NBTCollectors;
 
 import java.util.List;
 import java.util.function.Function;
@@ -78,13 +78,13 @@ public final class BookItemStackData {
                         })
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.PAGES)
-                        .get(h -> get(h, iv -> GsonComponentSerializer.gson().deserialize(iv)))
-                        .setAnd((h, v) -> set(h, v, ih -> GsonComponentSerializer.gson().serialize(ih)))
+                        .get(h -> BookItemStackData.get(h, iv -> GsonComponentSerializer.gson().deserialize(iv)))
+                        .setAnd((h, v) -> BookItemStackData.set(h, v, ih -> GsonComponentSerializer.gson().serialize(ih)))
                         .deleteAnd(BookItemStackData::delete)
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.PLAIN_PAGES)
-                        .get(h -> get(h, iv -> iv))
-                        .setAnd((h, v) -> set(h, v, iv -> iv))
+                        .get(h -> BookItemStackData.get(h, iv -> iv))
+                        .setAnd((h, v) -> BookItemStackData.set(h, v, iv -> iv))
                         .deleteAnd(BookItemStackData::delete)
                         .supports(h -> h.getItem() == Items.WRITABLE_BOOK);
     }

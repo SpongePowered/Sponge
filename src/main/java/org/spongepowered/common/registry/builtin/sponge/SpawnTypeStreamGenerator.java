@@ -55,8 +55,8 @@ public final class SpawnTypeStreamGenerator {
             new SpongeSpawnType(ResourceKey.sponge("chunk_load")),
             new SpongeSpawnType(ResourceKey.sponge("world_spawner")),
             new SpongeSpawnType(ResourceKey.sponge("plugin")),
-            ENTITY_DEATH,
-            FORCED
+            SpawnTypeStreamGenerator.ENTITY_DEATH,
+            SpawnTypeStreamGenerator.FORCED
         );
     }
 }

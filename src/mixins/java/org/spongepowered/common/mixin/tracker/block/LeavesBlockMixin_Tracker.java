@@ -86,7 +86,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
      */
     @Overwrite
     public void randomTick(net.minecraft.block.BlockState state, net.minecraft.world.server.ServerWorld worldIn, BlockPos pos, Random random) {
-        if (!state.get(PERSISTENT) && state.get(DISTANCE) == 7) {
+        if (!state.get(LeavesBlockMixin_Tracker.PERSISTENT) && state.get(LeavesBlockMixin_Tracker.DISTANCE) == 7) {
             // Sponge Start - PhaseTracker checks and phase entry
             if (!((WorldBridge) worldIn).bridge$isFake()) {
                 final PhaseContext<?> peek = PhaseTracker.getInstance().getPhaseContext();
@@ -100,13 +100,13 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
                     if (context != null) {
                         context.buildAndSwitch();
                     }
-                    shadow$spawnDrops(state, worldIn, pos);
+                    BlockMixin_Tracker.shadow$spawnDrops(state, worldIn, pos);
                     worldIn.removeBlock(pos, false);
                 }
                 return;
             }
             // Sponge End
-            shadow$spawnDrops(state, worldIn, pos);
+            BlockMixin_Tracker.shadow$spawnDrops(state, worldIn, pos);
             worldIn.removeBlock(pos, false);
         }
 

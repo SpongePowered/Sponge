@@ -44,8 +44,8 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -67,7 +67,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
     }
 
     public static SpongeBlockSnapshotBuilder pooled() {
-        final SpongeBlockSnapshotBuilder builder = pool.pollFirst();
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pool.pollFirst();
         if (builder != null) {
             return builder.reset();
         }
@@ -225,7 +225,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
         final SpongeBlockSnapshot spongeBlockSnapshot = new SpongeBlockSnapshot(this);
         this.reset();
         if (this.pooled) {
-            pool.push(this);
+            SpongeBlockSnapshotBuilder.pool.push(this);
         }
         return spongeBlockSnapshot;
     }

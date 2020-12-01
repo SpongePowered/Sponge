@@ -54,7 +54,7 @@ public final class BookUtil {
         // contents to the player's hand
         // These values are localized since sending item NBT doesn't trigger translation
         final ItemStack item = ItemStack.of(ItemTypes.WRITTEN_BOOK, 1);
-        Locale lastLocale = STARTER_LOCALE;
+        Locale lastLocale = BookUtil.STARTER_LOCALE;
 
         for (final Player player : players) {
             if (!Objects.equals(player.getLocale(), lastLocale)) {
@@ -70,14 +70,14 @@ public final class BookUtil {
 
             final PlayerInventory inventory = mcPlayer.inventory;
             final int bookSlot = inventory.mainInventory.size() + inventory.currentItem;
-            receiver.sendPacket(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
+            receiver.sendPacket(new SSetSlotPacket(BookUtil.WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
 
             // Next we tell the client to open the Book GUI
             receiver.sendPacket(new SOpenBookWindowPacket(Hand.MAIN_HAND));
 
             // Now we can remove the fake Book since it's contents will have already
             // been transferred to the GUI
-            receiver.sendPacket(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getCurrentItem()));
+            receiver.sendPacket(new SSetSlotPacket(BookUtil.WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getCurrentItem()));
         }
     }
 

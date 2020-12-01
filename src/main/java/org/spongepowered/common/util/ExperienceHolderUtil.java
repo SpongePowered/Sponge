@@ -75,9 +75,9 @@ public final class ExperienceHolderUtil {
      * @return The level the player would be at
      */
     public static int getLevelForExp(final int experience) {
-        if (experience >= XP_AT_LEVEL_30) {
+        if (experience >= ExperienceHolderUtil.XP_AT_LEVEL_30) {
             return (int) ((162.5 + Math.sqrt(-13553.75 + 18 * experience)) / 9);
-        } else if (experience >= XP_AT_LEVEL_15) {
+        } else if (experience >= ExperienceHolderUtil.XP_AT_LEVEL_15) {
             return (int) ((40.5 + Math.sqrt(-1959.75 + 10 * experience)) / 5);
         } else {
             return (int) (-3 + Math.sqrt(9 + experience));
@@ -103,7 +103,7 @@ public final class ExperienceHolderUtil {
 
             // Increment level, as we know we are at least that level (in the first instance -1 -> 0)
             // and add the next amount of experience to the variable.
-            experienceAtNextLevel += getExpBetweenLevels(++level);
+            experienceAtNextLevel += ExperienceHolderUtil.getExpBetweenLevels(++level);
         } while (experienceAtNextLevel <= value && experienceAtNextLevel > 0);
 
         // If experience for current level is still -1 that means that the holder has never gained a level nor has
@@ -116,7 +116,7 @@ public final class ExperienceHolderUtil {
         // Once we're here, we have the correct level. The experience is the decimal fraction that we are through the
         // current level. This is why we require the experienceForCurrentLevel variable, we need the difference between
         // the current value and the beginning of the level.
-        holder.experience = (float) (value - experienceForCurrentLevel) / getExpBetweenLevels(level);
+        holder.experience = (float) (value - experienceForCurrentLevel) / ExperienceHolderUtil.getExpBetweenLevels(level);
         holder.experienceLevel = level;
         holder.experienceTotal = value;
 

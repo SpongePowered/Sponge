@@ -27,6 +27,7 @@ package org.spongepowered.common.util;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
@@ -34,8 +35,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings({"rawtypes", "WeakerAccess"})
 public final class TypeTokenUtil {
@@ -82,11 +81,11 @@ public final class TypeTokenUtil {
     // Unlike normal GenericTypeReflector#isSupertypeOf, these functions treat generic parameters as covariant.
 
     public static boolean isAssignable(final TypeToken<?> type, final TypeToken<?> toType) {
-        return isAssignable(type.getType(), toType.getType());
+        return TypeTokenUtil.isAssignable(type.getType(), toType.getType());
     }
 
     public static boolean isAssignable(final Type type, final Type toType) {
-        return isAssignable(type, toType, null, 0);
+        return TypeTokenUtil.isAssignable(type, toType, null, 0);
     }
 
     private static boolean isAssignable(final Type type, final Type toType, final @Nullable Type parent, final int index) {
@@ -94,19 +93,19 @@ public final class TypeTokenUtil {
             return true;
         }
         if (toType instanceof Class) {
-            return isAssignable(type, (Class<?>) toType, parent, index);
+            return TypeTokenUtil.isAssignable(type, (Class<?>) toType, parent, index);
         }
         if (toType instanceof ParameterizedType) {
-            return isAssignable(type, (ParameterizedType) toType, parent, index);
+            return TypeTokenUtil.isAssignable(type, (ParameterizedType) toType, parent, index);
         }
         if (toType instanceof TypeVariable) {
-            return isAssignable(type, (TypeVariable) toType, parent, index);
+            return TypeTokenUtil.isAssignable(type, (TypeVariable) toType, parent, index);
         }
         if (toType instanceof WildcardType) {
-            return isAssignable(type, (WildcardType) toType, parent, index);
+            return TypeTokenUtil.isAssignable(type, (WildcardType) toType, parent, index);
         }
         if (toType instanceof GenericArrayType) {
-            return isAssignable(type, (GenericArrayType) toType, parent, index);
+            return TypeTokenUtil.isAssignable(type, (GenericArrayType) toType, parent, index);
         }
         throw new IllegalStateException("Unsupported type: " + type);
     }
@@ -117,7 +116,7 @@ public final class TypeTokenUtil {
             final Class<?> toEnclosing = toType.getEnclosingClass();
             if (toEnclosing != null && !Modifier.isStatic(toType.getModifiers())) {
                 final Class<?> otherEnclosing = other.getEnclosingClass();
-                if (otherEnclosing == null || !isAssignable(otherEnclosing, toEnclosing, null, 0)) {
+                if (otherEnclosing == null || !TypeTokenUtil.isAssignable(otherEnclosing, toEnclosing, null, 0)) {
                     return false;
                 }
             }
@@ -128,7 +127,7 @@ public final class TypeTokenUtil {
             final Class<?> toEnclosing = toType.getEnclosingClass();
             if (toEnclosing != null && !Modifier.isStatic(toType.getModifiers())) {
                 final Type otherEnclosing = other.getOwnerType();
-                if (otherEnclosing == null || !isAssignable(otherEnclosing, toEnclosing, null, 0)) {
+                if (otherEnclosing == null || !TypeTokenUtil.isAssignable(otherEnclosing, toEnclosing, null, 0)) {
                     return false;
                 }
             }
@@ -136,17 +135,17 @@ public final class TypeTokenUtil {
         }
         if (type instanceof TypeVariable) {
             final TypeVariable other = (TypeVariable) type;
-            return allSupertypes(toType, other.getBounds());
+            return TypeTokenUtil.allSupertypes(toType, other.getBounds());
         }
         if (type instanceof WildcardType) {
             final WildcardType other = (WildcardType) type;
-            return allWildcardSupertypes(toType, other.getUpperBounds(), parent, index) &&
-                    allAssignable(toType, other.getLowerBounds());
+            return TypeTokenUtil.allWildcardSupertypes(toType, other.getUpperBounds(), parent, index) &&
+                TypeTokenUtil.allAssignable(toType, other.getLowerBounds());
         }
         if (type instanceof GenericArrayType) {
             final GenericArrayType other = (GenericArrayType) type;
             return toType.equals(Object.class) || (toType.isArray() &&
-                    isAssignable(other.getGenericComponentType(), toType.getComponentType(), parent, index));
+                TypeTokenUtil.isAssignable(other.getGenericComponentType(), toType.getComponentType(), parent, index));
         }
         throw new IllegalStateException("Unsupported type: " + type);
     }
@@ -162,7 +161,7 @@ public final class TypeTokenUtil {
             final Type toEnclosing = toType.getOwnerType();
             if (toEnclosing != null && !Modifier.isStatic(toRaw.getModifiers())) {
                 final Class<?> otherEnclosing = otherRaw.getEnclosingClass();
-                if (otherEnclosing == null || !isAssignable(otherEnclosing, toEnclosing, null, 0)) {
+                if (otherEnclosing == null || !TypeTokenUtil.isAssignable(otherEnclosing, toEnclosing, null, 0)) {
                     return false;
                 }
             }
@@ -181,7 +180,7 @@ public final class TypeTokenUtil {
                 return false;
             }
             for (int i = 0; i < types.length; i++) {
-                if (!isAssignable(types[i], toTypes[i], type, i)) {
+                if (!TypeTokenUtil.isAssignable(types[i], toTypes[i], type, i)) {
                     return false;
                 }
             }
@@ -197,7 +196,7 @@ public final class TypeTokenUtil {
             final Type toEnclosing = toType.getOwnerType();
             if (toEnclosing != null && !Modifier.isStatic(toRaw.getModifiers())) {
                 final Type otherEnclosing = other.getOwnerType();
-                if (otherEnclosing == null || !isAssignable(otherEnclosing, toEnclosing, null, 0)) {
+                if (otherEnclosing == null || !TypeTokenUtil.isAssignable(otherEnclosing, toEnclosing, null, 0)) {
                     return false;
                 }
             }
@@ -214,7 +213,7 @@ public final class TypeTokenUtil {
                 return false;
             }
             for (int i = 0; i < types.length; i++) {
-                if (!isAssignable(types[i], toTypes[i], other, i)) {
+                if (!TypeTokenUtil.isAssignable(types[i], toTypes[i], other, i)) {
                     return false;
                 }
             }
@@ -222,53 +221,53 @@ public final class TypeTokenUtil {
         }
         if (type instanceof TypeVariable) {
             final TypeVariable other = (TypeVariable) type;
-            return allSupertypes(toType, other.getBounds());
+            return TypeTokenUtil.allSupertypes(toType, other.getBounds());
         }
         if (type instanceof WildcardType) {
             final WildcardType other = (WildcardType) type;
-            return allWildcardSupertypes(toType, other.getUpperBounds(), parent, index) &&
-                    allAssignable(toType, other.getLowerBounds());
+            return TypeTokenUtil.allWildcardSupertypes(toType, other.getUpperBounds(), parent, index) &&
+                TypeTokenUtil.allAssignable(toType, other.getLowerBounds());
         }
         if (type instanceof GenericArrayType) {
             final GenericArrayType other = (GenericArrayType) type;
             final Class<?> rawType = (Class<?>) toType.getRawType();
             return rawType.equals(Object.class) || (rawType.isArray() &&
-                    isAssignable(other.getGenericComponentType(), rawType.getComponentType(), parent, index));
+                TypeTokenUtil.isAssignable(other.getGenericComponentType(), rawType.getComponentType(), parent, index));
         }
         throw new IllegalStateException("Unsupported type: " + type);
     }
 
     private static boolean isAssignable(final Type type, final TypeVariable toType, final @Nullable Type parent, final int index) {
-        return allAssignable(type, toType.getBounds());
+        return TypeTokenUtil.allAssignable(type, toType.getBounds());
     }
 
     private static boolean isAssignable(final Type type, final WildcardType toType, final @Nullable Type parent, final int index) {
-        return allWildcardAssignable(type, toType.getUpperBounds(), parent, index) &&
-                allSupertypes(type, toType.getLowerBounds());
+        return TypeTokenUtil.allWildcardAssignable(type, toType.getUpperBounds(), parent, index) &&
+            TypeTokenUtil.allSupertypes(type, toType.getLowerBounds());
     }
 
     private static boolean isAssignable(final Type type, final GenericArrayType toType, final @Nullable Type parent, final int index) {
         if (type instanceof Class) {
             final Class<?> other = (Class<?>) type;
-            return other.isArray() && isAssignable(other.getComponentType(), toType.getGenericComponentType(), parent, index);
+            return other.isArray() && TypeTokenUtil.isAssignable(other.getComponentType(), toType.getGenericComponentType(), parent, index);
         }
         if (type instanceof ParameterizedType) {
             final ParameterizedType other = (ParameterizedType) type;
             final Class<?> rawType = (Class<?>) other.getRawType();
-            return rawType.isArray() && isAssignable(rawType.getComponentType(), toType.getGenericComponentType(), parent, index);
+            return rawType.isArray() && TypeTokenUtil.isAssignable(rawType.getComponentType(), toType.getGenericComponentType(), parent, index);
         }
         if (type instanceof TypeVariable) {
             final TypeVariable other = (TypeVariable) type;
-            return allSupertypes(toType, other.getBounds());
+            return TypeTokenUtil.allSupertypes(toType, other.getBounds());
         }
         if (type instanceof WildcardType) {
             final WildcardType other = (WildcardType) type;
-            return allWildcardSupertypes(toType, other.getUpperBounds(), parent, index) &&
-                    allAssignable(toType, other.getLowerBounds());
+            return TypeTokenUtil.allWildcardSupertypes(toType, other.getUpperBounds(), parent, index) &&
+                TypeTokenUtil.allAssignable(toType, other.getLowerBounds());
         }
         if (type instanceof GenericArrayType) {
             final GenericArrayType other = (GenericArrayType) type;
-            return isAssignable(other.getGenericComponentType(), toType.getGenericComponentType(), parent, index);
+            return TypeTokenUtil.isAssignable(other.getGenericComponentType(), toType.getGenericComponentType(), parent, index);
         }
         throw new IllegalStateException("Unsupported type: " + type);
     }
@@ -312,17 +311,17 @@ public final class TypeTokenUtil {
     }
 
     private static boolean allWildcardSupertypes(Type type, Type[] bounds, @Nullable Type parent, int index) {
-        return allSupertypes(type, processBounds(bounds, parent, index));
+        return TypeTokenUtil.allSupertypes(type, TypeTokenUtil.processBounds(bounds, parent, index));
     }
 
     private static boolean allWildcardAssignable(Type type, Type[] bounds, @Nullable Type parent, int index) {
-        return allAssignable(type, processBounds(bounds, parent, index));
+        return TypeTokenUtil.allAssignable(type, TypeTokenUtil.processBounds(bounds, parent, index));
     }
 
     private static boolean allAssignable(Type type, Type[] bounds) {
         for (Type toType : bounds) {
             // Skip the Object class
-            if (!isAssignable(type, toType, null, 0)) {
+            if (!TypeTokenUtil.isAssignable(type, toType, null, 0)) {
                 return false;
             }
         }
@@ -332,7 +331,7 @@ public final class TypeTokenUtil {
     private static boolean allSupertypes(Type type, Type[] bounds) {
         for (Type toType : bounds) {
             // Skip the Object class
-            if (!isAssignable(toType, type, null, 0)) {
+            if (!TypeTokenUtil.isAssignable(toType, type, null, 0)) {
                 return false;
             }
         }

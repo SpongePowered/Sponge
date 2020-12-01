@@ -82,7 +82,7 @@ public class ConfigHandle<T extends Config> {
                 try {
                     it.next().doSave();
                 } catch (final ConfigurateException ex) {
-                    LOGGER.error("Unable to save a Sponge configuration!", ex);
+                    ConfigHandle.LOGGER.error("Unable to save a Sponge configuration!", ex);
                 }
                 it.remove();
             }
@@ -109,13 +109,13 @@ public class ConfigHandle<T extends Config> {
     protected @MonotonicNonNull CommentedConfigurationNode node;
 
     protected ConfigHandle(final T instance) {
-        this.mapper = mutableMapper(instance);
+        this.mapper = ConfigHandle.mutableMapper(instance);
         this.instance = instance;
         this.loader = null;
     }
 
     protected ConfigHandle(final T instance, final @Nullable ConfigurationLoader<? extends CommentedConfigurationNode> loader) {
-        this.mapper = mutableMapper(instance);
+        this.mapper = ConfigHandle.mutableMapper(instance);
         this.instance = instance;
         this.loader = loader;
     }
@@ -137,7 +137,7 @@ public class ConfigHandle<T extends Config> {
 
     public CompletableFuture<T> updateAndSave(final UnaryOperator<T> updater) {
         final T updated = requireNonNull(updater, "updater").apply(this.instance);
-        return asyncFailableFuture(() -> {
+        return ConfigHandle.asyncFailableFuture(() -> {
             // TODO: Force one save at a time
             this.save();
             return updated;
@@ -157,15 +157,15 @@ public class ConfigHandle<T extends Config> {
 
     protected final void doVersionUpdate() throws ConfigurateException {
         final boolean wasEmpty = this.node.empty();
-        final CommentedConfigurationNode versionNode = this.node.node(VERSION_PATH);
+        final CommentedConfigurationNode versionNode = this.node.node(ConfigHandle.VERSION_PATH);
         final int existingVersion = versionNode.getInt(-1);
         this.instance.<CommentedConfigurationNode>getTransformation().apply(this.node);
         final int newVersion = versionNode.getInt(-1);
         if (!wasEmpty && newVersion > existingVersion) {
-            LOGGER.info("Updated {} from version {} to {}", this.instance, existingVersion, newVersion);
+            ConfigHandle.LOGGER.info("Updated {} from version {} to {}", this.instance, existingVersion, newVersion);
         }
-        versionNode.commentIfAbsent(VERSION_COMMENT);
-        this.node.node(VERSION_PATH).set(versionNode);
+        versionNode.commentIfAbsent(ConfigHandle.VERSION_COMMENT);
+        this.node.node(ConfigHandle.VERSION_PATH).set(versionNode);
     }
 
     public void reload() throws ConfigurateException {
@@ -180,7 +180,7 @@ public class ConfigHandle<T extends Config> {
             try {
                 this.doSave();
             } catch (final ConfigurateException ex) {
-                LOGGER.error("Unable to save configuration to {}", this.loader, ex);
+                ConfigHandle.LOGGER.error("Unable to save configuration to {}", this.loader, ex);
             }
         }
     }
@@ -211,7 +211,7 @@ public class ConfigHandle<T extends Config> {
     }
 
     public CompletableFuture<CommentedConfigurationNode> updateSetting(final String key, final Object value) {
-        return asyncFailableFuture(() -> {
+        return ConfigHandle.asyncFailableFuture(() -> {
             final CommentedConfigurationNode upd = this.getSetting(key);
             upd.set(value);
             this.mapper.load(this.instance, this.node);
@@ -221,7 +221,7 @@ public class ConfigHandle<T extends Config> {
     }
 
     public <V> CompletableFuture<CommentedConfigurationNode> updateSetting(final String key, final V value, final TypeToken<V> token) {
-        return asyncFailableFuture(() -> {
+        return ConfigHandle.asyncFailableFuture(() -> {
             final CommentedConfigurationNode upd = this.getSetting(key);
             upd.set(token, value);
             this.mapper.load(this.instance, this.node);

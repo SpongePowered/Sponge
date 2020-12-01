@@ -124,19 +124,20 @@ public final class ContainerUtil {
             for (int j = 0; j < inventory.getSizeInventory(); j++) {
                 final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(j);
                 if (!itemStack.isEmpty()) {
-                    final float f = RANDOM.nextFloat() * 0.8F + 0.1F;
-                    final float f1 = RANDOM.nextFloat() * 0.8F + 0.1F;
-                    final float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
+                    final float f = ContainerUtil.RANDOM.nextFloat() * 0.8F + 0.1F;
+                    final float f1 = ContainerUtil.RANDOM.nextFloat() * 0.8F + 0.1F;
+                    final float f2 = ContainerUtil.RANDOM.nextFloat() * 0.8F + 0.1F;
 
                     while (!itemStack.isEmpty())
                     {
-                        final int i = RANDOM.nextInt(21) + 10;
+                        final int i = ContainerUtil.RANDOM.nextInt(21) + 10;
 
                         final ItemEntity entityitem = new ItemEntity(worldServer, x + f, y + f1, z + f2, itemStack.split(i));
 
-                        entityitem.setMotion(RANDOM.nextGaussian() * 0.05,
-                                RANDOM.nextGaussian() * 0.05 + 0.2,
-                                RANDOM.nextGaussian() * 0.05);
+                        entityitem.setMotion(
+                            ContainerUtil.RANDOM.nextGaussian() * 0.05,
+                            ContainerUtil.RANDOM.nextGaussian() * 0.05 + 0.2,
+                            ContainerUtil.RANDOM.nextGaussian() * 0.05);
                         worldServer.addEntity(entityitem);
                     }
                 }
@@ -178,7 +179,7 @@ public final class ContainerUtil {
             final int slotCount = slotList.size();
             final IInventory subInventory = entry.getKey().orElse(null);
             // Generate Lens based on existing InventoryAdapter
-            Lens lens = generateAdapterLens(slots, index, crafting, slotList, subInventory);
+            Lens lens = ContainerUtil.generateAdapterLens(slots, index, crafting, slotList, subInventory);
             // Inventory size <> Lens size
             if (lens.slotCount() != slotCount) {
                 CompoundSlotLensProvider slotProvider = new CompoundSlotLensProvider().add(((InventoryBridge) subInventory).bridge$getAdapter());
@@ -283,15 +284,15 @@ public final class ContainerUtil {
                     return ((BlockCarrier) inventory);
                 }
             }
-            return carrierOrNull(inventory);
+            return ContainerUtil.carrierOrNull(inventory);
         } else if (container instanceof HopperContainerAccessor) {
-            return carrierOrNull(((HopperContainerAccessor) container).accessor$getHopperInventory());
+            return ContainerUtil.carrierOrNull(((HopperContainerAccessor) container).accessor$getHopperInventory());
         } else if (container instanceof DispenserContainerAccessor) {
-            return carrierOrNull(((DispenserContainerAccessor) container).accessor$getDispenserInventory());
+            return ContainerUtil.carrierOrNull(((DispenserContainerAccessor) container).accessor$getDispenserInventory());
         } else if (container instanceof AbstractFurnaceContainerAccessor) {
-            return carrierOrNull(((AbstractFurnaceContainerAccessor) container).accessor$getFurnaceInventory());
+            return ContainerUtil.carrierOrNull(((AbstractFurnaceContainerAccessor) container).accessor$getFurnaceInventory());
         } else if (container instanceof BrewingStandContainerAccessor) {
-            return carrierOrNull(((BrewingStandContainerAccessor) container).accessor$getTileBrewingStand());
+            return ContainerUtil.carrierOrNull(((BrewingStandContainerAccessor) container).accessor$getTileBrewingStand());
         } else if (container instanceof BeaconContainer) {
             return (Carrier) ((BeaconContainerAccessor) container).accessor$getWorldPosCallable().apply(World::getTileEntity).orElse(null);
         } else if (container instanceof HorseInventoryContainerAccessor) {

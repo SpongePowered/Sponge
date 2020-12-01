@@ -41,17 +41,17 @@ import java.util.stream.Collector;
 
 public final class NBTCollectors {
 
-    private static final Collector<INBT, ?, ListNBT> TO_TAG_LIST = toTagList(value -> value);
-    private static final Collector<Long, ?, ListNBT> TO_LONG_TAG_LIST = toTagList(LongNBT::valueOf);
-    private static final Collector<Integer, ?, ListNBT> TO_INT_TAG_LIST = toTagList(IntNBT::valueOf);
-    private static final Collector<Byte, ?, ListNBT> TO_BYTE_TAG_LIST = toTagList(ByteNBT::valueOf);
-    private static final Collector<Short, ?, ListNBT> TO_SHORT_TAG_LIST = toTagList(ShortNBT::valueOf);
-    private static final Collector<Boolean, ?, ListNBT> TO_BOOLEAN_TAG_LIST = toTagList(ByteNBT::valueOf);
-    private static final Collector<Double, ?, ListNBT> TO_DOUBLE_TAG_LIST = toTagList(DoubleNBT::valueOf);
-    private static final Collector<Float, ?, ListNBT> TO_FLOAT_TAG_LIST = toTagList(FloatNBT::valueOf);
-    private static final Collector<String, ?, ListNBT> TO_STRING_TAG_LIST = toTagList(StringNBT::valueOf);
+    private static final Collector<INBT, ?, ListNBT> TO_TAG_LIST = NBTCollectors.toTagList(value -> value);
+    private static final Collector<Long, ?, ListNBT> TO_LONG_TAG_LIST = NBTCollectors.toTagList(LongNBT::valueOf);
+    private static final Collector<Integer, ?, ListNBT> TO_INT_TAG_LIST = NBTCollectors.toTagList(IntNBT::valueOf);
+    private static final Collector<Byte, ?, ListNBT> TO_BYTE_TAG_LIST = NBTCollectors.toTagList(ByteNBT::valueOf);
+    private static final Collector<Short, ?, ListNBT> TO_SHORT_TAG_LIST = NBTCollectors.toTagList(ShortNBT::valueOf);
+    private static final Collector<Boolean, ?, ListNBT> TO_BOOLEAN_TAG_LIST = NBTCollectors.toTagList(ByteNBT::valueOf);
+    private static final Collector<Double, ?, ListNBT> TO_DOUBLE_TAG_LIST = NBTCollectors.toTagList(DoubleNBT::valueOf);
+    private static final Collector<Float, ?, ListNBT> TO_FLOAT_TAG_LIST = NBTCollectors.toTagList(FloatNBT::valueOf);
+    private static final Collector<String, ?, ListNBT> TO_STRING_TAG_LIST = NBTCollectors.toTagList(StringNBT::valueOf);
 
-    private static final Collector<INBT, ?, List<String>> TO_STRING_LIST = toList(INBT::getString);
+    private static final Collector<INBT, ?, List<String>> TO_STRING_LIST = NBTCollectors.toList(INBT::getString);
 
     private static <E> Collector<INBT, List<E>, List<E>> toList0(Function<INBT, E> toValueFunction) {
         return Collector.of(ArrayList::new,
@@ -64,7 +64,7 @@ public final class NBTCollectors {
     }
 
     public static <E> Collector<INBT, ?, List<E>> toList(Function<INBT, E> toValueFunction) {
-        return toList0(toValueFunction);
+        return NBTCollectors.toList0(toValueFunction);
     }
 
     public static <E> Collector<E, ?, ListNBT> toTagList(Function<E, INBT> toTagFunction) {
@@ -78,43 +78,43 @@ public final class NBTCollectors {
     }
 
     public static Collector<INBT, ?, ListNBT> toTagList() {
-        return TO_TAG_LIST;
+        return NBTCollectors.TO_TAG_LIST;
     }
 
     public static Collector<Boolean, ?, ListNBT> toBooleanTagList() {
-        return TO_BOOLEAN_TAG_LIST;
+        return NBTCollectors.TO_BOOLEAN_TAG_LIST;
     }
 
     public static Collector<Byte, ?, ListNBT> toByteTagList() {
-        return TO_BYTE_TAG_LIST;
+        return NBTCollectors.TO_BYTE_TAG_LIST;
     }
 
     public static Collector<Short, ?, ListNBT> toShortTagList() {
-        return TO_SHORT_TAG_LIST;
+        return NBTCollectors.TO_SHORT_TAG_LIST;
     }
 
     public static Collector<Integer, ?, ListNBT> toIntTagList() {
-        return TO_INT_TAG_LIST;
+        return NBTCollectors.TO_INT_TAG_LIST;
     }
 
     public static Collector<Long, ?, ListNBT> toLongTagList() {
-        return TO_LONG_TAG_LIST;
+        return NBTCollectors.TO_LONG_TAG_LIST;
     }
 
     public static Collector<Float, ?, ListNBT> toFloatTagList() {
-        return TO_FLOAT_TAG_LIST;
+        return NBTCollectors.TO_FLOAT_TAG_LIST;
     }
 
     public static Collector<Double, ?, ListNBT> toDoubleTagList() {
-        return TO_DOUBLE_TAG_LIST;
+        return NBTCollectors.TO_DOUBLE_TAG_LIST;
     }
 
     public static Collector<String, ?, ListNBT> toStringTagList() {
-        return TO_STRING_TAG_LIST;
+        return NBTCollectors.TO_STRING_TAG_LIST;
     }
 
     public static Collector<INBT, ?, List<String>> toStringList() {
-        return TO_STRING_LIST;
+        return NBTCollectors.TO_STRING_LIST;
     }
 
     private NBTCollectors() {

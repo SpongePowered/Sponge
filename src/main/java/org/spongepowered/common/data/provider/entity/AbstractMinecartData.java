@@ -57,7 +57,7 @@ public final class AbstractMinecartData {
                     .create(Keys.MINECART_BLOCK_OFFSET)
                         .get(AbstractMinecartEntity::getDisplayTileOffset)
                         .setAnd(AbstractMinecartData::setBlockOffset)
-                        .deleteAnd(h -> setBlockOffset(h, h.getDefaultDisplayTileOffset()))
+                        .deleteAnd(h -> AbstractMinecartData.setBlockOffset(h, h.getDefaultDisplayTileOffset()))
                 .asMutable(MinecartEntityBridge.class)
                     .create(Keys.AIRBORNE_VELOCITY_MODIFIER)
                         .get(MinecartEntityBridge::bridge$getAirborneMod)

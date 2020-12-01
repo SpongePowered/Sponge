@@ -111,7 +111,7 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
 
     @Override
     public void bossBarProgressChanged(final BossBar bar, final float oldProgress, final float newProgress) {
-        if (Math.abs(newProgress - this.impl$lastSentProgress) > EPSILON) {
+        if (Math.abs(newProgress - this.impl$lastSentProgress) > ServerBossInfoMixin.EPSILON) {
             this.impl$lastSentProgress = newProgress;
             this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_PCT);
         }

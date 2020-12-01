@@ -48,7 +48,7 @@ public final class JSONUtil {
     }
 
     public static JsonArray arrayOf(Object... elements) {
-        return gson.toJsonTree(elements).getAsJsonArray();
+        return JSONUtil.gson.toJsonTree(elements).getAsJsonArray();
     }
 
     public static JsonObjectBuilder objectBuilder() {
@@ -56,11 +56,11 @@ public final class JSONUtil {
     }
 
     public static JsonObject singleObjectPair(String key, Object value) {
-        return objectBuilder().add(key, value).build();
+        return JSONUtil.objectBuilder().add(key, value).build();
     }
 
     public static JsonObject singleObjectPair(int key, Object value) {
-        return objectBuilder().add(key, value).build();
+        return JSONUtil.objectBuilder().add(key, value).build();
     }
 
     public static class JsonObjectBuilder {
@@ -80,12 +80,12 @@ public final class JSONUtil {
         }
 
         public JsonObject build() {
-            return gson.toJsonTree(this.elements).getAsJsonObject();
+            return JSONUtil.gson.toJsonTree(this.elements).getAsJsonObject();
         }
     }
 
     public static <E> JsonArray mapArray(E[] elements, Function<E, Object> function) {
-        return mapArray(Lists.newArrayList(elements), function);
+        return JSONUtil.mapArray(Lists.newArrayList(elements), function);
     }
 
     public static <E> JsonArray mapArray(Iterable<E> elements, Function<E, Object> function) {
@@ -96,15 +96,15 @@ public final class JSONUtil {
                 list.add(transformed);
             }
         }
-        return gson.toJsonTree(list).getAsJsonArray();
+        return JSONUtil.gson.toJsonTree(list).getAsJsonArray();
     }
 
     public static <E> JsonObject mapArrayToObject(E[] array, Function<E, JsonObject> function) {
-        return mapArrayToObject(Lists.newArrayList(array), function);
+        return JSONUtil.mapArrayToObject(Lists.newArrayList(array), function);
     }
 
     public static <E> JsonObject mapArrayToObject(Iterable<E> iterable, Function<E, JsonObject> function) {
-        JsonObjectBuilder builder = objectBuilder();
+        JsonObjectBuilder builder = JSONUtil.objectBuilder();
         for (E element : iterable) {
             JsonObject obj = function.apply(element);
             if (obj == null) {
@@ -118,11 +118,11 @@ public final class JSONUtil {
     }
 
     public static String toString(JsonElement element) {
-        return gson.toJson(element);
+        return JSONUtil.gson.toJson(element);
     }
 
     public static JsonElement toJsonElement(Object value) {
-        return gson.toJsonTree(value);
+        return JSONUtil.gson.toJsonTree(value);
     }
 
 }

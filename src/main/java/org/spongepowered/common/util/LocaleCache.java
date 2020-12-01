@@ -68,7 +68,7 @@ public final class LocaleCache {
      * @return The locale
      */
     public static Locale getLocale(final String tag) {
-        return LOCALE_CACHE.computeIfAbsent(tag, LOCALE_FUNCTION);
+        return LocaleCache.LOCALE_CACHE.computeIfAbsent(tag, LocaleCache.LOCALE_FUNCTION);
     }
 
     /**
@@ -78,8 +78,8 @@ public final class LocaleCache {
      */
     public static void preload(final Locale locale) {
         final String tag = locale.toString();
-        LOCALE_CACHE.put(tag, locale);
-        LOCALE_CACHE.put(tag.toLowerCase(), locale);
+        LocaleCache.LOCALE_CACHE.put(tag, locale);
+        LocaleCache.LOCALE_CACHE.put(tag.toLowerCase(), locale);
     }
 
     private LocaleCache() {

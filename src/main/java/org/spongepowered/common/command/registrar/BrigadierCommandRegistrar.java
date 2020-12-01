@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.command.registrar;
 
-import io.leangen.geantyref.TypeToken;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -258,7 +258,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     @Override
     @NonNull
     public ResourceKey getKey() {
-        return RESOURCE_KEY;
+        return BrigadierCommandRegistrar.RESOURCE_KEY;
     }
 
     private String createCommandString(final String command, final String argument) {

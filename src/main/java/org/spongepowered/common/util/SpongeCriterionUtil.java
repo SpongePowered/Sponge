@@ -54,9 +54,9 @@ public final class SpongeCriterionUtil {
             final AdvancementCriterion criterion, final Iterable<AdvancementCriterion> criteria) {
         checkNotNull(criteria, "criteria");
         final List<AdvancementCriterion> builder = new ArrayList<>();
-        build(type, criterion, builder);
+        SpongeCriterionUtil.build(type, criterion, builder);
         for (final AdvancementCriterion criterion1 : criteria) {
-            build(type, criterion1, builder);
+            SpongeCriterionUtil.build(type, criterion1, builder);
         }
         return builder.isEmpty() ? new SpongeEmptyCriterion() : builder.size() == 1 ? builder.get(0) : function.apply(ImmutableSet.copyOf(builder));
     }

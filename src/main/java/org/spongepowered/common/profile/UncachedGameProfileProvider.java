@@ -217,7 +217,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         try {
             final int code = connection.getResponseCode();
             if (code == 200) {
-                final JsonObject json = GSON.fromJson(new InputStreamReader(connection.getInputStream()), JsonObject.class);
+                final JsonObject json = UncachedGameProfileProvider.GSON.fromJson(new InputStreamReader(connection.getInputStream()), JsonObject.class);
                 return this.parseGameProfile(json);
             } else if (code == 204) {
                 return null;
@@ -237,7 +237,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         }
         final InputStream is = connection.getInputStream();
         if (is.available() > 0) {
-            final JsonObject json = GSON.fromJson(new InputStreamReader(is), JsonObject.class);
+            final JsonObject json = UncachedGameProfileProvider.GSON.fromJson(new InputStreamReader(is), JsonObject.class);
             final String error = json.has("error") ? json.get("error").getAsString() : null;
             final String errorMessage = json.has("errorMessage") ? json.get("errorMessage").getAsString() : null;
             if (error != null) {

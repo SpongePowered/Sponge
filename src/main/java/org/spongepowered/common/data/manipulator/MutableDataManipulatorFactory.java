@@ -43,7 +43,7 @@ public final class MutableDataManipulatorFactory implements DataManipulator.Muta
 
     @Override
     public DataManipulator.Mutable of(final Iterable<? extends Value<?>> values) {
-        return new MutableDataManipulator(mapValues(values));
+        return new MutableDataManipulator(MutableDataManipulatorFactory.mapValues(values));
     }
 
     static Map<Key<?>, Object> mapValues(final Iterable<? extends Value<?>> values) {

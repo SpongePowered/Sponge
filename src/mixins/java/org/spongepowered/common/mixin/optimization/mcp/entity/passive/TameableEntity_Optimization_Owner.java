@@ -33,9 +33,8 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
 
-import java.util.UUID;
-
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 @Mixin(TameableEntity.class)
 public abstract class TameableEntity_Optimization_Owner extends AgeableEntityMixin {
@@ -53,7 +52,7 @@ public abstract class TameableEntity_Optimization_Owner extends AgeableEntityMix
     @Overwrite
     public UUID getOwnerId() {
         if (this.cachedOwner$OwnerId == null) {
-            this.cachedOwner$OwnerId = this.dataManager.get(OWNER_UNIQUE_ID).orNull();
+            this.cachedOwner$OwnerId = this.dataManager.get(TameableEntity_Optimization_Owner.OWNER_UNIQUE_ID).orNull();
         }
         return this.cachedOwner$OwnerId;
     }
@@ -67,7 +66,7 @@ public abstract class TameableEntity_Optimization_Owner extends AgeableEntityMix
     @Overwrite
     public void setOwnerId(@Nullable final UUID ownerUuid) {
         this.cachedOwner$OwnerId = ownerUuid;
-        this.dataManager.set(OWNER_UNIQUE_ID, Optional.fromNullable(ownerUuid));
+        this.dataManager.set(TameableEntity_Optimization_Owner.OWNER_UNIQUE_ID, Optional.fromNullable(ownerUuid));
     }
 
 }

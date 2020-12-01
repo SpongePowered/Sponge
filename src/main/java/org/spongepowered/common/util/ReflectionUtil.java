@@ -97,11 +97,11 @@ public final class ReflectionUtil {
         if (args == null) {
             args = new Object[] {null};
         }
-        final Constructor<T>tConstructor = findConstructor(objectClass, args);
+        final Constructor<T>tConstructor = ReflectionUtil.findConstructor(objectClass, args);
         try {
             return tConstructor.newInstance(args);
         } catch (final Exception e) {
-            final Object[] deconstructedArgs = deconstructArray(args).toArray();
+            final Object[] deconstructedArgs = ReflectionUtil.deconstructArray(args).toArray();
             return tConstructor.newInstance(deconstructedArgs);
         }
     }
@@ -112,7 +112,7 @@ public final class ReflectionUtil {
         if (args == null) {
             args = new Object[] {null};
         }
-        final Constructor<T> ctor = findConstructor(objectClass, args);
+        final Constructor<T> ctor = ReflectionUtil.findConstructor(objectClass, args);
         try {
             return ctor.newInstance(args);
         } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -137,8 +137,8 @@ public final class ReflectionUtil {
                 for (final Object object : args) {
                     if (object != null) { // hahahah
                         if (object.getClass().isArray()) {
-                            final Object[] objects = deconstructArray(args).toArray();
-                            return findConstructor(objectClass, objects);
+                            final Object[] objects = ReflectionUtil.deconstructArray(args).toArray();
+                            return ReflectionUtil.findConstructor(objectClass, objects);
                         }
                     }
                 }
@@ -164,7 +164,7 @@ public final class ReflectionUtil {
                 continue;
             }
             if (object.getClass().isArray()) {
-                list.addAll(deconstructArray((Object[]) object));
+                list.addAll(ReflectionUtil.deconstructArray((Object[]) object));
             } else {
                 list.add(object);
             }

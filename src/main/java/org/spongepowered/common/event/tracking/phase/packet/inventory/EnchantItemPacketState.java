@@ -135,7 +135,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
                         PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
                     }
                     if (inventoryEvent instanceof SpawnEntityEvent) {
-                        processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
+                        PacketState.processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
                     } else {
 //                        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
 //                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);

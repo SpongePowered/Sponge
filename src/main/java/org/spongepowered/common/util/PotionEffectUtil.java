@@ -39,15 +39,15 @@ public final class PotionEffectUtil {
     }
 
     public static EffectInstance copyAsEffectInstance(PotionEffect instance) {
-        return copy((EffectInstance) instance);
+        return PotionEffectUtil.copy((EffectInstance) instance);
     }
 
     public static List<EffectInstance> copyAsEffectInstances(Collection<PotionEffect> effects) {
-        return effects.stream().map(effect -> copy((EffectInstance) effect)).collect(Collectors.toList());
+        return effects.stream().map(effect -> PotionEffectUtil.copy((EffectInstance) effect)).collect(Collectors.toList());
     }
 
     public static List<PotionEffect> copyAsPotionEffects(Collection<EffectInstance> effects) {
-        return effects.stream().map(effect -> (PotionEffect) copy(effect)).collect(Collectors.toList());
+        return effects.stream().map(effect -> (PotionEffect) PotionEffectUtil.copy(effect)).collect(Collectors.toList());
     }
 
     private PotionEffectUtil() {

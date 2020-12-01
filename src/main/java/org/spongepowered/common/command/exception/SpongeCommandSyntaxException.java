@@ -62,7 +62,7 @@ public final class SpongeCommandSyntaxException extends CommandSyntaxException {
 
     public Component getComponentMessage() {
         final Component message = this.innerException.componentMessage();
-        return ERROR_MESSAGE.append(message == null ? Component.text("unknown") : message);
+        return SpongeCommandSyntaxException.ERROR_MESSAGE.append(message == null ? Component.text("unknown") : message);
     }
 
     @Override

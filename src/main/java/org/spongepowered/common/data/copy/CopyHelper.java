@@ -45,10 +45,10 @@ public class CopyHelper {
             return (T) ((Copyable) value).copy();
         }
         if (value instanceof Map) {
-            return (T) copyMap((Map<?,?>) value);
+            return (T) CopyHelper.copyMap((Map<?,?>) value);
         }
         if (value instanceof List) {
-            return (T) copyList((List<?>) value);
+            return (T) CopyHelper.copyList((List<?>) value);
         }
         return value;
     }
@@ -144,11 +144,11 @@ public class CopyHelper {
      * @return The constructed supplier
      */
     public static <T> Supplier<T> createSupplier(T value) {
-        final T copy = copy(value);
+        final T copy = CopyHelper.copy(value);
         if (copy == value) {
             return () -> value;
         } else {
-            return () -> copy(copy);
+            return () -> CopyHelper.copy(copy);
         }
     }
 }

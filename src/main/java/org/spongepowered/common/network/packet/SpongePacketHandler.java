@@ -58,8 +58,8 @@ public final class SpongePacketHandler {
     private static PacketChannel channel;
 
     public static void init(final SpongeChannelRegistry registry) {
-        channel = registry.createChannel(ResourceKey.sponge("default"), PacketChannel.class);
-        channel.registerTransactional(RequestBlockTrackerDataPacket.class, TrackerDataResponsePacket.class, 0)
+        SpongePacketHandler.channel = registry.createChannel(ResourceKey.sponge("default"), PacketChannel.class);
+        SpongePacketHandler.channel.registerTransactional(RequestBlockTrackerDataPacket.class, TrackerDataResponsePacket.class, 0)
                 .setRequestHandler(EngineConnectionTypes.SERVER_PLAYER, (requestPacket, connection, response) -> {
                     final ServerPlayer player = connection.getPlayer();
                     if (!player.hasPermission("sponge.debug.block-tracking")) {
@@ -76,9 +76,9 @@ public final class SpongePacketHandler {
                     final Optional<User> owner = chunkBridge.bridge$getBlockCreator(pos);
                     final Optional<User> notifier = chunkBridge.bridge$getBlockNotifier(pos);
 
-                    response.success(createTrackerDataResponse(owner, notifier));
+                    response.success(SpongePacketHandler.createTrackerDataResponse(owner, notifier));
                 });
-        channel.registerTransactional(RequestEntityTrackerDataPacket.class, TrackerDataResponsePacket.class, 1)
+        SpongePacketHandler.channel.registerTransactional(RequestEntityTrackerDataPacket.class, TrackerDataResponsePacket.class, 1)
                 .setRequestHandler(EngineConnectionTypes.SERVER_PLAYER, (requestPacket, connection, response) -> {
                     final ServerPlayer player = connection.getPlayer();
                     if (!player.hasPermission("sponge.debug.entity-tracking")) {
@@ -95,9 +95,9 @@ public final class SpongePacketHandler {
                     final Optional<User> owner = creatorTrackedBridge.tracked$getCreatorReference();
                     final Optional<User> notifier = creatorTrackedBridge.tracked$getNotifierReference();
 
-                    response.success(createTrackerDataResponse(owner, notifier));
+                    response.success(SpongePacketHandler.createTrackerDataResponse(owner, notifier));
                 });
-        channel.register(RegisterDimensionTypePacket.class, 2).addHandler(ClientSideConnection.class,
+        SpongePacketHandler.channel.register(RegisterDimensionTypePacket.class, 2).addHandler(ClientSideConnection.class,
                 (packet, connection) -> {
 
                     if (Registry.DIMENSION_TYPE.containsKey(packet.actualDimension)) {
@@ -117,7 +117,7 @@ public final class SpongePacketHandler {
                     ((DimensionTypeBridge) registeredType).bridge$setSpongeDimensionType(logicType);
                 }
         );
-        channel.register(ChangeViewerEnvironmentPacket.class, 3).addHandler(ClientSideConnection.class,
+        SpongePacketHandler.channel.register(ChangeViewerEnvironmentPacket.class, 3).addHandler(ClientSideConnection.class,
                 (packet, connection) -> {
                     final ClientWorld world = Minecraft.getInstance().world;
                     if (world == null) {

@@ -46,15 +46,16 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.config.inheritable.LoggingCategory;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.inheritable.BaseConfig;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.LoggingCategory;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.management.MBeanServer;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -62,8 +63,6 @@ import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
-
-import javax.management.MBeanServer;
 
 public final class SpongeHooks {
 
@@ -96,8 +95,8 @@ public final class SpongeHooks {
 
         final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.get().getLogging().entityDeathLogging()) {
-            logInfo("Dimension: {0} setDead(): {1}", entity.getEntityWorld().getDimension().getType(), entity);
-            logStack(configAdapter);
+            SpongeHooks.logInfo("Dimension: {0} setDead(): {1}", entity.getEntityWorld().getDimension().getType(), entity);
+            SpongeHooks.logStack(configAdapter);
         }
     }
 
@@ -108,8 +107,8 @@ public final class SpongeHooks {
 
         final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.get().getLogging().entityDespawnLogging()) {
-            logInfo("Dimension: {0} Despawning ({1}): {2}", entity.getEntityWorld().getDimension().getType(), reason, entity);
-            logStack(configAdapter);
+            SpongeHooks.logInfo("Dimension: {0} Despawning ({1}): {2}", entity.getEntityWorld().getDimension().getType(), reason, entity);
+            SpongeHooks.logStack(configAdapter);
         }
     }
 
@@ -126,8 +125,8 @@ public final class SpongeHooks {
 
         final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.get().getLogging().entitySpawnLogging()) {
-            logInfo("SPAWNED " + spawnName.getUnformattedComponentText() + " [Dimension: {1}]", entity.getEntityWorld().dimension.getType());
-            logStack(configAdapter);
+            SpongeHooks.logInfo("SPAWNED " + spawnName.getUnformattedComponentText() + " [Dimension: {1}]", entity.getEntityWorld().dimension.getType());
+            SpongeHooks.logStack(configAdapter);
         }
     }
 
@@ -139,11 +138,11 @@ public final class SpongeHooks {
 
         final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.get().getLogging().blockTrackLogging() && allowed) {
-            logInfo("Tracking Block " + "[RootCause: {0}][Dimension: {1}][Block: {2}][Pos: {3}]",
+            SpongeHooks.logInfo("Tracking Block " + "[RootCause: {0}][Dimension: {1}][Block: {2}][Pos: {3}]",
                     user.getName(), world.getDimension().getType(), ((BlockType) block).getKey(), pos);
-            logStack(configAdapter);
+            SpongeHooks.logStack(configAdapter);
         } else if (configAdapter.get().getLogging().blockTrackLogging() && !allowed) {
-            logInfo("Blacklisted! Unable to track Block " + "[RootCause: {0}][Dimension: {1}][Block: {2}][Pos: {3}]",
+            SpongeHooks.logInfo("Blacklisted! Unable to track Block " + "[RootCause: {0}][Dimension: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
                     world.getDimension().getType(),
                     ((BlockType) block).getKey(),
@@ -160,11 +159,11 @@ public final class SpongeHooks {
 
         final LoggingCategory logging = configAdapter.get().getLogging();
         if (type != null && type.allowsLogging(logging)) {
-            logInfo("Block " + type.name() + " [Dimension: {0}][OriginalState: {1}][NewState: {2}]",
+            SpongeHooks.logInfo("Block " + type.name() + " [Dimension: {0}][OriginalState: {1}][NewState: {2}]",
                     world.getDimension().getType(),
                     transaction.getOriginal().getState(),
                     transaction.getFinal().getState());
-            logStack(configAdapter);
+            SpongeHooks.logStack(configAdapter);
         }
     }
 
@@ -175,9 +174,9 @@ public final class SpongeHooks {
 
         final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.get().getLogging().chunkLoadLogging()) {
-            logInfo("Queue Chunk At [{0}] ({1}, {2})", world.getDimension().getType(), chunkPos.getX(),
+            SpongeHooks.logInfo("Queue Chunk At [{0}] ({1}, {2})", world.getDimension().getType(), chunkPos.getX(),
                     chunkPos.getZ());
-            logStack(configAdapter);
+            SpongeHooks.logStack(configAdapter);
         }
     }
 
@@ -188,9 +187,9 @@ public final class SpongeHooks {
 
         final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.get().getLogging().chunkLoadLogging()) {
-            logInfo("Load Chunk in Dimension [{0}] ({1}, {2})", world.getDimension().getType(), chunkPos.getX(),
+            SpongeHooks.logInfo("Load Chunk in Dimension [{0}] ({1}, {2})", world.getDimension().getType(), chunkPos.getX(),
                     chunkPos.getZ());
-            logStack(configAdapter);
+            SpongeHooks.logStack(configAdapter);
         }
     }
 
@@ -201,9 +200,9 @@ public final class SpongeHooks {
 
         final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.get().getLogging().chunkUnloadLogging()) {
-            logInfo("Unload Chunk in Dimension [{0}] ({1}, {2})", world.getDimension().getType(), chunkPos.getX(),
+            SpongeHooks.logInfo("Unload Chunk in Dimension [{0}] ({1}, {2})", world.getDimension().getType(), chunkPos.getX(),
                     chunkPos.getZ());
-            logStack(configAdapter);
+            SpongeHooks.logStack(configAdapter);
         }
     }
 
@@ -214,9 +213,9 @@ public final class SpongeHooks {
 
         final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.get().getLogging().chunkGCQueueUnloadLogging()) {
-            logInfo("Chunk GC Queued Chunk in Dimension '{0}' ({2}, {3} for unload)", world.getDimension().getType(), chunk.getPos().x,
+            SpongeHooks.logInfo("Chunk GC Queued Chunk in Dimension '{0}' ({2}, {3} for unload)", world.getDimension().getType(), chunk.getPos().x,
                     chunk.getPos().z);
-            logStack(configAdapter);
+            SpongeHooks.logStack(configAdapter);
         }
     }
 
@@ -227,11 +226,11 @@ public final class SpongeHooks {
 
         final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) player.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.get().getLogging().logExploitItemStackNameOverflow) {
-            logInfo("[EXPLOIT] Player '{0}' attempted to send a creative itemstack update with a display name length of '{1}' (Max allowed "
+            SpongeHooks.logInfo("[EXPLOIT] Player '{0}' attempted to send a creative itemstack update with a display name length of '{1}' (Max allowed "
                             + "length is 32767). This has been blocked to avoid server overflow.",
                     player.getName(),
                     length);
-            logStack(configAdapter);
+            SpongeHooks.logStack(configAdapter);
         }
     }
 
@@ -258,16 +257,16 @@ public final class SpongeHooks {
 
         final int size = Math.abs(x1 - x) * Math.abs(y1 - y) * Math.abs(z1 - z);
         if (size > maxBoundingBoxSize) {
-            logWarning("Entity being removed for bounding box restrictions");
-            logWarning("BB Size: {0} > {1} avg edge: {2}", size, maxBoundingBoxSize, aabb.getAverageEdgeLength());
-            logWarning("Motion: ({0}, {1}, {2})", entity.getMotion().x, entity.getMotion().y, entity.getMotion().z);
-            logWarning("Calculated bounding box: {0}", aabb);
-            logWarning("Entity bounding box: {0}", entity.getCollisionBoundingBox());
-            logWarning("Entity: {0}", entity);
+            SpongeHooks.logWarning("Entity being removed for bounding box restrictions");
+            SpongeHooks.logWarning("BB Size: {0} > {1} avg edge: {2}", size, maxBoundingBoxSize, aabb.getAverageEdgeLength());
+            SpongeHooks.logWarning("Motion: ({0}, {1}, {2})", entity.getMotion().x, entity.getMotion().y, entity.getMotion().z);
+            SpongeHooks.logWarning("Calculated bounding box: {0}", aabb);
+            SpongeHooks.logWarning("Entity bounding box: {0}", entity.getCollisionBoundingBox());
+            SpongeHooks.logWarning("Entity: {0}", entity);
             final CompoundNBT compound = new CompoundNBT();
             entity.writeWithoutTypeId(compound);
-            logWarning("Entity NBT: {0}", compound);
-            logStack(configAdapter);
+            SpongeHooks.logWarning("Entity NBT: {0}", compound);
+            SpongeHooks.logStack(configAdapter);
             entity.remove();
             return true;
         }
@@ -285,23 +284,23 @@ public final class SpongeHooks {
             final double distance = x * x + z * z;
             if (distance > maxSpeed && !entity.isPassenger()) {
                 if (configAdapter.get().getLogging().logEntitySpeedRemoval()) {
-                    logInfo("Speed violation: {0} was over {1} - Removing Entity: {2}", distance, maxSpeed, entity);
+                    SpongeHooks.logInfo("Speed violation: {0} was over {1} - Removing Entity: {2}", distance, maxSpeed, entity);
                     if (entity instanceof LivingEntity) {
                         final LivingEntity livingEntity = (LivingEntity) entity;
-                        logInfo("Entity Motion: ({0}, {1}, {2}) Move Strafing: {3} Move Forward: {4}",
+                        SpongeHooks.logInfo("Entity Motion: ({0}, {1}, {2}) Move Strafing: {3} Move Forward: {4}",
                                 entity.getMotion().x, entity.getMotion().y,
                                 entity.getMotion().z,
                                 livingEntity.moveStrafing, livingEntity.moveForward);
                     }
 
                     if (configAdapter.get().getLogging().logWithStackTraces()) {
-                        logInfo("Move offset: ({0}, {1}, {2})", x, y, z);
-                        logInfo("Motion: ({0}, {1}, {2})", entity.getMotion().x, entity.getMotion().y, entity.getMotion().z);
-                        logInfo("Entity: {0}", entity);
+                        SpongeHooks.logInfo("Move offset: ({0}, {1}, {2})", x, y, z);
+                        SpongeHooks.logInfo("Motion: ({0}, {1}, {2})", entity.getMotion().x, entity.getMotion().y, entity.getMotion().z);
+                        SpongeHooks.logInfo("Entity: {0}", entity);
                         final CompoundNBT compound = new CompoundNBT();
                         entity.writeWithoutTypeId(compound);
-                        logInfo("Entity NBT: {0}", compound);
-                        logStack(configAdapter);
+                        SpongeHooks.logInfo("Entity NBT: {0}", compound);
+                        SpongeHooks.logStack(configAdapter);
                     }
                 }
                 if (entity instanceof PlayerEntity) { // Skip killing players
@@ -336,7 +335,7 @@ public final class SpongeHooks {
                 }
             }
             SpongeHooks.recentWarnings.put(warning, System.currentTimeMillis());
-            logWarning("Entity collision > {0, number} at: {1}", collisionWarnSize, entity);
+            SpongeHooks.logWarning("Entity collision > {0, number} at: {1}", collisionWarnSize, entity);
         }
     }
 
@@ -378,7 +377,7 @@ public final class SpongeHooks {
             final Method m = clazz.getMethod("dumpHeap", String.class, boolean.class);
             m.invoke(hotspotMBean, file.getPath(), live);
         } catch (final Throwable t) {
-            logSevere("Could not write heap to {0}", file);
+            SpongeHooks.logSevere("Could not write heap to {0}", file);
         }
     }
 

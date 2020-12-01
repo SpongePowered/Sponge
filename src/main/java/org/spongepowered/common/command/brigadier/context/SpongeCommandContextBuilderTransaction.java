@@ -47,7 +47,7 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
 
     public static SpongeCommandContextBuilderTransaction getTransactionFromPool(final SpongeCommandContextBuilder builder) {
         SpongeCommandContextBuilderTransaction chosenTransaction = null;
-        for (final SpongeCommandContextBuilderTransaction transaction : TRANSACTION_POOL) {
+        for (final SpongeCommandContextBuilderTransaction transaction : SpongeCommandContextBuilderTransaction.TRANSACTION_POOL) {
             // isActive does GC checks.
             if (!transaction.isActive() && chosenTransaction == null) {
                 chosenTransaction = transaction.activateTransaction(builder);
@@ -59,7 +59,7 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
         }
 
         final SpongeCommandContextBuilderTransaction transaction = new SpongeCommandContextBuilderTransaction().activateTransaction(builder);
-        TRANSACTION_POOL.add(transaction);
+        SpongeCommandContextBuilderTransaction.TRANSACTION_POOL.add(transaction);
         return transaction;
     }
 

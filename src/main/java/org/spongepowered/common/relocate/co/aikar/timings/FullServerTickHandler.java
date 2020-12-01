@@ -34,10 +34,10 @@ public final class FullServerTickHandler extends TimingHandler {
     double avgUsedMemory = -1D;
 
     FullServerTickHandler() {
-        super(IDENTITY);
+        super(FullServerTickHandler.IDENTITY);
         this.minuteData = new TimingData(this.id);
 
-        TimingsManager.TIMING_MAP.put(IDENTITY, this);
+        TimingsManager.TIMING_MAP.put(FullServerTickHandler.IDENTITY, this);
     }
 
     @Override

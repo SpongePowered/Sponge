@@ -40,9 +40,9 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
@@ -106,13 +106,13 @@ public final class InventoryUtil {
 
     // Utility
     public static Inventory toInventory(IInventory inventory) {
-        return toInventory(inventory, null);
+        return InventoryUtil.toInventory(inventory, null);
     }
 
     public static Inventory toInventory(Object inventory, @Nullable Object forgeItemHandler) {
         if (forgeItemHandler == null) {
             if (inventory instanceof ChestTileEntity) {
-                inventory = getDoubleChestInventory(((ChestTileEntity) inventory)).orElse(((Inventory) inventory));
+                inventory = InventoryUtil.getDoubleChestInventory(((ChestTileEntity) inventory)).orElse(((Inventory) inventory));
             }
             if (inventory instanceof Inventory) {
                 return ((Inventory) inventory);

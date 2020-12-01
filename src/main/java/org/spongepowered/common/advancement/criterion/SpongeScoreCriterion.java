@@ -30,11 +30,10 @@ import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public class SpongeScoreCriterion implements ScoreAdvancementCriterion, DefaultedAdvancementCriterion {
 
@@ -57,7 +56,7 @@ public class SpongeScoreCriterion implements ScoreAdvancementCriterion, Defaulte
             }
             final Criterion criterion = new Criterion(mctrigger);
             ((CriterionBridge) criterion).bridge$setScoreCriterion(this);
-            ((CriterionBridge) criterion).bridge$setName(name + INTERNAL_SUFFIX_BASE + i);
+            ((CriterionBridge) criterion).bridge$setName(name + SpongeScoreCriterion.INTERNAL_SUFFIX_BASE + i);
             this.internalCriteria.add((DefaultedAdvancementCriterion) criterion);
         }
     }

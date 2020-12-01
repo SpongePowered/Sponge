@@ -62,7 +62,7 @@ public final class PlayerData {
                     .create(Keys.EXHAUSTION)
                         .get(h -> (double) ((FoodStatsAccessor) h.getFoodStats()).accessor$getFoodExhaustionLevel())
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > EXHAUSTION_MAX) {
+                            if (v < 0 || v > PlayerData.EXHAUSTION_MAX) {
                                 return false;
                             }
                             ((FoodStatsAccessor) h.getFoodStats()).accessor$setFoodExhaustionLevel(v.floatValue());
@@ -109,7 +109,7 @@ public final class PlayerData {
                     .create(Keys.FOOD_LEVEL)
                         .get(h -> h.getFoodStats().getFoodLevel())
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > FOOD_LEVEL_MAX) {
+                            if (v < 0 || v > PlayerData.FOOD_LEVEL_MAX) {
                                 return false;
                             }
                             h.getFoodStats().setFoodLevel(v);
@@ -134,7 +134,7 @@ public final class PlayerData {
                     .create(Keys.SATURATION)
                         .get(h -> (double) h.getFoodStats().getSaturationLevel())
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > SATURATION_MAX) {
+                            if (v < 0 || v > PlayerData.SATURATION_MAX) {
                                 return false;
                             }
                             ((FoodStatsAccessor) h.getFoodStats()).accessor$setFoodSaturationLevel(v.floatValue());

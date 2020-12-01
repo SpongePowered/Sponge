@@ -28,7 +28,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.entity.player.LoginPermissions;
 import org.spongepowered.common.util.Constants;
 
@@ -59,7 +58,7 @@ public final class SpongePermissions {
     }
 
     public static void registerPermission(final String permissionNode, final int opLevel) {
-        if (REGISTERED_PERMISSIONS.add(permissionNode)) {
+        if (SpongePermissions.REGISTERED_PERMISSIONS.add(permissionNode)) {
             final PermissionService service = Sponge.getServer().getServiceProvider().permissionService();
             if (opLevel == 0) {
                 // register as a default permission

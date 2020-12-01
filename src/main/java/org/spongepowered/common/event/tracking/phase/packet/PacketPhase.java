@@ -174,35 +174,35 @@ public final class PacketPhase {
         public static final BasicInventoryPacketState PLACE_RECIPE = new PlaceRecipePacketState();
 
         static final ImmutableList<BasicInventoryPacketState> VALUES = ImmutableList.<BasicInventoryPacketState>builder()
-                .add(INVENTORY)
-                .add(PRIMARY_INVENTORY_CLICK)
-                .add(SECONDARY_INVENTORY_CLICK)
-                .add(MIDDLE_INVENTORY_CLICK)
-                .add(DROP_ITEM_OUTSIDE_WINDOW)
-                .add(DROP_ITEM_WITH_HOTKEY)
-                .add(DROP_ITEM_OUTSIDE_WINDOW_NOOP)
-                .add(DROP_ITEMS)
-                .add(DROP_INVENTORY)
-                .add(SWITCH_HOTBAR_NUMBER_PRESS)
-                .add(PRIMARY_INVENTORY_SHIFT_CLICK)
-                .add(SECONDARY_INVENTORY_SHIFT_CLICK)
-                .add(DOUBLE_CLICK_INVENTORY)
+                .add(Inventory.INVENTORY)
+                .add(Inventory.PRIMARY_INVENTORY_CLICK)
+                .add(Inventory.SECONDARY_INVENTORY_CLICK)
+                .add(Inventory.MIDDLE_INVENTORY_CLICK)
+                .add(Inventory.DROP_ITEM_OUTSIDE_WINDOW)
+                .add(Inventory.DROP_ITEM_WITH_HOTKEY)
+                .add(Inventory.DROP_ITEM_OUTSIDE_WINDOW_NOOP)
+                .add(Inventory.DROP_ITEMS)
+                .add(Inventory.DROP_INVENTORY)
+                .add(Inventory.SWITCH_HOTBAR_NUMBER_PRESS)
+                .add(Inventory.PRIMARY_INVENTORY_SHIFT_CLICK)
+                .add(Inventory.SECONDARY_INVENTORY_SHIFT_CLICK)
+                .add(Inventory.DOUBLE_CLICK_INVENTORY)
 
-                .add(PRIMARY_DRAG_INVENTORY_START)
-                .add(SECONDARY_DRAG_INVENTORY_START)
-                .add(MIDDLE_DRAG_INVENTORY_START)
+                .add(Inventory.PRIMARY_DRAG_INVENTORY_START)
+                .add(Inventory.SECONDARY_DRAG_INVENTORY_START)
+                .add(Inventory.MIDDLE_DRAG_INVENTORY_START)
 
-                .add(PRIMARY_DRAG_INVENTORY_ADDSLOT)
-                .add(SECONDARY_DRAG_INVENTORY_ADDSLOT)
-                .add(MIDDLE_DRAG_INVENTORY_ADDSLOT)
+                .add(Inventory.PRIMARY_DRAG_INVENTORY_ADDSLOT)
+                .add(Inventory.SECONDARY_DRAG_INVENTORY_ADDSLOT)
+                .add(Inventory.MIDDLE_DRAG_INVENTORY_ADDSLOT)
 
-                .add(PRIMARY_DRAG_INVENTORY_STOP)
-                .add(SECONDARY_DRAG_INVENTORY_STOP)
-                .add(MIDDLE_DRAG_INVENTORY_STOP)
+                .add(Inventory.PRIMARY_DRAG_INVENTORY_STOP)
+                .add(Inventory.SECONDARY_DRAG_INVENTORY_STOP)
+                .add(Inventory.MIDDLE_DRAG_INVENTORY_STOP)
 
-                .add(SWITCH_HOTBAR_SCROLL)
-                .add(OPEN_INVENTORY)
-                .add(ENCHANT_ITEM)
+                .add(Inventory.SWITCH_HOTBAR_SCROLL)
+                .add(Inventory.OPEN_INVENTORY)
+                .add(Inventory.ENCHANT_ITEM)
                 .build();
 
     }
@@ -240,7 +240,7 @@ public final class PacketPhase {
         final int packed = windowPacket.getUsedButton();
         final int unpacked = mode == Constants.Networking.MODE_DRAG ? (0x01 << 6 << (packed >> 2 & 3)) | (0x01 << 3 << (packed & 3)) : (0x01 << (packed & 3));
 
-        final BasicInventoryPacketState inventory = fromState(clickType(windowPacket.getSlotId()) | mode | unpacked);
+        final BasicInventoryPacketState inventory = PacketPhase.fromState(PacketPhase.clickType(windowPacket.getSlotId()) | mode | unpacked);
         if (inventory == PacketPhase.Inventory.INVENTORY) {
             SpongeCommon.getLogger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
         }
@@ -303,7 +303,7 @@ public final class PacketPhase {
         this.packetTranslationMap.put(CPlayerDiggingPacket.class, packet -> {
             final CPlayerDiggingPacket playerDigging = (CPlayerDiggingPacket) packet;
             final CPlayerDiggingPacket.Action action = playerDigging.getAction();
-            final IPhaseState<? extends PacketContext<?>> state = INTERACTION_ACTION_MAPPINGS.get(action);
+            final IPhaseState<? extends PacketContext<?>> state = PacketPhase.INTERACTION_ACTION_MAPPINGS.get(action);
             return state == null ? PacketPhase.General.UNKNOWN : state;
         });
         this.packetTranslationMap.put(CPlayerTryUseItemOnBlockPacket.class, packet -> {
@@ -323,11 +323,11 @@ public final class PacketPhase {
         this.packetTranslationMap.put(CEntityActionPacket.class, packet -> {
             final CEntityActionPacket playerAction = (CEntityActionPacket) packet;
             final CEntityActionPacket.Action action = playerAction.getAction();
-            return PLAYER_ACTION_MAPPINGS.get(action);
+            return PacketPhase.PLAYER_ACTION_MAPPINGS.get(action);
         });
         this.packetTranslationMap.put(CInputPacket.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(CCloseWindowPacket.class, packet -> PacketPhase.General.CLOSE_WINDOW);
-        this.packetTranslationMap.put(CClickWindowPacket.class, packet -> fromWindowPacket((CClickWindowPacket) packet));
+        this.packetTranslationMap.put(CClickWindowPacket.class, packet -> PacketPhase.fromWindowPacket((CClickWindowPacket) packet));
         this.packetTranslationMap.put(CConfirmTransactionPacket.class, packet -> PacketPhase.General.UNKNOWN);
         this.packetTranslationMap.put(CCreativeInventoryActionPacket.class, packet -> PacketPhase.General.CREATIVE_INVENTORY);
         this.packetTranslationMap.put(CEnchantItemPacket.class, packet -> PacketPhase.Inventory.ENCHANT_ITEM);

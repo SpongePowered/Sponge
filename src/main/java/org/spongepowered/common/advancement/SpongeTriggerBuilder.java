@@ -65,7 +65,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
 
     private final static FilteredTriggerConfiguration.Empty EMPTY_TRIGGER_CONFIGURATION = new FilteredTriggerConfiguration.Empty();
     private final static Function<JsonObject, FilteredTriggerConfiguration.Empty> EMPTY_TRIGGER_CONFIGURATION_CONSTRUCTOR =
-            jsonObject -> EMPTY_TRIGGER_CONFIGURATION;
+            jsonObject -> SpongeTriggerBuilder.EMPTY_TRIGGER_CONFIGURATION;
 
     @Nullable private Type configType;
     @Nullable private Function<JsonObject, C> constructor;
@@ -94,7 +94,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
         public C apply(final JsonObject jsonObject) {
             final DataBuilder<C> builder = Sponge.getDataManager().getBuilder(this.dataConfigClass).get();
             try {
-                final DataView dataView = JsonDataFormat.serialize(GSON, jsonObject);
+                final DataView dataView = JsonDataFormat.serialize(SpongeTriggerBuilder.GSON, jsonObject);
                 return builder.build(dataView).get();
             } catch (final IOException e) {
                 throw new IllegalStateException(e);
@@ -167,7 +167,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
         public C apply(final JsonObject jsonObject) {
             final GsonConfigurationLoader loader = GsonConfigurationLoader.builder()
                     .defaultOptions(this.options)
-                    .source(() -> new BufferedReader(new StringReader(GSON.toJson(jsonObject))))
+                    .source(() -> new BufferedReader(new StringReader(SpongeTriggerBuilder.GSON.toJson(jsonObject))))
                     .build();
             try {
                 final ConfigurationNode node = loader.load();
@@ -189,7 +189,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
 
     @Override
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> jsonSerializableConfig(final Class<T> configClass) {
-        return this.jsonSerializableConfig(configClass, GSON);
+        return this.jsonSerializableConfig(configClass, SpongeTriggerBuilder.GSON);
     }
 
     private static class JsonConstructor<C extends FilteredTriggerConfiguration> implements Function<JsonObject, C> {
@@ -211,7 +211,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     @Override
     public Trigger.Builder<FilteredTriggerConfiguration.Empty> emptyConfig() {
         this.configType = FilteredTriggerConfiguration.Empty.class;
-        this.constructor = (Function<JsonObject, C>) EMPTY_TRIGGER_CONFIGURATION_CONSTRUCTOR;
+        this.constructor = (Function<JsonObject, C>) SpongeTriggerBuilder.EMPTY_TRIGGER_CONFIGURATION_CONSTRUCTOR;
         return (Trigger.Builder<FilteredTriggerConfiguration.Empty>) this;
     }
 

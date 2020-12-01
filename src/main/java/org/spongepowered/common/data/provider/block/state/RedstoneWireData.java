@@ -59,7 +59,7 @@ public final class RedstoneWireData {
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
                             final Set<Direction> directions = new HashSet<>();
-                            for (final Map.Entry<Direction, EnumProperty<RedstoneSide>> entry : sides.entrySet()) {
+                            for (final Map.Entry<Direction, EnumProperty<RedstoneSide>> entry : RedstoneWireData.sides.entrySet()) {
                                 if (h.get(entry.getValue()) != RedstoneSide.NONE) {
                                     directions.add(entry.getKey());
                                 }
@@ -67,27 +67,27 @@ public final class RedstoneWireData {
                             return directions;
                         })
                         .set((h, v) -> {
-                            for (final Map.Entry<Direction, EnumProperty<RedstoneSide>> entry : sides.entrySet()) {
-                                h = setConnected(h, v.contains(entry.getKey()), entry.getValue());
+                            for (final Map.Entry<Direction, EnumProperty<RedstoneSide>> entry : RedstoneWireData.sides.entrySet()) {
+                                h = RedstoneWireData.setConnected(h, v.contains(entry.getKey()), entry.getValue());
                             }
                             return h;
                         })
                         .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
                     .create(Keys.IS_CONNECTED_EAST)
                         .get(h -> h.get(RedstoneWireBlock.EAST) != RedstoneSide.NONE)
-                        .set((h, v) -> setConnected(h, v, RedstoneWireBlock.EAST))
+                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedstoneWireBlock.EAST))
                         .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
                     .create(Keys.IS_CONNECTED_NORTH)
                         .get(h -> h.get(RedstoneWireBlock.NORTH) != RedstoneSide.NONE)
-                        .set((h, v) -> setConnected(h, v, RedstoneWireBlock.NORTH))
+                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedstoneWireBlock.NORTH))
                         .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
                     .create(Keys.IS_CONNECTED_SOUTH)
                         .get(h -> h.get(RedstoneWireBlock.SOUTH) != RedstoneSide.NONE)
-                        .set((h, v) -> setConnected(h, v, RedstoneWireBlock.SOUTH))
+                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedstoneWireBlock.SOUTH))
                         .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
                     .create(Keys.IS_CONNECTED_WEST)
                         .get(h -> h.get(RedstoneWireBlock.WEST) != RedstoneSide.NONE)
-                        .set((h, v) -> setConnected(h, v, RedstoneWireBlock.WEST))
+                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedstoneWireBlock.WEST))
                         .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
                     .create(Keys.POWER)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.POWER, RedstoneWireBlock.POWER))
@@ -113,13 +113,13 @@ public final class RedstoneWireData {
                     .create(Keys.WIRE_ATTACHMENTS)
                         .get(h -> {
                             final Map<Direction, WireAttachmentType> attachments = new HashMap<>();
-                            for (final Map.Entry<Direction, EnumProperty<RedstoneSide>> entry : sides.entrySet()) {
+                            for (final Map.Entry<Direction, EnumProperty<RedstoneSide>> entry : RedstoneWireData.sides.entrySet()) {
                                 attachments.put(entry.getKey(), (WireAttachmentType) (Object) h.get(entry.getValue()));
                             }
                             return attachments;
                         })
                         .set((h, v) -> {
-                            for (final Map.Entry<Direction, EnumProperty<RedstoneSide>> entry : sides.entrySet()) {
+                            for (final Map.Entry<Direction, EnumProperty<RedstoneSide>> entry : RedstoneWireData.sides.entrySet()) {
                                 RedstoneSide type = (RedstoneSide) (Object) v.get(entry.getKey());
                                 if (type == null) {
                                     type = RedstoneSide.NONE;

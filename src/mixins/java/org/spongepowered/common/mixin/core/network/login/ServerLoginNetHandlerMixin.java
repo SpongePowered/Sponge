@@ -30,12 +30,11 @@ import net.minecraft.network.login.ServerLoginNetHandler;
 import net.minecraft.network.play.server.SDisconnectPacket;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
@@ -51,7 +50,6 @@ import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 import org.spongepowered.common.bridge.network.ServerLoginNetHandlerBridge;
 
 import java.net.SocketAddress;
-import java.util.Optional;
 
 @Mixin(ServerLoginNetHandler.class)
 public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandlerBridge, NetworkManagerHolderBridge {
@@ -78,11 +76,11 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
 
     private void impl$closeConnection(final ITextComponent reason) {
         try {
-            LOGGER.info("Disconnecting " + this.getConnectionInfo() + ": " + reason.getUnformattedComponentText());
+            ServerLoginNetHandlerMixin.LOGGER.info("Disconnecting " + this.getConnectionInfo() + ": " + reason.getUnformattedComponentText());
             this.networkManager.sendPacket(new SDisconnectPacket(reason));
             this.networkManager.closeChannel(reason);
         } catch (Exception exception) {
-            LOGGER.error("Error whilst disconnecting player", exception);
+            ServerLoginNetHandlerMixin.LOGGER.error("Error whilst disconnecting player", exception);
         }
     }
 

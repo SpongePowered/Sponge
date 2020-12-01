@@ -25,6 +25,10 @@
 package org.spongepowered.common.applaunch.config.core;
 
 import com.google.common.collect.ImmutableSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationOptions;
@@ -32,10 +36,6 @@ import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.configurate.objectmapping.meta.NodeResolver;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.plugin.Blackboard;
@@ -76,9 +76,9 @@ public final class SpongeConfigs {
             .build();
 
     public static final ConfigurationOptions OPTIONS = ConfigurationOptions.defaults()
-            .header(HEADER)
+            .header(SpongeConfigs.HEADER)
             .serializers(collection -> collection.register(TokenHoldingString.SERIALIZER)
-                    .registerAnnotatedObjects(OBJECT_MAPPERS));
+                    .registerAnnotatedObjects(SpongeConfigs.OBJECT_MAPPERS));
 
     static final Logger LOGGER = LogManager.getLogger();
 
@@ -104,7 +104,7 @@ public final class SpongeConfigs {
 
     public static Path getDirectory() {
         if (SpongeConfigs.configDir == null) {
-            SpongeConfigs.configDir = getPluginEnvironment().getBlackboard()
+            SpongeConfigs.configDir = SpongeConfigs.getPluginEnvironment().getBlackboard()
                     .get(PluginKeys.BASE_DIRECTORY)
                     .orElseThrow(() -> new IllegalStateException("No base directory was set"))
                     .resolve("config")
@@ -126,13 +126,13 @@ public final class SpongeConfigs {
                     // Load global config first so we can migrate over old settings
                     SpongeConfigs.splitFiles();
                     // Then load the actual configuration based on the new file
-                    SpongeConfigs.sponge = create(new CommonConfig(), CommonConfig.FILE_NAME);
+                    SpongeConfigs.sponge = SpongeConfigs.create(new CommonConfig(), CommonConfig.FILE_NAME);
                 }
             } finally {
                 SpongeConfigs.initLock.unlock();
             }
         }
-        return sponge;
+        return SpongeConfigs.sponge;
     }
 
 
@@ -159,7 +159,7 @@ public final class SpongeConfigs {
     }
 
     public static <T extends Config> ConfigHandle<T> create(final T instance, final String fileName) {
-        final HoconConfigurationLoader loader = createLoader(SpongeConfigs.getDirectory().resolve(fileName));
+        final HoconConfigurationLoader loader = SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(fileName));
         try {
             final ConfigHandle<T> handle = new ConfigHandle<>(instance, loader);
             handle.load();
@@ -223,9 +223,9 @@ public final class SpongeConfigs {
         }
 
         final ConfigurationTransformation xform = ConfigurationTransformation.chain(
-                new FileMovingConfigurationTransformation(MIGRATE_SPONGE_PATHS, SpongeConfigs.createLoader(commonFile), true),
-                new FileMovingConfigurationTransformation(MIGRATE_METRICS_PATHS, SpongeConfigs.createLoader(metricsFile), true));
-        final ConfigurationLoader<CommentedConfigurationNode> globalLoader = createLoader(oldGlobalFile);
+                new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_SPONGE_PATHS, SpongeConfigs.createLoader(commonFile), true),
+                new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_METRICS_PATHS, SpongeConfigs.createLoader(metricsFile), true));
+        final ConfigurationLoader<CommentedConfigurationNode> globalLoader = SpongeConfigs.createLoader(oldGlobalFile);
 
         try {
             Files.copy(oldGlobalFile, oldGlobalFile.resolveSibling(SpongeConfigs.GLOBAL_NAME + ".old-backup"));

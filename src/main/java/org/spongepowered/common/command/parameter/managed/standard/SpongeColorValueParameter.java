@@ -98,7 +98,7 @@ public final class SpongeColorValueParameter extends CatalogedArgumentParser<Col
         final String string = reader.parseUnquotedString();
 
         // Hex code?
-        if (HEX_CODE.matcher(string).matches()) {
+        if (SpongeColorValueParameter.HEX_CODE.matcher(string).matches()) {
             // Hex code
         }
 

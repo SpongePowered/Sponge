@@ -61,13 +61,12 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.advancement.SpongeAdvancementProvider;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.recipe.SpongeRecipeProvider;
@@ -78,11 +77,10 @@ import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
+import javax.annotation.Nullable;
 import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.function.BooleanSupplier;
-
-import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer, MinecraftServerBridge,
@@ -292,15 +290,15 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
                 if (log) {
                     if (this.bridge$performAutosaveChecks()) {
-                        LOGGER.info("Auto-saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+                        MinecraftServerMixin.LOGGER.info("Auto-saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
                     } else {
-                        LOGGER.info("Saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+                        MinecraftServerMixin.LOGGER.info("Saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
                     }
                 }
             // Forced happens during command
             } else {
                 if (log) {
-                    LOGGER.info("Manually saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+                    MinecraftServerMixin.LOGGER.info("Manually saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
                 }
 
                 ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().save();

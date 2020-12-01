@@ -31,15 +31,14 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.state.StateContainer;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.TeleportHelperCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
 
@@ -51,10 +50,10 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
     @Nullable private static List<BlockState> bodyBlockStates = null;
 
     public static void invalidateCache() {
-        floorBlockTypes = null;
-        floorBlockStates = null;
-        bodyBlockStates = null;
-        bodyBlockTypes = null;
+        ConfigTeleportHelperFilter.floorBlockTypes = null;
+        ConfigTeleportHelperFilter.floorBlockStates = null;
+        ConfigTeleportHelperFilter.bodyBlockStates = null;
+        ConfigTeleportHelperFilter.bodyBlockTypes = null;
     }
 
     private static void updateCacheIfNecessary() {
@@ -101,12 +100,12 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
     @Override
     public boolean isSafeFloorMaterial(@NonNull final BlockState blockState) {
         ConfigTeleportHelperFilter.updateCacheIfNecessary();
-        return !ConfigTeleportHelperFilter.floorBlockStates.contains(blockState) && !floorBlockTypes.contains(blockState.getType());
+        return !ConfigTeleportHelperFilter.floorBlockStates.contains(blockState) && !ConfigTeleportHelperFilter.floorBlockTypes.contains(blockState.getType());
     }
 
     @Override
     public boolean isSafeBodyMaterial(@NonNull final BlockState blockState) {
         ConfigTeleportHelperFilter.updateCacheIfNecessary();
-        return !ConfigTeleportHelperFilter.bodyBlockStates.contains(blockState) && !bodyBlockTypes.contains(blockState.getType());
+        return !ConfigTeleportHelperFilter.bodyBlockStates.contains(blockState) && !ConfigTeleportHelperFilter.bodyBlockTypes.contains(blockState.getType());
     }
 }

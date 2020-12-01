@@ -87,7 +87,7 @@ public class LensRegistrar {
 
     static {
 
-        register((inv, size, slp) -> lensGrid(inv, size, 9, 3, slp),
+        LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensGrid(inv, size, 9, 3, slp),
                 ChestTileEntity.class,
                 ShulkerBoxTileEntity.class,
                 TrappedChestTileEntity.class,
@@ -96,38 +96,40 @@ public class LensRegistrar {
                 ChestMinecartEntity.class
         );
 
-        register((inv, size, slp) -> lensGrid(inv, size, 3,3, slp),
+        LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensGrid(inv, size, 3,3, slp),
                 DispenserTileEntity.class,
                 DropperTileEntity.class,
                 CraftingInventory.class);
 
-        register((inv, size, slp) -> lensGrid(inv, size, 2, 2, slp),
+        LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensGrid(inv, size, 2, 2, slp),
                 CraftingInventory.class);
 
-        register((inv, size, slp) -> lensGrid(inv, size, 5, 1, slp),
+        LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensGrid(inv, size, 5, 1, slp),
                 HopperTileEntity.class);
 
-        register(restricted(LensRegistrar::lensFurnace, s -> s == 3),
+        LensRegistrar.register(
+            LensRegistrar.restricted(LensRegistrar::lensFurnace, s -> s == 3),
                 AbstractFurnaceTileEntity.class,
                 SmokerTileEntity.class,
                 FurnaceTileEntity.class,
                 BlastFurnaceTileEntity.class
         );
 
-        register(restricted(LensRegistrar::lensBrewingStandTileEntity, s -> s == 5), BrewingStandTileEntity.class);
-        register(restricted(LensRegistrar::lensDoubleSided, s -> s == 2 * 9 * 3), DoubleSidedInventory.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensBrewingStandTileEntity, s -> s == 5), BrewingStandTileEntity.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensDoubleSided, s -> s == 2 * 9 * 3), DoubleSidedInventory.class);
 
-        register(restricted(LensRegistrar::lensRepairContainer, s -> s == 2 + 1 + 9 * 3), RepairContainer.class);
-        register(restricted(LensRegistrar::lensWorkbenchContainer,s -> s == 1 + 3 * 3 + 9 * 3), WorkbenchContainer.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensRepairContainer, s -> s == 2 + 1 + 9 * 3), RepairContainer.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensWorkbenchContainer,s -> s == 1 + 3 * 3 + 9 * 3), WorkbenchContainer.class);
 
-        register(restricted(LensRegistrar::lensPlayerContainer, s -> s == 1+ 4 + 4 + 9*3 + 1), PlayerContainer.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensPlayerContainer, s -> s == 1+ 4 + 4 + 9*3 + 1), PlayerContainer.class);
 
-        register(restricted(LensRegistrar::generateLens, s -> s == 8),
+        LensRegistrar.register(
+            LensRegistrar.restricted(LensRegistrar::generateLens, s -> s == 8),
                 AbstractVillagerEntity.class,
                 VillagerEntity.class,
                 WanderingTraderEntity.class);
 
-        register(restricted(LensRegistrar::lensSlot, s -> s == 1), CraftResultInventory.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensSlot, s -> s == 1), CraftResultInventory.class);
     }
 
     private static Lens lensSlot(Object inventory, int size, SlotLensProvider slotLensProvider) {
@@ -136,7 +138,7 @@ public class LensRegistrar {
 
     public static void register(LensFactory lensFactory, Class<?>... classes) {
         for (Class<?> clazz : classes) {
-            lensFactories.put(clazz, lensFactory);
+            LensRegistrar.lensFactories.put(clazz, lensFactory);
         }
     }
 
@@ -150,11 +152,11 @@ public class LensRegistrar {
     }
 
     public static Lens getLens(Object inventory, SlotLensProvider slotLensProvider, int size) {
-        return getLenses(inventory.getClass()).computeIfAbsent(size, k -> generateLens(inventory, size, slotLensProvider));
+        return LensRegistrar.getLenses(inventory.getClass()).computeIfAbsent(size, k -> LensRegistrar.generateLens(inventory, size, slotLensProvider));
     }
 
     private static Int2ObjectMap<Lens> getLenses(Class<?> inventory) {
-        return lenses.computeIfAbsent(inventory, k -> new Int2ObjectOpenHashMap<>());
+        return LensRegistrar.lenses.computeIfAbsent(inventory, k -> new Int2ObjectOpenHashMap<>());
     }
 
     private interface LensFactory {
@@ -168,7 +170,7 @@ public class LensRegistrar {
             return new DefaultEmptyLens();
         }
 
-        LensFactory lensFactory = lensFactories.get(inventory.getClass());
+        LensFactory lensFactory = LensRegistrar.lensFactories.get(inventory.getClass());
         Lens lens = null;
         if (lensFactory != null) {
             lens = lensFactory.apply(inventory.getClass(), size, slotLensProvider);
@@ -178,7 +180,7 @@ public class LensRegistrar {
         }
 
         if (inventory instanceof CraftingInventory) {
-            lens = lensGrid(inventory, size, ((CraftingInventory) inventory).getWidth(), ((CraftingInventory) inventory).getHeight(), slotLensProvider);
+            lens = LensRegistrar.lensGrid(inventory, size, ((CraftingInventory) inventory).getWidth(), ((CraftingInventory) inventory).getHeight(), slotLensProvider);
         }
         else if (inventory instanceof Container) {
             lens = ContainerUtil.generateLens(((Container) inventory), slotLensProvider);
@@ -253,7 +255,7 @@ public class LensRegistrar {
 
         @Override
         public SlotLens getSlotLens(int index) {
-            return basicSlotLenses.computeIfAbsent(index, BasicSlotLens::new);
+            return BasicSlotLensProvider.basicSlotLenses.computeIfAbsent(index, BasicSlotLens::new);
         }
 
         @Override
