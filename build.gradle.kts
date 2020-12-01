@@ -370,28 +370,30 @@ allprojects {
             from(sourceSet.allJava)
         }
     }
-    publishing {
-        repositories {
-            maven {
-                name = "GitHubPackages"
-                this.url = uri("https://maven.pkg.github.com/spongepowered/${project.name}")
-                credentials {
-                    username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USERNAME")
-                    password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+    afterEvaluate {
+        publishing {
+            repositories {
+                maven {
+                    name = "GitHubPackages"
+                    this.url = uri("https://maven.pkg.github.com/spongepowered/${project.name}")
+                    credentials {
+                        username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USERNAME")
+                        password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+                    }
                 }
-            }
-            // Set by the build server
-            maven {
-                name = "spongeRepo"
-                val repoUrl = if ((version as String).endsWith("-SNAPSHOT")) spongeSnapshotRepo else spongeReleaseRepo
-                repoUrl?.apply {
-                    url = uri(this)
-                }
-                val spongeUsername: String? by project
-                val spongePassword: String? by project
-                credentials {
-                    username = spongeUsername ?: ""
-                    password = spongePassword ?: ""
+                // Set by the build server
+                maven {
+                    name = "spongeRepo"
+                    val repoUrl = if ((version as String).endsWith("-SNAPSHOT")) spongeSnapshotRepo else spongeReleaseRepo
+                    repoUrl?.apply {
+                        url = uri(this)
+                    }
+                    val spongeUsername: String? by project
+                    val spongePassword: String? by project
+                    credentials {
+                        username = spongeUsername ?: ""
+                        password = spongePassword ?: ""
+                    }
                 }
             }
         }
