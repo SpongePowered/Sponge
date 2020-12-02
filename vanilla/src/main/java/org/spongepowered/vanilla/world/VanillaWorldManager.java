@@ -391,6 +391,12 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     + "world loaded.", world.getKey())));
         }
 
+        try {
+            this.unloadWorld0((ServerWorld) world);
+        } catch (IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
         return CompletableFuture.completedFuture(true);
     }
 
