@@ -39,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.util.concurrent.TrackedTickDelayedTaskBridge;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
@@ -112,7 +111,7 @@ public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMix
             if (phaseContext.isEmpty()) {
                 return;
             }
-            ((IPhaseState) phaseContext.state).foldContextForThread(phaseContext, ((TrackedTickDelayedTaskBridge) returnValue));
+            phaseContext.foldContextForThread(((TrackedTickDelayedTaskBridge) returnValue));
         }
     }
 

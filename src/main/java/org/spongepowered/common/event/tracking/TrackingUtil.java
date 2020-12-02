@@ -265,12 +265,11 @@ public final class TrackingUtil {
         final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext(PhaseTracker.SERVER).source(locatable);
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
-        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState<?> currentState = currentContext.state;
-        ((IPhaseState) currentState).appendNotifierPreBlockTick(world, pos, currentContext, phaseContext);
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
+        currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
 
-        try (final PhaseContext<?> context = phaseContext;
+        try (final PhaseContext<@NonNull ?> context = phaseContext;
              final Timing timing = ((TimingBridge) block.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             context.buildAndSwitch();
@@ -305,8 +304,7 @@ public final class TrackingUtil {
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState<@NonNull ?> currentState = currentContext.state;
-        ((IPhaseState) currentState).appendNotifierPreBlockTick(world, pos, currentContext, phaseContext);
+        currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
 
         try (final PhaseContext<?> context = phaseContext;
@@ -346,11 +344,10 @@ public final class TrackingUtil {
         final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext(PhaseTracker.SERVER).source(locatable);
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
-        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState<?> currentState = currentContext.state;
-        ((IPhaseState) currentState).appendNotifierPreBlockTick(world, pos, currentContext, phaseContext);
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
+        currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
-        try (final PhaseContext<?> context = phaseContext) {
+        try (final PhaseContext<@NonNull ?> context = phaseContext) {
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, () -> "Wrapping Random Block Tick: " + state.toString());
             state.randomTick(world, pos, random);
@@ -384,10 +381,9 @@ public final class TrackingUtil {
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState<@NonNull ?> currentState = currentContext.state;
-        ((IPhaseState) currentState).appendNotifierPreBlockTick(world, pos, currentContext, phaseContext);
+        currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
-        try (final PhaseContext<?> context = phaseContext) {
+        try (final PhaseContext<@NonNull ?> context = phaseContext) {
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.FLUID_TICK, () -> "Wrapping Random Fluid Tick: " + state.toString());
             state.randomTick(world, pos, random);

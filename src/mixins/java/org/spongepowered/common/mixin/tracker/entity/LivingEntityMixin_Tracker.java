@@ -34,14 +34,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
 
@@ -87,7 +85,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
-        if (!((IPhaseState) context.state).doesBlockEventTracking(context)) {
+        if (!context.doesBlockEventTracking()) {
             this.shadow$onDeathUpdate();
             return;
         }
@@ -116,7 +114,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
-        if (!((IPhaseState) context.state).doesBlockEventTracking(context)) {
+        if (!context.doesBlockEventTracking()) {
             return;
         }
         try (final EffectTransactor ignored = context.getTransactor().ensureEntityDropTransactionEffect((LivingEntity) (Object) this)) {

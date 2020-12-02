@@ -229,28 +229,24 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      * @param randomIn The world random
      * @author gabizou - January 11th, 2020 - Minecraft 1.14.3
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "tickBlock",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockState;tick(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
     private void tracker$wrapBlockTick(final BlockState blockState, final ServerWorld worldIn, final BlockPos posIn, final Random randomIn) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
-        final IPhaseState currentState = currentContext.state;
-        if (currentState.alreadyCapturingBlockTicks(currentContext) || currentState.ignoresBlockUpdateTick(currentContext)) {
+        if (currentContext.alreadyCapturingBlockTicks() || currentContext.doesBlockEventTracking()) {
             blockState.tick(worldIn, posIn, randomIn);
             return;
         }
         TrackingUtil.updateTickBlock(this, blockState, posIn, randomIn);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "tickFluid",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/fluid/IFluidState;tick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
     private void tracker$wrapFluidTick(final IFluidState fluidState, final World worldIn, final BlockPos pos) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
-        final IPhaseState currentState = currentContext.state;
-        if (currentState.alreadyCapturingBlockTicks(currentContext) || currentState.ignoresBlockUpdateTick(currentContext)) {
+        if (currentContext.alreadyCapturingBlockTicks() || currentContext.ignoresBlockUpdateTick()) {
             fluidState.tick(worldIn, pos);
             return;
         }
@@ -265,7 +261,6 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      *
      * @author gabizou - January 11th, 2020 - Minecraft 1.14.3
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "tickEnvironment",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockState;randomTick(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
@@ -273,8 +268,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-            final IPhaseState phaseState = context.state;
-            if (phaseState.alreadyCapturingBlockTicks(context)) {
+            if (context.alreadyCapturingBlockTicks()) {
                 blockState.randomTick(worldIn, posIn, this.rand);
             } else {
                 TrackingUtil.randomTickBlock(this, blockState, posIn, this.rand);
@@ -282,7 +276,6 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "tickEnvironment",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/fluid/IFluidState;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"
@@ -290,8 +283,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     )
     private void tracker$wrapFluidRandomTick(final IFluidState fluidState, final World worldIn, final BlockPos pos, final Random random) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState phaseState = context.state;
-        if (phaseState.alreadyCapturingBlockTicks(context)) {
+        if (context.alreadyCapturingBlockTicks()) {
             fluidState.randomTick(worldIn, pos, this.rand);
         } else {
             TrackingUtil.randomTickFluid(this, fluidState, pos, this.rand);
@@ -351,7 +343,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         // effectively allow the block event get added to the list, but
         // we log the transaction so that we can call the change block event
         // pre, and if needed, undo the add to the list.
-        phaseState.appendNotifierToBlockEvent(currentContext, this, pos, blockEvent);
+        currentContext.appendNotifierToBlockEvent(this, pos, blockEvent);
         // We fire a Pre event to make sure our captures do not get stuck in a loop.
         // This is very common with pistons as they add block events while blocks are being notified.
         if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
@@ -624,7 +616,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         super.shadow$removeTileEntity(immutable);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked", "ConstantConditions", "RedundantCast"})
+    @SuppressWarnings({"ConstantConditions", "RedundantCast"})
     @Override
     public boolean shadow$addTileEntity(final TileEntity tileEntity) {
         if (this.bridge$isFake() || PhaseTracker.SERVER.getSidedThread() != Thread.currentThread()) {
@@ -636,8 +628,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         // and if so, log the tile entity removal (may associate with an existing transaction,
         // or create a new transaction.
         final PhaseContext<@NonNull ?> current = PhaseTracker.SERVER.getPhaseContext();
-        final IPhaseState state = current.state;
-        if (state.doesBlockEventTracking(current)) {
+        if (current.doesBlockEventTracking()) {
             final BlockPos immutable = tileEntity.getPos().toImmutable();
             if (tileEntity.getWorld() != (ServerWorld) (Object) this) {
                 tileEntity.setWorldAndPos((ServerWorld) (Object) this, immutable);
@@ -661,7 +652,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         return super.shadow$addTileEntity(tileEntity);
     }
 
-    @SuppressWarnings({"RedundantCast", "ConstantConditions", "unchecked", "rawtypes"})
+    @SuppressWarnings({"RedundantCast", "ConstantConditions"})
     @Override
     public void shadow$setTileEntity(final BlockPos pos, @Nullable final TileEntity proposed) {
         final BlockPos immutable = pos.toImmutable();
@@ -681,9 +672,8 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         // Otherwise, let's go on and check if we're recording transactions,
         // and if so, log the tile entity removal (may associate with an existing transaction,
         // or create a new transaction.
-        final PhaseContext<?> current = PhaseTracker.SERVER.getPhaseContext();
-        final IPhaseState state = current.state;
-        if (state.doesBlockEventTracking(current)) {
+        final PhaseContext<@NonNull ?> current = PhaseTracker.SERVER.getPhaseContext();
+        if (current.doesBlockEventTracking()) {
             final @Nullable TileEntity existing = this.shadow$getChunkAt(immutable).getTileEntity(immutable);
             if (current.getTransactor().logTileReplacement(immutable, existing, proposed, () -> (ServerWorld) (Object) this)) {
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
@@ -698,7 +688,6 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         super.shadow$setTileEntity(immutable, proposed);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void shadow$neighborChanged(final BlockPos pos, final Block blockIn, final BlockPos fromPos) {
         final BlockPos immutableTarget = pos.toImmutable();
@@ -736,8 +725,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         // Sponge End
 
         // Sponge start - prepare notification
-        final PhaseContext<?> peek = server.getPhaseContext();
-        final IPhaseState state = peek.state;
+        final PhaseContext<@NonNull ?> peek = server.getPhaseContext();
 
         //  try { // Vanilla - We need to push the effect transactor so that it always pops
         try {
@@ -746,7 +734,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             final @Nullable TileEntity existingTile = targetChunk.getTileEntity(immutableTarget, Chunk.CreateEntityType.CHECK);
             peek.getTransactor().logNeighborNotification(worldSupplier, immutableFrom, blockIn, immutableTarget, targetBlockState, existingTile);
 
-            state.associateNeighborStateNotifier(peek, immutableFrom, targetBlockState.getBlock(), immutableTarget, ((ServerWorld) (Object) this), PlayerTracker.Type.NOTIFIER);
+            peek.associateNeighborStateNotifier(immutableFrom, targetBlockState.getBlock(), immutableTarget, ((ServerWorld) (Object) this), PlayerTracker.Type.NOTIFIER);
             // Sponge End
 
             targetBlockState.neighborChanged(((ServerWorld) (Object) this), immutableTarget, blockIn, immutableFrom, false);
