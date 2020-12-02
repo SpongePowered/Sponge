@@ -66,6 +66,11 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
         ((PlayerProfileCacheBridge) cache).bridge$setCanSave(false);
     }
 
+    @Inject(method = "stopServer", at = @At("TAIL"))
+    private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
+        SpongeCommon.getGame().getAsyncScheduler().close();
+    }
+
     @Override
     public boolean bridge$performAutosaveChecks() {
         return this.shadow$isServerRunning();

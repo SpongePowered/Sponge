@@ -35,6 +35,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.chunk.listener.ChainedChunkStatusListener;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.chunk.listener.TrackingChunkStatusListener;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -146,5 +147,10 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     @Override
     public ClientType bridge$getClientType() {
         return ClientType.SPONGE_VANILLA;
+    }
+
+    @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;shutdownServerExecutor()V"))
+    private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
+        SpongeCommon.getGame().getAsyncScheduler().close();
     }
 }
