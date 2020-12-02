@@ -71,7 +71,7 @@ public final class ServerTickState extends TickPhaseState<ServerTickState.Server
         }
 
 
-        ServerTickContext(final IPhaseState<? extends ServerTickContext> phaseState, final PhaseTracker tracker) {
+        ServerTickContext(final IPhaseState<ServerTickContext> phaseState, final PhaseTracker tracker) {
             super(phaseState, tracker);
         }
     }

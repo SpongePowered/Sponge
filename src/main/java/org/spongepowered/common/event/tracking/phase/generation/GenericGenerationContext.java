@@ -29,7 +29,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class GenericGenerationContext extends GenerationContext<GenericGenerationContext> {
 
-    GenericGenerationContext(final IPhaseState<? extends GenericGenerationContext> state, PhaseTracker tracker) {
+    GenericGenerationContext(final IPhaseState<GenericGenerationContext> state, PhaseTracker tracker) {
         super(state, tracker);
     }
 }

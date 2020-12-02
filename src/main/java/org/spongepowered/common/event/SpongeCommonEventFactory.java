@@ -130,7 +130,6 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -426,7 +425,7 @@ public final class SpongeCommonEventFactory {
                 }
             }
 
-            if (!((IPhaseState) phaseContext.state).shouldProvideModifiers(phaseContext)) {
+            if (!phaseContext.shouldProvideModifiers()) {
                 phaseContext.getSource(BlockBridge.class).ifPresent(bridge -> {
                     bridge.bridge$getTickFrameModifier().accept(frame, worldIn);
                 });

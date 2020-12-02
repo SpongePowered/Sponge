@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public final class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseContext> {
 
-    PopulatorPhaseContext(final IPhaseState<? extends PopulatorPhaseContext> state, final PhaseTracker tracker) {
+    PopulatorPhaseContext(final IPhaseState<PopulatorPhaseContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 }

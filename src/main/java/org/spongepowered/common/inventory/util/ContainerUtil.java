@@ -59,7 +59,6 @@ import org.spongepowered.common.accessor.inventory.container.MerchantContainerAc
 import org.spongepowered.common.accessor.inventory.container.RepairContainerAccessor;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.SpongeLocationCarrier;
@@ -117,8 +116,7 @@ public final class ContainerUtil {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void performBlockInventoryDrops(final ServerWorld worldServer, final double x, final double y, final double z, final IInventory inventory) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState<@NonNull ?> currentState = context.state;
-        if (((IPhaseState) currentState).doesBlockEventTracking(context)) {
+        if (context.doesBlockEventTracking()) {
             // this is where we could perform item stack pre-merging.
             // TODO - figure out how inventory drops will work?
             for (int j = 0; j < inventory.getSizeInventory(); j++) {

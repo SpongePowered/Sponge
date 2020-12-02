@@ -67,9 +67,9 @@ class DelayedTaskPhaseState extends PluginPhaseState<DelayedTaskPhaseState.Conte
     public static class Context extends PluginPhaseContext<Context> {
 
         @Nullable PluginContainer container;
-        @Nullable BiConsumer<PhaseContext<?>, CauseStackManager.StackFrame> delayedContextPopulator;
+        @Nullable BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame> delayedContextPopulator;
 
-        public Context(final IPhaseState<? extends Context> phaseState, final PhaseTracker tracker) {
+        public Context(final IPhaseState<Context> phaseState, final PhaseTracker tracker) {
             super(phaseState, tracker);
         }
 

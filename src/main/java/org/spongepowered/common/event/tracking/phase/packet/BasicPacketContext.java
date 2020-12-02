@@ -26,17 +26,17 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.inventory.container.Container;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
-import net.minecraft.inventory.container.Container;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class BasicPacketContext extends PacketContext<BasicPacketContext> {
 
     @Nullable private Container container;
 
-    public BasicPacketContext(final PacketState<? extends BasicPacketContext> state, final PhaseTracker tracker) {
+    public BasicPacketContext(final PacketState<BasicPacketContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 

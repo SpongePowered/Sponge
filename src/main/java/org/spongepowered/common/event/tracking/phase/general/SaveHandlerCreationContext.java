@@ -32,7 +32,7 @@ public class SaveHandlerCreationContext extends PhaseContext<SaveHandlerCreation
 
     private boolean createFiles;
 
-    protected SaveHandlerCreationContext(final IPhaseState<? extends SaveHandlerCreationContext> state, final PhaseTracker tracker) {
+    protected SaveHandlerCreationContext(final IPhaseState<SaveHandlerCreationContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 

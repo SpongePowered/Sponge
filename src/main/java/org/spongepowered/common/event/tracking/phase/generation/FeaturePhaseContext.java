@@ -29,16 +29,15 @@ import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import java.util.Objects;
-
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 public final class FeaturePhaseContext extends GenerationContext<FeaturePhaseContext> {
 
     @Nullable private Feature<?> feature;
     @Nullable private BlockPos origin;
 
-    FeaturePhaseContext(final IPhaseState<? extends FeaturePhaseContext> state, final PhaseTracker tracker) {
+    FeaturePhaseContext(final IPhaseState<FeaturePhaseContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 
