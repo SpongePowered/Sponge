@@ -346,7 +346,7 @@ public final class PhaseTracker implements CauseStackManager {
             }
         }
 
-        if (((IPhaseState) state).shouldProvideModifiers(phaseContext)) {
+        if (phaseContext.shouldProvideModifiers()) {
             this.registerPhaseContextProvider(phaseContext);
         }
         this.stack.push(state, phaseContext);

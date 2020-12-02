@@ -26,9 +26,9 @@ package org.spongepowered.common.event.tracking.phase.generation;
 
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.gen.ChunkGenerator;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
 
@@ -37,7 +37,7 @@ public final class GenerationCompatibileContext extends GenerationContext<Genera
     @Nullable AbstractChunkProvider provider;
     @Nullable ChunkGenerator<?> generator;
 
-    GenerationCompatibileContext(final IPhaseState<? extends GenerationCompatibileContext> state, final PhaseTracker tracker) {
+    GenerationCompatibileContext(final IPhaseState<GenerationCompatibileContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 

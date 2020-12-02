@@ -50,7 +50,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
     BlockPos pos;
     SpongeBlockSnapshot snapshot;
 
-    protected GrowablePhaseContext(final IPhaseState<? extends GrowablePhaseContext> state, final PhaseTracker tracker) {
+    protected GrowablePhaseContext(final IPhaseState<GrowablePhaseContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 

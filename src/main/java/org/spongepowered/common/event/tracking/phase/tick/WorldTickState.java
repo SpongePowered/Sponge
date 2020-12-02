@@ -71,7 +71,7 @@ final class WorldTickState extends TickPhaseState<WorldTickState.WorldTickContex
         }
 
 
-        WorldTickContext(final IPhaseState<? extends WorldTickContext> phaseState, final PhaseTracker tracker) {
+        WorldTickContext(final IPhaseState<WorldTickContext> phaseState, final PhaseTracker tracker) {
             super(phaseState, tracker);
         }
     }
