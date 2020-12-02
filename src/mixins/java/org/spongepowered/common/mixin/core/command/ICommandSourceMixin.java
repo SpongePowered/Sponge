@@ -22,15 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.command;
+package org.spongepowered.common.mixin.core.command;
 
-import net.minecraft.command.CommandSource;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.CauseStackManager;
+import net.minecraft.command.ICommandSource;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.command.ICommandSourceBridge;
 
-public interface CommandSourceProviderBridge {
-
-    // we do this because of the lectern tile entity
-    CommandSource bridge$getCommandSource(Cause cause);
+@Mixin(ICommandSource.class)
+public interface ICommandSourceMixin extends ICommandSourceBridge {
 
 }

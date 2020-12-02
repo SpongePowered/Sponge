@@ -47,6 +47,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.command.ICommandSourceBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
 
@@ -63,7 +64,6 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
             if (iCommandSource instanceof CommandSourceProviderBridge) {
                 // We know about this one so we can create it using the factory method on the source.
                 commandSource = ((CommandSourceProviderBridge) iCommandSource).bridge$getCommandSource(cause);
-                ((CommandSourceProviderBridge) iCommandSource).bridge$addToCauseStack(frame);
             } else {
                 // try to create a command cause from the given ICommandSource, but as Mojang did not see fit to
                 // put any identifying characteristics on the object, we have to go it alone...

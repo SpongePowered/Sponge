@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.bridge.command;
 
-import net.minecraft.command.CommandSource;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 
-public interface CommandSourceProviderBridge {
+public interface ICommandSourceBridge {
 
-    // we do this because of the lectern tile entity
-    CommandSource bridge$getCommandSource(Cause cause);
+    // Used to forcibly redirect the server to the system subject to avoid issues with the
+    // server-wide forwarding audience.
+    default void bridge$addToCauseStack(final CauseStackManager.StackFrame frame) {
+        // In most cases, we'll be pushing this object, whatever this is.
+        frame.pushCause(this);
+    }
 
 }

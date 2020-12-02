@@ -364,6 +364,7 @@ public final class Constants {
         public static final int COMMAND_BLOCK_LEVEL = 2;
         public static final int SELECTOR_LEVEL = 2;
         public static final String SPONGE_HELP_PERMISSION = "sponge.command.help";
+        public static final String DEBUG_HOVER_STACKTRACE = "sponge.debug.hover-stacktrace";
         public static final int SPONGE_HELP_LEVEL = 0;
     }
 

@@ -109,9 +109,9 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
     public int execute(final StringReader input, final CommandSource source) throws CommandSyntaxException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final CommandSourceBridge sourceBridge = (CommandSourceBridge) source;
-            frame.pushCause(sourceBridge.bridge$getICommandSource());
-            frame.addContext(EventContextKeys.COMMAND, input.getString());
-            return ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).process(sourceBridge.bridge$asCommandCause(), input.getRemaining()).getResult();
+            frame.addContext(EventContextKeys.COMMAND.get(), input.getString());
+            sourceBridge.bridge$updateFrameFromICommandSource(frame);
+            return ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).process(sourceBridge.bridge$withCurrentCause(), input.getRemaining()).getResult();
         } catch (final CommandException e) {
             throw new net.minecraft.command.CommandException(SpongeAdventure.asVanilla(e.componentMessage()));
         }

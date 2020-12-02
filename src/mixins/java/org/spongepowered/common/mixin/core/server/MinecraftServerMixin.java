@@ -63,6 +63,7 @@ import org.spongepowered.common.advancement.SpongeAdvancementProvider;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.command.ICommandSourceBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
@@ -84,7 +85,7 @@ import java.util.function.BooleanSupplier;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer, MinecraftServerBridge,
-        CommandSourceProviderBridge, SubjectProxy {
+        CommandSourceProviderBridge, SubjectProxy, ICommandSourceBridge {
 
     @Shadow @Final protected Thread serverThread;
     @Shadow @Final private PlayerProfileCache profileCache;

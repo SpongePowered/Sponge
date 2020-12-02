@@ -66,9 +66,6 @@ public final class ShouldFire {
     public static boolean DROP_ITEM_EVENT_DESTRUCT = false;
     public static boolean DROP_ITEM_EVENT_DISPENSE = false;
 
-    public static boolean EXECUTE_COMMAND_EVENT_PRE = false;
-    public static boolean EXECUTE_COMMAND_EVENT_POST = false;
-
     public static boolean GOAL_EVENT_ADD = false;
     public static boolean GOAL_EVENT_REMOVE = false;
 

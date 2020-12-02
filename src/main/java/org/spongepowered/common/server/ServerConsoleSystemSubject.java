@@ -37,11 +37,12 @@ import net.minecraft.world.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.command.ICommandSourceBridge;
 import org.spongepowered.common.service.server.permission.SpongeSystemSubject;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 
-public final class ServerConsoleSystemSubject extends SpongeSystemSubject implements CommandSourceProviderBridge, ICommandSource {
+public final class ServerConsoleSystemSubject extends SpongeSystemSubject implements CommandSourceProviderBridge, ICommandSource, ICommandSourceBridge {
 
     @Override
     public String getIdentifier() {
