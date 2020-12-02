@@ -121,7 +121,7 @@ public final class SpongeGameConfigs {
                     SpongeGameConfigs.getGlobalInheritable());
             config.load();
             return config;
-        } catch (final ConfigurateException ex) {
+        } catch (final IOException ex) {
             SpongeGameConfigs.LOGGER.error("Unable to load configuration for world {}. Sponge will use a "
                     + "fallback configuration with default values that will not save.", world, ex);
             return SpongeGameConfigs.createDetached();
@@ -156,7 +156,7 @@ public final class SpongeGameConfigs {
                         SpongeGameConfigs.global = new InheritableConfigHandle<>(new GlobalConfig(),
                                 SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(GlobalConfig.FILE_NAME)), null);
                         SpongeGameConfigs.global.load();
-                    } catch (final ConfigurateException e) {
+                    } catch (final IOException e) {
                         SpongeGameConfigs.LOGGER.error("Unable to load global world configuration in {}. Sponge will run with default settings",
                                             GlobalConfig.FILE_NAME, e);
                         SpongeGameConfigs.global = new InheritableConfigHandle<>(new GlobalConfig(), null);

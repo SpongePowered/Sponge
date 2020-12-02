@@ -139,32 +139,27 @@ public final class SpongeConfigs {
     // Config-internal
     // everything below here should (mostly) not be directly accessed
 
-    public static HoconConfigurationLoader createLoader(final Path path) {
+    public static HoconConfigurationLoader createLoader(final Path path) throws IOException {
         return SpongeConfigs.createLoader(path, SpongeConfigs.OPTIONS);
     }
 
-    public static HoconConfigurationLoader createLoader(final Path path, final ConfigurationOptions options) {
-        // use File for slightly better performance on directory creation
-        // Files.exists uses an exception for this :(
-        final File parentFile = path.getParent().toFile();
-        if (!parentFile.exists()) {
-            parentFile.mkdirs();
-        }
+    public static HoconConfigurationLoader createLoader(final Path path, final ConfigurationOptions options) throws IOException {
+        Files.createDirectories(path.getParent());
 
         return HoconConfigurationLoader.builder()
             .source(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
-            .sink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.SYNC))
+            .sink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.SYNC))
             .defaultOptions(options)
             .build();
     }
 
     public static <T extends Config> ConfigHandle<T> create(final T instance, final String fileName) {
-        final HoconConfigurationLoader loader = SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(fileName));
         try {
+            final HoconConfigurationLoader loader = SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(fileName));
             final ConfigHandle<T> handle = new ConfigHandle<>(instance, loader);
             handle.load();
             return handle;
-        } catch (final ConfigurateException ex) {
+        } catch (final IOException ex) {
             SpongeConfigs.LOGGER.error("Unable to load configuration {}. Sponge will operate in "
                             + "fallback mode, with default configuration options and will not write to the invalid file", fileName, ex);
             return new ConfigHandle<>(instance);
@@ -222,12 +217,13 @@ public final class SpongeConfigs {
             return;
         }
 
-        final ConfigurationTransformation xform = ConfigurationTransformation.chain(
-                new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_SPONGE_PATHS, SpongeConfigs.createLoader(commonFile), true),
-                new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_METRICS_PATHS, SpongeConfigs.createLoader(metricsFile), true));
-        final ConfigurationLoader<CommentedConfigurationNode> globalLoader = SpongeConfigs.createLoader(oldGlobalFile);
 
         try {
+            final ConfigurationTransformation xform = ConfigurationTransformation.chain(
+                    new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_SPONGE_PATHS, SpongeConfigs.createLoader(commonFile), true),
+                    new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_METRICS_PATHS, SpongeConfigs.createLoader(metricsFile), true));
+            final ConfigurationLoader<CommentedConfigurationNode> globalLoader = SpongeConfigs.createLoader(oldGlobalFile);
+
             Files.copy(oldGlobalFile, oldGlobalFile.resolveSibling(SpongeConfigs.GLOBAL_NAME + ".old-backup"));
             final CommentedConfigurationNode source = globalLoader.load();
             xform.apply(source);
