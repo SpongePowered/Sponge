@@ -27,11 +27,11 @@ package org.spongepowered.common.event.tracking.phase.general;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.event.tracking.IPhaseState;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.common.accessor.world.ExplosionAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.accessor.world.ExplosionAccessor;
+import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
 
@@ -43,10 +43,9 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         super(GeneralPhase.State.EXPLOSION, tracker);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     ExplosionContext populateFromCurrentState() {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
-        ((IPhaseState) context.state).appendContextPreExplosion(this, context);
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
+        context.appendContextPreExplosion(this);
         return this;
     }
 

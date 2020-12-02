@@ -47,13 +47,11 @@ import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(net.minecraft.item.ItemStack.class)
 public abstract class ItemStackMixin implements CustomDataHolderBridge, DataCompoundHolder {
@@ -142,25 +140,21 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
     }
 
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "onBlockDestroyed", at = @At("HEAD"))
     private void impl$capturePlayerUsingItemstack(final World worldIn, final BlockState blockIn, final BlockPos pos, final PlayerEntity playerIn,
         final CallbackInfo ci) {
         if (!((WorldBridge) worldIn).bridge$isFake()) {
             final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-            final IPhaseState state = context.state;
-            state.capturePlayerUsingStackToBreakBlock((org.spongepowered.api.item.inventory.ItemStack) this, (ServerPlayerEntity) playerIn, context);
+            context.capturePlayerUsingStackToBreakBlock((org.spongepowered.api.item.inventory.ItemStack) this, (ServerPlayerEntity) playerIn);
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "onBlockDestroyed", at = @At("RETURN"))
     private void impl$nullOutCapturedPlayer(final World worldIn, final BlockState blockIn, final BlockPos pos, final PlayerEntity playerIn,
         final CallbackInfo ci) {
         if (!((WorldBridge) worldIn).bridge$isFake()) {
             final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-            final IPhaseState state = context.state;
-            state.capturePlayerUsingStackToBreakBlock((org.spongepowered.api.item.inventory.ItemStack) this, null, context);
+            context.capturePlayerUsingStackToBreakBlock((org.spongepowered.api.item.inventory.ItemStack) this, null);
         }
     }
 

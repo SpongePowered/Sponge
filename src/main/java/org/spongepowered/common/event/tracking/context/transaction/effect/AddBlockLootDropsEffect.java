@@ -33,7 +33,6 @@ import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootParameters;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
@@ -52,7 +51,6 @@ public final class AddBlockLootDropsEffect implements ProcessingSideEffect {
 
     AddBlockLootDropsEffect() {}
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public EffectResult processSideEffect(
         final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag
@@ -69,7 +67,7 @@ public final class AddBlockLootDropsEffect implements ProcessingSideEffect {
             .withParameter(LootParameters.TOOL, ItemStack.EMPTY)
             .withNullableParameter(LootParameters.BLOCK_ENTITY, existingTile);
 
-        ((IPhaseState) phaseContext.state).populateLootContext(phaseContext, lootBuilder);
+        phaseContext.populateLootContext(lootBuilder);
 
         return new EffectResult(newState, oldState.state.getDrops(lootBuilder), false);
     }

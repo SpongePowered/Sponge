@@ -40,7 +40,6 @@ import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
@@ -118,7 +117,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
                     new DummySnapshot(spawnRequest.originalPosition, spawnRequest.entityTag, spawnRequest.worldSupplier)
                 );
             }).collect(ImmutableList.toImmutableList());
-        return Optional.of(((IPhaseState) context.state).createSpawnEvent(context, parent, collect, currentCause));
+        return Optional.of(context.createSpawnEvent(parent, collect, currentCause));
     }
 
     @Override

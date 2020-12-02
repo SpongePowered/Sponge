@@ -53,7 +53,6 @@ import org.spongepowered.common.accessor.util.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -208,7 +207,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final Entity entityIn) {
         final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) serverWorld);
         final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final Supplier<SpawnType> contextualType = ((IPhaseState) current.state).getSpawnTypeForTransaction(current, entityIn);
+        final Supplier<SpawnType> contextualType = current.getSpawnTypeForTransaction(entityIn);
         final SpawnEntityTransaction transaction = new SpawnEntityTransaction(worldSupplier, entityIn, contextualType);
         this.logTransaction(transaction);
     }

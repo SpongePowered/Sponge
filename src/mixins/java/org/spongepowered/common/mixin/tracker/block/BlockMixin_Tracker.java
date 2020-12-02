@@ -39,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.block.TrackedBlockBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -102,7 +101,7 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if(!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+        if(!context.recordsEntitySpawns()) {
             return;
         }
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
@@ -122,7 +121,7 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if (!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+        if (!context.recordsEntitySpawns()) {
             return;
         }
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
@@ -141,7 +140,7 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if(!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+        if(!context.recordsEntitySpawns()) {
             return;
         }
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
@@ -163,7 +162,7 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if(!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+        if(!context.recordsEntitySpawns()) {
             return;
         }
         context.getTransactor().completeBlockDrops(BlockMixin_Tracker.tracker$effectTransactorForDrops);

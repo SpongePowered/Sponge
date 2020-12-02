@@ -30,13 +30,13 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -72,7 +72,6 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
      *
      * @param ci
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "tick()V",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z",
@@ -94,9 +93,9 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
         // of falling blocks, but, since the world already supposedly set the block to air,
         // we don't need to re-set the block state at the position, just need to check
         // if the processing succeeded or not.
-        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         // By this point, we should have some sort of captured block
-        if (((IPhaseState) currentContext.state).doesBlockEventTracking(currentContext)) {
+        if (currentContext.doesBlockEventTracking()) {
             if (!TrackingUtil.processBlockCaptures(currentContext)) {
                 // So, it's been cancelled, we want to absolutely remove this entity.
                 // And we want to stop the entity update at this point.

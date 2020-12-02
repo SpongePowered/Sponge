@@ -51,7 +51,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.entity.EntityTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -130,7 +129,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
-        if (!((IPhaseState) context.state).doesBlockEventTracking(context)) {
+        if (!context.doesBlockEventTracking()) {
             return;
         }
         if (this.tracker$dropsTransactor == null) {
@@ -140,7 +139,6 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
 
     protected @MonotonicNonNull EffectTransactor tracker$dropsTransactor = null;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "remove()V", at = @At("RETURN"))
     private void tracker$ensureDropEffectCompleted(final CallbackInfo ci) {
         final PhaseTracker instance = PhaseTracker.SERVER;
@@ -151,7 +149,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
-        if (!((IPhaseState) context.state).doesBlockEventTracking(context)) {
+        if (!context.doesBlockEventTracking()) {
             return;
         }
         if (this.tracker$dropsTransactor != null) {

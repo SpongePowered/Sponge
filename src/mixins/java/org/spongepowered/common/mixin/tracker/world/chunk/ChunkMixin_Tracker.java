@@ -155,10 +155,9 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         final Block newBlock = newState.getBlock();
         final Block currentBlock = currentState.getBlock();
 
-        final ChangeBlock transaction = state.createTransaction(context, snapshot, newState, flag);
+        final ChangeBlock transaction = context.createTransaction(snapshot, newState, flag);
 
-        snapshot.blockChange = state.associateBlockChangeWithSnapshot(
-            context,
+        snapshot.blockChange = context.associateBlockChangeWithSnapshot(
             newState,
             newBlock,
             currentState,
