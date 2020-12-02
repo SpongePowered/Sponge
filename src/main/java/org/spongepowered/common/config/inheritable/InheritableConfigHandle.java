@@ -93,7 +93,7 @@ public final class InheritableConfigHandle<T extends BaseConfig> extends ConfigH
         }
 
         // merge with settings from parent
-        if (this.parent != null) {
+        if (this.parent != null && this.parent.mergedNode != null) {
             this.mergedNode.mergeFrom(this.parent.mergedNode);
         }
 

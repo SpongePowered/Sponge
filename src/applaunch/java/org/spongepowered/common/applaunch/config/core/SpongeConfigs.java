@@ -82,7 +82,7 @@ public final class SpongeConfigs {
 
     static final Logger LOGGER = LogManager.getLogger();
 
-    private static final Lock initLock = new ReentrantLock();
+    public static final Lock initLock = new ReentrantLock();
     private static @MonotonicNonNull PluginEnvironment environment;
     private static Path configDir;
 
@@ -148,7 +148,12 @@ public final class SpongeConfigs {
 
         return HoconConfigurationLoader.builder()
             .source(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
-            .sink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.SYNC))
+            .sink(() -> Files.newBufferedWriter(path,
+                                                StandardCharsets.UTF_8,
+                                                StandardOpenOption.CREATE,
+                                                StandardOpenOption.TRUNCATE_EXISTING,
+                                                StandardOpenOption.WRITE,
+                                                StandardOpenOption.DSYNC))
             .defaultOptions(options)
             .build();
     }
