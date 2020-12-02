@@ -36,7 +36,9 @@ import org.spongepowered.vanilla.applaunch.util.ArgumentList;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public final class Main {
 
@@ -72,9 +74,13 @@ public final class Main {
         if (Files.notExists(modsDirectory)) {
             Files.createDirectories(modsDirectory);
         }
-        this.pluginEngine.getPluginEnvironment().getBlackboard()
-                .getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, AppCommandLine
-                        .gameDirectory.resolve("plugins")));
+        final Path pluginsDirectory = AppCommandLine.gameDirectory.resolve("plugins");
+        final List<Path> pluginDirectories = new ArrayList<>();
+        pluginDirectories.add(modsDirectory);
+        if (Files.exists(pluginsDirectory)) {
+            pluginDirectories.add(pluginsDirectory);
+        }
+        this.pluginEngine.getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> pluginDirectories);
 
         this.logger.info("Transitioning to ModLauncher, please wait...");
         final ArgumentList lst = ArgumentList.from(AppCommandLine.RAW_ARGS);
