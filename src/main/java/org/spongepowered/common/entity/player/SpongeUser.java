@@ -34,8 +34,6 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -185,27 +183,46 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
         try {
             try (final FileInputStream in = new FileInputStream(file)) {
-                this.readFromNBT(CompressedStreamTools.readCompressed(in));
+                this.readCompound(CompressedStreamTools.readCompressed(in));
             }
         } catch (final IOException e) {
             SpongeCommon.getLogger().warn("Corrupt user file '{}'!", file, e);
         }
     }
 
-    public void readFromNBT(final CompoundNBT compound) {
+    private UserInventory loadInventory() {
+        if (this.inventory == null) {
+            if (!this.isInitialized()) {
+                this.initialize();
+            }
+            this.inventory = new SpongeUserInventory(this);
+            final ListNBT listNBT = this.compound.getList(Constants.Entity.Player.INVENTORY, 10);
+            this.inventory.readList(listNBT);
+            this.inventory.currentItem = this.compound.getInt(Constants.Entity.Player.SELECTED_ITEM_SLOT);
+        }
+        return (UserInventory) this.inventory;
+    }
+
+    private SpongeUser loadEnderInventory() {
+        if (this.enderChest == null) {
+            if (!this.isInitialized()) {
+                this.initialize();
+            }
+            this.enderChest = new SpongeUserInventoryEnderchest(this);
+            if (this.compound.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9)) {
+                final ListNBT nbttaglist1 = this.compound.getList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
+                this.enderChest.read(nbttaglist1);
+            }
+        }
+        return this;
+    }
+
+    public void readCompound(final CompoundNBT compound) {
         this.reset();
         this.compound = compound;
 
-        if (!compound.contains(Constants.Sponge.World.KEY)) {
-            if (compound.contains(Constants.Sponge.World.DIMENSION_ID)) {
-                final DimensionType type = DimensionType.getById(compound.getInt(Constants.Sponge.World.DIMENSION_ID));
-
-                if (type != null) {
-                    this.worldKey = (ResourceKey) (Object) Registry.DIMENSION_TYPE.getKey(type);
-                }
-            }
-        } else {
-            this.worldKey = ResourceKey.resolve(compound.getString(Constants.Sponge.World.KEY));
+        if (!compound.contains(Constants.Sponge.World.WORLD_KEY)) {
+            this.worldKey = ResourceKey.resolve(compound.getString(Constants.Sponge.World.WORLD_KEY));
         }
         final ListNBT position = compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
         final ListNBT rotation = compound.getList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
@@ -237,58 +254,31 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         for (int i = 0; i < spawns.size(); i++) {
             final CompoundNBT spawnCompound = spawns.getCompound(i);
 
-            if (!spawnCompound.contains(Constants.Sponge.World.KEY)) {
+            if (!spawnCompound.contains(Constants.Sponge.World.WORLD_KEY)) {
                 continue;
             }
 
-            final ResourceKey key = ResourceKey.resolve(spawnCompound.getString(Constants.Sponge.World.KEY));
+            final ResourceKey key = ResourceKey.resolve(spawnCompound.getString(Constants.Sponge.World.WORLD_KEY));
             final double xPos = spawnCompound.getDouble(Constants.Sponge.User.USER_SPAWN_X);
             final double yPos = spawnCompound.getDouble(Constants.Sponge.User.USER_SPAWN_Y);
             final double zPos = spawnCompound.getDouble(Constants.Sponge.User.USER_SPAWN_Z);
             final boolean forced = spawnCompound.getBoolean(Constants.Sponge.User.USER_SPAWN_FORCED);
             this.spawnLocations.put(key, new RespawnLocation.Builder()
-                .world(key)
-                .position(new Vector3d(xPos, yPos, zPos))
-                .forceSpawn(forced)
-                .build());
+                    .world(key)
+                    .position(new Vector3d(xPos, yPos, zPos))
+                    .forceSpawn(forced)
+                    .build());
         }
     }
 
-    private UserInventory loadInventory() {
-        if (this.inventory == null) {
-            if (!this.isInitialized()) {
-                this.initialize();
-            }
-            this.inventory = new SpongeUserInventory(this);
-            final ListNBT listNBT = this.compound.getList(Constants.Entity.Player.INVENTORY, 10);
-            this.inventory.readFromNBT(listNBT);
-            this.inventory.currentItem = this.compound.getInt(Constants.Entity.Player.SELECTED_ITEM_SLOT);
-        }
-        return (UserInventory) this.inventory;
-    }
+    public void writeCompound(final CompoundNBT compound) {
 
-    private SpongeUser loadEnderInventory() {
-        if (this.enderChest == null) {
-            if (!this.isInitialized()) {
-                this.initialize();
-            }
-            this.enderChest = new SpongeUserInventoryEnderchest(this);
-            if (this.compound.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9)) {
-                final ListNBT nbttaglist1 = this.compound.getList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
-                this.enderChest.read(nbttaglist1);
-            }
-        }
-        return this;
-    }
-
-    public void writeToNbt(final CompoundNBT compound) {
-
-        compound.putString(Constants.Sponge.World.KEY, this.worldKey.getFormatted());
+        compound.putString(Constants.Sponge.World.WORLD_KEY, this.worldKey.getFormatted());
 
         this.loadInventory();
         this.loadEnderInventory();
 
-        compound.put(Constants.Entity.Player.INVENTORY, this.inventory.writeToNBT(new ListNBT()));
+        compound.put(Constants.Entity.Player.INVENTORY, this.inventory.writeList(new ListNBT()));
         compound.put(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.write());
         compound.putInt(Constants.Entity.Player.SELECTED_ITEM_SLOT, this.inventory.currentItem);
 
@@ -310,7 +300,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             final RespawnLocation respawn = entry.getValue();
 
             final CompoundNBT spawnCompound = new CompoundNBT();
-            spawnCompound.putString(Constants.Sponge.World.KEY, respawn.getWorldKey().getFormatted());
+            spawnCompound.putString(Constants.Sponge.World.WORLD_KEY, respawn.getWorldKey().getFormatted());
             spawnCompound.putDouble(Constants.Sponge.User.USER_SPAWN_X, respawn.getPosition().getX());
             spawnCompound.putDouble(Constants.Sponge.User.USER_SPAWN_Y, respawn.getPosition().getY());
             spawnCompound.putDouble(Constants.Sponge.User.USER_SPAWN_Z, respawn.getPosition().getZ());
@@ -511,7 +501,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             // Nevermind
             compound = new CompoundNBT();
         }
-        this.writeToNbt(compound);
+        this.writeCompound(compound);
         try (final FileOutputStream out = new FileOutputStream(dataFile)) {
             CompressedStreamTools.writeCompressed(compound, out);
             SpongeUser.dirtyUsers.remove(this);

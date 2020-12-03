@@ -88,8 +88,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     @Shadow public abstract void shadow$populateFromWorldSettings(WorldSettings p_176127_1_);
 
     @Nullable private ResourceKey impl$key;
-    @Nullable private Integer impl$dimensionId;
-    @Nullable private UUID impl$uniqueId;
+    private UUID impl$uniqueId = UUID.randomUUID();
 
     private SpongeDimensionType impl$logicType;
     private InheritableConfigHandle<WorldConfig> impl$configAdapter = SpongeGameConfigs.createDetached();
@@ -122,16 +121,11 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
             return null;
         }
 
-        if (world.getWorldInfo() != (WorldInfo) (Object) this) {
+        if (world.getWorldInfo() != (Object) this) {
             return null;
         }
 
         return world;
-    }
-
-    @Override
-    public Integer bridge$getDimensionId() {
-        return this.impl$dimensionId;
     }
 
     @Override
@@ -144,11 +138,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     @Override
     public boolean bridge$isSinglePlayerProperties() {
         return this.levelName != null && this.levelName.equals("MpServer");
-    }
-
-    @Override
-    public void bridge$setDimensionId(final DimensionType type) {
-        this.impl$dimensionId = type.getId() + 1;
     }
 
     @Override
@@ -306,13 +295,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$saveConfig() {
-        if (this.impl$configAdapter != null) {
-            this.impl$configAdapter.save();
-        }
-    }
-
-    @Override
     public void bridge$writeSpongeLevelData(final CompoundNBT compound) {
         if (!this.bridge$isValid()) {
             return;
@@ -320,10 +302,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
         final CompoundNBT spongeDataCompound = new CompoundNBT();
         spongeDataCompound.putInt(Constants.Sponge.DATA_VERSION, Constants.Sponge.SPONGE_DATA_VERSION);
-        spongeDataCompound.putString(Constants.Sponge.World.KEY, this.impl$key.getFormatted());
-        if (this.impl$dimensionId != null) {
-            spongeDataCompound.putInt(Constants.Sponge.World.DIMENSION_ID, this.impl$dimensionId);
-        }
         spongeDataCompound.putString(Constants.Sponge.World.DIMENSION_TYPE, this.impl$logicType.getKey().toString());
         spongeDataCompound.putUniqueId(Constants.Sponge.World.UNIQUE_ID, this.impl$uniqueId);
         spongeDataCompound.putBoolean(Constants.Sponge.World.IS_MOD_CREATED, this.impl$modCreated);
@@ -352,20 +330,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
         final CompoundNBT spongeDataCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
 
-        if (!spongeDataCompound.contains(Constants.Sponge.World.KEY)) {
-            // TODO TODO Minecraft 1.15 - Bad Sponge level data...warn/crash?
-            return;
-        }
-
-        if (!spongeDataCompound.hasUniqueId(Constants.Sponge.World.UNIQUE_ID)) {
-            // TODO TODO Minecraft 1.15 - Bad Sponge level data...warn/crash?
-            return;
-        }
-
-        this.impl$key = ResourceKey.resolve(spongeDataCompound.getString(Constants.Sponge.World.KEY));
-        if (spongeDataCompound.contains(Constants.Sponge.World.DIMENSION_ID)) {
-            this.impl$dimensionId = spongeDataCompound.getInt(Constants.Sponge.World.DIMENSION_ID);
-        }
         final String rawDimensionType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
         this.impl$logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.spongepowered.api.world.dimension
                 .DimensionType.class, ResourceKey.resolve(rawDimensionType)).orElseGet(() -> {
@@ -374,7 +338,11 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
                 return DimensionTypes.OVERWORLD.get();
         });
-        this.impl$uniqueId = spongeDataCompound.getUniqueId(Constants.Sponge.World.UNIQUE_ID);
+        if (spongeDataCompound.hasUniqueId(Constants.Sponge.World.UNIQUE_ID)) {
+            this.impl$uniqueId = spongeDataCompound.getUniqueId(Constants.Sponge.World.UNIQUE_ID);
+        } else {
+            this.impl$uniqueId = UUID.randomUUID();
+        }
         this.impl$hasCustomDifficulty = spongeDataCompound.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);
         this.impl$modCreated = spongeDataCompound.getBoolean(Constants.Sponge.World.IS_MOD_CREATED);
         this.impl$trackedUniqueIdCount = 0;
@@ -453,6 +421,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     public String toString() {
         return new StringJoiner(", ", WorldInfo.class.getSimpleName() + "[", "]")
                 .add("key=" + this.impl$key)
+                .add("uniqueId=" + this.impl$uniqueId)
                 .add("dimensionType=" + this.impl$logicType)
                 .add("generator=" + this.shadow$getGenerator())
                 .add("modCreated=" + this.impl$modCreated)

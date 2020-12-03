@@ -25,6 +25,8 @@
 package org.spongepowered.common.config.inheritable;
 
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;

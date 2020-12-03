@@ -26,7 +26,6 @@ package org.spongepowered.common.bridge.world.storage;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
@@ -43,12 +42,7 @@ public interface WorldInfoBridge {
     @Nullable
     ServerWorld bridge$getWorld();
 
-    @Nullable
-    Integer bridge$getDimensionId();
-
     boolean bridge$isSinglePlayerProperties();
-
-    void bridge$setDimensionId(DimensionType type);
 
     SpongeDimensionType bridge$getLogicType();
 
@@ -110,6 +104,4 @@ public interface WorldInfoBridge {
     @Nullable InheritableConfigHandle<WorldConfig> bridge$getConfigAdapter();
 
     void bridge$setConfigAdapter(final InheritableConfigHandle<WorldConfig> adapter);
-
-    void bridge$saveConfig();
 }

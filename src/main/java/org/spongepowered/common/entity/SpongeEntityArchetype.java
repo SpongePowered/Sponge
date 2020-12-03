@@ -74,7 +74,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     @Nullable
     private Vector3d position;
 
-    SpongeEntityArchetype(SpongeEntityArchetypeBuilder builder) {
+    SpongeEntityArchetype(final SpongeEntityArchetypeBuilder builder) {
         super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundNBT() : NbtTranslator.getInstance().translate(builder.entityData));
     }
 
@@ -165,9 +165,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
         mergedNbt.merge(this.data);
         mergedNbt.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
-        final Integer dimensionId = ((WorldInfoBridge) location.getWorld().getProperties()).bridge$getDimensionId();
-        // TODO null dimensionId possible?
-        mergedNbt.putInt(Constants.Entity.ENTITY_DIMENSION, dimensionId); // Fix dimension
+        mergedNbt.putString(Constants.Sponge.World.WORLD_KEY, location.getWorldKey().getFormatted());
         mergedNbt.putUniqueId(Constants.Entity.ENTITY_UUID, uniqueID); // TODO can we avoid this when the entity is only spawned once?
         entity.read(mergedNbt); // Read in all data
         entity.setPosition(location.getX(), location.getY(), location.getZ());
@@ -194,7 +192,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         CompoundNBT newCompound = this.data.copy();
         final Vector3d pos = location.getPosition();
         newCompound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(pos.getX(), pos.getY(), pos.getZ()));
-        newCompound.putInt(Constants.Entity.ENTITY_DIMENSION, ((WorldInfoBridge) location.getWorld().getProperties()).bridge$getDimensionId());
+        newCompound.putString(Constants.Sponge.World.WORLD_KEY, location.getWorldKey().getFormatted());
         builder.compound = newCompound;
         builder.worldKey = location.getWorld().getProperties().getKey();
         builder.position = pos;

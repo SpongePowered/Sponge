@@ -253,15 +253,15 @@ public final class Constants {
         public static final class World {
 
             public static final String DIMENSION_TYPE = "dimensionType";
-            public static final String DIMENSION_ID = "dimensionId";
             public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
             public static final String IS_MOD_CREATED = "isModCreated";
             public static final DataQuery WORLD_CUSTOM_SETTINGS = DataQuery.of("customSettings");
             public static final String LEVEL_SPONGE_DAT = "level_sponge.dat";
-            public static final String LEVEL_SPONGE_DAT_OLD = "level_sponge.dat_old";
-            public static final String LEVEL_SPONGE_DAT_NEW = "level_sponge.dat_new";
+            public static final String LEVEL_SPONGE_DAT_OLD = World.LEVEL_SPONGE_DAT + "_old";
+            public static final String LEVEL_SPONGE_DAT_NEW = World.LEVEL_SPONGE_DAT + "_new";
             public static final String UNIQUE_ID = "UUID";
-            public static final String KEY = "Key";
+            public static final String DIMENSIONS_DIRECTORY = "dimensions";
+            public static final String WORLD_KEY = "WorldKey";
         }
 
         public static final class Schematic {
@@ -390,6 +390,8 @@ public final class Constants {
             .of(net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN,
                 net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH);
         public static final ResourceKey INVALID_WORLD_KEY = ResourceKey.sponge("invalid_world");
+        public static final String LEVEL_DAT = "level.dat";
+        public static final String LEVEL_DAT_OLD = World.LEVEL_DAT + "_old";
     }
 
     public static final class Chunk {

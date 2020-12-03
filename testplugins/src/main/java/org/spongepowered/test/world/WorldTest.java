@@ -32,6 +32,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -68,6 +69,8 @@ public final class WorldTest {
         final Parameter.Value<PortalType> portalTypeParameter = Parameter.catalogedElementWithMinecraftAndSpongeDefaults(PortalType.class).setKey("portal_type").build();
         final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.catalogedElementWithMinecraftAndSpongeDefaults(DimensionType.class).setKey("dimension_type").build();
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
+        final Parameter.Value<ResourceKey> copyWorldKeyParameter = Parameter.resourceKey().setKey("copy_world").build();
+
         final Parameter.Value<ResourceKey> unloadedWorldKeyParameter = Parameter.resourceKey()
                 .setSuggestions((context, currentInput) -> Sponge.getServer().getWorldManager()
                         .getAllProperties()
@@ -80,8 +83,7 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                     .builder()
-                    .parameter(locationParameter)
-                    .parameter(portalTypeParameter)
+                    .parameters(locationParameter, portalTypeParameter)
                     .setPermission(this.plugin.getMetadata().getId() + ".command.portal.create")
                     .setExecutor(context -> {
                         final ServerLocation location = context.requireOne(locationParameter);
@@ -95,9 +97,7 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                     .builder()
-                    .parameter(playerParameter)
-                    .parameter(locationParameter)
-                    .parameter(portalTypeParameter)
+                    .parameters(playerParameter, locationParameter, portalTypeParameter)
                     .setPermission(this.plugin.getMetadata().getId() + ".command.portal.use")
                     .setExecutor(context -> {
                         final ServerPlayer player = context.requireOne(playerParameter);
@@ -112,8 +112,7 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                     .builder()
-                    .parameter(playerParameter)
-                    .parameter(dimensionTypeParameter)
+                    .parameters(playerParameter, dimensionTypeParameter)
                     .setPermission(this.plugin.getMetadata().getId() + ".command.environment.change")
                     .setExecutor(context -> {
                         final ServerPlayer player = context.requireOne(playerParameter);
@@ -127,8 +126,7 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                         .builder()
-                        .parameter(worldParameter)
-                        .parameter(dimensionTypeParameter)
+                        .parameters(worldParameter, dimensionTypeParameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.dimension.change")
                         .setExecutor(context -> {
                             final WorldProperties world = context.requireOne(worldParameter);
@@ -142,9 +140,7 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                         .builder()
-                        .parameter(playerParameter)
-                        .parameter(optWorldParameter)
-                        .parameter(optVector3Parameter)
+                        .parameters(playerParameter, optWorldParameter, optVector3Parameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.position.change")
                         .setExecutor(context -> {
                             final ServerPlayer player = context.requireOne(playerParameter);
@@ -177,8 +173,7 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                         .builder()
-                        .parameter(worldKeyParameter)
-                        .parameter(dimensionTypeParameter)
+                        .parameters(worldKeyParameter, dimensionTypeParameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.world.create")
                         .setExecutor(context -> {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
@@ -222,6 +217,25 @@ public final class WorldTest {
                         })
                         .build()
                 , "uw", "unloadworld"
+        );
+
+        event.register(this.plugin, Command
+                    .builder()
+                    .parameters(worldKeyParameter, copyWorldKeyParameter)
+                    .setExecutor(context -> {
+                        final ResourceKey worldKey = context.requireOne(worldKeyParameter);
+                        final ResourceKey copyWorldKey = context.requireOne(copyWorldKeyParameter);
+
+                        Sponge.getServer().getWorldManager().copyWorld(worldKey, copyWorldKey).whenComplete((aBoolean, throwable) -> {
+                            if (throwable != null) {
+                                context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
+                            }
+                        });
+
+                        return CommandResult.success();
+                    })
+                    .build()
+                , "cpw", "copyworld"
         );
 
         event.register(this.plugin, Command

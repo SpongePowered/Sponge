@@ -45,7 +45,6 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -62,7 +61,7 @@ import javax.annotation.Nullable;
 
 public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableDataHolder<EntitySnapshot>, DataContainerHolder.Immutable<EntitySnapshot> {
 
-    @Nullable private final UUID entityUuid;
+    @Nullable private final UUID uniqueId;
     private final ResourceKey worldKey;
     private final EntityType<?> entityType;
     private final Vector3d position;
@@ -71,9 +70,9 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     @Nullable private final CompoundNBT compound;
     @Nullable private final WeakReference<Entity> entityReference;
 
-    SpongeEntitySnapshot(SpongeEntitySnapshotBuilder builder) {
+    SpongeEntitySnapshot(final SpongeEntitySnapshotBuilder builder) {
         this.entityType = builder.entityType;
-        this.entityUuid = builder.entityId;
+        this.uniqueId = builder.uniqueId;
 
         this.compound = builder.compound == null ? null : builder.compound.copy();
         if (builder.manipulator != null) {
@@ -98,7 +97,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @Override
     public Optional<UUID> getUniqueId() {
-        return Optional.ofNullable(this.entityUuid);
+        return Optional.ofNullable(this.uniqueId);
     }
 
     @Override
@@ -132,7 +131,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(this.compound == null ? new CompoundNBT() : this.compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Queries.WORLD_KEY, this.worldKey.toString())
+                .set(Queries.WORLD_KEY, this.worldKey.getFormatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, this.position.getX())
                 .set(Queries.POSITION_Y, this.position.getY())
@@ -151,8 +150,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
                 .set(Constants.Entity.TYPE, this.entityType.getKey())
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
 
-        if (this.entityUuid != null) {
-            container.set(Constants.Entity.UUID, this.entityUuid.toString());
+        if (this.uniqueId != null) {
+            container.set(Constants.Entity.UUID, this.uniqueId.toString());
         }
         return container;
     }
@@ -184,14 +183,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     }
 
     @Override
-    public EntitySnapshot withLocation(ServerLocation location) {
+    public EntitySnapshot withLocation(final ServerLocation location) {
         Objects.requireNonNull(location, "location");
         final SpongeEntitySnapshotBuilder builder = this.createBuilder();
         builder.position = location.getPosition();
         builder.worldKey = location.getWorld().getKey();
-        CompoundNBT newCompound = this.compound.copy();
-        newCompound.putInt(Constants.Entity.ENTITY_DIMENSION, ((WorldInfoBridge) location.getWorld().getProperties()).bridge$getDimensionId());
-        builder.compound = newCompound;
+        builder.compound = new CompoundNBT();
         return builder.build();
     }
 
@@ -221,8 +218,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
         if (!world.isPresent()) {
             return Optional.empty();
         }
-        if (this.entityUuid != null) {
-            Optional<Entity> entity = world.get().getEntity(this.entityUuid);
+        if (this.uniqueId != null) {
+            Optional<Entity> entity = world.get().getEntity(this.uniqueId);
             if (entity.isPresent()) {
                 return entity;
             }
@@ -274,7 +271,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.entityUuid, this.worldKey, this.entityType, this.position, this.rotation, this.scale);
+        return Objects.hash(this.uniqueId, this.worldKey, this.entityType, this.position, this.rotation, this.scale);
     }
 
     @SuppressWarnings("rawtypes")
@@ -288,7 +285,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
         }
 
         final SpongeEntitySnapshot other = (SpongeEntitySnapshot) obj;
-        return Objects.equals(this.entityUuid, other.entityUuid)
+        return Objects.equals(this.uniqueId, other.uniqueId)
                 && Objects.equals(this.worldKey, other.worldKey)
                 && Objects.equals(this.entityType, other.entityType)
                 && Objects.equals(this.position, other.position)
@@ -299,7 +296,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("uniqueId", this.entityUuid)
+                .add("uniqueId", this.uniqueId)
                 .add("entityType", this.entityType)
                 .add("position", this.position)
                 .add("rotation", this.rotation)
