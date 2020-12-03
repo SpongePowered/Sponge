@@ -87,8 +87,9 @@ import org.spongepowered.vanilla.accessor.server.MinecraftServerAccessor_Vanilla
 import org.spongepowered.vanilla.accessor.world.storage.SaveFormatAccessor_Vanilla;
 import org.spongepowered.vanilla.bridge.util.registry.SimpleRegistryBridge;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -98,6 +99,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -433,7 +435,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
 
         if (this.worlds.containsKey(copyKey)) {
-            FutureUtil.completedWithException(new IllegalStateException(String.format("The copy key '%s' is a currently loaded world!", copyKey)));
+            return FutureUtil.completedWithException(new IllegalStateException(String.format("The copy key '%s' is a currently loaded world!",
+                    copyKey)));
         }
 
         final ServerWorld loadedWorld = this.worlds.get(key);
@@ -453,7 +456,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
         final Path gameDirectory = !isSinglePlayer ? savesDirectory : savesDirectory.getParent();
         final Path levelDirectory = savesDirectory.resolve(this.server.getFolderName());
-
 
         final String directoryName = this.getDirectoryName(key);
         final boolean isDefaultWorld = VanillaWorldManager.VANILLA_OVERWORLD.equals(key);
@@ -505,7 +507,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             // Bail the whole deal if we hit IO problems!
             try {
                 Files.deleteIfExists(copyDirectory);
-            } catch (IOException ignore) {
+            } catch (final IOException ignore) {
             }
 
             return FutureUtil.completedWithException(e);
@@ -525,7 +527,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             Files.createDirectories(copiedConfigFile.getParent());
             Files.copy(configFile, copiedConfigFile, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException e) {
-            FutureUtil.completedWithException(e);
+            return FutureUtil.completedWithException(e);
         }
 
         // Strip UUID
@@ -541,7 +543,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     CompressedStreamTools.writeCompressed(spongeLevelCompound, Files.newOutputStream(copiedSpongeLevelFile));
                 }
             } catch (final IOException e) {
-                FutureUtil.completedWithException(e);
+                return FutureUtil.completedWithException(e);
             }
         }
 
@@ -556,14 +558,118 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(newValue, "newValue");
 
-        return null;
+        if (VanillaWorldManager.VANILLA_OVERWORLD.equals(key)) {
+            throw new IllegalArgumentException("The default world cannot be renamed!");
+        }
+
+        final ResourceKey renamedKey = ResourceKey.of(key.getNamespace(), newValue);
+        if (this.worlds.containsKey(renamedKey)) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        ServerWorld loadedWorld = this.worlds.get(key);
+        if (loadedWorld != null) {
+            try {
+                this.unloadWorld0(loadedWorld);
+            } catch (final IOException e) {
+                return FutureUtil.completedWithException(e);
+            }
+        }
+
+        this.allInfos.remove(key);
+
+        final boolean isSinglePlayer = this.server.isSinglePlayer();
+        final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
+        final Path gameDirectory = !isSinglePlayer ? savesDirectory : savesDirectory.getParent();
+        final Path levelDirectory = savesDirectory.resolve(this.server.getFolderName());
+
+        final String directoryName = this.getDirectoryName(key);
+        final boolean isDefaultWorld = VanillaWorldManager.VANILLA_OVERWORLD.equals(key);
+        final boolean isVanillaSubWorld = this.isVanillaSubWorld(directoryName);
+
+        final Path originalDirectory = isDefaultWorld ? levelDirectory : isVanillaSubWorld ? levelDirectory.resolve(directoryName) :
+                levelDirectory.resolve(Constants.Sponge.World.DIMENSIONS_DIRECTORY).resolve(key.getNamespace()).resolve(key.getValue());
+
+        final Path renamedDirectory =
+                levelDirectory.resolve(Constants.Sponge.World.DIMENSIONS_DIRECTORY).resolve(renamedKey.getNamespace()).resolve(renamedKey.getValue());
+
+        try {
+            Files.createDirectories(renamedDirectory);
+            Files.move(originalDirectory, renamedDirectory, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
+        final Path configFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds").resolve(key
+                .getNamespace()).resolve(key.getValue() + ".conf");
+
+        final Path renamedConfigFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds")
+                .resolve(renamedKey.getNamespace()).resolve(renamedKey.getValue() + ".conf");
+
+        try {
+            Files.createDirectories(renamedConfigFile.getParent());
+            Files.move(configFile, renamedConfigFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
+        final SaveFormat saveFormat = new SaveFormat(renamedDirectory.getParent(), gameDirectory.resolve("backups"), this.server.getDataFixer());
+        final SaveHandler saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(renamedKey), this.server);
+
+        return CompletableFuture.completedFuture((WorldProperties) saveHandler.loadWorldInfo());
     }
 
     @Override
     public CompletableFuture<Boolean> deleteWorld(final ResourceKey key) {
         Objects.requireNonNull(key);
 
-        return null;
+        if (VanillaWorldManager.VANILLA_OVERWORLD.equals(key)) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        final ServerWorld loadedWorld = this.worlds.get(key);
+        if (loadedWorld != null) {
+            boolean disableLevelSaving = loadedWorld.disableLevelSaving;
+            loadedWorld.disableLevelSaving = true;
+            try {
+                this.unloadWorld0(loadedWorld);
+            } catch (final IOException e) {
+                loadedWorld.disableLevelSaving = disableLevelSaving;
+                return FutureUtil.completedWithException(e);
+            }
+        }
+
+        this.allInfos.remove(key);
+
+        final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
+        final Path levelDirectory = savesDirectory.resolve(this.server.getFolderName());
+
+        final String directoryName = this.getDirectoryName(key);
+        final boolean isDefaultWorld = VanillaWorldManager.VANILLA_OVERWORLD.equals(key);
+        final boolean isVanillaSubWorld = this.isVanillaSubWorld(directoryName);
+
+        final Path worldDirectory = isDefaultWorld ? levelDirectory : isVanillaSubWorld ? levelDirectory.resolve(directoryName) :
+                levelDirectory.resolve(Constants.Sponge.World.DIMENSIONS_DIRECTORY).resolve(key.getNamespace()).resolve(key.getValue());
+
+        try {
+            Files.walk(worldDirectory)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
+        final Path configFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds").resolve(key
+                .getNamespace()).resolve(key.getValue() + ".conf");
+
+        try {
+            Files.deleteIfExists(configFile);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
+        return CompletableFuture.completedFuture(true);
     }
 
     @Override
@@ -598,7 +704,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public void unloadWorld0(final ServerWorld world) throws IOException {
-        final ResourceLocation key = (ResourceLocation) (Object) ((ResourceKeyBridge) world).bridge$getKey();
+        final ResourceLocation key = (ResourceLocation) (Object) ((ResourceKeyBridge) world.getWorldInfo()).bridge$getKey();
 
         if (world.getPlayers().size() != 0) {
             throw new IOException(String.format("World '%s' was told to unload but players remain.", key));
@@ -1031,6 +1137,16 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         } else {
             serverWorld.getChunkProvider().registerTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(apiWorld.getProperties().getSpawnPosition()
                             .getX(), apiWorld.getProperties().getSpawnPosition().getZ()), 11, (ResourceLocation) (Object) apiWorld.getKey());
+        }
+    }
+
+    private boolean isDirectoryEmpty(final Path directory) throws IOException {
+        if (!Files.isDirectory(directory)) {
+            return false;
+        }
+
+        try (final DirectoryStream<Path> dir = Files.newDirectoryStream(directory)) {
+            return !dir.iterator().hasNext();
         }
     }
 }

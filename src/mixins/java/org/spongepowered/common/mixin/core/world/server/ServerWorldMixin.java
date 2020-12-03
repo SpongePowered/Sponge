@@ -36,6 +36,7 @@ import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SessionLockException;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
@@ -50,6 +51,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.accessor.world.server.ServerChunkProviderAccessor;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -72,7 +74,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 @Mixin(ServerWorld.class)
-public abstract class ServerWorldMixin extends WorldMixin implements ServerWorldBridge, PlatformServerWorldBridge {
+public abstract class ServerWorldMixin extends WorldMixin implements ServerWorldBridge, PlatformServerWorldBridge, ResourceKeyBridge {
 
     // @formatter:off
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
@@ -229,6 +231,16 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Override
     public void bridge$setManualSave(boolean state) {
         this.impl$isManualSave = state;
+    }
+
+    @Override
+    public ResourceKey bridge$getKey() {
+        return ((ResourceKeyBridge) this.shadow$getWorldInfo()).bridge$getKey();
+    }
+
+    @Override
+    public void bridge$setKey(final ResourceKey key) {
+        ((ResourceKeyBridge) this.shadow$getWorldInfo()).bridge$setKey(key);
     }
 
     /**

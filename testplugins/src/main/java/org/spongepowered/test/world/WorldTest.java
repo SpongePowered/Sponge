@@ -70,6 +70,7 @@ public final class WorldTest {
         final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.catalogedElementWithMinecraftAndSpongeDefaults(DimensionType.class).setKey("dimension_type").build();
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
         final Parameter.Value<ResourceKey> copyWorldKeyParameter = Parameter.resourceKey().setKey("copy_world").build();
+        final Parameter.Value<String> renameWorldKeyParameter = Parameter.string().setKey("new_world_name").build();
 
         final Parameter.Value<ResourceKey> unloadedWorldKeyParameter = Parameter.resourceKey()
                 .setSuggestions((context, currentInput) -> Sponge.getServer().getWorldManager()
@@ -236,6 +237,43 @@ public final class WorldTest {
                     })
                     .build()
                 , "cpw", "copyworld"
+        );
+
+        event.register(this.plugin, Command
+                        .builder()
+                        .parameters(worldKeyParameter, renameWorldKeyParameter)
+                        .setExecutor(context -> {
+                            final ResourceKey worldKey = context.requireOne(worldKeyParameter);
+                            final String renameWorld = context.requireOne(renameWorldKeyParameter);
+
+                            Sponge.getServer().getWorldManager().renameWorld(worldKey, renameWorld).whenComplete((aBoolean, throwable) -> {
+                                if (throwable != null) {
+                                    context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
+                                }
+                            });
+
+                            return CommandResult.success();
+                        })
+                        .build()
+                , "rw", "renameworld"
+        );
+
+        event.register(this.plugin, Command
+                        .builder()
+                        .parameters(worldKeyParameter)
+                        .setExecutor(context -> {
+                            final ResourceKey worldKey = context.requireOne(worldKeyParameter);
+
+                            Sponge.getServer().getWorldManager().deleteWorld(worldKey).whenComplete((aBoolean, throwable) -> {
+                                if (throwable != null) {
+                                    context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
+                                }
+                            });
+
+                            return CommandResult.success();
+                        })
+                        .build()
+                , "dw", "deleteworld"
         );
 
         event.register(this.plugin, Command
