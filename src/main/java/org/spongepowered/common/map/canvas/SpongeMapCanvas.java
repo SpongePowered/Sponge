@@ -30,5 +30,5 @@ import org.spongepowered.api.map.MapCanvas;
 // This interface means that both canvases backed by a byte array
 // and the empty version can be applied
 public interface SpongeMapCanvas extends MapCanvas {
-    void applyToMapData(MapData mapData);
+    void applyToMapData(final MapData mapData);
 }

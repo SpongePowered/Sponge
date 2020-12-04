@@ -41,7 +41,7 @@ import org.spongepowered.math.vector.Vector2i;
 
 import javax.annotation.Nullable;
 
-public class MapInfoData {
+public final class MapInfoData {
 
 	private MapInfoData() {
 	}

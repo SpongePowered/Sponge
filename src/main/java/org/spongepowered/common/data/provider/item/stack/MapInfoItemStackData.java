@@ -40,7 +40,11 @@ import org.spongepowered.common.util.Constants;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class MapInfoItemStackData {
+public final class MapInfoItemStackData {
+
+	private MapInfoItemStackData() {
+	}
+
 	// @formatter:off
 	public static void register(final DataProviderRegistrator registrator) {
 		registrator

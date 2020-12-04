@@ -32,6 +32,7 @@ import org.spongepowered.api.map.MapStorage;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
@@ -50,7 +51,7 @@ import java.util.UUID;
  * to handle maps, instead of putting the methods at overworld,
  * or at server level.
  */
-public class SpongeMapStorage implements MapStorage {
+public final class SpongeMapStorage implements MapStorage {
 
 	private final Map<UUID, MapInfo> uuidCache = new HashMap<>();
 	private final Map<UUID, Integer> uuidMapIndex = new HashMap<>();
@@ -107,7 +108,7 @@ public class SpongeMapStorage implements MapStorage {
 
 	@Override
 	public Optional<MapInfo> createNewMapInfo() {
-		return MapUtil.fireCreateMapEvent(PhaseTracker.getCauseStackManager().getCurrentCause());
+		return SpongeCommonEventFactory.fireCreateMapEvent(PhaseTracker.getCauseStackManager().getCurrentCause());
 	}
 
 	public void addMapInfo(final MapInfo mapInfo) {

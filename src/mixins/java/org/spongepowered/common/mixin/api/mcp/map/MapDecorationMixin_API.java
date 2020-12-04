@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
-import org.spongepowered.common.map.MapUtil;
+import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.registry.builtin.sponge.MapDecorationOrientationStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.MapDecorationTypeStreamGenerator;
@@ -41,7 +41,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector2i;
 
 @Mixin(MapDecoration.class)
-public class MapDecorationMixin_API implements org.spongepowered.api.map.decoration.MapDecoration {
+public abstract class MapDecorationMixin_API implements org.spongepowered.api.map.decoration.MapDecoration {
     @Shadow @Final private MapDecoration.Type type;
     @Shadow private byte x;
     @Shadow private byte y;

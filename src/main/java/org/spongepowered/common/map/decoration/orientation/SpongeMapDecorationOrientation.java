@@ -26,19 +26,14 @@ package org.spongepowered.common.map.decoration.orientation;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeMapDecorationOrientation implements MapDecorationOrientation {
-	private final ResourceKey resourceKey;
+public class SpongeMapDecorationOrientation extends SpongeCatalogType implements MapDecorationOrientation {
 	private final int orientationNumber;
 
 	public SpongeMapDecorationOrientation(ResourceKey resourceKey, int orientationNumber) {
-		this.resourceKey = resourceKey;
+		super(resourceKey);
 		this.orientationNumber = orientationNumber;
-	}
-
-	@Override
-	public ResourceKey getKey() {
-		return this.resourceKey;
 	}
 
 	public int getOrientationNumber() {

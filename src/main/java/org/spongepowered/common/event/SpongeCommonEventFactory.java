@@ -54,7 +54,10 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.MapData;
+import net.minecraft.world.storage.MapIdTracker;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -65,6 +68,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
@@ -81,6 +85,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.action.CreateMapEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -101,6 +106,7 @@ import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
@@ -121,6 +127,7 @@ import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -135,6 +142,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -153,6 +161,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public final class SpongeCommonEventFactory {
@@ -1036,4 +1045,54 @@ public final class SpongeCommonEventFactory {
         SpongeCommon.postEvent(event);
         return event;
     }
+
+	/**
+	 * Returns MapInfo of newly created map, if the event was not cancelled.
+	 * @param cause Cause of the event
+	 * @return MapInfo if event was not cancelled
+	 */
+	public static Optional<MapInfo> fireCreateMapEvent(final Cause cause) {
+		return fireCreateMapEvent(cause, Collections.emptySet());
+	}
+
+	public static Optional<MapInfo> fireCreateMapEvent(final Cause cause, Set<Value<?>> values) {
+		final ServerWorld defaultWorld = SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD);
+		final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getSavedData().getOrCreate(MapIdTracker::new, "idcounts");
+
+		final int id = mapIdTrackerBridge.bridge$getHighestMapId()
+				.map(i -> ++i)
+				.orElse(0);
+
+		final String s = Constants.Map.MAP_PREFIX + id;
+		final MapData mapData = new MapData(s);
+		mapData.dimension = DimensionType.OVERWORLD; // Set default to prevent NPEs
+
+		final MapInfo mapInfo = (MapInfo) mapData;
+
+		for (Value<?> value : values) {
+			mapInfo.offer(value);
+		}
+
+		final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapInfo);
+		SpongeCommon.postEvent(event);
+		if (event.isCancelled()) {
+			return Optional.empty();
+		}
+
+		// Advance map id.
+		final int mcId = defaultWorld.getNextMapId();
+		if (id != mcId) {
+			// TODO: REMOVE OR replace for Integer.MAX_VALUE
+			SpongeCommon.getLogger().warn("Map size corruption, vanilla only allows " + Integer.MAX_VALUE + "! Expected next number was not equal to the true next number.");
+			SpongeCommon.getLogger().warn("Expected: " + id + ". Got: " + mcId);
+			SpongeCommon.getLogger().warn("Automatically cancelling map creation");
+			mapIdTrackerBridge.bridge$setHighestMapId(id - 1);
+			return Optional.empty();
+		}
+		defaultWorld.registerMapData(mapData);
+
+		((SpongeMapStorage) Sponge.getServer().getMapStorage()).addMapInfo(mapInfo);
+
+		return Optional.of(mapInfo);
+	}
 }

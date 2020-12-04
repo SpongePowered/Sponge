@@ -32,9 +32,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.value.Value;
@@ -50,8 +48,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.map.MapUtil;
 import org.spongepowered.math.vector.Vector2i;
 
 import java.util.Optional;
@@ -62,14 +60,12 @@ public abstract class ItemEmptyMapMixin {
 
     @Redirect(method = "onItemRightClick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/item/FilledMapItem;setupNewMap(Lnet/minecraft/world/World;IIBZZ)Lnet/minecraft/item/ItemStack;",
-                    ordinal = 0))
+                    target = "Lnet/minecraft/item/FilledMapItem;setupNewMap(Lnet/minecraft/world/World;IIBZZ)Lnet/minecraft/item/ItemStack;"))
     private ItemStack impl$createMapWithSpongeData(World worldIn, int worldX, int worldZ, byte scale, boolean trackingPosition, boolean unlimitedTracking,
                                                    World worldIn2, PlayerEntity playerIn, Hand handIn) {
         final Player player = (Player) playerIn;
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
             frame.addContext(EventContextKeys.PLAYER, player);
             final HandType handType = (HandType) (Object) handIn;
             frame.addContext(EventContextKeys.USED_HAND, handType);
@@ -87,7 +83,7 @@ public abstract class ItemEmptyMapMixin {
                     //Value.immutableOf(Keys.MAP_DECORATIONS, Sets.newHashSet())
             );
 
-            final Optional<MapInfo> optMapInfo = MapUtil.fireCreateMapEvent(frame.getCurrentCause(), mapValues);
+            final Optional<MapInfo> optMapInfo = SpongeCommonEventFactory.fireCreateMapEvent(frame.getCurrentCause(), mapValues);
             if (!optMapInfo.isPresent()) {
                 return ItemStack.EMPTY;
             }

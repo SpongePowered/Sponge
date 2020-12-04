@@ -25,9 +25,7 @@
 package org.spongepowered.common.map.decoration;
 
 import com.google.common.base.Preconditions;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -37,7 +35,7 @@ import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
-import org.spongepowered.common.map.MapUtil;
+import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.registry.builtin.sponge.MapDecorationOrientationStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.MapDecorationTypeStreamGenerator;
