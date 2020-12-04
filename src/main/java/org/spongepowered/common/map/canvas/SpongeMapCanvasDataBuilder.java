@@ -25,12 +25,11 @@
 package org.spongepowered.common.map.canvas;
 
 import com.google.common.base.Preconditions;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.MapCanvas;
-import org.spongepowered.common.map.MapUtil;
+import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;

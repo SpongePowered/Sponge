@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
-import org.spongepowered.common.map.MapUtil;
+import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nonnull;

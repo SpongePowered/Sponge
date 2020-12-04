@@ -26,13 +26,12 @@ package org.spongepowered.common.map.canvas;
 
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.map.color.MapShade;
-import org.spongepowered.common.map.MapUtil;
+import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.map.color.SpongeMapColor;
 import org.spongepowered.common.util.Constants;
 
@@ -60,20 +59,28 @@ public class SpongeMapCanvasBuilder implements MapCanvas.Builder {
     }
 
     @Override
-    public MapCanvas.Builder paintAll(MapColor color) {
+    public MapCanvas.Builder paintAll(final MapColor color) {
         Arrays.fill(getCanvas(), ((SpongeMapColor)color).getMCColor());
         return this;
     }
 
     @Override
-    public MapCanvas.Builder paint(int startX, int startY, int endX, int endY, MapColor mapColor) {
-        Preconditions.checkArgument(MapUtil.isInCanvasBounds(startX), "startX out of bounds");
-        Preconditions.checkArgument(MapUtil.isInCanvasBounds(endX), "endX out of bounds");
-        Preconditions.checkArgument(MapUtil.isInCanvasBounds(startY), "startY out of bounds");
-        Preconditions.checkArgument(MapUtil.isInCanvasBounds(endY), "endY out of bounds");
+    public MapCanvas.Builder paint(final int startX, final int startY, final int endX, final int endY, final MapColor mapColor) {
+        if (!MapUtil.isInCanvasBounds(startX)) {
+            throw new IllegalStateException("startX out of bounds");
+        }
+        if (!MapUtil.isInCanvasBounds(startY)) {
+            throw new IllegalStateException("startY out of bounds");
+        }
+        if (!MapUtil.isInCanvasBounds(endX)) {
+            throw new IllegalStateException("endX out of bounds");
+        }
+        if (!MapUtil.isInCanvasBounds(endY)) {
+            throw new IllegalStateException("endY out of bounds");
+        }
 
-        byte[] canvas = getCanvas();
-        byte color = ((SpongeMapColor)mapColor).getMCColor();
+        final byte[] canvas = this.getCanvas();
+        final byte color = ((SpongeMapColor)mapColor).getMCColor();
         for (int x = startX; x <= endX; x++) {
             for (int y = startY; y <= endY; y++) {
                 canvas[x + (y * Constants.Map.MAP_PIXELS)] = color;
@@ -83,7 +90,7 @@ public class SpongeMapCanvasBuilder implements MapCanvas.Builder {
     }
 
     @Override
-    public MapCanvas.Builder from(MapCanvas canvas) {
+    public MapCanvas.Builder from(final MapCanvas canvas) {
         if (canvas instanceof SpongeEmptyCanvas) {
             return MapCanvas.builder();
         }
@@ -98,7 +105,7 @@ public class SpongeMapCanvasBuilder implements MapCanvas.Builder {
     }
 
     @Override
-    public MapCanvas.Builder fromImage(Image image) {
+    public MapCanvas.Builder fromImage(final Image image) {
         Objects.requireNonNull(image, "image cannot be null");
         if (image.getWidth(null) != Constants.Map.MAP_PIXELS || image.getHeight(null) != Constants.Map.MAP_PIXELS) {
             throw new IllegalArgumentException("image size was invalid!");
@@ -116,9 +123,9 @@ public class SpongeMapCanvasBuilder implements MapCanvas.Builder {
             bGr.drawImage(image, 0, 0, null);
             bGr.dispose();
         }
-        int[] pixels = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
+        final int[] pixels = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
         // Get the color palette we are working with
-        Map<Integer, SpongeMapColor> palette = new HashMap<>();
+        final Map<Integer, SpongeMapColor> palette = new HashMap<>();
         for (MapColorType type : Sponge.getRegistry().getCatalogRegistry().getAllOf(MapColorType.class)) {
             // Put each shade in also.
 
@@ -127,7 +134,7 @@ public class SpongeMapCanvasBuilder implements MapCanvas.Builder {
                 palette.put(spongeMapColor.getColor().getRgb(), spongeMapColor);
             }
         }
-        byte[] canvas = getCanvas();
+        final byte[] canvas = getCanvas();
         for (int i = 0; i < pixels.length; i++) {
             SpongeMapColor color = palette.get(pixels[i]);
             if (color == null) {
@@ -139,12 +146,12 @@ public class SpongeMapCanvasBuilder implements MapCanvas.Builder {
     }
 
     @Override
-    public MapCanvas.Builder fromContainer(DataView container) {
-        Preconditions.checkNotNull(container, "container cannot be null");
+    public MapCanvas.Builder fromContainer(final DataView container) {
+        Objects.requireNonNull(container, "container cannot be null");
         if (!container.contains(Constants.Map.MAP_CANVAS)) {
             return this;
         }
-        reset();
+        this.reset();
         this.canvas = MapUtil.getMapCanvasFromContainer(container);
         return this;
     }

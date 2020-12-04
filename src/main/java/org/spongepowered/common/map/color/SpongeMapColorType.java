@@ -28,16 +28,16 @@ import net.minecraft.block.material.MaterialColor;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.common.SpongeCatalogType;
 
 import java.util.Objects;
 
-public class SpongeMapColorType implements MapColorType {
-    private final ResourceKey resourceKey;
+public class SpongeMapColorType extends SpongeCatalogType implements MapColorType {
     private final int colorIndex;
 
 
     public SpongeMapColorType(ResourceKey resourceKey, int colorIndex) {
-        this.resourceKey = resourceKey;
+        super(resourceKey);
         this.colorIndex = colorIndex;
     }
 
@@ -48,24 +48,5 @@ public class SpongeMapColorType implements MapColorType {
     @Override
     public Color getColor() {
         return Color.of(new java.awt.Color(MaterialColor.COLORS[colorIndex].colorValue));
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.resourceKey;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SpongeMapColorType that = (SpongeMapColorType) o;
-        return colorIndex == that.colorIndex &&
-                resourceKey.equals(that.resourceKey);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(resourceKey, colorIndex);
     }
 }

@@ -26,11 +26,11 @@ package org.spongepowered.common.map.color;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.map.color.MapShade;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.util.Constants;
 
-public class SpongeMapShade implements MapShade {
+public class SpongeMapShade extends SpongeCatalogType implements MapShade {
 
-	private final ResourceKey resourceKey;
 	private final int shadeNum;
 	private final int multiplier;
 
@@ -41,14 +41,9 @@ public class SpongeMapShade implements MapShade {
 	 * @param multiplier Number to multiply R,G and B before dividing by {@value Constants.Map#SHADE_DIVIDER}
 	 */
 	public SpongeMapShade(ResourceKey resourceKey, int shadeNum, int multiplier) {
-		this.resourceKey = resourceKey;
+		super(resourceKey);
 		this.shadeNum = shadeNum;
 		this.multiplier = multiplier;
-	}
-
-	@Override
-	public ResourceKey getKey() {
-		return this.resourceKey;
 	}
 
 	public int getShadeNum() {

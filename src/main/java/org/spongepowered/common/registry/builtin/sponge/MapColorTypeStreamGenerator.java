@@ -36,70 +36,73 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class MapColorTypeStreamGenerator {
+public final class MapColorTypeStreamGenerator {
 	private static final Map<Integer, MapColorType> COLOR_INDEX_MAP = new HashMap<>();
 	private static final Logger logger = LogManager.getLogger(MapColorTypeStreamGenerator.class.getSimpleName());
+
+	private MapColorTypeStreamGenerator() {
+	}
 
 	public static Stream<MapColorType> stream() {
 		///////////////////////// ORDER MATTERS HERE ////////////////////
 		return Stream.of(
-				addToRegistry("air", 					MaterialColor.AIR),
-				addToRegistry("grass", 					MaterialColor.GRASS),
-				addToRegistry("sand", 					MaterialColor.SAND),
-				addToRegistry("wool", 					MaterialColor.WOOL),
-				addToRegistry("tnt", 					MaterialColor.TNT),
-				addToRegistry("ice", 					MaterialColor.ICE),
-				addToRegistry("iron", 					MaterialColor.IRON),
-				addToRegistry("foliage", 				MaterialColor.FOLIAGE),
-				addToRegistry("snow", 					MaterialColor.SNOW),
-				addToRegistry("clay", 					MaterialColor.CLAY),
-				addToRegistry("dirt",					MaterialColor.DIRT),
-				addToRegistry("stone", 					MaterialColor.STONE),
-				addToRegistry("water", 					MaterialColor.WATER),
-				addToRegistry("wood", 					MaterialColor.WOOD),
-				addToRegistry("quartz", 				MaterialColor.QUARTZ),
-				addToRegistry("adobe", 					MaterialColor.ADOBE),
-				addToRegistry("magenta", 				MaterialColor.MAGENTA),
-				addToRegistry("light_blue",				MaterialColor.LIGHT_BLUE),
-				addToRegistry("yellow", 				MaterialColor.YELLOW),
-				addToRegistry("lime", 					MaterialColor.LIME),
-				addToRegistry("pink",					MaterialColor.PINK),
-				addToRegistry("gray", 					MaterialColor.GRAY),
-				addToRegistry("light_gray",				MaterialColor.LIGHT_GRAY),
-				addToRegistry("cyan", 					MaterialColor.CYAN),
-				addToRegistry("purple", 				MaterialColor.PURPLE),
-				addToRegistry("blue",	 				MaterialColor.BLUE),
-				addToRegistry("brown", 					MaterialColor.BROWN),
-				addToRegistry("green", 					MaterialColor.GREEN),
-				addToRegistry("red", 					MaterialColor.RED),
-				addToRegistry("black", 					MaterialColor.BLACK),
-				addToRegistry("gold", 					MaterialColor.GOLD),
-				addToRegistry("diamond", 				MaterialColor.DIAMOND),
-				addToRegistry("lapis_lazuli", 			MaterialColor.LAPIS),
-				addToRegistry("emerald", 				MaterialColor.EMERALD),
-				addToRegistry("obsidian", 				MaterialColor.OBSIDIAN),
-				addToRegistry("netherrack", 			MaterialColor.NETHERRACK),
-				addToRegistry("white_terracotta", 		MaterialColor.WHITE_TERRACOTTA),
-				addToRegistry("orange_terracotta", 		MaterialColor.ORANGE_TERRACOTTA),
-				addToRegistry("magenta_terracotta", 	MaterialColor.MAGENTA_TERRACOTTA),
-				addToRegistry("light_blue_terracotta", 	MaterialColor.LIGHT_BLUE_TERRACOTTA),
-				addToRegistry("yellow_terracotta", 		MaterialColor.YELLOW_TERRACOTTA),
-				addToRegistry("lime_terracotta", 		MaterialColor.LIME_TERRACOTTA),
-				addToRegistry("pink_terracotta", 		MaterialColor.PINK_TERRACOTTA),
-				addToRegistry("gray_terracotta", 		MaterialColor.GRAY_TERRACOTTA),
-				addToRegistry("light_gray_terracotta", 	MaterialColor.LIGHT_GRAY_TERRACOTTA),
-				addToRegistry("cyan_terracotta", 		MaterialColor.CYAN_TERRACOTTA),
-				addToRegistry("purple_terracotta", 		MaterialColor.PURPLE_TERRACOTTA),
-				addToRegistry("blue_terracotta", 		MaterialColor.BLUE_TERRACOTTA),
-				addToRegistry("brown_terracotta", 		MaterialColor.BROWN_TERRACOTTA),
-				addToRegistry("green_terracotta", 		MaterialColor.GREEN_TERRACOTTA),
-				addToRegistry("red_terracotta", 		MaterialColor.RED_TERRACOTTA),
-				addToRegistry("black_terracotta", 		MaterialColor.BLACK_TERRACOTTA)
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("air"), 					MaterialColor.AIR),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("grass"), 				MaterialColor.GRASS),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("sand"), 					MaterialColor.SAND),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("wool"), 					MaterialColor.WOOL),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("tnt"), 					MaterialColor.TNT),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("ice"), 					MaterialColor.ICE),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("iron"), 					MaterialColor.IRON),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("foliage"), 				MaterialColor.FOLIAGE),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("snow"), 					MaterialColor.SNOW),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("clay"), 					MaterialColor.CLAY),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("dirt"),					MaterialColor.DIRT),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("stone"), 				MaterialColor.STONE),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("water"), 				MaterialColor.WATER),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("wood"), 					MaterialColor.WOOD),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("quartz)"), 				MaterialColor.QUARTZ),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("adobe"), 				MaterialColor.ADOBE),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("magenta"), 				MaterialColor.MAGENTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("light_blue"),			MaterialColor.LIGHT_BLUE),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("yellow"), 				MaterialColor.YELLOW),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("lime"), 					MaterialColor.LIME),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("pink"),					MaterialColor.PINK),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("gray"), 					MaterialColor.GRAY),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("light_gray"),			MaterialColor.LIGHT_GRAY),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("cyan"), 					MaterialColor.CYAN),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("purple"), 				MaterialColor.PURPLE),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("blue"),	 				MaterialColor.BLUE),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("brown"), 				MaterialColor.BROWN),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("green"), 				MaterialColor.GREEN),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("red"), 					MaterialColor.RED),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("black"), 				MaterialColor.BLACK),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("gold"), 					MaterialColor.GOLD),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("diamond"), 				MaterialColor.DIAMOND),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("lapis_lazuli"), 			MaterialColor.LAPIS),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("emerald"), 				MaterialColor.EMERALD),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("obsidian"), 				MaterialColor.OBSIDIAN),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("netherrack"), 			MaterialColor.NETHERRACK),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("white_terracotta"), 		MaterialColor.WHITE_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("orange_terracotta"), 	MaterialColor.ORANGE_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("magenta_terracotta"), 	MaterialColor.MAGENTA_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("light_blue_terracotta"), MaterialColor.LIGHT_BLUE_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("yellow_terracotta"), 	MaterialColor.YELLOW_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("lime_terracotta"), 		MaterialColor.LIME_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("pink_terracotta"), 		MaterialColor.PINK_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("gray_terracotta"), 		MaterialColor.GRAY_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("light_gray_terracotta"), MaterialColor.LIGHT_GRAY_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("cyan_terracotta"), 		MaterialColor.CYAN_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("purple_terracotta"), 	MaterialColor.PURPLE_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("blue_terracotta"), 		MaterialColor.BLUE_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("brown_terracotta"), 		MaterialColor.BROWN_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("green_terracotta"), 		MaterialColor.GREEN_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("red_terracotta"), 		MaterialColor.RED_TERRACOTTA),
+				MapColorTypeStreamGenerator.newMapColorType(ResourceKey.minecraft("black_terracotta"), 		MaterialColor.BLACK_TERRACOTTA)
 		);
 	}
 
-	private static MapColorType addToRegistry(final String id, final MaterialColor color) {
-		final SpongeMapColorType mapColorType = new SpongeMapColorType(ResourceKey.minecraft(id), color.colorIndex);
+	private static MapColorType newMapColorType(final ResourceKey key, final MaterialColor color) {
+		final SpongeMapColorType mapColorType = new SpongeMapColorType(key, color.colorIndex);
 		MapColorTypeStreamGenerator.COLOR_INDEX_MAP.put(mapColorType.getColorIndex(), mapColorType);
 
 		if (color.colorIndex != COLOR_INDEX_MAP.size() - 1) {
