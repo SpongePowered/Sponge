@@ -37,10 +37,8 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-import static com.google.common.base.Preconditions.checkState;
-
 // MapCanvas backed by a byte array
-public class SpongeMapByteCanvas implements SpongeMapCanvas {
+public final class SpongeMapByteCanvas implements SpongeMapCanvas {
     // Main Canvas storage
     public final byte[] canvas;
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.map.canvas;
 
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -32,16 +31,17 @@ import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Objects;
 import java.util.Optional;
 
-public class SpongeMapCanvasDataBuilder extends AbstractDataBuilder<MapCanvas> {
+public final class SpongeMapCanvasDataBuilder extends AbstractDataBuilder<MapCanvas> {
 	public SpongeMapCanvasDataBuilder() {
 		super(MapCanvas.class, 1);
 	}
 
 	@Override
 	protected Optional<MapCanvas> buildContent(DataView container) throws InvalidDataException {
-		Preconditions.checkNotNull(container, "container cannot be null");
+		Objects.requireNonNull(container, "container cannot be null");
 		if (!container.contains(Constants.Map.MAP_CANVAS)) {
 			return Optional.empty();
 		}
