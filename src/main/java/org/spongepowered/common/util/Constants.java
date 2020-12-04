@@ -293,6 +293,8 @@ public final class Constants {
             public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
             public static final String PORTAL_AGENT_TYPE = "portalAgentType";
             public static final String IS_MOD_CREATED = "isModCreated";
+            public static final String MAP = "map";
+            public static final String MAP_UUID_INDEX = "mapUUIDIndex";
             public static final DataQuery WORLD_CUSTOM_SETTINGS = DataQuery.of("customSettings");
             public static final String LEVEL_SPONGE_DAT = "level_sponge.dat";
             public static final String LEVEL_SPONGE_DAT_OLD = "level_sponge.dat_old";
@@ -1131,6 +1133,8 @@ public final class Constants {
         public static final byte TAG_INT_ARRAY = 11;
         public static final byte TAG_LONG_ARRAY = 12;
         public static final byte TAG_ANY_NUMERIC = 99;
+
+        public static final String UUID_KEY_MOST_SUFFIX = "Most";
 
         public static CompoundNBT filterSpongeCustomData(final CompoundNBT rootCompound) {
             if (rootCompound.contains(Forge.FORGE_DATA, TAG_COMPOUND)) {

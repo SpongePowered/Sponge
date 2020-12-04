@@ -35,17 +35,24 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.LogManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.accessor.world.server.ServerChunkProviderAccessor;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3d;
@@ -62,6 +69,14 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
 
     private CustomServerBossInfoManager impl$bossBarManager;
+
+    @Inject(method = "getMapData", at = @At("RETURN"), cancellable = true)
+    public void impl$addMapToCache(String mapName, CallbackInfoReturnable<MapData> cir, MapData mapData) {
+        ((SpongeMapStorage)Sponge.getServer().getMapStorage()).addMapInfo((MapInfo)mapData);
+        cir.setReturnValue(mapData);
+        cir.cancel();
+    }
+
 
     @Override
     public void bridge$adjustDimensionLogic(final SpongeDimensionType dimensionType) {

@@ -34,6 +34,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.value.Value;
@@ -41,6 +42,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -75,7 +77,7 @@ public abstract class ItemEmptyMapMixin {
 
             final Set<Value<?>> mapValues = Sets.newHashSet(
                     Value.immutableOf(Keys.MAP_LOCATION.get(), Vector2i.from(worldX, worldZ)),
-                    Value.immutableOf(Keys.MAP_WORLD, (org.spongepowered.api.world.World)worldIn),
+                    Value.immutableOf(Keys.MAP_WORLD, ((ServerWorld)worldIn).getKey()),
                     Value.immutableOf(Keys.MAP_TRACKS_PLAYERS, trackingPosition),
                     Value.immutableOf(Keys.MAP_UNLIMITED_TRACKING, unlimitedTracking),
                     Value.immutableOf(Keys.MAP_SCALE, (int)scale)

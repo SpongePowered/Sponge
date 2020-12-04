@@ -62,12 +62,14 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -380,6 +382,19 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         spongeDataCompound.putBoolean(Constants.Sponge.World.IS_MOD_CREATED, this.impl$modCreated);
         spongeDataCompound.putBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY, this.impl$hasCustomDifficulty);
 
+        // Map Stuff - only saved in the overworld.
+        if (this.impl$logicType == DimensionTypes.OVERWORLD.get()) {
+            final CompoundNBT mapNbt = spongeDataCompound.getCompound(Constants.Sponge.World.MAP);
+
+            final CompoundNBT mapIndexNbt = mapNbt.getCompound(Constants.Sponge.World.MAP_UUID_INDEX);
+            final SpongeMapStorage spongeMapStorage = (SpongeMapStorage) Sponge.getServer().getMapStorage();
+
+            for (final Map.Entry<UUID, Integer> entry : spongeMapStorage.getUuidMapIndex().entrySet()) {
+               mapIndexNbt.putUniqueId(entry.getValue().toString(), entry.getKey());
+            }
+            // TODO: map decorations.
+        }
+
         final Iterator<UUID> iter = this.impl$pendingUniqueIds.iterator();
         final ListNBT playerIdList = spongeDataCompound.getList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
         while (iter.hasNext()) {
@@ -425,6 +440,41 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
                 return DimensionTypes.OVERWORLD.get();
         });
+
+        // Map storage only on the overworld.
+        if (this.impl$logicType == DimensionTypes.OVERWORLD.get()
+        && spongeDataCompound.contains(Constants.Sponge.World.MAP, Constants.NBT.TAG_COMPOUND)) {
+            final CompoundNBT mapNbt = spongeDataCompound.getCompound(Constants.Sponge.World.MAP);
+
+            if (mapNbt.contains(Constants.Sponge.World.MAP_UUID_INDEX, Constants.NBT.TAG_COMPOUND)) {
+                final CompoundNBT mapIndexNbt = mapNbt.getCompound(Constants.Sponge.World.MAP_UUID_INDEX);
+                final SpongeMapStorage spongeMapStorage = (SpongeMapStorage) Sponge.getServer().getMapStorage();
+
+                // Read the map id uuid index so when we are asked to load a specific UUID, we don't need to check every map file.
+                final Map<UUID, Integer> uuidIndex = spongeMapStorage.getUuidMapIndex();
+                for (final String key : mapIndexNbt.keySet()) {
+                    // Filter out half the uuid entries, otherwise we end up reading each twice.
+                    if (!key.endsWith(Constants.NBT.UUID_KEY_MOST_SUFFIX)) {
+                        continue;
+                    }
+                    final String uuidKey = key.substring(0, key.length() - Constants.NBT.UUID_KEY_MOST_SUFFIX.length());
+                    if (!mapIndexNbt.hasUniqueId(uuidKey)) {
+                        SpongeCommon.getLogger().warn("Unexpected nbt key in uuid map id index, key '{}' should have a Least counterpart.", uuidKey);
+                        continue;
+                    }
+                    final int mapId;
+                    try {
+                        mapId = Integer.parseInt(uuidKey);
+                    } catch (NumberFormatException e) {
+                        SpongeCommon.getLogger().error("Error loading map index, expected a map id, got '" + uuidKey + "'", e);
+                        continue;
+                    }
+                    final UUID uuid = mapIndexNbt.getUniqueId(uuidKey);
+                    uuidIndex.put(uuid, mapId);
+                }
+            }
+        }
+
         this.impl$uniqueId = spongeDataCompound.getUniqueId(Constants.Sponge.World.UNIQUE_ID);
         this.impl$hasCustomDifficulty = spongeDataCompound.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);
         this.impl$modCreated = spongeDataCompound.getBoolean(Constants.Sponge.World.IS_MOD_CREATED);

@@ -32,6 +32,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.entity.Banner;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
@@ -60,6 +61,9 @@ import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.map.decoration.MapDecorationTypes;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
+import org.spongepowered.api.util.blockray.RayTrace;
+import org.spongepowered.api.util.blockray.RayTraceResult;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector2i;
@@ -138,7 +142,7 @@ public class MapTest implements LoadableModule {
                 });
                 throw new CommandException(Component.text("No nether loaded, trying to load now, please wait"));
             }
-            map.require(Keys.MAP_INFO).offer(Keys.MAP_WORLD, nether.get());
+            map.require(Keys.MAP_INFO).offer(Keys.MAP_WORLD, nether.get().getKey());
             return CommandResult.success();
         }, event);
 
@@ -457,16 +461,21 @@ public class MapTest implements LoadableModule {
         this.createDefaultCommand("addworldbanner", ctx -> {
             final Player player = this.requirePlayer(ctx);
             final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
-            if (heldMap.getType() == ItemTypes.FILLED_MAP.get()) {
+            if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
                 throw new CommandException(Component.text("You must hold a map in your hand"));
             }
             MapInfo mapInfo = heldMap.require(Keys.MAP_INFO);
-            try {
-                mapInfo.addBannerDecoration(player.getLocation());
-            } catch (IllegalArgumentException e) {
-                throw new CommandException(Component.text(e.getMessage()));
-            }
+            RayTraceResult<LocatableBlock> hit = RayTrace.block()
+                    .sourcePosition(player)
+                    .direction(player)
+                    .world(player.getServerLocation().getWorld())
+                    .continueWhileBlock(RayTrace.onlyAir())
+                    .limit(100)
+                    .select(a -> a.getLocation().getBlockEntity().filter(entity -> entity instanceof Banner).isPresent())
+                    .execute()
+                    .orElseThrow(() -> new CommandException(Component.text("You must look at a banner")));
 
+            mapInfo.addBannerDecoration(hit.getSelectedObject().getLocation());
 
             return CommandResult.success();
         }, event);
