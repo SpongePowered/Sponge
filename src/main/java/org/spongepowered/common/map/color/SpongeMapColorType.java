@@ -29,6 +29,8 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.util.Color;
 
+import java.util.Objects;
+
 public class SpongeMapColorType implements MapColorType {
     private final ResourceKey resourceKey;
     private final int colorIndex;
@@ -51,5 +53,19 @@ public class SpongeMapColorType implements MapColorType {
     @Override
     public ResourceKey getKey() {
         return this.resourceKey;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SpongeMapColorType that = (SpongeMapColorType) o;
+        return colorIndex == that.colorIndex &&
+                resourceKey.equals(that.resourceKey);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(resourceKey, colorIndex);
     }
 }

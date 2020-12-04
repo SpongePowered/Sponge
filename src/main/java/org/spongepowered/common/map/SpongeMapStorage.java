@@ -31,6 +31,7 @@ import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.MapStorage;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
@@ -52,13 +53,14 @@ import java.util.UUID;
 public class SpongeMapStorage implements MapStorage {
 
 	private final Map<UUID, MapInfo> uuidCache = new HashMap<>();
+	private final Map<UUID, Integer> uuidMapIndex = new HashMap<>();
 
 	@Override
 	public Collection<MapInfo> getAllMapInfos() {
-		Set<MapInfo> mapInfos = new HashSet<>();
+		final Set<MapInfo> mapInfos = new HashSet<>();
 
-		ServerWorld defaultWorld = SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD);
-		int highestId = ((MapIdTrackerBridge)defaultWorld.getSavedData().getOrCreate(MapIdTracker::new, "idcounts")).bridge$getHighestMapId()
+		final ServerWorld defaultWorld = SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD);
+		final int highestId = ((MapIdTrackerBridge)defaultWorld.getSavedData().getOrCreate(MapIdTracker::new, "idcounts")).bridge$getHighestMapId()
 				.orElse(-1);
 		for (int i = 0; i <= highestId; i++) {
 			final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + i);
@@ -66,8 +68,8 @@ public class SpongeMapStorage implements MapStorage {
 				SpongeCommon.getLogger().warn("Missing map with id: " + i);
 				continue;
 			}
-			UUID mapUUID = mapInfo.getUniqueId();
-			uuidCache.put(mapUUID, mapInfo);
+			final UUID mapUUID = mapInfo.getUniqueId();
+			this.addMapInfo(mapInfo);
 			mapInfos.add(mapInfo);
 		}
 		return mapInfos;
@@ -77,14 +79,14 @@ public class SpongeMapStorage implements MapStorage {
 	public Optional<MapInfo> getMapInfo(final UUID uuid) {
 		// TODO: Have methods for getting cached and getting all (getting all could involve opening a *lot* of files)
 		// 	maybe add a index file for uuids?
-		final MapInfo cachedInfo = uuidCache.get(uuid);
+		final MapInfo cachedInfo = this.uuidCache.get(uuid);
 
 		if (cachedInfo != null) {
 			return Optional.of(cachedInfo);
 		}
 
-		ServerWorld defaultWorld = SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD);
-		int highestId = ((MapIdTrackerBridge)defaultWorld.getSavedData().getOrCreate(MapIdTracker::new, "idcounts")).bridge$getHighestMapId()
+		final ServerWorld defaultWorld = SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD);
+		final int highestId = ((MapIdTrackerBridge)defaultWorld.getSavedData().getOrCreate(MapIdTracker::new, "idcounts")).bridge$getHighestMapId()
 				.orElse(-1);
 		for (int i = 0; i <= highestId; i++) {
 			final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + i);
@@ -92,8 +94,8 @@ public class SpongeMapStorage implements MapStorage {
 				SpongeCommon.getLogger().warn("Missing map with id: " + i);
 				continue;
 			}
-			UUID mapUUID = mapInfo.getUniqueId();
-			uuidCache.put(mapUUID, mapInfo);
+			final UUID mapUUID = mapInfo.getUniqueId();
+			this.uuidCache.put(mapUUID, mapInfo);
 
 			if (mapUUID.equals(uuid)) {
 				return Optional.of(mapInfo);
@@ -106,5 +108,14 @@ public class SpongeMapStorage implements MapStorage {
 	@Override
 	public Optional<MapInfo> createNewMapInfo() {
 		return MapUtil.fireCreateMapEvent(PhaseTracker.getCauseStackManager().getCurrentCause());
+	}
+
+	public void addMapInfo(final MapInfo mapInfo) {
+		this.uuidCache.put(mapInfo.getUniqueId(), mapInfo);
+		this.uuidMapIndex.put(mapInfo.getUniqueId(), ((MapDataBridge)mapInfo).bridge$getMapId());
+	}
+
+	public Map<UUID, Integer> getUuidMapIndex() {
+		return this.uuidMapIndex;
 	}
 }

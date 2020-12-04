@@ -54,6 +54,7 @@ import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.map.color.SpongeMapColor;
 import org.spongepowered.common.registry.builtin.sponge.MapColorTypeStreamGenerator;
@@ -78,7 +79,6 @@ public final class MapUtil {
     }
 
     public static Optional<MapInfo> fireCreateMapEvent(final Cause cause, Set<Value<?>> values) {
-        LogManager.getLogger().info("in fireCreateMapEvent!");
         final ServerWorld defaultWorld = SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD);
         final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getSavedData().getOrCreate(MapIdTracker::new, "idcounts");
 
@@ -113,6 +113,9 @@ public final class MapUtil {
             return Optional.empty();
         }
         defaultWorld.registerMapData(mapData);
+
+        ((SpongeMapStorage) Sponge.getServer().getMapStorage()).addMapInfo(mapInfo);
+
         return Optional.of(mapInfo);
     }
 

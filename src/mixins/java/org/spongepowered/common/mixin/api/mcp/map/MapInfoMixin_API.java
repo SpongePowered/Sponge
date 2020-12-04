@@ -34,6 +34,7 @@ import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapDecoration;
 import net.minecraft.world.storage.WorldSavedData;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.item.ItemTypes;
@@ -43,6 +44,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.api.LocationBridge;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.util.Constants;
@@ -64,6 +66,8 @@ public abstract class MapInfoMixin_API extends WorldSavedData implements MapInfo
 
     @Shadow protected abstract void updateDecorations(MapDecoration.Type type, @Nullable IWorld worldIn, String decorationName, double worldX, double worldZ, double rotationIn, @Nullable ITextComponent p_191095_10_);
 
+    @Shadow public abstract void tryAddBanner(IWorld p_204269_1_, BlockPos p_204269_2_);
+
     @Override
     public boolean isLinked(final ItemStack itemStack) {
         return itemStack.getType() == ItemTypes.FILLED_MAP.get()
@@ -72,12 +76,10 @@ public abstract class MapInfoMixin_API extends WorldSavedData implements MapInfo
 
     @Override
     public void addBannerDecoration(final Location<?> bannerLocation) throws IllegalArgumentException {
-        final BlockState blockState = bannerLocation.getBlock();
-        Preconditions.checkArgument(blockState instanceof BannerBlock, "Location must have a banner!");
-        final BannerBlock bannerBlock = (BannerBlock) blockState;
-        final MapBanner mapBanner = new MapBanner((BlockPos) bannerLocation, bannerBlock.getColor(), bannerBlock.getNameTextComponent());
-        this.banners.put(mapBanner.getMapDecorationId(), mapBanner);
-        this.updateDecorations(mapBanner.getDecorationType(), (IWorld)null, mapBanner.getMapDecorationId(), (double)mapBanner.getPos().getX(), (double)mapBanner.getPos().getZ(), 180.0D, mapBanner.getName());
+        final BlockType bannerType = bannerLocation.getBlock().getType();
+
+        Preconditions.checkArgument(bannerType instanceof BannerBlock, "Location must have a banner!");
+        this.tryAddBanner((IWorld) bannerLocation.getWorld(), ((LocationBridge) bannerLocation).bridge$getBlockPos());
         this.markDirty();
     }
 

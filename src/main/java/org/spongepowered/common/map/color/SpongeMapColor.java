@@ -31,6 +31,8 @@ import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Objects;
+
 public class SpongeMapColor implements MapColor {
     private final MapColorType type;
     private final MapShade shade;
@@ -77,5 +79,19 @@ public class SpongeMapColor implements MapColor {
         return DataContainer.createNew()
                 .set(Constants.Map.COLOR_INDEX, ((SpongeMapColorType) this.type).getColorIndex())
                 .set(Constants.Map.SHADE_NUM, ((SpongeMapShade)this.shade).getShadeNum());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SpongeMapColor that = (SpongeMapColor) o;
+        return type.equals(that.type) &&
+                shade.equals(that.shade);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, shade);
     }
 }
