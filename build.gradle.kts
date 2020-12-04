@@ -206,7 +206,7 @@ dependencies {
     implementation("org.ow2.asm:asm-tree:$asmVersion")
 
     // Implementation-only Adventure
-    implementation(platform("net.kyori:adventure-bom:4.2.0"))
+    implementation(platform("net.kyori:adventure-bom:4.3.0"))
     implementation("net.kyori:adventure-serializer-configurate4")
 
     annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")

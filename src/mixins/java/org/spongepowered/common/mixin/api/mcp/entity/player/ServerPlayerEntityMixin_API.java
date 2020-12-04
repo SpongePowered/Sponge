@@ -435,6 +435,21 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
+    public void sendPlayerListHeader(final Component header) {
+        this.api$tabList.setHeader(header);
+    }
+
+    @Override
+    public void sendPlayerListFooter(final Component footer) {
+        this.api$tabList.setFooter(footer);
+    }
+
+    @Override
+    public void sendPlayerListHeaderAndFooter(final Component header, final Component footer) {
+        this.api$tabList.setHeaderAndFooter(header, footer);
+    }
+
+    @Override
     public void showTitle(final Title title) {
         if (this.impl$isFake) {
             return;
