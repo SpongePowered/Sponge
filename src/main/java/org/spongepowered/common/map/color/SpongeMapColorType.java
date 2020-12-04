@@ -30,9 +30,7 @@ import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.Objects;
-
-public class SpongeMapColorType extends SpongeCatalogType implements MapColorType {
+public final class SpongeMapColorType extends SpongeCatalogType implements MapColorType {
     private final int colorIndex;
 
 

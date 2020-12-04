@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.map;
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
 import org.spongepowered.common.util.Constants;
 
-public class MapInfoDataProviders extends DataProviderRegistratorBuilder {
+public final class MapInfoDataProviders extends DataProviderRegistratorBuilder {
 	public MapInfoDataProviders() {
 		super(Constants.Map.MAP_INFO_DATA_PROVIDER_NAME);
 	}

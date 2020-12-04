@@ -29,7 +29,7 @@ import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.util.Constants;
 
-public class SpongeMapShade extends SpongeCatalogType implements MapShade {
+public final class SpongeMapShade extends SpongeCatalogType implements MapShade {
 
 	private final int shadeNum;
 	private final int multiplier;

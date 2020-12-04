@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.map.canvas;
 
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.map.MapCanvas;
@@ -45,7 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class SpongeMapCanvasBuilder implements MapCanvas.Builder {
+public final class SpongeMapCanvasBuilder implements MapCanvas.Builder {
     // If its being used to build from a DataView, or is blank
     // We don't want to create a big array.
     @Nullable
