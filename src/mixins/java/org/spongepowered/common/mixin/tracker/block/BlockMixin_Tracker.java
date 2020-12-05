@@ -83,7 +83,7 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
     )
     private static void tracker$cancelOnBlockRestoration(final CallbackInfo ci) {
         if (Thread.currentThread() == PhaseTracker.SERVER.getSidedThread()) {
-            if (PhaseTracker.SERVER.getPhaseContext().state.isRestoring()) {
+            if (PhaseTracker.SERVER.getPhaseContext().isRestoring()) {
                 ci.cancel();
             }
         }

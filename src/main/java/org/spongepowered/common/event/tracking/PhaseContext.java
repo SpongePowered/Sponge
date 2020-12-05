@@ -77,7 +77,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
         return PhaseContext.EMPTY.get();
     }
 
-    public final IPhaseState<P> state; // Only temporary to verify the state creation with constructors
+    protected final IPhaseState<P> state; // Only temporary to verify the state creation with constructors
     protected boolean isCompleted = false;
     // Only used in hard debugging instances.
     @Nullable private StackTraceElement[] stackTrace;

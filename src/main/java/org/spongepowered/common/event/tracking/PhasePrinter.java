@@ -221,7 +221,7 @@ public final class PhasePrinter {
     }
 
     public static void printMessageWithCaughtException(final PhaseTracker tracker, final String header, final String subheader, final Throwable e) {
-        PhasePrinter.printMessageWithCaughtException(tracker.stack, header, subheader, tracker.getCurrentState(), tracker.getPhaseContext(), e);
+        PhasePrinter.printMessageWithCaughtException(tracker.stack, header, subheader, tracker.getPhaseContext().state, tracker.getPhaseContext(), e);
     }
 
     public static void printMessageWithCaughtException(final PhaseTracker tracker, final String header, final String subHeader, final IPhaseState<?> state, final PhaseContext<?> context, @Nullable final Throwable t) {

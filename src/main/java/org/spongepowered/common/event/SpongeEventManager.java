@@ -444,7 +444,7 @@ public final class SpongeEventManager implements EventManager {
 
     @Nullable
     private EventListenerPhaseContext createPluginContext(final RegisteredListener<?> handler) {
-        if (PhaseTracker.getInstance().getCurrentState().allowsEventListener()) {
+        if (PhaseTracker.getInstance().getPhaseContext().allowsEventListener()) {
             return PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext(PhaseTracker.getInstance())
                 .source(handler.getPlugin());
         }

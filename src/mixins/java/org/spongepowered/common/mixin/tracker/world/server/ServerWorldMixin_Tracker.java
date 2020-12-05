@@ -173,7 +173,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     )
     private void tracker$wrapGlobalEntityTicking(final ServerWorld serverWorld, final Consumer<Entity> consumer, final Entity entity) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
-        if (currentContext.state.alreadyCapturingEntityTicks()) {
+        if (currentContext.alreadyCapturingEntityTicks()) {
             this.shadow$guardEntityTick(consumer, entity);
             return;
         }
@@ -195,7 +195,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     private void tracker$wrapNormalEntityTick(final ServerWorld serverWorld, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity
     ) {
-        final IPhaseState<@NonNull ?> currentState = PhaseTracker.SERVER.getCurrentState();
+        final PhaseContext<@NonNull ?> currentState = PhaseTracker.SERVER.getPhaseContext();
         if (currentState.alreadyCapturingEntityTicks()) {
             this.shadow$guardEntityTick(entityUpdateConsumer, entity);
             return;
@@ -208,7 +208,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         if (!SpongeImplHooks.shouldTickTile(tileEntity)) {
             return;
         }
-        final IPhaseState<?> state = PhaseTracker.SERVER.getCurrentState();
+        final PhaseContext<@NonNull ?> state = PhaseTracker.SERVER.getPhaseContext();
         if (state.alreadyCapturingTileTicks()) {
             tileEntity.tick();
             return;
@@ -312,9 +312,8 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         final BlockEventData blockEventData = (BlockEventData) data;
         final TrackerBlockEventDataBridge blockEvent = (TrackerBlockEventDataBridge) blockEventData;
-        final IPhaseState phaseState = currentContext.state;
         // Short circuit phase states who do not track during block events
-        if (phaseState.ignoresBlockEvent()) {
+        if (currentContext.ignoresBlockEvent()) {
             return list.add(blockEventData);
         }
 
@@ -603,8 +602,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         // Otherwise, let's go on and check if we're recording transactions,
         // and if so, log the tile entity removal (may associate with an existing transaction,
         // or create a new transaction.
-        final PhaseContext<?> current = PhaseTracker.SERVER.getPhaseContext();
-        final IPhaseState state = current.state;
+        final PhaseContext<@NonNull ?> current = PhaseTracker.SERVER.getPhaseContext();
         if (current.getTransactor().logTileRemoval(tileentity, () -> (ServerWorld) (Object) this)) {
             final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
                 .addEffect(RemoveTileEntityFromWorldEffect.getInstance())

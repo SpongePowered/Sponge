@@ -54,7 +54,6 @@ import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -142,7 +141,6 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 
         // Sponge Start - Build out the BlockTransaction
         final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState state = context.state;
         final @Nullable TileEntity existing = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
         // Build a transaction maybe?
         final WeakReference<ServerWorld> ref = new WeakReference<>((ServerWorld) this.world);
@@ -251,7 +249,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     private void tracker$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
         final java.util.function.Predicate<? super Entity> filter, final CallbackInfo ci
     ) {
-        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().isCollision()) {
+        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getPhaseContext().isCollision()) {
             return;
         }
 
@@ -266,7 +264,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, entityIn, listToFill);
 
         if (event == null || event.isCancelled()) {
-            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
+            if (event == null && !PhaseTracker.getInstance().getPhaseContext().isTicking()) {
                 return;
             }
             listToFill.clear();

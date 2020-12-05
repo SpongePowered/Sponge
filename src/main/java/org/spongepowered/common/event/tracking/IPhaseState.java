@@ -89,7 +89,7 @@ import java.util.stream.Collectors;
 @DefaultQualifier(NonNull.class)
 public interface IPhaseState<C extends PhaseContext<C>> {
 
-    BiConsumer<CauseStackManager.StackFrame, ? extends PhaseContext<?>> DEFAULT_OWNER_NOTIFIER = (frame, ctx) -> {
+    BiConsumer<CauseStackManager.StackFrame, ? extends PhaseContext<@NonNull ?>> DEFAULT_OWNER_NOTIFIER = (frame, ctx) -> {
         if (ctx.usedFrame == null) {
             ctx.usedFrame = new ArrayDeque<>();
         }
@@ -289,7 +289,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Gets whether this state will already consider any captures or extra processing for a
-     * {@link Block#tick(BlockState, net.minecraft.world.World, BlockPos, Random)}. Again usually
+     * {@link Block#tick(BlockState, ServerWorld, BlockPos, Random)}. Again usually
      * considered for world generation or post states or block restorations.
      *
      * @param context The phase data currently present

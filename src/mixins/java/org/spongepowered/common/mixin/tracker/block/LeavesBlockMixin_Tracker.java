@@ -28,6 +28,7 @@ import net.minecraft.block.LeavesBlock;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.util.math.BlockPos;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -37,7 +38,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -54,12 +54,11 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
     @Redirect(method = "tick",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/server/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
-    private boolean tracker$switchContextForDecay(net.minecraft.world.server.ServerWorld serverWorld, BlockPos pos,
-            net.minecraft.block.BlockState newState, int flags) {
+    private boolean tracker$switchContextForDecay(final net.minecraft.world.server.ServerWorld serverWorld, final BlockPos pos,
+            final net.minecraft.block.BlockState newState, final int flags) {
         final PhaseTracker instance = PhaseTracker.getInstance();
-        final PhaseContext<?> currentContext = instance.getPhaseContext();
-        final IPhaseState<?> currentState = currentContext.state;
-        try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext(instance)
+        final PhaseContext<@NonNull ?> currentContext = instance.getPhaseContext();
+        try (final PhaseContext<@NonNull ?> context = currentContext.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext(instance)
                                            .source(new SpongeLocatableBlockBuilder()
                                                .world((ServerWorld) serverWorld)
                                                .position(pos.getX(), pos.getY(), pos.getZ())
@@ -85,13 +84,12 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
      * @param pos The position
      */
     @Overwrite
-    public void randomTick(net.minecraft.block.BlockState state, net.minecraft.world.server.ServerWorld worldIn, BlockPos pos, Random random) {
+    public void randomTick(final net.minecraft.block.BlockState state, final net.minecraft.world.server.ServerWorld worldIn, final BlockPos pos, final Random random) {
         if (!state.get(LeavesBlockMixin_Tracker.PERSISTENT) && state.get(LeavesBlockMixin_Tracker.DISTANCE) == 7) {
             // Sponge Start - PhaseTracker checks and phase entry
             if (!((WorldBridge) worldIn).bridge$isFake()) {
-                final PhaseContext<?> peek = PhaseTracker.getInstance().getPhaseContext();
-                final IPhaseState<?> currentState = peek.state;
-                try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext(PhaseTracker.SERVER)
+                final PhaseContext<@NonNull ?> peek = PhaseTracker.getInstance().getPhaseContext();
+                try (final PhaseContext<@NonNull ?> context = peek.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext(PhaseTracker.SERVER)
                         .source(new SpongeLocatableBlockBuilder()
                                 .world((ServerWorld) worldIn)
                                 .position(pos.getX(), pos.getY(), pos.getZ())

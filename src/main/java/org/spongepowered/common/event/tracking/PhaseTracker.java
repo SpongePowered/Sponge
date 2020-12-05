@@ -392,7 +392,7 @@ public final class PhaseTracker implements CauseStackManager {
         }
 
         final boolean hasCaptures = currentContext.hasCaptures();
-        try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, currentContext, hasCaptures)) {
+        try (final @Nullable UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(currentContext, hasCaptures)) {
             // With UnwindingPhaseContext#unwind checking for post, if it is null, the try
             // will not attempt to close the phase context. If it is required,
             // it already automatically pushes onto the phase stack, along with
@@ -414,22 +414,6 @@ public final class PhaseTracker implements CauseStackManager {
         // If pop is called, the Deque will already throw an exception if there is no element
         // so it's an error properly handled.
         this.stack.pop();
-
-        if (this.stack.isEmpty()) {
-            // TODO Minecraft 1.14 - PhaseTracker is per-engine, cannot assume this anymore
-//            for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeCommon.getWorldManager().getWorlds()) {
-//                final TrackedWorldBridge trackedWorld = (TrackedWorldBridge) apiWorld;
-//                if (trackedWorld.bridge$getProxyAccess().hasProxy()) {
-//                    new PrettyPrinter().add("BlockPRoxy has extra proxies not pruned!").centre().hr()
-//                        .add("When completing the Phase: %s, some foreign BlockProxy was pushed, but never pruned.", state)
-//                        .add()
-//                        .add("Please analyze the following exception from the proxy:")
-//                        .add(new Exception())
-//                        .print(System.err);
-//
-//                }
-//            }
-        }
 
     }
 

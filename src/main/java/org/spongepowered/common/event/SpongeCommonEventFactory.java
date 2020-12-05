@@ -506,7 +506,7 @@ public final class SpongeCommonEventFactory {
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(final World world, final BlockPos sourcePos, final EnumSet<net.minecraft.util.Direction> notifiedSides) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         // Don't fire notify events during world gen or while restoring
-        if (context.state.isWorldGeneration() || context.state.isRestoring()) {
+        if (context.isWorldGeneration() || context.isRestoring()) {
             return null;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
