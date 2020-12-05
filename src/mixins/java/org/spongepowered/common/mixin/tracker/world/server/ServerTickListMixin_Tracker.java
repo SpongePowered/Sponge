@@ -22,38 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.generation;
+package org.spongepowered.common.mixin.tracker.world.server;
 
 import net.minecraft.world.NextTickListEntry;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.bridge.world.TrackedNextTickEntryBridge;
+import net.minecraft.world.server.ServerTickList;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import java.util.function.BiConsumer;
+@Mixin(ServerTickList.class)
+public abstract class ServerTickListMixin_Tracker<T> {
 
-public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<ChunkLoadContext> {
+    @Shadow protected abstract void shadow$addEntry(NextTickListEntry<T> p_219504_1_);
 
-    private final BiConsumer<CauseStackManager.StackFrame, ChunkLoadContext> CHUNK_LOAD_MODIFIER =
-        super.getFrameModifier().andThen((frame, context) -> {
-            frame.pushCause(context.getChunk());
-        });
-
-    public ChunkLoadPhaseState() {
-        super("CHUNK_LOAD");
-    }
-
-    @Override
-    public ChunkLoadContext createNewContext(final PhaseTracker tracker) {
-        return new ChunkLoadContext(this, tracker);
-    }
-
-    @Override
-    public BiConsumer<CauseStackManager.StackFrame, ChunkLoadContext> getFrameModifier() {
-        return this.CHUNK_LOAD_MODIFIER;
-    }
-
-    @Override
-    public void associateScheduledTickUpdate(final ChunkLoadContext asContext, final NextTickListEntry<?> entry) {
-        ((TrackedNextTickEntryBridge) entry).bridge$setIsPartOfWorldGeneration(true);
+    @Redirect(method = "scheduleTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerTickList;addEntry(Lnet/minecraft/world/NextTickListEntry;)V"))
+    private void tracker$associatePhaseContextWithTickEntry(final ServerTickList<T> thisList, final NextTickListEntry<T> entry) {
+        if (!PhaseTracker.SERVER.onSidedThread()) {
+            this.shadow$addEntry(entry);
+            return;
+        }
+        final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
+        phaseContext.associateScheduledTickUpdate(entry);
     }
 }

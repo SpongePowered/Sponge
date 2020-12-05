@@ -27,33 +27,53 @@ package org.spongepowered.common.event.tracking.phase.generation;
 import net.minecraft.world.NextTickListEntry;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.bridge.world.TrackedNextTickEntryBridge;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
-public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<ChunkLoadContext> {
+final class DeferredScheduledUpdatePhaseState extends GeneralGenerationPhaseState<DeferredScheduledUpdatePhaseState.Context> {
 
-    private final BiConsumer<CauseStackManager.StackFrame, ChunkLoadContext> CHUNK_LOAD_MODIFIER =
+    private final BiConsumer<CauseStackManager.StackFrame, Context> CHUNK_LOAD_MODIFIER =
         super.getFrameModifier().andThen((frame, context) -> {
-            frame.pushCause(context.getChunk());
+            frame.pushCause(context.getEntry());
         });
 
-    public ChunkLoadPhaseState() {
+    public DeferredScheduledUpdatePhaseState() {
         super("CHUNK_LOAD");
     }
 
     @Override
-    public ChunkLoadContext createNewContext(final PhaseTracker tracker) {
-        return new ChunkLoadContext(this, tracker);
+    public Context createNewContext(final PhaseTracker tracker) {
+        return new Context(tracker);
     }
 
     @Override
-    public BiConsumer<CauseStackManager.StackFrame, ChunkLoadContext> getFrameModifier() {
+    public BiConsumer<CauseStackManager.StackFrame, Context> getFrameModifier() {
         return this.CHUNK_LOAD_MODIFIER;
     }
 
     @Override
-    public void associateScheduledTickUpdate(final ChunkLoadContext asContext, final NextTickListEntry<?> entry) {
+    public void associateScheduledTickUpdate(final Context asContext, final NextTickListEntry<?> entry) {
         ((TrackedNextTickEntryBridge) entry).bridge$setIsPartOfWorldGeneration(true);
+    }
+
+    public static final class Context extends GenerationContext<Context> {
+
+        private NextTickListEntry<?> entry;
+
+        Context(final PhaseTracker tracker) {
+            super(GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE, tracker);
+        }
+
+        public Context scheduledUpdate(final NextTickListEntry<?> entry) {
+            this.entry = entry;
+            return this;
+        }
+
+        public NextTickListEntry<?> getEntry() {
+            return Objects.requireNonNull(this.entry, "NextTickListEntry was not initialized");
+        }
     }
 }

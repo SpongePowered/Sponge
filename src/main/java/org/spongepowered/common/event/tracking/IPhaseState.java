@@ -33,6 +33,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.loot.LootContext;
@@ -575,5 +576,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default void foldContextForThread(final C context, final TrackedTickDelayedTaskBridge returnValue) {
+    }
+
+    default void associateScheduledTickUpdate(C asContext, NextTickListEntry<?> entry) {
+
     }
 }

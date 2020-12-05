@@ -30,8 +30,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ITickList;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkPrimerTickList;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
@@ -45,6 +47,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -60,6 +63,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
+import org.spongepowered.common.event.tracking.phase.generation.ChunkLoadContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
@@ -70,6 +74,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 
 @Mixin(Chunk.class)
@@ -293,4 +298,17 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 //            listToFill.clear();
 //        }
 //    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Redirect(method = "rescheduleTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/ChunkPrimerTickList;postProcess(Lnet/minecraft/world/ITickList;Ljava/util/function/Function;)V"))
+    private void tracker$wrapRescheduledTicks(final ChunkPrimerTickList chunkPrimerTickList, final ITickList<?> tickList, final Function<BlockPos, ?> func) {
+        if (!PhaseTracker.SERVER.onSidedThread()) {
+            return;
+        }
+        try (final ChunkLoadContext context = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)) {
+            context.chunk((Chunk) (Object) this);
+            context.buildAndSwitch();
+            chunkPrimerTickList.postProcess(tickList, func);
+        }
+    }
 }

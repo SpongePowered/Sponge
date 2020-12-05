@@ -31,6 +31,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.loot.LootContext;
@@ -490,5 +491,9 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
 
     default void foldContextForThread(TrackedTickDelayedTaskBridge returnValue) {
         this.getState().foldContextForThread(this.asContext(), returnValue);
+    }
+
+    default void associateScheduledTickUpdate(NextTickListEntry<?> entry) {
+        this.getState().associateScheduledTickUpdate(this.asContext(), entry);
     }
 }

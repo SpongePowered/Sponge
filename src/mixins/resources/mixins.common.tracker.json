@@ -27,11 +27,13 @@
         "util.concurrent.ThreadTaskExecutorMixin_Tracker",
         "util.concurrent.TickDelayedTaskMixin_Tracker",
         "world.ExplosionMixin_Tracker",
+        "world.NextTickListEntryMixin_Tracker",
         "world.WorldMixin_Tracker",
         "world.chunk.ChunkMixin_Tracker",
         "world.end.DragonFightManagerMixin_Tracker",
         "world.server.ChunkManagerMixin_Tracker",
         "world.server.ServerChunkProviderMixin_Tracker",
+        "world.server.ServerTickListMixin_Tracker",
         "world.server.ServerWorldMixin_Tracker"
     ],
     "injectors": {

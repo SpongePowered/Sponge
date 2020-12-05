@@ -381,7 +381,7 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
                 .log(SpongeCommon.getLogger(), Level.ERROR);
             return;
         }
-        if (PhaseTracker.getInstance().getPhaseContext() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+        if (PhaseTracker.getInstance().getPhaseContext() == GenerationPhase.State.CHUNK_LOADING) {
             return;
         }
         GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)
@@ -394,7 +394,7 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
     @Inject(method = "setLoaded(Z)V", at = @At("RETURN"))
     private void tracker$endLoad(final boolean loaded, final CallbackInfo callbackInfo) {
         if (!((WorldBridge) this.shadow$getWorld()).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
-            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_LOADING) {
                 return;
             }
             // IF we're not on the main thread,

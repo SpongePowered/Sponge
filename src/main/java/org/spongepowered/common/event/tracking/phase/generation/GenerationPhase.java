@@ -50,6 +50,8 @@ public final class GenerationPhase {
 
         public static final IPhaseState<ChunkLoadContext> CHUNK_LOADING = new ChunkLoadPhaseState().bake();
 
+        public static final IPhaseState<DeferredScheduledUpdatePhaseState.Context> DEFERRED_SCHEDULED_UPDATE = new DeferredScheduledUpdatePhaseState();
+
         public static final IPhaseState<GenericGenerationContext> CHUNK_REGENERATING_LOAD_EXISTING = new ChunkRegeneratingLoadExistingPhaseState();
 
         public static final IPhaseState<ChunkRegenerateContext> CHUNK_REGENERATING = new ChunkRegeneratePhaseState();

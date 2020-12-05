@@ -35,6 +35,7 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SEntityVelocityPacket;
@@ -44,6 +45,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
@@ -79,6 +81,7 @@ import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.TrackedBlockBridge;
 import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedNextTickEntryBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -115,6 +118,8 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Chun
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.TileEntityPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
+import org.spongepowered.common.event.tracking.phase.generation.ChunkLoadContext;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.mixin.tracker.world.WorldMixin_Tracker;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -232,10 +237,20 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     @Redirect(method = "tickBlock",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockState;tick(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
-    private void tracker$wrapBlockTick(final BlockState blockState, final ServerWorld worldIn, final BlockPos posIn, final Random randomIn) {
+    private void tracker$wrapBlockTick(final BlockState blockState, final ServerWorld worldIn, final BlockPos posIn, final Random randomIn, final NextTickListEntry<Block> entry) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
-        if (currentContext.alreadyCapturingBlockTicks() || currentContext.doesBlockEventTracking()) {
+        if (currentContext.alreadyCapturingBlockTicks() || currentContext.ignoresBlockUpdateTick()) {
             blockState.tick(worldIn, posIn, randomIn);
+            return;
+        }
+        if (((TrackedNextTickEntryBridge) entry).bridge$isPartOfWorldGeneration()) {
+            try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE.createPhaseContext(PhaseTracker.SERVER)
+                .source(this)
+                .scheduledUpdate(entry)
+            ) {
+                context.buildAndSwitch();
+                blockState.tick(worldIn, posIn, randomIn);
+            }
             return;
         }
         TrackingUtil.updateTickBlock(this, blockState, posIn, randomIn);
@@ -244,10 +259,20 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     @Redirect(method = "tickFluid",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/fluid/IFluidState;tick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
-    private void tracker$wrapFluidTick(final IFluidState fluidState, final World worldIn, final BlockPos pos) {
+    private void tracker$wrapFluidTick(final IFluidState fluidState, final World worldIn, final BlockPos pos, final NextTickListEntry<Fluid> entry) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
-        if (currentContext.alreadyCapturingBlockTicks() || currentContext.ignoresBlockUpdateTick()) {
+        if (currentContext.alreadyCapturingBlockTicks() || currentContext.ignoresBlockUpdateTick() || ((TrackedNextTickEntryBridge) entry).bridge$isPartOfWorldGeneration()) {
             fluidState.tick(worldIn, pos);
+            return;
+        }
+        if (((TrackedNextTickEntryBridge) entry).bridge$isPartOfWorldGeneration()) {
+            try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE.createPhaseContext(PhaseTracker.SERVER)
+                .source(this)
+                .scheduledUpdate(entry)
+            ) {
+                context.buildAndSwitch();
+                fluidState.tick(worldIn, pos);
+            }
             return;
         }
         TrackingUtil.updateTickFluid(this, fluidState, pos);

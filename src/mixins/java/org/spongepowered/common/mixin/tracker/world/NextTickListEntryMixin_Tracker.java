@@ -22,38 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.generation;
+package org.spongepowered.common.mixin.tracker.world;
 
 import net.minecraft.world.NextTickListEntry;
-import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.TrackedNextTickEntryBridge;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import java.util.function.BiConsumer;
+@Mixin(NextTickListEntry.class)
+public abstract class NextTickListEntryMixin_Tracker implements TrackedNextTickEntryBridge {
 
-public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<ChunkLoadContext> {
+    private boolean tracker$isWorldGen = false;
 
-    private final BiConsumer<CauseStackManager.StackFrame, ChunkLoadContext> CHUNK_LOAD_MODIFIER =
-        super.getFrameModifier().andThen((frame, context) -> {
-            frame.pushCause(context.getChunk());
-        });
-
-    public ChunkLoadPhaseState() {
-        super("CHUNK_LOAD");
+    @Override
+    public boolean bridge$isPartOfWorldGeneration() {
+        return this.tracker$isWorldGen;
     }
 
     @Override
-    public ChunkLoadContext createNewContext(final PhaseTracker tracker) {
-        return new ChunkLoadContext(this, tracker);
-    }
-
-    @Override
-    public BiConsumer<CauseStackManager.StackFrame, ChunkLoadContext> getFrameModifier() {
-        return this.CHUNK_LOAD_MODIFIER;
-    }
-
-    @Override
-    public void associateScheduledTickUpdate(final ChunkLoadContext asContext, final NextTickListEntry<?> entry) {
-        ((TrackedNextTickEntryBridge) entry).bridge$setIsPartOfWorldGeneration(true);
+    public void bridge$setIsPartOfWorldGeneration(final boolean isLoading) {
+        this.tracker$isWorldGen = isLoading;
     }
 }
