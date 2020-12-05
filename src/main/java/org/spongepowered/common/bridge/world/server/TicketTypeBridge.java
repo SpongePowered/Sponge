@@ -22,26 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.bridge.world.server;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import java.util.function.Function;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+public interface TicketTypeBridge<N, T> {
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+    void bridge$setTypeConverter(Function<T, N> converter);
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
-
-
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(boolean flush);
-
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
+    N bridge$convertToNativeType(T spongeType);
 
 }

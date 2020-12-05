@@ -22,26 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.mixin.core.server.level;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.Ticket;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.bridge.world.server.TicketBridge;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+@Mixin(Ticket.class)
+public abstract class TicketMixin implements TicketBridge {
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+    private long impl$chunkPosition;
+    private Ticket<?> impl$parent;
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
+    @Override
+    public long bridge$chunkPosition() {
+        return this.impl$chunkPosition;
+    }
 
+    @Override
+    public void bridge$setChunkPosition(final long chunkPos) {
+        this.impl$chunkPosition = chunkPos;
+    }
 
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(boolean flush);
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    @Override
+    public <T> org.spongepowered.api.world.server.Ticket<T> bridge$retrieveAppropriateTicket() {
+        if (this.impl$parent != null) {
+            return (org.spongepowered.api.world.server.Ticket<T>) (Object) this.impl$parent;
+        }
+        return (org.spongepowered.api.world.server.Ticket<T>) this;
+    }
 
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
+    @Override
+    public void bridge$setParentTicket(final Ticket<?> parentTicket) {
+        this.impl$parent = parentTicket;
+    }
 
 }

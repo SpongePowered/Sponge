@@ -22,26 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.mixin.api.minecraft.server.level;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.server.TicketType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+@Mixin(net.minecraft.server.level.TicketType.class)
+public abstract class TicketTypeMixin_API<T> implements TicketType<T> {
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+    // @formatter:off
+    @Shadow @Final private long timeout;
+    // @formatter:on
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
-
-
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(boolean flush);
-
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
+    @Override
+    @NonNull
+    public Ticks lifetime() {
+        return Ticks.of(this.timeout);
+    }
 
 }

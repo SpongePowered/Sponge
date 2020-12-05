@@ -24,24 +24,27 @@
  */
 package org.spongepowered.common.accessor.server.level;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.Ticket;
+import net.minecraft.server.level.TicketType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+@Mixin(Ticket.class)
+public interface TicketAccessor<T> {
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+    @Invoker("<init>")
+    static <T> Ticket<T> accessor$createInstance(final TicketType<T> ticketType, final int ticketLevel, final T key) {
+        throw new UntransformedInvokerError();
+    }
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
+    @Accessor("createdTick") long accessor$createdTick();
 
+    @Accessor("key") T accessor$key();
 
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(boolean flush);
+    @Invoker("timedOut") boolean invoker$timedOut(long currentTimestamp);
 
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
+    @Invoker("setCreatedTick") void invoker$setCreatedTick(long timestamp);
 
 }

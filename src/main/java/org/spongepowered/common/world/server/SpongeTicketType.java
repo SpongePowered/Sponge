@@ -22,26 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.world.server;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import net.minecraft.server.level.TicketType;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.common.bridge.world.server.TicketTypeBridge;
+import org.spongepowered.common.util.SpongeTicks;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+import java.util.Comparator;
+import java.util.function.Function;
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+// For use with our own ticket types.
+public final class SpongeTicketType<T> extends TicketType<T> implements org.spongepowered.api.world.server.TicketType<T> {
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
+    @SuppressWarnings({"ConstantConditions", "unchecked"})
+    public SpongeTicketType(final String param0, final Comparator<T> param1, final long param2) {
+        super(param0, param1, param2);
+        // base class was mixed in to, so we know we can do this.
+        ((TicketTypeBridge<T, T>) (Object) this).bridge$setTypeConverter(Function.identity());
+    }
 
-
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(boolean flush);
-
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
+    @Override
+    public Ticks lifetime() {
+        return new SpongeTicks(this.timeout());
+    }
 
 }

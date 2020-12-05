@@ -34,6 +34,7 @@ import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.world.server.SpongeServerLocation;
 import org.spongepowered.math.vector.Vector2i;
+import org.spongepowered.math.vector.Vector3i;
 
 public final class VecHelper {
 
@@ -127,20 +128,20 @@ public final class VecHelper {
 
     // === MC ChunkPos ---> Flow Vector3i ===
 
-    public static Vec3i toVector3i(final ChunkPos pos) {
+    public static Vector3i toVector3i(final ChunkPos pos) {
         if (pos == null) {
             return null;
         }
-        return new Vec3i(pos.x, 0, pos.z);
+        return new Vector3i(pos.x, 0, pos.z);
     }
 
     // === Flow Vector3i --> MC ChunkPos ===
 
-    public static ChunkPos toChunkPos(final Vec3i vector) {
+    public static ChunkPos toChunkPos(final Vector3i vector) {
         if (vector == null) {
             return null;
         }
-        return new ChunkPos(vector.getX(), vector.getZ());
+        return new ChunkPos(vector.x(), vector.x());
     }
 
     // === MC Vector3d --> flow Vector3d ==

@@ -22,26 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.bridge.world;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.server.Ticket;
+import org.spongepowered.api.world.server.TicketType;
+import org.spongepowered.math.vector.Vector3i;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+import java.util.Collection;
+import java.util.Optional;
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+public interface DistanceManagerBridge {
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
+    boolean bridge$checkTicketValid(Ticket<?> ticket);
 
+    Ticks bridge$timeLeft(Ticket<?> ticket);
 
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(boolean flush);
+    <S, T> Optional<Ticket<T>> bridge$registerTicket(ServerWorld world, TicketType<T> ticketType, Vector3i pos, T value, int distanceLimit);
 
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
+    boolean bridge$renewTicket(Ticket<?> ticket);
+
+    boolean bridge$releaseTicket(Ticket<?> ticket);
+
+    <T> Collection<Ticket<T>> bridge$tickets(TicketType<T> ticketType);
 
 }

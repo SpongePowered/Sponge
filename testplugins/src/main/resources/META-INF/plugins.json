@@ -537,6 +537,31 @@
                 "source": "https://www.spongepowered.org/source",
                 "issues": "https://www.spongepowered.org/issues"
             },
+            "contributors": [
+                {
+                    "name": "SpongePowered",
+                    "description": "Lead Developer"
+                }
+            ],
+            "dependencies": [
+                {
+                    "id": "spongeapi",
+                    "version": "8.0.0"
+                }
+            ]
+        },
+        {
+            "loader": "java_plain",
+            "id": "chunkmanagertest",
+            "name": "Chunk Manager Test",
+            "version": "1.0.0",
+            "main-class": "org.spongepowered.test.chunkmanager.ChunkManagerTest",
+            "description": "Tests the Chunk Manager",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
             "contributors": [{
                 "name": "SpongePowered",
                 "description": "Lead Developer"
