@@ -25,6 +25,10 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.google.gson.JsonElement;
+import com.mojang.datafixers.Dynamic;
+import com.mojang.datafixers.types.JsonOps;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.WorldInfo;
@@ -43,6 +47,7 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import javax.annotation.Nullable;
@@ -53,6 +58,7 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     // @formatter:off
     @Shadow private boolean commandsAllowed;
     @Shadow private boolean bonusChestEnabled;
+    @Shadow private JsonElement generatorOptions;
     // @formatter:on
 
     private ResourceKey impl$key;
@@ -153,7 +159,8 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
 
     @Override
     public void bridge$setGeneratorSettings(final DataContainer generatorSettings) {
-        // TODO DataContainer -> JsonElement
+        final CompoundNBT nbt = NbtTranslator.getInstance().translate(generatorSettings);
+        this.generatorOptions = Dynamic.convert(NBTDynamicOps.INSTANCE, JsonOps.INSTANCE, nbt);
     }
 
     @Override
