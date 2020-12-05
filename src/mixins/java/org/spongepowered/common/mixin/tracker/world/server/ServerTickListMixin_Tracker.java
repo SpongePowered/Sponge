@@ -26,12 +26,10 @@ package org.spongepowered.common.mixin.tracker.world.server;
 
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.server.ServerTickList;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(ServerTickList.class)
@@ -41,11 +39,7 @@ public abstract class ServerTickListMixin_Tracker<T> {
 
     @Redirect(method = "scheduleTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerTickList;addEntry(Lnet/minecraft/world/NextTickListEntry;)V"))
     private void tracker$associatePhaseContextWithTickEntry(final ServerTickList<T> thisList, final NextTickListEntry<T> entry) {
-        if (!PhaseTracker.SERVER.onSidedThread()) {
-            this.shadow$addEntry(entry);
-            return;
-        }
-        final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
-        phaseContext.associateScheduledTickUpdate(entry);
+        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate(entry);
+        this.shadow$addEntry(entry);
     }
 }
