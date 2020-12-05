@@ -45,8 +45,12 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -55,6 +59,8 @@ import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -63,6 +69,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.entity.LivingEntityBridge;
@@ -73,15 +80,18 @@ import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.SpongeImplHooks;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(LivingEntity.class)
@@ -102,6 +112,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected boolean dead;
     @Shadow public int deathTime;
     @Shadow protected int scoreValue;
+    @Shadow protected ItemStack activeItemStack;
 
     @Shadow public abstract IAttributeInstance shadow$getAttribute(IAttribute attribute);
     @Shadow public abstract void shadow$setHealth(float health);
@@ -682,6 +693,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         return 0;
     }
 
+
     @Inject(method = "onItemUseFinish",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/LivingEntity;resetActiveHand()V"))
@@ -692,7 +704,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     // Data delegated methods
-
+     */
     // Start implementation of UseItemstackEvent
 
     @Inject(method = "setActiveHand",
@@ -743,9 +755,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     private void impl$addSelfToFrame(final CauseStackManager.StackFrame frame, final ItemStackSnapshot snapshot) {
         frame.pushCause(this);
         frame.addContext(EventContextKeys.USED_ITEM, snapshot);
-        if (this instanceof User) {
-            frame.addContext(EventContextKeys.CREATOR, (User) this);
-            frame.addContext(EventContextKeys.NOTIFIER, (User) this);
+        if (this instanceof ServerPlayer) {
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayer) this).getUser());
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayer) this).getUser());
         }
     }
 
@@ -786,7 +798,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Inject(method = "onItemUseFinish",
         cancellable = true,
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/LivingEntity;updateItemUse(Lnet/minecraft/item/ItemStack;I)V"))
+            target = "Lnet/minecraft/entity/LivingEntity;triggerItemUseEffects(Lnet/minecraft/item/ItemStack;I)V"))
     private void impl$onUpdateItemUse(final CallbackInfo ci) {
         if (this.world.isRemote) {
             return;
@@ -893,7 +905,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot));
         }
         this.impl$activeItemStackCopy = null;
-    }*/
+    }
 
     // End implementation of UseItemStackEvent
 }
