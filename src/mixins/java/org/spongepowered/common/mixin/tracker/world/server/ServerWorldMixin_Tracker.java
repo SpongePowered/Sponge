@@ -261,7 +261,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             target = "Lnet/minecraft/fluid/IFluidState;tick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
     private void tracker$wrapFluidTick(final IFluidState fluidState, final World worldIn, final BlockPos pos, final NextTickListEntry<Fluid> entry) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
-        if (currentContext.alreadyCapturingBlockTicks() || currentContext.ignoresBlockUpdateTick() || ((TrackedNextTickEntryBridge) entry).bridge$isPartOfWorldGeneration()) {
+        if (currentContext.alreadyCapturingBlockTicks() || currentContext.ignoresBlockUpdateTick()) {
             fluidState.tick(worldIn, pos);
             return;
         }
