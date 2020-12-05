@@ -251,6 +251,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             } else {
                 this.connection.setPlayerLocation(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.rotationYaw, this.rotationPitch,
                         new HashSet<>());
+                this.connection.captureCurrentPosition();
             }
         }
 
