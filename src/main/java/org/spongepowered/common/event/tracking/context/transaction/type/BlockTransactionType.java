@@ -59,17 +59,17 @@ final class BlockTransactionType extends TransactionType<ChangeBlockEvent.All> {
     @Override
     protected void consumeEventsAndMarker(final Collection<? extends ChangeBlockEvent.All> changeBlockEvents, final Marker marker) {
 
-        final Multimap<ResourceKey, ChangeBlockEvent> eventsByWorld = LinkedListMultimap.create();
+        final Multimap<ResourceKey, ChangeBlockEvent.All> eventsByWorld = LinkedListMultimap.create();
         changeBlockEvents.forEach(event -> eventsByWorld.put(event.getWorld().getKey(), event));
 
-        eventsByWorld.forEach((key, events) -> {
+        eventsByWorld.asMap().forEach((key, events) -> {
             final Optional<ServerWorld> serverWorld = ((SpongeServer) SpongeCommon.getServer()).getWorldManager().getWorld(key);
             if (!serverWorld.isPresent()) {
                 return;
             }
             final ListMultimap<BlockPos, SpongeBlockSnapshot> positions = LinkedListMultimap.create();
             // Gather transactions that were valid
-            changeBlockEvents.stream()
+            events.stream()
                 .flatMap(event -> event.getTransactions().stream())
                 .filter(BlockTransaction::isValid)
                 .forEach(transactions -> {
