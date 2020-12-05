@@ -32,21 +32,26 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.api.world.gen.GeneratorModifierType;
+import org.spongepowered.api.world.gen.GeneratorModifierTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Plugin("worldtest")
@@ -71,6 +76,7 @@ public final class WorldTest {
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
         final Parameter.Value<ResourceKey> copyWorldKeyParameter = Parameter.resourceKey().setKey("copy_world").build();
         final Parameter.Value<String> renameWorldKeyParameter = Parameter.string().setKey("new_world_name").build();
+        final Parameter.Value<BiomeType> biomeListTypeParameter = Parameter.catalogedElementWithMinecraftAndSpongeDefaults(BiomeType.class).setKey("biome_types").consumeAllRemaining().optional().build();
 
         final Parameter.Value<ResourceKey> unloadedWorldKeyParameter = Parameter.resourceKey()
                 .setSuggestions((context, currentInput) -> Sponge.getServer().getWorldManager()
@@ -174,15 +180,29 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                         .builder()
-                        .parameters(worldKeyParameter, dimensionTypeParameter)
+                        .parameters(worldKeyParameter, dimensionTypeParameter, biomeListTypeParameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.world.create")
                         .setExecutor(context -> {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
                             final DimensionType dimensionType = context.requireOne(dimensionTypeParameter);
+                            final Collection<? extends BiomeType> biomes = context.getAll(biomeListTypeParameter);
+                            DataContainer settings = DataContainer.createNew();
+                            GeneratorModifierType modifierType = GeneratorModifierTypes.NONE.get();
+                            if (!biomes.isEmpty()) {
+                                if (biomes.size() == 1) {
+                                    settings.set(DataQuery.of("biome_source", "type"), "minecraft:fixed");
+                                } else {
+                                    settings.set(DataQuery.of("biome_source", "type"), "minecraft:checkerboard");
+                                }
+                                settings.set(DataQuery.of("biome_source", "options", "biomes"), biomes.stream().map(BiomeType::getKey).map(ResourceKey::asString).collect(Collectors.toList()));
+                                modifierType = Sponge.getRegistry().getCatalogRegistry().get(GeneratorModifierType.class, ResourceKey.resolve("buffet")).get();
+                            }
                             final WorldArchetype archetype = WorldArchetype.builder()
                                     .key(ResourceKey.of(this.plugin, "nether_style"))
                                     .dimensionType(dimensionType)
                                     .generateSpawnOnLoad(true)
+                                    .generatorModifierType(modifierType)
+                                    .generatorSettings(settings)
                                     .build();
                             Sponge.getServer().getWorldManager().createProperties(key, archetype).whenComplete(((worldProperties, throwable) -> {
                                 if (throwable != null) {
