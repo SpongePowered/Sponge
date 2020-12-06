@@ -66,6 +66,8 @@ public class ShouldFire {
     public static boolean CHANGE_BLOCK_EVENT_POST = false;
     public static boolean CHANGE_BLOCK_EVENT_GROW = false;
 
+    public static boolean CHANGE_WORLD_TIME_EVENT = false;
+
     public static boolean CLICK_INVENTORY_EVENT = false;
     public static boolean CLICK_INVENTORY_EVENT_DOUBLE = false;
 

@@ -58,11 +58,15 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.GameRulesBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.Constants;
 
@@ -117,6 +121,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Shadow public abstract void setDifficulty(EnumDifficulty newDifficulty);
     @Shadow public abstract NBTTagCompound cloneNBTCompound(@Nullable NBTTagCompound nbt);
     @Shadow public abstract String shadow$getWorldName();
+    @Shadow public abstract void shadow$setWorldTime(long time);
 
     private SerializationBehavior api$serializationBehavior = SerializationBehaviors.AUTOMATIC;
 
@@ -163,12 +168,20 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         return this.worldTime;
     }
 
-    @Override
-    public void setWorldTime(final long time) {
+    @Intrinsic
+    public void worldproperties$setWorldTime(final long time) {
+        this.shadow$setWorldTime(time);
+    }
+
+    @Inject(method = "setWorldTime", at = @At("HEAD"), cancellable = true)
+    private void onSetWorldTimeVanilla(long time, CallbackInfo ci) {
+        if (!ShouldFire.CHANGE_WORLD_TIME_EVENT) {
+            return;
+        }
+
         final Optional<World> optionalTargetWorld = Sponge.getServer().getWorld(getUniqueId());
 
         if (!optionalTargetWorld.isPresent()) {
-            this.worldTime = time;
             return;
         }
 
@@ -181,10 +194,8 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         );
 
         if (Sponge.getEventManager().post(event)) {
-            return;
+            ci.cancel();
         }
-
-        this.worldTime = event.getTime();
     }
 
     @Override
