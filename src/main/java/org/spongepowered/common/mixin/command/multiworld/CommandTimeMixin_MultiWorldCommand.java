@@ -36,14 +36,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(CommandTime.class)
 public abstract class CommandTimeMixin_MultiWorldCommand {
 
+    private boolean modificationCancelled = false;
+    private boolean incrementCancelled = false;
+
     @Inject(method = "execute", cancellable = true,
             at = @At(
                     value = "INVOKE",
                     shift = At.Shift.AFTER,
                     target = "Lnet/minecraft/command/CommandTime;setAllWorldTimes(Lnet/minecraft/server/MinecraftServer;I)V"))
     private void multiWorldCommand$cancelAfterSetWorldTime(CallbackInfo ci) {
-        // TODO Find a way to cancel the method here before the result message is sent to the player, in case
-        // TODO ChangeWorldTimeEvent has been cancelled
+        if (modificationCancelled) {
+            ci.cancel();
+            modificationCancelled = false;
+        }
     }
 
     /**
@@ -57,6 +62,10 @@ public abstract class CommandTimeMixin_MultiWorldCommand {
     private void multiWorldCommand$setWorldTime(final CommandTime self, final MinecraftServer server, final int time, final MinecraftServer server2,
                                                 final ICommandSender sender, final String[] args) {
         sender.getEntityWorld().setWorldTime(time);
+
+        if (time != sender.getEntityWorld().getWorldTime()) {
+            modificationCancelled = true;
+        }
     }
 
     @Inject(method = "execute", cancellable = true,
@@ -65,8 +74,10 @@ public abstract class CommandTimeMixin_MultiWorldCommand {
                     shift = At.Shift.AFTER,
                     target = "Lnet/minecraft/command/CommandTime;incrementAllWorldTimes(Lnet/minecraft/server/MinecraftServer;I)V"))
     private void multiWorldCommand$cancelAfterIncrementWorldTime(CallbackInfo ci) {
-        // TODO Find a way to cancel the method here before the result message is sent to the player, in case
-        // TODO ChangeWorldTimeEvent has been cancelled
+        if (incrementCancelled) {
+            ci.cancel();
+            incrementCancelled = false;
+        }
     }
 
     /**
@@ -80,7 +91,13 @@ public abstract class CommandTimeMixin_MultiWorldCommand {
     private void multiWorldCommand$incrementWorldTime(
         final CommandTime self, final MinecraftServer server, final int time, final MinecraftServer server2, final ICommandSender sender,
         final String[] args) {
-        sender.getEntityWorld().setWorldTime(sender.getEntityWorld().getWorldTime() + time);
+        final long worldTime = sender.getEntityWorld().getWorldTime() + time;
+
+        sender.getEntityWorld().setWorldTime(worldTime);
+
+        if (worldTime != sender.getEntityWorld().getWorldTime()) {
+            incrementCancelled = true;
+        }
     }
 
 }
