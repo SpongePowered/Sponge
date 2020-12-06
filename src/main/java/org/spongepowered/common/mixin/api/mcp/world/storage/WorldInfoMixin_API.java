@@ -36,16 +36,20 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.world.ChangeWorldTimeEvent;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -113,7 +117,6 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Shadow public abstract void setDifficulty(EnumDifficulty newDifficulty);
     @Shadow public abstract NBTTagCompound cloneNBTCompound(@Nullable NBTTagCompound nbt);
     @Shadow public abstract String shadow$getWorldName();
-    @Shadow public abstract void shadow$setWorldTime(long time);
 
     private SerializationBehavior api$serializationBehavior = SerializationBehaviors.AUTOMATIC;
 
@@ -160,9 +163,28 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         return this.worldTime;
     }
 
-    @Intrinsic
-    public void worldproperties$setWorldTime(final long time) {
-        this.shadow$setWorldTime(time);
+    @Override
+    public void setWorldTime(final long time) {
+        final Optional<World> optionalTargetWorld = Sponge.getServer().getWorld(getUniqueId());
+
+        if (!optionalTargetWorld.isPresent()) {
+            this.worldTime = time;
+            return;
+        }
+
+        final ChangeWorldTimeEvent event = SpongeEventFactory.createChangeWorldTimeEvent(
+                Sponge.getCauseStackManager().getCurrentCause(),
+                worldTime,
+                time,
+                optionalTargetWorld.get(),
+                worldTime
+        );
+
+        if (Sponge.getEventManager().post(event)) {
+            return;
+        }
+
+        this.worldTime = event.getTime();
     }
 
     @Override
