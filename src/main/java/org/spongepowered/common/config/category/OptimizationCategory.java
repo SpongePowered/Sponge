@@ -93,7 +93,7 @@ public class OptimizationCategory extends ConfigCategory {
             + "If 'true', re-writes the incredibly inefficient Vanilla Map code.\n"
             + "This yields enormous performance enhancements when using many maps,\n"
             + "but has a tiny chance of breaking mods that invasively modify Vanilla.\n"
-            + "It is strongly reccomended to keep this on, unless explicitly advised otherwise by a Sponge developer")
+            + "It is strongly recommended to keep this on, unless explicitly advised otherwise by a Sponge developer")
     private boolean mapOptimization = true;
 
     @Setting(value = "optimize-hoppers", comment = ""
@@ -108,7 +108,7 @@ public class OptimizationCategory extends ConfigCategory {
     private boolean optimizeHoppers = false;
 
     @Setting(value = "use-active-chunks-for-collisions", comment = ""
-            + "Vanilla performs a lot of is area loaded checks during entity collision calculations with blocks,\n"
+            + "Vanilla performs a lot of \"is area loaded\" checks during entity collision calculations with blocks,\n"
             + "and because these calculations require fetching the chunks to see if they are loaded,\n"
             + "before getting the block states from those chunks, there can be some small performance\n"
             + "increase by checking the entity's owned active chunk it may currently reside in.\n"

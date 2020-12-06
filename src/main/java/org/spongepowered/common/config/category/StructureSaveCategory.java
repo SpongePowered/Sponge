@@ -36,9 +36,9 @@ public class StructureSaveCategory extends ConfigCategory {
     @Setting(value = "enabled", comment = ""
             + "Global switch to enable sponge's changes to the structure saving mechansim.\n"
             + "By default, this option is disabled, i.e. saving structures is not affected.\n"
-            + "If you want to prevent that a certain \"named\" structure is saved to the world's folder,\n"
+            + "If you want to prevent a certain \"named\" structure being saved to the world's folder,\n"
             + "you have to enable this module/setting and disable the structure in the further settings.\n"
-            + "An example of a structure that is costly and somewhat irrelevant is 'mineshaft',\n"
+            + "An example of a structure being costly and somewhat irrelevant is 'mineshaft',\n"
             + "as they build and save several structures even after the mine shafts have been completely generated.\n"
             + "However, this has the disadvantage that these structures may no longer be locatable by some mods.")
     private boolean isEnabled = false;

@@ -38,7 +38,8 @@ public class MetricsCategory {
 
     @Setting(value = "global-state", comment = ""
             + "The global collection state that should be respected by all plugins that have no specified "
-            + "collection state. If 'undefined' then it is treated as disabled.")
+            + "collection state.\n"
+            + "If 'undefined' then it is treated as disabled.")
     private Tristate globalState = Tristate.UNDEFINED;
 
     @Setting(value = "plugin-states",
