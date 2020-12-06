@@ -154,7 +154,10 @@
         "world.server.ServerWorldMixin",
         "world.spawner.AbstractSpawnerMixin",
         "world.storage.SaveHandlerMixin",
-        "world.storage.WorldInfoMixin"
+        "world.storage.WorldInfoMixin",
+        "entity.merchant.villager.VillagerEntityMixin",
+        "entity.merchant.villager.AbstractVillagerEntityMixin",
+        "entity.AgeableEntityMixin"
     ],
     "client": [
         "client.MinecraftMixin",

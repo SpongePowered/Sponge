@@ -35,7 +35,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.IEntityReader;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.Entity;
@@ -77,19 +76,21 @@ import javax.annotation.Nullable;
 @Mixin(MobEntity.class)
 public abstract class MobEntityMixin extends LivingEntityMixin {
 
+    // @formatter:off
     @Shadow @Final protected GoalSelector goalSelector;
     @Shadow @Final protected GoalSelector targetSelector;
     @Shadow @Nullable private LivingEntity attackTarget;
     @Shadow @Nullable public abstract net.minecraft.entity.Entity shadow$getLeashHolder();
     @Shadow protected abstract void shadow$registerGoals();
+    // @formatter:on
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/MobEntity;registerGoals()V"))
     private void impl$registerGoals(final MobEntity this$0) {
-        this.initSpongeAI();
+        this.impl$setupGoalSelectors();
         this.shadow$registerGoals();
     }
 
-    private void initSpongeAI() {
+    private void impl$setupGoalSelectors() {
         if (!((GoalSelectorBridge) this.goalSelector).bridge$initialized()) {
             ((GoalSelectorBridge) this.goalSelector).bridge$setOwner((MobEntity) (Object) this);
             ((GoalSelectorBridge) this.goalSelector).bridge$setType(GoalExecutorTypes.NORMAL.get());
@@ -109,20 +110,23 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         ),
         cancellable = true)
     private void impl$ThrowUnleashEvent(final boolean sendPacket, final boolean dropLead, final CallbackInfo ci) {
+        if (this.world.isRemote) {
+            return;
+        }
+
         final net.minecraft.entity.Entity entity = this.shadow$getLeashHolder();
-        if (!this.world.isRemote) {
-            final CauseStackManager csm = PhaseTracker.getCauseStackManager();
-            if (entity == null) {
-                csm.pushCause(this);
-            } else {
-                csm.pushCause(entity);
-            }
-            final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(csm.getCurrentCause(), (Living) this);
-            SpongeCommon.postEvent(event);
-            csm.popCause();
-            if (event.isCancelled()) {
-                ci.cancel();
-            }
+
+        final CauseStackManager csm = PhaseTracker.getCauseStackManager();
+        if (entity == null) {
+            csm.pushCause(this);
+        } else {
+            csm.pushCause(entity);
+        }
+        final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(csm.getCurrentCause(), (Living) this);
+        SpongeCommon.postEvent(event);
+        csm.popCause();
+        if (event.isCancelled()) {
+            ci.cancel();
         }
     }
 

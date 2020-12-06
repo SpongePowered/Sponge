@@ -25,55 +25,10 @@
 package org.spongepowered.common.mixin.core.entity.merchant.villager;
 
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
-import net.minecraft.entity.merchant.villager.VillagerTrades;
-import net.minecraft.item.MerchantOffer;
-import net.minecraft.item.MerchantOffers;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
-
-import java.util.Set;
 
 @Mixin(AbstractVillagerEntity.class)
 public abstract class AbstractVillagerEntityMixin extends AgeableEntityMixin {
-    /**
-     * @author i509VCB - February 21st, 2020 - 1.14.4
-     * @reason In order to apply the Trade mutators, we need a way to intercept the merchant offers. In VillagerEntityMixin we override this redirect to capture all the merchant offers being added to the merchant.
-     * This does the exact same as vanilla but the VillagerEntity and WanderingTraderEntity would override this to implement their own logic.
-     *
-     * @param merchantOffers The current offers the villager has.
-     * @param offer The merchant offer to add.
-     * @return true.
-     */
-    @Redirect(
-        method = "addTrades(Lnet/minecraft/item/MerchantOffers;[Lnet/minecraft/entity/merchant/villager/VillagerTrades$ITrade;I)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Ljava/util/Set;add(Ljava/lang/Object;)Z"
-        )
-    )
-    protected boolean impl$addNewOfferToTempMap(final Set<MerchantOffer> merchantOffers, final MerchantOffer offer) {
-        return merchantOffers.add(offer);
-    }
-
-    /**
-     * @author i509VCB - February 21st, 2020 - 1.14.4
-     * @reason At TAIL, all merchant offers have been selected. Implementations of this method would process trade mutators and then add to the givenMerchantOffers.
-     *
-     * @param givenMerchantOffers
-     * @param newTrades
-     * @param maxNumbers
-     * @param ci
-     */
-    @Inject(
-        method = "addTrades(Lnet/minecraft/item/MerchantOffers;[Lnet/minecraft/entity/merchant/villager/VillagerTrades$ITrade;I)V",
-        at = @At("TAIL"))
-    protected void impl$addAndApplyTradeMutators(final MerchantOffers givenMerchantOffers,
-        final VillagerTrades.ITrade[] newTrades, final int maxNumbers, final CallbackInfo ci) {
-        // Do nothing, this is overriden by the Villager/WanderingTraderEntity
-    }
 
 }

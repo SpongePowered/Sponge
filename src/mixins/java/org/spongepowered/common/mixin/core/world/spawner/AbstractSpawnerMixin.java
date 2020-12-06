@@ -38,6 +38,7 @@ import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
 @Mixin(AbstractSpawner.class)
 public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
 
+    // @formatter:off
     @Shadow private int spawnDelay;
     @Shadow private int minSpawnDelay;
     @Shadow private int maxSpawnDelay;
@@ -45,6 +46,7 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
     @Shadow private int maxNearbyEntities;
     @Shadow private int activatingRangeFromPlayer;
     @Shadow private int spawnRange;
+    // @formatter:on
 
     @Override
     public int bridge$getSpawnDelay() {
@@ -94,7 +96,7 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
     @Redirect(method = "isActivated()Z",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;isPlayerWithin(DDDD)Z"))
-    public boolean onIsPlayerWithin(final World world, final double x, final double y, final double z, final double distance) {
+    public boolean impl$checkPlayerSpawningStateForActivation(final World world, final double x, final double y, final double z, final double distance) {
         // Like vanilla but filter out players with !bridge$affectsSpawning
         for (final PlayerEntity playerentity : world.getPlayers()) {
             if (EntityPredicates.NOT_SPECTATING.test(playerentity)

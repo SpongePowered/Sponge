@@ -27,13 +27,10 @@ package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.trader.Villager;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import java.util.Set;
 
 @Mixin(VillagerEntity.class)
-@Implements(@Interface(iface = Villager.class, prefix = "apiVillager$"))
 public abstract class VillagerEntityMixin_API extends AbstractVillagerEntityMixin_API implements Villager {
 
     @Override
@@ -46,5 +43,4 @@ public abstract class VillagerEntityMixin_API extends AbstractVillagerEntityMixi
 
         return values;
     }
-
 }
