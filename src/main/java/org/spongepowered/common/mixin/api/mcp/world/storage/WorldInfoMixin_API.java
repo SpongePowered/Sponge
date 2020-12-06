@@ -174,7 +174,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
         final ChangeWorldTimeEvent event = SpongeEventFactory.createChangeWorldTimeEvent(
                 Sponge.getCauseStackManager().getCurrentCause(),
-                worldTime,
+                time,
                 time,
                 optionalTargetWorld.get(),
                 worldTime
