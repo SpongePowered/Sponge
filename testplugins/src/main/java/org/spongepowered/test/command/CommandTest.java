@@ -35,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.SystemSubject;
-import org.spongepowered.api.adventure.SpongeComponents;
+import org.spongepowered.api.adventure.Text;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -145,7 +145,7 @@ public final class CommandTest {
                 Command.builder()
                         .setExecutor(x -> {
                             x.sendMessage(Identity.nil(), Component.text().content("Click Me")
-                                    .clickEvent(SpongeComponents.executeCallback(ctx -> ctx.sendMessage(Identity.nil(), Component.text("Hello"))))
+                                    .clickEvent(Text.executeCallback(ctx -> ctx.sendMessage(Identity.nil(), Component.text("Hello"))))
                                     .build()
                             );
                             return CommandResult.success();

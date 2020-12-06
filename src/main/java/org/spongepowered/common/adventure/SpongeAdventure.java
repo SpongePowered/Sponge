@@ -55,7 +55,7 @@ import net.minecraft.world.BossInfo;
 import net.minecraft.world.server.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.adventure.SpongeComponents;
+import org.spongepowered.api.adventure.Text;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
@@ -481,7 +481,7 @@ public final class SpongeAdventure {
         return SpongeAdventure.asVanilla(source);
     }
 
-    public static class Factory implements SpongeComponents.Factory {
+    public static class Factory implements Text.Factory {
 
         @Override
         public @NonNull ClickEvent callbackClickEvent(final @NonNull Consumer<CommandCause> callback) {
