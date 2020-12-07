@@ -789,7 +789,7 @@ public final class ItemSupplier {
             .registerSupplier(ItemType.class, "wolf_spawn_egg", () -> (ItemType) Items.WOLF_SPAWN_EGG)
             .registerSupplier(ItemType.class, "zombie_spawn_egg", () -> (ItemType) Items.ZOMBIE_SPAWN_EGG)
             .registerSupplier(ItemType.class, "zombie_horse_spawn_egg", () -> (ItemType) Items.ZOMBIE_HORSE_SPAWN_EGG)
-            .registerSupplier(ItemType.class, "zombie_pigman_spawn_egg", () -> (ItemType) Items.ZOMBIE_PIGMAN_SPAWN_EGG)
+            .registerSupplier(ItemType.class, "zombified_piglin_spawn_egg", () -> (ItemType) Items.ZOMBIFIED_PIGLIN_SPAWN_EGG)
             .registerSupplier(ItemType.class, "zombie_villager_spawn_egg", () -> (ItemType) Items.ZOMBIE_VILLAGER_SPAWN_EGG)
             .registerSupplier(ItemType.class, "experience_bottle", () -> (ItemType) Items.EXPERIENCE_BOTTLE)
             .registerSupplier(ItemType.class, "fire_charge", () -> (ItemType) Items.FIRE_CHARGE)

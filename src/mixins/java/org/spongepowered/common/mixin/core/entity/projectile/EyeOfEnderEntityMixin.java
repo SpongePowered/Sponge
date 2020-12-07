@@ -22,16 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.item;
+package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EyeOfEnderEntity;
+import net.minecraft.entity.projectile.EyeOfEnderEntity;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;

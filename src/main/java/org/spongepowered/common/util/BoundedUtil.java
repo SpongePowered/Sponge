@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.state.IProperty;
-import net.minecraft.state.IStateHolder;
 import net.minecraft.state.IntegerProperty;
+import net.minecraft.state.Property;
+import net.minecraft.state.StateHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 
@@ -43,7 +43,7 @@ public final class BoundedUtil {
      * @return The immutable value
      */
     public static Value<Double> constructImmutableValueDouble(final Double value, final Supplier<? extends Key<? extends Value<Double>>> key,
-            final IProperty<Double> property) {
+            final Property<Double> property) {
         final double min = DataUtil.mind(property);
         final double max = DataUtil.maxd(property);
         return Value.immutableOf(key, (value < min || value > max) ? null : value);
@@ -58,7 +58,7 @@ public final class BoundedUtil {
      * @return The mutable value
      */
     public static Value<Double> constructMutableValueDouble(final Double value, final Supplier<? extends Key<? extends Value<Double>>> key,
-            final IProperty<Double> property) {
+            final Property<Double> property) {
         final double min = DataUtil.mind(property);
         final double max = DataUtil.maxd(property);
         return Value.mutableOf(key, (value < min || value > max) ? null : value);
@@ -100,10 +100,9 @@ public final class BoundedUtil {
      * @param holder The holder
      * @param value The value
      * @param property The property
-     * @param <H> {@link IStateHolder}
      * @return The holder with the property value applied if applicable
      */
-    public static <H extends IStateHolder<H>> H setDouble(final H holder, final Double value, final IProperty<Double> property) {
+    public static <O, H extends StateHolder<O, H>> H setDouble(final H holder, final Double value, final Property<Double> property) {
         final double min = DataUtil.mind(property);
         final double max = DataUtil.maxd(property);
         if (value < min || value > max) {
@@ -118,10 +117,9 @@ public final class BoundedUtil {
      * @param holder The holder
      * @param value The value
      * @param property The property
-     * @param <H> {@link IStateHolder}
      * @return The holder with the property value applied if applicable
      */
-    public static <H extends IStateHolder<H>> H setDoubleLower(final H holder, final Double value, final IProperty<Double> property) {
+    public static <O, H extends StateHolder<O, H>> H setDoubleLower(final H holder, final Double value, final Property<Double> property) {
         final double min = DataUtil.mind(property);
         if (value < min) {
             return holder;
@@ -135,10 +133,9 @@ public final class BoundedUtil {
      * @param holder The holder
      * @param value The value
      * @param property The property
-     * @param <H> {@link IStateHolder}
      * @return The holder with the property value applied if applicable
      */
-    public static <H extends IStateHolder<H>> H setDoubleUpper(final H holder, final Double value, final IProperty<Double> property) {
+    public static <O, H extends StateHolder<O, H>> H setDoubleUpper(final H holder, final Double value, final Property<Double> property) {
         final double max = DataUtil.maxd(property);
         if (value > max) {
             return holder;
@@ -152,10 +149,9 @@ public final class BoundedUtil {
      * @param holder The holder
      * @param value The value
      * @param property The property
-     * @param <H> {@link IStateHolder}
      * @return The holder with the property value applied if applicable
      */
-    public static <H extends IStateHolder<H>> H setInteger(final H holder, final Integer value, final IntegerProperty property) {
+    public static <O, H extends StateHolder<O, H>> H setInteger(final H holder, final Integer value, final IntegerProperty property) {
         final int min = DataUtil.mini(property);
         final int max = DataUtil.maxi(property);
         if (value < min || value > max) {
@@ -170,10 +166,9 @@ public final class BoundedUtil {
      * @param holder The holder
      * @param value The value
      * @param property The property
-     * @param <H> {@link IStateHolder}
      * @return The holder with the property value applied if applicable
      */
-    public static <H extends IStateHolder<H>> H setIntegerLower(final H holder, final Integer value, final IntegerProperty property) {
+    public static <O, H extends StateHolder<O, H>> H setIntegerLower(final H holder, final Integer value, final IntegerProperty property) {
         final int min = DataUtil.mini(property);
         if (value < min) {
             return holder;
@@ -187,10 +182,9 @@ public final class BoundedUtil {
      * @param holder The holder
      * @param value The value
      * @param property The property
-     * @param <H> {@link IStateHolder}
      * @return The holder with the property value applied if applicable
      */
-    public static <H extends IStateHolder<H>> H setIntegerUpper(final H holder, final Integer value, final IntegerProperty property) {
+    public static <O, H extends StateHolder<O, H>> H setIntegerUpper(final H holder, final Integer value, final IntegerProperty property) {
         final int max = DataUtil.maxi(property);
         if (value > max) {
             return holder;

@@ -25,7 +25,9 @@
 package org.spongepowered.common.event;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.World;
+import org.spongepowered.common.util.Constants;
 
 /**
  * Static methods for events where Forge would have called them in common code we overwrite of Forge's.
@@ -36,7 +38,7 @@ import net.minecraft.world.dimension.DimensionType;
  */
 public final class ModEventHooks {
 
-    public static void firePlayerChangedDimensionEvent(final PlayerEntity player, final DimensionType fromDimensionType,
-            final DimensionType toDimensionType) {
+    public static void firePlayerChangedDimensionEvent(final PlayerEntity player, final RegistryKey<Constants.World> fromWorldKey,
+            final RegistryKey<World> toWorldKey) {
     }
 }

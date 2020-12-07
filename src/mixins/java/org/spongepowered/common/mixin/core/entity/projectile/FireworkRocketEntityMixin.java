@@ -22,17 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.item;
+package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.FireworkRocketEntity;
+import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -46,9 +41,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
-import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -62,10 +54,11 @@ import javax.annotation.Nullable;
 @Mixin(FireworkRocketEntity.class)
 public abstract class FireworkRocketEntityMixin extends EntityMixin implements FusedExplosiveBridge, ExplosiveBridge {
 
+    // @formatter:off
     @Shadow private int fireworkAge;
     @Shadow private int lifetime;
-
     @Shadow protected abstract void func_213893_k();
+    // @formatter:on
 
     private ProjectileSource impl$projectileSource = UnknownProjectileSource.UNKNOWN;
     private int impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
@@ -145,31 +138,6 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$projectileSource);
                 this.bridge$postPrime();
             }
-        }
-    }
-
-    @Redirect(method = "dealExplosionDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;attackEntityFrom"
-            + "(Lnet/minecraft/util/DamageSource;F)Z"))
-    private boolean impl$useEntitySource(final LivingEntity entityLivingBase, final DamageSource source, final float amount) {
-        try {
-            final DamageSource fireworks = new EntityDamageSource(DamageSource.FIREWORKS.damageType, (Entity) (Object) this).setExplosion();
-            ((DamageSourceBridge) fireworks).bridge$setFireworksSource();
-            return entityLivingBase.attackEntityFrom(DamageSource.FIREWORKS, amount);
-        } finally {
-            ((DamageSourceBridge) source).bridge$setFireworksSource();
-        }
-    }
-
-    @Inject(method = "func_213892_a", at = @At("HEAD"), cancellable = true)
-    private void impl$onImpact(final RayTraceResult rayTraceResult, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).bridge$isFake() || rayTraceResult.getType() == RayTraceResult.Type.MISS) {
-            return;
-        }
-
-        if (SpongeCommonEventFactory.handleCollideImpactEvent((Entity) (Object)this,
-                ((FireworkRocket) this).get(Keys.SHOOTER).orElse(null), rayTraceResult)) {
-            this.shadow$remove();
-            ci.cancel();
         }
     }
 }

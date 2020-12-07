@@ -26,15 +26,12 @@ package org.spongepowered.common.accessor.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Mixin(Entity.class)
 public interface EntityAccessor {
@@ -71,9 +68,9 @@ public interface EntityAccessor {
 
     @Accessor("inPortal") void accessor$setInPortal(boolean value);
 
-    @Accessor("lastPortalPos") void accessor$setLastPortalPos(BlockPos value);
+    @Accessor("portalCounter") void accessor$setPortalCounter(int value);
 
-    @Accessor("timeUntilPortal") void accessor$setTimeUntilPortal(int value);
+    @Accessor("field_242271_ac") void accessor$field_242271_ac(BlockPos lastPortalPos);
 
     @Invoker("setFlag") void accessor$setFlag(int flag, boolean set);
 

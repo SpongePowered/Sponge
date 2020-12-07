@@ -57,24 +57,24 @@ import org.spongepowered.common.util.Constants;
 import java.util.List;
 import java.util.Map;
 
-public final class NbtTranslator extends SpongeCatalogType implements DataTranslator<CompoundNBT> {
+public final class NBTTranslator extends SpongeCatalogType implements DataTranslator<CompoundNBT> {
 
-    private static final NbtTranslator instance = new NbtTranslator();
+    private static final NBTTranslator instance = new NBTTranslator();
     private static final TypeToken<CompoundNBT> TOKEN = TypeToken.get(CompoundNBT.class);
     public static final String BOOLEAN_IDENTIFIER = "$Boolean";
 
-    public static NbtTranslator getInstance() {
-        return NbtTranslator.instance;
+    public static NBTTranslator getInstance() {
+        return NBTTranslator.instance;
     }
 
-    private NbtTranslator() {
+    private NBTTranslator() {
         super(ResourceKey.sponge("nbt"));
     }
 
     private static CompoundNBT containerToCompound(final DataView container) {
         checkNotNull(container);
         CompoundNBT compound = new CompoundNBT();
-        NbtTranslator.containerToCompound(container, compound);
+        NBTTranslator.containerToCompound(container, compound);
         return compound;
     }
 
@@ -88,12 +88,12 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
             String key = entry.getKey().asString('.');
             if (value instanceof DataView) {
                 CompoundNBT inner = new CompoundNBT();
-                NbtTranslator.containerToCompound(container.getView(entry.getKey()).get(), inner);
+                NBTTranslator.containerToCompound(container.getView(entry.getKey()).get(), inner);
                 compound.put(key, inner);
             } else if (value instanceof Boolean) {
-                compound.put(key + NbtTranslator.BOOLEAN_IDENTIFIER, ByteNBT.valueOf((Boolean) value));
+                compound.put(key + NBTTranslator.BOOLEAN_IDENTIFIER, ByteNBT.valueOf((Boolean) value));
             } else {
-                compound.put(key, NbtTranslator.getBaseFromObject(value));
+                compound.put(key, NBTTranslator.getBaseFromObject(value));
             }
         }
     }
@@ -151,7 +151,7 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
             for (Object object : (List) value) {
                 // Oh hey, we already have a translation already
                 // since DataView only supports some primitive types anyways...
-                list.add(NbtTranslator.getBaseFromObject(object));
+                list.add(NBTTranslator.getBaseFromObject(object));
             }
             return list;
         } else if (value instanceof Map) {
@@ -159,21 +159,21 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
             for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
                 if (entry.getKey() instanceof DataQuery) {
                     if (entry.getValue() instanceof Boolean) {
-                        compound.putBoolean(((DataQuery) entry.getKey()).asString('.') + NbtTranslator.BOOLEAN_IDENTIFIER, (Boolean) entry.getValue());
+                        compound.putBoolean(((DataQuery) entry.getKey()).asString('.') + NBTTranslator.BOOLEAN_IDENTIFIER, (Boolean) entry.getValue());
                     } else {
-                        compound.put(((DataQuery) entry.getKey()).asString('.'), NbtTranslator.getBaseFromObject(entry.getValue()));
+                        compound.put(((DataQuery) entry.getKey()).asString('.'), NBTTranslator.getBaseFromObject(entry.getValue()));
                     }
                 } else if (entry.getKey() instanceof String) {
-                    compound.put((String) entry.getKey(), NbtTranslator.getBaseFromObject(entry.getValue()));
+                    compound.put((String) entry.getKey(), NBTTranslator.getBaseFromObject(entry.getValue()));
                 } else {
-                    compound.put(entry.getKey().toString(), NbtTranslator.getBaseFromObject(entry.getValue()));
+                    compound.put(entry.getKey().toString(), NBTTranslator.getBaseFromObject(entry.getValue()));
                 }
             }
             return compound;
         } else if (value instanceof DataSerializable) {
-            return NbtTranslator.containerToCompound(((DataSerializable) value).toContainer());
+            return NBTTranslator.containerToCompound(((DataSerializable) value).toContainer());
         } else if (value instanceof DataView) {
-            return NbtTranslator.containerToCompound((DataView) value);
+            return NBTTranslator.containerToCompound((DataView) value);
         }
         throw new IllegalArgumentException("Unable to translate object to NBTBase: " + value);
     }
@@ -181,7 +181,7 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
     private static DataContainer getViewFromCompound(CompoundNBT compound) {
         checkNotNull(compound);
         DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
-        NbtTranslator.getInstance().addTo(compound, container);
+        NBTTranslator.getInstance().addTo(compound, container);
         return container;
     }
 
@@ -194,8 +194,8 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
         checkArgument(type > Constants.NBT.TAG_END && type <= Constants.NBT.TAG_INT_ARRAY);
         switch (type) {
             case Constants.NBT.TAG_BYTE:
-                if (key.contains(NbtTranslator.BOOLEAN_IDENTIFIER)) {
-                    view.set(of(key.replace(NbtTranslator.BOOLEAN_IDENTIFIER, "")), (((ByteNBT) base).getByte() != 0));
+                if (key.contains(NBTTranslator.BOOLEAN_IDENTIFIER)) {
+                    view.set(of(key.replace(NBTTranslator.BOOLEAN_IDENTIFIER, "")), (((ByteNBT) base).getByte() != 0));
                 } else {
                     view.set(of(key), ((ByteNBT) base).getByte());
                 }
@@ -223,11 +223,11 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
                 break;
             case Constants.NBT.TAG_LIST:
                 ListNBT list = (ListNBT) base;
-                byte listType = (byte) list.getTagType();
+                byte listType = list.func_230528_d__();
                 int count = list.size();
                 List objectList = Lists.newArrayListWithCapacity(count);
                 for (int i = 0; i < count; i++) {
-                    objectList.add(NbtTranslator.fromTagBase(list.get(i), listType));
+                    objectList.add(NBTTranslator.fromTagBase(list.get(i), listType));
                 }
                 view.set(of(key), objectList);
                 break;
@@ -241,7 +241,7 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
                     // Reasoning: This avoids creating a new DataContainer which would
                     // then be copied in to the owning DataView anyways. We can internally
                     // set the actual data directly to the child view instead.
-                    NbtTranslator.setInternal(internalBase, internalType, internalView, internalKey);
+                    NBTTranslator.setInternal(internalBase, internalType, internalView, internalKey);
                 }
                 break;
             case Constants.NBT.TAG_INT_ARRAY:
@@ -276,15 +276,15 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
                 return ((StringNBT) base).getString();
             case Constants.NBT.TAG_LIST:
                 ListNBT list = (ListNBT) base;
-                byte listType = (byte) list.getTagType();
+                byte listType = list.func_230528_d__();
                 int count = list.size();
                 List objectList = Lists.newArrayListWithCapacity(count);
                 for (INBT inbt : list) {
-                    objectList.add(NbtTranslator.fromTagBase(inbt, listType));
+                    objectList.add(NBTTranslator.fromTagBase(inbt, listType));
                 }
                 return objectList;
             case Constants.NBT.TAG_COMPOUND:
-                return NbtTranslator.getViewFromCompound((CompoundNBT) base);
+                return NBTTranslator.getViewFromCompound((CompoundNBT) base);
             case Constants.NBT.TAG_INT_ARRAY:
                 return ((IntArrayNBT) base).getIntArray();
             case Constants.NBT.TAG_LONG_ARRAY:
@@ -295,26 +295,26 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
     }
 
     public void translateContainerToData(CompoundNBT node, DataView container) {
-        NbtTranslator.containerToCompound(container, node);
+        NBTTranslator.containerToCompound(container, node);
     }
 
     public DataContainer translateFrom(CompoundNBT node) {
-        return NbtTranslator.getViewFromCompound(node);
+        return NBTTranslator.getViewFromCompound(node);
     }
 
     @Override
     public TypeToken<CompoundNBT> getToken() {
-        return NbtTranslator.TOKEN;
+        return NBTTranslator.TOKEN;
     }
 
     @Override
     public CompoundNBT translate(DataView view) throws InvalidDataException {
-        return NbtTranslator.containerToCompound(view);
+        return NBTTranslator.containerToCompound(view);
     }
 
     @Override
     public DataContainer translate(CompoundNBT obj) throws InvalidDataException {
-        return NbtTranslator.getViewFromCompound(obj);
+        return NBTTranslator.getViewFromCompound(obj);
     }
 
     @Override
@@ -322,7 +322,7 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
         for (String key : compound.keySet()) {
             INBT base = compound.get(key);
             byte type = base.getId();
-            NbtTranslator.setInternal(base, type, container, key); // gotta love recursion
+            NBTTranslator.setInternal(base, type, container, key); // gotta love recursion
         }
         return container;
     }

@@ -60,7 +60,6 @@ import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;

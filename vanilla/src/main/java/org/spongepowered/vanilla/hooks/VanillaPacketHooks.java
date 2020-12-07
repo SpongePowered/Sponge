@@ -32,10 +32,8 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.hooks.PacketHooks;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public final class VanillaPacketHooks implements PacketHooks {
 

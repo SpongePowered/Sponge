@@ -26,17 +26,18 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootParameters;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class AddBlockLootDropsEffect implements ProcessingSideEffect {
@@ -63,7 +64,7 @@ public final class AddBlockLootDropsEffect implements ProcessingSideEffect {
 
         final LootContext.Builder lootBuilder = (new LootContext.Builder(world))
             .withRandom(world.rand)
-            .withParameter(LootParameters.POSITION, pos)
+            .withParameter(LootParameters.field_237457_g_, VecHelper.toVanillaVector3d(pos))
             .withParameter(LootParameters.TOOL, ItemStack.EMPTY)
             .withNullableParameter(LootParameters.BLOCK_ENTITY, existingTile);
 

@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PickupRule;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.common.accessor.entity.projectile.AbstractArrowEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -52,10 +50,7 @@ public final class AbstractArrowData {
                         .set((h, v) -> h.setKnockbackStrength((int) Math.round(v)))
                     .create(Keys.PICKUP_RULE)
                         .get(h -> (PickupRule) (Object) h.pickupStatus)
-                        .set((h, v) -> h.pickupStatus = ((AbstractArrowEntity.PickupStatus) (Object) v))
-                    .create(Keys.SHOOTER)
-                        .get(h -> (ProjectileSource) h.getShooter())
-                        .set((h, v) -> h.setShooter((Entity) v));
+                        .set((h, v) -> h.pickupStatus = ((AbstractArrowEntity.PickupStatus) (Object) v));
     }
     // @formatter:on
 }

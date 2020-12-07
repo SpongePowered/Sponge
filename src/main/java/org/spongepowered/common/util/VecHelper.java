@@ -29,20 +29,18 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Rotations;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.bridge.api.LocationBridge;
 import org.spongepowered.math.vector.Vector2i;
-import org.spongepowered.math.vector.Vector3d;
-import org.spongepowered.math.vector.Vector3i;
 
 public final class VecHelper {
 
     // === Flow Vector3d --> BlockPos ===
 
-    public static BlockPos toBlockPos(Vector3d vector) {
+    public static BlockPos toBlockPos(org.spongepowered.math.vector.Vector3d vector) {
         if (vector == null) {
             return null;
         }
@@ -59,7 +57,6 @@ public final class VecHelper {
     }
 
     // === SpongeAPI Location --> BlockPos ===
-    @SuppressWarnings("ConstantConditions")
     public static BlockPos toBlockPos(ServerLocation location) {
         if (location == null) {
             return null;
@@ -77,11 +74,11 @@ public final class VecHelper {
 
     // === MC BlockPos --> Flow Vector3d ==
 
-    public static Vector3d toVector3d(BlockPos pos) {
+    public static org.spongepowered.math.vector.Vector3d toVector3d(BlockPos pos) {
         if (pos == null) {
             return null;
         }
-        return new Vector3d(pos.getX(), pos.getY(), pos.getZ());
+        return new org.spongepowered.math.vector.Vector3d(pos.getX(), pos.getY(), pos.getZ());
     }
     
     // === Rotations --> Flow Vector ===
@@ -93,52 +90,52 @@ public final class VecHelper {
         return new Vector3d(rotation.getX(), rotation.getY(), rotation.getZ());
     }
 
-    // === MC Vec3i --> Flow Vector3i ===
+    // === MC Vector3i --> Flow Vector3i ===
 
-    public static Vector3i toVector3i(Vec3i vector) {
+    public static Vector3i toVector3i(Vector3i vector) {
         if (vector == null) {
             return null;
         }
         return new Vector3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
-    // === Flow Vector3i --> MC Vec3i ===
+    // === Flow Vector3i --> MC Vector3i ===
 
-    public static Vec3i toVec3i(Vector3i vector) {
+    public static Vector3i toVanillaVector3i(org.spongepowered.math.vector.Vector3i vector) {
         if (vector == null) {
             return null;
         }
-        return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
+        return new Vector3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
-    // === Flow Vector3d --> MC Vec3d ===
+    // === Flow Vector3d --> MC Vector3d ===
 
-    public static Vec3d toVec3d(Vector3d vector) {
+    public static Vector3d toVanillaVector3d(org.spongepowered.math.vector.Vector3d vector) {
         if (vector == null) {
             return null;
         }
-        return new Vec3d(vector.getX(), vector.getY(), vector.getZ());
+        return new Vector3d(vector.getX(), vector.getY(), vector.getZ());
     }
 
-    // === MC BlockPos --> MC Vec3d
+    // === MC BlockPos --> MC Vector3d
 
-    public static Vec3d toVec3d(BlockPos pos) {
+    public static Vector3d toVanillaVector3d(BlockPos pos) {
         if (pos == null) {
             return null;
         }
-        return new Vec3d(pos.getX(), pos.getY(), pos.getZ());
+        return new Vector3d(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    // === MC ChunkCoordIntPair ---> Flow Vector3i ===
+    // === MC ChunkPos ---> Flow Vector3i ===
 
-    public static Vector3i toVec3i(ChunkPos pos) {
+    public static Vector3i toVector3i(ChunkPos pos) {
         if (pos == null) {
             return null;
         }
         return new Vector3i(pos.x, 0, pos.z);
     }
 
-    // === Flow Vector3i --> MC ChunkCoordIntPair ===
+    // === Flow Vector3i --> MC ChunkPos ===
 
     public static ChunkPos toChunkPos(Vector3i vector) {
         if (vector == null) {
@@ -147,22 +144,22 @@ public final class VecHelper {
         return new ChunkPos(vector.getX(), vector.getZ());
     }
 
-    // === MC Vec3 --> flow Vector3d ==
+    // === MC Vector3d --> flow Vector3d ==
 
-    public static Vector3d toVector3d(Vec3d vector) {
+    public static org.spongepowered.math.vector.Vector3d toVector3d(Vector3d vector) {
         if (vector == null) {
             return null;
         }
-        return new Vector3d(vector.x, vector.y, vector.z);
+        return new org.spongepowered.math.vector.Vector3d(vector.x, vector.y, vector.z);
     }
 
-    // === Flow Vector3d --> MC Vec3 ==
+    // === Flow Vector3d --> MC Vector3d ==
 
-    public static Vec3i toVec3i(Vector3d vector) {
+    public static Vector3i toVector3i(Vector3d vector) {
         if (vector == null) {
             return null;
         }
-        return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
+        return new Vector3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
     // === Flow Vector --> Rotations ===
@@ -193,8 +190,8 @@ public final class VecHelper {
         if (box == null) {
             return null;
         }
-        final Vector3d min = box.getMin();
-        final Vector3d max = box.getMax();
+        final org.spongepowered.math.vector.Vector3d min = box.getMin();
+        final org.spongepowered.math.vector.Vector3d max = box.getMax();
         return new AxisAlignedBB(
             min.getX(), min.getY(), min.getZ(),
             max.getX(), max.getY(), max.getZ()
@@ -206,8 +203,8 @@ public final class VecHelper {
             return null;
         }
         return new SpongeAABB(
-            new Vector3d(box.minX, box.minY, box.minZ),
-            new Vector3d(box.maxX, box.maxY, box.maxZ)
+            new org.spongepowered.math.vector.Vector3d(box.minX, box.minY, box.minZ),
+            new org.spongepowered.math.vector.Vector3d(box.maxX, box.maxY, box.maxZ)
         );
     }
 

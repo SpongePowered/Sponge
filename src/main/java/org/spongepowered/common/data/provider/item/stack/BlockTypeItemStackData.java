@@ -71,7 +71,7 @@ public final class BlockTypeItemStackData {
         return NBTStreams.toStrings(list)
                 .map(ResourceLocation::tryCreate)
                 .filter(Objects::nonNull)
-                .map(key -> (BlockType) Registry.BLOCK.getValue(key).orElse(null))
+                .map(key -> (BlockType) Registry.BLOCK.func_241873_b(key).orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }

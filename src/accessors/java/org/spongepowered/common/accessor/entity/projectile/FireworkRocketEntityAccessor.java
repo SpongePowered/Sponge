@@ -22,25 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world;
+package org.spongepowered.common.accessor.entity.projectile;
 
-import net.minecraft.world.WorldType;
+import net.minecraft.entity.projectile.FireworkRocketEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(WorldType.class)
-public interface WorldTypeAccessor {
+@Mixin(FireworkRocketEntity.class)
+public interface FireworkRocketEntityAccessor {
 
-    @Accessor("WORLD_TYPES") static WorldType[] accessor$getWorldTypes() {
+    @Accessor("FIREWORK_ITEM") static DataParameter<ItemStack> accessor$getFireworkItem() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Mutable @Accessor("WORLD_TYPES") static void accessor$setWorldTypes(WorldType[] types) {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
-
-    @Accessor("canBeCreated") void accessor$setCanBeCreated(boolean canBeCreated);
-
-    @Accessor("hasInfoNotice") void accessor$setHasInfoNotice(boolean hasInfoNotice);
+    @Accessor("lifetime") void accessor$setLifeTime(int lifetime);
 }

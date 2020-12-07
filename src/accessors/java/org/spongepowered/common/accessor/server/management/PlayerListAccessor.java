@@ -27,8 +27,8 @@ package org.spongepowered.common.accessor.server.management;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.storage.IPlayerFileData;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.PlayerData;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -41,7 +41,8 @@ public interface PlayerListAccessor {
 
     @Accessor("server") MinecraftServer accessor$getServer();
 
-    @Accessor("playerDataManager") IPlayerFileData accessor$getPlayerDataManager();
+    @Accessor("playerDataManager") PlayerData accessor$getPlayerDataManager();
 
-    @Invoker("setPlayerGameTypeBasedOnOther") void accessor$setPlayerGameTypeBasedOnOther(ServerPlayerEntity target, ServerPlayerEntity source, IWorld world);
+    @Invoker("setPlayerGameTypeBasedOnOther") void accessor$setPlayerGameTypeBasedOnOther(ServerPlayerEntity target, ServerPlayerEntity source,
+            ServerWorld world);
 }

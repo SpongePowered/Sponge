@@ -27,19 +27,13 @@ package org.spongepowered.common.mixin.core.world.dimension;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.Dimension;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 
 import net.minecraft.world.dimension.DimensionType;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.function.BiFunction;
 

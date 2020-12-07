@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.util.text;
 
+import net.minecraft.util.text.Color;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,27 +33,15 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Style.class)
 public interface StyleAccessor {
 
-    @Accessor("color") TextFormatting accessor$getColor();
-
-    @Accessor("color") void accessor$setColor(TextFormatting color);
+    @Accessor("color") Color accessor$getColor();
 
     @Accessor("bold") Boolean accessor$getBold();
 
-    @Accessor("bold") void accessor$setBold(Boolean bold);
-
     @Accessor("italic") Boolean accessor$getItalic();
-
-    @Accessor("italic") void accessor$setItalic(Boolean italic);
 
     @Accessor("underlined") Boolean accessor$getUnderlined();
 
-    @Accessor("underlined") void accessor$setUnderlined(Boolean underlined);
-
     @Accessor("strikethrough") Boolean accessor$getStrikethrough();
 
-    @Accessor("strikethrough") void accessor$setStrikethrough(Boolean strikethrough);
-
     @Accessor("obfuscated") Boolean accessor$getObfuscated();
-
-    @Accessor("obfuscated") void accessor$setObfuscated(Boolean obfuscated);
 }

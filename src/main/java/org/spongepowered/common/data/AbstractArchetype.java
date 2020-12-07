@@ -37,12 +37,11 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.Archetype;
 import org.spongepowered.api.world.LocatableSnapshot;
-import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.RawDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 
 import java.util.Collection;
@@ -89,7 +88,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     @Override
     public void setRawData(final DataView container) throws InvalidDataException {
         checkNotNull(container, "Raw data cannot be null!");
-        final CompoundNBT copy = NbtTranslator.getInstance().translate(container);
+        final CompoundNBT copy = NBTTranslator.getInstance().translate(container);
         final boolean valid = this.getValidator().validate(copy);
         if (valid) {
             this.data = copy;

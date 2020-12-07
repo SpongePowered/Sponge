@@ -41,13 +41,10 @@ import org.spongepowered.api.network.EngineConnectionTypes;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.Objects;
 import java.util.Optional;

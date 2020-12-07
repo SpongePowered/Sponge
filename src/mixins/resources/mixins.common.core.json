@@ -57,9 +57,9 @@
         "entity.item.BoatEntityMixin",
         "entity.item.EnderCrystalEntityMixin",
         "entity.item.EnderPearlEntityMixin",
-        "entity.item.EyeOfEnderEntityMixin",
+        "entity.projectile.EyeOfEnderEntityMixin",
         "entity.item.FallingBlockEntityMixin",
-        "entity.item.FireworkRocketEntityMixin",
+        "entity.projectile.FireworkRocketEntityMixin",
         "entity.item.ItemEntityMixin",
         "entity.item.TNTEntityMixin",
         "entity.item.minecart.AbstractMinecartEntityMixin",
@@ -157,7 +157,9 @@
         "world.storage.WorldInfoMixin",
         "entity.merchant.villager.VillagerEntityMixin",
         "entity.merchant.villager.AbstractVillagerEntityMixin",
-        "entity.AgeableEntityMixin"
+        "entity.AgeableEntityMixin",
+        "entity.projectile.ProjectileEntityMixin",
+        "server.dedicated.DedicatedPlayerListMixin"
     ],
     "client": [
         "client.MinecraftMixin",

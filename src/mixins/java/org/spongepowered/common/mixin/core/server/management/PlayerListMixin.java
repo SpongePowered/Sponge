@@ -38,9 +38,11 @@ import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
@@ -102,11 +104,11 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     // @formatter:on
 
     private boolean impl$isBedSpawn = false;
-    private DimensionType impl$originalDestination = null;
+    RegistryKey<World> impl$originalDestination = null;
 
     @Override
-    public void bridge$setOriginalDestinationDimensionForRespawn(DimensionType dimensionType) {
-        this.impl$originalDestination = dimensionType;
+    public void bridge$setOriginalDestinationDimensionForRespawn(final RegistryKey<World> key) {
+        this.impl$originalDestination = key;
     }
 
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;readPlayer"
@@ -313,7 +315,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((ServerPlayerEntityBridge) recreatedPlayer).bridge$sendDimensionData(serverPlayNetHandler.netManager, dimension);
 
         ((ServerPlayerEntityBridge) recreatedPlayer).bridge$sendChangeDimension(
-                ((SRespawnPacketAccessor) packetIn).accessor$getDimensionType(),
+                ((SRespawnPacketAccessor) packetIn).accessor$getDimensionID(),
                 ((SRespawnPacketAccessor) packetIn).accessor$getHashedSeed(), ((SRespawnPacketAccessor) packetIn).accessor$getWorldType(),
                 recreatedPlayer.interactionManager.getGameType()
         );

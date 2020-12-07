@@ -56,7 +56,7 @@ import org.spongepowered.common.accessor.inventory.container.DispenserContainerA
 import org.spongepowered.common.accessor.inventory.container.HopperContainerAccessor;
 import org.spongepowered.common.accessor.inventory.container.HorseInventoryContainerAccessor;
 import org.spongepowered.common.accessor.inventory.container.MerchantContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.RepairContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.AbstractRepairContainerAccessor;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -297,8 +297,8 @@ public final class ContainerUtil {
             return (Carrier) ((HorseInventoryContainerAccessor) container).accessor$getHorse();
         } else if (container instanceof MerchantContainerAccessor && ((MerchantContainerAccessor) container).accessor$getMerchant() instanceof Carrier) {
             return (Carrier) ((MerchantContainerAccessor) container).accessor$getMerchant();
-        } else if (container instanceof RepairContainerAccessor) {
-            final PlayerEntity player = ((RepairContainerAccessor) container).accessor$getPlayer();
+        } else if (container instanceof AbstractRepairContainerAccessor) {
+            final PlayerEntity player = ((AbstractRepairContainerAccessor) container).accessor$field_234645_f_();
             if (player instanceof ServerPlayerEntity) {
                 return (Carrier) player;
             }

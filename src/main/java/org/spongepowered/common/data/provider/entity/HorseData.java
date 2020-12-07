@@ -29,6 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.entity.passive.horse.HorseEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.data.type.SpongeHorseColor;
 import org.spongepowered.common.data.type.SpongeHorseStyle;
@@ -50,7 +51,7 @@ public final class HorseData {
                         })
                         .set((h, v) -> {
                             final int style = HorseData.getHorseStyle(h);
-                            h.setHorseVariant(((SpongeHorseColor) v).getMetadata() | style);
+                            ((HorseEntityAccessor) h).accessor$func_234242_w_(((SpongeHorseColor) v).getMetadata() | style);
                         })
                     .create(Keys.HORSE_STYLE)
                         .get(h -> {
@@ -59,16 +60,16 @@ public final class HorseData {
                         })
                         .set((h, v) -> {
                             final int color = HorseData.getHorseColor(h);
-                            h.setHorseVariant((color | ((SpongeHorseStyle) v).getBitMask()));
+                            ((HorseEntityAccessor) h).accessor$func_234242_w_((color | ((SpongeHorseStyle) v).getBitMask()));
                         });
     }
     // @formatter:on
 
     private static int getHorseColor(final HorseEntity holder) {
-        return holder.getHorseVariant() & 0xFF;
+        return ((HorseEntityAccessor) holder).accessor$func_234241_eS_() & 0xFF;
     }
 
     private static int getHorseStyle(final HorseEntity holder) {
-        return (holder.getHorseVariant() & 0xFF00) >> 8;
+        return (((HorseEntityAccessor) holder).accessor$func_234241_eS_() & 0xFF00) >> 8;
     }
 }

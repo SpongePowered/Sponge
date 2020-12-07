@@ -136,6 +136,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private @Nullable ITextComponent impl$connectionMessage;
+    private String impl$language = "en_us";
     private Scoreboard impl$scoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
     @Nullable private Boolean impl$keepInventory = null;
     // Used to restore original item received in a packet after canceling an event
@@ -282,6 +283,16 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         final ITextComponent component = SpongeAdventure.asVanilla(messageToSend);
         this.connection.disconnect(component);
         return true;
+    }
+
+    @Override
+    public String bridge$getLanguage() {
+        return this.impl$language;
+    }
+
+    @Override
+    public void bridge$setLanguage(final String language) {
+        this.impl$language = language;
     }
 
     @Override

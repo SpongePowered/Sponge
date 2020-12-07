@@ -29,7 +29,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
@@ -43,8 +42,6 @@ import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
-import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.VecHelper;
 
@@ -106,11 +103,11 @@ public final class NetherPortalType extends VanillaPortalType {
             final Function<Boolean, net.minecraft.entity.Entity> portalLogic;
             if (entity instanceof ServerPlayerEntity) {
                 portalLogic = PortalHelper.createVanillaPlayerPortalLogic((ServerPlayerEntity) entity,
-                        VecHelper.toVec3d(actualDestination.getPosition()), (ServerWorld) previousLocation.getWorld(),
+                        VecHelper.toVanillaVector3d(actualDestination.getPosition()), (ServerWorld) previousLocation.getWorld(),
                         (ServerWorld) actualDestination.getWorld(), this);
             } else {
                 portalLogic = PortalHelper.createVanillaEntityPortalLogic((net.minecraft.entity.Entity) entity,
-                        VecHelper.toVec3d(actualDestination.getPosition()), (ServerWorld) previousLocation.getWorld(),
+                        VecHelper.toVanillaVector3d(actualDestination.getPosition()), (ServerWorld) previousLocation.getWorld(),
                         (ServerWorld) actualDestination.getWorld(), this);
             }
 
@@ -138,8 +135,8 @@ public final class NetherPortalType extends VanillaPortalType {
             }
 
             if (!worldChange) {
-                ((EntityAccessor) entity).accessor$setLastPortalPos(new BlockPos(mEntity.getPosX(), mEntity.getPosY(), mEntity.getPosZ()));
-                ((EntityAccessor) entity).accessor$setTimeUntilPortal(Integer.MAX_VALUE);
+                ((EntityAccessor) entity).accessor$field_242271_ac(new BlockPos(mEntity.getPosX(), mEntity.getPosY(), mEntity.getPosZ()));
+                ((EntityAccessor) entity).accessor$setPortalCounter(Integer.MAX_VALUE);
 
                 return true;
             }
@@ -147,7 +144,7 @@ public final class NetherPortalType extends VanillaPortalType {
             // Players are special fickle things
             if (entity instanceof ServerPlayerEntity) {
                 // Hacks
-                ((EntityAccessor) entity).accessor$setTimeUntilPortal(Integer.MAX_VALUE);
+                ((EntityAccessor) entity).accessor$setPortalCounter(Integer.MAX_VALUE);
 
                 EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) mEntity, (ServerWorld) previousLocation.getWorld(),
                         (ServerWorld) destination.getWorld(), (ServerWorld) actualDestination.getWorld(), false);

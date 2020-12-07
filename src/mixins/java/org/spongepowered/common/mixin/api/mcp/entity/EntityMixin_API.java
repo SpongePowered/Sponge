@@ -58,7 +58,7 @@ import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
@@ -263,7 +263,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         final Transform transform = this.getTransform();
         final CompoundNBT compound = new CompoundNBT();
         this.shadow$writeUnlessRemoved(compound);
-        final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
+        final DataContainer unsafeNbt = NBTTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.Entity.CLASS, this.getClass().getName())

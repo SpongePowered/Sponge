@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.Attributes;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.attribute.type.AttributeType;
-import org.spongepowered.common.accessor.entity.monster.ZombieEntityAccessor;
-import org.spongepowered.common.accessor.entity.passive.horse.AbstractHorseEntityAccessor;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
 import java.util.stream.Stream;
@@ -44,19 +42,19 @@ public final class IAttributeTypeRegistrar {
     
     public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
-            .registerCatalogAndSupplier(AttributeType.class, "generic_armor", () -> (AttributeType) SharedMonsterAttributes.ARMOR)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_armor_toughness", () -> (AttributeType) SharedMonsterAttributes.ARMOR_TOUGHNESS)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_attack_damage", () -> (AttributeType) SharedMonsterAttributes.ATTACK_DAMAGE)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_attack_knockback", () -> (AttributeType) SharedMonsterAttributes.ATTACK_KNOCKBACK)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_attack_speed", () -> (AttributeType) SharedMonsterAttributes.ATTACK_SPEED)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_flying_speed", () -> (AttributeType) SharedMonsterAttributes.FLYING_SPEED)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_follow_range", () -> (AttributeType) SharedMonsterAttributes.FOLLOW_RANGE)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_knockback_resistance", () -> (AttributeType) SharedMonsterAttributes.KNOCKBACK_RESISTANCE)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_luck", () -> (AttributeType) SharedMonsterAttributes.LUCK)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_max_health", () -> (AttributeType) SharedMonsterAttributes.MAX_HEALTH)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_movement_speed", () -> (AttributeType) SharedMonsterAttributes.MOVEMENT_SPEED)
-            .registerCatalogAndSupplier(AttributeType.class, "horse_jump_strength", () -> (AttributeType) AbstractHorseEntityAccessor.accessor$getJumpStrength())
-            .registerCatalogAndSupplier(AttributeType.class, "zombie_spawn_reinforcements", () -> (AttributeType) ZombieEntityAccessor.accessor$getSpawnReinforcementsChance())
+            .registerCatalogAndSupplier(AttributeType.class, "generic_armor", () -> (AttributeType) Attributes.ARMOR)
+            .registerCatalogAndSupplier(AttributeType.class, "generic_armor_toughness", () -> (AttributeType) Attributes.ARMOR_TOUGHNESS)
+            .registerCatalogAndSupplier(AttributeType.class, "generic_attack_damage", () -> (AttributeType) Attributes.ATTACK_DAMAGE)
+            .registerCatalogAndSupplier(AttributeType.class, "generic_attack_knockback", () -> (AttributeType) Attributes.ATTACK_KNOCKBACK)
+            .registerCatalogAndSupplier(AttributeType.class, "generic_attack_speed", () -> (AttributeType) Attributes.ATTACK_SPEED)
+            .registerCatalogAndSupplier(AttributeType.class, "generic_flying_speed", () -> (AttributeType) Attributes.FLYING_SPEED)
+            .registerCatalogAndSupplier(AttributeType.class, "generic_follow_range", () -> (AttributeType) Attributes.FOLLOW_RANGE)
+            .registerCatalogAndSupplier(AttributeType.class, "generic_knockback_resistance", () -> (AttributeType) Attributes.KNOCKBACK_RESISTANCE)
+            .registerCatalogAndSupplier(AttributeType.class, "generic_luck", () -> (AttributeType) Attributes.LUCK)
+            .registerCatalogAndSupplier(AttributeType.class, "generic_max_health", () -> (AttributeType) Attributes.MAX_HEALTH)
+            .registerCatalogAndSupplier(AttributeType.class, "generic_movement_speed", () -> (AttributeType) Attributes.MOVEMENT_SPEED)
+            .registerCatalogAndSupplier(AttributeType.class, "horse_jump_strength", () -> (AttributeType) Attributes.HORSE_JUMP_STRENGTH)
+            .registerCatalogAndSupplier(AttributeType.class, "zombie_spawn_reinforcements", () -> (AttributeType) Attributes.ZOMBIE_SPAWN_REINFORCEMENTS)
         ;
     }
 }

@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.network.channel.ChannelBuffers;
 import org.spongepowered.common.util.Constants;
 
@@ -613,7 +613,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     public ChannelBuf cbuf$writeDataView(final DataView data) {
-        final CompoundNBT compound = NbtTranslator.getInstance().translate(checkNotNull(data, "data"));
+        final CompoundNBT compound = NBTTranslator.getInstance().translate(checkNotNull(data, "data"));
         this.shadow$writeCompoundTag(compound);
         return (ChannelBuf) this;
     }
@@ -629,7 +629,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
 
     public DataView cbuf$readDataView() {
         try {
-            return NbtTranslator.getInstance().translateFrom(this.shadow$readCompoundTag());
+            return NBTTranslator.getInstance().translateFrom(this.shadow$readCompoundTag());
         } catch (IOException e) {
             throw new DecoderException(e);
         }

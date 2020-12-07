@@ -25,7 +25,7 @@
 package org.spongepowered.common.accessor.entity.player;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -36,15 +36,13 @@ public interface ServerPlayerEntityAccessor {
 
     @Accessor("invulnerableDimensionChange") void accessor$setInvulnerableDimensionChange(boolean invulnerableDimensionChange);
 
-    @Accessor("language") String accessor$getLanguage();
-
     @Accessor("seenCredits") boolean accessor$getSeenCredits();
 
     @Accessor("chatColours") boolean accessor$getChatColours();
 
     @Accessor("seenCredits") void accessor$setSeenCredits(boolean seenCredits);
 
-    @Accessor("enteredNetherPosition") void accessor$setEnteredNetherPosition(Vec3d value);
+    @Accessor("enteredNetherPosition") void accessor$setEnteredNetherPosition(Vector3d value);
 
     @Accessor("lastExperience") void accessor$setLastExperience(int value);
 

@@ -27,8 +27,9 @@ package org.spongepowered.vanilla.mixin.core.entity.player;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SRespawnPacket;
-import net.minecraft.network.play.server.SServerDifficultyPacket;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.world.GameType;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
@@ -38,12 +39,9 @@ import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.network.packet.ChangeViewerEnvironmentPacket;
-import org.spongepowered.common.network.packet.RegisterDimensionTypePacket;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin_Vanilla implements ServerPlayerEntityBridge  {
@@ -51,14 +49,14 @@ public abstract class ServerPlayerEntityMixin_Vanilla implements ServerPlayerEnt
     @Shadow public abstract ServerWorld shadow$getServerWorld();
 
     @Override
-    public void bridge$sendDimensionData(final NetworkManager manager, final DimensionType dimensionType) {
+    public void bridge$sendDimensionData(final NetworkManager manager, final RegistryKey<World> key) {
         if (this.bridge$getClientType() == ClientType.SPONGE_VANILLA) {
             SpongePacketHandler.getChannel().sendTo((ServerPlayer) this, new RegisterDimensionTypePacket(dimensionType));
         }
     }
 
     @Override
-    public void bridge$sendChangeDimension(final DimensionType toDimensionType, long seed, final WorldType generator, final GameType gameType) {
+    public void bridge$sendChangeDimension(final DimensionType toDimensionType, long seed, final GameType gameType, final GameType previousGameType) {
         final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
 
         if (this.bridge$getClientType() == ClientType.SPONGE_VANILLA) {

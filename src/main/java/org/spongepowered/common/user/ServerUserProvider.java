@@ -35,7 +35,6 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.management.PlayerListAccessor;
-import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.profile.SpongeGameProfile;
 

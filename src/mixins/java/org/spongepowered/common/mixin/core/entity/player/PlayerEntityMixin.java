@@ -30,7 +30,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.boss.dragon.EnderDragonPartEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -48,6 +47,7 @@ import net.minecraft.potion.Effects;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.ITagCollectionSupplier;
 import net.minecraft.tags.NetworkTagManager;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.CachedBlockInfo;
@@ -61,7 +61,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
@@ -290,12 +289,11 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
      */
     @Redirect(method = "canPlayerEdit",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/item/ItemStack;canPlaceOn(Lnet/minecraft/tags/NetworkTagManager;Lnet/minecraft/util/CachedBlockInfo;)Z"))
-    private boolean impl$callChangeBlockPre(
-        final ItemStack stack, final NetworkTagManager tagManager, final CachedBlockInfo cachedBlockInfo, final BlockPos pos, final Direction facing, final ItemStack sameStack) {
+            target = "Lnet/minecraft/item/ItemStack;canPlaceOn(Lnet/minecraft/tags/ITagCollectionSupplier;Lnet/minecraft/util/CachedBlockInfo;)Z"))
+    private boolean impl$callChangeBlockPre(final ItemStack stack, final ITagCollectionSupplier tagSupplier, final CachedBlockInfo cachedBlockInfo) {
         // Lazy evaluation, if the stack isn't placeable anyways, might as well not
         // call the logic.
-        if (!stack.canPlaceOn(tagManager, cachedBlockInfo)) {
+        if (!stack.canPlaceOn(tagSupplier, cachedBlockInfo)) {
             return false;
         }
         // If we're going to throw an event, then do it.
@@ -312,7 +310,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
                 // Then go ahead and call the event and return if it was cancelled
                 // if it was cancelled, then there should be no changes needed to roll back
-                return !SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) this.world, pos, this).isCancelled();
+                return !SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) this.world, cachedBlockInfo.getPos(), this).isCancelled();
             }
         }
         // Otherwise, if all else is ignored, or we're not throwing events, we're just going to return the

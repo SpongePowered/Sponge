@@ -46,7 +46,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
@@ -128,7 +128,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @Override
     public DataContainer toContainer() {
-        final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(this.compound == null ? new CompoundNBT() : this.compound);
+        final DataContainer unsafeNbt = NBTTranslator.getInstance().translateFrom(this.compound == null ? new CompoundNBT() : this.compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Queries.WORLD_KEY, this.worldKey.getFormatted())
@@ -247,7 +247,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
         EntityArchetype.Builder builder = new SpongeEntityArchetypeBuilder();
         builder.type(this.entityType);
         if (this.compound != null) {
-            builder.entityData(NbtTranslator.getInstance().translate(this.compound));
+            builder.entityData(NBTTranslator.getInstance().translate(this.compound));
         }
         return builder.build();
     }
@@ -257,7 +257,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
         if (this.compound == null) {
             return DataContainer.createNew();
         }
-        return NbtTranslator.getInstance().translate(this.compound);
+        return NBTTranslator.getInstance().translate(this.compound);
     }
 
     @Override
@@ -265,7 +265,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
         final SpongeEntitySnapshotBuilder builder = this.createBuilder();
         builder.worldKey = this.worldKey;
         builder.position = this.position;
-        builder.compound = NbtTranslator.getInstance().translate(container);;
+        builder.compound = NBTTranslator.getInstance().translate(container);;
         return builder.build();
     }
 

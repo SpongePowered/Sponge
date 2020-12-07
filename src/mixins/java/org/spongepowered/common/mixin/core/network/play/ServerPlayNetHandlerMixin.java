@@ -47,8 +47,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -99,7 +98,6 @@ import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.math.vector.Vector3d;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -117,7 +115,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     @Shadow @Final public NetworkManager netManager;
     @Shadow public ServerPlayerEntity player;
     @Shadow @Final private MinecraftServer server;
-    @Shadow private Vec3d targetPos;
+    @Shadow private Vector3d targetPos;
     @Shadow private double firstGoodX;
     @Shadow private double firstGoodY;
     @Shadow private double firstGoodZ;
@@ -253,7 +251,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         at = @At(
             value = "FIELD",
             opcode = Opcodes.GETFIELD,
-            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;targetPos:Lnet/minecraft/util/math/Vec3d;"
+            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;targetPos:Lnet/minecraft/util/math/vector/Vector3d;"
         ),
         slice = @Slice(
             from = @At(
@@ -286,18 +284,21 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         final boolean fireRotationEvent = goodMovementPacket && packetInAccessor.accessor$getRotating() && ShouldFire.ROTATE_ENTITY_EVENT;
 
         final ServerPlayer player = (ServerPlayer) this.player;
-        final Vector3d fromRotation = new Vector3d(packetIn.getYaw(this.player.rotationYaw), packetIn.getPitch(this.player.rotationPitch), 0);
+        final org.spongepowered.math.vector.Vector3d fromRotation = new org.spongepowered.math.vector.Vector3d(packetIn.getYaw(this.player
+                .rotationYaw), packetIn.getPitch(this.player.rotationPitch), 0);
 
         // Use the position of the last movement with an event or the current player position if never called
         // We need this because we ignore very small position changes as to not spam as many move events.
-        final Vector3d fromPosition = player.getPosition();
+        final org.spongepowered.math.vector.Vector3d fromPosition = player.getPosition();
 
-        Vector3d toPosition = new Vector3d(packetIn.getX(this.player.getPosX()), packetIn.getY(this.player.getPosY()), packetIn.getZ(this.player.getPosZ()));
-        Vector3d toRotation = new Vector3d(packetIn.getYaw(this.player.rotationYaw), packetIn.getPitch(this.player.rotationPitch), 0);
+        org.spongepowered.math.vector.Vector3d toPosition = new org.spongepowered.math.vector.Vector3d(packetIn.getX(this.player.getPosX()),
+                packetIn.getY(this.player.getPosY()), packetIn.getZ(this.player.getPosZ()));
+        org.spongepowered.math.vector.Vector3d toRotation = new org.spongepowered.math.vector.Vector3d(packetIn.getYaw(this.player.rotationYaw),
+                packetIn.getPitch(this.player.rotationPitch), 0);
 
         final boolean significantRotation = fromRotation.distanceSquared(toRotation) > (.15f * .15f);
 
-        final Vector3d originalToPosition = toPosition;
+        final org.spongepowered.math.vector.Vector3d originalToPosition = toPosition;
         boolean cancelMovement = false;
         boolean cancelRotation = false;
         // Call move & rotate event as needed...
@@ -368,11 +369,10 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
     @Inject(method = "processUseEntity", cancellable = true,
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/Entity;applyPlayerInteraction(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResultType;"),
+                    target = "Lnet/minecraft/entity/Entity;applyPlayerInteraction(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/vector/Vector3d;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResultType;"),
             locals = LocalCapture.CAPTURE_FAILHARD
     )
-    public void impl$onRightClickAtEntity(
-        final CUseEntityPacket packetIn, final CallbackInfo ci, final ServerWorld serverworld, final Entity entity) {
+    public void impl$onRightClickAtEntity(final CUseEntityPacket packetIn, final CallbackInfo ci, final ServerWorld serverworld, final Entity entity) {
         final InteractEntityEvent.Secondary event = SpongeCommonEventFactory
                 .callInteractEntityEventSecondary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
         if (event.isCancelled()) {
@@ -436,12 +436,11 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         method = "processClientStatus",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;recreatePlayerEntity(Lnet/minecraft/entity/player/ServerPlayerEntity;Lnet/"
-                    + "minecraft/world/dimension/DimensionType;Z)Lnet/minecraft/entity/player/ServerPlayerEntity;"
+            target = "Lnet/minecraft/server/management/PlayerList;func_232644_a_(Lnet/minecraft/entity/player/ServerPlayerEntity;Z)Lnet/minecraft/entity/player/ServerPlayerEntity;"
         )
     )
-    private ServerPlayerEntity impl$usePlayerDimensionForRespawn(final PlayerList playerList, final ServerPlayerEntity entity,
-            final DimensionType dimensionType, final boolean conqueredEnd) {
+    private ServerPlayerEntity impl$usePlayerDimensionForRespawn(final PlayerList playerList, final ServerPlayerEntity player,
+            final boolean keepAllPlayerData) {
         // A few changes to Vanilla logic here that, by default, still preserve game mechanics:
         // - If we have conquered The End then keep the dimension type we're headed to (which is Overworld as of 1.15)
         // - Otherwise, check the platform hooks for which dimension to respawn to. In Sponge, this is the Player's dimension they

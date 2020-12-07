@@ -30,7 +30,6 @@ import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
 
 import java.util.Optional;
 

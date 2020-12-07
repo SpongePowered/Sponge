@@ -30,8 +30,8 @@ import net.minecraft.command.ICommandSource;
 import net.minecraft.command.arguments.EntityAnchorArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,8 +43,8 @@ public interface CommandSourceAccessor {
     @Invoker("<init>")
     static CommandSource accessor$createInstance(
             ICommandSource commandSource,
-            Vec3d position,
-            Vec2f rotation, // in X and Z only
+            Vector3d position,
+            Vector2f rotation, // in X and Z only
             ServerWorld world,
             int permissionLevel,
             String name,

@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.potion.EffectInstance;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.BodyParts;
@@ -144,7 +144,7 @@ public final class LivingData {
                         .set((h, v) -> ((LivingEntityBridge) h).bridge$setMaxAir(v))
                     .create(Keys.MAX_HEALTH)
                         .get(h -> (double) h.getMaxHealth())
-                        .set((h, v) -> h.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(v))
+                        .set((h, v) -> h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(v))
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
                             final Collection<EffectInstance> effects = h.getActivePotionEffects();
@@ -181,12 +181,12 @@ public final class LivingData {
                             return true;
                         })
                     .create(Keys.WALKING_SPEED)
-                        .get(h -> h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue())
+                        .get(h -> h.getAttribute(Attributes.MOVEMENT_SPEED).getValue())
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(v);
+                            h.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(v);
                             return true;
                         })
                 .asMutable(LivingEntityAccessor.class)

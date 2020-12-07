@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.core.world.dimension;
 
 import net.minecraft.world.dimension.Dimension;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
-import org.spongepowered.common.bridge.world.dimension.PlatformDimensionBridge;
 
 @Mixin(Dimension.class)
 public abstract class DimensionMixin implements DimensionBridge, PlatformDimensionBridge {

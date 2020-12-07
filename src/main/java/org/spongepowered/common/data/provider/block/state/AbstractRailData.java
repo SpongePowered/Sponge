@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.block.state;
 
 import net.minecraft.block.AbstractRailBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.state.IProperty;
+import net.minecraft.state.Property;
 import net.minecraft.state.properties.RailShape;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.RailDirection;
@@ -45,7 +45,7 @@ public final class AbstractRailData {
                         .get(h -> (RailDirection) (Object) h.get(((AbstractRailBlock) h.getBlock()).getShapeProperty()))
                         .set((h, v) -> {
                             final RailShape shape = (RailShape) (Object) v;
-                            final IProperty<RailShape> property = ((AbstractRailBlock) h.getBlock()).getShapeProperty();
+                            final Property<RailShape> property = ((AbstractRailBlock) h.getBlock()).getShapeProperty();
                             if (!property.getAllowedValues().contains(shape)) {
                                 return h;
                             }

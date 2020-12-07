@@ -26,8 +26,8 @@ package org.spongepowered.common.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.state.IProperty;
 import net.minecraft.state.IntegerProperty;
+import net.minecraft.state.Property;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
@@ -159,12 +159,12 @@ public final class DataUtil {
         return new LinkedHashMap<>(map);
     }
 
-    public static double mind(final IProperty<Double> property) {
+    public static double mind(final Property<Double> property) {
         //noinspection OptionalGetWithoutIsPresent
         return property.getAllowedValues().stream().mapToDouble(i -> i).min().getAsDouble();
     }
 
-    public static double maxd(final IProperty<Double> property) {
+    public static double maxd(final Property<Double> property) {
         //noinspection OptionalGetWithoutIsPresent
         return property.getAllowedValues().stream().mapToDouble(i -> i).max().getAsDouble();
     }

@@ -37,7 +37,7 @@ public interface ChunkManagerAccessor {
 
     @Accessor("entities") Int2ObjectMap<EntityTrackerAccessor> accessor$getEntityTrackers();
 
-    @Accessor("generator") void accessor$setChunkGenerator(ChunkGenerator<?> chunkGenerator);
+    @Accessor("generator") void accessor$setChunkGenerator(ChunkGenerator chunkGenerator);
 
     @Invoker("getLoadedChunksIterable") Iterable<ChunkHolder> accessor$getLoadedChunksIterable();
 

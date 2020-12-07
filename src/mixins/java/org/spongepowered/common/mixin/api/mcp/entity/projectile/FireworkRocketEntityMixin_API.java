@@ -22,27 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import net.minecraft.world.dimension.EndDimension;
-import net.minecraft.world.dimension.NetherDimension;
-import net.minecraft.world.dimension.OverworldDimension;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
+import net.minecraft.entity.projectile.FireworkRocketEntity;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.stream.Stream;
+import java.util.Set;
 
-public final class DimensionTypeStreamGenerator {
+@Mixin(FireworkRocketEntity.class)
+public abstract class FireworkRocketEntityMixin_API extends ProjectileEntityMixin_API implements FireworkRocket {
 
-    private DimensionTypeStreamGenerator() {
+    // @formatter:off
+    @Shadow private int fireworkAge;
+    @Shadow private int lifetime;
+    @Shadow protected abstract void shadow$func_213893_k();
+    // @formatter:on
+
+    @Override
+    public void detonate() {
+        this.fireworkAge = this.lifetime + 1;
+        this.shadow$func_213893_k();
     }
 
-    public static Stream<DimensionType> stream() {
-        return Stream.of(
-            new SpongeDimensionType(ResourceKey.minecraft("overworld"), () -> OverworldDimension::new, () -> true),
-            new SpongeDimensionType(ResourceKey.minecraft("the_nether"), () -> NetherDimension::new, () -> false),
-            new SpongeDimensionType(ResourceKey.minecraft("the_end"), () -> EndDimension::new, () -> false)
-        );
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // Projectile
+        values.add(this.shooter().asImmutable());
+
+        // FusedExplosive
+        values.add(this.primed().asImmutable());
+        values.add(this.fuseDuration().asImmutable());
+
+        values.add(this.effects().asImmutable());
+
+        return values;
     }
+
 }

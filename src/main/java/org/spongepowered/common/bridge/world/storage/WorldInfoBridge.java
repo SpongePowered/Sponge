@@ -30,7 +30,6 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.Optional;
 import java.util.UUID;

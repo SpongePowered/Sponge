@@ -24,23 +24,22 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
-import net.minecraft.tileentity.CommandBlockTileEntity;
+import net.minecraft.entity.item.minecart.CommandBlockMinecartEntity;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.tileentity.CommandBlockLogicAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-public final class MinecartCommandBlockData {
+public final class CommandBlockMinecartData {
 
-    private MinecartCommandBlockData() {
+    private CommandBlockMinecartData() {
     }
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(MinecartCommandBlockEntity.class)
+                .asMutable(CommandBlockMinecartEntity.class)
                     .create(Keys.COMMAND)
                         .get(h -> h.getCommandBlockLogic().getCommand())
                         .set((h, v) -> ((CommandBlockLogicAccessor) h.getCommandBlockLogic()).accessor$setCommandStored(v))

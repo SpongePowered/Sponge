@@ -49,14 +49,13 @@ import java.util.stream.Stream;
 
 public class GlobalPalette<T> implements Palette.Immutable<T> {
 
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     static final Supplier<GlobalPalette<BlockState>> GLOBAL_BLOCK_STATE_PALETTE = MemoizedSupplier.memoize(
         () -> new GlobalPalette<>(
             PaletteTypes.GLOBAL_BLOCK_PALETTE.get(),
             () -> (Stream<BlockState>) (Stream) Registry.BLOCK.stream()
                 .flatMap(block -> block.getStateContainer().getValidStates().stream()),
-            (type) -> Block.BLOCK_STATE_IDS.get((net.minecraft.block.BlockState) type),
+            (type) -> Block.BLOCK_STATE_IDS.getId((net.minecraft.block.BlockState) type),
             (id) -> (BlockState) Block.BLOCK_STATE_IDS.getByValue(id),
             BlockState.class
         )

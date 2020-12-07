@@ -27,9 +27,9 @@ package org.spongepowered.common.event.tracking.phase.general;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootParameters;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.Living;
@@ -99,36 +99,11 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         if (((ExplosionAccessor) explosion).accessor$getMode() == net.minecraft.world.Explosion.Mode.DESTROY) {
             lootBuilder.withParameter(LootParameters.EXPLOSION_RADIUS, ((ExplosionAccessor) explosion).accessor$getSize());
         }
-
     }
 
     @Override
     public void unwind(final ExplosionContext context) {
         TrackingUtil.processBlockCaptures(context);
-//        context.getCapturedEntitySupplier()
-//            .acceptAndClearIfNotEmpty(entities -> {
-//                try (final CauseStackManager.StackFrame smaller = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-//                    smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
-//                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
-//                }
-//            });
-//        context.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(drops -> drops.asMap()
-//            .forEach((pos, items) -> {
-//                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
-//                    final List<Entity> itemEntities = items.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
-//                    final DropItemEvent.Destruct event =
-//                        SpongeEventFactory.createDropItemEventDestruct(PhaseTracker.getCauseStackManager().getCurrentCause(), itemEntities);
-//                    SpongeCommon.postEvent(event);
-//                    if (!event.isCancelled()) {
-//                        EntityUtil.processEntitySpawnsFromEvent(context, event);
-//                    }
-//                } else {
-//                    items
-//                        .forEach(item -> EntityUtil.processEntitySpawn((Entity) item, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context)));
-//                }
-//            })
-//        );
-
     }
 
     @Override

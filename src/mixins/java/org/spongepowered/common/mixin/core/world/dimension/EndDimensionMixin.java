@@ -28,7 +28,6 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.EndDimension;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.accessor.world.dimension.DimensionAccessor;
 
 @Mixin(EndDimension.class)
 public abstract class EndDimensionMixin extends DimensionMixin {

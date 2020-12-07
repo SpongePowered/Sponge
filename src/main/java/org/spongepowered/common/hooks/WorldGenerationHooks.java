@@ -29,8 +29,6 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.feature.structure.LegacyStructureDataUtil;
 import net.minecraft.world.storage.DimensionSavedDataManager;
 import org.spongepowered.api.world.dimension.DimensionTypes;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.List;
 

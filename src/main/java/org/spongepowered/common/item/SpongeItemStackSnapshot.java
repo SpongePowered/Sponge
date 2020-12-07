@@ -47,7 +47,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
@@ -192,7 +192,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 //     TODO       container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedImmutableManipulatorList(this.manipulators));
         }
         if (this.compound != null) {
-            container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
+            container.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.getInstance().translateFrom(this.compound));
         }
         return container;
     }

@@ -30,7 +30,6 @@ import net.minecraft.block.EndPortalFrameBlock;
 import net.minecraft.block.NetherPortalBlock;
 import net.minecraft.block.pattern.BlockPattern;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -43,20 +42,15 @@ import net.minecraft.world.dimension.OverworldDimension;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
 import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
-import org.spongepowered.common.bridge.world.dimension.PlatformDimensionBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -384,7 +378,7 @@ public final class PortalHelper {
         };
     }
 
-    public static Function<Boolean, Entity> createVanillaPlayerPortalLogic(final ServerPlayerEntity player, final Vec3d destination,
+    public static Function<Boolean, Entity> createVanillaPlayerPortalLogic(final ServerPlayerEntity player, final Vector3d destination,
         final ServerWorld fromWorld, final ServerWorld toWorld, final PortalType portal) {
 
         return spawnInPortal -> {

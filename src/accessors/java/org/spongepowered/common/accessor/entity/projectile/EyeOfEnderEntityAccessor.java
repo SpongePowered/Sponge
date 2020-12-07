@@ -22,15 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.inventory.container;
+package org.spongepowered.common.accessor.entity.projectile;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.RepairContainer;
+import net.minecraft.entity.projectile.EyeOfEnderEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(RepairContainer.class)
-public interface RepairContainerAccessor {
+@Mixin(EyeOfEnderEntity.class)
+public interface EyeOfEnderEntityAccessor {
 
-    @Accessor("player") PlayerEntity accessor$getPlayer();
+    @Accessor("shatterOrDrop") boolean accessor$getShatterOrDrop();
+    @Accessor("shatterOrDrop") void accessor$setShatterOrDrop(boolean shatterOrDrop);
+    @Accessor("despawnTimer") int accessor$getDespawnTimer();
+    @Accessor("despawnTimer") void accessor$setDespawnTimer(int despawnTimer);
+
 }

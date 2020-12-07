@@ -52,7 +52,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -184,7 +184,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         this.itemType(itemType);
 
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            final CompoundNBT compound = NbtTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            final CompoundNBT compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (compound.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
                 compound.remove(Constants.Sponge.SPONGE_DATA);
             }
@@ -276,7 +276,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         final ItemType itemType = container.getCatalogType(Constants.ItemStack.TYPE, ItemType.class).orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            final CompoundNBT compound = NbtTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            final CompoundNBT compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (!compound.isEmpty()) {
                 SpongeItemStackBuilder.fixEnchantmentData(itemType, compound);
                 itemStack.setTag(compound);

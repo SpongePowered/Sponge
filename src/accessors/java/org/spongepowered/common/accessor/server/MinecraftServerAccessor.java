@@ -56,5 +56,5 @@ public interface MinecraftServerAccessor {
 
     @Accessor("dataFixer") DataFixer accessor$getDataFixer();
 
-    @Invoker("allowSpawnMonsters") boolean accessor$allowSpawnMonsters();
+    @Invoker("func_230536_N_") boolean accessor$func_230536_N_();
 }

@@ -22,11 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.dimension;
+package org.spongepowered.common.accessor.block;
 
-public interface PlatformDimensionBridge {
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    default float bridge$getMovementFactor() {
-        return 1.0f;
-    }
+@Mixin(AbstractBlock.Properties.class)
+public interface AbstractBlock_PropertiesAccessor {
+
+    @Accessor("hardness") float accessor$getHardness();
+    @Accessor("resistance") float accessor$getResistance();
 }

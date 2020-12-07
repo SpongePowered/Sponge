@@ -27,7 +27,6 @@ package org.spongepowered.common.accessor.world;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.Dimension;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -42,8 +41,6 @@ public interface WorldAccessor {
     @Accessor("addedTileEntityList") List<TileEntity> accessor$getAddedTileEntityList();
 
     @Accessor("processingLoadedTiles") boolean accessor$getProcessingLoadedTiles();
-
-    @Accessor("dimension") void accessor$setDimension(Dimension newDimension);
 
     @Invoker("getPendingTileEntityAt") @Nullable TileEntity accessor$getPendingTileEntityAt(BlockPos pos);
 

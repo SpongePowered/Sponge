@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
 public final class GenerationCompatibileContext extends GenerationContext<GenerationCompatibileContext> {
 
     @Nullable AbstractChunkProvider provider;
-    @Nullable ChunkGenerator<?> generator;
+    @Nullable ChunkGenerator generator;
 
     GenerationCompatibileContext(final IPhaseState<GenerationCompatibileContext> state, final PhaseTracker tracker) {
         super(state, tracker);

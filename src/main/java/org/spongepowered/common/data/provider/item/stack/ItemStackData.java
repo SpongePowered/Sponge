@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.item.Food;
 import net.minecraft.item.Item;
@@ -37,7 +38,6 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.util.registry.Registry;
-import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -71,7 +71,7 @@ public final class ItemStackData {
                                 final WeightedTable<PotionEffect> effects = new WeightedTable<>();
                                 final ChanceTable<PotionEffect> chance = new ChanceTable<>();
                                 for (Pair<EffectInstance,Float> effect : itemEffects) {
-                                    chance.add((PotionEffect) effect.getKey(), effect.getValue());
+                                    chance.add((PotionEffect) effect.getFirst(), effect.getSecond());
                                 }
                                 effects.add(new NestedTableEntry<>(1, chance));
                                 return effects;

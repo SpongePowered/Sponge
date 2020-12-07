@@ -41,7 +41,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
@@ -112,7 +112,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
         final CompoundNBT compound = new CompoundNBT();
         this.shadow$write(compound);
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
-        container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
+        container.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.getInstance().translateFrom(compound));
 //        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
 //        if (!manipulators.isEmpty()) {
 //            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));

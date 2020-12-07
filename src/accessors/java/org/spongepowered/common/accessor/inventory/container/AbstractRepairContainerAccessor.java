@@ -22,15 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.dimension;
+package org.spongepowered.common.accessor.inventory.container;
 
-import net.minecraft.world.dimension.Dimension;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.AbstractRepairContainer;
+import net.minecraft.inventory.container.RepairContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(Dimension.class)
-public interface DimensionAccessor {
+@Mixin(AbstractRepairContainer.class)
+public interface AbstractRepairContainerAccessor {
 
-    @Accessor("type") DimensionType accessor$getType();
+    @Accessor("field_234645_f_") PlayerEntity accessor$field_234645_f_();
 }

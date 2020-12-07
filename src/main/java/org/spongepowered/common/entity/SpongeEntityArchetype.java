@@ -43,13 +43,12 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.data.AbstractArchetype;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.nbt.validation.RawDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
@@ -75,7 +74,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     private Vector3d position;
 
     SpongeEntityArchetype(final SpongeEntityArchetypeBuilder builder) {
-        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundNBT() : NbtTranslator.getInstance().translate(builder.entityData));
+        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundNBT() : NBTTranslator.getInstance().translate(builder.entityData));
     }
 
     @Override
@@ -119,12 +118,12 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @Override
     public void data$setDataContainer(DataContainer container) {
-        this.data = NbtTranslator.getInstance().translate(container);
+        this.data = NBTTranslator.getInstance().translate(container);
     }
 
     @Override
     public DataContainer getEntityData() {
-        return NbtTranslator.getInstance().translateFrom(this.data);
+        return NBTTranslator.getInstance().translateFrom(this.data);
     }
 
     @Override
@@ -229,7 +228,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     public EntityArchetype copy() {
         final SpongeEntityArchetypeBuilder builder = new SpongeEntityArchetypeBuilder();
         builder.entityType = this.type;
-        builder.entityData = NbtTranslator.getInstance().translate(this.data);
+        builder.entityData = NBTTranslator.getInstance().translate(this.data);
         return builder.build();
     }
 

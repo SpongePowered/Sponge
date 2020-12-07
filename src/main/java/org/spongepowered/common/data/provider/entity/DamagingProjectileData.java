@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.DamagingProjectileEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.common.accessor.entity.projectile.DamagingProjectileEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.math.vector.Vector3d;
@@ -47,10 +45,7 @@ public final class DamagingProjectileData {
                             ((DamagingProjectileEntityAccessor) h).accessor$setAccelerationX(v.getX());
                             ((DamagingProjectileEntityAccessor) h).accessor$setAccelerationY(v.getY());
                             ((DamagingProjectileEntityAccessor) h).accessor$setAccelerationZ(v.getZ());
-                        })
-                    .create(Keys.SHOOTER)
-                        .get(h -> (ProjectileSource) h.shootingEntity)
-                        .set((h, v) -> h.shootingEntity = (LivingEntity) v);
+                        });
     }
     // @formatter:on
 }

@@ -28,6 +28,8 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.world.storage.PlayerData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -43,12 +45,13 @@ import org.spongepowered.common.service.server.permission.SpongePermissionServic
 @Mixin(DedicatedPlayerList.class)
 public abstract class DedicatedPlayerListMixin extends PlayerList {
 
-    public DedicatedPlayerListMixin(final MinecraftServer server, final int p_i50688_2_) {
-        super(server, p_i50688_2_);
+    public DedicatedPlayerListMixin(MinecraftServer p_i231425_1_, DynamicRegistries.Impl p_i231425_2_,
+            PlayerData p_i231425_3_, int p_i231425_4_) {
+        super(p_i231425_1_, p_i231425_2_, p_i231425_3_, p_i231425_4_);
     }
 
     @Inject(method = "canJoin", at = @At("HEAD"), cancellable = true)
-    private void onCanJoin(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
+    private void impl$checkForWhitelistBypassPermission(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
         if (!this.isWhiteListEnabled() || this.getWhitelistedPlayers().isWhitelisted(profile)) {
             ci.setReturnValue(true);
             return;
@@ -60,7 +63,7 @@ public abstract class DedicatedPlayerListMixin extends PlayerList {
     }
 
     @Inject(method = "bypassesPlayerLimit", at = @At("HEAD"), cancellable = true)
-    private void onBypassPlayerLimit(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
+    private void impl$checkForPlayerLimitBypassPermission(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
         final PermissionService permissionService = Sponge.getServer().getServiceProvider().permissionService();
         final Subject subject = permissionService.getUserSubjects()
                 .getSubject(profile.getId().toString()).orElse(permissionService.getDefaults());

@@ -41,7 +41,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.holder.SimpleNbtDataHolder;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.util.Constants;
@@ -232,7 +232,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         this.entityType = SpongeCommon.getRegistry().getCatalogRegistry().get(EntityType.class, net.kyori.adventure.key.Key.key(entityTypeId)).get();
         this.manipulator = null; // lazy read from nbt
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            this.compound = NbtTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            this.compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
         }
         if (container.contains(Constants.Entity.UUID)) {
             this.uniqueId = UUID.fromString(container.getString(Constants.Entity.UUID).get());

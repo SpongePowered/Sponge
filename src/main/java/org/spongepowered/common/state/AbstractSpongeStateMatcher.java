@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.state;
 
-import net.minecraft.state.IProperty;
-import net.minecraft.state.IStateHolder;
+import net.minecraft.state.Property;
+import net.minecraft.state.StateHolder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.DataHolder;
@@ -59,16 +59,16 @@ public abstract class AbstractSpongeStateMatcher<S extends State<@NonNull S>, T 
         this.keyValueMatchers = keyValueMatchers;
     }
 
-    protected final boolean isValid(final IStateHolder<?> stateHolder) {
+    protected final boolean isValid(final StateHolder<?, ?> stateHolder) {
         for (final Map.Entry<StateProperty<@NonNull ?>, Object> entry : this.properties.entrySet()) {
-            final IProperty<?> property = (IProperty<?>) entry.getKey();
+            final Property<?> property = (Property<?>) entry.getKey();
             final Object value = stateHolder.getValues().get(property);
             if (value == null || !value.equals(entry.getValue())) {
                 return false;
             }
         }
         for (final StateProperty<@NonNull ?> entry : this.requiredProperties) {
-            final IProperty<?> property = (IProperty<?>) entry;
+            final Property<?> property = (Property<?>) entry;
             if (stateHolder.getValues().get(property) == null) {
                 return false;
             }

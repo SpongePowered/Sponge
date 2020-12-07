@@ -47,8 +47,8 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.hooks.SpongeImplHooks;
-import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.Constants;
 
@@ -108,7 +108,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         try {
             final int integer = container.getInt(Constants.ItemStack.DAMAGE_VALUE).orElse(this.shadow$getDamage());
             this.shadow$setDamage(integer);
-            final CompoundNBT stackCompound = NbtTranslator.getInstance().translate(nbtData);
+            final CompoundNBT stackCompound = NBTTranslator.getInstance().translate(nbtData);
             this.shadow$setTag(stackCompound);
         } catch (final Exception e) {
             throw new InvalidDataException("Unable to set raw data or translate raw data for ItemStack setting", e);
@@ -177,7 +177,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
             }
             Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
             if (!compound.isEmpty()) {
-                final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
+                final DataContainer unsafeNbt = NBTTranslator.getInstance().translateFrom(compound);
                 container.set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
             }
         }

@@ -22,13 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.dimension;
+package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
+import net.minecraft.entity.projectile.EyeOfEnderEntity;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.projectile.EyeOfEnder;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-public interface DimensionTypeBridge {
+import java.util.Set;
 
-    SpongeDimensionType bridge$getSpongeDimensionType();
+@Mixin(EyeOfEnderEntity.class)
+public abstract class EyeOfEnderEntityMixin_API extends EntityMixin_API implements EyeOfEnder {
 
-    void bridge$setSpongeDimensionType(SpongeDimensionType dimensionType);
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // Projectile
+        values.add(this.shooter().asImmutable());
+
+        values.add(this.targetLocation().asImmutable());
+
+        return values;
+    }
+
 }

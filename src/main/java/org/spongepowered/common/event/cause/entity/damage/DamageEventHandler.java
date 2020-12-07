@@ -33,8 +33,8 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.nbt.ListNBT;
@@ -112,7 +112,7 @@ public final class DamageEventHandler {
         if (!damageSource.isUnblockable()) {
             final int totalArmorValue = entityLivingBase.getTotalArmorValue();
             final float totalArmor = (float) totalArmorValue;
-            final IAttributeInstance attribute = entityLivingBase.getAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS);
+            final ModifiableAttributeInstance attribute = entityLivingBase.getAttribute(Attributes.ARMOR_TOUGHNESS);
             final double armorToughness = attribute.getValue();
             final float f = 2.0F + (float) armorToughness / 4.0F;
 

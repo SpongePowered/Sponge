@@ -42,8 +42,8 @@ import org.spongepowered.api.data.type.MatterTypes;
 import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.common.accessor.block.BlockAccessor;
-import org.spongepowered.common.accessor.block.FireBlockAccessor;
+import org.spongepowered.common.accessor.block.AbstractBlock_PropertiesAccessor;
+import org.spongepowered.common.accessor.block.AbstractFireBlockAccessor;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -61,7 +61,7 @@ public final class BlockData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.BLAST_RESISTANCE)
-                        .get(h -> (double) ((BlockAccessor) h.getBlock()).accessor$getBlockResistance())
+                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getResistance())
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
                             if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
@@ -69,12 +69,12 @@ public final class BlockData {
                             }
                             return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)));
                         })
-                        .supports(h -> h.has(ChestBlock.TYPE))
+                        .supports(h -> h.hasProperty(ChestBlock.TYPE))
                     .create(Keys.DYE_COLOR)
                         .get(h -> ((DyeColorBlockBridge) h.getBlock()).bridge$getDyeColor().orElse(null))
                         .supports(h -> h.getBlock() instanceof DyeColorBlockBridge)
                     .create(Keys.HARDNESS)
-                        .get(h -> (double) ((BlockAccessor) h.getBlock()).accessor$getBlockHardness())
+                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getHardness())
                     .create(Keys.HELD_ITEM)
                         .get(h -> {
                             final Item item = h.getBlock().asItem();
@@ -89,9 +89,9 @@ public final class BlockData {
                     .create(Keys.IS_PASSABLE)
                         .get(h -> !h.getMaterial().blocksMovement())
                     .create(Keys.IS_UNBREAKABLE)
-                        .get(h -> ((BlockAccessor) h.getBlock()).accessor$getBlockHardness() < 0)
+                        .get(h -> ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getHardness() < 0)
                     .create(Keys.IS_FLAMMABLE)
-                        .get(h -> ((FireBlockAccessor) Blocks.FIRE).accessor$func_220274_q(h) > 0)
+                        .get(((AbstractFireBlockAccessor) Blocks.FIRE)::accessor$canBurn)
                     .create(Keys.IS_SOLID)
                         .get(h -> h.getMaterial().isSolid())
                     .create(Keys.IS_REPLACEABLE)

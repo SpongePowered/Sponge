@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.common.accessor.entity.projectile.FishingBobberEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class FishingBobberData {
@@ -39,8 +40,8 @@ public final class FishingBobberData {
         registrator
                 .asMutable(FishingBobberEntity.class)
                     .create(Keys.TARGET_ENTITY)
-                        .get(h -> (Entity) h.caughtEntity)
-                        .set((h, v) -> h.caughtEntity = (net.minecraft.entity.Entity) v);
+                        .get(h -> (Entity) h.func_234607_k_())
+                        .set((h, v) -> ((FishingBobberEntityAccessor) h).accessor$setCaughtEntity((net.minecraft.entity.Entity) v));
     }
     // @formatter:on
 }

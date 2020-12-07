@@ -156,7 +156,7 @@ public final class EntityData {
                     .create(Keys.IS_WET)
                         .get(Entity::isWet)
                     .create(Keys.ON_GROUND)
-                        .get(h -> h.onGround)
+                        .get(h -> h.isOnGround())
                     .create(Keys.PASSENGERS)
                         .get(h -> h.getPassengers().stream().map(org.spongepowered.api.entity.Entity.class::cast).collect(Collectors.toList()))
                         .set((h, v) -> {
@@ -179,7 +179,7 @@ public final class EntityData {
                         .set((h, v) -> h.startRiding((Entity) v, true))
                     .create(Keys.VELOCITY)
                         .get(h -> VecHelper.toVector3d(h.getMotion()))
-                        .set((h, v) -> h.setMotion(VecHelper.toVec3d(v)))
+                        .set((h, v) -> h.setMotion(VecHelper.toVanillaVector3d(v)))
                     .create(Keys.SWIFTNESS)
                         .get(m -> m.getMotion().length())
                         .set((m, v) -> m.setMotion(m.getMotion().normalize().scale(v)))

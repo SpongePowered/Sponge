@@ -24,11 +24,21 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import com.mojang.brigadier.arguments.*;
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.command.arguments.*;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.command.arguments.BlockStateArgument;
+import net.minecraft.command.arguments.ComponentArgument;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.command.arguments.GameProfileArgument;
+import net.minecraft.command.arguments.ItemArgument;
+import net.minecraft.command.arguments.ResourceLocationArgument;
+import net.minecraft.command.arguments.Vec2Argument;
+import net.minecraft.command.arguments.Vec3Argument;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
@@ -146,7 +156,7 @@ public final class CatalogedValueParameterStreamGenerator {
                         "vector2d",
                         Vec2Argument.vec2(),
                         (reader, cause, result) -> {
-                            final Vec3d r = result.getPosition(cause.getSource());
+                            final Vector3d r = result.getPosition(cause.getSource());
                             return new Vector2d(r.x, r.z);
                         }),
                 StandardCatalogedArgumentParser.createConverter(

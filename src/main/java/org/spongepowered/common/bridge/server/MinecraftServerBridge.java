@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.server;
 
 import com.google.inject.Injector;
-import net.minecraft.world.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -36,12 +35,6 @@ public interface MinecraftServerBridge {
     void bridge$initServices(Game game, Injector injector);
 
     SpongeServerScopedServiceProvider bridge$getServiceProvider();
-
-    long[] bridge$getWorldTickTimes(DimensionType dimensionType);
-
-    void bridge$putWorldTickTimes(DimensionType dimensionType, long[] tickTimes);
-
-    void bridge$removeWorldTickTimes(DimensionType dimensionType);
 
     @Nullable
     ResourcePack bridge$getResourcePack();

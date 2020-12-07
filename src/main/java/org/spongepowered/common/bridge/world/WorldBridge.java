@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.bridge.world;
 
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public interface WorldBridge {
 
@@ -47,5 +46,5 @@ public interface WorldBridge {
 
     void bridge$clearFakeCheck();
 
-    void bridge$adjustDimensionLogic(SpongeDimensionType dimensionType);
+    void bridge$adjustDimensionLogic(DimensionType dimensionType);
 }

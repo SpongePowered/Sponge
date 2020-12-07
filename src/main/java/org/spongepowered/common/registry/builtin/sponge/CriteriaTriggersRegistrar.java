@@ -79,8 +79,7 @@ public final class CriteriaTriggersRegistrar {
                 .registerCatalogAndSupplier(Trigger.class, "killed_by_crossbow", () -> (Trigger) CriteriaTriggers.KILLED_BY_CROSSBOW)
                 .registerCatalogAndSupplier(Trigger.class, "hero_of_the_village", () -> (Trigger) CriteriaTriggers.HERO_OF_THE_VILLAGE)
                 .registerCatalogAndSupplier(Trigger.class, "voluntary_exile", () -> (Trigger) CriteriaTriggers.VOLUNTARY_EXILE)
-                .registerCatalogAndSupplier(Trigger.class, "safely_harvest_honey", () -> (Trigger) CriteriaTriggers.SAFELY_HARVEST_HONEY)
-                .registerCatalogAndSupplier(Trigger.class, "slide_down_block", () -> (Trigger) CriteriaTriggers.field_229864_K_)
+                .registerCatalogAndSupplier(Trigger.class, "slide_down_block", () -> (Trigger) CriteriaTriggers.SLIDE_DOWN_BLOCK)
         ;
     }
 }

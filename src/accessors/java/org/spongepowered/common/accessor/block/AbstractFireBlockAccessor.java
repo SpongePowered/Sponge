@@ -24,16 +24,13 @@
  */
 package org.spongepowered.common.accessor.block;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.AbstractFireBlock;
+import net.minecraft.block.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(Block.class)
-public interface BlockAccessor {
+@Mixin(AbstractFireBlock.class)
+public interface AbstractFireBlockAccessor {
 
-    @Accessor("blockHardness")
-    float accessor$getBlockHardness();
-
-    @Accessor("blockResistance")
-    float accessor$getBlockResistance();
+    @Invoker("canBurn") boolean accessor$canBurn(BlockState block);
 }

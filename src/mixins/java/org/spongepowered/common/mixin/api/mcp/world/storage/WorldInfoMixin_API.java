@@ -58,12 +58,11 @@ import org.spongepowered.common.accessor.world.GameRulesAccessor;
 import org.spongepowered.common.accessor.world.GameRules_RuleValueAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
@@ -324,13 +323,13 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
             }
         } else {
             return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS,
-                NbtTranslator.getInstance().translateFrom(this.shadow$getGeneratorOptions()));
+                NBTTranslator.getInstance().translateFrom(this.shadow$getGeneratorOptions()));
         }
     }
 
     @Override
     public void setGeneratorSettings(final DataContainer generatorSettings) {
-        this.shadow$setGeneratorOptions(NbtTranslator.getInstance().translate(generatorSettings));
+        this.shadow$setGeneratorOptions(NBTTranslator.getInstance().translate(generatorSettings));
     }
 
     @Override

@@ -111,7 +111,7 @@ public final class EntityTypeSupplier {
                 .registerSupplier(EntityType.class, "parrot", () -> (EntityType) net.minecraft.entity.EntityType.PARROT)
                 .registerSupplier(EntityType.class, "pig", () -> (EntityType) net.minecraft.entity.EntityType.PIG)
                 .registerSupplier(EntityType.class, "pufferfish", () -> (EntityType) net.minecraft.entity.EntityType.PUFFERFISH)
-                .registerSupplier(EntityType.class, "zombie_pigman", () -> (EntityType) net.minecraft.entity.EntityType.ZOMBIE_PIGMAN)
+                .registerSupplier(EntityType.class, "zombified_piglin", () -> (EntityType) net.minecraft.entity.EntityType.ZOMBIFIED_PIGLIN)
                 .registerSupplier(EntityType.class, "polar_bear", () -> (EntityType) net.minecraft.entity.EntityType.POLAR_BEAR)
                 .registerSupplier(EntityType.class, "tnt", () -> (EntityType) net.minecraft.entity.EntityType.TNT)
                 .registerSupplier(EntityType.class, "rabbit", () -> (EntityType) net.minecraft.entity.EntityType.RABBIT)

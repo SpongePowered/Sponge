@@ -36,7 +36,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
@@ -101,16 +100,17 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
         this.setCanPickUpLoot(true);
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-
-        // PlayerEntity
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23F);
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.LUCK);
-    }
+    // TODO Minecraft 1.16 - Think about how to do attribute registration...
+//    @Override
+//    protected void registerAttributes() {
+//        super.registerAttributes();
+//
+//        // PlayerEntity
+//        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
+//        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23F);
+//        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
+//        this.getAttributes().registerAttribute(SharedMonsterAttributes.LUCK);
+//    }
 
     @Override
     protected void registerData() {

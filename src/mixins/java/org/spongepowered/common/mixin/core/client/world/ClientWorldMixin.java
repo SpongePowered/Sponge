@@ -28,7 +28,6 @@ import net.minecraft.client.world.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 @Mixin(ClientWorld.class)
 public abstract class ClientWorldMixin extends WorldMixin implements WorldBridge {

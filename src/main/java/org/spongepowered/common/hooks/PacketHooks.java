@@ -28,8 +28,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SJoinGamePacket;
 import net.minecraft.network.play.server.SRespawnPacket;
 import net.minecraft.world.GameType;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.dimension.DimensionType;
 
 public interface PacketHooks {
 

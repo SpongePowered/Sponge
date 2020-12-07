@@ -24,25 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.dimension.Dimension;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.server.ServerWorldLightManager;
-import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
-import java.io.IOException;
 import java.util.Random;
 
 @Mixin(net.minecraft.world.World.class)
@@ -81,7 +73,7 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
     }
 
     @Override
-    public void bridge$adjustDimensionLogic(final SpongeDimensionType dimensionType) {
+    public void bridge$adjustDimensionLogic(final DimensionType dimensionType) {
         ((DimensionTypeBridge) this.dimension.getType()).bridge$setSpongeDimensionType(dimensionType);
         ((WorldAccessor) this).accessor$setDimension(this.dimension.getType().create((World) (Object) this));
     }
