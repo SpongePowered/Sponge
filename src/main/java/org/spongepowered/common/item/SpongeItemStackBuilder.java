@@ -58,14 +58,11 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> implements ItemStack.Builder {
-    @Nullable private Set<Mutable<?, ?>> itemDataSet;
     private ItemType type;
     private int quantity;
     @Nullable private LinkedHashMap<Key<?>, Object> keyValues;
@@ -107,7 +104,6 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
     @Override
     public ItemStack.Builder fromItemStack(final ItemStack itemStack) {
         checkNotNull(itemStack, "Item stack cannot be null");
-        this.itemDataSet = new HashSet<>();
         // Assumes the item stack's values don't need to be validated
         this.type = itemStack.getType();
         this.quantity = itemStack.getQuantity();
@@ -300,7 +296,6 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
     public ItemStack.Builder reset() {
         this.type = null;
         this.quantity = 1;
-        this.itemDataSet = new HashSet<>();
         this.compound = null;
         return this;
     }

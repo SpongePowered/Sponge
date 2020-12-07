@@ -33,7 +33,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(VillagerEntity.class)
 public abstract class VillagerEntityMixin extends AbstractVillagerEntityMixin {
 
-    @Redirect(method = "onDeath", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
+    @Redirect(method = "onDeath",
+        at = @At(value = "INVOKE",
+            target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V",
+            remap = false
+        )
+    )
     private void impl$silenceMojangSpam(final Logger logger, final String message, final Object p0, final Object p1) {
         //noop
     }

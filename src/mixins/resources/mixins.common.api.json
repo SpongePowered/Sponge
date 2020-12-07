@@ -16,7 +16,7 @@
         "event.cause.entity.damage.source.common.AbstractDamageSourceMixin_API",
         "event.cause.entity.damage.source.common.AbstractEntityDamageSourceMixin_API",
         "event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSourceMixin_API",
-        "item.merchant.MerchantMixin",
+        "item.merchant.MerchantMixin_API",
         "mcp.advancements.AdvancementMixin_API",
         "mcp.advancements.AdvancementProgressMixin_API",
         "mcp.advancements.CriterionMixin_API",
@@ -234,6 +234,7 @@
         "mcp.potion.EffectMixin_API",
         "mcp.potion.PotionMixin_API",
         "mcp.scoreboard.ScoreCriteria_RenderTypeMixin_API",
+        "mcp.scoreboard.ScoreCriteriaMixin_API",
         "mcp.scoreboard.ScorePlayerTeamMixin_API",
         "mcp.scoreboard.ServerScoreboardMixin_API",
         "mcp.scoreboard.Team_CollisionRuleMixin_API",
@@ -334,8 +335,7 @@
         "mcp.world.storage.WorldInfoMixin_API",
         "mojang.authlib.properties.PropertyMixin_API",
         "service.permission.SubjectMixin_API",
-        "world.LocatableBlockMixin",
-        "mcp.scoreboard.ScoreCriteriaMixin_API"
+        "world.LocatableBlockMixin_API"
     ],
     "client": [
         "mcp.client.MinecraftMixin_API",

@@ -29,7 +29,6 @@ import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.AdventureRegistry;
-import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.GameRegistry;
@@ -75,8 +74,4 @@ public final class SpongeGameRegistry implements GameRegistry {
         return ((RecipeRegistry) ((MinecraftServer) Sponge.getServer()).getRecipeManager());
     }
 
-    @Override
-    public VillagerRegistry getVillagerRegistry() {
-        return SpongeVillagerRegistry.getInstance();
-    }
 }

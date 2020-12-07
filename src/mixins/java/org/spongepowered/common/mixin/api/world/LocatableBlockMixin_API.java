@@ -22,27 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
+package org.spongepowered.common.mixin.api.world;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.merchant.villager.VillagerTrades;
-import net.minecraft.item.MerchantOffer;
-import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.item.merchant.TradeOfferGenerator;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
-import javax.annotation.Nullable;
-import java.util.Random;
+@Mixin(value = LocatableBlock.class, remap = false)
+public interface LocatableBlockMixin_API {
 
-@Mixin(VillagerTrades.ITrade.class)
-public interface VillagerTrades_ITradeMixin_API extends TradeOfferGenerator {
-
-    @Shadow @Nullable MerchantOffer shadow$getOffer(Entity entity, Random random);
-
-    @Override
-    default TradeOffer apply(final org.spongepowered.api.entity.Entity merchant, final Random random) {
-        return (TradeOffer) this.shadow$getOffer((Entity) merchant, random);
+    /**
+     * @author gabizou - August 17th, 2018
+     * @reason Due to locatable blocks being created thousands of times per tick,
+     * we need this to be stupid fast.
+     */
+    @Overwrite
+    static LocatableBlock.Builder builder() {
+        return new SpongeLocatableBlockBuilder();
     }
-
 }

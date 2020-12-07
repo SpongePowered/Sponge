@@ -38,13 +38,12 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Collections;
-
 import javax.annotation.Nullable;
+import java.util.Collections;
 
 @Mixin(value = Merchant.class)
 @Implements(@Interface(iface = IMerchant.class, prefix = "imerchant$"))
-public interface MerchantMixin extends Merchant {
+public interface MerchantMixin_API extends Merchant {
 
     default void imerchant$setCustomer(@Nullable final PlayerEntity player) {
         this.setCustomer((Humanoid) player);
