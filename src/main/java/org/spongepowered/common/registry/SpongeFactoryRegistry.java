@@ -32,7 +32,7 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
 import org.spongepowered.api.adventure.Audiences;
-import org.spongepowered.api.adventure.Text;
+import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
@@ -132,7 +132,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(Parameter.Value.Factory.class, new SpongeParameterFactory())
             .registerFactory(ResourcePack.Factory.class, new SpongeResourcePack.Factory())
             .registerFactory(ServerLocation.Factory.class, new SpongeServerLocation.Factory())
-            .registerFactory(Text.Factory.class, new SpongeAdventure.Factory())
+            .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory())
             .registerFactory(TimingsFactory.class, new SpongeTimingsFactory())
             .registerFactory(Transform.Factory.class, new SpongeTransform.Factory())
             .registerFactory(VariableValueParameters.Factory.class, new SpongeVariableValueParametersFactory())
