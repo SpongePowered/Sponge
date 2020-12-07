@@ -41,7 +41,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.accessor.tileentity.BannerTileEntityAccessor;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
 import org.spongepowered.common.data.provider.item.stack.ShieldItemStackData;
@@ -115,6 +114,6 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
 
     @Override
     public void bridge$setCustomDisplayName(ITextComponent component) {
-        ((BannerTileEntityAccessor) this).accessor$func_213136_a(component);
+        ((BannerTileEntity) (Object) this).setName(component);
     }
 }

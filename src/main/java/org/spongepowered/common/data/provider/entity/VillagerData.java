@@ -26,7 +26,6 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.merchant.villager.VillagerProfession;
-import net.minecraft.entity.villager.IVillagerType;
 import net.minecraft.item.MerchantOffer;
 import net.minecraft.item.MerchantOffers;
 import org.spongepowered.api.data.Keys;
@@ -56,8 +55,8 @@ public final class VillagerData {
                         .get(h -> h.getOffers().stream().map(TradeOffer.class::cast).collect(Collectors.toList()))
                         .set((h, v) -> h.setOffers(v.stream().map(MerchantOffer.class::cast).collect(Collectors.toCollection(MerchantOffers::new))))
                     .create(Keys.VILLAGER_TYPE)
-                        .get(h -> (VillagerType) h.getVillagerData().getType())
-                        .set((h, v) -> h.setVillagerData(h.getVillagerData().withType((IVillagerType) v)));
+                        .get(h -> (VillagerType) (Object) h.getVillagerData().getType())
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().withType((net.minecraft.entity.villager.VillagerType) (Object) v)));
     }
     // @formatter:on
 }

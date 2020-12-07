@@ -22,17 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.entity.monster;
+package org.spongepowered.common.accessor.world.storage;
 
-import net.minecraft.entity.monster.AbstractRaiderEntity;
-import net.minecraft.network.datasync.DataParameter;
+import java.io.File;
+import net.minecraft.world.storage.PlayerData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(AbstractRaiderEntity.class)
-public interface AbstractRaiderEntityAccessor {
-
-    @Accessor("CELEBRATING") static DataParameter<Boolean> accessor$getDataIsCelebrating() {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
+@Mixin(PlayerData.class)
+public interface PlayerDataAccessor {
+    @Accessor("playerDataFolder") File accessor$getPlayerDataFolder();
 }

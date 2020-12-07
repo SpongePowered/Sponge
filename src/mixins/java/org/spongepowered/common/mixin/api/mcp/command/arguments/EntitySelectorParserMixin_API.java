@@ -36,7 +36,7 @@ import net.minecraft.command.arguments.EntitySelector;
 import net.minecraft.command.arguments.EntitySelectorParser;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.Advancement;
@@ -59,7 +59,6 @@ import org.spongepowered.common.accessor.advancements.criterion.MinMaxBounds_Flo
 import org.spongepowered.common.accessor.advancements.criterion.MinMaxBounds_IntBoundAccessor;
 import org.spongepowered.common.bridge.command.arguments.EntitySelectorParserBridge;
 import org.spongepowered.common.command.selector.SpongeSelectorSortAlgorithm;
-import org.spongepowered.math.vector.Vector3d;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,7 +79,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Shadow @Final private StringReader reader;
     @Shadow private int limit;
-    @Shadow private BiConsumer<Vec3d, List<? extends Entity>> sorter;
+    @Shadow private BiConsumer<Vector3d, List<? extends Entity>> sorter;
     @Shadow private MinMaxBounds.FloatBound distance;
     @Shadow private MinMaxBounds.IntBound level;
     @Shadow private boolean includeNonPlayers;
@@ -169,9 +168,10 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     @Override
-    public Selector.@NonNull Builder setVolume(@NonNull final Vector3d corner1, @NonNull final Vector3d corner2) {
-        final Vector3d minPoint = corner1.min(corner2);
-        final Vector3d distance = corner1.max(corner2).sub(minPoint);
+    public Selector.@NonNull Builder setVolume(final org.spongepowered.math.vector.@NonNull Vector3d corner1,
+                                               final org.spongepowered.math.vector.@NonNull Vector3d corner2) {
+        final org.spongepowered.math.vector.Vector3d minPoint = corner1.min(corner2);
+        final org.spongepowered.math.vector.Vector3d distance = corner1.max(corner2).sub(minPoint);
         this.shadow$setX(minPoint.getX());
         this.shadow$setY(minPoint.getY());
         this.shadow$setZ(minPoint.getZ());

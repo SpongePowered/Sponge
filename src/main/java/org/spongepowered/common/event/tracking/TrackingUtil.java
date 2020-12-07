@@ -33,7 +33,7 @@ import net.minecraft.block.BlockEventData;
 import net.minecraft.block.RedstoneLampBlock;
 import net.minecraft.block.RedstoneTorchBlock;
 import net.minecraft.block.RepeaterBlock;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -237,7 +237,7 @@ public final class TrackingUtil {
             try (final Timing timing = ((TimingBridge) tileEntity).bridge$getTimingsHandler().startTiming()) {
                 tile.tick();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }
         // We delay clearing active chunk if TE is invalidated during tick so we must remove it after
@@ -282,7 +282,7 @@ public final class TrackingUtil {
     }
 
     public static void updateTickFluid(
-        final TrackedWorldBridge mixinWorld, final IFluidState fluidState, final BlockPos pos
+        final TrackedWorldBridge mixinWorld, final FluidState fluidState, final BlockPos pos
     ) {
         final ServerWorld world = (ServerWorld) mixinWorld;
         final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) world;
@@ -313,7 +313,7 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.FLUID_TICK, () -> "Wrapping Fluid Tick: " + fluidState.toString());
             fluidState.tick(world, pos);
-        } catch (Exception | NoClassDefFoundError e) {
+        } catch (final Exception | NoClassDefFoundError e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
 
         }
@@ -357,7 +357,7 @@ public final class TrackingUtil {
     }
     @SuppressWarnings("rawtypes")
     public static void randomTickFluid(final TrackedWorldBridge mixinWorld,
-        final IFluidState state, final BlockPos pos, final Random random) {
+        final FluidState state, final BlockPos pos, final Random random) {
         final ServerWorld world = (ServerWorld) mixinWorld;
         final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) world;
 
@@ -407,7 +407,7 @@ public final class TrackingUtil {
         final @Nullable Object source = blockEvent.bridge$getTileEntity() != null ? blockEvent.bridge$getTileEntity() : blockEvent.bridge$getTickingLocatable();
         if (source == null) {
             // No source present which means we are ignoring the phase state
-            return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
+            return currentState.receiveBlockEvent(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         }
         final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext(PhaseTracker.SERVER);
         phaseContext.source(source);
@@ -421,7 +421,7 @@ public final class TrackingUtil {
         boolean result = true;
         try (final BlockEventTickContext o = phaseContext) {
             o.buildAndSwitch();
-            phaseContext.setEventSucceeded(currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter()));
+            phaseContext.setEventSucceeded(currentState.receiveBlockEvent(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter()));
             // We need to grab the result here as the phase context close will trigger a reset
             result = phaseContext.wasNotCancelled();
         } // We can't return onBlockEventReceived because the phase state may have cancelled all transactions
@@ -513,7 +513,7 @@ public final class TrackingUtil {
             existing.write(nbt);
             builder.addUnsafeCompound(nbt);
         }
-        catch(Throwable t) {
+        catch(final Throwable t) {
             // ignore
         }
     }

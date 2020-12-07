@@ -25,7 +25,7 @@
 package org.spongepowered.common.state;
 
 import net.minecraft.block.Block;
-import net.minecraft.state.IStateHolder;
+import net.minecraft.state.StateHolder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.fluid.FluidState;
@@ -48,7 +48,7 @@ public final class SpongeFluidStateMatcher extends AbstractSpongeStateMatcher<Fl
 
     @Override
     public boolean matches(@NonNull final FluidState state) {
-        return this.isValid((IStateHolder<?>) state);
+        return this.isValid((StateHolder<?, ?>) state);
     }
 
     @Override

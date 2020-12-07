@@ -26,11 +26,11 @@ package org.spongepowered.common.command.manager;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ICommandSource;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -83,13 +83,13 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
                 final String name = displayName.getString();
                 commandSource = new CommandSource(
                         iCommandSource,
-                        context.get(EventContextKeys.LOCATION).map(x -> VecHelper.toVec3d(x.getPosition()))
-                                .orElseGet(() -> locatable == null ? Vec3d.ZERO : VecHelper.toVec3d(locatable.getLocation().getPosition())),
+                        context.get(EventContextKeys.LOCATION).map(x -> VecHelper.toVanillaVector3d(x.getPosition()))
+                                .orElseGet(() -> locatable == null ? Vector3d.ZERO : VecHelper.toVanillaVector3d(locatable.getLocation().getPosition())),
                         context.get(EventContextKeys.ROTATION)
-                                .map(x -> new Vec2f((float) x.getX(), (float) x.getY()))
-                                .orElse(Vec2f.ZERO),
+                                .map(x -> new Vector2f((float) x.getX(), (float) x.getY()))
+                                .orElse(Vector2f.ZERO),
                         context.get(EventContextKeys.LOCATION).map(x -> (ServerWorld) x.getWorld())
-                                .orElseGet(() -> locatable == null ? SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD) :
+                                .orElseGet(() -> locatable == null ? SpongeCommon.getServer().getWorld(World.OVERWORLD) :
                                         (ServerWorld) locatable.getServerLocation().getWorld()),
                         4,
                         name,

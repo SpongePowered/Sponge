@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import org.spongepowered.api.data.Keys;
@@ -147,7 +147,7 @@ public final class PlayerData {
                         .get(h -> (double) h.abilities.getWalkSpeed())
                         .set((h, v) -> {
                             ((PlayerAbilitiesAccessor) h.abilities).accessor$setWalkSpeed(v.floatValue());
-                            h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(v);
+                            h.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(v);
                             h.sendPlayerAbilities();
                         })
                 .asMutable(PlayerEntityBridge.class)

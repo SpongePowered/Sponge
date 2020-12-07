@@ -29,13 +29,13 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.item.EnderPearlEntity;
 import net.minecraft.entity.item.ExperienceBottleEntity;
-import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.entity.passive.horse.LlamaEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.DragonFireballEntity;
 import net.minecraft.entity.projectile.EggEntity;
 import net.minecraft.entity.projectile.FireballEntity;
+import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.entity.projectile.LlamaSpitEntity;
 import net.minecraft.entity.projectile.PotionEntity;
@@ -49,7 +49,6 @@ import net.minecraft.item.Items;
 import net.minecraft.tileentity.DispenserTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.data.Keys;
@@ -340,7 +339,7 @@ public final class ProjectileUtil {
                     final EntityType<LlamaSpit> projectileType, final ServerLocation loc) {
                 final LlamaEntity llama = (LlamaEntity) source;
                 final LlamaSpitEntity llamaSpit = new LlamaSpitEntity(llama.world, (LlamaEntity) source);
-                final Vec3d lookVec = llama.getLook(1);
+                final net.minecraft.util.math.vector.Vector3d lookVec = llama.getLook(1);
                 llamaSpit.shoot(lookVec.x, lookVec.y, lookVec.z, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.getWorld(), (LlamaSpit) llamaSpit);
             }
@@ -350,7 +349,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<DragonFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final Vec3d lookVec = source.getLook(1);
+                final net.minecraft.util.math.vector.Vector3d lookVec = source.getLook(1);
                 final DragonFireballEntity fireball = new DragonFireballEntity(source.world, source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 fireball.setPosition(fireball.getPosX(), fireball.getPosY() + source.getEyeHeight(), fireball.getPosZ());

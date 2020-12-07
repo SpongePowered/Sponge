@@ -25,7 +25,7 @@
 package org.spongepowered.common.command.selector;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
 
@@ -34,11 +34,11 @@ import java.util.function.BiConsumer;
 
 public final class SpongeSelectorSortAlgorithm implements SelectorSortAlgorithm {
 
-    private final BiConsumer<Vec3d, List<? extends Entity>> sortAlgorithm;
+    private final BiConsumer<Vector3d, List<? extends Entity>> sortAlgorithm;
     private final ResourceKey resourceKey;
 
     public SpongeSelectorSortAlgorithm(
-            final BiConsumer<Vec3d, List<? extends Entity>> sortAlgorithm, final ResourceKey resourceKey) {
+            final BiConsumer<Vector3d, List<? extends Entity>> sortAlgorithm, final ResourceKey resourceKey) {
         this.sortAlgorithm = sortAlgorithm;
         this.resourceKey = resourceKey;
     }
@@ -48,7 +48,7 @@ public final class SpongeSelectorSortAlgorithm implements SelectorSortAlgorithm 
         return this.resourceKey;
     }
 
-    public final BiConsumer<Vec3d, List<? extends Entity>> getSortAlgorithm() {
+    public final BiConsumer<Vector3d, List<? extends Entity>> getSortAlgorithm() {
         return this.sortAlgorithm;
     }
 

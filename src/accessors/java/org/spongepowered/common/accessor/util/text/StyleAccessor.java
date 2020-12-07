@@ -26,7 +26,6 @@ package org.spongepowered.common.accessor.util.text;
 
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 

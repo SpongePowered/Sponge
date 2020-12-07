@@ -22,16 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.tileentity;
+package org.spongepowered.common.accessor.util.text.event;
 
-import net.minecraft.tileentity.BannerTileEntity;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.item.Item;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(BannerTileEntity.class)
-public interface BannerTileEntityAccessor {
+@Mixin(HoverEvent.ItemHover.class)
+public interface HoverEventItemHoverAccessor {
+    @Accessor("item") Item accessor$getItem();
 
-    @Invoker("func_213136_a")
-    void accessor$func_213136_a(ITextComponent component);
+    @Accessor("count") int accessor$getCount();
+
+    @Accessor("tag") CompoundNBT accessor$getTag();
 }

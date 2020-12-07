@@ -34,7 +34,9 @@ import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ItemParticleData;
 import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -54,7 +56,8 @@ import java.util.Random;
 
 public class SpongeParticleHelper {
 
-    public static void sendPackets(ParticleEffect particleEffect, Vector3d position, int radius, DimensionType type, PlayerList playerList) {
+    public static void sendPackets(final ParticleEffect particleEffect, final Vector3d position, final int radius, final RegistryKey<World> type,
+                                   final PlayerList playerList) {
         final List<IPacket<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
 
         if (!packets.isEmpty()) {

@@ -34,6 +34,7 @@ import net.minecraft.network.play.server.SChangeBlockPacket;
 import net.minecraft.network.play.server.SPlaySoundPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -120,7 +121,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Shadow public abstract DifficultyInstance shadow$getDifficultyForLocation(BlockPos p_175649_1_);
     @Shadow public abstract int shadow$getSkylightSubtracted();
     @Shadow public abstract WorldBorder shadow$getWorldBorder();
-    @Shadow public abstract Dimension shadow$getDimension();
+    @Shadow public abstract RegistryKey<net.minecraft.world.World> shadow$getDimensionKey();
     @Shadow public abstract Random shadow$getRandom();
     @Shadow public abstract boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<BlockState> p_217375_2_);
     @Shadow public abstract void shadow$setTileEntity(BlockPos pos, @javax.annotation.Nullable TileEntity tileEntityIn);
@@ -255,7 +256,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
         Preconditions.checkArgument(radius > 0, "The radius has to be greater then zero!");
 
         SpongeParticleHelper.sendPackets(particleEffect, position, radius,
-                this.shadow$getDimension().getType(), this.shadow$getServer().getPlayerList());
+                this.shadow$getDimensionKey(), this.shadow$getServer().getPlayerList());
     }
 
     private void api$playRecord(final Vector3i position, @javax.annotation.Nullable final MusicDisc recordType) {

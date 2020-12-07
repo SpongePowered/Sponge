@@ -37,6 +37,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -48,6 +49,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -57,6 +59,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.common.accessor.util.text.event.HoverEventItemHoverAccessor;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
@@ -79,8 +82,6 @@ public final class SpongeAdventure {
     public static final SpongeCallback CALLBACK_COMMAND = new SpongeCallback();
     public static final GsonComponentSerializer GSON = GsonComponentSerializer.builder()
         .legacyHoverEventSerializer(NbtLegacyHoverEventSerializer.INSTANCE)
-        .downsampleColors() // TODO(1.16) remove
-        .emitLegacyHoverEvent() // TODO(1.16) remove
         .build();
     public static final Codec<CompoundNBT, String, IOException, IOException> NBT_CODEC = new Codec<CompoundNBT, String, IOException, IOException>() {
         @Override
@@ -103,6 +104,19 @@ public final class SpongeAdventure {
             .build();
 
     private static final Set<ServerBossInfo> ACTIVE_BOSS_BARS = ConcurrentHashMap.newKeySet();
+
+    // -------------
+    // ---- Key ----
+    // -------------
+
+    // org.spongepowered.common.mixin.core.adventure.KeyMixin
+    public static Key asAdventure(final ResourceLocation key) {
+        return (Key) (Object) key;
+    }
+
+    // -------------------
+    // ---- Component ----
+    // -------------------
 
     public static Component legacy(final char character, final String string) {
         return LegacyComponentSerializer.legacy(character).deserialize(string);
@@ -189,6 +203,13 @@ public final class SpongeAdventure {
         throw new IllegalArgumentException();
     }
 
+    public static @Nullable TextColor asAdventure(final net.minecraft.util.text.@Nullable Color color) {
+        if (color == null) {
+            return null;
+        }
+        return TextColor.color(color.getColor());
+    }
+
     public static @Nullable NamedTextColor asAdventureNamed(final @Nullable TextFormatting color) {
         if (color == null) {
             return null;
@@ -256,7 +277,31 @@ public final class SpongeAdventure {
         throw new IllegalArgumentException(action.toString());
     }
 
-    public static net.minecraft.util.text.event.HoverEvent.Action asVanilla(final HoverEvent.Action<?> action) {
+    public static HoverEvent<?> asAdventure(final net.minecraft.util.text.event.HoverEvent event) {
+        final net.minecraft.util.text.event.HoverEvent.Action<?> action = event.getAction();
+        if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT) {
+            return HoverEvent.showText(asAdventure(event.getParameter(net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT)));
+        } else if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_ENTITY) {
+            final net.minecraft.util.text.event.HoverEvent.EntityHover value = event.getParameter(
+                net.minecraft.util.text.event.HoverEvent.Action.SHOW_ENTITY);
+            return HoverEvent.showEntity(
+                asAdventure(Registry.ENTITY_TYPE.getKey(value.type)),
+                value.id,
+                asAdventure(value.name)
+            );
+        } else if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM) {
+            final net.minecraft.util.text.event.HoverEvent.ItemHover value = event.getParameter(
+                net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM);
+            return HoverEvent.showItem(
+                asAdventure(Registry.ITEM.getKey(((HoverEventItemHoverAccessor) value).accessor$getItem())),
+                ((HoverEventItemHoverAccessor) value).accessor$getCount(),
+                asBinaryTagHolder(((HoverEventItemHoverAccessor) value).accessor$getTag())
+            );
+        }
+        throw new IllegalArgumentException(event.toString());
+    }
+
+    public static net.minecraft.util.text.event.HoverEvent.Action<?> asVanilla(final HoverEvent.Action<?> action) {
         if (action == HoverEvent.Action.SHOW_TEXT) {
             return net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT;
         } else if (action == HoverEvent.Action.SHOW_ITEM) {

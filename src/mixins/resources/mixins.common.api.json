@@ -200,7 +200,7 @@
         "mcp.entity.projectile.ThrowableEntityMixin_API",
         "mcp.entity.projectile.TridentEntityMixin_API",
         "mcp.entity.projectile.WitherSkullEntityMixin_API",
-        "mcp.entity.villager.IVillagerTypeMixin_API",
+        "mcp.entity.villager.VillagerTypeMixin_API",
         "mcp.fluid.FluidMixin_API",
         "mcp.fluid.IFluidStateMixin_API",
         "mcp.item.ArmorMaterialMixin_API",

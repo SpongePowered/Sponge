@@ -25,7 +25,7 @@
 package org.spongepowered.common.util.raytrace;
 
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.Entity;
@@ -57,14 +57,14 @@ public final class SpongeEntityRayTrace extends AbstractSpongeRayTrace<@NonNull 
     }
 
     @Override
-    final Optional<RayTraceResult<@NonNull Entity>> testSelectLocation(final ServerWorld serverWorld, final Vec3d vec3din, final Vec3d vec3dend) {
+    final Optional<RayTraceResult<@NonNull Entity>> testSelectLocation(final ServerWorld serverWorld, final Vector3d vec3din, final Vector3d vec3dend) {
         double currentSqDist = Double.MAX_VALUE;
         RayTraceResult<@NonNull Entity> returnedEntity = null;
         final LocatableBlock locatableBlock = this.getBlock(serverWorld, vec3din, vec3dend);
         for (final net.minecraft.entity.Entity entity : this.selectEntities(serverWorld, this.getBlockAABB(locatableBlock.getBlockPosition()))) {
-            final Optional<Vec3d> vec3d = entity.getBoundingBox().rayTrace(vec3din, vec3dend);
+            final Optional<Vector3d> vec3d = entity.getBoundingBox().rayTrace(vec3din, vec3dend);
             if (vec3d.isPresent()) {
-                final Vec3d hitPosition = vec3d.get();
+                final Vector3d hitPosition = vec3d.get();
                 final double sqdist = hitPosition.squareDistanceTo(vec3din);
                 if (sqdist < currentSqDist) {
                     currentSqDist = sqdist;

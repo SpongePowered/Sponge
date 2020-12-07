@@ -27,7 +27,7 @@ package org.spongepowered.common.user;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.storage.SaveHandler;
+import net.minecraft.world.storage.PlayerData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.User;
@@ -35,6 +35,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.management.PlayerListAccessor;
+import org.spongepowered.common.accessor.world.storage.PlayerDataAccessor;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
@@ -125,7 +126,7 @@ public final class ServerUserProvider {
         this.userCache.invalidateAll();
 
         // Add all known profiles from the data files
-        final String[] uuids = this.getSaveHandler().func_215771_d();
+        final String[] uuids = this.getSaveHandler().getSeenPlayerUUIDs();
         for (final String playerUuid : uuids) {
 
             // If the filename contains a period, we can fail fast. Vanilla code fixes the Strings that have ".dat" to strip that out
@@ -285,12 +286,12 @@ public final class ServerUserProvider {
         }
     }
 
-    private SaveHandler getSaveHandler() {
-        return (SaveHandler) ((PlayerListAccessor) this.server.getPlayerList()).accessor$getPlayerDataManager();
+    private PlayerData getSaveHandler() {
+        return (PlayerData) ((PlayerListAccessor) this.server.getPlayerList()).accessor$getPlayerDataManager();
     }
 
     private Path getSaveHandlerDirectory() {
-        return ((SaveHandlerAccessor) this.getSaveHandler()).accessor$getPlayersDirectory().toPath();
+        return ((PlayerDataAccessor) this.getSaveHandler()).accessor$getPlayerDataFolder().toPath();
     }
 
     // Used to reduce the number of calls to maps.

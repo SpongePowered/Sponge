@@ -40,7 +40,7 @@ public final class VecHelper {
 
     // === Flow Vector3d --> BlockPos ===
 
-    public static BlockPos toBlockPos(org.spongepowered.math.vector.Vector3d vector) {
+    public static BlockPos toBlockPos(final org.spongepowered.math.vector.Vector3d vector) {
         if (vector == null) {
             return null;
         }
@@ -49,7 +49,7 @@ public final class VecHelper {
 
     // === Flow Vector3i --> BlockPos ===
 
-    public static BlockPos toBlockPos(Vector3i vector) {
+    public static BlockPos toBlockPos(final Vector3i vector) {
         if (vector == null) {
             return null;
         }
@@ -57,7 +57,7 @@ public final class VecHelper {
     }
 
     // === SpongeAPI Location --> BlockPos ===
-    public static BlockPos toBlockPos(ServerLocation location) {
+    public static BlockPos toBlockPos(final ServerLocation location) {
         if (location == null) {
             return null;
         }
@@ -65,16 +65,16 @@ public final class VecHelper {
     }
     // === MC BlockPos --> Flow Vector3i ==
 
-    public static Vector3i toVector3i(BlockPos pos) {
+    public static org.spongepowered.math.vector.Vector3i toVector3i(final BlockPos pos) {
         if (pos == null) {
             return null;
         }
-        return new Vector3i(pos.getX(), pos.getY(), pos.getZ());
+        return new org.spongepowered.math.vector.Vector3i(pos.getX(), pos.getY(), pos.getZ());
     }
 
     // === MC BlockPos --> Flow Vector3d ==
 
-    public static org.spongepowered.math.vector.Vector3d toVector3d(BlockPos pos) {
+    public static org.spongepowered.math.vector.Vector3d toVector3d(final BlockPos pos) {
         if (pos == null) {
             return null;
         }
@@ -83,7 +83,7 @@ public final class VecHelper {
     
     // === Rotations --> Flow Vector ===
 
-    public static Vector3d toVector3d(Rotations rotation) {
+    public static Vector3d toVector3d(final Rotations rotation) {
         if (rotation == null) {
             return null;
         }
@@ -92,7 +92,7 @@ public final class VecHelper {
 
     // === MC Vector3i --> Flow Vector3i ===
 
-    public static Vector3i toVector3i(Vector3i vector) {
+    public static Vector3i toVector3i(final Vector3i vector) {
         if (vector == null) {
             return null;
         }
@@ -101,7 +101,7 @@ public final class VecHelper {
 
     // === Flow Vector3i --> MC Vector3i ===
 
-    public static Vector3i toVanillaVector3i(org.spongepowered.math.vector.Vector3i vector) {
+    public static Vector3i toVanillaVector3i(final org.spongepowered.math.vector.Vector3i vector) {
         if (vector == null) {
             return null;
         }
@@ -110,7 +110,7 @@ public final class VecHelper {
 
     // === Flow Vector3d --> MC Vector3d ===
 
-    public static Vector3d toVanillaVector3d(org.spongepowered.math.vector.Vector3d vector) {
+    public static Vector3d toVanillaVector3d(final org.spongepowered.math.vector.Vector3d vector) {
         if (vector == null) {
             return null;
         }
@@ -119,7 +119,7 @@ public final class VecHelper {
 
     // === MC BlockPos --> MC Vector3d
 
-    public static Vector3d toVanillaVector3d(BlockPos pos) {
+    public static Vector3d toVanillaVector3d(final BlockPos pos) {
         if (pos == null) {
             return null;
         }
@@ -128,7 +128,7 @@ public final class VecHelper {
 
     // === MC ChunkPos ---> Flow Vector3i ===
 
-    public static Vector3i toVector3i(ChunkPos pos) {
+    public static Vector3i toVector3i(final ChunkPos pos) {
         if (pos == null) {
             return null;
         }
@@ -137,7 +137,7 @@ public final class VecHelper {
 
     // === Flow Vector3i --> MC ChunkPos ===
 
-    public static ChunkPos toChunkPos(Vector3i vector) {
+    public static ChunkPos toChunkPos(final Vector3i vector) {
         if (vector == null) {
             return null;
         }
@@ -146,7 +146,7 @@ public final class VecHelper {
 
     // === MC Vector3d --> flow Vector3d ==
 
-    public static org.spongepowered.math.vector.Vector3d toVector3d(Vector3d vector) {
+    public static org.spongepowered.math.vector.Vector3d toVector3d(final Vector3d vector) {
         if (vector == null) {
             return null;
         }
@@ -155,7 +155,7 @@ public final class VecHelper {
 
     // === Flow Vector3d --> MC Vector3d ==
 
-    public static Vector3i toVector3i(Vector3d vector) {
+    public static Vector3i toVector3i(final Vector3d vector) {
         if (vector == null) {
             return null;
         }
@@ -163,30 +163,30 @@ public final class VecHelper {
     }
 
     // === Flow Vector --> Rotations ===
-    public static Rotations toRotation(Vector3d vector) {
+    public static Rotations toRotation(final Vector3d vector) {
         if (vector == null) {
             return null;
         }
         return new Rotations((float) vector.getX(), (float) vector.getY(), (float) vector.getZ());
     }
 
-    public static boolean inBounds(int x, int y, Vector2i min, Vector2i max) {
+    public static boolean inBounds(final int x, final int y, final Vector2i min, final Vector2i max) {
         return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY();
     }
 
-    public static boolean inBounds(int x, int y, int z, Vector3i min, Vector3i max) {
+    public static boolean inBounds(final int x, final int y, final int z, final Vector3i min, final Vector3i max) {
         return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
     }
 
-    public static boolean inBounds(Vector3d pos, Vector3i min, Vector3i max) {
+    public static boolean inBounds(final Vector3d pos, final Vector3i min, final Vector3i max) {
         return VecHelper.inBounds(pos.getX(), pos.getY(), pos.getZ(), min, max);
     }
 
-    public static boolean inBounds(double x, double y, double z, Vector3i min, Vector3i max) {
+    public static boolean inBounds(final double x, final double y, final double z, final Vector3i min, final Vector3i max) {
         return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
     }
 
-    public static AxisAlignedBB toMinecraftAABB(AABB box) {
+    public static AxisAlignedBB toMinecraftAABB(final AABB box) {
         if (box == null) {
             return null;
         }
@@ -198,7 +198,7 @@ public final class VecHelper {
         );
     }
 
-    public static AABB toSpongeAABB(AxisAlignedBB box) {
+    public static AABB toSpongeAABB(final AxisAlignedBB box) {
         if (box == null) {
             return null;
         }
@@ -208,15 +208,15 @@ public final class VecHelper {
         );
     }
 
-    public static CompoundNBT toCompound(Vector3d vector) {
-        CompoundNBT compound = new CompoundNBT();
+    public static CompoundNBT toCompound(final Vector3d vector) {
+        final CompoundNBT compound = new CompoundNBT();
         compound.putDouble("x", vector.getX());
         compound.putDouble("y", vector.getY());
         compound.putDouble("z", vector.getZ());
         return compound;
     }
 
-    public static Vector3d fromCompound(CompoundNBT compound) {
+    public static Vector3d fromCompound(final CompoundNBT compound) {
         return new Vector3d(compound.getDouble("x"), compound.getDouble("y"), compound.getDouble("z"));
     }
 
