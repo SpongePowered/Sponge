@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.EnderCrystalEntity;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.explosive.EnderCrystal;
+import org.spongepowered.api.entity.explosive.EndCrystal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.entity.item.EnderCrystalEntityBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
@@ -34,7 +34,7 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 import java.util.Set;
 
 @Mixin(EnderCrystalEntity.class)
-public abstract class EnderCrystalEntityMixin_API extends EntityMixin_API implements EnderCrystal {
+public abstract class EnderCrystalEntityMixin_API extends EntityMixin_API implements EndCrystal {
 
     @Override
     public void detonate() {
