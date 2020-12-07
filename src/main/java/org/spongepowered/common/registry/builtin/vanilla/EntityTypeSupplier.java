@@ -47,6 +47,7 @@ public final class EntityTypeSupplier {
         final net.minecraft.entity.EntityType<HumanEntity> entityType = net.minecraft.entity.EntityType.Builder.create(HumanEntity::new, EntityClassification.CREATURE)
                 .size(Constants.Entity.Player.PLAYER_WIDTH, Constants.Entity.Player.PLAYER_HEIGHT)
                 .disableSerialization()
+                .trackingRange(Constants.Entity.Player.TRACKING_RANGE)
                 .build(key.getFormatted());
         ((ResourceKeyBridge) entityType).bridge$setKey(key);
         return Registry.register(Registry.ENTITY_TYPE, (ResourceLocation) (Object) key, entityType);

@@ -113,7 +113,7 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
 
             if (!strike.isCancelled()) {
                 for (final Entity e : strike.getEntities()) {
-                    ((net.minecraft.entity.Entity) e).onStruckByLightning((LightningBoltEntity) (Object) this);
+                    ((net.minecraft.entity.Entity) e).func_241841_a((ServerWorld) this.world, (LightningBoltEntity) (Object) this);
                 }
                 SpongeCommon.postEvent(SpongeEventFactory.createLightningEventPost(frame.getCurrentCause()));
             }

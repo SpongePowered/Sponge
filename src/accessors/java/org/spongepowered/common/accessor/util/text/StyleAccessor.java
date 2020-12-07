@@ -24,13 +24,34 @@
  */
 package org.spongepowered.common.accessor.util.text;
 
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.Style;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(Style.class)
 public interface StyleAccessor {
+
+    @Invoker("<init>")
+    static Style accessor$new(
+            final @Nullable Color color,
+            final @Nullable Boolean bold,
+            final @Nullable Boolean italic,
+            final @Nullable Boolean underlined,
+            final @Nullable Boolean strikethrough,
+            final @Nullable Boolean obfuscated,
+            final @Nullable ClickEvent clickEvent,
+            final @Nullable HoverEvent hoverEvent,
+            final @Nullable String insertion,
+            final @Nullable ResourceLocation font
+    ) {
+        throw new AssertionError();
+    }
 
     @Accessor("color") Color accessor$getColor();
 

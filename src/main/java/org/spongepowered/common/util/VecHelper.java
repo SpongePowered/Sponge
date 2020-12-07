@@ -208,7 +208,7 @@ public final class VecHelper {
         );
     }
 
-    public static CompoundNBT toCompound(final Vector3d vector) {
+    public static CompoundNBT toCompound(final org.spongepowered.math.vector.Vector3d vector) {
         final CompoundNBT compound = new CompoundNBT();
         compound.putDouble("x", vector.getX());
         compound.putDouble("y", vector.getY());
@@ -216,8 +216,8 @@ public final class VecHelper {
         return compound;
     }
 
-    public static Vector3d fromCompound(final CompoundNBT compound) {
-        return new Vector3d(compound.getDouble("x"), compound.getDouble("y"), compound.getDouble("z"));
+    public static org.spongepowered.math.vector.Vector3d fromCompound(final CompoundNBT compound) {
+        return new org.spongepowered.math.vector.Vector3d(compound.getDouble("x"), compound.getDouble("y"), compound.getDouble("z"));
     }
 
     private VecHelper() {

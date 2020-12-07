@@ -25,20 +25,34 @@
 package org.spongepowered.common.mixin.core.entity.item.minecart;
 
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
+import net.minecraft.entity.item.minecart.CommandBlockMinecartEntity;
+import net.minecraft.tileentity.CommandBlockLogic;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.util.Tristate;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
-@Mixin(MinecartCommandBlockEntity.MinecartCommandLogic.class)
-public abstract class MinecartCommandBlockEntity_MinecartCommandLogicMixin implements CommandSourceProviderBridge {
+@Mixin(CommandBlockMinecartEntity.class)
+public abstract class CommandBlockMinecartEntityMixin extends AbstractMinecartEntityMixin implements SubjectBridge, CommandSourceProviderBridge {
 
-    @Shadow public abstract CommandSource shadow$getCommandSource();
+    @Shadow @Final private CommandBlockLogic commandBlockLogic;
+
+    @Override
+    public String bridge$getSubjectCollectionIdentifier() {
+        return PermissionService.SUBJECTS_COMMAND_BLOCK;
+    }
+
+    @Override
+    public Tristate bridge$permDefault(final String permission) {
+        return Tristate.TRUE;
+    }
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.shadow$getCommandSource();
+        return this.commandBlockLogic.getCommandSource();
     }
-
 }

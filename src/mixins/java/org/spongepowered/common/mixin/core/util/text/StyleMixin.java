@@ -29,14 +29,9 @@ import net.minecraft.util.text.Style;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.util.text.StyleAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.util.text.StyleBridge;
-
-import java.io.IOException;
 
 @Mixin(Style.class)
 public class StyleMixin implements StyleBridge {
@@ -73,12 +68,5 @@ public class StyleMixin implements StyleBridge {
             this.bridge$adventure = builder.build();
         }
         return this.bridge$adventure;
-    }
-
-    @Inject(method = "setParentStyle", at = @At("HEAD"))
-    private void preventParentCycles(final Style newParent, final CallbackInfoReturnable<Style> ci) {
-        if (newParent == (Style) (Object) this) {
-            throw new IllegalArgumentException("Cannot set style " + this + " as a parent of itself!");
-        }
     }
 }

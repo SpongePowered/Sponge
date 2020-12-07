@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.entity.item.minecart;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartLike;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -45,7 +45,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.math.vector.Vector3d;
 
 import java.util.ArrayList;
 
@@ -54,11 +53,11 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
 
     protected double impl$maxSpeed = Constants.Entity.Minecart.DEFAULT_MAX_SPEED;
     private boolean impl$slowWhenEmpty = true;
-    private Vector3d impl$airborneMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
+    private org.spongepowered.math.vector.Vector3d impl$airborneMod = new org.spongepowered.math.vector.Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
         Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
         Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD);
-    private Vector3d
-        impl$derailedMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_DERAILED_MOD,
+    private org.spongepowered.math.vector.Vector3d
+        impl$derailedMod = new org.spongepowered.math.vector.Vector3d(Constants.Entity.Minecart.DEFAULT_DERAILED_MOD,
         Constants.Entity.Minecart.DEFAULT_DERAILED_MOD,
         Constants.Entity.Minecart.DEFAULT_DERAILED_MOD);
 
@@ -73,22 +72,22 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
 
     @Redirect(method = "moveDerailedMinecart",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/util/math/Vec3d;scale(D)Lnet/minecraft/util/math/Vec3d;"
+            target = "Lnet/minecraft/util/math/vector/Vector3d;scale(D)Lnet/minecraft/util/math/vector/Vector3d;"
         ),
         slice = @Slice(
-            from = @At(value = "FIELD", target = "Lnet/minecraft/util/math/Vec3d;z:D"),
+            from = @At(value = "FIELD", target = "Lnet/minecraft/util/math/vector/Vector3d;z:D"),
             to = @At(value = "FIELD", target = "Lnet/minecraft/entity/MoverType;SELF:Lnet/minecraft/entity/MoverType;")
         ),
         expect = 1,
         require = 1
     )
-    private Vec3d impl$applyDerailedModifierOnGround(final Vec3d vec3d, final double factor) {
+    private Vector3d impl$applyDerailedModifierOnGround(final Vector3d vec3d, final double factor) {
         return vec3d.mul(this.impl$derailedMod.getX(), this.impl$derailedMod.getY(), this.impl$derailedMod.getZ());
     }
 
     @Redirect(method = "moveDerailedMinecart",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/util/math/Vec3d;scale(D)Lnet/minecraft/util/math/Vec3d;"
+            target = "Lnet/minecraft/util/math/vector/Vector3d;scale(D)Lnet/minecraft/util/math/vector/Vector3d;"
         ),
         slice = @Slice(
             from = @At(value = "FIELD", target = "Lnet/minecraft/entity/MoverType;SELF:Lnet/minecraft/entity/MoverType;"),
@@ -97,7 +96,7 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
         expect = 1,
         require = 1
     )
-    private Vec3d impl$applyDerailedModifierInAir(final Vec3d vec3d, final double factor) {
+    private Vector3d impl$applyDerailedModifierInAir(final Vector3d vec3d, final double factor) {
         return vec3d.mul(this.impl$airborneMod.getX(), this.impl$airborneMod.getY(), this.impl$airborneMod.getZ());
     }
 
@@ -169,27 +168,27 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
     }
 
     @Override
-    public void bridge$setSlowWhenEmpty(boolean impl$slowWhenEmpty) {
+    public void bridge$setSlowWhenEmpty(final boolean impl$slowWhenEmpty) {
         this.impl$slowWhenEmpty = impl$slowWhenEmpty;
     }
 
     @Override
-    public Vector3d bridge$getAirborneMod() {
+    public org.spongepowered.math.vector.Vector3d bridge$getAirborneMod() {
         return this.impl$airborneMod;
     }
 
     @Override
-    public void bridge$setAirborneMod(Vector3d impl$airborneMod) {
+    public void bridge$setAirborneMod(final org.spongepowered.math.vector.Vector3d impl$airborneMod) {
         this.impl$airborneMod = impl$airborneMod;
     }
 
     @Override
-    public Vector3d bridge$getDerailedMod() {
+    public org.spongepowered.math.vector.Vector3d bridge$getDerailedMod() {
         return this.impl$derailedMod;
     }
     
     @Override
-    public void bridge$setDerailedMod(Vector3d impl$derailedMod) {
+    public void bridge$setDerailedMod(final org.spongepowered.math.vector.Vector3d impl$derailedMod) {
         this.impl$derailedMod = impl$derailedMod;
     }
 }

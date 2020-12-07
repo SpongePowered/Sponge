@@ -80,6 +80,9 @@ public class TextComponentMixin implements TextComponentBridge {
                 } else if ((Object) this instanceof NBTTextComponent.Entity) {
                     final NBTTextComponent.Entity $this = (NBTTextComponent.Entity) (Object) this;
                     builder = Component.entityNBT().nbtPath($this.func_218676_i()).interpret($this.func_218677_j()).selector($this.func_218687_k());
+                } else if ((Object) this instanceof NBTTextComponent.Storage) {
+                    final NBTTextComponent.Storage $this = (NBTTextComponent.Storage) (Object) this;
+                    builder = Component.storageNBT().nbtPath($this.func_218676_i()).interpret($this.func_218677_j()).storage(SpongeAdventure.asAdventure($this.func_229726_k_()));
                 }
             } else {
               throw new UnsupportedOperationException();

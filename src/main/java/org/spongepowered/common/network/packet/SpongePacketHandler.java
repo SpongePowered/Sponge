@@ -29,17 +29,12 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.biome.ColumnFuzzedBiomeMagnifier;
-import net.minecraft.world.biome.FuzzedBiomeMagnifier;
-import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.network.EngineConnectionTypes;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
-import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -94,26 +89,6 @@ public final class SpongePacketHandler {
 
                     response.success(SpongePacketHandler.createTrackerDataResponse(owner, notifier));
                 });
-        SpongePacketHandler.channel.register(RegisterDimensionTypePacket.class, 2).addHandler(ClientSideConnection.class,
-                (packet, connection) -> {
-
-                    if (Registry.DIMENSION_TYPE.containsKey(packet.actualDimension)) {
-                        return;
-                    }
-
-                    final SpongeDimensionType logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.
-                                    spongepowered.api.world.dimension.DimensionType.class, (ResourceKey) (Object) packet.dimensionLogic)
-                            .orElse(null);
-
-                    final DimensionType registeredType = DimensionTypeAccessor.accessor$construct(packet.dimensionId, "", packet.actualDimension.getPath(),
-                            logicType.getDimensionFactory(),
-                            logicType.hasSkylight(), logicType == DimensionTypes.OVERWORLD.get() ? ColumnFuzzedBiomeMagnifier.INSTANCE :
-                                    FuzzedBiomeMagnifier.INSTANCE);
-                    DimensionTypeAccessor.accessor$register(packet.actualDimension.toString(), registeredType);
-
-                    ((DimensionTypeBridge) registeredType).bridge$setSpongeDimensionType(logicType);
-                }
-        );
         SpongePacketHandler.channel.register(ChangeViewerEnvironmentPacket.class, 3).addHandler(ClientSideConnection.class,
                 (packet, connection) -> {
                     final ClientWorld world = Minecraft.getInstance().world;

@@ -43,6 +43,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.kyori.adventure.util.Codec;
+import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.ListNBT;
@@ -154,6 +155,13 @@ public final class SpongeAdventure {
         return PlainComponentSerializer.plain().serialize(component);
     }
 
+    public static @Nullable ITextComponent asVanillaNullable(final @Nullable Component component) {
+        if (component == null) {
+            return null;
+        }
+        return SpongeAdventure.asVanilla(component);
+    }
+
     public static ITextComponent asVanilla(final Component component) {
         return ((ComponentBridge) component).bridge$asVanillaComponent();
     }
@@ -164,6 +172,13 @@ public final class SpongeAdventure {
 
     public static net.minecraft.util.text.Style asVanilla(final Style style) {
         return ((StyleBridge) (Object) style).bridge$asVanilla();
+    }
+
+    public static net.minecraft.util.text.@Nullable Color asVanillaNullable(final @Nullable TextColor color) {
+        if (color == null) {
+            return null;
+        }
+        return net.minecraft.util.text.Color.fromInt(color.value());
     }
 
     public static TextFormatting asVanilla(final NamedTextColor color) {
@@ -248,7 +263,7 @@ public final class SpongeAdventure {
         return NamedTextColor.WHITE;
     }
 
-    public static Boolean asVanilla(final TextDecoration.State state) {
+    public static @Nullable Boolean asVanillaNullable(final TextDecoration.State state) {
         if (state == TextDecoration.State.TRUE) {
             return true;
         } else if (state == TextDecoration.State.FALSE) {
@@ -266,36 +281,67 @@ public final class SpongeAdventure {
         throw new IllegalArgumentException(type.name());
     }
 
-    public static HoverEvent.Action<?> asAdventure(final net.minecraft.util.text.event.HoverEvent.Action action) {
-        if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT) {
-            return HoverEvent.Action.SHOW_TEXT;
-        } else if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM) {
-            return HoverEvent.Action.SHOW_ITEM;
-        } else if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_ENTITY) {
-            return HoverEvent.Action.SHOW_ENTITY;
-        }
-        throw new IllegalArgumentException(action.toString());
-    }
-
+    @SuppressWarnings("ConstantConditions")
     public static HoverEvent<?> asAdventure(final net.minecraft.util.text.event.HoverEvent event) {
         final net.minecraft.util.text.event.HoverEvent.Action<?> action = event.getAction();
         if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT) {
-            return HoverEvent.showText(asAdventure(event.getParameter(net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT)));
+            return HoverEvent.showText(SpongeAdventure.asAdventure(event.getParameter(net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT)));
         } else if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_ENTITY) {
             final net.minecraft.util.text.event.HoverEvent.EntityHover value = event.getParameter(
                 net.minecraft.util.text.event.HoverEvent.Action.SHOW_ENTITY);
             return HoverEvent.showEntity(
-                asAdventure(Registry.ENTITY_TYPE.getKey(value.type)),
+                SpongeAdventure.asAdventure(Registry.ENTITY_TYPE.getKey(value.type)),
                 value.id,
-                asAdventure(value.name)
+                SpongeAdventure.asAdventure(value.name)
             );
         } else if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM) {
             final net.minecraft.util.text.event.HoverEvent.ItemHover value = event.getParameter(
                 net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM);
             return HoverEvent.showItem(
-                asAdventure(Registry.ITEM.getKey(((HoverEventItemHoverAccessor) value).accessor$getItem())),
+                SpongeAdventure.asAdventure(Registry.ITEM.getKey(((HoverEventItemHoverAccessor) value).accessor$getItem())),
                 ((HoverEventItemHoverAccessor) value).accessor$getCount(),
-                asBinaryTagHolder(((HoverEventItemHoverAccessor) value).accessor$getTag())
+                SpongeAdventure.asBinaryTagHolder(((HoverEventItemHoverAccessor) value).accessor$getTag())
+            );
+        }
+        throw new IllegalArgumentException(event.toString());
+    }
+
+    public static net.minecraft.util.text.event.@Nullable ClickEvent asVanillaNullable(final @Nullable ClickEvent event) {
+        if (event == null) {
+            return null;
+        }
+        return new net.minecraft.util.text.event.ClickEvent(SpongeAdventure.asVanilla(event.action()), event.value());
+    }
+
+    public static net.minecraft.util.text.event.@Nullable HoverEvent asVanillaNullable(final @Nullable HoverEvent<?> event) {
+        if (event == null) {
+            return null;
+        }
+        final HoverEvent.Action<?> action = event.action();
+        if (action == HoverEvent.Action.SHOW_TEXT) {
+            return new net.minecraft.util.text.event.HoverEvent(
+                net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT,
+                SpongeAdventure.asVanilla((Component) event.value())
+            );
+        } else if (action == HoverEvent.Action.SHOW_ENTITY) {
+            final HoverEvent.ShowEntity value = (HoverEvent.ShowEntity) event.value();
+            return new net.minecraft.util.text.event.HoverEvent(
+                net.minecraft.util.text.event.HoverEvent.Action.SHOW_ENTITY,
+                new net.minecraft.util.text.event.HoverEvent.EntityHover(
+                    Registry.ENTITY_TYPE.getOrDefault(SpongeAdventure.asVanilla(value.type())),
+                    value.id(),
+                    SpongeAdventure.asVanillaNullable(value.name())
+                )
+            );
+        } else if (action == HoverEvent.Action.SHOW_ITEM) {
+            final HoverEvent.ShowItem value = (HoverEvent.ShowItem) event.value();
+            return new net.minecraft.util.text.event.HoverEvent(
+                net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM,
+                HoverEventItemHoverAccessor.accessor$new(
+                    Registry.ITEM.getOrDefault(SpongeAdventure.asVanilla(value.item())),
+                    value.count(),
+                    SpongeAdventure.asVanillaCompound(value.nbt())
+                )
             );
         }
         throw new IllegalArgumentException(event.toString());
@@ -457,6 +503,17 @@ public final class SpongeAdventure {
     }
 
     // NBT
+
+    public static @Nullable CompoundNBT asVanillaCompound(final @Nullable BinaryTagHolder tag) {
+        if (tag == null) {
+            return null;
+        }
+        try {
+            return tag.get(SpongeAdventure.NBT_CODEC);
+        } catch (final IOException e) {
+            return null;
+        }
+    }
 
     public static @Nullable BinaryTagHolder asBinaryTagHolder(final @Nullable CompoundNBT tag) {
         if (tag == null) {

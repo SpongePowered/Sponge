@@ -25,25 +25,28 @@
 package org.spongepowered.common.hooks;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.structure.LegacyStructureDataUtil;
 import net.minecraft.world.storage.DimensionSavedDataManager;
-import org.spongepowered.api.world.dimension.DimensionTypes;
 
 import java.util.List;
 
 public interface WorldGenerationHooks {
 
-    default LegacyStructureDataUtil createLegacyStructureDataUtil(final DimensionType dimensionType, final DimensionSavedDataManager saveData) {
-        final SpongeDimensionType spongeDimensionType = ((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType();
-        if (spongeDimensionType == DimensionTypes.OVERWORLD.get()) {
-            return new LegacyStructureDataUtil(saveData, ImmutableList.of("Monument", "Stronghold", "Village", "Mineshaft", "Temple", "Mansion"), ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument"));
-        } else if (spongeDimensionType == DimensionTypes.THE_NETHER.get()) {
-            List<String> list1 = ImmutableList.of("Fortress");
-            return new LegacyStructureDataUtil(saveData, list1, list1);
-        } else if (spongeDimensionType == DimensionTypes.THE_END.get()) {
-            List<String> list = ImmutableList.of("EndCity");
-            return new LegacyStructureDataUtil(saveData, list, list);
+    default LegacyStructureDataUtil createLegacyStructureDataUtil(final RegistryKey<World> dimensionType, final DimensionSavedDataManager savedData) {
+        if (dimensionType == World.OVERWORLD) {
+            return new LegacyStructureDataUtil(
+                savedData,
+                ImmutableList.of("Monument", "Stronghold", "Village", "Mineshaft", "Temple", "Mansion"),
+                ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument")
+            );
+        } else if (dimensionType == World.THE_NETHER) {
+            final List<String> keys = ImmutableList.of("Fortress");
+            return new LegacyStructureDataUtil(savedData, keys, keys);
+        } else if (dimensionType == World.THE_END) {
+            final List<String> keys = ImmutableList.of("EndCity");
+            return new LegacyStructureDataUtil(savedData, keys, keys);
         } else {
             throw new RuntimeException(String.format("Unknown dimension type : %s", dimensionType));
         }

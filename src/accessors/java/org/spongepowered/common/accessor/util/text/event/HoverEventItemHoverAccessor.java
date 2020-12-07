@@ -24,14 +24,20 @@
  */
 package org.spongepowered.common.accessor.util.text.event;
 
+import javax.annotation.Nullable;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(HoverEvent.ItemHover.class)
 public interface HoverEventItemHoverAccessor {
+    static @Invoker("<init>") HoverEvent.ItemHover accessor$new(final Item item, final int count, final @Nullable CompoundNBT tag) {
+        throw new AssertionError();
+    }
+
     @Accessor("item") Item accessor$getItem();
 
     @Accessor("count") int accessor$getCount();
