@@ -45,17 +45,17 @@ import java.util.List;
 @Mixin(StonecutterContainer.class)
 public abstract class StonecutterContainerMixin {
 
-    @Shadow @Final private Slot outputInventorySlot;
+    @Shadow @Final private Slot resultSlot;
     @Shadow private List<StonecuttingRecipe> recipes;
-    @Shadow @Final private IntReferenceHolder selectedRecipe;
+    @Shadow @Final private IntReferenceHolder selectedRecipeIndex;
 
-    @Inject(method = "updateRecipeResultSlot", at = @At(value = "RETURN"))
-    private void impl$updateRecipeResultSlot(CallbackInfo ci) {
-        if (!this.recipes.isEmpty() && this.recipes.get(this.selectedRecipe.get()) instanceof SpongeStonecuttingRecipe) {
+    @Inject(method = "setupResultSlot", at = @At(value = "RETURN"))
+    private void impl$updateRecipeResultSlot(final CallbackInfo ci) {
+        if (!this.recipes.isEmpty() && this.recipes.get(this.selectedRecipeIndex.get()) instanceof SpongeStonecuttingRecipe) {
             // For SpongeStonecuttingRecipe resend the output slot in case the actual crafting result differs from the exemplary result
-            final ItemStack stack = this.outputInventorySlot.getStack();
-            for (IContainerListener listener : ((ContainerAccessor) this).accessor$containerListeners()) {
-                listener.sendSlotContents((Container) (Object) this, 1, stack);
+            final ItemStack stack = this.resultSlot.getItem();
+            for (final IContainerListener listener : ((ContainerAccessor) this).accessor$containerListeners()) {
+                listener.slotChanged((Container) (Object) this, 1, stack);
             }
         }
     }

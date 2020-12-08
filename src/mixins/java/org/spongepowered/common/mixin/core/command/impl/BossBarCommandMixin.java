@@ -42,28 +42,27 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 @Mixin(BossBarCommand.class)
 public abstract class BossBarCommandMixin {
 
-    @Shadow @Mutable @Final public static SuggestionProvider<CommandSource> SUGGESTIONS_PROVIDER = ((context, builder) -> ISuggestionProvider.suggestIterable(((ServerWorldBridge) context.getSource().getWorld()).bridge$getBossBarManager().getIDs(), builder));
+    @Shadow @Mutable @Final public static SuggestionProvider<CommandSource> SUGGEST_BOSS_BAR = ((context, builder) -> ISuggestionProvider.suggestResource(((ServerWorldBridge) context.getSource().getLevel()).bridge$getBossBarManager().getIds(), builder));
 
     @Redirect(method = "listBars", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()"
             + "Lnet/minecraft/server/CustomServerBossInfoManager;"))
-    private static CustomServerBossInfoManager impl$getBossBarManagerForWorldOnList(MinecraftServer minecraftServer, CommandSource source) {
-        return ((ServerWorldBridge) source.getWorld()).bridge$getBossBarManager();
+    private static CustomServerBossInfoManager impl$getBossBarManagerForWorldOnList(final MinecraftServer server, final CommandSource source) {
+        return ((ServerWorldBridge) source.getLevel()).bridge$getBossBarManager();
     }
 
-    @Redirect(method = "createBossbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()"
+    @Redirect(method = "createBar", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()"
             + "Lnet/minecraft/server/CustomServerBossInfoManager;"))
-    private static CustomServerBossInfoManager impl$getBossBarManagerForWorldOnCreate(MinecraftServer minecraftServer, CommandSource source) {
-        return ((ServerWorldBridge) source.getWorld()).bridge$getBossBarManager();
+    private static CustomServerBossInfoManager impl$getBossBarManagerForWorldOnCreate(final MinecraftServer server, final CommandSource source) {
+        return ((ServerWorldBridge) source.getLevel()).bridge$getBossBarManager();
     }
 
-    @Redirect(method = "removeBossbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
-    private static CustomServerBossInfoManager impl$getBossBarManagerForWorldOnRemove(MinecraftServer minecraftServer, CommandSource source) {
-        return ((ServerWorldBridge) source.getWorld()).bridge$getBossBarManager();
+    @Redirect(method = "removeBar", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
+    private static CustomServerBossInfoManager impl$getBossBarManagerForWorldOnRemove(final MinecraftServer server, final CommandSource source) {
+        return ((ServerWorldBridge) source.getLevel()).bridge$getBossBarManager();
     }
 
-    @Redirect(method = "getBossbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()"
-            + "Lnet/minecraft/server/CustomServerBossInfoManager;"))
-    private static CustomServerBossInfoManager impl$getBossBarManagerForWorldOnGet(MinecraftServer minecraftServer, CommandContext<CommandSource> source) {
-        return ((ServerWorldBridge) source.getSource().getWorld()).bridge$getBossBarManager();
+    @Redirect(method = "getBossBar", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
+    private static CustomServerBossInfoManager impl$getBossBarManagerForWorldOnGet(final MinecraftServer server, final CommandContext<CommandSource> source) {
+        return ((ServerWorldBridge) source.getSource().getLevel()).bridge$getBossBarManager();
     }
 }

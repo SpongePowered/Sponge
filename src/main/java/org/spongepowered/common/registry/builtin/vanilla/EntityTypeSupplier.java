@@ -44,10 +44,10 @@ public final class EntityTypeSupplier {
     // TODO Minecraft 1.15 - Figure out how to turn back on serialization for Human
     private static net.minecraft.entity.EntityType<HumanEntity> createHumanType() {
         final ResourceKey key = ResourceKey.sponge("human");
-        final net.minecraft.entity.EntityType<HumanEntity> entityType = net.minecraft.entity.EntityType.Builder.create(HumanEntity::new, EntityClassification.CREATURE)
-                .size(Constants.Entity.Player.PLAYER_WIDTH, Constants.Entity.Player.PLAYER_HEIGHT)
-                .disableSerialization()
-                .trackingRange(Constants.Entity.Player.TRACKING_RANGE)
+        final net.minecraft.entity.EntityType<HumanEntity> entityType = net.minecraft.entity.EntityType.Builder.of(HumanEntity::new, EntityClassification.CREATURE)
+                .sized(Constants.Entity.Player.PLAYER_WIDTH, Constants.Entity.Player.PLAYER_HEIGHT)
+                .noSave()
+                .clientTrackingRange(Constants.Entity.Player.TRACKING_RANGE)
                 .build(key.getFormatted());
         ((ResourceKeyBridge) entityType).bridge$setKey(key);
         return Registry.register(Registry.ENTITY_TYPE, (ResourceLocation) (Object) key, entityType);
@@ -118,7 +118,7 @@ public final class EntityTypeSupplier {
                 .registerSupplier(EntityType.class, "phantom", () -> (EntityType) net.minecraft.entity.EntityType.PHANTOM)
                 .registerSupplier(EntityType.class, "pig", () -> (EntityType) net.minecraft.entity.EntityType.PIG)
                 .registerSupplier(EntityType.class, "piglin", () -> (EntityType) net.minecraft.entity.EntityType.PIGLIN)
-                .registerSupplier(EntityType.class, "piglin_brute", () -> (EntityType) net.minecraft.entity.EntityType.field_242287_aj)
+                .registerSupplier(EntityType.class, "piglin_brute", () -> (EntityType) net.minecraft.entity.EntityType.PIGLIN_BRUTE)
                 .registerSupplier(EntityType.class, "pillager", () -> (EntityType) net.minecraft.entity.EntityType.PILLAGER)
                 .registerSupplier(EntityType.class, "player", () -> (EntityType) net.minecraft.entity.EntityType.PLAYER)
                 .registerSupplier(EntityType.class, "polar_bear", () -> (EntityType) net.minecraft.entity.EntityType.POLAR_BEAR)

@@ -39,7 +39,7 @@ public final class CatTypeStreamGenerator {
 
     public static Stream<Tuple<CatType, Integer>> stream() {
         // Meowzers
-        return CatEntity.TEXTURE_BY_ID.entrySet()
+        return CatEntity.TEXTURE_BY_TYPE.entrySet()
             .stream()
             .map(kv -> {
                 final String value = kv.getValue().getPath();

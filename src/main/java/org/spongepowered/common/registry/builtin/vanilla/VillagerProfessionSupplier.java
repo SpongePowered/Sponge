@@ -35,7 +35,6 @@ public final class VillagerProfessionSupplier {
 
     public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
-            .registerSupplier(ProfessionType.class, "none", () -> (ProfessionType) VillagerProfession.NONE)
             .registerSupplier(ProfessionType.class, "armorer", () -> (ProfessionType) VillagerProfession.ARMORER)
             .registerSupplier(ProfessionType.class, "butcher", () -> (ProfessionType) VillagerProfession.BUTCHER)
             .registerSupplier(ProfessionType.class, "cartographer", () -> (ProfessionType) VillagerProfession.CARTOGRAPHER)
@@ -47,6 +46,7 @@ public final class VillagerProfessionSupplier {
             .registerSupplier(ProfessionType.class, "librarian", () -> (ProfessionType) VillagerProfession.LIBRARIAN)
             .registerSupplier(ProfessionType.class, "mason", () -> (ProfessionType) VillagerProfession.MASON)
             .registerSupplier(ProfessionType.class, "nitwit", () -> (ProfessionType) VillagerProfession.NITWIT)
+            .registerSupplier(ProfessionType.class, "none", () -> (ProfessionType) VillagerProfession.NONE)
             .registerSupplier(ProfessionType.class, "shepherd", () -> (ProfessionType) VillagerProfession.SHEPHERD)
             .registerSupplier(ProfessionType.class, "toolsmith", () -> (ProfessionType) VillagerProfession.TOOLSMITH)
             .registerSupplier(ProfessionType.class, "weaponsmith", () -> (ProfessionType) VillagerProfession.WEAPONSMITH)

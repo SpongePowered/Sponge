@@ -91,7 +91,7 @@ public final class SpongeScore implements Score {
             if (j != this.score || ((ScoreAccessor) score).accessor$forceUpdate())
             {
                 ((ScoreAccessor) score).accessor$forceUpdate(false);
-                score.getScoreScoreboard().onScoreChanged(score);
+                score.getScoreboard().onScoreChanged(score);
             }
         }
     }

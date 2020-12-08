@@ -211,7 +211,7 @@ public final class SpongeObjective implements Objective {
     }
 
     private void addScoreToScoreboard(final net.minecraft.scoreboard.Scoreboard scoreboard, final net.minecraft.scoreboard.Score score) {
-        final String name = score.getPlayerName();
+        final String name = score.getOwner();
         final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$playerScores()
             .computeIfAbsent(name, k -> Maps.newHashMap());
 
@@ -219,7 +219,7 @@ public final class SpongeObjective implements Objective {
 
         // Trigger refresh
         ((ScoreAccessor) score).accessor$forceUpdate(true);
-        score.setScorePoints(((ScoreAccessor) score).accessor$count());
+        score.setScore(((ScoreAccessor) score).accessor$count());
     }
 
     public ScoreObjective getObjectiveFor(final net.minecraft.scoreboard.Scoreboard scoreboard) {
@@ -318,7 +318,7 @@ public final class SpongeObjective implements Objective {
             if (this.objectiveDisplayMode != null) {
                 objective.setDisplayMode(this.objectiveDisplayMode);
             } else if (this.criterion instanceof ScoreCriteria) {
-                objective.setDisplayMode((ObjectiveDisplayMode) (Object) ((ScoreCriteria) this.criterion).getRenderType());
+                objective.setDisplayMode((ObjectiveDisplayMode) (Object) ((ScoreCriteria) this.criterion).getDefaultRenderType());
             }
 
             return objective;

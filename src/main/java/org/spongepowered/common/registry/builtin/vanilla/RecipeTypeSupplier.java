@@ -34,11 +34,14 @@ public final class RecipeTypeSupplier {
     }
 
     public static void registerSuppliers(final SpongeCatalogRegistry registry) {
-        registry.registerSupplier(RecipeType.class, "crafting", () -> (RecipeType) IRecipeType.CRAFTING)
-                .registerSupplier(RecipeType.class, "smelting", () -> (RecipeType) IRecipeType.SMELTING)
-                .registerSupplier(RecipeType.class, "blasting", () -> (RecipeType) IRecipeType.BLASTING)
-                .registerSupplier(RecipeType.class, "smoking", () -> (RecipeType) IRecipeType.SMOKING)
-                .registerSupplier(RecipeType.class, "campfire_cooking", () -> (RecipeType) IRecipeType.CAMPFIRE_COOKING)
-                .registerSupplier(RecipeType.class, "stonecutting", () -> (RecipeType) IRecipeType.STONECUTTING);
+        registry
+            .registerSupplier(RecipeType.class, "blasting", () -> (RecipeType) IRecipeType.BLASTING)
+            .registerSupplier(RecipeType.class, "campfire_cooking", () -> (RecipeType) IRecipeType.CAMPFIRE_COOKING)
+            .registerSupplier(RecipeType.class, "crafting", () -> (RecipeType) IRecipeType.CRAFTING)
+            .registerSupplier(RecipeType.class, "smelting", () -> (RecipeType) IRecipeType.SMELTING)
+            .registerSupplier(RecipeType.class, "smithing", () -> (RecipeType) IRecipeType.SMITHING)
+            .registerSupplier(RecipeType.class, "smoking", () -> (RecipeType) IRecipeType.SMOKING)
+            .registerSupplier(RecipeType.class, "stonecutting", () -> (RecipeType) IRecipeType.STONECUTTING)
+        ;
     }
 }

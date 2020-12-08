@@ -36,41 +36,41 @@ public class PlayerOwnBorderListener implements IBorderListener {
 
     private ServerPlayerEntity player;
 
-    public PlayerOwnBorderListener(ServerPlayerEntity player) {
+    public PlayerOwnBorderListener(final ServerPlayerEntity player) {
         this.player = player;
     }
 
     @Override
-    public void onSizeChanged(WorldBorder border, double newSize) {
+    public void onBorderSizeSet(final WorldBorder border, final double newSize) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_SIZE));
     }
 
     @Override
-    public void onTransitionStarted(WorldBorder border, double oldSize, double newSize, long time) {
+    public void onBorderSizeLerping(final WorldBorder border, final double oldSize, final double newSize, final long time) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.LERP_SIZE));
     }
 
     @Override
-    public void onCenterChanged(WorldBorder border, double x, double z) {
+    public void onBorderCenterSet(final WorldBorder border, final double x, final double z) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_CENTER));
     }
 
     @Override
-    public void onWarningTimeChanged(WorldBorder border, int newTime) {
+    public void onBorderSetWarningTime(final WorldBorder border, final int newTime) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_TIME));
     }
 
     @Override
-    public void onWarningDistanceChanged(WorldBorder border, int newDistance) {
+    public void onBorderSetWarningBlocks(final WorldBorder border, final int newDistance) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_BLOCKS));
     }
 
     @Override
-    public void onDamageAmountChanged(WorldBorder border, double newAmount) {
+    public void onBorderSetDamagePerBlock(final WorldBorder border, final double newAmount) {
     }
 
     @Override
-    public void onDamageBufferChanged(WorldBorder border, double newSize) {
+    public void onBorderSetDamageSafeZOne(final WorldBorder border, final double newSize) {
     }
     
     /**
@@ -80,7 +80,7 @@ public class PlayerOwnBorderListener implements IBorderListener {
         ((ServerPlayer) this.player).getWorldBorder().ifPresent(border -> ((WorldBorderAccessor) border).accessor$listeners().remove(this));
     }
 
-    private void sendBorderPacket(IPacket<?> packet) {
-        this.player.connection.sendPacket(packet);
+    private void sendBorderPacket(final IPacket<?> packet) {
+        this.player.connection.send(packet);
     }
 }

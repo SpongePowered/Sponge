@@ -60,7 +60,7 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
         return new CommandSource(this,
                 Vector3d.ZERO,
                 Vector2f.ZERO,
-                SpongeCommon.getServer().getWorld(World.OVERWORLD),
+                SpongeCommon.getServer().getLevel(World.OVERWORLD),
                 4,
                 "System Subject",
                 new StringTextComponent("System Subject"),
@@ -74,17 +74,17 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
     }
 
     @Override
-    public boolean shouldReceiveFeedback() {
+    public boolean acceptsSuccess() {
         return true;
     }
 
     @Override
-    public boolean shouldReceiveErrors() {
+    public boolean acceptsFailure() {
         return true;
     }
 
     @Override
-    public boolean allowLogging() {
+    public boolean shouldInformAdmins() {
         return true;
     }
 

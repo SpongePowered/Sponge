@@ -31,9 +31,9 @@ import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
 import java.util.stream.Stream;
 
-public final class IAttributeTypeRegistrar {
+public final class AttributeTypeRegistrar {
 
-    private IAttributeTypeRegistrar() {
+    private AttributeTypeRegistrar() {
     }
 
     public static void registerRegistry(final SpongeCatalogRegistry registry) {
@@ -42,19 +42,20 @@ public final class IAttributeTypeRegistrar {
     
     public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
-            .registerCatalogAndSupplier(AttributeType.class, "generic_armor", () -> (AttributeType) Attributes.ARMOR)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_armor_toughness", () -> (AttributeType) Attributes.ARMOR_TOUGHNESS)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_attack_damage", () -> (AttributeType) Attributes.ATTACK_DAMAGE)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_attack_knockback", () -> (AttributeType) Attributes.ATTACK_KNOCKBACK)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_attack_speed", () -> (AttributeType) Attributes.ATTACK_SPEED)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_flying_speed", () -> (AttributeType) Attributes.FLYING_SPEED)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_follow_range", () -> (AttributeType) Attributes.FOLLOW_RANGE)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_knockback_resistance", () -> (AttributeType) Attributes.KNOCKBACK_RESISTANCE)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_luck", () -> (AttributeType) Attributes.LUCK)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_max_health", () -> (AttributeType) Attributes.MAX_HEALTH)
-            .registerCatalogAndSupplier(AttributeType.class, "generic_movement_speed", () -> (AttributeType) Attributes.MOVEMENT_SPEED)
-            .registerCatalogAndSupplier(AttributeType.class, "horse_jump_strength", () -> (AttributeType) Attributes.HORSE_JUMP_STRENGTH)
-            .registerCatalogAndSupplier(AttributeType.class, "zombie_spawn_reinforcements", () -> (AttributeType) Attributes.ZOMBIE_SPAWN_REINFORCEMENTS)
+            .registerCatalogAndSupplier(AttributeType.class, "generic.armor", () -> (AttributeType) Attributes.ARMOR)
+            .registerCatalogAndSupplier(AttributeType.class, "generic.armor_toughness", () -> (AttributeType) Attributes.ARMOR_TOUGHNESS)
+            .registerCatalogAndSupplier(AttributeType.class, "generic.attack_damage", () -> (AttributeType) Attributes.ATTACK_DAMAGE)
+            .registerCatalogAndSupplier(AttributeType.class, "generic.attack_knockback", () -> (AttributeType) Attributes.ATTACK_KNOCKBACK)
+            .registerCatalogAndSupplier(AttributeType.class, "generic.attack_speed", () -> (AttributeType) Attributes.ATTACK_SPEED)
+            .registerCatalogAndSupplier(AttributeType.class, "generic.flying_speed", () -> (AttributeType) Attributes.FLYING_SPEED)
+            .registerCatalogAndSupplier(AttributeType.class, "generic.follow_range", () -> (AttributeType) Attributes.FOLLOW_RANGE)
+            .registerCatalogAndSupplier(AttributeType.class, "generic.knockback_resistance", () -> (AttributeType) Attributes.KNOCKBACK_RESISTANCE)
+            .registerCatalogAndSupplier(AttributeType.class, "generic.luck", () -> (AttributeType) Attributes.LUCK)
+            .registerCatalogAndSupplier(AttributeType.class, "generic.max_health", () -> (AttributeType) Attributes.MAX_HEALTH)
+            .registerCatalogAndSupplier(AttributeType.class, "generic.movement_speed", () -> (AttributeType) Attributes.MOVEMENT_SPEED)
+            .registerCatalogAndSupplier(AttributeType.class, "horse.jump_strength", () -> (AttributeType) Attributes.JUMP_STRENGTH)
+            .registerCatalogAndSupplier(AttributeType.class, "zombie.spawn_reinforcements", () -> (AttributeType) Attributes.SPAWN_REINFORCEMENTS_CHANCE)
+
         ;
     }
 }

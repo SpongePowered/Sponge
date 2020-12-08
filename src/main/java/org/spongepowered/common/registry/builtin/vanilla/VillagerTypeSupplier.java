@@ -33,12 +33,14 @@ public final class VillagerTypeSupplier {
     }
 
     public static void registerSuppliers(final SpongeCatalogRegistry registry) {
-        registry.registerSupplier(VillagerType.class, "desert", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.DESERT)
-                .registerSupplier(VillagerType.class, "jungle", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.JUNGLE)
-                .registerSupplier(VillagerType.class, "plains", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.PLAINS)
-                .registerSupplier(VillagerType.class, "savanna", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.SAVANNA)
-                .registerSupplier(VillagerType.class, "snow", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.SNOW)
-                .registerSupplier(VillagerType.class, "swamp", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.SWAMP)
-                .registerSupplier(VillagerType.class, "taiga", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.TAIGA);
+        registry
+            .registerSupplier(VillagerType.class, "desert", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.DESERT)
+            .registerSupplier(VillagerType.class, "jungle", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.JUNGLE)
+            .registerSupplier(VillagerType.class, "plains", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.PLAINS)
+            .registerSupplier(VillagerType.class, "savanna", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.SAVANNA)
+            .registerSupplier(VillagerType.class, "snow", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.SNOW)
+            .registerSupplier(VillagerType.class, "swamp", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.SWAMP)
+            .registerSupplier(VillagerType.class, "taiga", () -> (VillagerType) (Object) net.minecraft.entity.villager.VillagerType.TAIGA)
+        ;
     }
 }

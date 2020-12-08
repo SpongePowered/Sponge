@@ -205,7 +205,7 @@ import org.spongepowered.common.registry.builtin.sponge.GoalExecutorTypeStreamGe
 import org.spongepowered.common.registry.builtin.sponge.GoalTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.HorseColorStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.HorseStyleStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.IAttributeTypeRegistrar;
+import org.spongepowered.common.registry.builtin.sponge.AttributeTypeRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.KeyStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.LlamaTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.MatterTypeStreamGenerator;
@@ -693,7 +693,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         // Que the "I'm Vanilla and I'm fucking stupid" music
         CriteriaTriggersRegistrar.registerRegistry(this);
         GeneratorModifierTypeRegistrar.registerRegistry(this);
-        IAttributeTypeRegistrar.registerRegistry(this);
+        AttributeTypeRegistrar.registerRegistry(this);
         PhaseTypeRegistrar.registerRegistry(this);
     }
 
@@ -714,7 +714,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         EntityTypeSupplier.registerSuppliers(this);
         FluidSupplier.registerSuppliers(this);
         GeneratorModifierTypeRegistrar.registerSuppliers(this);
-        IAttributeTypeRegistrar.registerSuppliers(this);
+        AttributeTypeRegistrar.registerSuppliers(this);
         ItemSupplier.registerSuppliers(this);
         PaintingTypeSupplier.registerSuppliers(this);
         ParticleTypeSupplier.registerSuppliers(this);
