@@ -54,7 +54,7 @@ public final class PluginConfigManager implements ConfigManager {
     PluginConfigManager(final CatalogTypeTypeSerializer catalogSerializer, final DataSerializableTypeSerializer dataSerializableSerializer) throws IOException {
         // TODO: Move this onto the async scheduler, rather than shared FJ pool?
         this.listener = WatchServiceListener.builder()
-                .threadFactory(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("SpongeCommon-WatchService-%d").build())
+                .threadFactory(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Sponge-WatchService-%d").build())
                 .build();
 
         this.serializers = TypeSerializerCollection.defaults().childBuilder()

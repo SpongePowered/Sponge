@@ -89,7 +89,7 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
                                 .map(x -> new Vector2f((float) x.getX(), (float) x.getY()))
                                 .orElse(Vector2f.ZERO),
                         context.get(EventContextKeys.LOCATION).map(x -> (ServerWorld) x.getWorld())
-                                .orElseGet(() -> locatable == null ? SpongeCommon.getServer().getWorld(World.OVERWORLD) :
+                                .orElseGet(() -> locatable == null ? SpongeCommon.getServer().getLevel(World.OVERWORLD) :
                                         (ServerWorld) locatable.getServerLocation().getWorld()),
                         4,
                         name,

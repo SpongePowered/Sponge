@@ -42,7 +42,7 @@ import java.util.UUID;
 
 public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSerializer {
     public static final NbtLegacyHoverEventSerializer INSTANCE = new NbtLegacyHoverEventSerializer();
-    private static final Codec<CompoundNBT, String, CommandSyntaxException, RuntimeException> SNBT_CODEC = Codec.of(JsonToNBT::getTagFromJson, INBT::toString);
+    private static final Codec<CompoundNBT, String, CommandSyntaxException, RuntimeException> SNBT_CODEC = Codec.of(JsonToNBT::parseTag, INBT::toString);
 
     static final String ITEM_TYPE = "id";
     static final String ITEM_COUNT = "Count";

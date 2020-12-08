@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.arguments.ArgumentType;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -39,7 +37,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 import org.spongepowered.common.util.Constants;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;

@@ -31,14 +31,14 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import java.util.Optional;
 
-public class OptionalVarianceBuilder extends AbstractDataBuilder<VariableAmount.OptionalAmount> {
+public final class OptionalVarianceBuilder extends AbstractDataBuilder<VariableAmount.OptionalAmount> {
 
     public OptionalVarianceBuilder() {
         super(VariableAmount.OptionalAmount.class, 1);
     }
 
     @Override
-    protected Optional<VariableAmount.OptionalAmount> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<VariableAmount.OptionalAmount> buildContent(final DataView container) throws InvalidDataException {
         if (!container.contains(Queries.VARIABLE_BASE, Queries.VARIABLE_VARIANCE, Queries.VARIABLE_CHANCE)) {
             return Optional.empty();
         }

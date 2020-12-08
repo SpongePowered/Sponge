@@ -39,9 +39,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class NbtDataFormat extends SpongeCatalogType implements DataFormat {
+public final class NBTDataFormat extends SpongeCatalogType implements DataFormat {
 
-    public NbtDataFormat(ResourceKey key) {
+    public NBTDataFormat(final ResourceKey key) {
         super(key);
     }
 

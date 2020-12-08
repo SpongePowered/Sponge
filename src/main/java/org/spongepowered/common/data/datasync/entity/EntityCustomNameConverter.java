@@ -37,7 +37,7 @@ import org.spongepowered.common.accessor.entity.EntityAccessor;
 import java.util.List;
 import java.util.Optional;
 
-public class EntityCustomNameConverter extends DataParameterConverter<String> {
+public final class EntityCustomNameConverter extends DataParameterConverter<String> {
 
     public EntityCustomNameConverter() {
         super(EntityAccessor.accessor$getDATA_CUSTOM_NAME());

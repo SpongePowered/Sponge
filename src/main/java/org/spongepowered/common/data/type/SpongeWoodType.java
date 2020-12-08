@@ -35,7 +35,7 @@ public final class SpongeWoodType extends SpongeCatalogType implements WoodType,
 
     private final Tag<Block> tag;
 
-    public SpongeWoodType(ResourceKey key, Tag<Block> tag) {
+    public SpongeWoodType(final ResourceKey key, final Tag<Block> tag) {
         super(key);
         this.tag = tag;
     }

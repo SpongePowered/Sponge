@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.value;
 
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.util.CopyHelper;
 
 public interface ValueConstructor<V extends Value<E>, E> {
 

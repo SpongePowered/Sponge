@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.copy;
+package org.spongepowered.common.data;
 
 // TODO: Expose in API?
 public interface Copyable<T extends Copyable<T>> {

@@ -49,10 +49,12 @@ public final class DataViewJsonWriter extends JsonWriter {
         @Override public void write(char[] buffer, int offset, int counter) {
             throw new AssertionError();
         }
-        @Override public void flush() throws IOException {
+
+        @Override public void flush() {
             throw new AssertionError();
         }
-        @Override public void close() throws IOException {
+
+        @Override public void close() {
             throw new AssertionError();
         }
     };

@@ -45,7 +45,7 @@ import org.spongepowered.common.bridge.data.DataContainerHolder;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
-import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.util.CopyHelper;
 import org.spongepowered.common.data.persistence.datastore.SpongeDataStoreBuilder;
 import org.spongepowered.common.util.TypeTokenUtil;
 

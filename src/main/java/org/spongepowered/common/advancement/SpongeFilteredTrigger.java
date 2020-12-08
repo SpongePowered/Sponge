@@ -26,7 +26,9 @@ package org.spongepowered.common.advancement;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.minecraft.advancements.ICriterionInstance;
+import net.minecraft.loot.ConditionArraySerializer;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
@@ -38,7 +40,7 @@ import org.spongepowered.api.data.persistence.DataSerializable;
 import java.io.IOException;
 
 @SuppressWarnings("rawtypes")
-public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigger {
+public final class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigger {
 
     private final static Gson GSON = new Gson();
 
@@ -51,7 +53,7 @@ public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigge
     }
 
     @Override
-    public ResourceLocation getId() {
+    public ResourceLocation getCriterion() {
         return this.triggerType.getId();
     }
 
@@ -66,16 +68,17 @@ public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigge
     }
 
     @Override
-    public JsonElement serialize() {
+    public JsonObject serializeToJson(final ConditionArraySerializer arraySerializer) {
         if (this.configuration instanceof DataSerializable) {
             final DataContainer dataContainer = ((DataSerializable) this.configuration).toContainer();
             try {
                 final String json = DataFormats.JSON.get().write(dataContainer);
-                return SpongeFilteredTrigger.GSON.fromJson(json, JsonElement.class);
+                return SpongeFilteredTrigger.GSON.fromJson(json, JsonObject.class);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        return SpongeFilteredTrigger.GSON.toJsonTree(this.configuration);
+
+        return SpongeFilteredTrigger.GSON.toJsonTree(this.configuration).getAsJsonObject();
     }
 }

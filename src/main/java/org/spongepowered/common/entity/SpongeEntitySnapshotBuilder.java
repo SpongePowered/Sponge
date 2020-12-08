@@ -40,7 +40,7 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.data.holder.SimpleNbtDataHolder;
+import org.spongepowered.common.data.holder.SimpleNBTDataHolder;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.util.DataUtil;
@@ -206,7 +206,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
                 this.compound = new CompoundNBT();
             }
 
-            final SimpleNbtDataHolder dataHolder = new SimpleNbtDataHolder(this.compound, NBTDataTypes.ENTITY);
+            final SimpleNBTDataHolder dataHolder = new SimpleNBTDataHolder(this.compound, NBTDataTypes.ENTITY);
             dataHolder.copyFrom(this.manipulator);
             this.compound = dataHolder.data$getCompound();
 

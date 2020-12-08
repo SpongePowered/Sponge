@@ -65,7 +65,6 @@ public interface SpongeImmutableDataHolder<I extends DataHolder.Immutable<I>> ex
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     default I mergeWith(I that, MergeFunction function) {
         I result = (I) this;
         if (function == MergeFunction.REPLACEMENT_PREFERRED) {

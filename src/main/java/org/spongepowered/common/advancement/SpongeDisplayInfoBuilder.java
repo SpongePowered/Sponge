@@ -36,7 +36,7 @@ import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
-public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
+public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
 
     private AdvancementType advancementType;
     private Component description;

@@ -87,7 +87,7 @@ public final class SpongeAdventure {
         @Override
         public @NonNull CompoundNBT decode(final @NonNull String encoded) throws IOException {
             try {
-                return JsonToNBT.getTagFromJson(encoded);
+                return JsonToNBT.parseTag(encoded);
             } catch (final CommandSyntaxException e) {
                 throw new IOException(e);
             }
@@ -177,7 +177,7 @@ public final class SpongeAdventure {
         if (color == null) {
             return null;
         }
-        return net.minecraft.util.text.Color.fromInt(color.value());
+        return net.minecraft.util.text.Color.fromRgb(color.value());
     }
 
     public static TextFormatting asVanilla(final NamedTextColor color) {
@@ -221,7 +221,7 @@ public final class SpongeAdventure {
         if (color == null) {
             return null;
         }
-        return TextColor.color(color.getColor());
+        return TextColor.color(color.getValue());
     }
 
     public static @Nullable NamedTextColor asAdventureNamed(final @Nullable TextFormatting color) {
@@ -284,9 +284,9 @@ public final class SpongeAdventure {
     public static HoverEvent<?> asAdventure(final net.minecraft.util.text.event.HoverEvent event) {
         final net.minecraft.util.text.event.HoverEvent.Action<?> action = event.getAction();
         if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT) {
-            return HoverEvent.showText(SpongeAdventure.asAdventure(event.getParameter(net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT)));
+            return HoverEvent.showText(SpongeAdventure.asAdventure(event.getValue(net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT)));
         } else if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_ENTITY) {
-            final net.minecraft.util.text.event.HoverEvent.EntityHover value = event.getParameter(
+            final net.minecraft.util.text.event.HoverEvent.EntityHover value = event.getValue(
                 net.minecraft.util.text.event.HoverEvent.Action.SHOW_ENTITY);
             return HoverEvent.showEntity(
                 SpongeAdventure.asAdventure(Registry.ENTITY_TYPE.getKey(value.type)),
@@ -294,7 +294,7 @@ public final class SpongeAdventure {
                 SpongeAdventure.asAdventure(value.name)
             );
         } else if (action == net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM) {
-            final net.minecraft.util.text.event.HoverEvent.ItemHover value = event.getParameter(
+            final net.minecraft.util.text.event.HoverEvent.ItemHover value = event.getValue(
                 net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM);
             return HoverEvent.showItem(
                 SpongeAdventure.asAdventure(Registry.ITEM.getKey(((HoverEventItemHoverAccessor) value).accessor$getItem())),
@@ -327,7 +327,7 @@ public final class SpongeAdventure {
             return new net.minecraft.util.text.event.HoverEvent(
                 net.minecraft.util.text.event.HoverEvent.Action.SHOW_ENTITY,
                 new net.minecraft.util.text.event.HoverEvent.EntityHover(
-                    Registry.ENTITY_TYPE.getOrDefault(SpongeAdventure.asVanilla(value.type())),
+                    Registry.ENTITY_TYPE.get(SpongeAdventure.asVanilla(value.type())),
                     value.id(),
                     SpongeAdventure.asVanillaNullable(value.name())
                 )
@@ -337,7 +337,7 @@ public final class SpongeAdventure {
             return new net.minecraft.util.text.event.HoverEvent(
                 net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM,
                 HoverEventItemHoverAccessor.accessor$init(
-                    Registry.ITEM.getOrDefault(SpongeAdventure.asVanilla(value.item())),
+                    Registry.ITEM.get(SpongeAdventure.asVanilla(value.item())),
                     value.count(),
                     SpongeAdventure.asVanillaCompound(value.nbt())
                 )

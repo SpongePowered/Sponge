@@ -339,7 +339,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     private ResourceKey readResourceLocation(@Nullable final String defaultNamespace) throws ArgumentParseException {
         final int i = this.getCursor();
 
-        while (this.canRead() && ResourceLocation.isValidPathCharacter(this.peek())) {
+        while (this.canRead() && ResourceLocation.isAllowedInResourceLocation(this.peek())) {
             this.skip();
         }
 

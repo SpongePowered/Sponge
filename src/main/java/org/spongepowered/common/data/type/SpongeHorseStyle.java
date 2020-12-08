@@ -29,7 +29,7 @@ import org.spongepowered.api.data.type.HorseStyle;
 
 public final class SpongeHorseStyle extends SpongeEntityMetadataType<Integer> implements HorseStyle {
 
-    public SpongeHorseStyle(ResourceKey key, int metadata) {
+    public SpongeHorseStyle(final ResourceKey key, final int metadata) {
         super(key, metadata);
     }
 

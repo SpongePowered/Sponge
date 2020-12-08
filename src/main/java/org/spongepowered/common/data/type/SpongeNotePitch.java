@@ -35,7 +35,7 @@ public final class SpongeNotePitch extends SpongeCatalogType implements NotePitc
 
     private final int id;
 
-    public SpongeNotePitch(ResourceKey key, int id) {
+    public SpongeNotePitch(final ResourceKey key, final int id) {
         super(key);
         this.id = id;
     }
@@ -48,7 +48,7 @@ public final class SpongeNotePitch extends SpongeCatalogType implements NotePitc
     public NotePitch cycleNext() {
         final SimpleRegistry<NotePitch> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(NotePitch.class);
         final int value = this.id + 1;
-        NotePitch next = registry.getByValue(value);
+        NotePitch next = registry.byId(value);
         if (next == null) {
             next = NotePitches.A1.get();
         }

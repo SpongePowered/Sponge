@@ -195,46 +195,46 @@ public final class NBTTranslator extends SpongeCatalogType implements DataTransl
         switch (type) {
             case Constants.NBT.TAG_BYTE:
                 if (key.contains(NBTTranslator.BOOLEAN_IDENTIFIER)) {
-                    view.set(of(key.replace(NBTTranslator.BOOLEAN_IDENTIFIER, "")), (((ByteNBT) base).getByte() != 0));
+                    view.set(of(key.replace(NBTTranslator.BOOLEAN_IDENTIFIER, "")), (((ByteNBT) base).getAsByte() != 0));
                 } else {
-                    view.set(of(key), ((ByteNBT) base).getByte());
+                    view.set(of(key), ((ByteNBT) base).getAsByte());
                 }
                 break;
             case Constants.NBT.TAG_SHORT:
-                view.set(of(key), ((ShortNBT) base).getShort());
+                view.set(of(key), ((ShortNBT) base).getAsShort());
                 break;
             case Constants.NBT.TAG_INT:
-                view.set(of(key), ((IntNBT) base).getInt());
+                view.set(of(key), ((IntNBT) base).getAsInt());
                 break;
             case Constants.NBT.TAG_LONG:
-                view.set(of(key), ((LongNBT) base).getLong());
+                view.set(of(key), ((LongNBT) base).getAsLong());
                 break;
             case Constants.NBT.TAG_FLOAT:
-                view.set(of(key), ((FloatNBT) base).getFloat());
+                view.set(of(key), ((FloatNBT) base).getAsFloat());
                 break;
             case Constants.NBT.TAG_DOUBLE:
-                view.set(of(key), ((DoubleNBT) base).getDouble());
+                view.set(of(key), ((DoubleNBT) base).getAsDouble());
                 break;
             case Constants.NBT.TAG_BYTE_ARRAY:
-                view.set(of(key), ((ByteArrayNBT) base).getByteArray());
+                view.set(of(key), ((ByteArrayNBT) base).getAsByteArray());
                 break;
             case Constants.NBT.TAG_STRING:
-                view.set(of(key), base.getString());
+                view.set(of(key), base.getAsString());
                 break;
             case Constants.NBT.TAG_LIST:
                 ListNBT list = (ListNBT) base;
-                byte listType = list.func_230528_d__();
+                byte listType = list.getElementType();
                 int count = list.size();
                 List objectList = Lists.newArrayListWithCapacity(count);
-                for (int i = 0; i < count; i++) {
-                    objectList.add(NBTTranslator.fromTagBase(list.get(i), listType));
+                for (final INBT inbt : list) {
+                    objectList.add(NBTTranslator.fromTagBase(inbt, listType));
                 }
                 view.set(of(key), objectList);
                 break;
             case Constants.NBT.TAG_COMPOUND:
                 DataView internalView = view.createView(of(key));
                 CompoundNBT compound = (CompoundNBT) base;
-                for (String internalKey : compound.keySet()) {
+                for (String internalKey : compound.getAllKeys()) {
                     INBT internalBase = compound.get(internalKey);
                     byte internalType = internalBase.getId();
                     // Basically.... more recursion.
@@ -245,7 +245,7 @@ public final class NBTTranslator extends SpongeCatalogType implements DataTransl
                 }
                 break;
             case Constants.NBT.TAG_INT_ARRAY:
-                view.set(of(key), ((IntArrayNBT) base).getIntArray());
+                view.set(of(key), ((IntArrayNBT) base).getAsIntArray());
                 break;
             case Constants.NBT.TAG_LONG_ARRAY:
                 view.set(of(key), ((LongArrayNBTAccessor) base).accessor$getData());
@@ -259,24 +259,24 @@ public final class NBTTranslator extends SpongeCatalogType implements DataTransl
     private static Object fromTagBase(INBT base, byte type) {
         switch (type) {
             case Constants.NBT.TAG_BYTE:
-                return ((ByteNBT) base).getByte();
+                return ((ByteNBT) base).getAsByte();
             case Constants.NBT.TAG_SHORT:
-                return (((ShortNBT) base)).getShort();
+                return (((ShortNBT) base)).getAsShort();
             case Constants.NBT.TAG_INT:
-                return ((IntNBT) base).getInt();
+                return ((IntNBT) base).getAsInt();
             case Constants.NBT.TAG_LONG:
-                return ((LongNBT) base).getLong();
+                return ((LongNBT) base).getAsLong();
             case Constants.NBT.TAG_FLOAT:
-                return ((FloatNBT) base).getFloat();
+                return ((FloatNBT) base).getAsFloat();
             case Constants.NBT.TAG_DOUBLE:
-                return ((DoubleNBT) base).getDouble();
+                return ((DoubleNBT) base).getAsDouble();
             case Constants.NBT.TAG_BYTE_ARRAY:
-                return ((ByteArrayNBT) base).getByteArray();
+                return ((ByteArrayNBT) base).getAsByteArray();
             case Constants.NBT.TAG_STRING:
-                return ((StringNBT) base).getString();
+                return base.getAsString();
             case Constants.NBT.TAG_LIST:
                 ListNBT list = (ListNBT) base;
-                byte listType = list.func_230528_d__();
+                byte listType = list.getElementType();
                 int count = list.size();
                 List objectList = Lists.newArrayListWithCapacity(count);
                 for (INBT inbt : list) {
@@ -286,7 +286,7 @@ public final class NBTTranslator extends SpongeCatalogType implements DataTransl
             case Constants.NBT.TAG_COMPOUND:
                 return NBTTranslator.getViewFromCompound((CompoundNBT) base);
             case Constants.NBT.TAG_INT_ARRAY:
-                return ((IntArrayNBT) base).getIntArray();
+                return ((IntArrayNBT) base).getAsIntArray();
             case Constants.NBT.TAG_LONG_ARRAY:
                 return ((LongArrayNBTAccessor) base).accessor$getData();
             default :
@@ -319,7 +319,7 @@ public final class NBTTranslator extends SpongeCatalogType implements DataTransl
 
     @Override
     public DataView addTo(CompoundNBT compound, DataView container) {
-        for (String key : compound.keySet()) {
+        for (String key : compound.getAllKeys()) {
             INBT base = compound.get(key);
             byte type = base.getId();
             NBTTranslator.setInternal(base, type, container, key); // gotta love recursion

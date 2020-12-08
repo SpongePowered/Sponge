@@ -32,23 +32,24 @@ import org.spongepowered.common.data.provider.nbt.NBTDataType;
  * Simple mutable data holder wrapper around a nbt compound. {@link org.spongepowered.common.bridge.data.CustomDataHolderBridge} is mixed in.
  * Used for preparing data for Immutable data holders like {@link org.spongepowered.api.entity.EntitySnapshot}
  */
-public class SimpleNbtDataHolder implements DataCompoundHolder, SpongeMutableDataHolder {
-    private CompoundNBT nbt;
+public final class SimpleNBTDataHolder implements DataCompoundHolder, SpongeMutableDataHolder {
+
+    private CompoundNBT compound;
     private final NBTDataType dataType;
 
-    public SimpleNbtDataHolder(CompoundNBT nbt, NBTDataType dataType) {
-        this.nbt = nbt;
+    public SimpleNBTDataHolder(final CompoundNBT compound, final NBTDataType dataType) {
+        this.compound = compound;
         this.dataType = dataType;
     }
 
     @Override
     public CompoundNBT data$getCompound() {
-        return this.nbt;
+        return this.compound;
     }
 
     @Override 
-    public void data$setCompound(CompoundNBT nbt) {
-        this.nbt = nbt;
+    public void data$setCompound(final CompoundNBT compound) {
+        this.compound = compound;
     }
 
     @Override 

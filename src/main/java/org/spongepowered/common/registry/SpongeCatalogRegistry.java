@@ -177,7 +177,7 @@ import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.data.persistence.HoconDataFormat;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
-import org.spongepowered.common.data.persistence.NbtDataFormat;
+import org.spongepowered.common.data.persistence.NBTDataFormat;
 import org.spongepowered.common.event.lifecycle.RegisterCatalogEventImpl;
 import org.spongepowered.common.event.tracking.context.transaction.type.BlockTransactionTypeStreamGenerator;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
@@ -638,7 +638,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(Visibility.class, ResourceKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true, false)
             .generateRegistry(ClickType.class, ResourceKey.minecraft("click_type"), ClickTypeStreamGenerator.stream(), true, false)
             .generateRegistry(StringDataFormat.class, ResourceKey.sponge("string_data_format"), Stream.of(new JsonDataFormat(ResourceKey.sponge("json")), new HoconDataFormat(ResourceKey.sponge("hocon"))), true, false)
-            .generateRegistry(DataFormat.class, ResourceKey.sponge("data_format"), Stream.of(new NbtDataFormat(ResourceKey.sponge("nbt"))), true, false)
+            .generateRegistry(DataFormat.class, ResourceKey.sponge("data_format"), Stream.of(new NBTDataFormat(ResourceKey.sponge("nbt"))), true, false)
             .generateRegistry(TeleportHelperFilter.class, ResourceKey.sponge("teleport_helper_filter"), TeleportHelperFilterStreamGenerator.stream(), true, false)
             .generateRegistry(Operation.class, ResourceKey.sponge("block_operation"), BlockOperationStreamGenerator.stream(), true, false)
             .generateRegistry(TransactionType.class, ResourceKey.sponge("transaction_type"), BlockTransactionTypeStreamGenerator.stream(), true, false)

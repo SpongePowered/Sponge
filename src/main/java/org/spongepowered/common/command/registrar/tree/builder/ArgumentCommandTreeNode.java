@@ -24,19 +24,13 @@
  */
 package org.spongepowered.common.command.registrar.tree.builder;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.SuggestionProviders;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.command.brigadier.tree.ForcedRedirectArgumentSuggestionNode;
-
-import java.util.Map;
 
 public abstract class ArgumentCommandTreeNode<T extends CommandTreeNode<T>>
         extends AbstractCommandTreeNode<T, CommandNode<ISuggestionProvider>> {

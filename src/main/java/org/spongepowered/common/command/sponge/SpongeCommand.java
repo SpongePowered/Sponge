@@ -404,7 +404,7 @@ public class SpongeCommand {
 //            tps.add(this.appendTickTime(((MinecraftServerBridge) SpongeCommon.getServer()).bridge$getWorldTickTimes()));
 //        }
 
-        tps.add(this.appendTickTime(SpongeCommon.getServer().tickTimeArray, Component.text().content("Overall TPS: ")).build());
+        tps.add(this.appendTickTime(SpongeCommon.getServer().tickTimes, Component.text().content("Overall TPS: ")).build());
 
         SpongeCommon.getGame().getServiceProvider()
                 .paginationService()

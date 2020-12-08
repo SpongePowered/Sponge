@@ -67,7 +67,7 @@ public final class VanillaBossBarListener implements BossBar.Listener {
     private void sendPacket(final SUpdateBossInfoPacket.Operation action) {
         final SUpdateBossInfoPacket packet = new SUpdateBossInfoPacket(action, this.vanilla);
         for (final ServerPlayerEntity player : this.vanilla.getPlayers()) {
-            player.connection.sendPacket(packet);
+            player.connection.send(packet);
         }
     }
 }

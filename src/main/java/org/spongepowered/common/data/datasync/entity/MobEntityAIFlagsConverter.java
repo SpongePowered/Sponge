@@ -35,7 +35,7 @@ import org.spongepowered.common.accessor.entity.MobEntityAccessor;
 import java.util.List;
 import java.util.Optional;
 
-public class MobEntityAIFlagsConverter extends DataParameterConverter<Byte> {
+public final class MobEntityAIFlagsConverter extends DataParameterConverter<Byte> {
 
     public MobEntityAIFlagsConverter() {
         super(MobEntityAccessor.accessor$getDATA_MOB_FLAGS_ID());

@@ -34,16 +34,16 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-public class BlockStateSerializerDeserializer {
+public final class BlockStateSerializerDeserializer {
 
     public static String serialize(final BlockState state) {
-        return BlockStateParser.toString((net.minecraft.block.BlockState) state);
+        return BlockStateParser.serialize((net.minecraft.block.BlockState) state);
     }
 
     public static Optional<BlockState> deserialize(final String string) {
         final String state = Objects.requireNonNull(string, "Id cannot be null!").toLowerCase(Locale.ENGLISH);
         try {
-            return Optional.of((BlockState) BlockStateArgument.blockState().parse(new StringReader(state)).getState());
+            return Optional.of((BlockState) BlockStateArgument.block().parse(new StringReader(state)).getState());
         } catch (final CommandSyntaxException e) {
             return Optional.empty();
         }

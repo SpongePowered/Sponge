@@ -35,7 +35,7 @@ import com.mojang.datafixers.types.templates.List;
 import net.minecraft.util.datafix.TypeReferences;
 import org.spongepowered.common.util.Constants;
 
-public class SpongeLevelFixer extends DataFix {
+public final class SpongeLevelFixer extends DataFix {
 
     public SpongeLevelFixer(Schema outputSchema, boolean changesType) {
         super(outputSchema, changesType);

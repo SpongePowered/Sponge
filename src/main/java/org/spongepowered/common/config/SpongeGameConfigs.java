@@ -83,7 +83,7 @@ public final class SpongeGameConfigs {
     }
 
     public static InheritableConfigHandle<WorldConfig> getForWorld(final net.minecraft.world.World mcWorld) {
-        return ((WorldInfoBridge) mcWorld.getWorldInfo()).bridge$getConfigAdapter();
+        return ((WorldInfoBridge) mcWorld.getLevelData()).bridge$getConfigAdapter();
     }
 
     public static boolean doesWorldConfigExist(final ResourceKey world) {

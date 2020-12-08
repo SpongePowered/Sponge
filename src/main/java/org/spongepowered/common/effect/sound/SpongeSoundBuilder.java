@@ -33,7 +33,7 @@ import org.spongepowered.common.util.SpongeCatalogBuilder;
 public final class SpongeSoundBuilder extends SpongeCatalogBuilder<SoundType, SoundType.Builder> implements SoundType.Builder {
 
     @Override
-    protected SoundType build(ResourceKey key) {
+    protected SoundType build(final ResourceKey key) {
         return (SoundType) new SoundEvent((ResourceLocation) (Object) key);
     }
 }

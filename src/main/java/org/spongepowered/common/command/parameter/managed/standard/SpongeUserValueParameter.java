@@ -89,7 +89,7 @@ public final class SpongeUserValueParameter extends CatalogedArgumentParser<User
             try {
                 final ServerPlayer entity =
                         (ServerPlayer) (this.selectorArgumentType.parse((StringReader) reader)
-                                .selectOnePlayer(((SpongeCommandContextBuilder) context).getSource()));
+                                .findSingleEntity(((SpongeCommandContextBuilder) context).getSource()));
                 return Optional.of(entity.getUser());
             } catch (final CommandSyntaxException e) {
                 throw reader.createException(Component.text(e.getContext()));

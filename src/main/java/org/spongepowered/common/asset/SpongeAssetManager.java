@@ -44,7 +44,7 @@ public final class SpongeAssetManager implements AssetManager {
     private static final ClassLoader CLASS_LOADER = Sponge.class.getClassLoader();
 
     @Override
-    public Optional<Asset> getAsset(PluginContainer container, String name) {
+    public Optional<Asset> getAsset(final PluginContainer container, final String name) {
         checkNotNull(container);
         checkNotNull(name);
         checkArgument(!name.isEmpty(), "name cannot be empty");

@@ -39,7 +39,7 @@ import java.nio.file.Path;
 /**
  * Root for plugin configurations.
  */
-public class PluginConfigRoot implements ConfigRoot {
+public final class PluginConfigRoot implements ConfigRoot {
     private final TypeSerializerCollection serializers;
     private final String pluginName;
     private final Path baseDir;

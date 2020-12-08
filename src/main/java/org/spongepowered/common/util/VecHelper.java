@@ -49,7 +49,7 @@ public final class VecHelper {
 
     // === Flow Vector3i --> BlockPos ===
 
-    public static BlockPos toBlockPos(final Vector3i vector) {
+    public static BlockPos toBlockPos(final org.spongepowered.math.vector.Vector3i vector) {
         if (vector == null) {
             return null;
         }

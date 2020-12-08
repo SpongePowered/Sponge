@@ -37,7 +37,6 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -54,7 +53,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-public class SpongeParticleHelper {
+public final class SpongeParticleHelper {
 
     public static void sendPackets(final ParticleEffect particleEffect, final Vector3d position, final int radius, final RegistryKey<World> type,
                                    final PlayerList playerList) {
@@ -66,7 +65,7 @@ public class SpongeParticleHelper {
             final double z = position.getZ();
 
             for (final IPacket<?> packet : packets) {
-                playerList.sendToAllNearExcept(null, x, y, z, radius, type, packet);
+                playerList.broadcast(null, x, y, z, radius, type, packet);
             }
         }
     }
@@ -177,7 +176,7 @@ public class SpongeParticleHelper {
         final Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
         if (blockState.isPresent()) {
             // Use the provided block state option.
-            return Block.getStateId((net.minecraft.block.BlockState) blockState.get());
+            return Block.getId((net.minecraft.block.BlockState) blockState.get());
         }
 
         final Optional<ItemStackSnapshot> itemSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
@@ -185,12 +184,12 @@ public class SpongeParticleHelper {
             // Try to convert the item into a usable block state.
             final Optional<BlockType> blockType = itemSnapshot.get().getType().getBlock();
             // TODO: correct behavior?
-            return blockType.map(type -> Block.getStateId((net.minecraft.block.BlockState) type.getDefaultState()))
+            return blockType.map(type -> Block.getId((net.minecraft.block.BlockState) type.getDefaultState()))
                     .orElse(0);
         }
 
         // Otherwise, use the default block state option if available.
-        return defaultBlockState.map(state -> Block.getStateId((net.minecraft.block.BlockState) state))
+        return defaultBlockState.map(state -> Block.getId((net.minecraft.block.BlockState) state))
                 .orElse(0);
     }
 

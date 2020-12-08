@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.persistence.datastore;
 
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataStore;

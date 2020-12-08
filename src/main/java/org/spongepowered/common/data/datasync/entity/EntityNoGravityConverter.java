@@ -35,7 +35,7 @@ import org.spongepowered.common.accessor.entity.EntityAccessor;
 import java.util.List;
 import java.util.Optional;
 
-public class EntityNoGravityConverter extends DataParameterConverter<Boolean> {
+public final class EntityNoGravityConverter extends DataParameterConverter<Boolean> {
 
     public EntityNoGravityConverter() {
         super(EntityAccessor.accessor$getDATA_NO_GRAVITY());

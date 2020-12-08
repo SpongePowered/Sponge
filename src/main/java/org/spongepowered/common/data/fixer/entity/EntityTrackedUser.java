@@ -35,7 +35,7 @@ import net.minecraft.util.datafix.TypeReferences;
 import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
 import org.spongepowered.common.util.Constants;
 
-public class EntityTrackedUser extends DataFix {
+public final class EntityTrackedUser extends DataFix {
 
     public EntityTrackedUser(Schema outputSchema, boolean changesType) {
         super(outputSchema, changesType);
