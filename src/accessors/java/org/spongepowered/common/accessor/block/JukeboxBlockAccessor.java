@@ -33,5 +33,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(JukeboxBlock.class)
 public interface JukeboxBlockAccessor {
 
-    @Invoker("dropRecord") void accessor$dropRecord(World worldIn, BlockPos pos);
+    @Invoker("dropRecording") void accessor$dropRecording(World worldIn, BlockPos pos);
 }

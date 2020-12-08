@@ -31,10 +31,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(PufferfishEntity.class)
 public interface PufferfishEntityAccessor {
 
-    @Invoker("getPuffSize") static float accessor$getPuffSize(int puffState) {
+    @Invoker("getScale") static float accessor$getScale(int scale) {
         throw new IllegalStateException("Untransformed Accessor!");
     }
-
-
-
 }

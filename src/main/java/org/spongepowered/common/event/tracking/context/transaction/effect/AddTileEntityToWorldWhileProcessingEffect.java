@@ -55,13 +55,13 @@ public final class AddTileEntityToWorldWhileProcessingEffect implements Processi
         if (tileEntity == null) {
             return EffectResult.NULL_RETURN;
         }
-        if (((WorldAccessor) serverWorld).accessor$getProcessingLoadedTiles()) {
-            ServerWorldAccessor.accessor$LOGGER().error(
+        if (((WorldAccessor) serverWorld).accessor$getUpdatingBlockEntities()) {
+            ServerWorldAccessor.accessor$getLOGGER().error(
                 "Adding block entity while ticking: {} @ {}",
                 () -> Registry.BLOCK_ENTITY_TYPE.getKey(tileEntity.getType()),
                 tileEntity::getPos
             );
-            final boolean add = ((WorldAccessor) serverWorld).accessor$getAddedTileEntityList().add(tileEntity);
+            final boolean add = ((WorldAccessor) serverWorld).accessor$getPendingBlockEntities().add(tileEntity);
             if (add) {
                 return new EffectResult(oldState.state, true);
             } else {

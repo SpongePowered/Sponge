@@ -98,14 +98,14 @@ public final class EntityData {
                             return ((EntityAccessor) h).accessor$getFireImmuneTicks() == ticks;
                         })
                     .create(Keys.FIRE_TICKS)
-                        .get(h -> ((EntityAccessor) h).accessor$getFire() > 0 ? Ticks.of(((EntityAccessor) h).accessor$getFire()) : null)
+                        .get(h -> ((EntityAccessor) h).accessor$getRemainingFireTicks() > 0 ? Ticks.of(((EntityAccessor) h).accessor$getRemainingFireTicks()) : null)
                         .set((h, v) -> {
                             final int ticks = (int) v.getTicks();
-                            ((EntityAccessor) h).accessor$setFire(Math.max(ticks, Constants.Entity.MINIMUM_FIRE_TICKS));
+                            ((EntityAccessor) h).accessor$setRemainingFireTicks(Math.max(ticks, Constants.Entity.MINIMUM_FIRE_TICKS));
                         })
                         .deleteAndGet(h -> {
                             final EntityAccessor accessor = (EntityAccessor) h;
-                            final int ticks = accessor.accessor$getFire();
+                            final int ticks = accessor.accessor$getRemainingFireTicks();
                             if (ticks < Constants.Entity.MINIMUM_FIRE_TICKS) {
                                 return DataTransactionResult.failNoData();
                             }
@@ -172,7 +172,7 @@ public final class EntityData {
                             h.getTags().addAll(v);
                         })
                     .create(Keys.TRANSIENT)
-                        .get(h -> ((EntityAccessor) h).accessor$getEntityString() == null)
+                        .get(h -> ((EntityAccessor) h).accessor$getEncodeId() == null)
                         .set((h, v) -> ((EntityBridge) h).bridge$setTransient(v))
                     .create(Keys.VEHICLE)
                         .get(h -> (org.spongepowered.api.entity.Entity) h.getRidingEntity())

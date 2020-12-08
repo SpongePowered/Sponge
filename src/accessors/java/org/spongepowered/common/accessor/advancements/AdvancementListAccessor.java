@@ -40,7 +40,7 @@ public interface AdvancementListAccessor {
 
     @Accessor("roots") Set<Advancement> accessor$getRootsSet();
 
-    @Accessor("nonRoots") Set<Advancement> accessor$getNonRootsSet();
+    @Accessor("tasks") Set<Advancement> accessor$getTasks();
 
     @Accessor("listener") AdvancementList.IListener accessor$getListener();
 

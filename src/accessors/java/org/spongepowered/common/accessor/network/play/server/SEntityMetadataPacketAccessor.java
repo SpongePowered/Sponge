@@ -34,9 +34,9 @@ import java.util.List;
 @Mixin(SEntityMetadataPacket.class)
 public interface SEntityMetadataPacketAccessor {
 
-    @Accessor("entityId") void accessor$setEntityId(int id);
+    @Accessor("id") void accessor$setId(int id);
 
-    @Accessor("dataManagerEntries") List< EntityDataManager.DataEntry<? >> accessor$getDataManagerEntries();
+    @Accessor("packedItems") List<EntityDataManager.DataEntry<?>> accessor$getPackedItems();
 
-    @Accessor("dataManagerEntries") void accessor$setDataManagerEntries(List< EntityDataManager.DataEntry<? >> entries);
+    @Accessor("packedItems") void accessor$setPackedItems(List<EntityDataManager.DataEntry<?>> packedItems);
 }

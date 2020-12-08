@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 @Mixin(TextFormatting.class)
 public interface TextFormattingAccessor {
 
-    @Accessor("formattingCode") char accessor$getFormattingCode();
+    @Accessor("code") char accessor$getCode();
 
     @Accessor("color") @Nullable Integer accessor$getColor();
 }

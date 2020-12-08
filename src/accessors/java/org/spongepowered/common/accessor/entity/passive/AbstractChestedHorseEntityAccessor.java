@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface AbstractChestedHorseEntityAccessor {
 
     @Accessor("DATA_ID_CHEST")
-    static DataParameter<Boolean> accessor$getDataIdChest() {
+    static DataParameter<Boolean> accessor$getDATA_ID_CHEST() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 }

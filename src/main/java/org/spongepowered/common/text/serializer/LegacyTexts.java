@@ -52,7 +52,7 @@ public final class LegacyTexts {
         final char[] lookup = new char[LegacyTexts.formatting.length];
 
         for (int i = 0; i < LegacyTexts.formatting.length; i++) {
-            lookup[i] = ((TextFormattingAccessor) (Object) LegacyTexts.formatting[i]).accessor$getFormattingCode();
+            lookup[i] = ((TextFormattingAccessor) (Object) LegacyTexts.formatting[i]).accessor$getCode();
         }
 
         LOOKUP = new String(lookup);

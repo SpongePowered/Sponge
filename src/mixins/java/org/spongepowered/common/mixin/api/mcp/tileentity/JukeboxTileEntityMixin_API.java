@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.JukeboxBlock;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.MusicDiscItem;
 import net.minecraft.tileentity.JukeboxTileEntity;
@@ -65,7 +64,7 @@ public abstract class JukeboxTileEntityMixin_API extends TileEntityMixin_API imp
     public void eject() {
         final BlockState block = this.world.getBlockState(this.shadow$getPos());
         if (block.getBlock() == Blocks.JUKEBOX) {
-            ((JukeboxBlockAccessor) block.getBlock()).accessor$dropRecord(this.world, this.shadow$getPos());
+            ((JukeboxBlockAccessor) block.getBlock()).accessor$dropRecording(this.world, this.shadow$getPos());
             this.world.setBlockState(this.shadow$getPos(), block.with(JukeboxBlock.HAS_RECORD, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }

@@ -33,7 +33,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(HangingEntity.class)
 public interface HangingEntityAccessor {
 
-    @Invoker("updateFacingWithBoundingBox") void accessor$updateFacingWithBoundingBox(Direction facingDirectionIn);
+    @Invoker("setDirection") void accessor$setDirection(Direction direction);
 
-    @Accessor("facingDirection") Direction accessor$facingDirection();
 }

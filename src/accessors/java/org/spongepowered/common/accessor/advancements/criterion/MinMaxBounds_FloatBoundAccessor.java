@@ -35,7 +35,7 @@ public interface MinMaxBounds_FloatBoundAccessor {
 
     @Invoker("<init>")
     static MinMaxBounds.FloatBound accessor$init(@Nullable final Float p_i49717_1_, @Nullable final Float p_i49717_2_) {
-        throw new AssertionError("should not happen");
+        throw new AssertionError("Untransformed Accessor!");
     }
 
 }

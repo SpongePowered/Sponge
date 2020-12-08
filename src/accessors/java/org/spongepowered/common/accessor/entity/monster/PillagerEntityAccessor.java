@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(PillagerEntity.class)
 public interface PillagerEntityAccessor {
 
-    @Accessor("DATA_CHARGING_STATE") static DataParameter<Boolean> accessor$getDataChargingState() {
+    @Accessor("IS_CHARGING_CROSSBOW") static DataParameter<Boolean> accessor$getIS_CHARGING_CROSSBOW() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 }

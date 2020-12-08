@@ -34,6 +34,6 @@ public interface ICriterionTrigger_ListenerAccessor {
 
     @Accessor("advancement") Advancement accessor$getAdvancement();
 
-    @Accessor("criterionName") String accessor$getCriterionName();
+    @Accessor("criterion") String accessor$getCriterion();
 
 }

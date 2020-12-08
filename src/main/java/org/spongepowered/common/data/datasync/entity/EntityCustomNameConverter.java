@@ -40,7 +40,7 @@ import java.util.Optional;
 public class EntityCustomNameConverter extends DataParameterConverter<String> {
 
     public EntityCustomNameConverter() {
-        super(EntityAccessor.accessor$getCustomName());
+        super(EntityAccessor.accessor$getDATA_CUSTOM_NAME());
     }
 
     @Override

@@ -35,7 +35,6 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.chunk.listener.ChainedChunkStatusListener;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.chunk.listener.TrackingChunkStatusListener;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -123,7 +122,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         )
     )
     private GameProfileRepository impl$useServerGameProfileRepository(final YggdrasilAuthenticationService yggdrasilAuthenticationService) {
-        return ((MinecraftServerAccessor) this.integratedServer).accessor$getProfileRepo();
+        return ((MinecraftServerAccessor) this.integratedServer).accessor$getProfileRepository();
     }
 
     @Redirect(method = "launchIntegratedServer", at = @At(value = "NEW", target = "net/minecraft/server/integrated/IntegratedServer"))

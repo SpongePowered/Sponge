@@ -36,51 +36,51 @@ import java.util.Random;
 @Mixin(Entity.class)
 public interface EntityAccessor {
 
-    @Accessor("FLAGS") static DataParameter<Byte> accessor$getFlags() {
+    @Accessor("DATA_SHARED_FLAGS_ID") static DataParameter<Byte> accessor$getDATA_SHARED_FLAGS_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("AIR") static DataParameter<Integer> accessor$getAir() {
+    @Accessor("DATA_AIR_SUPPLY_ID") static DataParameter<Integer> accessor$getDATA_AIR_SUPPLY_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("CUSTOM_NAME") static DataParameter<String> accessor$getCustomName() {
+    @Accessor("DATA_CUSTOM_NAME") static DataParameter<String> accessor$getDATA_CUSTOM_NAME() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("CUSTOM_NAME_VISIBLE") static DataParameter<Boolean> accessor$getCustomNameVisible() {
+    @Accessor("DATA_CUSTOM_NAME_VISIBLE") static DataParameter<Boolean> accessor$getDATA_CUSTOM_NAME_VISIBLE() {
         throw new IllegalStateException("Untransformed accessor!");
     }
 
-    @Accessor("SILENT") static DataParameter<Boolean> accessor$getSilent() {
+    @Accessor("DATA_SILENT") static DataParameter<Boolean> accessor$getDATA_SILENT() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("NO_GRAVITY") static DataParameter<Boolean> accessor$getNoGravity() {
+    @Accessor("DATA_NO_GRAVITY") static DataParameter<Boolean> accessor$getDATA_NO_GRAVITY() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("rand") Random accessor$getRand();
+    @Accessor("random") Random accessor$getRandom();
 
-    @Accessor("fire") int accessor$getFire();
+    @Accessor("remainingFireTicks") int accessor$getRemainingFireTicks();
 
-    @Accessor("fire") void accessor$setFire(int fire);
+    @Accessor("remainingFireTicks") void accessor$setRemainingFireTicks(int remainingFireTicks);
 
-    @Accessor("inPortal") void accessor$setInPortal(boolean value);
+    @Accessor("isInsidePortal") void accessor$setInsidePortal(boolean insidePortal);
 
-    @Accessor("portalCounter") void accessor$setPortalCounter(int value);
+    @Accessor("portalTime") void accessor$setPortalTime(int portalTime);
 
-    @Accessor("field_242271_ac") void accessor$field_242271_ac(BlockPos lastPortalPos);
+    @Accessor("portalEntrancePos") void accessor$setPortalEntrancePos(BlockPos portalEntrancePos);
 
-    @Invoker("setFlag") void accessor$setFlag(int flag, boolean set);
+    @Invoker("setSharedFlag") void accessor$setSharedFlag(int flag, boolean set);
 
     @Invoker("getFireImmuneTicks") int accessor$getFireImmuneTicks();
 
     @Invoker("getPermissionLevel") int accessor$getPermissionLevel();
 
-    @Invoker("getEntityString") String accessor$getEntityString();
+    @Invoker("getEncodeId") String accessor$getEncodeId();
 
     @Invoker("removePassenger") void accessor$removePassenger(Entity entity);
 
-    @Invoker("setRotation") void accessor$setRotation(float yaw, float pitch);
+    @Invoker("setRot") void accessor$setRot(float yaw, float pitch);
 }

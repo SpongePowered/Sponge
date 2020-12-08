@@ -41,8 +41,7 @@ public interface PlayerListAccessor {
 
     @Accessor("server") MinecraftServer accessor$getServer();
 
-    @Accessor("playerDataManager") PlayerData accessor$getPlayerDataManager();
+    @Accessor("playerIo") PlayerData accessor$getPlayerIo();
 
-    @Invoker("setPlayerGameTypeBasedOnOther") void accessor$setPlayerGameTypeBasedOnOther(ServerPlayerEntity target, ServerPlayerEntity source,
-            ServerWorld world);
+    @Invoker("updatePlayerGameMode") void accessor$updatePlayerGameMode(ServerPlayerEntity target, ServerPlayerEntity source, ServerWorld world);
 }

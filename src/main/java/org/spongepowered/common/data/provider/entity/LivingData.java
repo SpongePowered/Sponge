@@ -128,7 +128,7 @@ public final class LivingData {
                         })
                     .create(Keys.IS_ELYTRA_FLYING)
                         .get(LivingEntity::isElytraFlying)
-                        .set((h, v) -> ((EntityAccessor) h).accessor$setFlag(Constants.Entity.ELYTRA_FLYING_FLAG, v))
+                        .set((h, v) -> ((EntityAccessor) h).accessor$setSharedFlag(Constants.Entity.ELYTRA_FLYING_FLAG, v))
                     .create(Keys.LAST_ATTACKER)
                         .get(h -> (Entity) h.getRevengeTarget())
                         .setAnd((h, v) -> {
@@ -191,8 +191,8 @@ public final class LivingData {
                         })
                 .asMutable(LivingEntityAccessor.class)
                     .create(Keys.LAST_DAMAGE_RECEIVED)
-                        .get(h -> (double) h.accessor$getLastDamage())
-                        .set((h, v) -> h.accessor$setLastDamage(v.floatValue()));
+                        .get(h -> (double) h.accessor$getLastHurt())
+                        .set((h, v) -> h.accessor$setLastHurt(v.floatValue()));
     }
     // @formatter:on
 }

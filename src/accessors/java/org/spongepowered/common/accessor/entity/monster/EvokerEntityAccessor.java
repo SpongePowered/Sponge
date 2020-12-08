@@ -35,5 +35,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface EvokerEntityAccessor {
 
     @Accessor("wololoTarget") SheepEntity accessor$getWololoTarget();
+
     @Accessor("wololoTarget") void accessor$setWololoTarget(SheepEntity wololoTarget);
 }

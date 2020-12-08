@@ -104,7 +104,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         final BlockSnapshot targetBlock = phaseContext.getTargetBlock();
         
         final net.minecraft.item.ItemStack endActiveItem = player.getActiveItemStack();
-        ((LivingEntityAccessor) player).accessor$setActiveItemStack(ItemStackUtil.toNative(phaseContext.getActiveItem()));
+        ((LivingEntityAccessor) player).accessor$setUseItem(ItemStackUtil.toNative(phaseContext.getActiveItem()));
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
@@ -126,7 +126,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             trackedInventory.bridge$getCapturedSlotTransactions().clear();
         }
         
-        ((LivingEntityAccessor) player).accessor$setActiveItemStack(endActiveItem);
+        ((LivingEntityAccessor) player).accessor$setUseItem(endActiveItem);
     }
 
 }

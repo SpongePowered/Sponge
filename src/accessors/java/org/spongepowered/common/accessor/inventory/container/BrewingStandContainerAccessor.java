@@ -32,5 +32,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(BrewingStandContainer.class)
 public interface BrewingStandContainerAccessor {
 
-    @Accessor("tileBrewingStand") IInventory accessor$getTileBrewingStand();
+    @Accessor("brewingStand") IInventory accessor$getBrewingStand();
 }

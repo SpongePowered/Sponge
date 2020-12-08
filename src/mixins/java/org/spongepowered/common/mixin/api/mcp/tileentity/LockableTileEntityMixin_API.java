@@ -55,7 +55,7 @@ public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API im
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
         if (this.code != null) {
-            container.set(Constants.TileEntity.LOCK_CODE, ((LockCodeAccessor) this.code).accessor$getLock());
+            container.set(Constants.TileEntity.LOCK_CODE, ((LockCodeAccessor) this.code).accessor$getKey());
         }
         final List<DataView> items = Lists.newArrayList();
         for (int i = 0; i < ((IInventory) this).getSizeInventory(); i++) {

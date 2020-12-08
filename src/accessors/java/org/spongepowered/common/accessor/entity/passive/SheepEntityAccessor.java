@@ -37,18 +37,18 @@ import java.util.Map;
 @Mixin(SheepEntity.class)
 public interface SheepEntityAccessor {
 
-    @Accessor("DYE_COLOR")
-    static DataParameter<Byte> accessor$getDyeColor() {
+    @Accessor("DATA_WOOL_ID")
+    static DataParameter<Byte> accessor$getDATA_WOOL_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
     @Invoker("createSheepColor")
-    static float[] accessor$createSheepColor(DyeColor p_192020_0_) {
+    static float[] accessor$createSheepColor(DyeColor color) {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("WOOL_BY_COLOR")
-    static Map<DyeColor, IItemProvider> accessor$getWoolByColor() {
+    @Accessor("ITEM_BY_DYE")
+    static Map<DyeColor, IItemProvider> accessor$getITEM_BY_DYE() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 }

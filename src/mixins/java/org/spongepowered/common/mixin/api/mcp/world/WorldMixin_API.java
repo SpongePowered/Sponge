@@ -201,7 +201,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
         if (chunkProvider instanceof ServerChunkProvider) {
             final ChunkManagerAccessor chunkManager = (ChunkManagerAccessor) ((ServerChunkProvider) chunkProvider).chunkManager;
             final List<Chunk> chunks = new ArrayList<>();
-            chunkManager.accessor$getLoadedChunksIterable().forEach(holder -> chunks.add((Chunk) holder.getChunkIfComplete()));
+            chunkManager.accessor$getChunks().forEach(holder -> chunks.add((Chunk) holder.getChunkIfComplete()));
             return chunks;
         }
         return Collections.emptyList();
@@ -284,7 +284,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
         Preconditions.checkNotNull(state, "state");
         final SChangeBlockPacket packet = new SChangeBlockPacket();
         ((SChangeBlockPacketAccessor) packet).accessor$setPos(new BlockPos(x, y, z));
-        ((SChangeBlockPacketAccessor) packet).accessor$setState((BlockState) state);
+        ((SChangeBlockPacketAccessor) packet).accessor$setBlockState((BlockState) state);
 
         ((net.minecraft.world.World) (Object) this).getPlayers().stream()
                 .filter(ServerPlayerEntity.class::isInstance)

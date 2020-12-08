@@ -140,7 +140,7 @@ public final class EntityUtil {
 
         toWorld = (ServerWorld) event.getDestinationWorld();
 
-        ((ServerPlayerEntityAccessor) player).accessor$setInvulnerableDimensionChange(true);
+        ((ServerPlayerEntityAccessor) player).accessor$setIsChangingDimension(true);
 
         final ServerLocation previousLocation = ((ServerPlayer) player).getServerLocation();
         final ServerWorld fromWorld = player.getServerWorld();
@@ -209,7 +209,7 @@ public final class EntityUtil {
         player.setWorld(toWorld);
         toWorld.addRespawnedPlayer(player);
         if (isPortal) {
-            ((ServerPlayerEntityAccessor) player).accessor$func_213846_b(toWorld);
+            ((ServerPlayerEntityAccessor) player).accessor$triggerDimensionChangeTriggers(toWorld);
         }
         player.interactionManager.setWorld(toWorld);
         player.connection.sendPacket(new SPlayerAbilitiesPacket(player.abilities));
@@ -227,9 +227,9 @@ public final class EntityUtil {
         ((ServerWorldBridge) fromWorld).bridge$getBossBarManager().onPlayerLogout(player);
         ((ServerWorldBridge) toWorld).bridge$getBossBarManager().onPlayerLogin(player);
 
-        ((ServerPlayerEntityAccessor) player).accessor$setLastExperience(-1);
-        ((ServerPlayerEntityAccessor) player).accessor$setLastHealth(-1.0f);
-        ((ServerPlayerEntityAccessor) player).accessor$setLastFoodLevel(-1);
+        ((ServerPlayerEntityAccessor) player).accessor$setLastSentExp(-1);
+        ((ServerPlayerEntityAccessor) player).accessor$setLastSentHealth(-1.0f);
+        ((ServerPlayerEntityAccessor) player).accessor$setLastSentFood(-1);
 
         if (!isPortal) {
             player.connection.setPlayerLocation(player.getPosX(), player.getPosY(), player.getPosZ(), player.rotationYaw, player.rotationPitch);

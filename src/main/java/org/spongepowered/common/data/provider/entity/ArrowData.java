@@ -45,7 +45,7 @@ public final class ArrowData {
                 .asMutable(ArrowEntity.class)
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
-                            final Set<EffectInstance> effects = ((ArrowEntityAccessor) h).accessor$getCustomPotionEffects();
+                            final Set<EffectInstance> effects = ((ArrowEntityAccessor) h).accessor$getEffects();
                             if (effects.isEmpty()) {
                                 return null;
                             }
@@ -55,7 +55,7 @@ public final class ArrowData {
                                     .collect(Collectors.toList());
                         })
                         .set((h, v) -> {
-                            ((ArrowEntityAccessor) h).accessor$getCustomPotionEffects().clear();
+                            ((ArrowEntityAccessor) h).accessor$getEffects().clear();
                             for (final PotionEffect effect : v) {
                                 final EffectInstance mcEffect = new EffectInstance(((EffectInstance) effect).getPotion(), effect.getDuration(),
                                         effect.getAmplifier(), effect.isAmbient(), effect.showsParticles());

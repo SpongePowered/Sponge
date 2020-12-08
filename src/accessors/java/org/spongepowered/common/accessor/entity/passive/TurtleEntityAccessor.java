@@ -35,12 +35,16 @@ public interface TurtleEntityAccessor {
     @Invoker("setHasEgg") void accessor$setHasEgg(boolean hasEgg);
 
     @Invoker("isGoingHome") boolean accessor$isGoingHome();
-    @Invoker("setGoingHome") void accessor$setGoingHome(boolean isGoingHome);
-    @Invoker("setDigging") void accessor$setDigging(boolean isDigging);
+
+    @Invoker("setGoingHome") void accessor$setGoingHome(boolean goingHome);
+
+    @Invoker("setLayingEgg") void accessor$setLayingEgg(boolean layingEgg);
 
     @Invoker("isTravelling") boolean accessor$isTravelling();
-    @Invoker("setTravelling") void accessor$setTravelling(boolean isTravelling);
+
+    @Invoker("setTravelling") void accessor$setTravelling(boolean travelling);
 
     @Invoker("getTravelPos") BlockPos accessor$getTravelPos();
-    @Invoker("setTravelPos") void accessor$setTravelPos(BlockPos isTravelling);
+
+    @Invoker("setTravelPos") void accessor$setTravelPos(BlockPos pos);
 }

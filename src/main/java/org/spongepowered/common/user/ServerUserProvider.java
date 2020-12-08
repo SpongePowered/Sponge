@@ -287,11 +287,11 @@ public final class ServerUserProvider {
     }
 
     private PlayerData getSaveHandler() {
-        return (PlayerData) ((PlayerListAccessor) this.server.getPlayerList()).accessor$getPlayerDataManager();
+        return (PlayerData) ((PlayerListAccessor) this.server.getPlayerList()).accessor$getPlayerIo();
     }
 
     private Path getSaveHandlerDirectory() {
-        return ((PlayerDataAccessor) this.getSaveHandler()).accessor$getPlayerDataFolder().toPath();
+        return ((PlayerDataAccessor) this.getSaveHandler()).accessor$getPlayerDir().toPath();
     }
 
     // Used to reduce the number of calls to maps.

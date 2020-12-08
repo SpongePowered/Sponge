@@ -50,7 +50,7 @@ public final class ClientCompletionKeyStreamGenerator {
     }
 
     public static Stream<? extends ClientCompletionKey<?>> stream() {
-        return ArgumentTypesAccessor.accessor$getID_TYPE_MAP()
+        return ArgumentTypesAccessor.accessor$BY_NAME()
                 .entrySet()
                 .stream()
                 .map(ClientCompletionKeyStreamGenerator::transform)
@@ -61,7 +61,7 @@ public final class ClientCompletionKeyStreamGenerator {
         final ResourceKey key = ResourceKey.sponge(entry.getKey().getPath());
         final IArgumentSerializer<?> serializer = entry.getValue().accessor$getSerializer();
         if (serializer instanceof ArgumentSerializerAccessor) {
-            return new SpongeBasicClientCompletionKey(key, ((ArgumentSerializerAccessor<?>) serializer).accessor$getFactory().get());
+            return new SpongeBasicClientCompletionKey(key, ((ArgumentSerializerAccessor<?>) serializer).accessor$getConstructor().get());
         }
         if (serializer instanceof EntityArgument.Serializer) {
             return new SpongeEntityClientCompletionKey(key);

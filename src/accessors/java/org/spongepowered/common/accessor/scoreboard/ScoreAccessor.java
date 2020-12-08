@@ -34,9 +34,9 @@ public interface ScoreAccessor {
 
     @Accessor("objective") ScoreObjective accessor$getObjective();
 
-    @Accessor("scorePoints") int accessor$getScorePoints();
+    @Accessor("count") int accessor$getCount();
 
-    @Accessor("scorePoints") void accessor$setScorePoints(int scorePoints);
+    @Accessor("count") void accessor$setCount(int count);
 
     @Accessor("forceUpdate") boolean accessor$getForceUpdate();
 

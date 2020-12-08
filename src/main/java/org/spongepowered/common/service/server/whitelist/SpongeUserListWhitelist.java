@@ -29,7 +29,6 @@ import net.minecraft.server.management.WhitelistEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
-import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
@@ -65,7 +64,7 @@ public class SpongeUserListWhitelist extends WhiteList {
     @SuppressWarnings("unchecked")
     @Override
     public void addEntry(final WhitelistEntry entry) {
-        Sponge.getServer().getServiceProvider().whitelistService().addProfile(((UserListEntryAccessor<GameProfile>) entry).accessor$getValue());
+        Sponge.getServer().getServiceProvider().whitelistService().addProfile(((UserListEntryAccessor<GameProfile>) entry).accessor$getUser());
     }
 
     @Override

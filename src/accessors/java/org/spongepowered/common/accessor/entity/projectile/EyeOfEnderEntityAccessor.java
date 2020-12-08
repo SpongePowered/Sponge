@@ -31,9 +31,12 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(EyeOfEnderEntity.class)
 public interface EyeOfEnderEntityAccessor {
 
-    @Accessor("shatterOrDrop") boolean accessor$getShatterOrDrop();
-    @Accessor("shatterOrDrop") void accessor$setShatterOrDrop(boolean shatterOrDrop);
-    @Accessor("despawnTimer") int accessor$getDespawnTimer();
-    @Accessor("despawnTimer") void accessor$setDespawnTimer(int despawnTimer);
+    @Accessor("surviveAfterDeath") boolean accessor$getSurviveAfterDeath();
+
+    @Accessor("surviveAfterDeath") void accessor$setSurviveAfterDeath(boolean surviveAfterDeath);
+
+    @Accessor("life") int accessor$getLife();
+
+    @Accessor("life") void accessor$setLife(int life);
 
 }

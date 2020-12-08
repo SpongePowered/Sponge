@@ -34,21 +34,21 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(ServerPlayerEntity.class)
 public interface ServerPlayerEntityAccessor {
 
-    @Accessor("invulnerableDimensionChange") void accessor$setInvulnerableDimensionChange(boolean invulnerableDimensionChange);
+    @Accessor("isChangingDimension") void accessor$setIsChangingDimension(boolean isChangingDimension);
 
     @Accessor("seenCredits") boolean accessor$getSeenCredits();
 
-    @Accessor("chatColours") boolean accessor$getChatColours();
+    @Accessor("canChatColor") boolean accessor$getCanChatColor();
 
     @Accessor("seenCredits") void accessor$setSeenCredits(boolean seenCredits);
 
-    @Accessor("enteredNetherPosition") void accessor$setEnteredNetherPosition(Vector3d value);
+    @Accessor("enteredNetherPosition") void accessor$setEnteredNetherPosition(Vector3d enteredNetherPosition);
 
-    @Accessor("lastExperience") void accessor$setLastExperience(int value);
+    @Accessor("lastSentExp") void accessor$setLastSentExp(int lastSentExp);
 
-    @Accessor("lastHealth") void accessor$setLastHealth(float value);
+    @Accessor("lastSentHealth") void accessor$setLastSentHealth(float lastSentHealth);
 
-    @Accessor("lastFoodLevel") void accessor$setLastFoodLevel(int value);
+    @Accessor("lastSentFood") void accessor$setLastSentFood(int lastSentFood);
 
-    @Invoker("func_213846_b") void accessor$func_213846_b(ServerWorld toWorld);
+    @Invoker("triggerDimensionChangeTriggers") void accessor$triggerDimensionChangeTriggers(ServerWorld world);
 }

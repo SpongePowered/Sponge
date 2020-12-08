@@ -193,7 +193,7 @@ public final class SpongeTabList implements TabList {
         final SPlayerListItemPacket.AddPlayerData data = packet.new AddPlayerData(SpongeGameProfile.toMcProfile(entry.getProfile()),
             entry.getLatency(), (GameType) (Object) entry.getGameMode(),
             entry.getDisplayName().isPresent() ? SpongeAdventure.asVanilla(entry.getDisplayName().get()) : null);
-        ((SPlayerListItemPacketAccessor) packet).accessor$getPlayers().add(data);
+        ((SPlayerListItemPacketAccessor) packet).accessor$getEntries().add(data);
         this.player.connection.sendPacket(packet);
     }
 
@@ -207,7 +207,7 @@ public final class SpongeTabList implements TabList {
      */
     @SuppressWarnings("ConstantConditions")
     public void updateEntriesOnSend(final SPlayerListItemPacket packet) {
-        for (final SPlayerListItemPacket.AddPlayerData data : ((SPlayerListItemPacketAccessor) packet).accessor$getPlayers()) {
+        for (final SPlayerListItemPacket.AddPlayerData data : ((SPlayerListItemPacketAccessor) packet).accessor$getEntries()) {
             final SPlayerListItemPacket.Action action = ((SPlayerListItemPacketAccessor) packet).accessor$getAction();
             if (action == SPlayerListItemPacket.Action.ADD_PLAYER) {
                 // If an entry with the same id exists nothing will be done

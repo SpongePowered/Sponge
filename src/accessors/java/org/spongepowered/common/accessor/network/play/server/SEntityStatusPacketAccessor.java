@@ -33,5 +33,5 @@ public interface SEntityStatusPacketAccessor {
 
     @Accessor("entityId") void accessor$setEntityId(int id);
 
-    @Accessor("logicOpcode") void accessor$setLogicOpcode(byte opcode);
+    @Accessor("eventId") void accessor$setEventId(byte eventId);
 }

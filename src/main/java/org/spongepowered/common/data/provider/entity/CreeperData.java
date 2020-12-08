@@ -40,7 +40,7 @@ public final class CreeperData {
                 .asMutable(CreeperEntity.class)
                     .create(Keys.IS_CHARGED)
                         .get(CreeperEntity::isCharged)
-                        .set((h, v) -> h.getDataManager().set(CreeperEntityAccessor.accessor$getPowered(), v));
+                        .set((h, v) -> h.getDataManager().set(CreeperEntityAccessor.accessor$getDATA_IS_POWERED(), v));
     }
     // @formatter:on
 }

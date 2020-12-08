@@ -36,18 +36,22 @@ import java.util.UUID;
 @Mixin(FoxEntity.class)
 public interface FoxEntityAccessor {
 
-    @Accessor("TRUSTED_UUID_SECONDARY") static DataParameter<Optional<UUID>> accessor$getTrustedUuidSecondary() {
+    @Accessor("DATA_TRUSTED_ID_0") static DataParameter<Optional<UUID>> accessor$getDATA_TRUSTED_ID_0() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("TRUSTED_UUID_MAIN") static DataParameter<Optional<UUID>> accessor$getTrustedUuidMain() {
+    @Accessor("DATA_TRUSTED_ID_1") static DataParameter<Optional<UUID>> accessor$getDATA_TRUSTED_ID_1() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Invoker("setVariantType") void accessor$setVariantType(FoxEntity.Type typeIn);
-    @Invoker("setStuck") void accessor$setStuck(boolean isStuck);
-    @Invoker("setSleeping") void accessor$setSleeping(boolean isSleeping);
-    @Invoker("isFoxAggroed") boolean accessor$isFoxAggroed();
-    @Invoker("setFoxAggroed") void accessor$setFoxAggroed(boolean aggroed);
+    @Invoker("setFoxType") void accessor$setFoxType(FoxEntity.Type type);
+
+    @Invoker("setFaceplanted") void accessor$setFaceplanted(boolean faceplanted);
+
+    @Invoker("setSleeping") void accessor$setSleeping(boolean sleeping);
+
+    @Invoker("isDefending") boolean accessor$isDefending();
+
+    @Invoker("setDefending") void accessor$setDefending(boolean defending);
 
 }

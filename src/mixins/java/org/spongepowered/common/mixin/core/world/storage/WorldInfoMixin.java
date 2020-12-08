@@ -407,7 +407,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         } else if (server.isSinglePlayer()) {
             serverWorld.setAllowedSpawnTypes(this.difficulty != Difficulty.PEACEFUL, true);
         } else {
-            serverWorld.setAllowedSpawnTypes(((MinecraftServerAccessor) server).accessor$func_230536_N_(), server.getCanSpawnAnimals());
+            serverWorld.setAllowedSpawnTypes(((MinecraftServerAccessor) server).accessor$isSpawningMonsters(), server.getCanSpawnAnimals());
         }
 
         serverWorld

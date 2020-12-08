@@ -61,8 +61,8 @@ public final class MobData {
                         .delete(h -> h.setAttackTarget(null))
                 .asMutable(MobEntityAccessor.class)
                     .create(Keys.IS_AI_ENABLED)
-                        .get(h -> !h.accessor$isAIDisabled())
-                        .set((h, v) -> h.accessor$setNoAI(!v))
+                        .get(h -> !h.accessor$getIsNoAi())
+                        .set((h, v) -> h.accessor$setIsNoAi(!v))
                     .create(Keys.IS_PERSISTENT)
                         .get(h -> ((MobEntity) h).isNoDespawnRequired())
                         .set(MobEntityAccessor::accessor$setPersistingRequired);

@@ -32,5 +32,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CraftingResultSlot.class)
 public interface CraftingResultSlotAccessor {
 
-    @Accessor("craftMatrix") CraftingInventory accessor$getCraftMatrix();
+    @Accessor("craftSlots") CraftingInventory accessor$getCraftSlots();
 }

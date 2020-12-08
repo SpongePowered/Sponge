@@ -185,7 +185,10 @@
         "network.play.server.SRespawnPacketAccessor",
         "tileentity.TileEntityAccessor",
         "entity.projectile.FishingBobberEntityAccessor",
-        "entity.passive.horse.HorseEntityAccessor"
+        "entity.passive.horse.HorseEntityAccessor",
+        "entity.item.ItemFrameEntityAccessor",
+        "entity.monster.AbstractRaiderEntityAccessor",
+        "world.LockCodeAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

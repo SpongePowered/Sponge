@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface PatrollerEntityAccessor {
 
     @Accessor("patrolling") boolean accessor$getPatrolling();
+
     @Accessor("patrolling") void accessor$setPatrolling(boolean patrolling);
 
 }

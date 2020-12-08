@@ -36,5 +36,5 @@ public interface NetworkManagerAccessor {
 
     @Accessor("channel") Channel accessor$getChannel();
 
-    @Accessor("socketAddress") void accessor$setSocketAddress(SocketAddress socketAddress);
+    @Accessor("address") void accessor$setAddress(SocketAddress address);
 }

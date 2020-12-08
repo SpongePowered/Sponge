@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface StyleAccessor {
 
     @Invoker("<init>")
-    static Style accessor$new(
+    static Style accessor$init(
             final @Nullable Color color,
             final @Nullable Boolean bold,
             final @Nullable Boolean italic,

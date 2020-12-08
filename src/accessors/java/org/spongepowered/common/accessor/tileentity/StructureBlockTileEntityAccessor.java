@@ -45,9 +45,9 @@ public interface StructureBlockTileEntityAccessor {
 
     @Accessor("mode") void accessor$setMode(StructureMode mode);
 
-    @Accessor("position") BlockPos accessor$getPosition();
+    @Accessor("structurePos") BlockPos accessor$getStructurePos();
 
-    @Accessor("position") void accessor$setPosition(BlockPos position);
+    @Accessor("structurePos") void accessor$setStructurePos(BlockPos structurePos);
 
     @Accessor("showAir") boolean accessor$getShowAir();
 
@@ -55,8 +55,8 @@ public interface StructureBlockTileEntityAccessor {
 
     @Accessor("seed") long accessor$getSeed();
 
-    @Accessor("size") BlockPos accessor$getSize();
+    @Accessor("structureSize") BlockPos accessor$getStructureSize();
 
-    @Accessor("size") void accessor$setSize(BlockPos size);
+    @Accessor("structureSize") void accessor$setStructureSize(BlockPos structureSize);
     
 }

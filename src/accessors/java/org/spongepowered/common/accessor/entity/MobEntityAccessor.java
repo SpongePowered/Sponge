@@ -34,15 +34,15 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(MobEntity.class)
 public interface MobEntityAccessor {
 
-    @Accessor("AI_FLAGS") static DataParameter<Byte> accessor$getAIFlags() {
+    @Accessor("DATA_MOB_FLAGS_ID") static DataParameter<Byte> accessor$getDATA_MOB_FLAGS_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("persistenceRequired") void accessor$setPersistingRequired(boolean persisting);
+    @Accessor("persistenceRequired") void accessor$setPersistingRequired(boolean persistingRequired);
 
-    @Invoker("isAIDisabled") boolean accessor$isAIDisabled();
+    @Invoker("isNoAi") boolean accessor$getIsNoAi();
 
-    @Invoker("setNoAI") void accessor$setNoAI(boolean noAi);
+    @Invoker("setNoAi") void accessor$setIsNoAi(boolean noAi);
 
-    @Invoker("setEquipmentBasedOnDifficulty") void accessor$setEquipmentBasedOnDifficulty(DifficultyInstance difficulty);
+    @Invoker("populateDefaultEquipmentSlots") void accessor$populateDefaultEquipmentSlots(DifficultyInstance difficulty);
 }

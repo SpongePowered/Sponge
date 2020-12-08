@@ -42,7 +42,7 @@ public final class CommandBlockMinecartData {
                 .asMutable(CommandBlockMinecartEntity.class)
                     .create(Keys.COMMAND)
                         .get(h -> h.getCommandBlockLogic().getCommand())
-                        .set((h, v) -> ((CommandBlockLogicAccessor) h.getCommandBlockLogic()).accessor$setCommandStored(v))
+                        .set((h, v) -> ((CommandBlockLogicAccessor) h.getCommandBlockLogic()).accessor$setCommand(v))
                     .create(Keys.LAST_COMMAND_OUTPUT)
                         .get(h -> {
                             final ITextComponent component = ((CommandBlockLogicAccessor) h.getCommandBlockLogic()).accessor$getLastOutput();

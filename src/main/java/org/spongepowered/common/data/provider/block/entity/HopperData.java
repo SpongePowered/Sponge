@@ -39,13 +39,13 @@ public final class HopperData {
         registrator
                 .asMutable(HopperTileEntityAccessor.class)
                     .create(Keys.COOLDOWN)
-                        .get(h -> new SpongeTicks(Math.max(h.accessor$getTransferCooldown(), 0)))
+                        .get(h -> new SpongeTicks(Math.max(h.accessor$getCooldownTime(), 0)))
                         .setAnd((h, v) -> {
                             final int ticks = (int) v.getTicks();
                             if (ticks < 0) {
                                 return false;
                             }
-                            h.accessor$setTransferCooldown(ticks);
+                            h.accessor$setCooldownTime(ticks);
                             return true;
                         });
     }

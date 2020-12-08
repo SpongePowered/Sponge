@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractRaiderEntity.class)
 public interface AbstractRaiderEntityAccessor {
 
-    @Accessor("CELEBRATING") static DataParameter<Boolean> accessor$getDataIsCelebrating() {
+    @Accessor("IS_CELEBRATING") static DataParameter<Boolean> accessor$getIS_CELEBRATING() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 }

@@ -33,9 +33,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(FireworkRocketEntity.class)
 public interface FireworkRocketEntityAccessor {
 
-    @Accessor("FIREWORK_ITEM") static DataParameter<ItemStack> accessor$getFireworkItem() {
+    @Accessor("DATA_ID_FIREWORKS_ITEM") static DataParameter<ItemStack> accessor$getDATA_ID_FIREWORKS_ITEM() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("lifetime") void accessor$setLifeTime(int lifetime);
+    @Accessor("lifetime") void accessor$setLifetime(int lifetime);
 }

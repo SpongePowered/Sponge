@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(HoverEvent.ItemHover.class)
 public interface HoverEventItemHoverAccessor {
-    static @Invoker("<init>") HoverEvent.ItemHover accessor$new(final Item item, final int count, final @Nullable CompoundNBT tag) {
+    static @Invoker("<init>") HoverEvent.ItemHover accessor$init(final Item item, final int count, final @Nullable CompoundNBT tag) {
         throw new AssertionError();
     }
 

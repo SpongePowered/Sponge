@@ -31,5 +31,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(BannerPattern.class)
 public interface BannerPatternAccessor {
 
-    @Accessor("fileName") String accessor$getFileName();
+    @Accessor("filename") String accessor$getFilename();
 }

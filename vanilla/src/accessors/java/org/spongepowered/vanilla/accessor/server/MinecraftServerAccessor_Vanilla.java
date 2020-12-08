@@ -25,47 +25,31 @@
 package org.spongepowered.vanilla.accessor.server;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
-import net.minecraft.world.storage.SaveHandler;
-import net.minecraft.world.storage.WorldInfo;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.io.File;
 import java.util.Map;
 
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor_Vanilla {
 
-    @Accessor("anvilFile") File accessor$getAnvilFile();
+    @Accessor("progressListenerFactory") IChunkStatusListenerFactory accessor$getProgressListenerFactory();
 
-    @Accessor("chunkStatusListenerFactory") IChunkStatusListenerFactory accessor$getChunkStatusListenerFactory();
+    @Accessor("levels") Map<RegistryKey<World>, ServerWorld> accessor$getLevels();
 
-    @Accessor("enableBonusChest") boolean accessor$getEnableBonusChest();
+    @Accessor("nextTickTime") void accessor$setNextTickTime(long nextTickTime);
 
-    @Accessor("worlds") Map<DimensionType, ServerWorld> accessor$getWorlds();
+    @Invoker("detectBundledResources") void accessor$detectBundledResources();
 
-    @Accessor("serverTime") void accessor$setServerTime(long serverTime);
-
-    @Invoker("convertMapIfNeeded") void accessor$convertMapIfNeeded(String worldName);
-
-    @Invoker("setUserMessage") void accessor$setUserMessage(ITextComponent userMessage);
-
-    @Invoker("setResourcePackFromWorld") void accessor$setResourcePackFromWorld(String worldName, SaveHandler saveHandler);
-
-    @Invoker("loadDataPacks") void accessor$loadDataPacks(File directory, WorldInfo worldInfo);
-
-    @Invoker("applyDebugWorldInfo") void accessor$applyDebugWorldInfo(WorldInfo worldInfo);
-
-    @Invoker("func_213204_a") void accessor$func_213204_a(DimensionSavedDataManager manager);
+    @Invoker("readScoreboard") void accessor$readScoreboard(DimensionSavedDataManager manager);
 
     @Invoker("stopServer") void accessor$stopServer();
 
-    @Invoker("runScheduledTasks") void accessor$runScheduledTasks();
+    @Invoker("waitUntilNextTick") void accessor$waitUntilNextTick();
 }

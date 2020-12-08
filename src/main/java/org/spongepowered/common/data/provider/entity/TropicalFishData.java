@@ -31,8 +31,6 @@ import org.spongepowered.api.data.type.TropicalFishShape;
 import org.spongepowered.common.accessor.entity.passive.fish.TropicalFishEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-import java.util.Arrays;
-
 public final class TropicalFishData {
 
     private TropicalFishData() {
@@ -48,21 +46,21 @@ public final class TropicalFishData {
                         .set((h, v) -> {
                             final net.minecraft.item.DyeColor baseColor = TropicalFishData.getBaseColor(h);
                             final net.minecraft.item.DyeColor patternColor = TropicalFishData.getPatternColor(h);
-                            h.setVariant(((TropicalFishEntityAccessor.pack(((TropicalFishEntity.Type) (Object) v), patternColor, baseColor))));
+                            h.setVariant(((TropicalFishEntityAccessor.accessor$calculateVariant(((TropicalFishEntity.Type) (Object) v), patternColor, baseColor))));
                         })
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) TropicalFishData.getBaseColor(h))
                         .set((h, v) -> {
                             final net.minecraft.item.DyeColor patternColor = TropicalFishData.getPatternColor(h);
                             final TropicalFishEntity.Type type = TropicalFishData.getType(h);
-                            h.setVariant(((TropicalFishEntityAccessor.pack(type, patternColor, (net.minecraft.item.DyeColor) (Object) v))));
+                            h.setVariant(((TropicalFishEntityAccessor.accessor$calculateVariant(type, patternColor, (net.minecraft.item.DyeColor) (Object) v))));
                         })
                     .create(Keys.PATTERN_COLOR)
                         .get(h -> (DyeColor) (Object) TropicalFishData.getPatternColor(h))
                         .set((h, v) -> {
                             final net.minecraft.item.DyeColor baseColor = TropicalFishData.getBaseColor(h);
                             final TropicalFishEntity.Type type = TropicalFishData.getType(h);
-                            h.setVariant(((TropicalFishEntityAccessor.pack(type, (net.minecraft.item.DyeColor) (Object) v, baseColor))));
+                            h.setVariant(((TropicalFishEntityAccessor.accessor$calculateVariant(type, (net.minecraft.item.DyeColor) (Object) v, baseColor))));
                         });
     }
     // @formatter:on

@@ -41,7 +41,7 @@ public final class ToolItemStackData {
                     .create(Keys.EFFICIENCY)
                         .get(h -> {
                             if (h.getItem() instanceof ToolItemAccessor) {
-                                return (double) ((ToolItemAccessor) h.getItem()).accessor$getEfficiency();
+                                return (double) ((ToolItemAccessor) h.getItem()).accessor$getSpeed();
                             }
                             return null;
                         })

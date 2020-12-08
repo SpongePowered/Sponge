@@ -40,19 +40,20 @@ public interface ShapedRecipeAccessor {
 
     @Accessor("group") String accessor$getGroup();
 
-    @Invoker("deserializeKey")  static Map<String, Ingredient> accessor$deserializeKey(JsonObject json) {
-        throw new IllegalStateException("Untransformed Accessor");
+    @Invoker("keyFromJson")  static Map<String, Ingredient> accessor$keyFromJson(JsonObject json) {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 
     @Invoker("patternFromJson") static String[] accessor$patternFromJson(JsonArray jsonArr) {
-        throw new IllegalStateException("Untransformed Accessor");
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 
     @Invoker("shrink") static String[] accessor$shrink(String...  toShrink) {
-        throw new IllegalStateException("Untransformed Accessor");
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Invoker("deserializeIngredients") static NonNullList<Ingredient> accessor$deserializeIngredients(String[] pattern, Map<String, Ingredient> keys, int patternWidth, int patternHeight) {
-        throw new IllegalStateException("Untransformed Accessor");
+    @Invoker("dissolvePattern") static NonNullList<Ingredient> accessor$dissolvePattern(String[] pattern, Map<String, Ingredient> keys,
+            int patternWidth, int patternHeight) {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 }

@@ -44,17 +44,17 @@ public interface MinecraftServerAccessor {
         throw new RuntimeException("Accessor was not mixed!");
     }
 
-    @Accessor("field_229733_al_") void accessor$setfield_229733_al(CommandStorage storage);
+    @Accessor("commandStorage") void accessor$setCommandStorage(CommandStorage commandStorage);
 
     @Accessor("sessionService") MinecraftSessionService accessor$getSessionService();
 
-    @Accessor("profileRepo") GameProfileRepository accessor$getProfileRepo();
+    @Accessor("profileRepository") GameProfileRepository accessor$getProfileRepository();
 
     @Accessor("profileCache") PlayerProfileCache accessor$getProfileCache();
 
     @Mutable @Accessor("profileCache") void accessor$setProfileCache(PlayerProfileCache profileCache);
 
-    @Accessor("dataFixer") DataFixer accessor$getDataFixer();
+    @Accessor("fixerUpper") DataFixer accessor$getFixerUpper();
 
-    @Invoker("func_230536_N_") boolean accessor$func_230536_N_();
+    @Invoker("isSpawningMonsters") boolean accessor$isSpawningMonsters();
 }

@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ExperienceOrbEntity.class)
 public interface ExperienceOrbEntityAccessor {
 
-    @Accessor("xpValue") int accessor$getXpValue();
+    @Accessor("value") int accessor$getValue();
 
-    @Accessor("xpValue") void accessor$setXpValue(int xp);
+    @Accessor("value") void accessor$setValue(int value);
 }

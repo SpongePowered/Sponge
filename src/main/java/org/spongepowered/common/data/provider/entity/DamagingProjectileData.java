@@ -42,9 +42,9 @@ public final class DamagingProjectileData {
                     .create(Keys.ACCELERATION)
                         .get(h -> new Vector3d(h.accelerationX, h.accelerationY, h.accelerationZ))
                         .set((h, v) -> {
-                            ((DamagingProjectileEntityAccessor) h).accessor$setAccelerationX(v.getX());
-                            ((DamagingProjectileEntityAccessor) h).accessor$setAccelerationY(v.getY());
-                            ((DamagingProjectileEntityAccessor) h).accessor$setAccelerationZ(v.getZ());
+                            ((DamagingProjectileEntityAccessor) h).accessor$setXPower(v.getX());
+                            ((DamagingProjectileEntityAccessor) h).accessor$setYPower(v.getY());
+                            ((DamagingProjectileEntityAccessor) h).accessor$setZPower(v.getZ());
                         });
     }
     // @formatter:on

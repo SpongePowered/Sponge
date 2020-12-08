@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Explosion.class)
 public interface ExplosionAccessor {
 
-    @Accessor("world") World accessor$getWorld();
+    @Accessor("level") World accessor$getLevel();
 
     @Accessor("x") double accessor$getX();
 
@@ -41,10 +41,10 @@ public interface ExplosionAccessor {
 
     @Accessor("z") double accessor$getZ();
 
-    @Accessor("exploder") Entity accessor$getExploder();
+    @Accessor("source") Entity accessor$getSource();
 
-    @Accessor("mode") Explosion.Mode accessor$getMode();
+    @Accessor("blockInteraction") Explosion.Mode accessor$getBlockInteraction();
 
-    @Accessor("size") float accessor$getSize();
+    @Accessor("radius") float accessor$getRadius();
 
 }

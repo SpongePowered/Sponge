@@ -35,9 +35,9 @@ public interface EntityOptionsAccessor {
 
     // The type is actually Map<String, EntityOptions.EntityOptions>, but the inner class is
     // package private and we just need the accessor anyway.
-    @Accessor("REGISTRY")
-    static Map<String, EntityOptions_OptionHandlerAccessor> accessor$getREGISTRY() {
-        throw new AssertionError("This should not be called.");
+    @Accessor("OPTIONS")
+    static Map<String, EntityOptions_OptionHandlerAccessor> accessor$getOPTIONS() {
+        throw new AssertionError("Untransformed Accessor!");
     }
 
 }

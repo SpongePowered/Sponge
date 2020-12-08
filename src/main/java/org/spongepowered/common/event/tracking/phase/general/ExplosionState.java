@@ -65,7 +65,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
                 }
                 frame.addContext(EventContextKeys.IGNITER, (Living) placedBy);
             }
-            final @Nullable Entity exploder = ((ExplosionAccessor) explosion).accessor$getExploder();
+            final @Nullable Entity exploder = ((ExplosionAccessor) explosion).accessor$getSource();
             if (exploder != null) {
                 frame.pushCause(exploder);
             }
@@ -94,10 +94,10 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     @Override
     public void populateLootContext(final ExplosionContext phaseContext, final LootContext.Builder lootBuilder) {
         final Explosion explosion = phaseContext.getExplosion();
-        lootBuilder.withNullableParameter(LootParameters.THIS_ENTITY, ((ExplosionAccessor) explosion).accessor$getExploder());
+        lootBuilder.withNullableParameter(LootParameters.THIS_ENTITY, ((ExplosionAccessor) explosion).accessor$getSource());
 
-        if (((ExplosionAccessor) explosion).accessor$getMode() == net.minecraft.world.Explosion.Mode.DESTROY) {
-            lootBuilder.withParameter(LootParameters.EXPLOSION_RADIUS, ((ExplosionAccessor) explosion).accessor$getSize());
+        if (((ExplosionAccessor) explosion).accessor$getBlockInteraction() == net.minecraft.world.Explosion.Mode.DESTROY) {
+            lootBuilder.withParameter(LootParameters.EXPLOSION_RADIUS, ((ExplosionAccessor) explosion).accessor$getRadius());
         }
     }
 

@@ -33,29 +33,29 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(PlayerEntity.class)
 public interface PlayerEntityAccessor {
 
-    @Accessor("ABSORPTION") static DataParameter<Float> accessor$getAbsorption() {
+    @Accessor("DATA_PLAYER_ABSORPTION_ID") static DataParameter<Float> accessor$getDATA_PLAYER_ABSORPTION_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("PLAYER_SCORE") static DataParameter<Integer> accessor$getPlayerScore() {
+    @Accessor("DATA_SCORE_ID") static DataParameter<Integer> accessor$getDATA_SCORE_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("PLAYER_MODEL_FLAG") static DataParameter<Byte> accessor$getPlayerModelFlag() {
+    @Accessor("DATA_PLAYER_MODE_CUSTOMISATION") static DataParameter<Byte> accessor$getDATA_PLAYER_MODE_CUSTOMISATION() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("MAIN_HAND") static DataParameter<Byte> accessor$getMainHand() {
+    @Accessor("DATA_PLAYER_MAIN_HAND") static DataParameter<Byte> accessor$getDATA_PLAYER_MAIN_HAND() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("LEFT_SHOULDER_ENTITY") static DataParameter<CompoundNBT> accessor$getLeftShoulderEntity() {
+    @Accessor("DATA_SHOULDER_LEFT") static DataParameter<CompoundNBT> accessor$getDATA_SHOULDER_LEFT() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("RIGHT_SHOULDER_ENTITY") static DataParameter<CompoundNBT> accessor$getRightShoulderEntity() {
+    @Accessor("DATA_SHOULDER_RIGHT") static DataParameter<CompoundNBT> accessor$getDATA_SHOULDER_RIGHT() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("sleepTimer") void accessor$setSleepTimer(int sleepTimer);
+    @Accessor("sleepCounter") void accessor$setSleepCounter(int sleepCounter);
 }

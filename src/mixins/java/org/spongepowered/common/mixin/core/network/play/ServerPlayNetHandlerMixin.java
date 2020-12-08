@@ -275,13 +275,13 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
         // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
         // We don't fire an event to avoid confusing plugins.
-        if (!packetInAccessor.accessor$getMoving() && !packetInAccessor.accessor$getRotating()) {
+        if (!packetInAccessor.accessor$getHasPos() && !packetInAccessor.accessor$getHasRot()) {
             return;
         }
 
         final boolean goodMovementPacket = this.movePacketCounter - this.lastMovePacketCounter <= 5;
-        final boolean fireMoveEvent = goodMovementPacket && packetInAccessor.accessor$getMoving() && ShouldFire.MOVE_ENTITY_EVENT;
-        final boolean fireRotationEvent = goodMovementPacket && packetInAccessor.accessor$getRotating() && ShouldFire.ROTATE_ENTITY_EVENT;
+        final boolean fireMoveEvent = goodMovementPacket && packetInAccessor.accessor$getHasPos() && ShouldFire.MOVE_ENTITY_EVENT;
+        final boolean fireRotationEvent = goodMovementPacket && packetInAccessor.accessor$getHasRot() && ShouldFire.ROTATE_ENTITY_EVENT;
 
         final ServerPlayer player = (ServerPlayer) this.player;
         final org.spongepowered.math.vector.Vector3d fromRotation = new org.spongepowered.math.vector.Vector3d(packetIn.getYaw(this.player
@@ -325,12 +325,12 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         // At this point, we cancel out and let the "confirmed teleport" code run through to update the
         // player position and update the player's relation in the chunk manager.
         if (cancelMovement) {
-            if (packetInAccessor.accessor$getRotating() && !cancelRotation) {
+            if (packetInAccessor.accessor$getHasRot() && !cancelRotation) {
                 // Rest the rotation here
-                ((EntityAccessor) this.player).accessor$setRotation((float) toRotation.getX(), (float) toRotation.getY());
+                ((EntityAccessor) this.player).accessor$setRot((float) toRotation.getX(), (float) toRotation.getY());
             }
-            final float yaw = packetInAccessor.accessor$getRotating() && !cancelRotation ? (float) toRotation.getX() : this.player.rotationYaw;
-            final float pitch = packetInAccessor.accessor$getRotating() && !cancelRotation ? (float) toRotation.getY() : this.player.rotationPitch;
+            final float yaw = packetInAccessor.accessor$getHasRot() && !cancelRotation ? (float) toRotation.getX() : this.player.rotationYaw;
+            final float pitch = packetInAccessor.accessor$getHasRot() && !cancelRotation ? (float) toRotation.getY() : this.player.rotationPitch;
             this.lastPositionUpdate = this.networkTickCount;
             // Then, we set the location, as if the player was teleporting
             this.shadow$setPlayerLocation(fromPosition.getX(), fromPosition.getY(), fromPosition.getZ(), yaw, pitch);
@@ -354,12 +354,12 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             if (d11 - d10 > (double)(f2 * (float)i) && !this.shadow$isServerOwner()) {
                 // At this point, we need to set the target position so the teleport code forces it
                 this.targetPos = VecHelper.toVec3d(toPosition);
-                ((EntityAccessor) this.player).accessor$setRotation((float) toRotation.getX(), (float) toRotation.getY());
+                ((EntityAccessor) this.player).accessor$setRot((float) toRotation.getX(), (float) toRotation.getY());
                 // And reset the position update so the force set is done.
                 this.lastPositionUpdate = this.networkTickCount - Constants.Networking.MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF;
             } else {
                 // otherwise, set the data back onto the packet
-                packetInAccessor.accessor$setMoving(true);
+                packetInAccessor.accessor$setHasPos(true);
                 packetInAccessor.accessor$setX(toPosition.getX());
                 packetInAccessor.accessor$setY(toPosition.getY());
                 packetInAccessor.accessor$setZ(toPosition.getZ());

@@ -466,8 +466,8 @@ public class SpongeImplHooks {
         } else {
             TileEntity tileentity2 = null;
 
-            if (((WorldAccessor) world).accessor$getProcessingLoadedTiles()) {
-                tileentity2 = ((WorldAccessor) world).accessor$getPendingTileEntityAt(pos);
+            if (((WorldAccessor) world).accessor$getUpdatingBlockEntities()) {
+                tileentity2 = ((WorldAccessor) world).accessor$getPendingBlockEntityAt(pos);
             }
 
             if (tileentity2 == null) {
@@ -478,7 +478,7 @@ public class SpongeImplHooks {
             }
 
             if (tileentity2 == null) {
-                tileentity2 =  ((WorldAccessor) world).accessor$getPendingTileEntityAt(pos);
+                tileentity2 =  ((WorldAccessor) world).accessor$getPendingBlockEntityAt(pos);
             }
 
             return tileentity2;

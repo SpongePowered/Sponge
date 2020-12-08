@@ -25,7 +25,6 @@
 package org.spongepowered.common.accessor.world.server;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.TrackedEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -34,7 +33,5 @@ import java.util.Set;
 @Mixin(targets = "net/minecraft/world/server/ChunkManager$EntityTracker")
 public interface EntityTrackerAccessor {
 
-    @Accessor("trackingPlayers") Set<ServerPlayerEntity> accessor$getTrackingPlayers();
-
-    @Accessor("entry") TrackedEntity accessor$getEntry();
+    @Accessor("seenBy") Set<ServerPlayerEntity> accessor$getSeenBy();
 }

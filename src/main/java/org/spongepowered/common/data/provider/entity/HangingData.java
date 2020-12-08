@@ -40,9 +40,9 @@ public final class HangingData {
         registrator
                 .asMutable(HangingEntityAccessor.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> h.accessor$facingDirection() == null ? Direction.NONE :
-                                Constants.DirectionFunctions.getFor(h.accessor$facingDirection()))
-                        .set((h, v) -> h.accessor$updateFacingWithBoundingBox(Constants.DirectionFunctions.getFor(v)));
+                        .get(h -> h.accessor$getDirection() == null ? Direction.NONE :
+                                Constants.DirectionFunctions.getFor(h.accessor$getDirection()))
+                        .set((h, v) -> h.accessor$setDirection(Constants.DirectionFunctions.getFor(v)));
     }
     // @formatter:on
 }

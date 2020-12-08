@@ -44,7 +44,7 @@ public final class AbstractRaiderData {
                         .get(AbstractRaiderEntity::func_213658_ej)
                         .set(AbstractRaiderEntity::func_213644_t)
                     .create(Keys.IS_CELEBRATING)
-                        .get(h -> h.getDataManager().get(AbstractRaiderEntityAccessor.accessor$getDataIsCelebrating()))
+                        .get(h -> h.getDataManager().get(AbstractRaiderEntityAccessor.accessor$getIS_CELEBRATING()))
                         .set(AbstractRaiderEntity::func_213655_u)
                     .create(Keys.IS_LEADER)
                         .get(PatrollerEntity::isLeader)

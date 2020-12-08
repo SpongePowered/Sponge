@@ -42,7 +42,7 @@ public final class GuardianData {
                 .asMutable(GuardianEntity.class)
                     .create(Keys.BEAM_TARGET_ENTITY)
                         .get(h -> (Living) h.getTargetedEntity())
-                        .set((h, v) -> ((GuardianEntityAccessor) h).accessor$setTargetedEntity(((LivingEntity) v).getEntityId()));
+                        .set((h, v) -> ((GuardianEntityAccessor) h).accessor$setActiveAttackTarget(((LivingEntity) v).getEntityId()));
     }
     // @formatter:on
 }

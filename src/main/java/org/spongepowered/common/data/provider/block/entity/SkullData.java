@@ -41,7 +41,7 @@ public final class SkullData {
         registrator
                 .asMutable(SkullTileEntity.class)
                     .create(Keys.GAME_PROFILE)
-                        .get(h -> SpongeGameProfile.of(((SkullTileEntityAccessor) h).accessor$getPlayerProfile()))
+                        .get(h -> SpongeGameProfile.of(((SkullTileEntityAccessor) h).accessor$getOwner()))
                         .set((h, v) -> ((SkullTileEntityBridge) h).bridge$setUnresolvedPlayerProfile(SpongeGameProfile.toMcProfile(v)))
                         .delete(h -> ((SkullTileEntityBridge) h).bridge$setUnresolvedPlayerProfile(null));
     }

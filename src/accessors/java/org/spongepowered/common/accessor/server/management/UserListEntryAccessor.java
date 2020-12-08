@@ -31,5 +31,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(UserListEntry.class)
 public interface UserListEntryAccessor<T> {
 
-    @Accessor("value") T accessor$getValue();
+    @Accessor("user") T accessor$getUser();
 }

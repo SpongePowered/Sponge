@@ -110,7 +110,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         super.bridge$adjustDimensionLogic(dimensionType);
 
         final ChunkGenerator<?> chunkGenerator = this.dimension.createChunkGenerator();
-        ((ServerChunkProviderAccessor) this.chunkProvider).accessor$setChunkGenerator(chunkGenerator);
+        ((ServerChunkProviderAccessor) this.chunkProvider).accessor$setGenerator(chunkGenerator);
         ((ChunkManagerAccessor) ((ServerChunkProvider) this.chunkProvider).chunkManager).accessor$setChunkGenerator(chunkGenerator);
 
         for (final ServerPlayerEntity player : this.shadow$getPlayers()) {

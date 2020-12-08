@@ -33,5 +33,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractRepairContainer.class)
 public interface AbstractRepairContainerAccessor {
 
-    @Accessor("field_234645_f_") PlayerEntity accessor$field_234645_f_();
+    @Accessor("player") PlayerEntity accessor$getPlayer();
 }

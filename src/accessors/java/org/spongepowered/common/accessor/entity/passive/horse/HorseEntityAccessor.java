@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(HorseEntity.class)
 public interface HorseEntityAccessor {
 
-    @Invoker("func_234242_w_") void accessor$func_234242_w_(int variant);
+    @Invoker("getTypeVariant") int accessor$getTypeVariant();
 
-    @Invoker("func_234241_eS_") int accessor$func_234241_eS_();
+    @Invoker("setTypeVariant") void accessor$setTypeVariant(int variant);
 }

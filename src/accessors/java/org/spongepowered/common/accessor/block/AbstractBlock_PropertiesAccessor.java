@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractBlock.Properties.class)
 public interface AbstractBlock_PropertiesAccessor {
 
-    @Accessor("hardness") float accessor$getHardness();
-    @Accessor("resistance") float accessor$getResistance();
+    @Accessor("explosionResistance") float accessor$getExplosionResistance();
+
+    @Accessor("destroyTime") float accessor$getDestroyTime();
 }

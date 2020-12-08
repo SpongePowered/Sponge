@@ -73,7 +73,7 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
 
         if (accessor.accessor$getExpirationDate().getTime() < System.currentTimeMillis()) {
             this.uuidToProfileEntryMap.remove(uniqueId, accessor);
-            this.usernameToProfileEntryMap.remove(accessor.accessor$getGameProfile().getName(), accessor);
+            this.usernameToProfileEntryMap.remove(accessor.accessor$getProfile().getName(), accessor);
             return Optional.empty();
         }
 
@@ -91,7 +91,7 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
         }
 
         if (accessor.accessor$getExpirationDate().getTime() < System.currentTimeMillis()) {
-            this.uuidToProfileEntryMap.remove(accessor.accessor$getGameProfile().getId(), accessor);
+            this.uuidToProfileEntryMap.remove(accessor.accessor$getProfile().getId(), accessor);
             this.usernameToProfileEntryMap.remove(lowerName, accessor);
             return Optional.empty();
         }
@@ -104,7 +104,7 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
         Objects.requireNonNull(profile, "profile");
 
         PlayerProfileCache_ProfileEntryAccessor accessor = this.uuidToProfileEntryMap.get(profile.getId());
-        final com.mojang.authlib.GameProfile current = accessor == null ? null : accessor.accessor$getGameProfile();
+        final com.mojang.authlib.GameProfile current = accessor == null ? null : accessor.accessor$getProfile();
         // Don't allow basic game profiles to overwrite the contents if already
         // an entry exists that is full.
         if (current != null && Objects.equals(current.getId(), profile.getId()) &&
@@ -114,7 +114,7 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
 
         this.shadow$addEntry(profile, null);
         accessor = this.uuidToProfileEntryMap.get(profile.getId());
-        if (accessor == null || accessor.accessor$getGameProfile() != profile) {
+        if (accessor == null || accessor.accessor$getProfile() != profile) {
             return;
         }
         final PlayerProfileCache_ProfileEntryBridge bridge = (PlayerProfileCache_ProfileEntryBridge) accessor;
@@ -127,7 +127,7 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
         Objects.requireNonNull(profile, "profile");
 
         PlayerProfileCache_ProfileEntryAccessor accessor = this.uuidToProfileEntryMap.get(profile.getUniqueId());
-        final com.mojang.authlib.GameProfile current = accessor == null ? null : accessor.accessor$getGameProfile();
+        final com.mojang.authlib.GameProfile current = accessor == null ? null : accessor.accessor$getProfile();
         final com.mojang.authlib.GameProfile mcProfile = SpongeGameProfile.toMcProfile(profile);
         // Don't allow basic game profiles to overwrite the contents if already
         // an entry exists that is full.
@@ -138,7 +138,7 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
 
         this.shadow$addEntry(mcProfile, null);
         accessor = this.uuidToProfileEntryMap.get(profile.getUniqueId());
-        if (accessor == null || accessor.accessor$getGameProfile() != mcProfile) {
+        if (accessor == null || accessor.accessor$getProfile() != mcProfile) {
             return;
         }
         ((PlayerProfileCache_ProfileEntryBridge) accessor).bridge$set(profile, full, signed);

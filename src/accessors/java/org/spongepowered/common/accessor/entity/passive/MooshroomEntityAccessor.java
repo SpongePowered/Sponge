@@ -34,5 +34,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(MooshroomEntity.class)
 public interface MooshroomEntityAccessor {
 
-    @Invoker("setMooshroomType") void accessor$setMooshroomType(MooshroomEntity.Type type);
+    @Invoker("setMushroomType") void accessor$setMushroomType(MooshroomEntity.Type type);
 }

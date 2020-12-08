@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(TropicalFishEntity.class)
 public interface TropicalFishEntityAccessor {
 
-    @Invoker("pack") static int pack(TropicalFishEntity.Type size, DyeColor pattern, DyeColor bodyColor) {
+    @Invoker("calculateVariant") static int accessor$calculateVariant(TropicalFishEntity.Type size, DyeColor pattern, DyeColor bodyColor) {
         throw new IllegalStateException("Untransformed accessor!");
     }
 }

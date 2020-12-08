@@ -85,8 +85,8 @@ public final class SpongeScore implements Score {
 
     private void updateScore() {
         for (final net.minecraft.scoreboard.Score score : this.scores.values()) {
-            final int j = ((ScoreAccessor) score).accessor$getScorePoints();
-            ((ScoreAccessor) score).accessor$setScorePoints(this.score);
+            final int j = ((ScoreAccessor) score).accessor$getCount();
+            ((ScoreAccessor) score).accessor$setCount(this.score);
 
             if (j != this.score || ((ScoreAccessor) score).accessor$getForceUpdate())
             {
@@ -115,7 +115,7 @@ public final class SpongeScore implements Score {
         // We deliberately set the fields here instead of using the methods.
         // Since a new score is being created here, we want to avoid
         // sending packets until everything is in the proper state.
-        ((ScoreAccessor) score).accessor$setScorePoints(this.score);
+        ((ScoreAccessor) score).accessor$setCount(this.score);
 
         ((ScoreBridge) score).bridge$setSpongeScore(this);
         this.scores.put(objective, score);

@@ -32,8 +32,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CreeperEntity.class)
 public interface CreeperEntityAccessor {
 
-    @Accessor("POWERED")
-    static DataParameter<Boolean> accessor$getPowered() {
+    @Accessor("DATA_IS_POWERED")
+    static DataParameter<Boolean> accessor$getDATA_IS_POWERED() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 }

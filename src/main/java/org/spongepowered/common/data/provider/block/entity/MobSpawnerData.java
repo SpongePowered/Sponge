@@ -56,33 +56,33 @@ public final class MobSpawnerData {
         registrator
                 .asMutable(MobSpawnerTileEntityAccessor.class)
                     .create(Keys.MAX_NEARBY_ENTITIES)
-                        .get(h -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getMaxNearbyEntities())
-                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setMaxNearbyEntities(v))
+                        .get(h -> ((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$getMaxNearbyEntities())
+                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$setMaxNearbyEntities(v))
                     .create(Keys.MAX_SPAWN_DELAY)
-                        .get(h -> new SpongeTicks(((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getMaxSpawnDelay()))
-                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setMaxSpawnDelay((int) v.getTicks()))
+                        .get(h -> new SpongeTicks(((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$getMaxSpawnDelay()))
+                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$setMaxSpawnDelay((int) v.getTicks()))
                     .create(Keys.MIN_SPAWN_DELAY)
-                        .get(h -> new SpongeTicks(((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getMinSpawnDelay()))
-                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setMinSpawnDelay((int) v.getTicks()))
+                        .get(h -> new SpongeTicks(((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$getMinSpawnDelay()))
+                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$setMinSpawnDelay((int) v.getTicks()))
                     .create(Keys.NEXT_ENTITY_TO_SPAWN)
-                        .get(h -> MobSpawnerData.getNextEntity((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()))
-                        .set((h, v) -> MobSpawnerData.setNextEntity(h.accessor$getSpawnerLogic(), v))
+                        .get(h -> MobSpawnerData.getNextEntity((AbstractSpawnerAccessor) h.accessor$getSpawner()))
+                        .set((h, v) -> MobSpawnerData.setNextEntity(h.accessor$getSpawner(), v))
                     .create(Keys.REMAINING_SPAWN_DELAY)
-                        .get(h -> new SpongeTicks(((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getSpawnDelay()))
-                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setSpawnDelay((int) v.getTicks()))
+                        .get(h -> new SpongeTicks(((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$getSpawnDelay()))
+                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$setSpawnDelay((int) v.getTicks()))
                     .create(Keys.REQUIRED_PLAYER_RANGE)
-                        .get(h -> (double) ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getActivatingRangeFromPlayer())
-                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setActivatingRangeFromPlayer(v.intValue()))
+                        .get(h -> (double) ((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$getRequiredPlayerRange())
+                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$setRequiredPlayerRange(v.intValue()))
                     .create(Keys.SPAWN_COUNT)
-                        .get(h -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getSpawnCount())
-                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setSpawnCount(v))
+                        .get(h -> ((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$getSpawnCount())
+                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$setSpawnCount(v))
                     .create(Keys.SPAWN_RANGE)
-                        .get(h -> (double) ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getSpawnRange())
-                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setSpawnRange(v.intValue()))
+                        .get(h -> (double) ((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$getSpawnRange())
+                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawner()).accessor$setSpawnRange(v.intValue()))
                     .create(Keys.SPAWNABLE_ENTITIES)
-                        .get(h -> MobSpawnerData.getEntities(h.accessor$getSpawnerLogic()))
+                        .get(h -> MobSpawnerData.getEntities(h.accessor$getSpawner()))
                         .set((h, v) -> {
-                            final AbstractSpawnerAccessor logic = (AbstractSpawnerAccessor) h.accessor$getSpawnerLogic();
+                            final AbstractSpawnerAccessor logic = (AbstractSpawnerAccessor) h.accessor$getSpawner();
                             MobSpawnerData.setEntities(logic, v);
                             MobSpawnerData.setNextEntity((AbstractSpawner) logic, MobSpawnerData.getNextEntity(logic));
                         });
@@ -90,13 +90,13 @@ public final class MobSpawnerData {
     // @formatter:on
 
     private static WeightedSerializableObject<EntityArchetype> getNextEntity(final AbstractSpawnerAccessor logic) {
-        final int weight = ((WeightedRandom_ItemAccessor) logic.accessor$getSpawnData()).accessor$getItemWeight();
+        final int weight = ((WeightedRandom_ItemAccessor) logic.accessor$getNextSpawnData()).accessor$getWeight();
 
-        final String resourceLocation = logic.accessor$getSpawnData().getNbt().getString(Constants.Entity.ENTITY_TYPE_ID);
+        final String resourceLocation = logic.accessor$getNextSpawnData().getNbt().getString(Constants.Entity.ENTITY_TYPE_ID);
         final EntityType<?> type =
                 Registry.ENTITY_TYPE.func_241873_b(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
-        final CompoundNBT data = logic.accessor$getSpawnData().getNbt();
+        final CompoundNBT data = logic.accessor$getNextSpawnData().getNbt();
 
         final EntityArchetype archetype = EntityArchetype.builder()
                 .type(type)
@@ -118,7 +118,7 @@ public final class MobSpawnerData {
 
     private static WeightedTable<EntityArchetype> getEntities(final AbstractSpawner logic) {
         final WeightedTable<EntityArchetype> possibleEntities = new WeightedTable<>();
-        for (final WeightedSpawnerEntity weightedEntity : ((AbstractSpawnerAccessor) logic).accessor$getPotentialSpawns()) {
+        for (final WeightedSpawnerEntity weightedEntity : ((AbstractSpawnerAccessor) logic).accessor$getSpawnPotentials()) {
 
             final CompoundNBT nbt = weightedEntity.getNbt();
 
@@ -132,14 +132,14 @@ public final class MobSpawnerData {
                     .build();
 
             possibleEntities
-                    .add(new WeightedSerializableObject<>(archetype, ((WeightedRandom_ItemAccessor) weightedEntity).accessor$getItemWeight()));
+                    .add(new WeightedSerializableObject<>(archetype, ((WeightedRandom_ItemAccessor) weightedEntity).accessor$getWeight()));
         }
 
         return possibleEntities;
     }
 
     private static void setEntities(final AbstractSpawnerAccessor logic, final WeightedTable<EntityArchetype> table) {
-        logic.accessor$getPotentialSpawns().clear();
+        logic.accessor$getSpawnPotentials().clear();
         for (final TableEntry<EntityArchetype> entry : table) {
             if (!(entry instanceof WeightedObject)) {
                 continue;
@@ -153,7 +153,7 @@ public final class MobSpawnerData {
             }
 
 
-            logic.accessor$getPotentialSpawns().add(new WeightedSpawnerEntity((int) entry.getWeight(), compound));
+            logic.accessor$getSpawnPotentials().add(new WeightedSpawnerEntity((int) entry.getWeight(), compound));
         }
     }
 }

@@ -38,9 +38,9 @@ public interface AbstractSpawnerAccessor {
 
     @Accessor("spawnDelay") void accessor$setSpawnDelay(int spawnDelay);
 
-    @Accessor("potentialSpawns") List<WeightedSpawnerEntity> accessor$getPotentialSpawns();
+    @Accessor("spawnPotentials") List<WeightedSpawnerEntity> accessor$getSpawnPotentials();
 
-    @Accessor("spawnData") WeightedSpawnerEntity accessor$getSpawnData();
+    @Accessor("nextSpawnData") WeightedSpawnerEntity accessor$getNextSpawnData();
 
     @Accessor("minSpawnDelay") int accessor$getMinSpawnDelay();
 
@@ -58,9 +58,9 @@ public interface AbstractSpawnerAccessor {
 
     @Accessor("maxNearbyEntities") void accessor$setMaxNearbyEntities(int maxNearbyEntities);
 
-    @Accessor("activatingRangeFromPlayer") int accessor$getActivatingRangeFromPlayer();
+    @Accessor("requiredPlayerRange") int accessor$getRequiredPlayerRange();
 
-    @Accessor("activatingRangeFromPlayer") void accessor$setActivatingRangeFromPlayer(int activatingRangeFromPlayer);
+    @Accessor("requiredPlayerRange") void accessor$setRequiredPlayerRange(int requiredPlayerRange);
 
     @Accessor("spawnRange") int accessor$getSpawnRange();
 

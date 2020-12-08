@@ -35,5 +35,5 @@ public interface SChangeBlockPacketAccessor {
 
     @Accessor("pos") void accessor$setPos(BlockPos pos);
 
-    @Accessor("state") void accessor$setState(BlockState state);
+    @Accessor("blockState") void accessor$setBlockState(BlockState blockState);
 }

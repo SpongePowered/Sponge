@@ -66,11 +66,11 @@ public final class StructureBlockData {
                         .get(StructureBlockTileEntityAccessor::accessor$getAuthor)
                         .set(StructureBlockTileEntityAccessor::accessor$setAuthor)
                     .create(Keys.STRUCTURE_POSITION)
-                        .get(h -> VecHelper.toVector3i(h.accessor$getPosition()))
-                        .set((h, v) -> h.accessor$setPosition(VecHelper.toBlockPos(v)))
+                        .get(h -> VecHelper.toVector3i(h.accessor$getStructurePos()))
+                        .set((h, v) -> h.accessor$setStructurePos(VecHelper.toBlockPos(v)))
                     .create(Keys.STRUCTURE_SIZE)
-                        .get(h -> VecHelper.toVector3i(h.accessor$getSize()))
-                        .set((h, v) -> h.accessor$setSize(VecHelper.toBlockPos(v)));
+                        .get(h -> VecHelper.toVector3i(h.accessor$getStructureSize()))
+                        .set((h, v) -> h.accessor$setStructureSize(VecHelper.toBlockPos(v)));
     }
     // @formatter:on
 }

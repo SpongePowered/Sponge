@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface FurnaceMinecartEntityAccessor {
 
     @Accessor("fuel") int accessor$getFuel();
+
     @Accessor("fuel") void accessor$setFuel(int fuel);
 }

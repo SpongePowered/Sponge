@@ -95,11 +95,11 @@ public class SpongeInventoryMenu implements InventoryMenu {
                     final Slot slot = newContainer.inventorySlots.get(i);
                     container.inventorySlots.set(i, slot);
                     // Update Container items
-                    ((ContainerAccessor)container).accessor$getInventoryItemStacks().set(i, slot.getStack());
+                    ((ContainerAccessor)container).accessor$getLastSlots().set(i, slot.getStack());
                 }
                 // send update to Client
-                for (IContainerListener listener : ((ContainerAccessor) container).accessor$getListeners()) {
-                    listener.sendAllContents(container, ((ContainerAccessor) container).accessor$getInventoryItemStacks());
+                for (IContainerListener listener : ((ContainerAccessor) container).accessor$getContainerListeners()) {
+                    listener.sendAllContents(container, ((ContainerAccessor) container).accessor$getLastSlots());
                 }
             }
         } else {

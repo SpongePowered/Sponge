@@ -32,5 +32,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(DispenserContainer.class)
 public interface DispenserContainerAccessor {
 
-    @Accessor("dispenserInventory") IInventory accessor$getDispenserInventory();
+    @Accessor("dispenser") IInventory accessor$getDispenser();
 }

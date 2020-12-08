@@ -54,7 +54,7 @@ public interface CommandSourceAccessor {
             boolean feedbackDisabled,
             ResultConsumer<CommandSource> resultConsumer,
             EntityAnchorArgument.Type entityAnchorType) {
-        throw new AssertionError("This should not be called!");
+        throw new AssertionError("Untransformed Accessor!");
     }
 
 }

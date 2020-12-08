@@ -37,16 +37,16 @@ import javax.annotation.Nullable;
 @Mixin(HopperTileEntity.class)
 public interface HopperTileEntityAccessor {
 
-    @Accessor("transferCooldown") int accessor$getTransferCooldown();
+    @Accessor("cooldownTime") int accessor$getCooldownTime();
 
-    @Accessor("transferCooldown") void accessor$setTransferCooldown(int transferCooldown);
+    @Accessor("cooldownTime") void accessor$setCooldownTime(int cooldownTime);
 
-    @Invoker("insertStack") static ItemStack accsssor$insertStack(@Nullable IInventory source, IInventory destination, ItemStack stack, int index,
+    @Invoker("tryMoveInItem") static ItemStack accessor$tryMoveInItem(@Nullable IInventory source, IInventory destination, ItemStack stack, int index,
             @Nullable Direction direction) {
         throw new RuntimeException("Untransformed accessor!");
     }
 
-    @Invoker("isInventoryEmpty") static boolean accsssor$isInventoryEmpty(IInventory inventoryIn, Direction side) {
+    @Invoker("isEmptyContainer") static boolean accessor$isEmptyContainer(IInventory inventory, Direction side) {
         throw new RuntimeException("Untransformed accessor!");
     }
 }

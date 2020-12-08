@@ -51,7 +51,7 @@ public final class HorseData {
                         })
                         .set((h, v) -> {
                             final int style = HorseData.getHorseStyle(h);
-                            ((HorseEntityAccessor) h).accessor$func_234242_w_(((SpongeHorseColor) v).getMetadata() | style);
+                            ((HorseEntityAccessor) h).accessor$setTypeVariant(((SpongeHorseColor) v).getMetadata() | style);
                         })
                     .create(Keys.HORSE_STYLE)
                         .get(h -> {
@@ -60,16 +60,16 @@ public final class HorseData {
                         })
                         .set((h, v) -> {
                             final int color = HorseData.getHorseColor(h);
-                            ((HorseEntityAccessor) h).accessor$func_234242_w_((color | ((SpongeHorseStyle) v).getBitMask()));
+                            ((HorseEntityAccessor) h).accessor$setTypeVariant((color | ((SpongeHorseStyle) v).getBitMask()));
                         });
     }
     // @formatter:on
 
     private static int getHorseColor(final HorseEntity holder) {
-        return ((HorseEntityAccessor) holder).accessor$func_234241_eS_() & 0xFF;
+        return ((HorseEntityAccessor) holder).accessor$getTypeVariant() & 0xFF;
     }
 
     private static int getHorseStyle(final HorseEntity holder) {
-        return (((HorseEntityAccessor) holder).accessor$func_234241_eS_() & 0xFF00) >> 8;
+        return (((HorseEntityAccessor) holder).accessor$getTypeVariant() & 0xFF00) >> 8;
     }
 }

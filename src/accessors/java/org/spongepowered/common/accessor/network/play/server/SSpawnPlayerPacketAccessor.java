@@ -33,17 +33,17 @@ import java.util.UUID;
 @Mixin(SSpawnPlayerPacket.class)
 public interface SSpawnPlayerPacketAccessor {
 
-    @Accessor("entityId") void accessor$setEntityId(int value);
+    @Accessor("entityId") void accessor$setEntityId(int entityId);
 
-    @Accessor("uniqueId") void accessor$setUniqueId(UUID value);
+    @Accessor("playerId") void accessor$setPlayerId(UUID playerId);
 
-    @Accessor("x") void accessor$setX(double value);
+    @Accessor("x") void accessor$setX(double x);
 
-    @Accessor("y") void accessor$setY(double value);
+    @Accessor("y") void accessor$setY(double y);
 
-    @Accessor("z") void accessor$setZ(double value);
+    @Accessor("z") void accessor$setZ(double z);
 
-    @Accessor("yaw") void accessor$setYaw(byte value);
+    @Accessor("yRot") void accessor$setYaw(byte yRot);
 
-    @Accessor("pitch") void accessor$setPitch(byte value);
+    @Accessor("xRot") void accessor$setPitch(byte xRot);
 }

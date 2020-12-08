@@ -51,8 +51,8 @@ public final class WolfData {
                             final WolfEntityAccessor accessor = (WolfEntityAccessor) h;
                             accessor.accessor$setIsWet(v);
                             accessor.accessor$setIsShaking(v);
-                            accessor.accessor$setTimeWolfIsShaking(0f);
-                            accessor.accessor$setPrevTimeWolfIsShaking(0f);
+                            accessor.accessor$setShakeAnim(0f);
+                            accessor.accessor$setShakeAnim0(0f);
                         });
     }
     // @formatter:on

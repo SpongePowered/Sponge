@@ -10,5 +10,5 @@ import javax.annotation.Nullable;
 @Mixin(FishingBobberEntity.class)
 public interface FishingBobberEntityAccessor {
 
-    @Accessor("caughtEntity") void accessor$setCaughtEntity(@Nullable Entity caughtEntity);
+    @Accessor("hookedIn") void accessor$setHookedIn(@Nullable Entity hookedIn);
 }

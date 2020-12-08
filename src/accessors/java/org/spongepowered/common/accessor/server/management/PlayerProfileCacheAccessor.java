@@ -33,6 +33,6 @@ import java.util.Map;
 @Mixin(PlayerProfileCache.class)
 public interface PlayerProfileCacheAccessor {
 
-    @Accessor("usernameToProfileEntryMap") Map<String, PlayerProfileCache_ProfileEntryAccessor> accessor$getUsernameToProfileEntryMap();
+    @Accessor("profilesByName") Map<String, PlayerProfileCache_ProfileEntryAccessor> accessor$getProfilesByName();
 
 }

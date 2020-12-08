@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(WolfEntity.class)
 public interface WolfEntityAccessor {
 
-    @Accessor("COLLAR_COLOR") static DataParameter<Integer> accessor$getCollarColor() {
+    @Accessor("DATA_COLLAR_COLOR") static DataParameter<Integer> accessor$getDATA_COLLAR_COLOR() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
@@ -44,7 +44,7 @@ public interface WolfEntityAccessor {
 
     @Accessor("isShaking") void accessor$setIsShaking(boolean isWet);
 
-    @Accessor("timeWolfIsShaking") void accessor$setTimeWolfIsShaking(float isWet);
+    @Accessor("shakeAnim") void accessor$setShakeAnim(float shakeAnim);
 
-    @Accessor("prevTimeWolfIsShaking") void accessor$setPrevTimeWolfIsShaking(float isWet);
+    @Accessor("shakeAnimO") void accessor$setShakeAnim0(float shakeAnim0);
 }

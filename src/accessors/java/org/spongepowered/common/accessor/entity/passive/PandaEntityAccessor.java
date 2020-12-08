@@ -33,5 +33,5 @@ public interface PandaEntityAccessor {
 
     @Invoker("getEatCounter") int accessor$getEatCounter();
 
-    @Invoker("setEatCounter") void accessor$setEatCounter(int eatingTime);
+    @Invoker("setEatCounter") void accessor$setEatCounter(int eatCounter);
 }

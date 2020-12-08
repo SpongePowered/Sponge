@@ -33,6 +33,7 @@ import java.util.UUID;
 @Mixin(AnimalEntity.class)
 public interface AnimalEntityAccessor {
 
-    @Accessor("playerInLove") UUID accessor$getPlayerInLove();
-    @Accessor("playerInLove") void accessor$setPlayerInLove(UUID entityUUID);
+    @Accessor("loveCause") UUID accessor$getLoveCause();
+
+    @Accessor("loveCause") void accessor$setLoveCause(UUID loveCause);
 }

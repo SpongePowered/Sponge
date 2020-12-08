@@ -38,12 +38,12 @@ public final class ExperienceOrbData {
         registrator
                 .asMutable(ExperienceOrbEntityAccessor.class)
                     .create(Keys.EXPERIENCE)
-                        .get(ExperienceOrbEntityAccessor::accessor$getXpValue)
+                        .get(ExperienceOrbEntityAccessor::accessor$getValue)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.accessor$setXpValue(v);
+                            h.accessor$setValue(v);
                             return true;
                         });
     }

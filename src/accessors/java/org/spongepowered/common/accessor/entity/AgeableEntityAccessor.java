@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AgeableEntity.class)
 public interface AgeableEntityAccessor {
 
-    @Accessor("BABY") static DataParameter<Boolean> accessor$getBaby() {
+    @Accessor("DATA_BABY_ID") static DataParameter<Boolean> accessor$getDATA_BABY_ID() {
         throw new IllegalStateException("Untransformed accessor!");
     }
 }

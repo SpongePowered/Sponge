@@ -34,37 +34,37 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(ArmorStandEntity.class)
 public interface ArmorStandEntityAccessor {
 
-    @Accessor("DEFAULT_HEAD_ROTATION") static Rotations accessor$getDefaultHeadRotation() {
+    @Accessor("DEFAULT_HEAD_POSE") static Rotations accessor$getDEFAULT_HEAD_POSE() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("DEFAULT_BODY_ROTATION") static Rotations accessor$getDefaultBodyRotation() {
+    @Accessor("DEFAULT_BODY_POSE") static Rotations accessor$getDEFAULT_BODY_POSE() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("DEFAULT_LEFTARM_ROTATION") static Rotations accessor$getDefaultLeftarmRotation() {
+    @Accessor("DEFAULT_LEFT_ARM_POSE") static Rotations accessor$getDEFAULT_LEFT_ARM_POSE() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("DEFAULT_RIGHTARM_ROTATION") static Rotations accessor$getDefaultRightarmRotation() {
+    @Accessor("DEFAULT_RIGHT_ARM_POSE") static Rotations accessor$getDEFAULT_RIGHT_ARM_POSE() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("DEFAULT_LEFTLEG_ROTATION") static Rotations accessor$getDefaultLeftlegRotation() {
+    @Accessor("DEFAULT_LEFT_LEG_POSE") static Rotations accessor$getDEFAULT_LEFT_LEG_POSE() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("DEFAULT_RIGHTLEG_ROTATION") static Rotations accessor$getDefaultRightlegRotation() {
+    @Accessor("DEFAULT_RIGHT_LEG_POSE") static Rotations accessor$getDEFAULT_RIGHT_LEG_POSE() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("leftArmRotation") Rotations accessor$getLeftArmRotation();
+    @Accessor("leftArmPose") Rotations accessor$getLeftArmPose();
 
-    @Accessor("rightArmRotation") Rotations accessor$getRightArmRotation();
+    @Accessor("rightArmPose") Rotations accessor$getRightArmPose();
 
-    @Accessor("leftLegRotation") Rotations accessor$getLeftLegRotation();
+    @Accessor("leftLegPose") Rotations accessor$getLeftLegPose();
 
-    @Accessor("rightLegRotation") Rotations accessor$getRightLegRotation();
+    @Accessor("rightLegPose") Rotations accessor$getRightLegPose();
 
     @Accessor("disabledSlots") int accessor$getDisabledSlots();
 

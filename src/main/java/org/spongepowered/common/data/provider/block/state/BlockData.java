@@ -61,7 +61,7 @@ public final class BlockData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.BLAST_RESISTANCE)
-                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getResistance())
+                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getExplosionResistance())
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
                             if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
@@ -74,7 +74,7 @@ public final class BlockData {
                         .get(h -> ((DyeColorBlockBridge) h.getBlock()).bridge$getDyeColor().orElse(null))
                         .supports(h -> h.getBlock() instanceof DyeColorBlockBridge)
                     .create(Keys.HARDNESS)
-                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getHardness())
+                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getDestroyTime())
                     .create(Keys.HELD_ITEM)
                         .get(h -> {
                             final Item item = h.getBlock().asItem();
@@ -89,7 +89,7 @@ public final class BlockData {
                     .create(Keys.IS_PASSABLE)
                         .get(h -> !h.getMaterial().blocksMovement())
                     .create(Keys.IS_UNBREAKABLE)
-                        .get(h -> ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getHardness() < 0)
+                        .get(h -> ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getDestroyTime() < 0)
                     .create(Keys.IS_FLAMMABLE)
                         .get(((AbstractFireBlockAccessor) Blocks.FIRE)::accessor$canBurn)
                     .create(Keys.IS_SOLID)

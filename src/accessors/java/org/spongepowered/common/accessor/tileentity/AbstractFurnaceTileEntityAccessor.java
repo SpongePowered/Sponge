@@ -33,13 +33,21 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractFurnaceTileEntity.class)
 public interface AbstractFurnaceTileEntityAccessor {
 
-    @Accessor("burnTime") int accessor$getBurnTime();
-    @Accessor("burnTime") void accessor$setBurnTime(int burnTime);
-    @Accessor("recipesUsed") int accessor$getRecipesUsed();
-    @Accessor("recipesUsed") void accessor$setRecipesUsed(int recipesUsed);
-    @Accessor("cookTime") int accessor$getCookTime();
-    @Accessor("cookTime") void accessor$setCookTime(int cookTime);
-    @Accessor("cookTimeTotal") int accessor$getCookTimeTotal();
-    @Accessor("cookTimeTotal") void accessor$setCookTimeTotal(int cookTimeTotal);
+    @Accessor("litTime") int accessor$getLitTime();
+
+    @Accessor("litTime") void accessor$setLitTime(int litTime);
+
+    @Accessor("litDuration") int accessor$getLitDuration();
+
+    @Accessor("litDuration") void accessor$setLitDuration(int litDuration);
+
+    @Accessor("cookingProgress") int accessor$getCookingProgress();
+
+    @Accessor("cookingProgress") void accessor$setCookingProgress(int cookingProgress);
+
+    @Accessor("cookingTotalTime") int accessor$getCookingTotalTime();
+
+    @Accessor("cookingTotalTime") void accessor$setCookingTotalTime(int cookingTotalTime);
+
     @Accessor("recipeType") IRecipeType<? extends AbstractCookingRecipe> accessor$getRecipeType();
 }

@@ -80,7 +80,7 @@ public final class ServerPlayerData {
                     .create(Keys.LOCALE)
                         .get(h -> LocaleCache.getLocale(h.accessor$getLanguage()))
                    .create(Keys.CHAT_COLORS_ENABLED)
-                        .get(ServerPlayerEntityAccessor::accessor$getChatColours)
+                        .get(ServerPlayerEntityAccessor::accessor$getCanChatColor)
                 .asMutable(ServerPlayerEntityBridge.class)
                     .create(Keys.HEALTH_SCALE)
                         .get(h -> h.bridge$isHealthScaled() ? h.bridge$getHealthScale() : null)

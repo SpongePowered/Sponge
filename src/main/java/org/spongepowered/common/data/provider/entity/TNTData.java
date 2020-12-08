@@ -29,7 +29,6 @@ import net.minecraft.entity.item.TNTEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.accessor.entity.item.TNTEntityAccessor;
-import org.spongepowered.common.bridge.entity.item.EntityTNTPrimedBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class TNTData {
@@ -43,7 +42,7 @@ public final class TNTData {
                 .asMutable(TNTEntity.class)
                     .create(Keys.DETONATOR)
                         .get(h -> (Living) h.getTntPlacedBy())
-                        .set((h, v) -> ((TNTEntityAccessor) h).accessor$setTntPlacedBy((LivingEntity) v))
+                        .set((h, v) -> ((TNTEntityAccessor) h).accessor$setOwner((LivingEntity) v))
                     .create(Keys.IS_PRIMED)
                         .get(h -> !h.removed && h.getFuse() > 0);
     }

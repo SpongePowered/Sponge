@@ -33,5 +33,5 @@ import net.minecraft.tileentity.SkullTileEntity;
 @Mixin(SkullTileEntity.class)
 public interface SkullTileEntityAccessor {
 
-    @Accessor("playerProfile") GameProfile accessor$getPlayerProfile();
+    @Accessor("owner") GameProfile accessor$getOwner();
 }

@@ -41,7 +41,7 @@ public final class MooshroomData {
                 .asMutable(MooshroomEntity.class)
                     .create(Keys.MOOSHROOM_TYPE)
                         .get(h -> (MooshroomType) (Object) h.getMooshroomType())
-                        .set((h, v) -> ((MooshroomEntityAccessor) h).accessor$setMooshroomType((MooshroomEntity.Type) (Object) v));
+                        .set((h, v) -> ((MooshroomEntityAccessor) h).accessor$setMushroomType((MooshroomEntity.Type) (Object) v));
     }
     // @formatter:on
 }

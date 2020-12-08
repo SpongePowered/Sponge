@@ -58,10 +58,10 @@ public final class ArmorStandData {
                             final Map<BodyPart, Vector3d> values = new HashMap<>();
                             values.put(BodyParts.HEAD.get(), VecHelper.toVector3d(h.getHeadRotation()));
                             values.put(BodyParts.CHEST.get(), VecHelper.toVector3d(h.getBodyRotation()));
-                            values.put(BodyParts.LEFT_ARM.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getLeftArmRotation()));
-                            values.put(BodyParts.RIGHT_ARM.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getRightArmRotation()));
-                            values.put(BodyParts.LEFT_LEG.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getLeftLegRotation()));
-                            values.put(BodyParts.RIGHT_LEG.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getRightLegRotation()));
+                            values.put(BodyParts.LEFT_ARM.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getLeftArmPose()));
+                            values.put(BodyParts.RIGHT_ARM.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getRightArmPose()));
+                            values.put(BodyParts.LEFT_LEG.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getLeftLegPose()));
+                            values.put(BodyParts.RIGHT_LEG.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getRightLegPose()));
                             return values;
                         })
                         .set((h, v) -> {

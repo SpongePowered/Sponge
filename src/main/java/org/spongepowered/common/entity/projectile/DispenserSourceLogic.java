@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.entity.projectile;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.dispenser.IDispenseItemBehavior;
@@ -41,11 +39,9 @@ import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.common.accessor.block.DispenserBlockAccessor;
-import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Queue;
 
 public final class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
 
@@ -75,7 +71,7 @@ public final class DispenserSourceLogic implements ProjectileSourceLogic<Dispens
 
     @SuppressWarnings("unchecked")
     private <P extends Projectile> Optional<P> launch(final DispenserTileEntity dispenser, final EntityType<P> projectileType, final Item item) {
-        final IDispenseItemBehavior behavior = DispenserBlockAccessor.accessor$DISPENSE_BEHAVIOR_REGISTRY().get(item);
+        final IDispenseItemBehavior behavior = DispenserBlockAccessor.accessor$getDISPENSER_REGISTRY().get(item);
         final ServerWorld world = (ServerWorld) dispenser.getWorld();
         behavior.dispense(new ProxyBlockSource(world, dispenser.getPos()), new ItemStack(item));
         final List<Entity> entities = world.getEntities((net.minecraft.entity.EntityType<?>) projectileType, entity -> true);

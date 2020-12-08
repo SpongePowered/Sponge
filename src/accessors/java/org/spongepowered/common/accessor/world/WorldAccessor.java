@@ -38,17 +38,17 @@ import javax.annotation.Nullable;
 @Mixin(World.class)
 public interface WorldAccessor {
 
-    @Accessor("addedTileEntityList") List<TileEntity> accessor$getAddedTileEntityList();
+    @Accessor("pendingBlockEntities") List<TileEntity> accessor$getPendingBlockEntities();
 
-    @Accessor("processingLoadedTiles") boolean accessor$getProcessingLoadedTiles();
+    @Accessor("updatingBlockEntities") boolean accessor$getUpdatingBlockEntities();
 
-    @Invoker("getPendingTileEntityAt") @Nullable TileEntity accessor$getPendingTileEntityAt(BlockPos pos);
+    @Invoker("getPendingBlockEntityAt") @Nullable TileEntity accessor$getPendingBlockEntityAt(BlockPos pos);
 
-    @Invoker("isValid") static boolean accessor$isValid(BlockPos pos) {
-        throw new UnsupportedOperationException("Accessor not mixed in!");
+    @Invoker("isInWorldBounds") static boolean accessor$isInWorldBounds(BlockPos pos) {
+        throw new UnsupportedOperationException("Untransformed Accessor!");
     }
 
     @Invoker("isOutsideBuildHeight") static boolean accessor$isOutsideBuildHeight(BlockPos pos) {
-        throw new UnsupportedOperationException("Accessor not mixed in!");
+        throw new UnsupportedOperationException("Untransformed Accessor!");
     }
 }

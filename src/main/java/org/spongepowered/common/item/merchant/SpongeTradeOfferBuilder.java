@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.item.MerchantOffer;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
@@ -40,7 +39,6 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.accessor.item.MerchantOfferAccessor;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Optional;
 
@@ -132,7 +130,7 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         final ItemStack selling = this.sellingItem.createStack();
         final MerchantOffer merchantOffer = new MerchantOffer(ItemStackUtil.toNative(first), ItemStackUtil.toNative(second), ItemStackUtil.toNative(selling),
                         this.useCount, this.maxUses, this.merchantExperienceGranted, (float) this.priceGrowthMultiplier);
-        ((MerchantOfferAccessor) merchantOffer).accessor$setRewardsExp(this.allowsExperience);
+        ((MerchantOfferAccessor) merchantOffer).accessor$setRewardExp(this.allowsExperience);
         ((MerchantOfferAccessor) merchantOffer).accessor$setDemand(this.demandBonus);
         return (TradeOffer) merchantOffer;
     }

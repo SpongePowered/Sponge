@@ -54,7 +54,7 @@ public abstract class StonecutterContainerMixin {
         if (!this.recipes.isEmpty() && this.recipes.get(this.selectedRecipe.get()) instanceof SpongeStonecuttingRecipe) {
             // For SpongeStonecuttingRecipe resend the output slot in case the actual crafting result differs from the exemplary result
             final ItemStack stack = this.outputInventorySlot.getStack();
-            for (IContainerListener listener : ((ContainerAccessor) this).accessor$getListeners()) {
+            for (IContainerListener listener : ((ContainerAccessor) this).accessor$getContainerListeners()) {
                 listener.sendSlotContents((Container) (Object) this, 1, stack);
             }
         }

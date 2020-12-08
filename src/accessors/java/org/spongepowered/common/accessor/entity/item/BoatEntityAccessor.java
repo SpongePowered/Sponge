@@ -30,5 +30,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(BoatEntity.class)
 public interface BoatEntityAccessor {
-    @Accessor("status")  BoatEntity.Status accessor$getStatus();
+
+    @Accessor("status") BoatEntity.Status accessor$getStatus();
 }

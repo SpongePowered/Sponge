@@ -33,6 +33,6 @@ import java.net.SocketAddress;
 @Mixin(IPBanList.class)
 public interface IPBanListAccessor {
 
-    @Invoker("addressToString") String accessor$addressToString(SocketAddress address);
+    @Invoker("getIpFromAddress") String accessor$getIpFromAddress(SocketAddress address);
 
 }

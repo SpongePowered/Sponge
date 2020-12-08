@@ -40,7 +40,7 @@ public final class EndermanData {
                 .asMutable(EndermanEntity.class)
                     .create(Keys.IS_SCREAMING)
                         .get(EndermanEntity::isScreaming)
-                        .set((h, v) -> h.getDataManager().set(EndermanEntityAccessor.accessor$getScreaming(), v));
+                        .set((h, v) -> h.getDataManager().set(EndermanEntityAccessor.accessor$getDATA_STARED_AT(), v));
     }
     // @formatter:on
 }

@@ -51,29 +51,29 @@ public final class PacketUtil {
         final CCustomPayloadLoginPacket packet = new CCustomPayloadLoginPacket();
         final CCustomPayloadLoginPacketAccessor accessor = (CCustomPayloadLoginPacketAccessor) packet;
         accessor.accessor$setTransactionId(transactionId);
-        accessor.accessor$setPayload((PacketBuffer) payload);
+        accessor.accessor$setData((PacketBuffer) payload);
         return packet;
     }
 
     public static IPacket<?> createLoginPayloadRequest(final ResourceKey channel, final ChannelBuf payload, final int transactionId) {
         final SCustomPayloadLoginPacket packet = new SCustomPayloadLoginPacket();
         final SCustomPayloadLoginPacketAccessor accessor = (SCustomPayloadLoginPacketAccessor) packet;
-        accessor.accessor$setChannel((ResourceLocation) (Object) channel);
+        accessor.accessor$setIdentifier((ResourceLocation) (Object) channel);
         accessor.accessor$setTransactionId(transactionId);
-        accessor.accessor$setPayload((PacketBuffer) payload);
+        accessor.accessor$setData((PacketBuffer) payload);
         return packet;
     }
 
     public static IPacket<?> createPlayPayload(final ResourceKey channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
         if (side == EngineConnectionSide.CLIENT) {
             final CCustomPayloadPacketAccessor packet = (CCustomPayloadPacketAccessor) new CCustomPayloadPacket();
-            packet.accessor$setChannel((ResourceLocation) (Object) channel);
-            packet.accessor$setPayload((PacketBuffer) payload);
+            packet.accessor$setIdentifier((ResourceLocation) (Object) channel);
+            packet.accessor$setData((PacketBuffer) payload);
             return (IPacket<?>) packet;
         } else if (side == EngineConnectionSide.SERVER) {
             final SCustomPayloadPlayPacketAccessor packet = (SCustomPayloadPlayPacketAccessor) new SCustomPayloadPlayPacket();
-            packet.accessor$setChannel((ResourceLocation) (Object) channel);
-            packet.accessor$setPayload((PacketBuffer) payload);
+            packet.accessor$setIdentifier((ResourceLocation) (Object) channel);
+            packet.accessor$setData((PacketBuffer) payload);
             return (IPacket<?>) packet;
         } else {
             throw new UnsupportedOperationException();

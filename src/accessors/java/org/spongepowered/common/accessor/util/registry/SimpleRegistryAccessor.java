@@ -33,11 +33,11 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(SimpleRegistry.class)
 public interface SimpleRegistryAccessor {
 
-    @Accessor(value = "values") Object[] accessor$getValues();
+    @Accessor("randomCache") Object[] accessor$getRandomCache();
 
-    @Accessor(value = "registryObjects") BiMap<ResourceLocation, Object> accessor$getRegistryObjects();
+    @Accessor("storage") BiMap<ResourceLocation, Object> accessor$getStorage();
 
-    @Accessor(value = "nextFreeId") int accessor$getNextFreeId();
+    @Accessor("nextId") int accessor$getNextId();
 
-    @Accessor(value = "nextFreeId") void accessor$setNextFreeId(int nextFreeId);
+    @Accessor("nextId") void accessor$setNextId(int nextId);
 }

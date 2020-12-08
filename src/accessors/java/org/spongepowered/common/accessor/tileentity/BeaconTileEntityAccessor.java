@@ -35,15 +35,15 @@ import java.util.Set;
 @Mixin(BeaconTileEntity.class)
 public interface BeaconTileEntityAccessor {
 
-    @Accessor("VALID_EFFECTS") static Set<Effect> getValidEffects() {
-        throw new IllegalStateException("Untransformed accessor!");
+    @Accessor("VALID_EFFECTS") static Set<Effect> accessor$getVALID_EFFECTS() {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("primaryEffect") @Nullable Effect accessor$getPrimaryEffect();
+    @Accessor("primaryPower") @Nullable Effect accessor$getPrimaryPower();
 
-    @Accessor("primaryEffect") void accessor$setPrimaryEffect(@Nullable Effect effect);
+    @Accessor("primaryPower") void accessor$setPrimaryPower(@Nullable Effect primaryPower);
 
-    @Accessor("secondaryEffect") @Nullable Effect accessor$getSecondaryEffect();
+    @Accessor("secondaryPower") @Nullable Effect accessor$getSecondaryPower();
 
-    @Accessor("secondaryEffect") void accessor$setSecondaryEffect(@Nullable Effect effect);
+    @Accessor("secondaryPower") void accessor$setSecondaryPower(@Nullable Effect secondaryPower);
 }

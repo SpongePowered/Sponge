@@ -38,6 +38,6 @@ public interface LivingEntityBridge {
     void bridge$setMaxAir(int max);
 
     default int bridge$getExperiencePointsOnDeath(LivingEntity entity, PlayerEntity attackingPlayer) {
-        return ((LivingEntityAccessor) entity).accessor$getExperiencePoints(attackingPlayer);
+        return ((LivingEntityAccessor) entity).accessor$getExperienceReward(attackingPlayer);
     }
 }

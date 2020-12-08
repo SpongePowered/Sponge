@@ -34,9 +34,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(SRespawnPacket.class)
 public interface SRespawnPacketAccessor {
 
-    @Accessor("dimensionID") RegistryKey<World> accessor$getDimensionID();
+    @Accessor("dimension") RegistryKey<World> accessor$getDimension();
 
-    @Accessor("hashedSeed") long accessor$getHashedSeed();
+    @Accessor("seed") long accessor$getSeed();
 
-    @Accessor("gameType") GameType accessor$getGameType();
+    @Accessor("playerGameType") GameType accessor$getPlayerGameType();
 }

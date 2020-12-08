@@ -33,29 +33,29 @@ public interface CPlayerPacketAccessor {
 
     @Accessor("x") double accessor$getX();
 
-    @Accessor("x") void accessor$setX(double newX);
+    @Accessor("x") void accessor$setX(double x);
 
     @Accessor("y") double accessor$getY();
 
-    @Accessor("y") void accessor$setY(double newY);
+    @Accessor("y") void accessor$setY(double y);
 
     @Accessor("z") double accessor$getZ();
 
-    @Accessor("z") void accessor$setZ(double newZ);
+    @Accessor("z") void accessor$setZ(double z);
 
-    @Accessor("yaw") float accessor$getYaw();
+    @Accessor("yRot") float accessor$getYRot();
 
-    @Accessor("yaw") void accessor$setYaw(float newYaw);
+    @Accessor("yRot") void accessor$setYRot(float yRot);
 
-    @Accessor("pitch") float accessor$getPitch();
+    @Accessor("xRot") float accessor$getXRot();
 
-    @Accessor("pitch") void accessor$setPitch(float newPitch);
+    @Accessor("xRot") void accessor$setXRot(float xRot);
 
     @Accessor("onGround") boolean accessor$getOnGround();
 
-    @Accessor("moving") boolean accessor$getMoving();
+    @Accessor("hasPos") boolean accessor$getHasPos();
 
-    @Accessor("moving") void accessor$setMoving(boolean moving);
+    @Accessor("hasPos") void accessor$setHasPos(boolean hasPos);
 
-    @Accessor("rotating") boolean accessor$getRotating();
+    @Accessor("hasRot") boolean accessor$getHasRot();
 }

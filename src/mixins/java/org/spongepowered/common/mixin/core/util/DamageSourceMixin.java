@@ -94,8 +94,8 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     private static void onSetExplosionSource(@Nullable final Explosion explosion,
             final CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
         if (explosion != null) {
-            final Entity entity = ((ExplosionAccessor) explosion).accessor$getExploder();
-            if (entity != null && !((WorldBridge) ((ExplosionAccessor) explosion).accessor$getWorld()).bridge$isFake()) {
+            final Entity entity = ((ExplosionAccessor) explosion).accessor$getSource();
+            if (entity != null && !((WorldBridge) ((ExplosionAccessor) explosion).accessor$getLevel()).bridge$isFake()) {
                 if (explosion.getExplosivePlacedBy() == null && entity instanceof CreatorTrackedBridge) {
                     // check creator
                     final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) entity;

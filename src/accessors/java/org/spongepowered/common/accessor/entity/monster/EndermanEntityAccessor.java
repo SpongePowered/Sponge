@@ -32,8 +32,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(EndermanEntity.class)
 public interface EndermanEntityAccessor {
 
-    @Accessor("SCREAMING")
-    static DataParameter<Boolean> accessor$getScreaming() {
+    @Accessor("DATA_STARED_AT")
+    static DataParameter<Boolean> accessor$getDATA_STARED_AT() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 }

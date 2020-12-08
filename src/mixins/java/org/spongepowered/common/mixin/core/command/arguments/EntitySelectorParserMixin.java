@@ -68,9 +68,9 @@ public abstract class EntitySelectorParserMixin implements EntitySelectorParserB
         try {
             this.impl$overrideInvert = shouldInvert;
             this.impl$readerOverride = new StringReader(input);
-            final EntityOptions_OptionHandlerAccessor option = EntityOptionsAccessor.accessor$getREGISTRY().get(id);
-            if (option.accessor$getCanHandle().test((EntitySelectorParser) (Object) this)) {
-                option.accessor$getHandler().handle((EntitySelectorParser) (Object) this);
+            final EntityOptions_OptionHandlerAccessor option = EntityOptionsAccessor.accessor$getOPTIONS().get(id);
+            if (option.accessor$getPredicate().test((EntitySelectorParser) (Object) this)) {
+                option.accessor$getModifier().handle((EntitySelectorParser) (Object) this);
             }
         } finally {
             this.impl$readerOverride = null;

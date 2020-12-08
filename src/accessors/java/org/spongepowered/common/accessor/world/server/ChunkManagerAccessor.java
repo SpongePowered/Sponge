@@ -35,11 +35,11 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(ChunkManager.class)
 public interface ChunkManagerAccessor {
 
-    @Accessor("entities") Int2ObjectMap<EntityTrackerAccessor> accessor$getEntityTrackers();
+    @Accessor("entityMap") Int2ObjectMap<EntityTrackerAccessor> accessor$getEntityMap();
 
     @Accessor("generator") void accessor$setChunkGenerator(ChunkGenerator chunkGenerator);
 
-    @Invoker("getLoadedChunksIterable") Iterable<ChunkHolder> accessor$getLoadedChunksIterable();
+    @Invoker("getChunks") Iterable<ChunkHolder> accessor$getChunks();
 
-    @Invoker("save") void accessor$save(boolean flush);
+    @Invoker("saveAllChunks") void accessor$saveAllChunks(boolean flush);
 }

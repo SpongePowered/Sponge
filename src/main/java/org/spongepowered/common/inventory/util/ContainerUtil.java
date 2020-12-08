@@ -255,7 +255,7 @@ public final class ContainerUtil {
                     // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
                     // e.g. for IC2 ContainerIndustrialWorkbench
                     crafting.base = index + 1;
-                    crafting.grid = ((CraftingResultSlotAccessor) slot).accessor$getCraftMatrix();
+                    crafting.grid = ((CraftingResultSlotAccessor) slot).accessor$getCraftSlots();
                 }
             }
         }
@@ -284,21 +284,21 @@ public final class ContainerUtil {
             }
             return ContainerUtil.carrierOrNull(inventory);
         } else if (container instanceof HopperContainerAccessor) {
-            return ContainerUtil.carrierOrNull(((HopperContainerAccessor) container).accessor$getHopperInventory());
+            return ContainerUtil.carrierOrNull(((HopperContainerAccessor) container).accessor$getHopper());
         } else if (container instanceof DispenserContainerAccessor) {
-            return ContainerUtil.carrierOrNull(((DispenserContainerAccessor) container).accessor$getDispenserInventory());
+            return ContainerUtil.carrierOrNull(((DispenserContainerAccessor) container).accessor$getDispenser());
         } else if (container instanceof AbstractFurnaceContainerAccessor) {
-            return ContainerUtil.carrierOrNull(((AbstractFurnaceContainerAccessor) container).accessor$getFurnaceInventory());
+            return ContainerUtil.carrierOrNull(((AbstractFurnaceContainerAccessor) container).accessor$getContainer());
         } else if (container instanceof BrewingStandContainerAccessor) {
-            return ContainerUtil.carrierOrNull(((BrewingStandContainerAccessor) container).accessor$getTileBrewingStand());
+            return ContainerUtil.carrierOrNull(((BrewingStandContainerAccessor) container).accessor$getBrewingStand());
         } else if (container instanceof BeaconContainer) {
-            return (Carrier) ((BeaconContainerAccessor) container).accessor$getWorldPosCallable().apply(World::getTileEntity).orElse(null);
+            return (Carrier) ((BeaconContainerAccessor) container).accessor$getAccess().apply(World::getTileEntity).orElse(null);
         } else if (container instanceof HorseInventoryContainerAccessor) {
             return (Carrier) ((HorseInventoryContainerAccessor) container).accessor$getHorse();
-        } else if (container instanceof MerchantContainerAccessor && ((MerchantContainerAccessor) container).accessor$getMerchant() instanceof Carrier) {
-            return (Carrier) ((MerchantContainerAccessor) container).accessor$getMerchant();
+        } else if (container instanceof MerchantContainerAccessor && ((MerchantContainerAccessor) container).accessor$getTrader() instanceof Carrier) {
+            return (Carrier) ((MerchantContainerAccessor) container).accessor$getTrader();
         } else if (container instanceof AbstractRepairContainerAccessor) {
-            final PlayerEntity player = ((AbstractRepairContainerAccessor) container).accessor$field_234645_f_();
+            final PlayerEntity player = ((AbstractRepairContainerAccessor) container).accessor$getPlayer();
             if (player instanceof ServerPlayerEntity) {
                 return (Carrier) player;
             }
@@ -306,7 +306,7 @@ public final class ContainerUtil {
 
         // Fallback: Try to find a Carrier owning the first Slot of the Container
         if (container instanceof ContainerAccessor) {
-            for (final Slot slot : ((ContainerAccessor) container).accessor$getInventorySlots()) {
+            for (final Slot slot : ((ContainerAccessor) container).accessor$getSlots()) {
                 // Slot Inventory is a Carrier?
                 if (slot.inventory instanceof Carrier) {
                     return ((Carrier) slot.inventory);

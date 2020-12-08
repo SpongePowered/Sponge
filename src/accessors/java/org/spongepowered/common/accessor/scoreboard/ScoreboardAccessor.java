@@ -38,19 +38,17 @@ import java.util.Map;
 @Mixin(Scoreboard.class)
 public interface ScoreboardAccessor {
 
-    @Accessor("entitiesScoreObjectives") Map<String, Map<ScoreObjective, Score>>  accessor$getEntitiesScoreObjectivesMap();
+    @Accessor("objectivesByName") Map<String, ScoreObjective> accessor$getObjectivesByName();
 
-    @Accessor("scoreObjectives") Map<String, ScoreObjective> accessor$getScoreObjectives();
+    @Accessor("objectivesByCriteria") Map<ScoreCriteria, List<ScoreObjective>> accessor$getObjectivesByCriteria();
 
-    @Accessor("scoreObjectiveCriterias") Map<ScoreCriteria, List<ScoreObjective>> accessor$getScoreObjectiveCriterias();
+    @Accessor("playerScores") Map<String, Map<ScoreObjective, Score>> accessor$getPlayerScores();
 
-    @Accessor("entitiesScoreObjectives") Map<String, Map<ScoreObjective, Score>> accessor$getEntitiesScoreObjectives();
+    @Accessor("displayObjectives") ScoreObjective[] accessor$getDisplayObjectives();
 
-    @Accessor("objectiveDisplaySlots") ScoreObjective[] accessor$getObjectiveDisplaySlots();
+    @Accessor("teamsByName") Map<String, ScorePlayerTeam> accessor$getTeamsByName();
 
-    @Accessor("teams") Map<String, ScorePlayerTeam> accessor$getTeams();
+    @Accessor("teamsByPlayer") Map<String, ScorePlayerTeam> accessor$getTeamsByPlayer();
 
-    @Accessor("teamMemberships") Map<String, ScorePlayerTeam> accessor$getTeamMemberships();
-
-    @Accessor("displaySlots") String[] accessor$getDisplaySlots();
+    @Accessor("displaySlotNames") String[] accessor$getDisplaySlotNames();
 }

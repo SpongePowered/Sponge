@@ -114,12 +114,12 @@ public final class NetherPortalType extends VanillaPortalType {
             ((net.minecraft.entity.Entity) entity).setPortal(VecHelper.toBlockPos(previousLocation.getPosition()));
 
             if (entity instanceof ServerPlayerEntity) {
-                ((ServerPlayerEntityAccessor) entity).accessor$setInvulnerableDimensionChange(true);
+                ((ServerPlayerEntityAccessor) entity).accessor$setIsChangingDimension(true);
             }
 
             final net.minecraft.entity.Entity result = portalLogic.apply(generateDestinationPortal);
 
-            ((EntityAccessor) entity).accessor$setInPortal(false);
+            ((EntityAccessor) entity).accessor$setInsidePortal(false);
 
             if (result == null) {
                 return false;
@@ -135,8 +135,8 @@ public final class NetherPortalType extends VanillaPortalType {
             }
 
             if (!worldChange) {
-                ((EntityAccessor) entity).accessor$field_242271_ac(new BlockPos(mEntity.getPosX(), mEntity.getPosY(), mEntity.getPosZ()));
-                ((EntityAccessor) entity).accessor$setPortalCounter(Integer.MAX_VALUE);
+                ((EntityAccessor) entity).accessor$setPortalEntrancePos(new BlockPos(mEntity.getPosX(), mEntity.getPosY(), mEntity.getPosZ()));
+                ((EntityAccessor) entity).accessor$setPortalTime(Integer.MAX_VALUE);
 
                 return true;
             }
@@ -144,7 +144,7 @@ public final class NetherPortalType extends VanillaPortalType {
             // Players are special fickle things
             if (entity instanceof ServerPlayerEntity) {
                 // Hacks
-                ((EntityAccessor) entity).accessor$setPortalCounter(Integer.MAX_VALUE);
+                ((EntityAccessor) entity).accessor$setPortalTime(Integer.MAX_VALUE);
 
                 EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) mEntity, (ServerWorld) previousLocation.getWorld(),
                         (ServerWorld) destination.getWorld(), (ServerWorld) actualDestination.getWorld(), false);

@@ -41,45 +41,45 @@ import javax.annotation.Nullable;
 @Mixin(LivingEntity.class)
 public interface LivingEntityAccessor {
 
-    @Accessor("LIVING_FLAGS") static DataParameter<Byte> accessor$getLivingFlags() {
+    @Accessor("DATA_LIVING_ENTITY_FLAGS") static DataParameter<Byte> accessor$getDATA_LIVING_ENTITY_FLAGS() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("HEALTH") static DataParameter<Float> accessor$getHealth() {
+    @Accessor("DATA_HEALTH_ID") static DataParameter<Float> accessor$getDATA_HEALTH_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("POTION_EFFECTS") static DataParameter<Integer> accessor$getPotionEffects() {
+    @Accessor("DATA_EFFECT_COLOR_ID") static DataParameter<Integer> accessor$getDATA_EFFECT_COLOR_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("HIDE_PARTICLES") static DataParameter<Boolean> accessor$getHideParticles() {
+    @Accessor("DATA_EFFECT_AMBIENCE_ID") static DataParameter<Boolean> accessor$getDATA_EFFECT_AMBIENCE_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("ARROW_COUNT_IN_ENTITY") static DataParameter<Integer> accessor$getArrowCountInEntity() {
+    @Accessor("DATA_ARROW_COUNT_ID") static DataParameter<Integer> accessor$getDATA_ARROW_COUNT_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("BEE_STING_COUNT") static DataParameter<Integer> accessor$getBeeStringCount() {
+    @Accessor("DATA_STINGER_COUNT_ID") static DataParameter<Integer> accessor$getDATA_STINGER_COUNT_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("BED_POSITION") static DataParameter<Optional<BlockPos>> accessor$getBedPosition() {
+    @Accessor("SLEEPING_POS_ID") static DataParameter<Optional<BlockPos>> accessor$getSLEEPING_POS_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("lastDamage") float accessor$getLastDamage();
+    @Accessor("lastHurt") float accessor$getLastHurt();
 
-    @Accessor("lastDamage") void accessor$setLastDamage(float lastDamage);
+    @Accessor("lastHurt") void accessor$setLastHurt(float lastHurt);
 
     @Accessor("dead") boolean accessor$getDead();
 
-    @Accessor("revengeTarget") @Nullable LivingEntity accessor$getRevengeTarget();
+    @Accessor("lastHurtByMob") @Nullable LivingEntity accessor$getLastHurtByMob();
 
-    @Accessor("activeItemStack") void accessor$setActiveItemStack(ItemStack stack);
+    @Accessor("useItem") void accessor$setUseItem(ItemStack useItem);
 
-    @Invoker("canBlockDamageSource")  boolean accessor$canBlockDamageSource(DamageSource damageSourceIn);
+    @Invoker("isDamageSourceBlocked")  boolean accessor$getIsDamageSourceBlocked(DamageSource isDamageSourceBlocked);
 
-    @Invoker("getExperiencePoints") int accessor$getExperiencePoints(PlayerEntity attackingPlayer);
+    @Invoker("getExperienceReward") int accessor$getExperienceReward(PlayerEntity player);
 }

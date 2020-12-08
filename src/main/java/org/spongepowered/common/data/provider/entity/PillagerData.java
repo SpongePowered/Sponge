@@ -39,7 +39,7 @@ public final class PillagerData {
         registrator
                 .asMutable(PillagerEntity.class)
                     .create(Keys.IS_CHARGING_CROSSBOW)
-                        .get(h -> h.getDataManager().get(PillagerEntityAccessor.accessor$getDataChargingState()))
+                        .get(h -> h.getDataManager().get(PillagerEntityAccessor.accessor$getIS_CHARGING_CROSSBOW()))
                         .set(PillagerEntity::setCharging);
     }
     // @formatter:on

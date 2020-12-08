@@ -147,7 +147,7 @@ public final class PacketPhaseUtil {
             player.inventory.mainInventory.set(player.inventory.currentItem, itemStack);
             // TODO check if window id -2 and slotid = player.inventory.currentItem works instead of this:
             for (Slot containerSlot : player.openContainer.inventorySlots) {
-                if (containerSlot.inventory == player.inventory && ((SlotAccessor) containerSlot).accessor$getSlotIndex() == player.inventory.currentItem) {
+                if (containerSlot.inventory == player.inventory && ((SlotAccessor) containerSlot).accessor$getSlot() == player.inventory.currentItem) {
                     slotId = containerSlot.slotNumber;
                     break;
                 }
@@ -256,12 +256,12 @@ public final class PacketPhaseUtil {
         if (item instanceof DyeItem) {
             // ItemDye.itemInteractionForEntity
             if (entity instanceof SheepEntity) {
-                return SheepEntityAccessor.accessor$getDyeColor();
+                return SheepEntityAccessor.accessor$getDATA_WOOL_ID();
             }
 
             // EntityWolf.processInteract
             if (entity instanceof WolfEntity) {
-                return WolfEntityAccessor.accessor$getCollarColor();
+                return WolfEntityAccessor.accessor$getDATA_COLLAR_COLOR();
             }
 
             return null;
@@ -269,17 +269,17 @@ public final class PacketPhaseUtil {
 
         if (item == Items.NAME_TAG) {
             // ItemNameTag.itemInteractionForEntity
-            return entity instanceof LivingEntity && !(entity instanceof PlayerEntity) && stack.hasDisplayName() ? EntityAccessor.accessor$getCustomName() : null;
+            return entity instanceof LivingEntity && !(entity instanceof PlayerEntity) && stack.hasDisplayName() ? EntityAccessor.accessor$getDATA_CUSTOM_NAME() : null;
         }
 
         if (item == Items.SADDLE) {
             // ItemSaddle.itemInteractionForEntity
-            return entity instanceof PigEntity ? PigEntityAccessor.accessor$getSaddled() : null;
+            return entity instanceof PigEntity ? PigEntityAccessor.accessor$getDATA_SADDLE_ID() : null;
         }
 
         if (item instanceof BlockItem && ((BlockItem) item).getBlock() == Blocks.CHEST) {
             // AbstractChestHorse.processInteract
-            return entity instanceof AbstractChestedHorseEntity ? AbstractChestedHorseEntityAccessor.accessor$getDataIdChest() : null;
+            return entity instanceof AbstractChestedHorseEntity ? AbstractChestedHorseEntityAccessor.accessor$getDATA_ID_CHEST() : null;
         }
 
         return null;

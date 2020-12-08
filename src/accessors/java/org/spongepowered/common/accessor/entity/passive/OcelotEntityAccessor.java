@@ -33,5 +33,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface OcelotEntityAccessor {
 
     @Invoker("isTrusting") boolean accessor$isTrusting();
-    @Invoker("setTrusting") void accessor$setTrusting(boolean isTrusting);
+
+    @Invoker("setTrusting") void accessor$setTrusting(boolean trusting);
 }

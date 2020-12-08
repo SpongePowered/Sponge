@@ -38,7 +38,7 @@ import java.util.Optional;
 public class LivingEntityArrowCountConverter extends DataParameterConverter<Integer> {
 
     public LivingEntityArrowCountConverter() {
-        super(LivingEntityAccessor.accessor$getArrowCountInEntity());
+        super(LivingEntityAccessor.accessor$getDATA_ARROW_COUNT_ID());
     }
 
     @Override

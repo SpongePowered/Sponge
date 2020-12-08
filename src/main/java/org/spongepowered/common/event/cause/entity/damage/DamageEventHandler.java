@@ -387,7 +387,7 @@ public final class DamageEventHandler {
 
     @SuppressWarnings("ConstantConditions")
     public static Optional<DamageFunction> createShieldFunction(final LivingEntity entity, final DamageSource source, final float amount) {
-        if (entity.isActiveItemStackBlocking() && amount > 0.0 && ((LivingEntityAccessor) entity).accessor$canBlockDamageSource(source)) {
+        if (entity.isActiveItemStackBlocking() && amount > 0.0 && ((LivingEntityAccessor) entity).accessor$getIsDamageSourceBlocked(source)) {
             final DamageModifier modifier = DamageModifier.builder()
                 .cause(Cause.of(EventContext.empty(), entity, ((ItemStack) (Object) entity.getActiveItemStack()).createSnapshot()))
                 .type(DamageModifierTypes.SHIELD)

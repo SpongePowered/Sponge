@@ -43,7 +43,6 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.kyori.adventure.util.Codec;
-import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.ListNBT;
@@ -337,7 +336,7 @@ public final class SpongeAdventure {
             final HoverEvent.ShowItem value = (HoverEvent.ShowItem) event.value();
             return new net.minecraft.util.text.event.HoverEvent(
                 net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM,
-                HoverEventItemHoverAccessor.accessor$new(
+                HoverEventItemHoverAccessor.accessor$init(
                     Registry.ITEM.getOrDefault(SpongeAdventure.asVanilla(value.item())),
                     value.count(),
                     SpongeAdventure.asVanillaCompound(value.nbt())

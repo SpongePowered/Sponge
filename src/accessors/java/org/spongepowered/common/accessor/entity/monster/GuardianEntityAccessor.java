@@ -32,5 +32,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(GuardianEntity.class)
 public interface GuardianEntityAccessor {
 
-    @Invoker("setTargetedEntity") void accessor$setTargetedEntity(int entityId);
+    @Invoker("setActiveAttackTarget") void accessor$setActiveAttackTarget(int entityId);
 }

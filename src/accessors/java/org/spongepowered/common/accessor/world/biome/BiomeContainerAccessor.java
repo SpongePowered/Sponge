@@ -32,10 +32,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(BiomeContainer.class)
 public interface BiomeContainerAccessor {
 
-    @Accessor("biomes") Biome[] accessor$getBiomes();
-
-    @Accessor("WIDTH_BITS") static int accessor$WIDTH_BITS() {
+    @Accessor("WIDTH_BITS") static int accessor$getWIDTH_BITS() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
+    @Accessor("biomes") Biome[] accessor$getBiomes();
 }

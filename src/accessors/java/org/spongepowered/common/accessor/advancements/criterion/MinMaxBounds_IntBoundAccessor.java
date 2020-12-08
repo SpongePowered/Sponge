@@ -35,7 +35,7 @@ public interface MinMaxBounds_IntBoundAccessor {
 
     @Invoker("<init>")
     static MinMaxBounds.IntBound accessor$init(@Nullable final Integer p_i49717_1_, @Nullable final Integer p_i49717_2_) {
-        throw new AssertionError("should not happen");
+        throw new AssertionError("Untransformed Accessor!");
     }
 
 }

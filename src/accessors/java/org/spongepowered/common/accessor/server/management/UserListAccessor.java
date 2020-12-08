@@ -36,13 +36,13 @@ import java.util.Map;
 @Mixin(UserList.class)
 public interface UserListAccessor<K, V extends UserListEntry<K>> {
 
-    @Accessor("LOGGER") static Logger accessor$getLogger() {
-        throw new IllegalStateException("Untransformed Accessor");
+    @Accessor("LOGGER") static Logger accessor$geLOGGER() {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("values") Map<String, V> accessor$getValues();
+    @Accessor("map") Map<String, V> accessor$getMap();
 
-    @Invoker("getObjectKey") String accessor$getObjectKey(K obj);
+    @Invoker("getKeyForUser") String accessor$getKeyForUser(K obj);
 
     @Invoker("removeExpired") void accessor$removeExpired();
 }

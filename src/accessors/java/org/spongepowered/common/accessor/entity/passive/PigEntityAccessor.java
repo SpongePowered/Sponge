@@ -32,8 +32,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(PigEntity.class)
 public interface PigEntityAccessor {
 
-    @Accessor("SADDLED")
-    static DataParameter<Boolean> accessor$getSaddled() {
+    @Accessor("DATA_SADDLE_ID")
+    static DataParameter<Boolean> accessor$getDATA_SADDLE_ID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 }

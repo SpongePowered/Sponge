@@ -37,14 +37,14 @@ import javax.annotation.Nullable;
 @Mixin(ShulkerBulletEntity.class)
 public interface ShulkerBulletEntityAccessor {
 
-    @Accessor("target") Entity accessor$getTarget();
+    @Accessor("finalTarget") Entity accessor$getFinalTarget();
 
-    @Accessor("target") void accessor$setTarget(Entity target);
+    @Accessor("finalTarget") void accessor$setFinalTarget(Entity finalTarget);
 
-    @Accessor("targetUniqueId") void accessor$setTargetUniqueId(@Nullable UUID target);
+    @Accessor("targetId") void accessor$setTargetId(@Nullable UUID targetId);
 
-    @Accessor("direction") @Nullable Direction accessor$getDirection();
+    @Accessor("currentMoveDirection") @Nullable Direction accessor$getCurrentMoveDirection();
 
-    @Accessor("direction") void accessor$setDirection(@Nullable Direction facing);
+    @Accessor("currentMoveDirection") void accessor$setCurrentMoveDirection(@Nullable Direction currentMoveDirection);
 
 }

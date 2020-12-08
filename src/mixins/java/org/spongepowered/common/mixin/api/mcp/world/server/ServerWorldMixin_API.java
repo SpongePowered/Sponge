@@ -211,7 +211,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Override
     public Collection<org.spongepowered.api.raid.Raid> getRaids() {
         final RaidManagerAccessor raidManager = (RaidManagerAccessor) this.shadow$getRaids();
-        return (Collection<org.spongepowered.api.raid.Raid>) (Collection) raidManager.accessor$getById().values();
+        return (Collection<org.spongepowered.api.raid.Raid>) (Collection) raidManager.accessor$getRaidMap().values();
     }
 
     @Override

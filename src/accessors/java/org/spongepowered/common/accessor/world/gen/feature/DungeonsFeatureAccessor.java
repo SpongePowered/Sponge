@@ -32,5 +32,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(DungeonsFeature.class)
 public interface DungeonsFeatureAccessor {
 
-    @Accessor("SPAWNERTYPES") EntityType<?>[] accessor$getSpawnerTypes();
+    @Accessor("MOBS") EntityType<?>[] accessor$getMOBS();
 }

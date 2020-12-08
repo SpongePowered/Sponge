@@ -34,5 +34,5 @@ public interface PistonBlockAccessor {
 
     @Accessor("isSticky") boolean accessor$getIsSticky();
 
-    @Mutable @Accessor("isSticky") void accessor$setIsSticky(boolean isSticke);
+    @Mutable @Accessor("isSticky") void accessor$setIsSticky(boolean isSticky);
 }

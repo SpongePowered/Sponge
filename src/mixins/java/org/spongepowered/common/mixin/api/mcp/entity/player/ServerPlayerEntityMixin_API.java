@@ -258,7 +258,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         final SChangeBlockPacket packet = new SChangeBlockPacket();
         final SChangeBlockPacketAccessor accessor = (SChangeBlockPacketAccessor) packet;
         accessor.accessor$setPos(pos);
-        accessor.accessor$setState(state);
+        accessor.accessor$setBlockState(state);
         this.connection.sendPacket(packet);
     }
 

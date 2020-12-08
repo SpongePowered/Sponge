@@ -35,8 +35,9 @@ import java.util.stream.Stream;
 @Mixin(Ingredient.class)
 public interface IngredientAccessor {
 
-    @Accessor("matchingStacks") ItemStack[] accessor$getMatchingStacks();
-    @Invoker("fromItemListStream") static Ingredient accessor$fromItemListStream(Stream<? extends Ingredient.IItemList> stream) {
-        throw new IllegalStateException("Untransformed Accessor");
+    @Accessor("itemStacks") ItemStack[] accessor$getItemStacks();
+
+    @Invoker("fromValues") static Ingredient accessor$fromValues(Stream<? extends Ingredient.IItemList> stream) {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 }

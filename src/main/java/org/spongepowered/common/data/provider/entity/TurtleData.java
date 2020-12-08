@@ -47,7 +47,7 @@ public final class TurtleData {
                         .set((h, v) -> h.setHome(VecHelper.toBlockPos(v)))
                     .create(Keys.IS_LAYING_EGG)
                         .get(TurtleEntity::isDigging)
-                        .set((h, v) -> ((TurtleEntityAccessor) h).accessor$setDigging(v))
+                        .set((h, v) -> ((TurtleEntityAccessor) h).accessor$setLayingEgg(v))
                 .asMutable(TurtleEntityAccessor.class)
                     .create(Keys.IS_GOING_HOME)
                         .get(TurtleEntityAccessor::accessor$isGoingHome)

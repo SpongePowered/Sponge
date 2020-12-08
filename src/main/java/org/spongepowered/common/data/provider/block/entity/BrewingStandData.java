@@ -48,9 +48,9 @@ public final class BrewingStandData {
                             return true;
                         })
                     .create(Keys.REMAINING_BREW_TIME)
-                        .get(h -> h.accessor$canBrew() ? new SpongeTicks(h.accessor$getBrewTime()) : null)
+                        .get(h -> h.accessor$isBrewable() ? new SpongeTicks(h.accessor$getBrewTime()) : null)
                         .set((h, v) -> {
-                            if (h.accessor$canBrew()) {
+                            if (h.accessor$isBrewable()) {
                                 h.accessor$setBrewTime((int) v.getTicks());
                             }
                         });

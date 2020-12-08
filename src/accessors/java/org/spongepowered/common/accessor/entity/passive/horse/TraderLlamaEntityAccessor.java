@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface TraderLlamaEntityAccessor {
 
     @Accessor("despawnDelay") int accessor$getDespawnDelay();
+
     @Accessor("despawnDelay") void accessor$setDespawnDelay(int despawnDelay);
 }

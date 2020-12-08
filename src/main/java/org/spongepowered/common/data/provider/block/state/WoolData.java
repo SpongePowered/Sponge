@@ -42,7 +42,7 @@ public final class WoolData {
                 .asImmutable(BlockState.class)
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_WOOL.get(h.getBlock()))
-                        .supports(h -> SheepEntityAccessor.accessor$getWoolByColor().containsValue(h.getBlock()));
+                        .supports(h -> SheepEntityAccessor.accessor$getITEM_BY_DYE().containsValue(h.getBlock()));
     }
     // @formatter:on
 }

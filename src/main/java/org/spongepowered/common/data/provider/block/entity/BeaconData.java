@@ -44,15 +44,15 @@ public final class BeaconData {
         registrator
                 .asMutable(BeaconTileEntity.class)
                     .create(Keys.PRIMARY_POTION_EFFECT_TYPE)
-                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$getPrimaryEffect))
-                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$setPrimaryEffect))
-                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$getPrimaryEffect,
-                                BeaconTileEntityAccessor::accessor$setPrimaryEffect))
+                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$getPrimaryPower))
+                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$setPrimaryPower))
+                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$getPrimaryPower,
+                                BeaconTileEntityAccessor::accessor$setPrimaryPower))
                     .create(Keys.SECONDARY_POTION_EFFECT_TYPE)
-                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$getSecondaryEffect))
-                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$setSecondaryEffect))
-                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$getSecondaryEffect,
-                                BeaconTileEntityAccessor::accessor$setSecondaryEffect));
+                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$getSecondaryPower))
+                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$setSecondaryPower))
+                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$getSecondaryPower,
+                                BeaconTileEntityAccessor::accessor$setSecondaryPower));
     }
     // @formatter:on
 
@@ -64,7 +64,7 @@ public final class BeaconData {
             final BiConsumer<BeaconTileEntityAccessor, Effect> setter) {
         final BeaconTileEntityAccessor accessor = (BeaconTileEntityAccessor) holder;
         final Effect effect = (Effect) value;
-        if (!BeaconTileEntityAccessor.getValidEffects().contains(effect)) {
+        if (!BeaconTileEntityAccessor.accessor$getVALID_EFFECTS().contains(effect)) {
             return false;
         }
         setter.accept(accessor, (Effect) value);
@@ -75,7 +75,7 @@ public final class BeaconData {
     private static boolean delete(final BeaconTileEntity holder, final Function<BeaconTileEntityAccessor, Effect> getter,
             final BiConsumer<BeaconTileEntityAccessor, Effect> setter) {
         final BeaconTileEntityAccessor accessor = (BeaconTileEntityAccessor) holder;
-        if (accessor.accessor$getPrimaryEffect() != null) {
+        if (accessor.accessor$getPrimaryPower() != null) {
             setter.accept(accessor, null);
             holder.markDirty();
         }

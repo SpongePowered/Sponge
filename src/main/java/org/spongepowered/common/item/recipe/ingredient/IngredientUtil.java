@@ -29,7 +29,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.realmsclient.util.JsonUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.tags.ItemTags;
@@ -42,7 +41,6 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.accessor.item.crafting.IngredientAccessor;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -113,7 +111,7 @@ public class IngredientUtil {
             } else {
                 // Vanilla Ingredient
                 final Ingredient.IItemList itemList = Ingredient.deserializeItemList(ingredientJson);
-                return IngredientAccessor.accessor$fromItemListStream(Stream.of(itemList));
+                return IngredientAccessor.accessor$fromValues(Stream.of(itemList));
             }
         }
         if (json.isJsonArray()) {
@@ -121,7 +119,7 @@ public class IngredientUtil {
             if (jsonarray.size() == 0) {
                 throw new JsonSyntaxException("Item array cannot be empty, at least one item must be defined");
             }
-            return IngredientAccessor.accessor$fromItemListStream(StreamSupport.stream(jsonarray.spliterator(), false).map((p_209355_0_) ->
+            return IngredientAccessor.accessor$fromValues(StreamSupport.stream(jsonarray.spliterator(), false).map((p_209355_0_) ->
                     Ingredient.deserializeItemList(JSONUtils.getJsonObject(p_209355_0_, "item"))));
         }
         throw new JsonSyntaxException("Expected item to be object or array of objects");

@@ -155,14 +155,14 @@ public final class SpongeObjective implements Objective {
             final net.minecraft.scoreboard.Scoreboard scoreboard = ((ScoreObjectiveAccessor) objective).accessor$getScoreboard();
 
 
-            final Map<?, ?> map = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectives().get(name);
+            final Map<?, ?> map = ((ScoreboardAccessor) scoreboard).accessor$getPlayerScores().get(name);
 
             if (map != null) {
                 final net.minecraft.scoreboard.Score score = (net.minecraft.scoreboard.Score) map.remove(objective);
 
 
                 if (map.size() < 1) {
-                    final Map<?, ?> map1 = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectives().remove(name);
+                    final Map<?, ?> map1 = ((ScoreboardAccessor) scoreboard).accessor$getPlayerScores().remove(name);
 
                     if (map1 != null) {
                         scoreboard.onPlayerRemoved(name);
@@ -212,14 +212,14 @@ public final class SpongeObjective implements Objective {
 
     private void addScoreToScoreboard(final net.minecraft.scoreboard.Scoreboard scoreboard, final net.minecraft.scoreboard.Score score) {
         final String name = score.getPlayerName();
-        final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectives()
+        final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$getPlayerScores()
             .computeIfAbsent(name, k -> Maps.newHashMap());
 
         scoreMap.put(((ScoreAccessor) score).accessor$getObjective(), score);
 
         // Trigger refresh
         ((ScoreAccessor) score).accessor$setForceUpdate(true);
-        score.setScorePoints(((ScoreAccessor) score).accessor$getScorePoints());
+        score.setScorePoints(((ScoreAccessor) score).accessor$getCount());
     }
 
     public ScoreObjective getObjectiveFor(final net.minecraft.scoreboard.Scoreboard scoreboard) {

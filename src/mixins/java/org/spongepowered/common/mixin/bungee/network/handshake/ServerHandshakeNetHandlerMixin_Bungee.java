@@ -55,12 +55,12 @@ public abstract class ServerHandshakeNetHandlerMixin_Bungee {
     @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
     private void bungee$patchHandshake(CHandshakePacket packet, CallbackInfo ci) {
         if (SpongeConfigs.getCommon().get().getBungeeCord().getIpForwarding() && packet.getRequestedState().equals(ProtocolType.LOGIN)) {
-            final String ip = ((CHandshakePacketAccessor) packet).accessor$getIp();
+            final String ip = ((CHandshakePacketAccessor) packet).accessor$getHostName();
             final String[] split = ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
             if (split.length == 3 || split.length == 4) {
-                ((CHandshakePacketAccessor) packet).accessor$setIp(split[0]);
-                ((NetworkManagerAccessor) this.networkManager).accessor$setSocketAddress(new InetSocketAddress(split[1],
+                ((CHandshakePacketAccessor) packet).accessor$setHostName(split[0]);
+                ((NetworkManagerAccessor) this.networkManager).accessor$setAddress(new InetSocketAddress(split[1],
                         ((InetSocketAddress) this.networkManager.getRemoteAddress()).getPort()));
                 ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
 

@@ -126,7 +126,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
         if (((ServerWorldAccessor) serverWorld).accessor$isTickingEntities()) {
             // More than likely we could also be needing to remove the entity from both the entities to add
             // and the chunk.
-            ((ServerWorldAccessor) serverWorld).accessor$getEntitiesToAdd().remove(this.entityToSpawn);
+            ((ServerWorldAccessor) serverWorld).accessor$getToAddAfterTick().remove(this.entityToSpawn);
             ((ServerWorldAccessor) serverWorld).accessor$removeFromChunk(this.entityToSpawn);
         } else {
             serverWorld.removeEntity(this.entityToSpawn);

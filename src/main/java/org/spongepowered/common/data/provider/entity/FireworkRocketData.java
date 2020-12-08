@@ -66,7 +66,7 @@ public final class FireworkRocketData {
                             final ItemStack item = FireworkUtil.getItem(h);
                             final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
                             fireworks.putByte(Constants.Item.Fireworks.FLIGHT, (byte) ticks);
-                            ((FireworkRocketEntityAccessor) h).accessor$setLifeTime(10 * ticks + ((EntityAccessor) h).accessor$getRand().nextInt(6) + ((EntityAccessor) h).accessor$getRand().nextInt(7));
+                            ((FireworkRocketEntityAccessor) h).accessor$setLifetime(10 * ticks + ((EntityAccessor) h).accessor$getRandom().nextInt(6) + ((EntityAccessor) h).accessor$getRandom().nextInt(7));
                             return true;
                         });
     }
