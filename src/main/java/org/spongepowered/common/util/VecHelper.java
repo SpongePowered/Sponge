@@ -155,7 +155,7 @@ public final class VecHelper {
 
     // === Flow Vector3d --> MC Vector3d ==
 
-    public static Vector3i toVector3i(final Vector3d vector) {
+    public static Vector3i toVector3i(final org.spongepowered.math.vector.Vector3d vector) {
         if (vector == null) {
             return null;
         }
@@ -163,7 +163,7 @@ public final class VecHelper {
     }
 
     // === Flow Vector --> Rotations ===
-    public static Rotations toRotation(final Vector3d vector) {
+    public static Rotations toRotation(final org.spongepowered.math.vector.Vector3d vector) {
         if (vector == null) {
             return null;
         }
@@ -178,11 +178,13 @@ public final class VecHelper {
         return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
     }
 
-    public static boolean inBounds(final Vector3d pos, final Vector3i min, final Vector3i max) {
+    public static boolean inBounds(final org.spongepowered.math.vector.Vector3d pos, final org.spongepowered.math.vector.Vector3i min,
+                                   final org.spongepowered.math.vector.Vector3i max) {
         return VecHelper.inBounds(pos.getX(), pos.getY(), pos.getZ(), min, max);
     }
 
-    public static boolean inBounds(final double x, final double y, final double z, final Vector3i min, final Vector3i max) {
+    public static boolean inBounds(final double x, final double y, final double z, final org.spongepowered.math.vector.Vector3i min,
+                                   final org.spongepowered.math.vector.Vector3i max) {
         return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
     }
 

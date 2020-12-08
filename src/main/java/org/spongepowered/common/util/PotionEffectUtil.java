@@ -33,20 +33,20 @@ import java.util.stream.Collectors;
 
 public final class PotionEffectUtil {
 
-    public static EffectInstance copy(EffectInstance instance) {
-        return new EffectInstance(instance.getPotion(), instance.getDuration(), instance.getAmplifier(),
-                instance.isAmbient(), instance.doesShowParticles(), instance.isShowIcon());
+    public static EffectInstance copy(final EffectInstance instance) {
+        return new EffectInstance(instance.getEffect(), instance.getDuration(), instance.getAmplifier(),
+                instance.isAmbient(), instance.isVisible(), instance.showIcon());
     }
 
-    public static EffectInstance copyAsEffectInstance(PotionEffect instance) {
+    public static EffectInstance copyAsEffectInstance(final PotionEffect instance) {
         return PotionEffectUtil.copy((EffectInstance) instance);
     }
 
-    public static List<EffectInstance> copyAsEffectInstances(Collection<PotionEffect> effects) {
+    public static List<EffectInstance> copyAsEffectInstances(final Collection<PotionEffect> effects) {
         return effects.stream().map(effect -> PotionEffectUtil.copy((EffectInstance) effect)).collect(Collectors.toList());
     }
 
-    public static List<PotionEffect> copyAsPotionEffects(Collection<EffectInstance> effects) {
+    public static List<PotionEffect> copyAsPotionEffects(final Collection<EffectInstance> effects) {
         return effects.stream().map(effect -> (PotionEffect) PotionEffectUtil.copy(effect)).collect(Collectors.toList());
     }
 

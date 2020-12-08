@@ -53,7 +53,7 @@ public final class SpongeEntityRayTrace extends AbstractSpongeRayTrace<@NonNull 
 
     @Override
     List<net.minecraft.entity.Entity> selectEntities(final ServerWorld serverWorld, final AxisAlignedBB targetAABB) {
-        return ((World) serverWorld).getEntitiesInAABBexcluding(null, targetAABB, (Predicate) this.select);
+        return ((World) serverWorld).getEntities((net.minecraft.entity.Entity) null, targetAABB, (Predicate) this.select);
     }
 
     @Override
@@ -62,10 +62,10 @@ public final class SpongeEntityRayTrace extends AbstractSpongeRayTrace<@NonNull 
         RayTraceResult<@NonNull Entity> returnedEntity = null;
         final LocatableBlock locatableBlock = this.getBlock(serverWorld, vec3din, vec3dend);
         for (final net.minecraft.entity.Entity entity : this.selectEntities(serverWorld, this.getBlockAABB(locatableBlock.getBlockPosition()))) {
-            final Optional<Vector3d> vec3d = entity.getBoundingBox().rayTrace(vec3din, vec3dend);
+            final Optional<Vector3d> vec3d = entity.getBoundingBox().clip(vec3din, vec3dend);
             if (vec3d.isPresent()) {
                 final Vector3d hitPosition = vec3d.get();
-                final double sqdist = hitPosition.squareDistanceTo(vec3din);
+                final double sqdist = hitPosition.distanceToSqr(vec3din);
                 if (sqdist < currentSqDist) {
                     currentSqDist = sqdist;
                     returnedEntity = new SpongeRayTraceResult<>((Entity) entity, VecHelper.toVector3d(hitPosition));

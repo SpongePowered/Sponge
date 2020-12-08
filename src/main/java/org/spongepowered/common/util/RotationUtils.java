@@ -35,7 +35,7 @@ public final class RotationUtils {
     }
 
     public static BlockState set(final BlockState holder, final Direction value, final Property<Integer> property) {
-        return holder.with(property, (value.ordinal() + 8) % 16);
+        return holder.setValue(property, (value.ordinal() + 8) % 16);
     }
 
     private RotationUtils() {

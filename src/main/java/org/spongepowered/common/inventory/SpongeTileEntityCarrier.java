@@ -45,8 +45,8 @@ public class SpongeTileEntityCarrier implements DefaultSingleBlockCarrier {
 
     @Override
     public ServerLocation getLocation() {
-        final BlockPos pos = this.inventory.getPos();
-        return ServerLocation.of(((ServerWorld) this.inventory.getWorld()), pos.getX(), pos.getY(), pos.getZ());
+        final BlockPos pos = this.inventory.getBlockPos();
+        return ServerLocation.of(((ServerWorld) this.inventory.getLevel()), pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override

@@ -38,10 +38,9 @@ public final class UserListUtil {
         ((UserListAccessor) list).accessor$getMap().put(((UserListAccessor) list).accessor$getKeyForUser(((UserListEntryAccessor) entry).accessor$getUser()), entry);
 
         try {
-            list.writeChanges();
-        }
-        catch (IOException ioexception) {
-            UserListAccessor.accessor$geLOGGER().warn("Could not save the list after adding a user.", ioexception);
+            list.save();
+        } catch (final IOException e) {
+            UserListAccessor.accessor$geLOGGER().warn("Could not save the list after adding a user.", e);
         }
     }
 
@@ -50,10 +49,9 @@ public final class UserListUtil {
         ((UserListAccessor) list).accessor$getMap().remove(((UserListAccessor) list).accessor$getKeyForUser(object));
 
         try {
-            list.writeChanges();
-        }
-        catch (IOException ioexception) {
-            UserListAccessor.accessor$geLOGGER().warn("Could not save the list after removing a user.", ioexception);
+            list.save();
+        } catch (final IOException e) {
+            UserListAccessor.accessor$geLOGGER().warn("Could not save the list after removing a user.", e);
         }
     }
 

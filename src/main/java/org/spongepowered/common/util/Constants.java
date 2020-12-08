@@ -992,14 +992,14 @@ public final class Constants {
                 return Collections.emptyList();
             }
             final List<Enchantment> enchantments = Lists.newArrayList();
-            final ListNBT list = itemStack.getEnchantmentTagList();
+            final ListNBT list = itemStack.getEnchantmentTags();
             for (int i = 0; i < list.size(); i++) {
                 final CompoundNBT compound = list.getCompound(i);
                 final short enchantmentId = compound.getShort(Item.ITEM_ENCHANTMENT_ID);
                 final short level = compound.getShort(Item.ITEM_ENCHANTMENT_LEVEL);
 
                 final EnchantmentType enchantmentType =
-                        (EnchantmentType) Registry.ENCHANTMENT.getByValue(enchantmentId);
+                        (EnchantmentType) Registry.ENCHANTMENT.byId(enchantmentId);
                 if (enchantmentType == null) {
                     continue;
                 }
@@ -1218,8 +1218,8 @@ public final class Constants {
 
         public static final ArgumentType<?> STANDARD_STRING_ARGUMENT_TYPE = StringArgumentType.string();
         public static final ArgumentType<?> GREEDY_STRING_ARGUMENT_TYPE = StringArgumentType.greedyString();
-        public static final ArgumentType<?> NBT_ARGUMENT_TYPE = NBTCompoundTagArgument.nbt();
-        public static final ResourceLocationArgument RESOURCE_LOCATION_TYPE = ResourceLocationArgument.resourceLocation();
+        public static final ArgumentType<?> NBT_ARGUMENT_TYPE = NBTCompoundTagArgument.compoundTag();
+        public static final ResourceLocationArgument RESOURCE_LOCATION_TYPE = ResourceLocationArgument.id();
         public static final String COMMAND_BLOCK_COMMAND = "";
         public static final String SELECTOR_COMMAND = "@";
         public static final String SPONGE_HELP_COMMAND = "sponge:help";

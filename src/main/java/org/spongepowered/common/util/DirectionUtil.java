@@ -75,10 +75,10 @@ public final class DirectionUtil {
 
     public static net.minecraft.block.BlockState set(final net.minecraft.block.BlockState holder, final Direction value, final DirectionProperty property) {
         final net.minecraft.util.Direction direction = DirectionUtil.getFor(value);
-        if (direction == null || !property.getAllowedValues().contains(direction)) {
+        if (direction == null || !property.getPossibleValues().contains(direction)) {
             return holder;
         }
-        return holder.with(property, direction);
+        return holder.setValue(property, direction);
     }
 
     private DirectionUtil() {

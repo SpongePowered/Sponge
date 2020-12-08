@@ -53,38 +53,38 @@ public class CustomContainer extends Container {
     }
 
     @Override
-    public boolean canInteractWith(final PlayerEntity playerIn) {
+    public boolean stillValid(final PlayerEntity playerIn) {
         return true;
     }
 
     @Override
-    public void onContainerClosed(final PlayerEntity playerIn) {
-        super.onContainerClosed(playerIn);
-        this.inv.closeInventory(playerIn);
+    public void removed(final PlayerEntity playerIn) {
+        super.removed(playerIn);
+        this.inv.stopOpen(playerIn);
     }
 
     @Override
-    public ItemStack transferStackInSlot(final PlayerEntity playerIn, final int index) {
+    public ItemStack quickMoveStack(final PlayerEntity playerIn, final int index) {
         // Almost 1:1 copy of ChestContainer#transferStackInSlot
         ItemStack itemstack = ItemStack.EMPTY;
-        final Slot slot = this.inventorySlots.get(index);
+        final Slot slot = this.slots.get(index);
 
-        if (slot != null && slot.getHasStack()) {
-            final ItemStack itemstack1 = slot.getStack();
+        if (slot != null && slot.hasItem()) {
+            final ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
 
             if (index < this.inv.getSizeInventory()) {
-                if (!this.mergeItemStack(itemstack1, this.inv.getSizeInventory(), this.inventorySlots.size(), true)) {
+                if (!this.moveItemStackTo(itemstack1, this.inv.getSizeInventory(), this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.mergeItemStack(itemstack1, 0, this.inv.getSizeInventory(), false)) {
+            } else if (!this.moveItemStackTo(itemstack1, 0, this.inv.getSizeInventory(), false)) {
                 return ItemStack.EMPTY;
             }
 
             if (itemstack1.isEmpty()) {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             } else {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
         }
 

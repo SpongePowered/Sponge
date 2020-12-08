@@ -51,7 +51,7 @@ public class FireworkUtil {
 
     public static @Nullable FireworkEffect getStarEffect(final ItemStack item) {
         Preconditions.checkArgument(item.getItem() == Items.FIREWORK_STAR, "Item is not a firework star!");
-        @Nullable final CompoundNBT tag = item.getChildTag(Constants.Entity.Firework.EXPLOSION);
+        @Nullable final CompoundNBT tag = item.getTagElement(Constants.Entity.Firework.EXPLOSION);
         if (tag == null) {
             return null;
         }
@@ -124,10 +124,10 @@ public class FireworkUtil {
         }
 
         if (item.getItem() == Items.FIREWORK_STAR) {
-            item.setTagInfo(Constants.Entity.Firework.EXPLOSION, FireworkUtil.toCompound(effects.get(0)));
+            item.addTagElement(Constants.Entity.Firework.EXPLOSION, FireworkUtil.toCompound(effects.get(0)));
             return true;
         } else if (item.getItem() == Items.FIREWORK_ROCKET) {
-            final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
+            final CompoundNBT fireworks = item.getOrCreateTagElement(Constants.Item.Fireworks.FIREWORKS);
             fireworks.put(Constants.Item.Fireworks.EXPLOSIONS, effects.stream()
                     .map(FireworkUtil::toCompound)
                     .collect(NBTCollectors.toTagList()));
@@ -144,7 +144,7 @@ public class FireworkUtil {
 
         final List<FireworkEffect> effects;
         if (item.getItem() == Items.FIREWORK_ROCKET) {
-            @Nullable final CompoundNBT fireworks = item.getChildTag(Constants.Item.Fireworks.FIREWORKS);
+            @Nullable final CompoundNBT fireworks = item.getTagElement(Constants.Item.Fireworks.FIREWORKS);
             if (fireworks == null || !fireworks.contains(Constants.Item.Fireworks.EXPLOSIONS)) {
                 return Optional.empty();
             }
@@ -178,7 +178,7 @@ public class FireworkUtil {
             tag.remove(Constants.Entity.Firework.EXPLOSION);
             return true;
         } else if (item.getItem() == Items.FIREWORK_ROCKET) {
-            final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
+            final CompoundNBT fireworks = item.getOrCreateTagElement(Constants.Item.Fireworks.FIREWORKS);
             fireworks.remove(Constants.Item.Fireworks.EXPLOSIONS);
             return true;
         }
@@ -186,10 +186,10 @@ public class FireworkUtil {
     }
 
     public static ItemStack getItem(final FireworkRocketEntity firework) {
-        ItemStack item = firework.getDataManager().get(FireworkRocketEntityAccessor.accessor$getDATA_ID_FIREWORKS_ITEM());
+        ItemStack item = firework.getEntityData().get(FireworkRocketEntityAccessor.accessor$getDATA_ID_FIREWORKS_ITEM());
         if (item.isEmpty()) {
             item = (ItemStack) (Object) new SpongeItemStackBuilder().itemType(ItemTypes.FIREWORK_ROCKET).build();
-            firework.getDataManager().set(FireworkRocketEntityAccessor.accessor$getDATA_ID_FIREWORKS_ITEM(), item);
+            firework.getEntityData().set(FireworkRocketEntityAccessor.accessor$getDATA_ID_FIREWORKS_ITEM(), item);
         }
         return item;
     }

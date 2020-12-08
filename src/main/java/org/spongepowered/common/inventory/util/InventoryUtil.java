@@ -94,7 +94,7 @@ public final class InventoryUtil {
             return Optional.empty();
         }
 
-        ChestType chestType = chest.getBlockState().get(ChestBlock.TYPE);
+        ChestType chestType = chest.getBlockState().getValue(ChestBlock.TYPE);
         ChestTileEntity connectedChest = (ChestTileEntity) connectedChestOptional.get();
         // Logic in the instanceof check of ChestBlock.getChestInventory but with exploded ternary operators.
         if (chestType == ChestType.RIGHT) {

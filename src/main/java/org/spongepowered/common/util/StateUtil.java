@@ -32,10 +32,10 @@ import java.util.Map;
 @SuppressWarnings(value = {"unchecked", "rawtypes"})
 public final class StateUtil {
 
-    public static <O, S extends StateHolder<O, S>> S copyStatesFrom(S original, StateHolder<?,?> from) {
+    public static <O, S extends StateHolder<O, S>> S copyStatesFrom(S original, final StateHolder<?,?> from) {
         for (final Map.Entry<Property<?>, Comparable<?>> entry : from.getValues().entrySet()) {
             if (original.hasProperty(entry.getKey())) {
-                original = (S) original.with((Property) entry.getKey(), (Comparable) entry.getValue());
+                original = (S) original.setValue((Property) entry.getKey(), (Comparable) entry.getValue());
             }
         }
         return original;

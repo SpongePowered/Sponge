@@ -108,7 +108,7 @@ public final class BoundedUtil {
         if (value < min || value > max) {
             return holder;
         }
-        return holder.with(property, value);
+        return holder.setValue(property, value);
     }
 
     /**
@@ -124,7 +124,7 @@ public final class BoundedUtil {
         if (value < min) {
             return holder;
         }
-        return holder.with(property, value);
+        return holder.setValue(property, value);
     }
 
     /**
@@ -140,7 +140,7 @@ public final class BoundedUtil {
         if (value > max) {
             return holder;
         }
-        return holder.with(property, value);
+        return holder.setValue(property, value);
     }
 
     /**
@@ -157,7 +157,7 @@ public final class BoundedUtil {
         if (value < min || value > max) {
             return holder;
         }
-        return holder.with(property, value);
+        return holder.setValue(property, value);
     }
 
     /**
@@ -173,7 +173,7 @@ public final class BoundedUtil {
         if (value < min) {
             return holder;
         }
-        return holder.with(property, value);
+        return holder.setValue(property, value);
     }
 
     /**
@@ -189,7 +189,7 @@ public final class BoundedUtil {
         if (value > max) {
             return holder;
         }
-        return holder.with(property, value);
+        return holder.setValue(property, value);
     }
 
     private BoundedUtil() {

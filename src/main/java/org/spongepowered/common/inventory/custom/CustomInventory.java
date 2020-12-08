@@ -88,7 +88,7 @@ public class CustomInventory implements IInventory, CarriedBridge {
     // IInventory implementation
 
     @Override
-    public int getSizeInventory() {
+    public int getContainerSize() {
         return this.size;
     }
 
@@ -103,7 +103,7 @@ public class CustomInventory implements IInventory, CarriedBridge {
     }
 
     @Override
-    public ItemStack getStackInSlot(final int index) {
+    public ItemStack getItem(final int index) {
         int offset = 0;
         for (Inventory inv : this.inventories) {
             if (inv.capacity() > index - offset) {
@@ -118,7 +118,7 @@ public class CustomInventory implements IInventory, CarriedBridge {
     }
 
     @Override
-    public ItemStack decrStackSize(final int index, final int count) {
+    public ItemStack removeItem(final int index, final int count) {
         int offset = 0;
         for (Inventory inv : this.inventories) {
             if (inv.capacity() <= index - offset) {
@@ -132,7 +132,7 @@ public class CustomInventory implements IInventory, CarriedBridge {
     }
 
     @Override
-    public ItemStack removeStackFromSlot(final int index) {
+    public ItemStack removeItemNoUpdate(final int index) {
         int offset = 0;
         for (Inventory inv : this.inventories) {
             if (inv.capacity() > index - offset) {
@@ -145,7 +145,7 @@ public class CustomInventory implements IInventory, CarriedBridge {
     }
 
     @Override
-    public void setInventorySlotContents(final int index, final ItemStack stack) {
+    public void setItem(final int index, final ItemStack stack) {
         int offset = 0;
         for (Inventory inv : this.inventories) {
             if (inv.capacity() > index - offset) {
@@ -157,21 +157,21 @@ public class CustomInventory implements IInventory, CarriedBridge {
     }
 
     @Override
-    public void markDirty() {
+    public void setChanged() {
         for (Inventory inventory : this.inventories) {
             if (inventory instanceof IInventory) {
-                ((IInventory) inventory).markDirty();
+                ((IInventory) inventory).setChanged();
             }
         }
     }
 
     @Override
-    public boolean isUsableByPlayer(final PlayerEntity player) {
+    public boolean stillValid(final PlayerEntity player) {
         return true;
     }
 
     @Override
-    public void clear() {
+    public void clearContent() {
         for (Inventory inventory : this.inventories) {
             inventory.clear();
         }

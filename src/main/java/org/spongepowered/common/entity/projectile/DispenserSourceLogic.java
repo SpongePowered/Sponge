@@ -58,22 +58,22 @@ public final class DispenserSourceLogic implements ProjectileSourceLogic<Dispens
         if (projectile.isPresent()) {
             final Direction enumfacing = DispenserSourceLogic.getFacing((DispenserTileEntity) source);
             final net.minecraft.entity.Entity projectileEntity = (net.minecraft.entity.Entity) projectile.get();
-            final BlockPos adjustedPosition = projectileEntity.getPosition().add(enumfacing.getDirectionVec());
-            projectileEntity.setPosition(adjustedPosition.getX(), adjustedPosition.getY(), adjustedPosition.getZ());
+            final BlockPos adjustedPosition = projectileEntity.blockPosition().offset(enumfacing.getNormal());
+            projectileEntity.setPos(adjustedPosition.getX(), adjustedPosition.getY(), adjustedPosition.getZ());
         }
         return projectile;
     }
 
     public static Direction getFacing(final DispenserTileEntity dispenser) {
-        final BlockState state = dispenser.getWorld().getBlockState(dispenser.getPos());
-        return state.get(DispenserBlock.FACING);
+        final BlockState state = dispenser.getLevel().getBlockState(dispenser.getBlockPos());
+        return state.getValue(DispenserBlock.FACING);
     }
 
     @SuppressWarnings("unchecked")
     private <P extends Projectile> Optional<P> launch(final DispenserTileEntity dispenser, final EntityType<P> projectileType, final Item item) {
         final IDispenseItemBehavior behavior = DispenserBlockAccessor.accessor$getDISPENSER_REGISTRY().get(item);
-        final ServerWorld world = (ServerWorld) dispenser.getWorld();
-        behavior.dispense(new ProxyBlockSource(world, dispenser.getPos()), new ItemStack(item));
+        final ServerWorld world = (ServerWorld) dispenser.getLevel();
+        behavior.dispense(new ProxyBlockSource(world, dispenser.getBlockPos()), new ItemStack(item));
         final List<Entity> entities = world.getEntities((net.minecraft.entity.EntityType<?>) projectileType, entity -> true);
         if (entities.isEmpty()) {
             return Optional.empty();

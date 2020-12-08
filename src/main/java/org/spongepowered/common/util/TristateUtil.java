@@ -25,7 +25,6 @@
 package org.spongepowered.common.util;
 
 import com.google.common.collect.EnumBiMap;
-import com.google.common.collect.ImmutableBiMap;
 import net.minecraft.util.ActionResultType;
 import org.spongepowered.api.util.Tristate;
 

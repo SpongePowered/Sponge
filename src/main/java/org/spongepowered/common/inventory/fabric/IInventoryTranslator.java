@@ -48,31 +48,31 @@ class IInventoryTranslator implements InventoryTranslator<IInventory> {
 
     @Override
     public ItemStack getStack(IInventory inventory, int index) {
-        return inventory.getStackInSlot(index);
+        return inventory.getItem(index);
     }
 
     @Override
     public void setStack(IInventory inventory, int index, ItemStack stack) {
-        inventory.setInventorySlotContents(index, stack);
+        inventory.setItem(index, stack);
     }
 
     @Override
     public int getMaxStackSize(IInventory inventory) {
-        return inventory.getInventoryStackLimit();
+        return inventory.getMaxStackSize();
     }
 
     @Override
     public int getSize(IInventory inventory) {
-        return inventory.getSizeInventory();
+        return inventory.getContainerSize();
     }
 
     @Override
     public void clear(IInventory inventory) {
-        inventory.clear();
+        inventory.clearContent();
     }
 
     @Override
     public void markDirty(IInventory inventory) {
-        inventory.markDirty();
+        inventory.setChanged();
     }
 }

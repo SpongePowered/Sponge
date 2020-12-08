@@ -37,6 +37,7 @@ import net.minecraft.network.play.server.SPlayerListItemPacket;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.GameType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
@@ -46,7 +47,6 @@ import org.spongepowered.common.accessor.network.play.server.SPlayerListItemPack
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -57,8 +57,8 @@ public final class SpongeTabList implements TabList {
 
     private static final ITextComponent EMPTY_COMPONENT = new StringTextComponent("");
     private final ServerPlayerEntity player;
-    @Nullable private Component header;
-    @Nullable private Component footer;
+    private @Nullable Component header;
+    private @Nullable Component footer;
     private final Map<UUID, TabListEntry> entries = Maps.newHashMap();
 
     public SpongeTabList(final ServerPlayerEntity player) {
@@ -76,7 +76,7 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public TabList setHeader(@Nullable final Component header) {
+    public TabList setHeader(final @Nullable Component header) {
         this.header = header;
 
         this.refreshClientHeaderFooter();
@@ -90,7 +90,7 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public TabList setFooter(@Nullable final Component footer) {
+    public TabList setFooter(final @Nullable Component footer) {
         this.footer = footer;
 
         this.refreshClientHeaderFooter();
@@ -115,7 +115,7 @@ public final class SpongeTabList implements TabList {
         // MC-98180 - Sending null as header or footer will cause an exception on the client
         ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setHeader(this.header == null ? SpongeTabList.EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.header));
         ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setFooter(this.footer == null ? SpongeTabList.EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.footer));
-        this.player.connection.sendPacket(packet);
+        this.player.connection.send(packet);
     }
 
     @Override
@@ -145,7 +145,7 @@ public final class SpongeTabList implements TabList {
                     this,
                     SpongeGameProfile.of(entry.getProfile()),
                     entry.getDisplayName() == null ? null : SpongeAdventure.asAdventure(entry.getDisplayName()),
-                    entry.getPing(),
+                    entry.getLatency(),
                     (GameMode) (Object) entry.getGameMode()
             ), false);
         }
@@ -194,7 +194,7 @@ public final class SpongeTabList implements TabList {
             entry.getLatency(), (GameType) (Object) entry.getGameMode(),
             entry.getDisplayName().isPresent() ? SpongeAdventure.asVanilla(entry.getDisplayName().get()) : null);
         ((SPlayerListItemPacketAccessor) packet).accessor$getEntries().add(data);
-        this.player.connection.sendPacket(packet);
+        this.player.connection.send(packet);
     }
 
     /**
@@ -221,7 +221,7 @@ public final class SpongeTabList implements TabList {
                         entry.setDisplayName(data.getDisplayName() == null ? null : SpongeAdventure.asAdventure(data.getDisplayName()));
                     } else if (action == SPlayerListItemPacket.Action.UPDATE_LATENCY) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
-                        entry.setLatency(data.getPing());
+                        entry.setLatency(data.getLatency());
                     } else if (action == SPlayerListItemPacket.Action.UPDATE_GAME_MODE) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
                         entry.setGameMode((GameMode) (Object) data.getGameMode());

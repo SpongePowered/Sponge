@@ -228,10 +228,10 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
                 }
                 final AxisAlignedBB targetAABB = this.getBlockAABB(currentBlock);
                 for (final net.minecraft.entity.Entity entity : this.getFailingEntities(serverWorld, targetAABB)) {
-                    final Optional<net.minecraft.util.math.vector.Vector3d> vec3d = entity.getBoundingBox().rayTrace(vec3dstart, vec3dend);
+                    final Optional<net.minecraft.util.math.vector.Vector3d> vec3d = entity.getBoundingBox().clip(vec3dstart, vec3dend);
                     if (vec3d.isPresent()) {
                         final net.minecraft.util.math.vector.Vector3d hitPosition = vec3d.get();
-                        final double sqdist = hitPosition.squareDistanceTo(vec3dstart);
+                        final double sqdist = hitPosition.distanceToSqr(vec3dstart);
                         if (sqdist < resultDistance) {
                             // We have a failure, so at this point we just bail out and end the trace.
                             return Optional.empty();
@@ -290,7 +290,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     private List<net.minecraft.entity.Entity> getFailingEntities(final ServerWorld serverWorld, final AxisAlignedBB targetAABB) {
-        return ((World) serverWorld).getEntitiesInAABBexcluding(null, targetAABB, (Predicate) this.continueWhileEntity.negate());
+        return ((World) serverWorld).getEntities((net.minecraft.entity.Entity) null, targetAABB, (Predicate) this.continueWhileEntity.negate());
     }
 
     boolean requiresEntityTracking() {

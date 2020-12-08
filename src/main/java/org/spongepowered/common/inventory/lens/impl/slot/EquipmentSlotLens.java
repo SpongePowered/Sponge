@@ -49,7 +49,7 @@ public class EquipmentSlotLens extends FilteringSlotLens {
 
     private static FilteringSlotLens.ItemStackFilter equipmentTypeFilter(EquipmentType type) {
         return (fabric, item) -> {
-            final EquipmentSlotType itemSlotType = MobEntity.getSlotForItemStack(ItemStackUtil.toNative(item));
+            final EquipmentSlotType itemSlotType = MobEntity.getEquipmentSlotForItem(ItemStackUtil.toNative(item));
             return itemSlotType == (Object) type;
         };
     }

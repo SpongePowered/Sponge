@@ -28,26 +28,25 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NumberNBT;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.util.Constants;
 
 public final class NBTUtil {
 
-    public static @Nullable Boolean getNullableBoolean(CompoundNBT compound, String key) {
+    public static @Nullable Boolean getNullableBoolean(final CompoundNBT compound, final String key) {
         final INBT tag = compound.get(key);
         if (tag instanceof NumberNBT) {
-            return ((NumberNBT) tag).getByte() != 0;
+            return ((NumberNBT) tag).getAsByte() != 0;
         }
         return null;
     }
 
-    public static @Nullable CompoundNBT getNullableCompound(CompoundNBT compound, String key) {
+    public static @Nullable CompoundNBT getNullableCompound(final CompoundNBT compound, final String key) {
         if (!compound.contains(key, Constants.NBT.TAG_COMPOUND)) {
             return null;
         }
         return compound.getCompound(key);
     }
 
-    public static CompoundNBT getOrCreateCompound(CompoundNBT compound, String key) {
+    public static CompoundNBT getOrCreateCompound(final CompoundNBT compound, final String key) {
         if (!compound.contains(key, Constants.NBT.TAG_COMPOUND)) {
             final CompoundNBT child = new CompoundNBT();
             compound.put(key, child);

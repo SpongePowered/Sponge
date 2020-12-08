@@ -36,28 +36,28 @@ import java.util.stream.Stream;
 
 public final class NBTStreams {
 
-    public static Stream<CompoundNBT> toCompounds(Iterable<INBT> iterable) {
+    public static Stream<CompoundNBT> toCompounds(final Iterable<INBT> iterable) {
         return Streams.stream(iterable)
                 .filter(tag -> tag instanceof CompoundNBT)
                 .map(tag -> (CompoundNBT) tag);
     }
 
-    public static Stream<String> toStrings(Iterable<INBT> iterable) {
+    public static Stream<String> toStrings(final Iterable<INBT> iterable) {
         return Streams.stream(iterable)
                 .filter(tag -> tag instanceof StringNBT)
-                .map(INBT::getString);
+                .map(INBT::getAsString);
     }
 
-    public static LongStream toLongs(Iterable<INBT> iterable) {
+    public static LongStream toLongs(final Iterable<INBT> iterable) {
         return Streams.stream(iterable)
                 .filter(tag -> tag instanceof NumberNBT)
-                .mapToLong(tag -> ((NumberNBT) tag).getLong());
+                .mapToLong(tag -> ((NumberNBT) tag).getAsLong());
     }
 
-    public static IntStream toInts(Iterable<INBT> iterable) {
+    public static IntStream toInts(final Iterable<INBT> iterable) {
         return Streams.stream(iterable)
                 .filter(tag -> tag instanceof NumberNBT)
-                .mapToInt(tag -> ((NumberNBT) tag).getInt());
+                .mapToInt(tag -> ((NumberNBT) tag).getAsInt());
     }
 
     private NBTStreams() {
