@@ -38,7 +38,7 @@ import java.util.Optional;
 public final class EntitySilentConverter extends DataParameterConverter<Boolean> {
 
     public EntitySilentConverter() {
-        super(EntityAccessor.accessor$getDATA_SILENT());
+        super(EntityAccessor.accessor$DATA_SILENT());
     }
 
     @Override

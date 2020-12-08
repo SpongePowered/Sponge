@@ -113,8 +113,8 @@ public final class SpongeTabList implements TabList {
     private void refreshClientHeaderFooter() {
         final SPlayerListHeaderFooterPacket packet = new SPlayerListHeaderFooterPacket();
         // MC-98180 - Sending null as header or footer will cause an exception on the client
-        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setHeader(this.header == null ? SpongeTabList.EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.header));
-        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setFooter(this.footer == null ? SpongeTabList.EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.footer));
+        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$header(this.header == null ? SpongeTabList.EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.header));
+        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$footer(this.footer == null ? SpongeTabList.EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.footer));
         this.player.connection.send(packet);
     }
 
@@ -189,11 +189,11 @@ public final class SpongeTabList implements TabList {
     @SuppressWarnings("ConstantConditions")
     void sendUpdate(final TabListEntry entry, final SPlayerListItemPacket.Action action) {
         final SPlayerListItemPacket packet = new SPlayerListItemPacket();
-        ((SPlayerListItemPacketAccessor) packet).accessor$setAction(action);
+        ((SPlayerListItemPacketAccessor) packet).accessor$action(action);
         final SPlayerListItemPacket.AddPlayerData data = packet.new AddPlayerData(SpongeGameProfile.toMcProfile(entry.getProfile()),
             entry.getLatency(), (GameType) (Object) entry.getGameMode(),
             entry.getDisplayName().isPresent() ? SpongeAdventure.asVanilla(entry.getDisplayName().get()) : null);
-        ((SPlayerListItemPacketAccessor) packet).accessor$getEntries().add(data);
+        ((SPlayerListItemPacketAccessor) packet).accessor$entries().add(data);
         this.player.connection.send(packet);
     }
 
@@ -207,8 +207,8 @@ public final class SpongeTabList implements TabList {
      */
     @SuppressWarnings("ConstantConditions")
     public void updateEntriesOnSend(final SPlayerListItemPacket packet) {
-        for (final SPlayerListItemPacket.AddPlayerData data : ((SPlayerListItemPacketAccessor) packet).accessor$getEntries()) {
-            final SPlayerListItemPacket.Action action = ((SPlayerListItemPacketAccessor) packet).accessor$getAction();
+        for (final SPlayerListItemPacket.AddPlayerData data : ((SPlayerListItemPacketAccessor) packet).accessor$entries()) {
+            final SPlayerListItemPacket.Action action = ((SPlayerListItemPacketAccessor) packet).accessor$action();
             if (action == SPlayerListItemPacket.Action.ADD_PLAYER) {
                 // If an entry with the same id exists nothing will be done
                 this.addEntry(data);

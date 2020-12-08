@@ -53,7 +53,7 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
             new net.minecraft.util.EntityDamageSource(this.damageType.getKey().getValue(), (net.minecraft.entity.Entity) this.reference.get());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
         if (this.creative) {
-            accessor.accessor$setBypassInvul();
+            accessor.invoker$bypassInvul();
         }
         if (this.scales) {
             damageSource.setDifficultyScaled();
@@ -62,16 +62,16 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
             damageSource.setMagicDamage();
         }
         if (this.bypasses) {
-            accessor.accessor$setBypassArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.absolute) {
-            accessor.accessor$setBypassMagic();
+            accessor.invoker$bypassMagic();
         }
         if (this.explosion) {
             damageSource.setExplosion();
         }
         if (this.exhaustion != null) {
-            accessor.accessor$setExhaustion(this.exhaustion.floatValue());
+            accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
         return (EntityDamageSource) damageSource;
     }

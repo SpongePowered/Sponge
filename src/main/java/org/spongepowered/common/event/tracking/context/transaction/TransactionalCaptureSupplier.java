@@ -280,9 +280,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         entity.writeWithoutTypeId(tag);
         final @Nullable DamageSource lastAttacker;
         if (entity instanceof LivingEntity) {
-            final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).accessor$getMostSignificantFall();
+            final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).invoker$getMostSignificantFall();
             if (entry != null) {
-                lastAttacker = ((CombatEntryAccessor) entry).accessor$getSource();
+                lastAttacker = ((CombatEntryAccessor) entry).accessor$source();
             } else {
                 lastAttacker = null;
             }

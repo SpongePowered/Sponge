@@ -28,23 +28,26 @@ import net.minecraft.util.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(DamageSource.class)
 public interface DamageSourceAccessor {
 
-    @Invoker("<init>") static DamageSource accessor$init(String id) {
-        throw new AssertionError("Untransformed Accessor!");
+    @Invoker("<init>")
+    static DamageSource invoker$new(final String msgId) {
+        throw new UntransformedInvokerError();
     }
 
-    @Accessor("exhaustion") void accessor$setExhaustion(float exhaustion);
+    @Accessor("exhaustion") void accessor$exhaustion(final float exhaustion);
 
-    @Accessor("msgId") void accessor$setMsgId(String msgId);
+    @Accessor("msgId") void accessor$msgId(final String msgId);
 
-    @Invoker("bypassInvul") DamageSource accessor$setBypassInvul();
+    @Invoker("bypassArmor") DamageSource invoker$bypassArmor();
 
-    @Invoker("bypassArmor") DamageSource accessor$setBypassArmor();
+    @Invoker("bypassInvul") DamageSource invoker$bypassInvul();
 
-    @Invoker("bypassMagic") DamageSource accessor$setBypassMagic();
+    @Invoker("bypassMagic") DamageSource invoker$bypassMagic();
 
-    @Invoker("setIsFire") DamageSource accessor$setIsFire();
+    @Invoker("setIsFire") DamageSource invoker$setIsFire();
+
 }

@@ -59,7 +59,7 @@ public abstract class HopperTileEntityMixin_Inventory {
             at = @At(value = "INVOKE",
                      target = "Lnet/minecraft/tileentity/HopperTileEntity;isInventoryEmpty(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/Direction;)Z"))
     private static boolean impl$throwTransferPreIfNotEmpty(final IInventory inventory, final Direction facing, final IHopper hopper) {
-        final boolean result = HopperTileEntityAccessor.accessor$isEmptyContainer(inventory, facing);
+        final boolean result = HopperTileEntityAccessor.invoker$isEmptyContainer(inventory, facing);
         if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
             return result;
         }
@@ -86,17 +86,17 @@ public abstract class HopperTileEntityMixin_Inventory {
             final int index, final Direction direction) {
         // capture Transaction
         if (!((source instanceof TrackedInventoryBridge || destination instanceof TrackedInventoryBridge) && destination instanceof InventoryAdapter)) {
-            return HopperTileEntityAccessor.accessor$tryMoveInItem(source, destination, stack, index, direction);
+            return HopperTileEntityAccessor.invoker$tryMoveInItem(source, destination, stack, index, direction);
         }
         if (!ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
-            return HopperTileEntityAccessor.accessor$tryMoveInItem(source, destination, stack, index, direction);
+            return HopperTileEntityAccessor.invoker$tryMoveInItem(source, destination, stack, index, direction);
         }
         TrackedInventoryBridge captureIn = HopperTileEntityMixin_Inventory.impl$forCapture(source);
         if (captureIn == null) {
             captureIn = HopperTileEntityMixin_Inventory.impl$forCapture(destination);
         }
         return InventoryEventFactory.captureTransaction(captureIn, InventoryUtil.toInventory(destination), index,
-                () -> HopperTileEntityAccessor.accessor$tryMoveInItem(source, destination, stack, index, direction));
+                () -> HopperTileEntityAccessor.invoker$tryMoveInItem(source, destination, stack, index, direction));
     }
 
     // Post Captured Transactions

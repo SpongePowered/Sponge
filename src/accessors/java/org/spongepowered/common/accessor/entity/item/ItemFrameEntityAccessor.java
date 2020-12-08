@@ -32,6 +32,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(ItemFrameEntity.class)
 public interface ItemFrameEntityAccessor {
 
-    @Invoker("dropItem") void accessor$dropItem(Entity entity, boolean drop);
+    @Invoker("dropItem") void invoker$dropItem(final Entity entity, final boolean drop);
 
 }

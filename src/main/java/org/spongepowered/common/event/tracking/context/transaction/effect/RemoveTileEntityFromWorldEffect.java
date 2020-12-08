@@ -54,12 +54,12 @@ public final class RemoveTileEntityFromWorldEffect implements ProcessingSideEffe
         }
         final ServerWorld serverWorld = pipeline.getServerWorld();
         final WorldAccessor worldAccessor = (WorldAccessor) serverWorld;
-        if (worldAccessor.accessor$getUpdatingBlockEntities()) {
+        if (worldAccessor.accessor$updatingBlockEntities()) {
             tileEntity.remove();
-            worldAccessor.accessor$getPendingBlockEntities().remove(tileEntity);
+            worldAccessor.accessor$pendingBlockEntities().remove(tileEntity);
             return EffectResult.NULL_RETURN;
         }
-        worldAccessor.accessor$getPendingBlockEntities().remove(tileEntity);
+        worldAccessor.accessor$pendingBlockEntities().remove(tileEntity);
         serverWorld.loadedTileEntityList.remove(tileEntity);
         serverWorld.tickableTileEntities.remove(tileEntity);
         return EffectResult.NULL_PASS;

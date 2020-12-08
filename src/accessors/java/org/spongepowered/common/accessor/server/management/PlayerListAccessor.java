@@ -33,15 +33,20 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(PlayerList.class)
 public interface PlayerListAccessor {
 
-    @Accessor("LOGGER") Logger accessor$getLogger();
+    @Accessor("LOGGER")
+    static Logger accessor$LOGGER() {
+        throw new UntransformedAccessorError();
+    }
 
-    @Accessor("server") MinecraftServer accessor$getServer();
+    @Accessor("server") MinecraftServer accessor$server();
 
-    @Accessor("playerIo") PlayerData accessor$getPlayerIo();
+    @Accessor("playerIo") PlayerData accessor$playerIo();
 
-    @Invoker("updatePlayerGameMode") void accessor$updatePlayerGameMode(ServerPlayerEntity target, ServerPlayerEntity source, ServerWorld world);
+    @Invoker("updatePlayerGameMode") void invoker$updatePlayerGameMode(final ServerPlayerEntity target, final ServerPlayerEntity source, final ServerWorld world);
+
 }

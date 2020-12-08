@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(PlayerData.class)
 public interface PlayerDataAccessor {
 
-    @Accessor("playerDir") File accessor$getPlayerDir();
+    @Accessor("playerDir") File accessor$playerDir();
+
 }

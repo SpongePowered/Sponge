@@ -201,7 +201,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
         if (chunkProvider instanceof ServerChunkProvider) {
             final ChunkManagerAccessor chunkManager = (ChunkManagerAccessor) ((ServerChunkProvider) chunkProvider).chunkManager;
             final List<Chunk> chunks = new ArrayList<>();
-            chunkManager.accessor$getChunks().forEach(holder -> chunks.add((Chunk) holder.getChunkIfComplete()));
+            chunkManager.invoker$getChunks().forEach(holder -> chunks.add((Chunk) holder.getChunkIfComplete()));
             return chunks;
         }
         return Collections.emptyList();
@@ -283,8 +283,8 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     public void sendBlockChange(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState state) {
         Preconditions.checkNotNull(state, "state");
         final SChangeBlockPacket packet = new SChangeBlockPacket();
-        ((SChangeBlockPacketAccessor) packet).accessor$setPos(new BlockPos(x, y, z));
-        ((SChangeBlockPacketAccessor) packet).accessor$setBlockState((BlockState) state);
+        ((SChangeBlockPacketAccessor) packet).accessor$pos(new BlockPos(x, y, z));
+        ((SChangeBlockPacketAccessor) packet).accessor$blockState((BlockState) state);
 
         ((net.minecraft.world.World) (Object) this).getPlayers().stream()
                 .filter(ServerPlayerEntity.class::isInstance)

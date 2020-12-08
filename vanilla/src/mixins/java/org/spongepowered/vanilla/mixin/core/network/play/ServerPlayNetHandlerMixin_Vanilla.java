@@ -69,7 +69,7 @@ public abstract class ServerPlayNetHandlerMixin_Vanilla implements IServerPlayNe
     private void onHandleCustomPayload(final CCustomPayloadPacket packet, final CallbackInfo ci) {
         // For some reason, "CCustomPayloadPacket" is released in the processPacket
         // method of its class, only applicable to this packet, so just retain here.
-        ((CCustomPayloadPacketAccessor) packet).accessor$getData().retain();
+        ((CCustomPayloadPacketAccessor) packet).accessor$data().retain();
 
         final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.getChannelRegistry();
         this.server.execute(() -> channelRegistry.handlePlayPayload((EngineConnection) this, packet));

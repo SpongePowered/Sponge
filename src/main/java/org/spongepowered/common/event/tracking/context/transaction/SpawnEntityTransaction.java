@@ -123,11 +123,11 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     @Override
     public void restore() {
         final ServerWorld serverWorld = this.worldSupplier.get();
-        if (((ServerWorldAccessor) serverWorld).accessor$isTickingEntities()) {
+        if (((ServerWorldAccessor) serverWorld).accessor$tickingEntities()) {
             // More than likely we could also be needing to remove the entity from both the entities to add
             // and the chunk.
-            ((ServerWorldAccessor) serverWorld).accessor$getToAddAfterTick().remove(this.entityToSpawn);
-            ((ServerWorldAccessor) serverWorld).accessor$removeFromChunk(this.entityToSpawn);
+            ((ServerWorldAccessor) serverWorld).accessor$toAddAfterTick().remove(this.entityToSpawn);
+            ((ServerWorldAccessor) serverWorld).invoker$removeFromChunk(this.entityToSpawn);
         } else {
             serverWorld.removeEntity(this.entityToSpawn);
         }

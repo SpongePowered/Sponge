@@ -42,20 +42,20 @@ public final class FoxData {
         registrator
                 .asMutable(FoxEntity.class)
                     .create(Keys.FIRST_TRUSTED)
-                        .get(h -> h.getDataManager().get(FoxEntityAccessor.accessor$getDATA_TRUSTED_ID_1()).orElse(null))
-                        .set((h, v) -> h.getDataManager().set(FoxEntityAccessor.accessor$getDATA_TRUSTED_ID_1(), Optional.ofNullable(v)))
+                        .get(h -> h.getDataManager().get(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_1()).orElse(null))
+                        .set((h, v) -> h.getDataManager().set(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_1(), Optional.ofNullable(v)))
                     .create(Keys.FOX_TYPE)
                         .get(h -> (FoxType) (Object) h.getVariantType())
-                        .set((h, v) -> ((FoxEntityAccessor) h).accessor$setFoxType((FoxEntity.Type) (Object) v))
+                        .set((h, v) -> ((FoxEntityAccessor) h).invoker$setFoxType((FoxEntity.Type) (Object) v))
                     .create(Keys.IS_CROUCHING)
                         .get(FoxEntity::isCrouching)
                         .set(FoxEntity::setCrouching)
                     .create(Keys.IS_DEFENDING)
-                        .get(h -> ((FoxEntityAccessor) h).accessor$isDefending())
-                        .set((h, v) -> ((FoxEntityAccessor) h).accessor$setDefending(v))
+                        .get(h -> ((FoxEntityAccessor) h).invoker$isDefending())
+                        .set((h, v) -> ((FoxEntityAccessor) h).invoker$setDefending(v))
                     .create(Keys.IS_FACEPLANTED)
                         .get(FoxEntity::isStuck)
-                        .set((h, v) -> ((FoxEntityAccessor) h).accessor$setFaceplanted(v))
+                        .set((h, v) -> ((FoxEntityAccessor) h).invoker$setFaceplanted(v))
                     .create(Keys.IS_INTERESTED)
                         .get(FoxEntity::func_213467_eg)
                         .set(FoxEntity::func_213502_u)
@@ -64,10 +64,10 @@ public final class FoxData {
                         .set(FoxEntity::func_213461_s)
                     .create(Keys.IS_SLEEPING)
                         .get(FoxEntity::isSleeping)
-                        .set((h, v) -> ((FoxEntityAccessor) h).accessor$setSleeping(v))
+                        .set((h, v) -> ((FoxEntityAccessor) h).invoker$setSleeping(v))
                     .create(Keys.SECOND_TRUSTED)
-                        .get(h -> h.getDataManager().get(FoxEntityAccessor.accessor$getDATA_TRUSTED_ID_0()).orElse(null))
-                        .set((h, v) -> h.getDataManager().set(FoxEntityAccessor.accessor$getDATA_TRUSTED_ID_0(), Optional.ofNullable(v)));
+                        .get(h -> h.getDataManager().get(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_0()).orElse(null))
+                        .set((h, v) -> h.getDataManager().set(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_0(), Optional.ofNullable(v)));
     }
     // @formatter:on
 }

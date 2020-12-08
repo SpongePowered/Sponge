@@ -31,5 +31,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(BlazeEntity.class)
 public interface BlazeEntityAccessor {
 
-    @Invoker("setCharged") void accessor$setCharged(boolean charged);
+    @Invoker("setCharged") void invoker$setCharged(final boolean charged);
+
 }

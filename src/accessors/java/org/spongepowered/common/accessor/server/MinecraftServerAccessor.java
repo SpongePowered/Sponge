@@ -29,32 +29,34 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.storage.CommandStorage;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor {
 
-    @Accessor("LOGGER") static Logger accessor$getLogger() {
-        throw new RuntimeException("Accessor was not mixed!");
+    @Accessor("LOGGER")
+    static Logger accessor$LOGGER() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("commandStorage") void accessor$setCommandStorage(CommandStorage commandStorage);
+    @Accessor("fixerUpper") DataFixer accessor$fixerUpper();
 
-    @Accessor("sessionService") MinecraftSessionService accessor$getSessionService();
+    @Accessor("sessionService") MinecraftSessionService accessor$sessionService();
 
-    @Accessor("profileRepository") GameProfileRepository accessor$getProfileRepository();
+    @Accessor("profileRepository") GameProfileRepository accessor$profileRepository();
 
-    @Accessor("profileCache") PlayerProfileCache accessor$getProfileCache();
+    @Accessor("profileCache") PlayerProfileCache accessor$profileCache();
 
-    @Mutable @Accessor("profileCache") void accessor$setProfileCache(PlayerProfileCache profileCache);
+    @Mutable @Accessor("profileCache") void accessor$profileCache(final PlayerProfileCache profileCache);
 
-    @Accessor("fixerUpper") DataFixer accessor$getFixerUpper();
+    @Accessor("commandStorage") void accessor$commandStorage(final CommandStorage commandStorage);
 
-    @Invoker("isSpawningMonsters") boolean accessor$isSpawningMonsters();
+    @Invoker("isSpawningMonsters") boolean invoker$isSpawningMonsters();
+
 }

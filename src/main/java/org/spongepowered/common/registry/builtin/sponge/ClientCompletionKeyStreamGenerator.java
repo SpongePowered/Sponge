@@ -59,9 +59,9 @@ public final class ClientCompletionKeyStreamGenerator {
 
     private static ClientCompletionKey<?> transform(final Map.Entry<ResourceLocation, ArgumentTypes_EntryAccessor> entry) {
         final ResourceKey key = ResourceKey.sponge(entry.getKey().getPath());
-        final IArgumentSerializer<?> serializer = entry.getValue().accessor$getSerializer();
+        final IArgumentSerializer<?> serializer = entry.getValue().accessor$serializer();
         if (serializer instanceof ArgumentSerializerAccessor) {
-            return new SpongeBasicClientCompletionKey(key, ((ArgumentSerializerAccessor<?>) serializer).accessor$getConstructor().get());
+            return new SpongeBasicClientCompletionKey(key, ((ArgumentSerializerAccessor<?>) serializer).accessor$constructor().get());
         }
         if (serializer instanceof EntityArgument.Serializer) {
             return new SpongeEntityClientCompletionKey(key);

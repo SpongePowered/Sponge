@@ -41,23 +41,23 @@ public final class TurtleData {
                 .asMutable(TurtleEntity.class)
                     .create(Keys.HAS_EGG)
                         .get(TurtleEntity::hasEgg)
-                        .set((h, v) -> ((TurtleEntityAccessor) h).accessor$setHasEgg(v))
+                        .set((h, v) -> ((TurtleEntityAccessor) h).invoker$setHasEgg(v))
                     .create(Keys.HOME_POSITION)
                         .get(h -> VecHelper.toVector3i(h.getHomePosition()))
                         .set((h, v) -> h.setHome(VecHelper.toBlockPos(v)))
                     .create(Keys.IS_LAYING_EGG)
                         .get(TurtleEntity::isDigging)
-                        .set((h, v) -> ((TurtleEntityAccessor) h).accessor$setLayingEgg(v))
+                        .set((h, v) -> ((TurtleEntityAccessor) h).invoker$setLayingEgg(v))
                 .asMutable(TurtleEntityAccessor.class)
                     .create(Keys.IS_GOING_HOME)
-                        .get(TurtleEntityAccessor::accessor$isGoingHome)
-                        .set(TurtleEntityAccessor::accessor$setGoingHome)
+                        .get(TurtleEntityAccessor::invoker$isGoingHome)
+                        .set(TurtleEntityAccessor::invoker$setGoingHome)
                     .create(Keys.IS_TRAVELING)
-                        .get(TurtleEntityAccessor::accessor$isTravelling)
-                        .set(TurtleEntityAccessor::accessor$setTravelling)
+                        .get(TurtleEntityAccessor::invoker$isTravelling)
+                        .set(TurtleEntityAccessor::invoker$setTravelling)
                     .create(Keys.TARGET_POSITION)
-                        .get(h -> VecHelper.toVector3i(h.accessor$getTravelPos()))
-                        .set((h, v) -> h.accessor$setTravelPos(VecHelper.toBlockPos(v)));
+                        .get(h -> VecHelper.toVector3i(h.invoker$getTravelPos()))
+                        .set((h, v) -> h.invoker$setTravelPos(VecHelper.toBlockPos(v)));
     }
     // @formatter:on
 }

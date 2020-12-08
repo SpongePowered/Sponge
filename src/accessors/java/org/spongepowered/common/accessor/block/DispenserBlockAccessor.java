@@ -29,6 +29,7 @@ import net.minecraft.dispenser.IDispenseItemBehavior;
 import net.minecraft.item.Item;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Map;
 
@@ -36,7 +37,8 @@ import java.util.Map;
 public interface DispenserBlockAccessor {
 
     @Accessor("DISPENSER_REGISTRY")
-    static Map<Item, IDispenseItemBehavior> accessor$getDISPENSER_REGISTRY() {
-        throw new UnsupportedOperationException("Untransformed Accessor!");
+    static Map<Item, IDispenseItemBehavior> accessor$DISPENSER_REGISTRY() {
+        throw new UntransformedAccessorError();
     }
+
 }

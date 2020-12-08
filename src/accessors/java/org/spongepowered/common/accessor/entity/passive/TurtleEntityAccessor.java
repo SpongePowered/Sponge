@@ -32,19 +32,20 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(TurtleEntity.class)
 public interface TurtleEntityAccessor {
 
-    @Invoker("setHasEgg") void accessor$setHasEgg(boolean hasEgg);
+    @Invoker("getTravelPos") BlockPos invoker$getTravelPos();
 
-    @Invoker("isGoingHome") boolean accessor$isGoingHome();
+    @Invoker("setTravelPos") void invoker$setTravelPos(final BlockPos travelPos);
 
-    @Invoker("setGoingHome") void accessor$setGoingHome(boolean goingHome);
+    @Invoker("setHasEgg") void invoker$setHasEgg(final boolean hasEgg);
 
-    @Invoker("setLayingEgg") void accessor$setLayingEgg(boolean layingEgg);
+    @Invoker("setLayingEgg") void invoker$setLayingEgg(final boolean layingEgg);
 
-    @Invoker("isTravelling") boolean accessor$isTravelling();
+    @Invoker("isGoingHome") boolean invoker$isGoingHome();
 
-    @Invoker("setTravelling") void accessor$setTravelling(boolean travelling);
+    @Invoker("setGoingHome") void invoker$setGoingHome(final boolean goingHome);
 
-    @Invoker("getTravelPos") BlockPos accessor$getTravelPos();
+    @Invoker("isTravelling") boolean invoker$isTravelling();
 
-    @Invoker("setTravelPos") void accessor$setTravelPos(BlockPos pos);
+    @Invoker("setTravelling") void invoker$setTravelling(final boolean travelling);
+
 }

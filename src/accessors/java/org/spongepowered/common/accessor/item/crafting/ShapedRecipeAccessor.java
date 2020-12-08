@@ -34,26 +34,32 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Map;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(ShapedRecipe.class)
 public interface ShapedRecipeAccessor {
 
-    @Accessor("group") String accessor$getGroup();
+    @Accessor("group") String accessor$group();
 
-    @Invoker("keyFromJson")  static Map<String, Ingredient> accessor$keyFromJson(JsonObject json) {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Invoker("dissolvePattern")
+    static NonNullList<Ingredient> invoker$dissolvePattern(final String[] pattern, final Map<String, Ingredient> keys,
+                                                           final int width, final int height) {
+        throw new UntransformedInvokerError();
     }
 
-    @Invoker("patternFromJson") static String[] accessor$patternFromJson(JsonArray jsonArr) {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Invoker("shrink")
+    static String[] invoker$shrink(final String... pattern) {
+        throw new UntransformedInvokerError();
     }
 
-    @Invoker("shrink") static String[] accessor$shrink(String...  toShrink) {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Invoker("patternFromJson")
+    static String[] invoker$patternFromJson(final JsonArray json) {
+        throw new UntransformedInvokerError();
     }
 
-    @Invoker("dissolvePattern") static NonNullList<Ingredient> accessor$dissolvePattern(String[] pattern, Map<String, Ingredient> keys,
-            int patternWidth, int patternHeight) {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Invoker("keyFromJson")
+    static Map<String, Ingredient> invoker$keyFromJson(final JsonObject json) {
+        throw new UntransformedInvokerError();
     }
+
 }

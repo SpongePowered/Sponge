@@ -99,18 +99,18 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
         Preconditions.checkNotNull(inventory);
         Preconditions.checkNotNull(world);
         if (inventory instanceof AbstractFurnaceTileEntity) {
-            final IRecipeType<? extends AbstractCookingRecipe> type = ((AbstractFurnaceTileEntityAccessor) inventory).accessor$getRecipeType();
+            final IRecipeType<? extends AbstractCookingRecipe> type = ((AbstractFurnaceTileEntityAccessor) inventory).accessor$recipeType();
             return this.shadow$getRecipe(type, (IInventory) inventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
         if (inventory instanceof CampfireTileEntity) {
             return this.shadow$getRecipe(IRecipeType.CAMPFIRE_COOKING, (IInventory) inventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
         if (inventory instanceof WorkbenchContainer) {
-            final CraftingInventory craftingInventory = ((WorkbenchContainerAccessor) inventory).accessor$getCraftSlots();
+            final CraftingInventory craftingInventory = ((WorkbenchContainerAccessor) inventory).accessor$craftSlots();
             return this.shadow$getRecipe(IRecipeType.CRAFTING, craftingInventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
         if (inventory instanceof PlayerContainer) {
-            final CraftingInventory craftingInventory = ((PlayerContainerAccessor) inventory).accessor$getCraftSlots();
+            final CraftingInventory craftingInventory = ((PlayerContainerAccessor) inventory).accessor$craftSlots();
             return this.shadow$getRecipe(IRecipeType.CRAFTING, craftingInventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
         if (inventory instanceof StonecutterContainer) {

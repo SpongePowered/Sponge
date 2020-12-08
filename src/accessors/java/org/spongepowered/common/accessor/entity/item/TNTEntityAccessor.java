@@ -32,6 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(TNTEntity.class)
 public interface TNTEntityAccessor {
 
-    @Accessor("owner") void accessor$setOwner(LivingEntity owner);
+    @Accessor("owner") void accessor$owner(final LivingEntity owner);
 
 }

@@ -319,7 +319,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         if (registry == null) {
             return Collections.emptyList();
         }
-        return ImmutableSet.<T>copyOf((Set<T>) (Object) (((SimpleRegistryAccessor) registry).accessor$getStorage().values()));
+        return ImmutableSet.<T>copyOf((Set<T>) (Object) (((SimpleRegistryAccessor) registry).accessor$storage().values()));
     }
 
     @Override
@@ -329,7 +329,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         if (registry == null) {
             stream = Stream.empty();
         } else {
-            stream = (Stream<T>) (Object) ((SimpleRegistryAccessor) registry).accessor$getStorage().values().stream();
+            stream = (Stream<T>) (Object) ((SimpleRegistryAccessor) registry).accessor$storage().values().stream();
         }
 
         return stream;
@@ -341,7 +341,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         final Registry<CatalogType> registry = this.registriesByType.get(typeClass);
         final List<T> types = new ArrayList<>();
-        for (final Map.Entry<ResourceLocation, Object> entry : ((SimpleRegistryAccessor) registry).accessor$getStorage().entrySet()) {
+        for (final Map.Entry<ResourceLocation, Object> entry : ((SimpleRegistryAccessor) registry).accessor$storage().entrySet()) {
             if (entry.getKey().getNamespace().equals(namespace)) {
                 types.add((T) entry.getValue());
             }
@@ -359,7 +359,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         if (registry == null) {
             stream = Stream.empty();
         } else {
-            stream = (Stream<T>) (Object) ((SimpleRegistryAccessor) registry).accessor$getStorage()
+            stream = (Stream<T>) (Object) ((SimpleRegistryAccessor) registry).accessor$storage()
                 .entrySet()
                 .stream()
                 .filter(kv -> kv.getKey().getNamespace().equals(namespace))

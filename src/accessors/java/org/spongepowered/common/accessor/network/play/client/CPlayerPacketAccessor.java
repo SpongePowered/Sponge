@@ -31,31 +31,32 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CPlayerPacket.class)
 public interface CPlayerPacketAccessor {
 
-    @Accessor("x") double accessor$getX();
+    @Accessor("x") double accessor$x();
 
-    @Accessor("x") void accessor$setX(double x);
+    @Accessor("x") void accessor$x(final double x);
 
-    @Accessor("y") double accessor$getY();
+    @Accessor("y") double accessor$y();
 
-    @Accessor("y") void accessor$setY(double y);
+    @Accessor("y") void accessor$y(final double y);
 
-    @Accessor("z") double accessor$getZ();
+    @Accessor("z") double accessor$z();
 
-    @Accessor("z") void accessor$setZ(double z);
+    @Accessor("z") void accessor$z(final double z);
 
-    @Accessor("yRot") float accessor$getYRot();
+    @Accessor("yRot") float accessor$yRot();
 
-    @Accessor("yRot") void accessor$setYRot(float yRot);
+    @Accessor("yRot") void accessor$yRot(final float yRot);
 
-    @Accessor("xRot") float accessor$getXRot();
+    @Accessor("xRot") float accessor$xRot();
 
-    @Accessor("xRot") void accessor$setXRot(float xRot);
+    @Accessor("xRot") void accessor$xRot(final float xRot);
 
-    @Accessor("onGround") boolean accessor$getOnGround();
+    @Accessor("onGround") boolean accessor$onGround();
 
-    @Accessor("hasPos") boolean accessor$getHasPos();
+    @Accessor("hasPos") boolean accessor$hasPos();
 
-    @Accessor("hasPos") void accessor$setHasPos(boolean hasPos);
+    @Accessor("hasPos") void accessor$hasPos(final boolean hasPos);
 
-    @Accessor("hasRot") boolean accessor$getHasRot();
+    @Accessor("hasRot") boolean accessor$hasRot();
+
 }

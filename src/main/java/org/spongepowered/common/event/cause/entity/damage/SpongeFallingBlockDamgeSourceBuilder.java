@@ -63,7 +63,7 @@ public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSo
                 (FallingBlockEntity) this.reference.get());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) (Object) damageSource;
         if (this.creative) {
-            accessor.accessor$setBypassInvul();
+            accessor.invoker$bypassInvul();
         }
         if (this.scales) {
             damageSource.setDifficultyScaled();
@@ -72,16 +72,16 @@ public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSo
             damageSource.setMagicDamage();
         }
         if (this.bypasses) {
-            accessor.accessor$setBypassArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.absolute) {
-            accessor.accessor$setBypassMagic();
+            accessor.invoker$bypassMagic();
         }
         if (this.explosion) {
             damageSource.setExplosion();
         }
         if (this.exhaustion != null) {
-            accessor.accessor$setExhaustion(this.exhaustion.floatValue());
+            accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
         return (FallingBlockDamageSource) (Object) damageSource;
     }

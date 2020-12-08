@@ -32,55 +32,63 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Random;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(Entity.class)
 public interface EntityAccessor {
 
-    @Accessor("DATA_SHARED_FLAGS_ID") static DataParameter<Byte> accessor$getDATA_SHARED_FLAGS_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_SHARED_FLAGS_ID")
+    static DataParameter<Byte> accessor$DATA_SHARED_FLAGS_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_AIR_SUPPLY_ID") static DataParameter<Integer> accessor$getDATA_AIR_SUPPLY_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_AIR_SUPPLY_ID")
+    static DataParameter<Integer> accessor$DATA_AIR_SUPPLY_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_CUSTOM_NAME") static DataParameter<String> accessor$getDATA_CUSTOM_NAME() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_CUSTOM_NAME")
+    static DataParameter<String> accessor$DATA_CUSTOM_NAME() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_CUSTOM_NAME_VISIBLE") static DataParameter<Boolean> accessor$getDATA_CUSTOM_NAME_VISIBLE() {
-        throw new IllegalStateException("Untransformed accessor!");
+    @Accessor("DATA_CUSTOM_NAME_VISIBLE")
+    static DataParameter<Boolean> accessor$DATA_CUSTOM_NAME_VISIBLE() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_SILENT") static DataParameter<Boolean> accessor$getDATA_SILENT() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_SILENT")
+    static DataParameter<Boolean> accessor$DATA_SILENT() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_NO_GRAVITY") static DataParameter<Boolean> accessor$getDATA_NO_GRAVITY() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_NO_GRAVITY")
+    static DataParameter<Boolean> accessor$DATA_NO_GRAVITY() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("random") Random accessor$getRandom();
+    @Accessor("remainingFireTicks") int accessor$remainingFireTicks();
 
-    @Accessor("remainingFireTicks") int accessor$getRemainingFireTicks();
+    @Accessor("remainingFireTicks") void accessor$remainingFireTicks(final int remainingFireTicks);
 
-    @Accessor("remainingFireTicks") void accessor$setRemainingFireTicks(int remainingFireTicks);
+    @Accessor("random") Random accessor$random();
 
-    @Accessor("isInsidePortal") void accessor$setInsidePortal(boolean insidePortal);
+    @Accessor("isInsidePortal") void accessor$isInsidePortal(final boolean isInsidePortal);
 
-    @Accessor("portalTime") void accessor$setPortalTime(int portalTime);
+    @Accessor("portalTime") void accessor$portalTime(final int portalTime);
 
-    @Accessor("portalEntrancePos") void accessor$setPortalEntrancePos(BlockPos portalEntrancePos);
+    @Accessor("portalEntrancePos") void accessor$portalEntrancePos(final BlockPos portalEntrancePos);
 
-    @Invoker("setSharedFlag") void accessor$setSharedFlag(int flag, boolean set);
+    @Invoker("setRot") void invoker$setRot(final float yRot, final float xRot);
 
-    @Invoker("getFireImmuneTicks") int accessor$getFireImmuneTicks();
+    @Invoker("getEncodeId") String invoker$getEncodeId();
 
-    @Invoker("getPermissionLevel") int accessor$getPermissionLevel();
+    @Invoker("removePassenger") void invoker$removePassenger(final Entity passenger);
 
-    @Invoker("getEncodeId") String accessor$getEncodeId();
+    @Invoker("setSharedFlag") void invoker$setSharedFlag(final int flag, final boolean value);
 
-    @Invoker("removePassenger") void accessor$removePassenger(Entity entity);
+    @Invoker("getFireImmuneTicks") int invoker$getFireImmuneTicks();
 
-    @Invoker("setRot") void accessor$setRot(float yaw, float pitch);
+    @Invoker("getPermissionLevel") int invoker$getPermissionLevel();
+
 }

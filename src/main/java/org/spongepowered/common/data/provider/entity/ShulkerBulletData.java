@@ -41,11 +41,11 @@ public final class ShulkerBulletData {
         registrator
                 .asMutable(ShulkerBulletEntityAccessor.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> h.accessor$getCurrentMoveDirection() == null ? Direction.NONE : Constants.DirectionFunctions.getFor(h.accessor$getCurrentMoveDirection()))
-                        .set((h, v) -> h.accessor$setCurrentMoveDirection(Constants.DirectionFunctions.getFor(v)))
+                        .get(h -> h.accessor$currentMoveDirection() == null ? Direction.NONE : Constants.DirectionFunctions.getFor(h.accessor$currentMoveDirection()))
+                        .set((h, v) -> h.accessor$currentMoveDirection(Constants.DirectionFunctions.getFor(v)))
                     .create(Keys.TARGET_ENTITY)
-                        .get(h -> (Entity) h.accessor$getFinalTarget())
-                        .set((h, v) -> h.accessor$setFinalTarget((net.minecraft.entity.Entity) v));
+                        .get(h -> (Entity) h.accessor$finalTarget())
+                        .set((h, v) -> h.accessor$finalTarget((net.minecraft.entity.Entity) v));
     }
     // @formatter:on
 }

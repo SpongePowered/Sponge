@@ -34,5 +34,6 @@ import java.util.List;
 @Mixin(WorldBorder.class)
 public interface WorldBorderAccessor {
 
-    @Accessor("listeners") List<IBorderListener> accessor$getListeners();
+    @Accessor("listeners") List<IBorderListener> accessor$listeners();
+
 }

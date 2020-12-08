@@ -51,7 +51,7 @@ public abstract class SpongeCommonDamageSource extends DamageSource implements o
      * @param type The damage type id
      */
     public void setDamageType(final String type) {
-        ((DamageSourceAccessor) this).accessor$setMsgId(type);
+        ((DamageSourceAccessor) this).accessor$msgId(type);
     }
 
     @Override
@@ -99,6 +99,6 @@ public abstract class SpongeCommonDamageSource extends DamageSource implements o
 
 
     public void bridge$setHungerDamage(final float exhaustion) {
-        ((DamageSourceAccessor) this).accessor$setExhaustion(exhaustion);
+        ((DamageSourceAccessor) this).accessor$exhaustion(exhaustion);
     }
 }

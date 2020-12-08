@@ -60,12 +60,12 @@ public final class PlayerData {
                         .get(h -> (HandPreference) (Object) h.getPrimaryHand())
                         .set((h, v) -> h.setPrimaryHand((HandSide) (Object) v))
                     .create(Keys.EXHAUSTION)
-                        .get(h -> (double) ((FoodStatsAccessor) h.getFoodStats()).accessor$geExhaustionLevel())
+                        .get(h -> (double) ((FoodStatsAccessor) h.getFoodStats()).accessor$exhaustionLevel())
                         .setAnd((h, v) -> {
                             if (v < 0 || v > PlayerData.EXHAUSTION_MAX) {
                                 return false;
                             }
-                            ((FoodStatsAccessor) h.getFoodStats()).accessor$setExhaustionLevel(v.floatValue());
+                            ((FoodStatsAccessor) h.getFoodStats()).accessor$exhaustionLevel(v.floatValue());
                             return true;
                         })
                     .create(Keys.EXPERIENCE)
@@ -102,7 +102,7 @@ public final class PlayerData {
                             if (v < 0) {
                                 return false;
                             }
-                            ((PlayerAbilitiesAccessor) h.abilities).accessor$setFlyingSpeed(v.floatValue());
+                            ((PlayerAbilitiesAccessor) h.abilities).accessor$flyingSpeed(v.floatValue());
                             h.sendPlayerAbilities();
                             return true;
                         })
@@ -137,16 +137,16 @@ public final class PlayerData {
                             if (v < 0 || v > PlayerData.SATURATION_MAX) {
                                 return false;
                             }
-                            ((FoodStatsAccessor) h.getFoodStats()).accessor$setSaturationLevel(v.floatValue());
+                            ((FoodStatsAccessor) h.getFoodStats()).accessor$saturationLevel(v.floatValue());
                             return true;
                         })
                     .create(Keys.SLEEP_TIMER)
                         .get(PlayerEntity::getSleepTimer)
-                        .set((p, i) -> ((PlayerEntityAccessor) p).accessor$setSleepCounter(i))
+                        .set((p, i) -> ((PlayerEntityAccessor) p).accessor$sleepCounter(i))
                     .create(Keys.WALKING_SPEED)
                         .get(h -> (double) h.abilities.getWalkSpeed())
                         .set((h, v) -> {
-                            ((PlayerAbilitiesAccessor) h.abilities).accessor$setWalkingSpeed(v.floatValue());
+                            ((PlayerAbilitiesAccessor) h.abilities).accessor$walkingSpeed(v.floatValue());
                             h.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(v);
                             h.sendPlayerAbilities();
                         })

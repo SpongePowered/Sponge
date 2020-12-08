@@ -62,7 +62,7 @@ public class DelegatingLens extends AbstractLens {
         final CustomSlotProvider slotProvider = new CustomSlotProvider();
         for (final Slot slot : containerSlots) {
             // Get slots from original slot provider and add them to custom slot provider in order of actual containerSlots.
-            slotProvider.add(slots.getSlotLens(((SlotAccessor) slot).accessor$getIndex()));
+            slotProvider.add(slots.getSlotLens(((SlotAccessor) slot).accessor$index()));
         }
         // Provide indexed access over the Container to the slots in the base inventory
         this.addSpanningChild(new DefaultIndexedLens(0, containerSlots.size(), slotProvider));

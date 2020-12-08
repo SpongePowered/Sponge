@@ -64,7 +64,7 @@ public abstract class JukeboxTileEntityMixin_API extends TileEntityMixin_API imp
     public void eject() {
         final BlockState block = this.world.getBlockState(this.shadow$getPos());
         if (block.getBlock() == Blocks.JUKEBOX) {
-            ((JukeboxBlockAccessor) block.getBlock()).accessor$dropRecording(this.world, this.shadow$getPos());
+            ((JukeboxBlockAccessor) block.getBlock()).invoker$dropRecording(this.world, this.shadow$getPos());
             this.world.setBlockState(this.shadow$getPos(), block.with(JukeboxBlock.HAS_RECORD, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }

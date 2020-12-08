@@ -44,7 +44,7 @@ public abstract class StyleImplMixin implements StyleBridge {
 
         if (this.bridge$vanilla == null) {
             final net.kyori.adventure.text.format.Style $this = (net.kyori.adventure.text.format.Style) (Object) this;
-            this.bridge$vanilla = StyleAccessor.accessor$init(
+            this.bridge$vanilla = StyleAccessor.invoker$new(
                 // color
                 SpongeAdventure.asVanillaNullable($this.color()),
                 // decorations

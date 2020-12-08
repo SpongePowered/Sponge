@@ -41,13 +41,13 @@ public abstract class ChunkMixin_API implements Chunk {
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final BiomeType biome) {
-        final Biome[] biomes = ((BiomeContainerAccessor) this.blockBiomeArray).accessor$getBiomes();
+        final Biome[] biomes = ((BiomeContainerAccessor) this.blockBiomeArray).accessor$biomes();
 
         int maskedX = x & BiomeContainer.HORIZONTAL_MASK;
         int maskedY = MathHelper.clamp(y, 0, BiomeContainer.VERTICAL_MASK);
         int maskedZ = z & BiomeContainer.HORIZONTAL_MASK;
 
-        final int WIDTH_BITS = BiomeContainerAccessor.accessor$getWIDTH_BITS();
+        final int WIDTH_BITS = BiomeContainerAccessor.accessor$WIDTH_BITS();
         final int posKey = maskedY << WIDTH_BITS + WIDTH_BITS | maskedZ << WIDTH_BITS | maskedX;
         biomes[posKey] = (Biome) biome;
 

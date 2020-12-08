@@ -22,14 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.nbt;
+package org.spongepowered.common;
 
-import net.minecraft.nbt.LongArrayNBT;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-
-@Mixin(LongArrayNBT.class)
-public interface LongArrayNBTAccessor {
-
-    @Accessor("data") long[] accessor$getData();
+public final class UntransformedAccessorError extends AssertionError {
+    public UntransformedAccessorError() {
+        super("An untransformed @Accessor has been encountered");
+    }
 }

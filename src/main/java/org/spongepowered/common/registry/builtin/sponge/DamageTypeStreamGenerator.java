@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 
 public final class DamageTypeStreamGenerator {
 
-    public static final DamageSource IGNORED_DAMAGE_SOURCE = DamageSourceAccessor.accessor$init("sponge:ignored");
+    public static final DamageSource IGNORED_DAMAGE_SOURCE = DamageSourceAccessor.invoker$new("sponge:ignored");
 
     private DamageTypeStreamGenerator() {}
 

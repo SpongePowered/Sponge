@@ -34,6 +34,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(targets = "net.minecraft.command.arguments.ArgumentTypes$Entry")
 public interface ArgumentTypes_EntryAccessor {
 
-    @Accessor("serializer") IArgumentSerializer<?> accessor$getSerializer();
+    @Accessor("serializer") IArgumentSerializer<?> accessor$serializer();
 
 }

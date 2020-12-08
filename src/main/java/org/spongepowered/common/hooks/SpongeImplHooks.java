@@ -461,13 +461,13 @@ public class SpongeImplHooks {
     }
 
     public static TileEntity onChunkGetTileDuringRemoval(final ServerWorld world, final BlockPos pos) {
-        if (WorldAccessor.accessor$isOutsideBuildHeight(pos)) {
+        if (WorldAccessor.invoker$isOutsideBuildHeight(pos)) {
             return null;
         } else {
             TileEntity tileentity2 = null;
 
-            if (((WorldAccessor) world).accessor$getUpdatingBlockEntities()) {
-                tileentity2 = ((WorldAccessor) world).accessor$getPendingBlockEntityAt(pos);
+            if (((WorldAccessor) world).accessor$updatingBlockEntities()) {
+                tileentity2 = ((WorldAccessor) world).invoker$getPendingBlockEntityAt(pos);
             }
 
             if (tileentity2 == null) {
@@ -478,7 +478,7 @@ public class SpongeImplHooks {
             }
 
             if (tileentity2 == null) {
-                tileentity2 =  ((WorldAccessor) world).accessor$getPendingBlockEntityAt(pos);
+                tileentity2 =  ((WorldAccessor) world).invoker$getPendingBlockEntityAt(pos);
             }
 
             return tileentity2;

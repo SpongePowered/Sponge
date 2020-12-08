@@ -127,7 +127,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
 
         // This *should* be a static method, but apparently not...
         final IPBanList ipBans = SpongeCommon.getServer().getPlayerList().getIpBans();
-        return (Ban) new IPBanEntry(((IPBanListAccessor) ipBans).accessor$getIpFromAddress(new InetSocketAddress(this.address, 0)),
+        return (Ban) new IPBanEntry(((IPBanListAccessor) ipBans).invoker$getIpFromAddress(new InetSocketAddress(this.address, 0)),
                 Date.from(this.start), sourceName, this.toDate(this.end), reason);
     }
 

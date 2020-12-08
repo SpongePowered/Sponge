@@ -42,7 +42,7 @@ public final class HangingData {
                     .create(Keys.DIRECTION)
                         .get(h -> h.accessor$getDirection() == null ? Direction.NONE :
                                 Constants.DirectionFunctions.getFor(h.accessor$getDirection()))
-                        .set((h, v) -> h.accessor$setDirection(Constants.DirectionFunctions.getFor(v)));
+                        .set((h, v) -> h.invoker$setDirection(Constants.DirectionFunctions.getFor(v)));
     }
     // @formatter:on
 }

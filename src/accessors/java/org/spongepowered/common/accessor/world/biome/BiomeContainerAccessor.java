@@ -28,13 +28,16 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(BiomeContainer.class)
 public interface BiomeContainerAccessor {
 
-    @Accessor("WIDTH_BITS") static int accessor$getWIDTH_BITS() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("WIDTH_BITS")
+    static int accessor$WIDTH_BITS() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("biomes") Biome[] accessor$getBiomes();
+    @Accessor("biomes") Biome[] accessor$biomes();
+
 }

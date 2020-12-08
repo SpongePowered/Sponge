@@ -34,7 +34,8 @@ import java.util.Set;
 @Mixin(ToolItem.class)
 public interface ToolItemAccessor {
 
-    @Accessor("blocks") Set<Block> accessor$getBlocks();
+    @Accessor("blocks") Set<Block> accessor$blocks();
 
-    @Accessor("speed") float accessor$getSpeed();
+    @Accessor("speed") float accessor$speed();
+
 }

@@ -231,11 +231,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final DimensionType dimensionType = Registry.DIMENSION_TYPE.getValue((ResourceLocation) (Object) key).orElseGet(() -> this.
                 createDimensionType(key, logicType, worldDirectory.getFileName().toString(), ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE)
-                        .accessor$getNextId()));
+                        .accessor$nextId()));
 
         ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType(logicType);
 
-        MinecraftServerAccessor.accessor$getLogger().info("Loading World '{}' ({})", key, logicType.getKey().getFormatted());
+        MinecraftServerAccessor.accessor$LOGGER().info("Loading World '{}' ({})", key, logicType.getKey().getFormatted());
 
         final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(logicType, key);
         ((WorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
@@ -304,7 +304,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             }
         } else {
             dimensionType = this.createDimensionType(properties.getKey(), (SpongeDimensionType) properties.getDimensionType(),
-                    worldDirectory.getFileName().toString(), ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE).accessor$getNextId());
+                    worldDirectory.getFileName().toString(), ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE).accessor$nextId());
         }
 
         final WorldInfo worldInfo = (WorldInfo) properties;
@@ -313,7 +313,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType(logicType);
 
-        MinecraftServerAccessor.accessor$getLogger().info("Loading World '{}' ({})", properties.getKey(), logicType.getKey()
+        MinecraftServerAccessor.accessor$LOGGER().info("Loading World '{}' ({})", properties.getKey(), logicType.getKey()
                 .getFormatted());
 
         final InheritableConfigHandle<WorldConfig> adapter = SpongeGameConfigs.createWorld(logicType, properties.getKey());
@@ -825,12 +825,12 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             if (dimensionType == null) {
                 dimensionType = this.createDimensionType(worldRegistration.getKey(),
                         (SpongeDimensionType) ((WorldArchetype) (Object) worldRegistration.getDefaultSettings()).getDimensionType(),
-                        worldDirectory.getFileName().toString(), ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE).accessor$getNextId());
+                        worldDirectory.getFileName().toString(), ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE).accessor$nextId());
             }
 
             final SpongeDimensionType logicType = ((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType();
 
-            MinecraftServerAccessor.accessor$getLogger().info("Loading World '{}' ({})", key, logicType.getKey().getFormatted());
+            MinecraftServerAccessor.accessor$LOGGER().info("Loading World '{}' ({})", key, logicType.getKey().getFormatted());
 
             final boolean configExists = SpongeGameConfigs.doesWorldConfigExist(key);
 
@@ -966,7 +966,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     private void loadSpawnChunks(final ServerWorld serverWorld, final IChunkStatusListener chunkStatusListener) {
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setUserMessage(new TranslationTextComponent("menu.generatingTerrain"));
         final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) serverWorld;
-        MinecraftServerAccessor.accessor$getLogger().info("Preparing start region for world '{}' ({})", apiWorld.getKey(),
+        MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for world '{}' ({})", apiWorld.getKey(),
                 apiWorld.getProperties().getDimensionType().getKey());
         final BlockPos spawnPoint = serverWorld.getSpawnPoint();
         final ChunkPos spawnChunkPos = new ChunkPos(spawnPoint);
@@ -1039,7 +1039,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 }
 
                 final DimensionType registeredType = this.createDimensionType(key, logicType, valueDirectory.getFileName().toString(),
-                        ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE).accessor$getNextId());
+                        ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE).accessor$nextId());
 
                 final WorldRegistration existingRegistration = this.pendingWorlds.get(key);
                 if (existingRegistration != null) {
@@ -1089,7 +1089,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             // Initialize scoreboard data. This will hook to the ServerScoreboard, needs to be made multi-world aware
             ((MinecraftServerAccessor_Vanilla) this.server).accessor$readScoreboard(serverWorld.getSavedData());
 
-            ((MinecraftServerAccessor) this.server).accessor$setCommandStorage(new CommandStorage(serverWorld.getSavedData()));
+            ((MinecraftServerAccessor) this.server).accessor$commandStorage(new CommandStorage(serverWorld.getSavedData()));
         }
 
         serverWorld.getWorldBorder().copyFrom(serverWorld.getWorldInfo());

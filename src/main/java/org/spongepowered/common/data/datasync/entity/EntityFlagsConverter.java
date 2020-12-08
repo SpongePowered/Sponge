@@ -38,7 +38,7 @@ import java.util.Optional;
 public final class EntityFlagsConverter extends DataParameterConverter<Byte> {
 
     public EntityFlagsConverter() {
-        super(EntityAccessor.accessor$getDATA_SHARED_FLAGS_ID());
+        super(EntityAccessor.accessor$DATA_SHARED_FLAGS_ID());
     }
 
     @Override

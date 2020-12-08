@@ -92,9 +92,9 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         final ExplosionAccessor otherExplosion = (ExplosionAccessor) ((ExplosionContext) phaseContext).explosion;
         final ExplosionAccessor thisExplosion = (ExplosionAccessor) this.explosion;
 
-        return otherExplosion.accessor$getLevel() == thisExplosion.accessor$getLevel()
-               && otherExplosion.accessor$getX() == thisExplosion.accessor$getX()
-               && otherExplosion.accessor$getY() == thisExplosion.accessor$getY()
-               && otherExplosion.accessor$getZ() == thisExplosion.accessor$getZ();
+        return otherExplosion.accessor$level() == thisExplosion.accessor$level()
+               && otherExplosion.accessor$x() == thisExplosion.accessor$x()
+               && otherExplosion.accessor$y() == thisExplosion.accessor$y()
+               && otherExplosion.accessor$z() == thisExplosion.accessor$z();
     }
 }

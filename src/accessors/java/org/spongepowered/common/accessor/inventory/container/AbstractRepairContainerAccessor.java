@@ -26,12 +26,12 @@ package org.spongepowered.common.accessor.inventory.container;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.AbstractRepairContainer;
-import net.minecraft.inventory.container.RepairContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(AbstractRepairContainer.class)
 public interface AbstractRepairContainerAccessor {
 
-    @Accessor("player") PlayerEntity accessor$getPlayer();
+    @Accessor("player") PlayerEntity accessor$player();
+
 }

@@ -45,7 +45,7 @@ public abstract class V1125Mixin extends NamespacedSchema {
     @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         final Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
-        map.put("sponge:human", () -> DSL.and(V0100Accessor.equipment(schema), DSL.remainder()));
+        map.put("sponge:human", () -> DSL.and(V0100Accessor.invoker$equipment(schema), DSL.remainder()));
         return map;
     }
 }

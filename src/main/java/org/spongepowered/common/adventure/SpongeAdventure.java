@@ -297,9 +297,9 @@ public final class SpongeAdventure {
             final net.minecraft.util.text.event.HoverEvent.ItemHover value = event.getValue(
                 net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM);
             return HoverEvent.showItem(
-                SpongeAdventure.asAdventure(Registry.ITEM.getKey(((HoverEventItemHoverAccessor) value).accessor$getItem())),
-                ((HoverEventItemHoverAccessor) value).accessor$getCount(),
-                SpongeAdventure.asBinaryTagHolder(((HoverEventItemHoverAccessor) value).accessor$getTag())
+                SpongeAdventure.asAdventure(Registry.ITEM.getKey(((HoverEventItemHoverAccessor) value).accessor$item())),
+                ((HoverEventItemHoverAccessor) value).accessor$count(),
+                SpongeAdventure.asBinaryTagHolder(((HoverEventItemHoverAccessor) value).accessor$tag())
             );
         }
         throw new IllegalArgumentException(event.toString());
@@ -336,7 +336,7 @@ public final class SpongeAdventure {
             final HoverEvent.ShowItem value = (HoverEvent.ShowItem) event.value();
             return new net.minecraft.util.text.event.HoverEvent(
                 net.minecraft.util.text.event.HoverEvent.Action.SHOW_ITEM,
-                HoverEventItemHoverAccessor.accessor$init(
+                HoverEventItemHoverAccessor.invoker$new(
                     Registry.ITEM.get(SpongeAdventure.asVanilla(value.item())),
                     value.count(),
                     SpongeAdventure.asVanillaCompound(value.nbt())

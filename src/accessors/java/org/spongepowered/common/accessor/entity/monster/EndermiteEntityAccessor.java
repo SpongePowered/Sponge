@@ -31,7 +31,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(EndermiteEntity.class)
 public interface EndermiteEntityAccessor {
 
-    @Accessor("life") int accessor$getLife();
+    @Accessor("life") int accessor$life();
 
-    @Accessor("life") void accessor$setLife(int life);
+    @Accessor("life") void accessor$life(final int life);
+
 }

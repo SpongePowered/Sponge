@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractSkullBlock.class)
 public interface AbstractSkullBlockAccessor {
 
-    @Accessor("type") SkullBlock.ISkullType accessor$getType();
+    @Accessor("type") SkullBlock.ISkullType accessor$type();
+
 }

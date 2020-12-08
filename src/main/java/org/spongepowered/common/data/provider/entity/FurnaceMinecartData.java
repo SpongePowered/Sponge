@@ -38,12 +38,12 @@ public final class FurnaceMinecartData {
         registrator
                 .asMutable(FurnaceMinecartEntityAccessor.class)
                     .create(Keys.FUEL)
-                        .get(FurnaceMinecartEntityAccessor::accessor$getFuel)
+                        .get(FurnaceMinecartEntityAccessor::accessor$fuel)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.accessor$setFuel(v);
+                            h.accessor$fuel(v);
                             return true;
                         });
     }

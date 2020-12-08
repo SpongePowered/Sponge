@@ -53,7 +53,7 @@ public abstract class MagmaBlockMixin extends BlockMixin {
             try {
                 final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
                 final MinecraftBlockDamageSource hotFloor = new MinecraftBlockDamageSource("hotFloor", location);
-                ((DamageSourceAccessor) (Object) hotFloor).accessor$setIsFire();
+                ((DamageSourceAccessor) (Object) hotFloor).invoker$setIsFire();
                 ((DamageSourceBridge) (Object) hotFloor).bridge$setHotFloorSource();
                 return entity.attackEntityFrom(DamageSource.HOT_FLOOR, damage);
             } finally {

@@ -61,17 +61,17 @@ public final class WallSkullBlockData {
                             if (v == isWallBlock) {
                                 return h;
                             }
-                            final SkullBlock.ISkullType type = ((AbstractSkullBlockAccessor) block).accessor$getType();
+                            final SkullBlock.ISkullType type = ((AbstractSkullBlockAccessor) block).accessor$type();
                             // Find the ground/wall pair based on the skull type
                             final Pair pair = wallAndGroundPairs.computeIfAbsent(type, type1 -> {
                                 final SkullBlock groundBlock = (SkullBlock) Registry.BLOCK.stream()
-                                        .filter(b -> b instanceof SkullBlock && ((AbstractSkullBlockAccessor) b).accessor$getType() == type)
+                                        .filter(b -> b instanceof SkullBlock && ((AbstractSkullBlockAccessor) b).accessor$type() == type)
                                         .findFirst().orElse(null);
                                 if (groundBlock == null) {
                                     return null;
                                 }
                                 final WallSkullBlock wallBlock = (WallSkullBlock) Registry.BLOCK.stream()
-                                        .filter(b -> b instanceof WallSkullBlock && ((AbstractSkullBlockAccessor) b).accessor$getType() == type)
+                                        .filter(b -> b instanceof WallSkullBlock && ((AbstractSkullBlockAccessor) b).accessor$type() == type)
                                         .findFirst().orElse(null);
                                 if (wallBlock == null) {
                                     return null;

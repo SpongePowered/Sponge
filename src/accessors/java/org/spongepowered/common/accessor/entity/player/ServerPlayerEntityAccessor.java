@@ -34,21 +34,22 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(ServerPlayerEntity.class)
 public interface ServerPlayerEntityAccessor {
 
-    @Accessor("isChangingDimension") void accessor$setIsChangingDimension(boolean isChangingDimension);
+    @Accessor("lastSentHealth") void accessor$lastSentHealth(final float lastSentHealth);
 
-    @Accessor("seenCredits") boolean accessor$getSeenCredits();
+    @Accessor("lastSentFood") void accessor$lastSentFood(final int lastSentFood);
 
-    @Accessor("canChatColor") boolean accessor$getCanChatColor();
+    @Accessor("lastSentExp") void accessor$lastSentExp(final int lastSentExp);
 
-    @Accessor("seenCredits") void accessor$setSeenCredits(boolean seenCredits);
+    @Accessor("canChatColor") boolean accessor$canChatColor();
 
-    @Accessor("enteredNetherPosition") void accessor$setEnteredNetherPosition(Vector3d enteredNetherPosition);
+    @Accessor("isChangingDimension") void accessor$isChangingDimension(final boolean isChangingDimension);
 
-    @Accessor("lastSentExp") void accessor$setLastSentExp(int lastSentExp);
+    @Accessor("seenCredits") boolean accessor$seenCredits();
 
-    @Accessor("lastSentHealth") void accessor$setLastSentHealth(float lastSentHealth);
+    @Accessor("seenCredits") void accessor$seenCredits(final boolean seenCredits);
 
-    @Accessor("lastSentFood") void accessor$setLastSentFood(int lastSentFood);
+    @Accessor("enteredNetherPosition") void accessor$enteredNetherPosition(final Vector3d enteredNetherPosition);
 
-    @Invoker("triggerDimensionChangeTriggers") void accessor$triggerDimensionChangeTriggers(ServerWorld world);
+    @Invoker("triggerDimensionChangeTriggers") void invoker$triggerDimensionChangeTriggers(final ServerWorld world);
+
 }

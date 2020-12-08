@@ -38,7 +38,7 @@ import java.util.Optional;
 public final class EntityCustomNameVisibleConverter extends DataParameterConverter<Boolean> {
 
     public EntityCustomNameVisibleConverter() {
-        super(EntityAccessor.accessor$getDATA_CUSTOM_NAME_VISIBLE());
+        super(EntityAccessor.accessor$DATA_CUSTOM_NAME_VISIBLE());
     }
 
     @Override

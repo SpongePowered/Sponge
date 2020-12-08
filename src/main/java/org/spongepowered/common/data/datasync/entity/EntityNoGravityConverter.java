@@ -38,7 +38,7 @@ import java.util.Optional;
 public final class EntityNoGravityConverter extends DataParameterConverter<Boolean> {
 
     public EntityNoGravityConverter() {
-        super(EntityAccessor.accessor$getDATA_NO_GRAVITY());
+        super(EntityAccessor.accessor$DATA_NO_GRAVITY());
     }
 
     @Override

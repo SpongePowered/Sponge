@@ -90,7 +90,7 @@ public final class ItemStackData {
                         .get(h -> {
                             final Item item = h.getItem();
                             if (item instanceof ToolItemAccessor && !(item instanceof PickaxeItem)) {
-                                final Set<Block> blocks = ((ToolItemAccessor) item).accessor$getBlocks();
+                                final Set<Block> blocks = ((ToolItemAccessor) item).accessor$blocks();
                                 return ImmutableSet.copyOf((Set<BlockType>) (Object) blocks);
                             }
 

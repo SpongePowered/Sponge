@@ -52,10 +52,10 @@ public interface ICraftingRecipeMixin_API {
     default Optional<String> recipe$getGroup() {
         String group = "";
         if (this instanceof ShapedRecipe) {
-            group = ((ShapedRecipeAccessor) this).accessor$getGroup();
+            group = ((ShapedRecipeAccessor) this).accessor$group();
         }
         if (this instanceof ShapelessRecipe) {
-            group = ((ShapelessRecipeAccessor) this).accessor$getGroup();
+            group = ((ShapelessRecipeAccessor) this).accessor$group();
         }
         if (group.isEmpty()) {
             return Optional.empty();

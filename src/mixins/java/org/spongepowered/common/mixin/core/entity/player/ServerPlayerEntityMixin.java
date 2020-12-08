@@ -651,7 +651,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                     .map(part -> (SpongeSkinPart) part)
                     .filter(part -> part.test(packet.getModelPartFlags()))
                     .collect(ImmutableSet.toImmutableSet());
-            final int viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$getViewDistance();
+            final int viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$viewDistance();
 
             // Post before the player values are updated
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -672,10 +672,10 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Inject(method = "handleClientSettings", at = @At("TAIL"))
     private void impl$updateTrackedClientSettings(final CClientSettingsPacket packet, final CallbackInfo ci) {
         final Locale newLocale = LocaleCache.getLocale(packet.getLang());
-        final int viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$getViewDistance();
+        final int viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$viewDistance();
 
         // Update locale on Channel, used for sending localized messages
-        final Channel channel = ((NetworkManagerAccessor) this.connection.netManager).accessor$getChannel();
+        final Channel channel = ((NetworkManagerAccessor) this.connection.netManager).accessor$channel();
         channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(newLocale);
         SpongeAdventure.forEachBossBar(bar -> this.connection.sendPacket(new SUpdateBossInfoPacket(SUpdateBossInfoPacket.Operation.UPDATE_NAME, bar)));
 

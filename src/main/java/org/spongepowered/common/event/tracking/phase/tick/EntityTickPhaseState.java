@@ -151,11 +151,11 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     private void appendContextOfPossibleEntityDeath(final Entity tickingEntity, final CauseStackManager.StackFrame frame) {
         if (EntityUtil.isEntityDead((net.minecraft.entity.Entity) tickingEntity)) {
             if (tickingEntity instanceof LivingEntity) {
-                final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) tickingEntity).getCombatTracker()).accessor$getMostSignificantFall();
+                final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) tickingEntity).getCombatTracker()).invoker$getMostSignificantFall();
                 if (entry != null) {
-                    if (((CombatEntryAccessor) entry).accessor$getSource() != null) {
+                    if (((CombatEntryAccessor) entry).accessor$source() != null) {
                         frame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE,
-                                (DamageSource) ((CombatEntryAccessor) entry).accessor$getSource());
+                                (DamageSource) ((CombatEntryAccessor) entry).accessor$source());
                     }
                 }
             }
@@ -204,7 +204,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 if (entityHanging instanceof ItemFrameEntity) {
                     final ItemFrameEntity itemFrame = (ItemFrameEntity) entityHanging;
                     if (!itemFrame.removed) {
-                        ((ItemFrameEntityAccessor) itemFrame).accessor$dropItem((net.minecraft.entity.Entity) tickingEntity, true);
+                        ((ItemFrameEntityAccessor) itemFrame).invoker$dropItem((net.minecraft.entity.Entity) tickingEntity, true);
                     }
                     itemFrame.remove();
                 }

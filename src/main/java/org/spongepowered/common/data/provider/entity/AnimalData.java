@@ -38,8 +38,8 @@ public final class AnimalData {
         registrator
                 .asMutable(AnimalEntityAccessor.class)
                     .create(Keys.BREEDER)
-                        .get(AnimalEntityAccessor::accessor$getLoveCause)
-                        .set(AnimalEntityAccessor::accessor$setLoveCause);
+                        .get(AnimalEntityAccessor::accessor$loveCause)
+                        .set(AnimalEntityAccessor::accessor$loveCause);
     }
     // @formatter:on
 }

@@ -161,7 +161,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     public Selector.@NonNull Builder setDistance(@NonNull final Range<@NonNull Double> range) {
         Preconditions.checkArgument(range.getMin() == null || range.getMin() >= 0, "min must be non-negative");
         Preconditions.checkArgument(range.getMax() == null || range.getMax() >= 0, "max must be non-negative");
-        this.distance = MinMaxBounds_FloatBoundAccessor.accessor$init(
+        this.distance = MinMaxBounds_FloatBoundAccessor.invoker$new(
                 this.api$floatFromDouble(range.getMin(), Function.identity()),
                 this.api$floatFromDouble(range.getMax(), Function.identity()));
         return this;
@@ -252,7 +252,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     public Selector.@NonNull Builder setExperienceLevel(@NonNull final Range<@NonNull Integer> range) {
         Preconditions.checkArgument(range.getMin() == null || range.getMin() >= 0, "min must be non-negative");
         Preconditions.checkArgument(range.getMax() == null || range.getMax() >= 0, "max must be non-negative");
-        this.level = MinMaxBounds_IntBoundAccessor.accessor$init(range.getMin(), range.getMax());
+        this.level = MinMaxBounds_IntBoundAccessor.invoker$new(range.getMin(), range.getMax());
         this.shadow$setIncludeNonPlayers(false);
         return this;
     }

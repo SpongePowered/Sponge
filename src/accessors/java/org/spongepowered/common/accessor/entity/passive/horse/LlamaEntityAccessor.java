@@ -31,5 +31,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(LlamaEntity.class)
 public interface LlamaEntityAccessor {
 
-    @Invoker("setStrength") void accessor$setStrength(int strength);
+    @Invoker("setStrength") void invoker$setStrength(final int strength);
+
 }

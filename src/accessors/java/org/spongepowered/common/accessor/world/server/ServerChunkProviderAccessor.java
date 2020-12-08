@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ServerChunkProvider.class)
 public interface ServerChunkProviderAccessor {
 
-    @Accessor("generator") void accessor$setGenerator(ChunkGenerator generator);
+    @Accessor("generator") void accessor$generator(final ChunkGenerator generator);
+
 }

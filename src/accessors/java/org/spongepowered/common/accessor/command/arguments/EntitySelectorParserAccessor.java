@@ -31,6 +31,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(EntitySelectorParser.class)
 public interface EntitySelectorParserAccessor {
 
-    @Invoker("parseSelector") void accessor$parseSelector();
+    @Invoker("parseSelector") void invoker$parseSelector();
 
 }

@@ -25,14 +25,14 @@
 package org.spongepowered.common.accessor.block;
 
 import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(AbstractBlock.Properties.class)
 public interface AbstractBlock_PropertiesAccessor {
 
-    @Accessor("explosionResistance") float accessor$getExplosionResistance();
+    @Accessor("explosionResistance") float accessor$explosionResistance();
 
-    @Accessor("destroyTime") float accessor$getDestroyTime();
+    @Accessor("destroyTime") float accessor$destroyTime();
+
 }

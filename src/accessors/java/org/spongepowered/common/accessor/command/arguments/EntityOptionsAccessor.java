@@ -27,6 +27,7 @@ package org.spongepowered.common.accessor.command.arguments;
 import net.minecraft.command.arguments.EntityOptions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Map;
 
@@ -36,8 +37,8 @@ public interface EntityOptionsAccessor {
     // The type is actually Map<String, EntityOptions.EntityOptions>, but the inner class is
     // package private and we just need the accessor anyway.
     @Accessor("OPTIONS")
-    static Map<String, EntityOptions_OptionHandlerAccessor> accessor$getOPTIONS() {
-        throw new AssertionError("Untransformed Accessor!");
+    static Map<String, EntityOptions_OptionHandlerAccessor> accessor$OPTIONS() {
+        throw new UntransformedAccessorError();
     }
 
 }

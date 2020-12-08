@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(BedBlock.class)
 public interface BedBlockAccessor {
 
-    @Accessor("color") DyeColor accessor$getColor();
+    @Accessor("color") DyeColor accessor$color();
+
 }

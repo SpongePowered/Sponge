@@ -28,11 +28,14 @@ import net.minecraft.entity.passive.fish.TropicalFishEntity;
 import net.minecraft.item.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(TropicalFishEntity.class)
 public interface TropicalFishEntityAccessor {
 
-    @Invoker("calculateVariant") static int accessor$calculateVariant(TropicalFishEntity.Type size, DyeColor pattern, DyeColor bodyColor) {
-        throw new IllegalStateException("Untransformed accessor!");
+    @Invoker("calculateVariant")
+    static int invoker$calculateVariant(final TropicalFishEntity.Type size, final DyeColor pattern, final DyeColor bodyColor) {
+        throw new UntransformedInvokerError();
     }
+
 }

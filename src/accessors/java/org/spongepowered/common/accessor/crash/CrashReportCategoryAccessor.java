@@ -32,6 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CrashReportCategory.class)
 public interface CrashReportCategoryAccessor {
 
-    @Accessor("report") CrashReport accessor$getReport();
+    @Accessor("report") CrashReport accessor$report();
 
 }

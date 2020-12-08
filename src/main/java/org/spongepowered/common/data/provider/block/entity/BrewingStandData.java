@@ -39,19 +39,19 @@ public final class BrewingStandData {
         registrator
                 .asMutable(BrewingStandTileEntityAccessor.class)
                     .create(Keys.FUEL)
-                        .get(BrewingStandTileEntityAccessor::accessor$getFuel)
+                        .get(BrewingStandTileEntityAccessor::accessor$fuel)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.accessor$setFuel(v);
+                            h.accessor$fuel(v);
                             return true;
                         })
                     .create(Keys.REMAINING_BREW_TIME)
-                        .get(h -> h.accessor$isBrewable() ? new SpongeTicks(h.accessor$getBrewTime()) : null)
+                        .get(h -> h.invoker$isBrewable() ? new SpongeTicks(h.accessor$brewTime()) : null)
                         .set((h, v) -> {
-                            if (h.accessor$isBrewable()) {
-                                h.accessor$setBrewTime((int) v.getTicks());
+                            if (h.invoker$isBrewable()) {
+                                h.accessor$brewTime((int) v.getTicks());
                             }
                         });
     }

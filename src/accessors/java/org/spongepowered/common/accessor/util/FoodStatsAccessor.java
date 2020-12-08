@@ -31,10 +31,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(FoodStats.class)
 public interface FoodStatsAccessor {
 
-    @Accessor("saturationLevel") void accessor$setSaturationLevel(float saturationLevel);
+    @Accessor("saturationLevel") void accessor$saturationLevel(final float saturationLevel);
 
-    @Accessor("exhaustionLevel") float accessor$geExhaustionLevel();
+    @Accessor("exhaustionLevel") float accessor$exhaustionLevel();
 
-    @Accessor("exhaustionLevel") void accessor$setExhaustionLevel(float exhaustionLevel);
+    @Accessor("exhaustionLevel") void accessor$exhaustionLevel(final float exhaustionLevel);
 
 }

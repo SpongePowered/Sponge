@@ -27,11 +27,14 @@ package org.spongepowered.common.accessor.entity.passive.fish;
 import net.minecraft.entity.passive.fish.PufferfishEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(PufferfishEntity.class)
 public interface PufferfishEntityAccessor {
 
-    @Invoker("getScale") static float accessor$getScale(int scale) {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Invoker("getScale")
+    static float invoker$getScale(final int scale) {
+        throw new UntransformedInvokerError();
     }
+
 }

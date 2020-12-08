@@ -31,12 +31,12 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(EyeOfEnderEntity.class)
 public interface EyeOfEnderEntityAccessor {
 
-    @Accessor("surviveAfterDeath") boolean accessor$getSurviveAfterDeath();
+    @Accessor("surviveAfterDeath") boolean accessor$surviveAfterDeath();
 
-    @Accessor("surviveAfterDeath") void accessor$setSurviveAfterDeath(boolean surviveAfterDeath);
+    @Accessor("surviveAfterDeath") void accessor$surviveAfterDeath(final boolean surviveAfterDeath);
 
-    @Accessor("life") int accessor$getLife();
+    @Accessor("life") int accessor$life();
 
-    @Accessor("life") void accessor$setLife(int life);
+    @Accessor("life") void accessor$life(final int life);
 
 }

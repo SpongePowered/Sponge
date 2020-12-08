@@ -45,34 +45,34 @@ public final class FallingBlockData {
                         .set((h, v) -> h.shouldDropItem = v)
                 .asMutable(FallingBlockEntityAccessor.class)
                     .create(Keys.BLOCK_STATE)
-                        .get(h -> (BlockState) h.accessor$getBlockState())
-                        .set((h, v) -> h.accessor$setBlockState((net.minecraft.block.BlockState) v))
+                        .get(h -> (BlockState) h.accessor$blockState())
+                        .set((h, v) -> h.accessor$blockState((net.minecraft.block.BlockState) v))
                     .create(Keys.CAN_PLACE_AS_BLOCK)
-                        .get(h -> !h.accessor$getCancelDrop())
-                        .set((h, v) -> h.accessor$setCancelDrop(!v))
+                        .get(h -> !h.accessor$cancelDrop())
+                        .set((h, v) -> h.accessor$cancelDrop(!v))
                     .create(Keys.CAN_HURT_ENTITIES)
-                        .get(FallingBlockEntityAccessor::accessor$getHurtEntities)
-                        .set(FallingBlockEntityAccessor::accessor$setHurtEntities)
+                        .get(FallingBlockEntityAccessor::accessor$hurtEntities)
+                        .set(FallingBlockEntityAccessor::accessor$hurtEntities)
                     .create(Keys.DAMAGE_PER_BLOCK)
-                        .get(h -> (double) h.accessor$getFallDamageAmount())
-                        .set((h, v) -> h.accessor$setFallDamageAmount(v.floatValue()))
+                        .get(h -> (double) h.accessor$fallDamageAmount())
+                        .set((h, v) -> h.accessor$fallDamageAmount(v.floatValue()))
                     .create(Keys.FALL_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getTime()))
+                        .get(x -> new SpongeTicks(x.accessor$time()))
                         .setAnd((h, v) -> {
                             final int ticks = (int) v.getTicks();
                             if (ticks < 0) {
                                 return false;
                             }
-                            h.accessor$setTime(ticks);
+                            h.accessor$time(ticks);
                             return true;
                         })
                     .create(Keys.MAX_FALL_DAMAGE)
-                        .get(h -> (double) h.accessor$getFallDamageMax())
+                        .get(h -> (double) h.accessor$fallDamageMax())
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.accessor$setFallDamageMax(v.intValue());
+                            h.accessor$fallDamageMax(v.intValue());
                             return true;
                         });
     }

@@ -61,11 +61,11 @@ public final class MobData {
                         .delete(h -> h.setAttackTarget(null))
                 .asMutable(MobEntityAccessor.class)
                     .create(Keys.IS_AI_ENABLED)
-                        .get(h -> !h.accessor$getIsNoAi())
-                        .set((h, v) -> h.accessor$setIsNoAi(!v))
+                        .get(h -> !h.invoker$isNoAi())
+                        .set((h, v) -> h.invoker$setNoAi(!v))
                     .create(Keys.IS_PERSISTENT)
                         .get(h -> ((MobEntity) h).isNoDespawnRequired())
-                        .set(MobEntityAccessor::accessor$setPersistingRequired);
+                        .set(MobEntityAccessor::accessor$persistenceRequired);
     }
     // @formatter:on
 }

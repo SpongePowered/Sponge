@@ -42,7 +42,7 @@ public final class SlimeData {
                         .get(h -> (double) (0.255F * (float) h.getSlimeSize()))
                     .create(Keys.SIZE)
                         .get(h -> h.getSlimeSize() - 1)
-                        .set((h, v) -> ((SlimeEntityAccessor) h).accessor$setSize(v + 1, false));
+                        .set((h, v) -> ((SlimeEntityAccessor) h).invoker$setSize(v + 1, false));
     }
     // @formatter:on
 }

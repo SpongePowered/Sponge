@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(StringTextComponent.class)
 public interface StringTextComponentAccessor {
 
-    @Mutable @Accessor("text") void accessor$setText(String text);
+    @Mutable @Accessor("text") void accessor$text(final String text);
+
 }

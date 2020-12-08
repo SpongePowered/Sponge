@@ -25,14 +25,14 @@
 package org.spongepowered.common.accessor.entity.passive;
 
 import net.minecraft.entity.passive.OcelotEntity;
-import net.minecraft.entity.passive.TurtleEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(OcelotEntity.class)
 public interface OcelotEntityAccessor {
 
-    @Invoker("isTrusting") boolean accessor$isTrusting();
+    @Invoker("isTrusting") boolean invoker$isTrusting();
 
-    @Invoker("setTrusting") void accessor$setTrusting(boolean trusting);
+    @Invoker("setTrusting") void invoker$setTrusting(final boolean trusting);
+
 }

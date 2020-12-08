@@ -34,5 +34,6 @@ import java.util.function.Predicate;
 @Mixin(EntityPredicate.class)
 public interface EntityPredicateAccessor {
 
-    @Accessor("selector") Predicate<LivingEntity> accessor$getSelector();
+    @Accessor("selector") Predicate<LivingEntity> accessor$selector();
+
 }

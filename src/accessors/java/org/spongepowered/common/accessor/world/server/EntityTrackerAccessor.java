@@ -33,5 +33,6 @@ import java.util.Set;
 @Mixin(targets = "net/minecraft/world/server/ChunkManager$EntityTracker")
 public interface EntityTrackerAccessor {
 
-    @Accessor("seenBy") Set<ServerPlayerEntity> accessor$getSeenBy();
+    @Accessor("seenBy") Set<ServerPlayerEntity> accessor$seenBy();
+
 }

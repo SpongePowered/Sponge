@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(MobSpawnerTileEntity.class)
 public interface MobSpawnerTileEntityAccessor {
 
-    @Accessor("spawner") AbstractSpawner accessor$getSpawner();
+    @Accessor("spawner") AbstractSpawner accessor$spawner();
+
 }

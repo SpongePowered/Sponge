@@ -315,8 +315,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((ServerPlayerEntityBridge) recreatedPlayer).bridge$sendDimensionData(serverPlayNetHandler.netManager, dimension);
 
         ((ServerPlayerEntityBridge) recreatedPlayer).bridge$sendChangeDimension(
-                ((SRespawnPacketAccessor) packetIn).accessor$getDimension(),
-                ((SRespawnPacketAccessor) packetIn).accessor$getSeed(), ((SRespawnPacketAccessor) packetIn).accessor$getWorldType(),
+                ((SRespawnPacketAccessor) packetIn).accessor$dimension(),
+                ((SRespawnPacketAccessor) packetIn).accessor$seed(), ((SRespawnPacketAccessor) packetIn).accessor$getWorldType(),
                 recreatedPlayer.interactionManager.getGameType()
         );
     }

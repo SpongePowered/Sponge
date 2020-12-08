@@ -37,9 +37,10 @@ import java.util.List;
 @Mixin(Container.class)
 public interface ContainerAccessor {
 
-    @Accessor("slots") List<Slot> accessor$getSlots();
+    @Accessor("lastSlots") NonNullList<ItemStack> accessor$lastSlots();
 
-    @Accessor("lastSlots") NonNullList<ItemStack> accessor$getLastSlots();
+    @Accessor("slots") List<Slot> accessor$slots();
 
-    @Accessor("containerListeners") List<IContainerListener> accessor$getContainerListeners();
+    @Accessor("containerListeners") List<IContainerListener> accessor$containerListeners();
+
 }

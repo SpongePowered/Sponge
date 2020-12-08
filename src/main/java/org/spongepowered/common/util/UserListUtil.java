@@ -35,23 +35,23 @@ public final class UserListUtil {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void addEntry(final UserList list, final UserListEntry entry) {
-        ((UserListAccessor) list).accessor$getMap().put(((UserListAccessor) list).accessor$getKeyForUser(((UserListEntryAccessor) entry).accessor$getUser()), entry);
+        ((UserListAccessor) list).accessor$map().put(((UserListAccessor) list).invoker$getKeyForUser(((UserListEntryAccessor) entry).accessor$user()), entry);
 
         try {
             list.save();
         } catch (final IOException e) {
-            UserListAccessor.accessor$geLOGGER().warn("Could not save the list after adding a user.", e);
+            UserListAccessor.accessor$LOGGER().warn("Could not save the list after adding a user.", e);
         }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void removeEntry(final UserList list, final Object object) {
-        ((UserListAccessor) list).accessor$getMap().remove(((UserListAccessor) list).accessor$getKeyForUser(object));
+        ((UserListAccessor) list).accessor$map().remove(((UserListAccessor) list).invoker$getKeyForUser(object));
 
         try {
             list.save();
         } catch (final IOException e) {
-            UserListAccessor.accessor$geLOGGER().warn("Could not save the list after removing a user.", e);
+            UserListAccessor.accessor$LOGGER().warn("Could not save the list after removing a user.", e);
         }
     }
 

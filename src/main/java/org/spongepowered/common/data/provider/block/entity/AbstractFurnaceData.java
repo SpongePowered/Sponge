@@ -39,26 +39,26 @@ public final class AbstractFurnaceData {
         registrator
                 .asMutable(AbstractFurnaceTileEntityAccessor.class)
                     .create(Keys.FUEL)
-                        .get(AbstractFurnaceTileEntityAccessor::accessor$getLitTime)
+                        .get(AbstractFurnaceTileEntityAccessor::accessor$litTime)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.accessor$setLitTime(v);
+                            h.accessor$litTime(v);
                             return true;
                         })
                     .create(Keys.MAX_BURN_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getLitDuration()))
-                        .set((h, v) -> h.accessor$setLitDuration((int) v.getTicks()))
+                        .get(x -> new SpongeTicks(x.accessor$litDuration()))
+                        .set((h, v) -> h.accessor$litDuration((int) v.getTicks()))
                     .create(Keys.MAX_COOK_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getCookingTotalTime()))
-                        .set((h, v) -> h.accessor$setCookingTotalTime((int) v.getTicks()))
+                        .get(x -> new SpongeTicks(x.accessor$cookingTotalTime()))
+                        .set((h, v) -> h.accessor$cookingTotalTime((int) v.getTicks()))
                     .create(Keys.PASSED_COOK_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getCookingProgress()))
+                        .get(x -> new SpongeTicks(x.accessor$cookingProgress()))
                         .set((h, v) -> {
                             final int ticks = (int) v.getTicks();
-                            if (ticks < h.accessor$getCookingTotalTime()) {
-                                h.accessor$setCookingProgress(ticks);
+                            if (ticks < h.accessor$cookingTotalTime()) {
+                                h.accessor$cookingProgress(ticks);
                             }
                         });
     }

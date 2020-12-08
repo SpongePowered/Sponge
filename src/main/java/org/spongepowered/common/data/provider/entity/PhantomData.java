@@ -46,8 +46,8 @@ public final class PhantomData {
                         .set(PhantomEntity::setPhantomSize)
                 .asMutable(PhantomEntityAccessor.class)
                     .create(Keys.PHANTOM_PHASE)
-                        .get(h -> (PhantomPhase) (Object) h.accessor$getAttackPhase())
-                        .set((h, v) -> h.accessor$setAttackPhase((PhantomEntity.AttackPhase) (Object) v));
+                        .get(h -> (PhantomPhase) (Object) h.accessor$attackPhase())
+                        .set((h, v) -> h.accessor$attackPhase((PhantomEntity.AttackPhase) (Object) v));
     }
     // @formatter:on
 }

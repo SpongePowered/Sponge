@@ -40,8 +40,8 @@ public final class LockableData {
         registrator
                 .asMutable(LockableTileEntityAccessor.class)
                     .create(Keys.LOCK_TOKEN)
-                        .get(h -> ((LockCodeAccessor) h.accessor$getLockKey()).accessor$getKey())
-                        .set((h, v) -> h.accessor$setLockKey(v.isEmpty() ? LockCode.EMPTY_CODE : new LockCode(v)));
+                        .get(h -> ((LockCodeAccessor) h.accessor$lockKey()).accessor$key())
+                        .set((h, v) -> h.accessor$lockKey(v.isEmpty() ? LockCode.EMPTY_CODE : new LockCode(v)));
     }
     // @formatter:on
 }

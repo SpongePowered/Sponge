@@ -284,7 +284,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         final Entity tempEntity = this.shadow$getRidingEntity();
         if (tempEntity != null) {
             this.ridingEntity = null;
-            ((EntityAccessor) tempEntity).accessor$removePassenger((Entity) (Object) this);
+            ((EntityAccessor) tempEntity).invoker$removePassenger((Entity) (Object) this);
         }
         return true;
     }

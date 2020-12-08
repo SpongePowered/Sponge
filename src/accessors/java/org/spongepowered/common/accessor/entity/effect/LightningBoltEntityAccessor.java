@@ -31,9 +31,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(LightningBoltEntity.class)
 public interface LightningBoltEntityAccessor {
 
-    @Accessor("life") int accessor$getLife();
+    @Accessor("life") int accessor$life();
 
-    @Accessor("life") void accessor$setLife(int boltLivingTime);
+    @Accessor("life") void accessor$life(final int life);
 
-    @Accessor("visualOnly") boolean accessor$getVisualOnly();
+    @Accessor("visualOnly") boolean accessor$visualOnly();
+
 }

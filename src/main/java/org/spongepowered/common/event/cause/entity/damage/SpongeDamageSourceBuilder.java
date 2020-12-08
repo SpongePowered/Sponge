@@ -37,7 +37,7 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
     @Override
     public DamageSource build() throws IllegalStateException {
         checkState(this.damageType != null, "DamageType was null!");
-        final net.minecraft.util.DamageSource source = DamageSourceAccessor.accessor$init(this.damageType.toString());
+        final net.minecraft.util.DamageSource source = DamageSourceAccessor.invoker$new(this.damageType.toString());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) source;
         if (!this.scales
                 && this.bypasses
@@ -148,13 +148,13 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
             return (DamageSource) net.minecraft.util.DamageSource.WITHER;
         }
         if (this.absolute) {
-            accessor.accessor$setBypassMagic();
+            accessor.invoker$bypassMagic();
         }
         if (this.bypasses) {
-            accessor.accessor$setBypassArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.creative) {
-            accessor.accessor$setBypassInvul();
+            accessor.invoker$bypassInvul();
         }
         if (this.magical) {
             source.setMagicDamage();
@@ -166,10 +166,10 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
             source.setExplosion();
         }
         if (this.exhaustion != null) {
-            accessor.accessor$setExhaustion(this.exhaustion.floatValue());
+            accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
         if (this.fire) {
-            accessor.accessor$setIsFire();
+            accessor.invoker$setIsFire();
         }
         return (DamageSource) source;
     }

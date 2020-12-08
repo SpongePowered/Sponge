@@ -25,12 +25,12 @@
 package org.spongepowered.common.accessor.entity.monster;
 
 import net.minecraft.entity.monster.GuardianEntity;
-import net.minecraft.entity.monster.SlimeEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(GuardianEntity.class)
 public interface GuardianEntityAccessor {
 
-    @Invoker("setActiveAttackTarget") void accessor$setActiveAttackTarget(int entityId);
+    @Invoker("setActiveAttackTarget") void invoker$setActiveAttackTarget(final int activeAttackTarget);
+
 }

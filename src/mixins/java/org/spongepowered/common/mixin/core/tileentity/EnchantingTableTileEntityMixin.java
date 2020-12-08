@@ -35,6 +35,6 @@ public abstract class EnchantingTableTileEntityMixin implements CustomNameableBr
 
     @Override
     public void bridge$setCustomDisplayName(ITextComponent component) {
-        ((EnchantingTableTileEntityAccessor) this).accessor$setCustomName(component);
+        ((EnchantingTableTileEntityAccessor) this).invoker$setCustomName(component);
     }
 }

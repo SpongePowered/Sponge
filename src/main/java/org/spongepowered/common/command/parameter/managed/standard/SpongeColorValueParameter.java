@@ -87,7 +87,7 @@ public final class SpongeColorValueParameter extends CatalogedArgumentParser<Col
         // First, is the argument type giving the correct return type?
         try {
             final TextFormatting formatting = this.colorArgumentType.parse((StringReader) reader);
-            final Integer colorCode = ((TextFormattingAccessor) (Object) formatting).accessor$getColor();
+            final Integer colorCode = ((TextFormattingAccessor) (Object) formatting).accessor$color();
             if (colorCode != null) {
                 return Optional.of(Color.ofRgb(colorCode));
             }

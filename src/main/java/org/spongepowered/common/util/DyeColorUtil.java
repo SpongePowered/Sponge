@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 public class DyeColorUtil {
 
-    public static final Map<IItemProvider, DyeColor> COLOR_BY_WOOL = SheepEntityAccessor.accessor$getITEM_BY_DYE().entrySet()
+    public static final Map<IItemProvider, DyeColor> COLOR_BY_WOOL = SheepEntityAccessor.accessor$ITEM_BY_DYE().entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 

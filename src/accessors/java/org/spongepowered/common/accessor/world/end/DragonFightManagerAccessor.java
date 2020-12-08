@@ -32,6 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(DragonFightManager.class)
 public interface DragonFightManagerAccessor {
 
-    @Accessor("dragonEvent") ServerBossInfo accessor$getDragonEvent();
+    @Accessor("dragonEvent") ServerBossInfo accessor$dragonEvent();
 
 }

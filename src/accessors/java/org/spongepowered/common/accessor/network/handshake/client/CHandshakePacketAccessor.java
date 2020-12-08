@@ -31,9 +31,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CHandshakePacket.class)
 public interface CHandshakePacketAccessor {
 
-    @Accessor("hostName") String accessor$getHostName();
+    @Accessor("hostName") String accessor$hostName();
 
-    @Accessor("hostName") void accessor$setHostName(String hostName);
+    @Accessor("hostName") void accessor$hostName(final String hostName);
 
-    @Accessor("port") int accessor$getPort();
+    @Accessor("port") int accessor$port();
+
 }

@@ -28,6 +28,7 @@ import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Map;
 
@@ -36,7 +37,7 @@ public interface ArgumentTypesAccessor {
 
     @Accessor("BY_NAME")
     static Map<ResourceLocation, ArgumentTypes_EntryAccessor> accessor$BY_NAME() {
-        throw new AssertionError("Untransformed Accessor!");
+        throw new UntransformedAccessorError();
     }
 
 }

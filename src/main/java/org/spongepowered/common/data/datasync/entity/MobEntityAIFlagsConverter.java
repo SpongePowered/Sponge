@@ -38,7 +38,7 @@ import java.util.Optional;
 public final class MobEntityAIFlagsConverter extends DataParameterConverter<Byte> {
 
     public MobEntityAIFlagsConverter() {
-        super(MobEntityAccessor.accessor$getDATA_MOB_FLAGS_ID());
+        super(MobEntityAccessor.accessor$DATA_MOB_FLAGS_ID());
     }
 
     @Override

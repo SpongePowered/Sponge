@@ -33,22 +33,25 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Map;
+import org.spongepowered.common.UntransformedAccessorError;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(SheepEntity.class)
 public interface SheepEntityAccessor {
 
     @Accessor("DATA_WOOL_ID")
-    static DataParameter<Byte> accessor$getDATA_WOOL_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
-
-    @Invoker("createSheepColor")
-    static float[] accessor$createSheepColor(DyeColor color) {
-        throw new IllegalStateException("Untransformed Accessor!");
+    static DataParameter<Byte> accessor$DATA_WOOL_ID() {
+        throw new UntransformedAccessorError();
     }
 
     @Accessor("ITEM_BY_DYE")
-    static Map<DyeColor, IItemProvider> accessor$getITEM_BY_DYE() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    static Map<DyeColor, IItemProvider> accessor$ITEM_BY_DYE() {
+        throw new UntransformedAccessorError();
     }
+
+    @Invoker("createSheepColor")
+    static float[] invoker$createSheepColor(final DyeColor color) {
+        throw new UntransformedInvokerError();
+    }
+
 }

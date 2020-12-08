@@ -29,33 +29,41 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(PlayerEntity.class)
 public interface PlayerEntityAccessor {
 
-    @Accessor("DATA_PLAYER_ABSORPTION_ID") static DataParameter<Float> accessor$getDATA_PLAYER_ABSORPTION_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_PLAYER_ABSORPTION_ID")
+    static DataParameter<Float> accessor$DATA_PLAYER_ABSORPTION_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_SCORE_ID") static DataParameter<Integer> accessor$getDATA_SCORE_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_SCORE_ID")
+    static DataParameter<Integer> accessor$DATA_SCORE_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_PLAYER_MODE_CUSTOMISATION") static DataParameter<Byte> accessor$getDATA_PLAYER_MODE_CUSTOMISATION() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_PLAYER_MODE_CUSTOMISATION")
+    static DataParameter<Byte> accessor$DATA_PLAYER_MODE_CUSTOMISATION() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_PLAYER_MAIN_HAND") static DataParameter<Byte> accessor$getDATA_PLAYER_MAIN_HAND() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_PLAYER_MAIN_HAND")
+    static DataParameter<Byte> accessor$DATA_PLAYER_MAIN_HAND() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_SHOULDER_LEFT") static DataParameter<CompoundNBT> accessor$getDATA_SHOULDER_LEFT() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_SHOULDER_LEFT")
+    static DataParameter<CompoundNBT> accessor$DATA_SHOULDER_LEFT() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_SHOULDER_RIGHT") static DataParameter<CompoundNBT> accessor$getDATA_SHOULDER_RIGHT() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_SHOULDER_RIGHT")
+    static DataParameter<CompoundNBT> accessor$DATA_SHOULDER_RIGHT() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("sleepCounter") void accessor$setSleepCounter(int sleepCounter);
+    @Accessor("sleepCounter") void accessor$sleepCounter(final int sleepCounter);
+
 }

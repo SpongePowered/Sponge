@@ -64,7 +64,7 @@ public class SpongeUserListWhitelist extends WhiteList {
     @SuppressWarnings("unchecked")
     @Override
     public void addEntry(final WhitelistEntry entry) {
-        Sponge.getServer().getServiceProvider().whitelistService().addProfile(((UserListEntryAccessor<GameProfile>) entry).accessor$getUser());
+        Sponge.getServer().getServiceProvider().whitelistService().addProfile(((UserListEntryAccessor<GameProfile>) entry).accessor$user());
     }
 
     @Override

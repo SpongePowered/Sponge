@@ -234,7 +234,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
         if (naturally && entity instanceof MobEntity) {
             // Adding the default equipment
             final DifficultyInstance difficulty = this.shadow$getDifficultyForLocation(new BlockPos(x, y, z));
-            ((MobEntityAccessor)entity).accessor$populateDefaultEquipmentSlots(difficulty);
+            ((MobEntityAccessor)entity).invoker$populateDefaultEquipmentSlots(difficulty);
         }
 
         if (entity instanceof PaintingEntity) {

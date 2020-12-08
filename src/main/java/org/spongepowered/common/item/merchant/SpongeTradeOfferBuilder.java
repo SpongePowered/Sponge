@@ -130,8 +130,8 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         final ItemStack selling = this.sellingItem.createStack();
         final MerchantOffer merchantOffer = new MerchantOffer(ItemStackUtil.toNative(first), ItemStackUtil.toNative(second), ItemStackUtil.toNative(selling),
                         this.useCount, this.maxUses, this.merchantExperienceGranted, (float) this.priceGrowthMultiplier);
-        ((MerchantOfferAccessor) merchantOffer).accessor$setRewardExp(this.allowsExperience);
-        ((MerchantOfferAccessor) merchantOffer).accessor$setDemand(this.demandBonus);
+        ((MerchantOfferAccessor) merchantOffer).accessor$rewardExp(this.allowsExperience);
+        ((MerchantOfferAccessor) merchantOffer).accessor$demand(this.demandBonus);
         return (TradeOffer) merchantOffer;
     }
 

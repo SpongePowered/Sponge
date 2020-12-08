@@ -54,15 +54,15 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecra
      * @param type The damage type id
      */
     public void setDamageType(final String type) {
-        ((DamageSourceAccessor) this).accessor$setMsgId(type);
+        ((DamageSourceAccessor) this).accessor$msgId(type);
     }
 
     public void setEntitySource(final Entity entitySource) {
-        ((EntityDamageSourceAccessor) this).accessor$setEntity(entitySource);
+        ((EntityDamageSourceAccessor) this).accessor$entity(entitySource);
     }
 
     public void setIndirectSource(final Entity entity) {
-        ((IndirectEntityDamageSourceAccessor) this).accessor$setOwner(entity);
+        ((IndirectEntityDamageSourceAccessor) this).accessor$owner(entity);
     }
 
 

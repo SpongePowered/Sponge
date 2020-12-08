@@ -31,13 +31,16 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.stream.Stream;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(Ingredient.class)
 public interface IngredientAccessor {
 
-    @Accessor("itemStacks") ItemStack[] accessor$getItemStacks();
+    @Accessor("itemStacks") ItemStack[] accessor$itemStacks();
 
-    @Invoker("fromValues") static Ingredient accessor$fromValues(Stream<? extends Ingredient.IItemList> stream) {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Invoker("fromValues")
+    static Ingredient invoker$fromValues(final Stream<? extends Ingredient.IItemList> stream) {
+        throw new UntransformedInvokerError();
     }
+
 }

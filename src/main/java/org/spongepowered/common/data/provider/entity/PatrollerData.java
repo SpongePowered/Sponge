@@ -44,8 +44,8 @@ public final class PatrollerData {
                         .set((h, v) -> h.setPatrolTarget(VecHelper.toBlockPos(v)))
                 .asMutable(PatrollerEntityAccessor.class)
                     .create(Keys.IS_PATROLLING)
-                        .get(PatrollerEntityAccessor::accessor$getPatrolling)
-                        .set(PatrollerEntityAccessor::accessor$setPatrolling);
+                        .get(PatrollerEntityAccessor::accessor$patrolling)
+                        .set(PatrollerEntityAccessor::accessor$patrolling);
     }
     // @formatter:on
 }

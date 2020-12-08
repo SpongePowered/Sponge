@@ -47,7 +47,7 @@ public final class PistonData {
                         .set((h, v) -> h.with(PistonBlock.EXTENDED, v))
                         .supports(h -> h.getBlock() instanceof PistonBlock)
                     .create(Keys.PISTON_TYPE)
-                        .get(h -> ((PistonBlockAccessor) h.getBlock()).accessor$getIsSticky() ? PistonTypes.STICKY.get() : PistonTypes.NORMAL.get())
+                        .get(h -> ((PistonBlockAccessor) h.getBlock()).accessor$isSticky() ? PistonTypes.STICKY.get() : PistonTypes.NORMAL.get())
                         .set((h, v) -> {
                             if (v == PistonTypes.NORMAL.get()) {
                                 return Blocks.PISTON.getDefaultState().with(DirectionalBlock.FACING, h.get(DirectionalBlock.FACING));

@@ -33,5 +33,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(EnchantingTableTileEntity.class)
 public interface EnchantingTableTileEntityAccessor {
 
-    @Invoker("setCustomName") void accessor$setCustomName(@Nullable ITextComponent customName);
+    @Invoker("setCustomName") void invoker$setCustomName(final @Nullable ITextComponent customName);
+
 }

@@ -31,5 +31,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CResourcePackStatusPacket.class)
 public interface CResourcePackStatusPacketAccessor {
 
-    @Accessor("action") CResourcePackStatusPacket.Action accessor$getAction();
+    @Accessor("action") CResourcePackStatusPacket.Action accessor$action();
+
 }

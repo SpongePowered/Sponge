@@ -28,12 +28,14 @@ import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(EndermanEntity.class)
 public interface EndermanEntityAccessor {
 
     @Accessor("DATA_STARED_AT")
-    static DataParameter<Boolean> accessor$getDATA_STARED_AT() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    static DataParameter<Boolean> accessor$DATA_STARED_AT() {
+        throw new UntransformedAccessorError();
     }
+
 }

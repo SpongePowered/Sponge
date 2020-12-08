@@ -33,12 +33,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(Style.class)
 public interface StyleAccessor {
 
     @Invoker("<init>")
-    static Style accessor$init(
+    static Style invoker$new(
             final @Nullable Color color,
             final @Nullable Boolean bold,
             final @Nullable Boolean italic,
@@ -50,18 +51,19 @@ public interface StyleAccessor {
             final @Nullable String insertion,
             final @Nullable ResourceLocation font
     ) {
-        throw new AssertionError();
+        throw new UntransformedInvokerError();
     }
 
-    @Accessor("color") Color accessor$getColor();
+    @Accessor("color") Color accessor$color();
 
-    @Accessor("bold") Boolean accessor$getBold();
+    @Accessor("bold") Boolean accessor$bold();
 
-    @Accessor("italic") Boolean accessor$getItalic();
+    @Accessor("italic") Boolean accessor$italic();
 
-    @Accessor("underlined") Boolean accessor$getUnderlined();
+    @Accessor("underlined") Boolean accessor$underlined();
 
-    @Accessor("strikethrough") Boolean accessor$getStrikethrough();
+    @Accessor("strikethrough") Boolean accessor$strikethrough();
 
-    @Accessor("obfuscated") Boolean accessor$getObfuscated();
+    @Accessor("obfuscated") Boolean accessor$obfuscated();
+
 }

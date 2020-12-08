@@ -28,12 +28,14 @@ import net.minecraft.entity.passive.horse.AbstractChestedHorseEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(AbstractChestedHorseEntity.class)
 public interface AbstractChestedHorseEntityAccessor {
 
     @Accessor("DATA_ID_CHEST")
-    static DataParameter<Boolean> accessor$getDATA_ID_CHEST() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    static DataParameter<Boolean> accessor$DATA_ID_CHEST() {
+        throw new UntransformedAccessorError();
     }
+
 }

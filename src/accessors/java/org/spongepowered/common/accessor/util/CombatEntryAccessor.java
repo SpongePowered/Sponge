@@ -34,5 +34,6 @@ import javax.annotation.Nullable;
 @Mixin(CombatEntry.class)
 public interface CombatEntryAccessor {
 
-    @Accessor("source") @Nullable DamageSource accessor$getSource();
+    @Accessor("source") @Nullable DamageSource accessor$source();
+
 }

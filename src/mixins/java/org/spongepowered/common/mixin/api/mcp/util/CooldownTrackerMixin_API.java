@@ -61,7 +61,7 @@ public abstract class CooldownTrackerMixin_API implements org.spongepowered.api.
         final CooldownTracker_CooldownAccessor cooldown = (CooldownTracker_CooldownAccessor) this.cooldowns.get((Item) type);
 
         if (cooldown != null) {
-            final int remainingCooldown = cooldown.accessor$getEndTime() - this.ticks;
+            final int remainingCooldown = cooldown.accessor$endTime() - this.ticks;
             if (remainingCooldown > 0) {
                 return OptionalInt.of(remainingCooldown);
             }

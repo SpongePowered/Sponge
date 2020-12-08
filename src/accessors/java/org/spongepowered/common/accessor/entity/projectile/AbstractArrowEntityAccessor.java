@@ -31,5 +31,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractArrowEntity.class)
 public interface AbstractArrowEntityAccessor {
 
-    @Accessor("knockback") int accessor$getKnockback();
+    @Accessor("knockback") int accessor$knockback();
+
 }

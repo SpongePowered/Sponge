@@ -35,7 +35,7 @@ import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 
 public final class SpongeScoreTrigger extends AbstractCriterionTrigger<SpongeScoreTrigger.Instance> {
 
-    public static final SpongeScoreTrigger SCORE_TRIGGER = CriteriaTriggersAccessor.accessor$register(new SpongeScoreTrigger(new ResourceLocation("sponge:score")));
+    public static final SpongeScoreTrigger SCORE_TRIGGER = CriteriaTriggersAccessor.invoker$register(new SpongeScoreTrigger(new ResourceLocation("sponge:score")));
 
     private final ResourceLocation resourceLocation;
 

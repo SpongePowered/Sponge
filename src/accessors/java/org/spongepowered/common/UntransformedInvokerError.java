@@ -22,30 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.item.stack;
+package org.spongepowered.common;
 
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.item.ToolItemAccessor;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
-
-public final class ToolItemStackData {
-
-    private ToolItemStackData() {
+public final class UntransformedInvokerError extends AssertionError {
+    public UntransformedInvokerError() {
+        super("An untransformed @Invoker has been encountered");
     }
-
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(ItemStack.class)
-                    .create(Keys.EFFICIENCY)
-                        .get(h -> {
-                            if (h.getItem() instanceof ToolItemAccessor) {
-                                return (double) ((ToolItemAccessor) h.getItem()).accessor$speed();
-                            }
-                            return null;
-                        })
-                        .supports(h -> h.getItem() instanceof ToolItemAccessor);
-    }
-    // @formatter:on
 }

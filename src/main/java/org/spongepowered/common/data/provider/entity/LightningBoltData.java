@@ -39,16 +39,16 @@ public final class LightningBoltData {
         registrator
                 .asMutable(LightningBoltEntityAccessor.class)
                     .create(Keys.DESPAWN_DELAY)
-                        .get(x -> new SpongeTicks(x.accessor$getLife()))
+                        .get(x -> new SpongeTicks(x.accessor$life()))
                         .setAnd((h, v) -> {
                             if (v.getTicks() < 0) {
                                 return false;
                             }
-                            h.accessor$setLife((int) v.getTicks());
+                            h.accessor$life((int) v.getTicks());
                             return true;
                         })
                     .create(Keys.IS_EFFECT_ONLY)
-                        .get(LightningBoltEntityAccessor::accessor$getVisualOnly);
+                        .get(LightningBoltEntityAccessor::accessor$visualOnly);
     }
     // @formatter:on
 }

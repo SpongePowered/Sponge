@@ -46,7 +46,7 @@ public final class EndermiteData {
                             if (h.isNoDespawnRequired()) {
                                 return null;
                             }
-                            return new SpongeTicks(((EndermiteEntityAccessor) h).accessor$getLife());
+                            return new SpongeTicks(((EndermiteEntityAccessor) h).accessor$life());
                         })
                         .setAnd((h, v) -> {
                             if (h.isNoDespawnRequired()) {
@@ -56,7 +56,7 @@ public final class EndermiteData {
                             if (ticks < 0 || ticks > EndermiteData.DESPAWN_DELAY_MAX) {
                                 return false;
                             }
-                            ((EndermiteEntityAccessor) h).accessor$setLife(ticks);
+                            ((EndermiteEntityAccessor) h).accessor$life(ticks);
                             return true;
                         });
     }

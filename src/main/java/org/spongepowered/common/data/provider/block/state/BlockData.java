@@ -61,7 +61,7 @@ public final class BlockData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.BLAST_RESISTANCE)
-                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getExplosionResistance())
+                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$explosionResistance())
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
                             if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
@@ -74,7 +74,7 @@ public final class BlockData {
                         .get(h -> ((DyeColorBlockBridge) h.getBlock()).bridge$getDyeColor().orElse(null))
                         .supports(h -> h.getBlock() instanceof DyeColorBlockBridge)
                     .create(Keys.HARDNESS)
-                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getDestroyTime())
+                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$destroyTime())
                     .create(Keys.HELD_ITEM)
                         .get(h -> {
                             final Item item = h.getBlock().asItem();
@@ -89,9 +89,9 @@ public final class BlockData {
                     .create(Keys.IS_PASSABLE)
                         .get(h -> !h.getMaterial().blocksMovement())
                     .create(Keys.IS_UNBREAKABLE)
-                        .get(h -> ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$getDestroyTime() < 0)
+                        .get(h -> ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$destroyTime() < 0)
                     .create(Keys.IS_FLAMMABLE)
-                        .get(((AbstractFireBlockAccessor) Blocks.FIRE)::accessor$canBurn)
+                        .get(((AbstractFireBlockAccessor) Blocks.FIRE)::invoker$canBurn)
                     .create(Keys.IS_SOLID)
                         .get(h -> h.getMaterial().isSolid())
                     .create(Keys.IS_REPLACEABLE)

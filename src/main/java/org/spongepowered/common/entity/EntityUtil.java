@@ -140,7 +140,7 @@ public final class EntityUtil {
 
         toWorld = (ServerWorld) event.getDestinationWorld();
 
-        ((ServerPlayerEntityAccessor) player).accessor$setIsChangingDimension(true);
+        ((ServerPlayerEntityAccessor) player).accessor$isChangingDimension(true);
 
         final ServerLocation previousLocation = ((ServerPlayer) player).getServerLocation();
         final ServerWorld fromWorld = player.getServerWorld();
@@ -169,9 +169,9 @@ public final class EntityUtil {
             player.getServerWorld().removePlayer(player);
             if (!player.queuedEndExit) {
                 player.queuedEndExit = true;
-                player.connection.sendPacket(new SChangeGameStatePacket(4, ((ServerPlayerEntityAccessor) player).accessor$getSeenCredits() ?
+                player.connection.sendPacket(new SChangeGameStatePacket(4, ((ServerPlayerEntityAccessor) player).accessor$seenCredits() ?
                         0.0F : 1.0F));
-                ((ServerPlayerEntityAccessor) player).accessor$setSeenCredits(true);
+                ((ServerPlayerEntityAccessor) player).accessor$seenCredits(true);
             }
 
             return new DimensionChangeResult<>(player, true, false);
@@ -209,7 +209,7 @@ public final class EntityUtil {
         player.setWorld(toWorld);
         toWorld.addRespawnedPlayer(player);
         if (isPortal) {
-            ((ServerPlayerEntityAccessor) player).accessor$triggerDimensionChangeTriggers(toWorld);
+            ((ServerPlayerEntityAccessor) player).invoker$triggerDimensionChangeTriggers(toWorld);
         }
         player.interactionManager.setWorld(toWorld);
         player.connection.sendPacket(new SPlayerAbilitiesPacket(player.abilities));
@@ -227,9 +227,9 @@ public final class EntityUtil {
         ((ServerWorldBridge) fromWorld).bridge$getBossBarManager().onPlayerLogout(player);
         ((ServerWorldBridge) toWorld).bridge$getBossBarManager().onPlayerLogin(player);
 
-        ((ServerPlayerEntityAccessor) player).accessor$setLastSentExp(-1);
-        ((ServerPlayerEntityAccessor) player).accessor$setLastSentHealth(-1.0f);
-        ((ServerPlayerEntityAccessor) player).accessor$setLastSentFood(-1);
+        ((ServerPlayerEntityAccessor) player).accessor$lastSentExp(-1);
+        ((ServerPlayerEntityAccessor) player).accessor$lastSentHealth(-1.0f);
+        ((ServerPlayerEntityAccessor) player).accessor$lastSentFood(-1);
 
         if (!isPortal) {
             player.connection.setPlayerLocation(player.getPosX(), player.getPosY(), player.getPosZ(), player.rotationYaw, player.rotationPitch);
@@ -248,7 +248,7 @@ public final class EntityUtil {
     public static boolean isEntityDead(final net.minecraft.entity.Entity entity) {
         if (entity instanceof LivingEntity) {
             final LivingEntity base = (LivingEntity) entity;
-            return base.getHealth() <= 0 || base.deathTime > 0 || ((LivingEntityAccessor) entity).accessor$getDead();
+            return base.getHealth() <= 0 || base.deathTime > 0 || ((LivingEntityAccessor) entity).accessor$dead();
         }
         return entity.removed;
     }

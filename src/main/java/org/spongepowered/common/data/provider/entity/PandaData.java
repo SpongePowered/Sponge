@@ -70,8 +70,8 @@ public final class PandaData {
                         .set((h, v) -> h.setUnhappyCounter((int) v.getTicks()))
                 .asMutable(PandaEntityAccessor.class)
                     .create(Keys.EATING_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getEatCounter()))
-                        .set((h, v) -> h.accessor$setEatCounter((int) v.getTicks()));
+                        .get(x -> new SpongeTicks(x.invoker$getEatCounter()))
+                        .set((h, v) -> h.invoker$setEatCounter((int) v.getTicks()));
     }
     // @formatter:on
 }

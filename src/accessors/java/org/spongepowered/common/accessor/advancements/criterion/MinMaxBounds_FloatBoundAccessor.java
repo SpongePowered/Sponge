@@ -25,17 +25,17 @@
 package org.spongepowered.common.accessor.advancements.criterion;
 
 import net.minecraft.advancements.criterion.MinMaxBounds;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
-
-import javax.annotation.Nullable;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(MinMaxBounds.FloatBound.class)
 public interface MinMaxBounds_FloatBoundAccessor {
 
     @Invoker("<init>")
-    static MinMaxBounds.FloatBound accessor$init(@Nullable final Float p_i49717_1_, @Nullable final Float p_i49717_2_) {
-        throw new AssertionError("Untransformed Accessor!");
+    static MinMaxBounds.FloatBound invoker$new(final @Nullable Float min, final @Nullable Float max) {
+        throw new UntransformedInvokerError();
     }
 
 }

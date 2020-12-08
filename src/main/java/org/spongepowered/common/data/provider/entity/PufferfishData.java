@@ -39,7 +39,7 @@ public final class PufferfishData {
         registrator
                 .asMutable(PufferfishEntity.class)
                     .create(Keys.SCALE)
-                        .get(h -> (double) PufferfishEntityAccessor.accessor$getScale(h.getPuffState()));
+                        .get(h -> (double) PufferfishEntityAccessor.invoker$getScale(h.getPuffState()));
     }
     // @formatter:on
 }

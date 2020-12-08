@@ -75,16 +75,16 @@ public final class SpongeBanService implements BanService {
     public Collection<Ban.Profile> getProfileBans() {
         final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor =
             (UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getUserBanList();
-        accessor.accessor$removeExpired();
-        return new ArrayList<>((Collection<Ban.Profile>) (Object) accessor.accessor$getMap().values());
+        accessor.invoker$removeExpired();
+        return new ArrayList<>((Collection<Ban.Profile>) (Object) accessor.accessor$map().values());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Ban.Ip> getIpBans() {
         final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor = ((UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getIPBanList());
-        accessor.accessor$removeExpired();
-        return new ArrayList<>((Collection<Ban.Ip>) (Object) accessor.accessor$getMap().values());
+        accessor.invoker$removeExpired();
+        return new ArrayList<>((Collection<Ban.Ip>) (Object) accessor.accessor$map().values());
     }
 
     @SuppressWarnings("unchecked")
@@ -92,8 +92,8 @@ public final class SpongeBanService implements BanService {
     public Optional<Ban.Profile> getBanFor(final GameProfile profile) {
         final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor =
             (UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getUserBanList();
-        accessor.accessor$removeExpired();
-        return Optional.ofNullable((Ban.Profile) accessor.accessor$getMap().get(accessor.accessor$getKeyForUser(SpongeGameProfile.toMcProfile(profile))));
+        accessor.invoker$removeExpired();
+        return Optional.ofNullable((Ban.Profile) accessor.accessor$map().get(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile))));
     }
 
     @SuppressWarnings("unchecked")
@@ -101,8 +101,8 @@ public final class SpongeBanService implements BanService {
     public Optional<Ban.Ip> getBanFor(final InetAddress address) {
         final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
 
-        accessor.accessor$removeExpired();
-        return Optional.ofNullable((Ban.Ip) accessor.accessor$getMap().get(accessor.accessor$getKeyForUser(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0)))));
+        accessor.invoker$removeExpired();
+        return Optional.ofNullable((Ban.Ip) accessor.accessor$map().get(accessor.invoker$getKeyForUser(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0)))));
     }
 
     @SuppressWarnings("unchecked")
@@ -111,8 +111,8 @@ public final class SpongeBanService implements BanService {
         final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor =
             (UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getUserBanList();
 
-        accessor.accessor$removeExpired();
-        return accessor.accessor$getMap().containsKey(accessor.accessor$getKeyForUser(SpongeGameProfile.toMcProfile(profile)));
+        accessor.invoker$removeExpired();
+        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile)));
     }
 
     @SuppressWarnings("unchecked")
@@ -120,8 +120,8 @@ public final class SpongeBanService implements BanService {
     public boolean isBanned(final InetAddress address) {
         final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
 
-        accessor.accessor$removeExpired();
-        return accessor.accessor$getMap().containsKey(accessor.accessor$getKeyForUser(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0))));
+        accessor.invoker$removeExpired();
+        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0))));
     }
 
     @SuppressWarnings("unchecked")
@@ -130,7 +130,7 @@ public final class SpongeBanService implements BanService {
         final Optional<Ban.Profile> ban = this.getBanFor(profile);
         final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor =
             (UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getUserBanList();
-        accessor.accessor$removeExpired();
+        accessor.invoker$removeExpired();
         return ban.isPresent() && this.removeBan(ban.get());
     }
 
@@ -139,7 +139,7 @@ public final class SpongeBanService implements BanService {
     public boolean pardon(final InetAddress address) {
         final Optional<Ban.Ip> ban = this.getBanFor(address);
         final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
-        accessor.accessor$removeExpired();
+        accessor.invoker$removeExpired();
         return ban.isPresent() && this.removeBan(ban.get());
     }
 

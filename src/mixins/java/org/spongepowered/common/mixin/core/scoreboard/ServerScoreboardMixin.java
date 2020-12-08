@@ -92,8 +92,8 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             throw new IllegalStateException("Attempting to set an objective's display slot that does not exist on this scoreboard!");
         }
         final int index = ((SpongeDisplaySlot) displaySlot).getIndex();
-        ((ScoreboardAccessor) this).accessor$getDisplayObjectives()[index] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
-        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SDisplayObjectivePacket(index, ((ScoreboardAccessor) this).accessor$getDisplayObjectives()[index]));
+        ((ScoreboardAccessor) this).accessor$displayObjectives()[index] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
+        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SDisplayObjectivePacket(index, ((ScoreboardAccessor) this).accessor$displayObjectives()[index]));
     }
 
     // Get objectives
@@ -106,14 +106,14 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             throw new IllegalArgumentException(String.format("An objective with the name '%s' already exists!", objective.getName()));
         }
         final ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
-        List<ScoreObjective> objectives = ((ScoreboardAccessor) this).accessor$getObjectivesByCriteria().get(objective.getCriterion());
+        List<ScoreObjective> objectives = ((ScoreboardAccessor) this).accessor$objectivesByCriteria().get(objective.getCriterion());
         if (objectives == null) {
             objectives = new ArrayList<>();
-            ((ScoreboardAccessor) this).accessor$getObjectivesByCriteria().put((ScoreCriteria) objective.getCriterion(), objectives);
+            ((ScoreboardAccessor) this).accessor$objectivesByCriteria().put((ScoreCriteria) objective.getCriterion(), objectives);
         }
 
         objectives.add(scoreObjective);
-        ((ScoreboardAccessor) this).accessor$getObjectivesByName().put(objective.getName(), scoreObjective);
+        ((ScoreboardAccessor) this).accessor$objectivesByName().put(objective.getName(), scoreObjective);
         this.onObjectiveAdded(scoreObjective);
 
         ((SpongeObjective) objective).updateScores(this);
@@ -127,7 +127,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public Optional<Objective> bridge$getObjective(final DisplaySlot slot) {
-        final ScoreObjective objective = ((ScoreboardAccessor) this).accessor$getDisplayObjectives()[((SpongeDisplaySlot) slot).getIndex()];
+        final ScoreObjective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[((SpongeDisplaySlot) slot).getIndex()];
         if (objective != null) {
             return Optional.of(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
         }
@@ -136,8 +136,8 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public Set<Objective> bridge$getObjectivesByCriterion(final Criterion criterion) {
-        if (((ScoreboardAccessor) this).accessor$getObjectivesByCriteria().containsKey(criterion)) {
-            return ((ScoreboardAccessor) this).accessor$getObjectivesByCriteria().get(criterion).stream()
+        if (((ScoreboardAccessor) this).accessor$objectivesByCriteria().containsKey(criterion)) {
+            return ((ScoreboardAccessor) this).accessor$objectivesByCriteria().get(criterion).stream()
                 .map(objective -> ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective()).collect(Collectors.toSet());
         }
         return new HashSet<>();
@@ -146,7 +146,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Override
     public void bridge$removeObjective(final Objective objective) {
         final ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
-        ((ScoreboardAccessor) this).accessor$getObjectivesByName().remove(scoreObjective.getName());
+        ((ScoreboardAccessor) this).accessor$objectivesByName().remove(scoreObjective.getName());
 
         for (int i = 0; i < 19; ++i)
         {
@@ -158,14 +158,14 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
         ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SScoreboardObjectivePacket(scoreObjective, Constants.Scoreboards.OBJECTIVE_PACKET_REMOVE));
 
-        final List list = ((ScoreboardAccessor) this).accessor$getObjectivesByCriteria().get(scoreObjective.getCriteria());
+        final List list = ((ScoreboardAccessor) this).accessor$objectivesByCriteria().get(scoreObjective.getCriteria());
 
         if (list != null)
         {
             list.remove(scoreObjective);
         }
 
-        for (final Map<ScoreObjective, Score> scoreMap : ((ScoreboardAccessor) this).accessor$getPlayerScores().values()) {
+        for (final Map<ScoreObjective, Score> scoreMap : ((ScoreboardAccessor) this).accessor$playerScores().values()) {
             final Score score = scoreMap.remove(scoreObjective);
             if (score != null) {
                 ((ScoreBridge) score).bridge$getSpongeScore().removeScoreFor(scoreObjective);
@@ -186,12 +186,12 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             throw new IllegalArgumentException(String.format("A team with the name '%s' already exists!", spongeTeam.getName()));
         }
 
-        if (((ScorePlayerTeamAccessor) team).accessor$getScoreboard() != null) {
+        if (((ScorePlayerTeamAccessor) team).accessor$scoreboard() != null) {
             throw new IllegalArgumentException("The passed in team is already registered to a scoreboard!");
         }
 
-        ((ScorePlayerTeamAccessor) team).accessor$setScoreboard(this);
-        ((ScoreboardAccessor) this).accessor$getTeamsByName().put(team.getName(), team);
+        ((ScorePlayerTeamAccessor) team).accessor$scoreboard(this);
+        ((ScoreboardAccessor) this).accessor$teamsByName().put(team.getName(), team);
 
         for (final String entry: team.getMembershipCollection()) {
             this.addPlayerToTeam(entry, team);
@@ -255,7 +255,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Override
     public void removeTeam(final ScorePlayerTeam team) {
         super.removeTeam(team);
-        ((ScorePlayerTeamAccessor) team).accessor$setScoreboard(null);
+        ((ScorePlayerTeamAccessor) team).accessor$scoreboard(null);
     }
 
     @Override

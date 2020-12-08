@@ -31,6 +31,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(VexEntity.class)
 public interface VexEntityAccessor {
 
-    @Accessor("limitedLifeTicks") int accessor$getLimitedLifeTicks();
+    @Accessor("limitedLifeTicks") int accessor$limitedLifeTicks();
 
 }

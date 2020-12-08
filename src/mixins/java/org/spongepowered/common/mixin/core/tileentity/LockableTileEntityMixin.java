@@ -35,6 +35,6 @@ public abstract class LockableTileEntityMixin extends TileEntityMixin implements
 
     @Override
     public void bridge$setCustomDisplayName(ITextComponent component) {
-        ((LockableTileEntityAccessor) this).accessor$setCustomName(component);
+        ((LockableTileEntityAccessor) this).invoker$setCustomName(component);
     }
 }

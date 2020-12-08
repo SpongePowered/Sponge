@@ -147,7 +147,7 @@ public final class PacketPhaseUtil {
             player.inventory.mainInventory.set(player.inventory.currentItem, itemStack);
             // TODO check if window id -2 and slotid = player.inventory.currentItem works instead of this:
             for (Slot containerSlot : player.openContainer.inventorySlots) {
-                if (containerSlot.inventory == player.inventory && ((SlotAccessor) containerSlot).accessor$getSlot() == player.inventory.currentItem) {
+                if (containerSlot.inventory == player.inventory && ((SlotAccessor) containerSlot).accessor$slot() == player.inventory.currentItem) {
                     slotId = containerSlot.slotNumber;
                     break;
                 }
@@ -197,7 +197,7 @@ public final class PacketPhaseUtil {
                     final CPlayerPacket movingPacket = ((CPlayerPacket) packetIn);
                     if (movingPacket instanceof CPlayerPacket.RotationPacket) {
                         ignoreMovementCapture = true;
-                    } else if (packetPlayer.getPosX() == ((CPlayerPacketAccessor) movingPacket).accessor$getX() && packetPlayer.getPosY() == ((CPlayerPacketAccessor) movingPacket).accessor$getY() && packetPlayer.getPosZ() == ((CPlayerPacketAccessor) movingPacket).accessor$getZ()) {
+                    } else if (packetPlayer.getPosX() == ((CPlayerPacketAccessor) movingPacket).accessor$x() && packetPlayer.getPosY() == ((CPlayerPacketAccessor) movingPacket).accessor$y() && packetPlayer.getPosZ() == ((CPlayerPacketAccessor) movingPacket).accessor$z()) {
                         ignoreMovementCapture = true;
                     } else {
                         ignoreMovementCapture = false;
@@ -256,12 +256,12 @@ public final class PacketPhaseUtil {
         if (item instanceof DyeItem) {
             // ItemDye.itemInteractionForEntity
             if (entity instanceof SheepEntity) {
-                return SheepEntityAccessor.accessor$getDATA_WOOL_ID();
+                return SheepEntityAccessor.accessor$DATA_WOOL_ID();
             }
 
             // EntityWolf.processInteract
             if (entity instanceof WolfEntity) {
-                return WolfEntityAccessor.accessor$getDATA_COLLAR_COLOR();
+                return WolfEntityAccessor.accessor$DATA_COLLAR_COLOR();
             }
 
             return null;
@@ -269,17 +269,17 @@ public final class PacketPhaseUtil {
 
         if (item == Items.NAME_TAG) {
             // ItemNameTag.itemInteractionForEntity
-            return entity instanceof LivingEntity && !(entity instanceof PlayerEntity) && stack.hasDisplayName() ? EntityAccessor.accessor$getDATA_CUSTOM_NAME() : null;
+            return entity instanceof LivingEntity && !(entity instanceof PlayerEntity) && stack.hasDisplayName() ? EntityAccessor.accessor$DATA_CUSTOM_NAME() : null;
         }
 
         if (item == Items.SADDLE) {
             // ItemSaddle.itemInteractionForEntity
-            return entity instanceof PigEntity ? PigEntityAccessor.accessor$getDATA_SADDLE_ID() : null;
+            return entity instanceof PigEntity ? PigEntityAccessor.accessor$DATA_SADDLE_ID() : null;
         }
 
         if (item instanceof BlockItem && ((BlockItem) item).getBlock() == Blocks.CHEST) {
             // AbstractChestHorse.processInteract
-            return entity instanceof AbstractChestedHorseEntity ? AbstractChestedHorseEntityAccessor.accessor$getDATA_ID_CHEST() : null;
+            return entity instanceof AbstractChestedHorseEntity ? AbstractChestedHorseEntityAccessor.accessor$DATA_ID_CHEST() : null;
         }
 
         return null;

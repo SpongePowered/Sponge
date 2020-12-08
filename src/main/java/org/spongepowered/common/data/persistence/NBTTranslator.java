@@ -51,7 +51,6 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.accessor.nbt.LongArrayNBTAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -248,7 +247,7 @@ public final class NBTTranslator extends SpongeCatalogType implements DataTransl
                 view.set(of(key), ((IntArrayNBT) base).getAsIntArray());
                 break;
             case Constants.NBT.TAG_LONG_ARRAY:
-                view.set(of(key), ((LongArrayNBTAccessor) base).accessor$getData());
+                view.set(of(key), ((LongArrayNBT) base).getAsLongArray());
                 break;
             default:
                 throw new IllegalArgumentException("Unknown NBT type " + type);
@@ -288,7 +287,7 @@ public final class NBTTranslator extends SpongeCatalogType implements DataTransl
             case Constants.NBT.TAG_INT_ARRAY:
                 return ((IntArrayNBT) base).getAsIntArray();
             case Constants.NBT.TAG_LONG_ARRAY:
-                return ((LongArrayNBTAccessor) base).accessor$getData();
+                return ((LongArrayNBT) base).getAsLongArray();
             default :
                 return null;
         }

@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(EntityDamageSource.class)
 public interface EntityDamageSourceAccessor {
 
-    @Accessor("entity") void accessor$setEntity(Entity entity);
+    @Accessor("entity") void accessor$entity(final Entity entity);
+
 }

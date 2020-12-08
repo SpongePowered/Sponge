@@ -123,7 +123,7 @@ public final class SpongeObjective implements Objective {
 
         final SpongeScore spongeScore = (SpongeScore) score;
         for (final ScoreObjective objective: this.objectives.values()) {
-            this.addScoreToScoreboard(((ScoreObjectiveAccessor) objective).accessor$getScoreboard(), spongeScore.getScoreFor(objective));
+            this.addScoreToScoreboard(((ScoreObjectiveAccessor) objective).accessor$scoreboard(), spongeScore.getScoreFor(objective));
         }
     }
 
@@ -152,17 +152,17 @@ public final class SpongeObjective implements Objective {
         }
 
         for (final ScoreObjective objective: this.objectives.values()) {
-            final net.minecraft.scoreboard.Scoreboard scoreboard = ((ScoreObjectiveAccessor) objective).accessor$getScoreboard();
+            final net.minecraft.scoreboard.Scoreboard scoreboard = ((ScoreObjectiveAccessor) objective).accessor$scoreboard();
 
 
-            final Map<?, ?> map = ((ScoreboardAccessor) scoreboard).accessor$getPlayerScores().get(name);
+            final Map<?, ?> map = ((ScoreboardAccessor) scoreboard).accessor$playerScores().get(name);
 
             if (map != null) {
                 final net.minecraft.scoreboard.Score score = (net.minecraft.scoreboard.Score) map.remove(objective);
 
 
                 if (map.size() < 1) {
-                    final Map<?, ?> map1 = ((ScoreboardAccessor) scoreboard).accessor$getPlayerScores().remove(name);
+                    final Map<?, ?> map1 = ((ScoreboardAccessor) scoreboard).accessor$playerScores().remove(name);
 
                     if (map1 != null) {
                         scoreboard.onPlayerRemoved(name);
@@ -212,14 +212,14 @@ public final class SpongeObjective implements Objective {
 
     private void addScoreToScoreboard(final net.minecraft.scoreboard.Scoreboard scoreboard, final net.minecraft.scoreboard.Score score) {
         final String name = score.getPlayerName();
-        final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$getPlayerScores()
+        final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$playerScores()
             .computeIfAbsent(name, k -> Maps.newHashMap());
 
-        scoreMap.put(((ScoreAccessor) score).accessor$getObjective(), score);
+        scoreMap.put(((ScoreAccessor) score).accessor$objective(), score);
 
         // Trigger refresh
-        ((ScoreAccessor) score).accessor$setForceUpdate(true);
-        score.setScorePoints(((ScoreAccessor) score).accessor$getCount());
+        ((ScoreAccessor) score).accessor$forceUpdate(true);
+        score.setScorePoints(((ScoreAccessor) score).accessor$count());
     }
 
     public ScoreObjective getObjectiveFor(final net.minecraft.scoreboard.Scoreboard scoreboard) {

@@ -49,7 +49,7 @@ public abstract class ServerChunkProviderMixin {
         final ServerWorld world = this.world;
         final SerializationBehavior serializationBehavior = ((WorldProperties) world.getWorldInfo()).getSerializationBehavior();
         if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
-            ((ChunkManagerAccessor) chunkManager).accessor$saveAllChunks(flush);
+            ((ChunkManagerAccessor) chunkManager).invoker$saveAllChunks(flush);
         }
     }
 }

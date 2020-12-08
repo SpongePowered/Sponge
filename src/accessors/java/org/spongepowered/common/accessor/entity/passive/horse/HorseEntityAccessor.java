@@ -31,7 +31,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(HorseEntity.class)
 public interface HorseEntityAccessor {
 
-    @Invoker("getTypeVariant") int accessor$getTypeVariant();
+    @Invoker("getTypeVariant") int invoker$getTypeVariant();
 
-    @Invoker("setTypeVariant") void accessor$setTypeVariant(int variant);
+    @Invoker("setTypeVariant") void invoker$setTypeVariant(final int typeVariant);
+
 }

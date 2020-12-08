@@ -44,15 +44,15 @@ public final class BeaconData {
         registrator
                 .asMutable(BeaconTileEntity.class)
                     .create(Keys.PRIMARY_POTION_EFFECT_TYPE)
-                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$getPrimaryPower))
-                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$setPrimaryPower))
-                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$getPrimaryPower,
-                                BeaconTileEntityAccessor::accessor$setPrimaryPower))
+                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$primaryPower))
+                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$primaryPower))
+                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$primaryPower,
+                                BeaconTileEntityAccessor::accessor$primaryPower))
                     .create(Keys.SECONDARY_POTION_EFFECT_TYPE)
-                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$getSecondaryPower))
-                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$setSecondaryPower))
-                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$getSecondaryPower,
-                                BeaconTileEntityAccessor::accessor$setSecondaryPower));
+                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$secondaryPower))
+                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$secondaryPower))
+                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$secondaryPower,
+                                BeaconTileEntityAccessor::accessor$secondaryPower));
     }
     // @formatter:on
 
@@ -75,7 +75,7 @@ public final class BeaconData {
     private static boolean delete(final BeaconTileEntity holder, final Function<BeaconTileEntityAccessor, Effect> getter,
             final BiConsumer<BeaconTileEntityAccessor, Effect> setter) {
         final BeaconTileEntityAccessor accessor = (BeaconTileEntityAccessor) holder;
-        if (accessor.accessor$getPrimaryPower() != null) {
+        if (accessor.accessor$primaryPower() != null) {
             setter.accept(accessor, null);
             holder.markDirty();
         }

@@ -88,31 +88,31 @@ public final class EntityData {
                             return true;
                         })
                     .create(Keys.FIRE_DAMAGE_DELAY)
-                        .get(h -> new SpongeTicks(((EntityAccessor) h).accessor$getFireImmuneTicks()))
+                        .get(h -> new SpongeTicks(((EntityAccessor) h).invoker$getFireImmuneTicks()))
                         .setAnd((h, v) -> {
                             final int ticks = (int) v.getTicks();
                             if (ticks < 1 || ticks > Short.MAX_VALUE) {
                                 return false;
                             }
                             ((EntityBridge) h).bridge$setFireImmuneTicks(ticks);
-                            return ((EntityAccessor) h).accessor$getFireImmuneTicks() == ticks;
+                            return ((EntityAccessor) h).invoker$getFireImmuneTicks() == ticks;
                         })
                     .create(Keys.FIRE_TICKS)
-                        .get(h -> ((EntityAccessor) h).accessor$getRemainingFireTicks() > 0 ? Ticks.of(((EntityAccessor) h).accessor$getRemainingFireTicks()) : null)
+                        .get(h -> ((EntityAccessor) h).accessor$remainingFireTicks() > 0 ? Ticks.of(((EntityAccessor) h).accessor$remainingFireTicks()) : null)
                         .set((h, v) -> {
                             final int ticks = (int) v.getTicks();
-                            ((EntityAccessor) h).accessor$setRemainingFireTicks(Math.max(ticks, Constants.Entity.MINIMUM_FIRE_TICKS));
+                            ((EntityAccessor) h).accessor$remainingFireTicks(Math.max(ticks, Constants.Entity.MINIMUM_FIRE_TICKS));
                         })
                         .deleteAndGet(h -> {
                             final EntityAccessor accessor = (EntityAccessor) h;
-                            final int ticks = accessor.accessor$getRemainingFireTicks();
+                            final int ticks = accessor.accessor$remainingFireTicks();
                             if (ticks < Constants.Entity.MINIMUM_FIRE_TICKS) {
                                 return DataTransactionResult.failNoData();
                             }
                             final DataTransactionResult.Builder dtrBuilder = DataTransactionResult.builder();
                             dtrBuilder.replace(Value.immutableOf(Keys.FIRE_TICKS, new SpongeTicks(ticks)));
                             dtrBuilder.replace(Value.immutableOf(Keys.FIRE_DAMAGE_DELAY,
-                                    new SpongeTicks(((EntityAccessor) h).accessor$getFireImmuneTicks())));
+                                    new SpongeTicks(((EntityAccessor) h).invoker$getFireImmuneTicks())));
                             h.extinguish();
                             return dtrBuilder.result(DataTransactionResult.Type.SUCCESS).build();
                         })
@@ -172,7 +172,7 @@ public final class EntityData {
                             h.getTags().addAll(v);
                         })
                     .create(Keys.TRANSIENT)
-                        .get(h -> ((EntityAccessor) h).accessor$getEncodeId() == null)
+                        .get(h -> ((EntityAccessor) h).invoker$getEncodeId() == null)
                         .set((h, v) -> ((EntityBridge) h).bridge$setTransient(v))
                     .create(Keys.VEHICLE)
                         .get(h -> (org.spongepowered.api.entity.Entity) h.getRidingEntity())

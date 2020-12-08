@@ -112,7 +112,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         )
     )
     private MinecraftSessionService impl$useServerMinecraftSessionService(final YggdrasilAuthenticationService yggdrasilAuthenticationService) {
-        return ((MinecraftServerAccessor) this.integratedServer).accessor$getSessionService();
+        return ((MinecraftServerAccessor) this.integratedServer).accessor$sessionService();
     }
 
     @Redirect(method = "launchIntegratedServer",
@@ -122,14 +122,14 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         )
     )
     private GameProfileRepository impl$useServerGameProfileRepository(final YggdrasilAuthenticationService yggdrasilAuthenticationService) {
-        return ((MinecraftServerAccessor) this.integratedServer).accessor$getProfileRepository();
+        return ((MinecraftServerAccessor) this.integratedServer).accessor$profileRepository();
     }
 
     @Redirect(method = "launchIntegratedServer", at = @At(value = "NEW", target = "net/minecraft/server/integrated/IntegratedServer"))
     private IntegratedServer impl$setCacheOnServer(final Minecraft mcIn, final String worldName, final String p_i50895_3_,
             final WorldSettings worldSettingsIn, final YggdrasilAuthenticationService p_i50895_5_, final MinecraftSessionService p_i50895_6_,
             final GameProfileRepository p_i50895_7_, final PlayerProfileCache p_i50895_8_, final IChunkStatusListenerFactory p_i50895_9_) {
-        ((MinecraftServerAccessor) this.integratedServer).accessor$setProfileCache(p_i50895_8_);
+        ((MinecraftServerAccessor) this.integratedServer).accessor$profileCache(p_i50895_8_);
         return this.integratedServer;
     }
 

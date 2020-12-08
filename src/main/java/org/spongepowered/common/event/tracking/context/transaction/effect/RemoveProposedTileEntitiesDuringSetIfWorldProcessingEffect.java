@@ -58,8 +58,8 @@ public final class RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect im
         if (tileEntity == null || tileEntity.isRemoved()) {
             return EffectResult.NULL_RETURN;
         }
-        if (((WorldAccessor) serverWorld).accessor$getUpdatingBlockEntities()) {
-            final Iterator<TileEntity> iterator = ((WorldAccessor) serverWorld).accessor$getPendingBlockEntities().iterator();
+        if (((WorldAccessor) serverWorld).accessor$updatingBlockEntities()) {
+            final Iterator<TileEntity> iterator = ((WorldAccessor) serverWorld).accessor$pendingBlockEntities().iterator();
 
             while(iterator.hasNext()) {
                 final TileEntity tileentity = iterator.next();

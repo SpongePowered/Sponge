@@ -31,7 +31,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(PhantomEntity.class)
 public interface PhantomEntityAccessor {
 
-    @Accessor("attackPhase") PhantomEntity.AttackPhase accessor$getAttackPhase();
+    @Accessor("attackPhase") PhantomEntity.AttackPhase accessor$attackPhase();
 
-    @Accessor("attackPhase") void accessor$setAttackPhase(PhantomEntity.AttackPhase phase);
+    @Accessor("attackPhase") void accessor$attackPhase(final PhantomEntity.AttackPhase attackPhase);
+
 }

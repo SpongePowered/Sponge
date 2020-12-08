@@ -30,19 +30,22 @@ import net.minecraft.world.DifficultyInstance;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(MobEntity.class)
 public interface MobEntityAccessor {
 
-    @Accessor("DATA_MOB_FLAGS_ID") static DataParameter<Byte> accessor$getDATA_MOB_FLAGS_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_MOB_FLAGS_ID")
+    static DataParameter<Byte> accessor$DATA_MOB_FLAGS_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("persistenceRequired") void accessor$setPersistingRequired(boolean persistingRequired);
+    @Accessor("persistenceRequired") void accessor$persistenceRequired(final boolean persistingRequired);
 
-    @Invoker("isNoAi") boolean accessor$getIsNoAi();
+    @Invoker("populateDefaultEquipmentSlots") void invoker$populateDefaultEquipmentSlots(final DifficultyInstance difficulty);
 
-    @Invoker("setNoAi") void accessor$setIsNoAi(boolean noAi);
+    @Invoker("isNoAi") boolean invoker$isNoAi();
 
-    @Invoker("populateDefaultEquipmentSlots") void accessor$populateDefaultEquipmentSlots(DifficultyInstance difficulty);
+    @Invoker("setNoAi") void invoker$setNoAi(final boolean noAi);
+
 }

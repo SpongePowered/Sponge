@@ -36,25 +36,27 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(CommandSource.class)
 public interface CommandSourceAccessor {
 
     @Invoker("<init>")
-    static CommandSource accessor$createInstance(
-            ICommandSource commandSource,
-            Vector3d position,
-            Vector2f rotation, // in X and Z only
-            ServerWorld world,
-            int permissionLevel,
-            String name,
-            ITextComponent displayName,
-            MinecraftServer server,
-            Entity entity,
-            boolean feedbackDisabled,
-            ResultConsumer<CommandSource> resultConsumer,
-            EntityAnchorArgument.Type entityAnchorType) {
-        throw new AssertionError("Untransformed Accessor!");
+    static CommandSource invoker$new(
+            final ICommandSource source,
+            final Vector3d worldPosition,
+            final Vector2f rotation, // in X and Z only
+            final ServerWorld level,
+            final int permissionLevel,
+            final String textName,
+            final ITextComponent displayName,
+            final MinecraftServer server,
+            final Entity entity,
+            final boolean silent,
+            final ResultConsumer<CommandSource> consumer,
+            final EntityAnchorArgument.Type anchor
+    ) {
+        throw new UntransformedInvokerError();
     }
 
 }

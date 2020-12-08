@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractFurnaceContainer.class)
 public interface AbstractFurnaceContainerAccessor {
 
-    @Accessor("container") IInventory accessor$getContainer();
+    @Accessor("container") IInventory accessor$container();
+
 }

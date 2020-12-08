@@ -40,7 +40,7 @@ public final class BlazeData {
                 .asMutable(BlazeEntity.class)
                     .create(Keys.IS_AFLAME)
                         .get(BlazeEntity::isBurning)
-                        .set((h, v) -> ((BlazeEntityAccessor) h).accessor$setCharged(v));
+                        .set((h, v) -> ((BlazeEntityAccessor) h).invoker$setCharged(v));
     }
     // @formatter:on
 }

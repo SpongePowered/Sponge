@@ -29,13 +29,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(FireworkRocketEntity.class)
 public interface FireworkRocketEntityAccessor {
 
-    @Accessor("DATA_ID_FIREWORKS_ITEM") static DataParameter<ItemStack> accessor$getDATA_ID_FIREWORKS_ITEM() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_ID_FIREWORKS_ITEM")
+    static DataParameter<ItemStack> accessor$DATA_ID_FIREWORKS_ITEM() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("lifetime") void accessor$setLifetime(int lifetime);
+    @Accessor("lifetime") void accessor$lifetime(final int lifetime);
+
 }

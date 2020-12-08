@@ -34,21 +34,25 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(World.class)
 public interface WorldAccessor {
 
-    @Accessor("pendingBlockEntities") List<TileEntity> accessor$getPendingBlockEntities();
+    @Accessor("pendingBlockEntities") List<TileEntity> accessor$pendingBlockEntities();
 
-    @Accessor("updatingBlockEntities") boolean accessor$getUpdatingBlockEntities();
+    @Accessor("updatingBlockEntities") boolean accessor$updatingBlockEntities();
 
-    @Invoker("getPendingBlockEntityAt") @Nullable TileEntity accessor$getPendingBlockEntityAt(BlockPos pos);
-
-    @Invoker("isInWorldBounds") static boolean accessor$isInWorldBounds(BlockPos pos) {
-        throw new UnsupportedOperationException("Untransformed Accessor!");
+    @Invoker("isInWorldBounds")
+    static boolean invoker$isInWorldBounds(final BlockPos pos) {
+        throw new UntransformedInvokerError();
     }
 
-    @Invoker("isOutsideBuildHeight") static boolean accessor$isOutsideBuildHeight(BlockPos pos) {
-        throw new UnsupportedOperationException("Untransformed Accessor!");
+    @Invoker("isOutsideBuildHeight")
+    static boolean invoker$isOutsideBuildHeight(final BlockPos pos) {
+        throw new UntransformedInvokerError();
     }
+
+    @Invoker("getPendingBlockEntityAt") @Nullable TileEntity invoker$getPendingBlockEntityAt(final BlockPos pos);
+
 }

@@ -33,11 +33,12 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CCustomPayloadLoginPacket.class)
 public interface CCustomPayloadLoginPacketAccessor {
 
-    @Accessor("transactionId") int accessor$getTransactionId();
+    @Accessor("transactionId") int accessor$transactionId();
 
-    @Accessor("transactionId") void accessor$setTransactionId(int transactionId);
+    @Accessor("transactionId") void accessor$transactionId(final int transactionId);
 
-    @Accessor("data") @Nullable PacketBuffer accessor$getData();
+    @Accessor("data") @Nullable PacketBuffer accessor$data();
 
-    @Accessor("data") void accessor$setData(@Nullable PacketBuffer data);
+    @Accessor("data") void accessor$data(final @Nullable PacketBuffer data);
+
 }

@@ -58,10 +58,10 @@ public final class ArmorStandData {
                             final Map<BodyPart, Vector3d> values = new HashMap<>();
                             values.put(BodyParts.HEAD.get(), VecHelper.toVector3d(h.getHeadRotation()));
                             values.put(BodyParts.CHEST.get(), VecHelper.toVector3d(h.getBodyRotation()));
-                            values.put(BodyParts.LEFT_ARM.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getLeftArmPose()));
-                            values.put(BodyParts.RIGHT_ARM.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getRightArmPose()));
-                            values.put(BodyParts.LEFT_LEG.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getLeftLegPose()));
-                            values.put(BodyParts.RIGHT_LEG.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$getRightLegPose()));
+                            values.put(BodyParts.LEFT_ARM.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$leftArmPose()));
+                            values.put(BodyParts.RIGHT_ARM.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$rightArmPose()));
+                            values.put(BodyParts.LEFT_LEG.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$leftLegPose()));
+                            values.put(BodyParts.RIGHT_LEG.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$rightLegPose()));
                             return values;
                         })
                         .set((h, v) -> {
@@ -77,13 +77,13 @@ public final class ArmorStandData {
                         .set((h, v) -> h.setBodyRotation(VecHelper.toRotation(v)))
                     .create(Keys.HAS_ARMS)
                         .get(ArmorStandEntity::getShowArms)
-                        .set((h, v) -> ((ArmorStandEntityAccessor) h).accessor$setShowArms(v))
+                        .set((h, v) -> ((ArmorStandEntityAccessor) h).invoker$setShowArms(v))
                     .create(Keys.HAS_BASE_PLATE)
                         .get(h -> !h.hasNoBasePlate())
-                        .set((h, v) -> ((ArmorStandEntityAccessor) h).accessor$setNoBasePlate(!v))
+                        .set((h, v) -> ((ArmorStandEntityAccessor) h).invoker$setNoBasePlate(!v))
                     .create(Keys.HAS_MARKER)
                         .get(ArmorStandEntity::hasMarker)
-                        .set((h, v) -> ((ArmorStandEntityAccessor) h).accessor$setMarker(v))
+                        .set((h, v) -> ((ArmorStandEntityAccessor) h).invoker$setMarker(v))
                     .create(Keys.HEAD_ROTATION)
                         .get(h -> VecHelper.toVector3d(h.getHeadRotation()))
                         .set((h, v) -> h.setHeadRotation(VecHelper.toRotation(v)))
@@ -91,11 +91,11 @@ public final class ArmorStandData {
                         .get(h -> Sponge.getRegistry().getCatalogRegistry()
                             .streamAllOf(EquipmentType.class)
                             .filter(t -> (Object) t instanceof EquipmentSlotType)
-                            .collect(Collectors.toMap(t -> t, t -> ((ArmorStandEntityAccessor) h).accessor$isDisabled((EquipmentSlotType) (Object) t))))
+                            .collect(Collectors.toMap(t -> t, t -> ((ArmorStandEntityAccessor) h).invoker$isDisabled((EquipmentSlotType) (Object) t))))
                         .set((h, v) -> {
                             int chunk = 0;
 
-                            int disabledSlots = ((ArmorStandEntityAccessor) h).accessor$getDisabledSlots();
+                            int disabledSlots = ((ArmorStandEntityAccessor) h).accessor$disabledSlots();
                             // try and keep the all chunk empty
                             final int allChunk = disabledSlots & 0b1111_1111;
                             if (allChunk != 0) {
@@ -109,15 +109,15 @@ public final class ArmorStandData {
                             if (v.get(EquipmentTypes.HEAD.get())) chunk |= 1 << 4;
 
                             disabledSlots |= (chunk << 16);
-                            ((ArmorStandEntityAccessor) h).accessor$setDisabledSlots(disabledSlots);
+                            ((ArmorStandEntityAccessor) h).accessor$disabledSlots(disabledSlots);
                         })
                     .create(Keys.IS_SMALL)
                         .get(ArmorStandEntity::isSmall)
-                        .set((h, v) -> ((ArmorStandEntityAccessor) h).accessor$setSmall(v))
+                        .set((h, v) -> ((ArmorStandEntityAccessor) h).invoker$setSmall(v))
                     .create(Keys.IS_TAKING_DISABLED)
                         .get(h -> {
                             // include all chunk
-                            final int disabled = ((ArmorStandEntityAccessor) h).accessor$getDisabledSlots();
+                            final int disabled = ((ArmorStandEntityAccessor) h).accessor$disabledSlots();
                             final int resultantChunk = ((disabled >> 16) & 0b1111_1111) | (disabled & 0b1111_1111);
 
                             return ImmutableMap.of(
@@ -129,13 +129,13 @@ public final class ArmorStandData {
                         .set((h, v) -> {
                             int chunk = 0;
 
-                            int disabledSlots = ((ArmorStandEntityAccessor) h).accessor$getDisabledSlots();
+                            int disabledSlots = ((ArmorStandEntityAccessor) h).accessor$disabledSlots();
                             // try and keep the all chunk empty
                             final int allChunk = disabledSlots & 0b1111_1111;
                             if (allChunk != 0) {
                                 disabledSlots |= (allChunk << 16);
                                 disabledSlots ^= 0b1111_1111;
-                                ((ArmorStandEntityAccessor) h).accessor$setDisabledSlots(disabledSlots);
+                                ((ArmorStandEntityAccessor) h).accessor$disabledSlots(disabledSlots);
                             }
 
                             if (v.get(EquipmentTypes.FEET.get())) chunk |= 1 << 1;
@@ -144,7 +144,7 @@ public final class ArmorStandData {
                             if (v.get(EquipmentTypes.HEAD.get())) chunk |= 1 << 4;
 
                             disabledSlots |= (chunk << 8);
-                            ((ArmorStandEntityAccessor) h).accessor$setDisabledSlots(disabledSlots);
+                            ((ArmorStandEntityAccessor) h).accessor$disabledSlots(disabledSlots);
                         })
                     .create(Keys.LEFT_ARM_ROTATION)
                         .get(h -> VecHelper.toVector3d(h.getLeftArmRotation()))

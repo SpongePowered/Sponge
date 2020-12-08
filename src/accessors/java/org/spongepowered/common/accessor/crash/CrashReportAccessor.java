@@ -31,6 +31,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CrashReport.class)
 public interface CrashReportAccessor {
 
-    @Accessor("exception") Throwable accessor$getException();
+    @Accessor("exception") Throwable accessor$exception();
 
 }

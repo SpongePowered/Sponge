@@ -61,7 +61,7 @@ public final class WitherData {
                         })
                 .asMutable(WitherEntityAccessor.class)
                     .create(Keys.BOSS_BAR)
-                        .get(h -> (BossBar) h.accessor$getBossEvent());
+                        .get(h -> (BossBar) h.accessor$bossEvent());
     }
     // @formatter:on
 }

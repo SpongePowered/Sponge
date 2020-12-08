@@ -35,7 +35,7 @@ import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 
 public final class SpongeDummyTrigger extends AbstractCriterionTrigger<SpongeDummyTrigger.Instance> {
 
-    public static final SpongeDummyTrigger DUMMY_TRIGGER = CriteriaTriggersAccessor.accessor$register(new SpongeDummyTrigger(new ResourceLocation("sponge:dummy")));
+    public static final SpongeDummyTrigger DUMMY_TRIGGER = CriteriaTriggersAccessor.invoker$register(new SpongeDummyTrigger(new ResourceLocation("sponge:dummy")));
 
     private final ResourceLocation resourceLocation;
 

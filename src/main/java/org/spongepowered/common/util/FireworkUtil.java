@@ -186,10 +186,10 @@ public class FireworkUtil {
     }
 
     public static ItemStack getItem(final FireworkRocketEntity firework) {
-        ItemStack item = firework.getEntityData().get(FireworkRocketEntityAccessor.accessor$getDATA_ID_FIREWORKS_ITEM());
+        ItemStack item = firework.getEntityData().get(FireworkRocketEntityAccessor.accessor$DATA_ID_FIREWORKS_ITEM());
         if (item.isEmpty()) {
             item = (ItemStack) (Object) new SpongeItemStackBuilder().itemType(ItemTypes.FIREWORK_ROCKET).build();
-            firework.getEntityData().set(FireworkRocketEntityAccessor.accessor$getDATA_ID_FIREWORKS_ITEM(), item);
+            firework.getEntityData().set(FireworkRocketEntityAccessor.accessor$DATA_ID_FIREWORKS_ITEM(), item);
         }
         return item;
     }

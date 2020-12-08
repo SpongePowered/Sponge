@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(DedicatedServer.class)
 public interface DedicatedServerAccessor {
 
-    @Accessor("rconThread") MainThread accessor$getRconThread();
+    @Accessor("rconThread") MainThread accessor$rconThread();
+
 }

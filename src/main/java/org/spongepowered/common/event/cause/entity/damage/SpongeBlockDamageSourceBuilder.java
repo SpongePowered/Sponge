@@ -60,10 +60,10 @@ public final class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBu
         final MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getKey().getFormatted(), this.location);
         final DamageSourceAccessor accessor = (DamageSourceAccessor) (Object) damageSource;
         if (this.absolute) {
-            accessor.accessor$setBypassMagic();
+            accessor.invoker$bypassMagic();
         }
         if (this.bypasses) {
-            accessor.accessor$setBypassArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.scales) {
             damageSource.setDifficultyScaled();
@@ -75,10 +75,10 @@ public final class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBu
             damageSource.setMagicDamage();
         }
         if (this.creative) {
-            accessor.accessor$setBypassInvul();
+            accessor.invoker$bypassInvul();
         }
         if (this.exhaustion != null) {
-            accessor.accessor$setExhaustion(this.exhaustion.floatValue());
+            accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
         return (BlockDamageSource) (Object) damageSource;
     }

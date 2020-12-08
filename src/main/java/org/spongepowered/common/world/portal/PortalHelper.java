@@ -485,7 +485,7 @@ public final class PortalHelper {
             // Only set the entered nether position if we've spawned in a portal, it isn't inter-world, not the API nether portal, and we're going
             // to Vanilla's The Nether
             } else if (spawnInPortal && !isSameWorld && (!(portal instanceof NetherPortalType) && toWorld.getDimension().getType() == DimensionType.THE_NETHER)) {
-                ((ServerPlayerEntityAccessor) player).accessor$setEnteredNetherPosition(player.getPositionVec());
+                ((ServerPlayerEntityAccessor) player).accessor$enteredNetherPosition(player.getPositionVec());
             }
 
             if (spawnInPortal && !isPortalThere) {

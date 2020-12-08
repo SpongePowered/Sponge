@@ -53,11 +53,11 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
      * @param type The damage type id
      */
     public void setDamageType(final String type) {
-        ((DamageSourceAccessor) this).accessor$setMsgId(type);
+        ((DamageSourceAccessor) this).accessor$msgId(type);
     }
 
     public void setEntitySource(final Entity entitySource) {
-        ((EntityDamageSourceAccessor) this).accessor$setEntity(entitySource);
+        ((EntityDamageSourceAccessor) this).accessor$entity(entitySource);
     }
 
     public void bridge$setDamageIsAbsolute() {

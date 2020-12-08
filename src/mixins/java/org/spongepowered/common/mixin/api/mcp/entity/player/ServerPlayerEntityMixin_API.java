@@ -257,8 +257,8 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     public void sendBlockChange(final BlockPos pos, final net.minecraft.block.BlockState state) {
         final SChangeBlockPacket packet = new SChangeBlockPacket();
         final SChangeBlockPacketAccessor accessor = (SChangeBlockPacketAccessor) packet;
-        accessor.accessor$setPos(pos);
-        accessor.accessor$setBlockState(state);
+        accessor.accessor$pos(pos);
+        accessor.accessor$blockState(state);
         this.connection.sendPacket(packet);
     }
 
@@ -340,7 +340,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         if (!SpongeCommon.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 Optional.ofNullable(this.api$worldBorder), this, Optional.ofNullable(border)))) {
             if (this.api$worldBorder != null) { //is the world border about to be unset?
-                ((WorldBorderAccessor) this.api$worldBorder).accessor$getListeners().remove(
+                ((WorldBorderAccessor) this.api$worldBorder).accessor$listeners().remove(
                         ((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
             }
             this.api$worldBorder = border;

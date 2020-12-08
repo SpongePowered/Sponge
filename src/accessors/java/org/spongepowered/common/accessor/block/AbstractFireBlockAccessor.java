@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(AbstractFireBlock.class)
 public interface AbstractFireBlockAccessor {
 
-    @Invoker("canBurn") boolean accessor$canBurn(BlockState block);
+    @Invoker("canBurn") boolean invoker$canBurn(final BlockState state);
+
 }

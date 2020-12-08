@@ -40,7 +40,7 @@ public final class EndGatewayData {
         registrator
                 .asMutable(EndGatewayTileEntityAccessor.class)
                     .create(Keys.COOLDOWN)
-                        .get(x -> new SpongeTicks(x.accessor$getTeleportCooldown()))
+                        .get(x -> new SpongeTicks(x.accessor$teleportCooldown()))
                         .setAnd((h, v) -> {
                             final int ticks = (int) v.getTicks();
                             if (ticks < 0) {
@@ -50,21 +50,21 @@ public final class EndGatewayData {
                             return true;
                         })
                     .create(Keys.DO_EXACT_TELEPORT)
-                        .get(EndGatewayTileEntityAccessor::accessor$getExactTeleport)
-                        .set(EndGatewayTileEntityAccessor::accessor$setExactTeleport)
+                        .get(EndGatewayTileEntityAccessor::accessor$exactTeleport)
+                        .set(EndGatewayTileEntityAccessor::accessor$exactTeleport)
                     .create(Keys.END_GATEWAY_AGE)
-                        .get(x -> new SpongeTicks(x.accessor$getAge()))
+                        .get(x -> new SpongeTicks(x.accessor$age()))
                         .setAnd((h, v) -> {
                             final long ticks = v.getTicks();
                             if (ticks < 0) {
                                 return false;
                             }
-                            h.accessor$setAge(ticks);
+                            h.accessor$age(ticks);
                             return true;
                         })
                     .create(Keys.TARGET_POSITION)
-                        .get(h -> VecHelper.toVector3i(h.accessor$getExitPortal()))
-                        .set((h, v) -> h.accessor$setExitPortal(VecHelper.toBlockPos(v)));
+                        .get(h -> VecHelper.toVector3i(h.accessor$exitPortal()))
+                        .set((h, v) -> h.accessor$exitPortal(VecHelper.toBlockPos(v)));
     }
     // @formatter:on
 }

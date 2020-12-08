@@ -30,5 +30,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(targets = "net.minecraft.util.CooldownTracker$Cooldown")
 public interface CooldownTracker_CooldownAccessor {
 
-    @Accessor("endTime") int accessor$getEndTime();
+    @Accessor("endTime") int accessor$endTime();
+
 }

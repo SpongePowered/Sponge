@@ -104,7 +104,6 @@
         "item.crafting.IngredientAccessor",
         "item.crafting.ShapedRecipeAccessor",
         "item.crafting.ShapelessRecipeAccessor",
-        "nbt.LongArrayNBTAccessor",
         "network.NetworkManagerAccessor",
         "network.datasync.EntityDataManagerAccessor",
         "network.handshake.client.CHandshakePacketAccessor",

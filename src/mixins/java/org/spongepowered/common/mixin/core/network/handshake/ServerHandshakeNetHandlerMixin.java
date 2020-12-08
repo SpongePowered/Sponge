@@ -48,7 +48,7 @@ public abstract class ServerHandshakeNetHandlerMixin implements NetworkManagerHo
         final NetworkManagerBridge info = (NetworkManagerBridge) this.networkManager;
         info.bridge$setVersion(packetIn.getProtocolVersion());
         info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(
-                ((CHandshakePacketAccessor) packetIn).accessor$getHostName()), ((CHandshakePacketAccessor) packetIn).accessor$getPort());
+                ((CHandshakePacketAccessor) packetIn).accessor$hostName()), ((CHandshakePacketAccessor) packetIn).accessor$port());
     }
 
     @Override

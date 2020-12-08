@@ -27,24 +27,23 @@ package org.spongepowered.common.accessor.entity.projectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ShulkerBulletEntity;
 import net.minecraft.util.Direction;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
 @Mixin(ShulkerBulletEntity.class)
 public interface ShulkerBulletEntityAccessor {
 
-    @Accessor("finalTarget") Entity accessor$getFinalTarget();
+    @Accessor("finalTarget") Entity accessor$finalTarget();
 
-    @Accessor("finalTarget") void accessor$setFinalTarget(Entity finalTarget);
+    @Accessor("finalTarget") void accessor$finalTarget(final Entity finalTarget);
 
-    @Accessor("targetId") void accessor$setTargetId(@Nullable UUID targetId);
+    @Accessor("currentMoveDirection") @Nullable Direction accessor$currentMoveDirection();
 
-    @Accessor("currentMoveDirection") @Nullable Direction accessor$getCurrentMoveDirection();
+    @Accessor("currentMoveDirection") void accessor$currentMoveDirection(final @Nullable Direction currentMoveDirection);
 
-    @Accessor("currentMoveDirection") void accessor$setCurrentMoveDirection(@Nullable Direction currentMoveDirection);
+    @Accessor("targetId") void accessor$targetId(final @Nullable UUID targetId);
 
 }

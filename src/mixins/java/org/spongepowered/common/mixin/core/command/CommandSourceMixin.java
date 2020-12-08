@@ -52,7 +52,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.command.CommandSourceAccessor;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.command.ICommandSourceBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.service.server.permission.SpongePermissions;
@@ -114,7 +113,7 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
         context.get(EventContextKeys.ROTATION).ifPresent(x -> this.rotation = new Vector2f((float) x.getX(), (float) x.getY()));
         context.get(EventContextKeys.SUBJECT).ifPresent(x -> {
             if (x instanceof EntityAccessor) {
-                this.permissionLevel = ((EntityAccessor) x).accessor$getPermissionLevel();
+                this.permissionLevel = ((EntityAccessor) x).invoker$getPermissionLevel();
             } else if (x instanceof MinecraftServer && !((MinecraftServer) x).isSinglePlayer()) {
                 this.permissionLevel = 4;
             }
@@ -148,7 +147,7 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
     @Override
     public CommandCause bridge$withCurrentCause() {
         // Cause is set in ctor.
-        return (CommandCause) CommandSourceAccessor.accessor$createInstance(this.source, this.pos, this.rotation, this.world, this.permissionLevel,
+        return (CommandCause) CommandSourceAccessor.invoker$new(this.source, this.pos, this.rotation, this.world, this.permissionLevel,
                 this.name, this.displayName, this.server, this.entity, this.feedbackDisabled, this.resultConsumer, this.entityAnchorType);
     }
 

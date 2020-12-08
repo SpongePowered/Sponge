@@ -49,11 +49,11 @@ public class StyleMixin implements StyleBridge {
             // color
             builder.color(SpongeAdventure.asAdventure($this.getColor()));
             // decorations
-            builder.decoration(TextDecoration.OBFUSCATED, TextDecoration.State.byBoolean($access.accessor$getObfuscated()));
-            builder.decoration(TextDecoration.BOLD, TextDecoration.State.byBoolean($access.accessor$getBold()));
-            builder.decoration(TextDecoration.STRIKETHROUGH, TextDecoration.State.byBoolean($access.accessor$getStrikethrough()));
-            builder.decoration(TextDecoration.UNDERLINED, TextDecoration.State.byBoolean($access.accessor$getUnderlined()));
-            builder.decoration(TextDecoration.ITALIC, TextDecoration.State.byBoolean($access.accessor$getItalic()));
+            builder.decoration(TextDecoration.OBFUSCATED, TextDecoration.State.byBoolean($access.accessor$obfuscated()));
+            builder.decoration(TextDecoration.BOLD, TextDecoration.State.byBoolean($access.accessor$bold()));
+            builder.decoration(TextDecoration.STRIKETHROUGH, TextDecoration.State.byBoolean($access.accessor$strikethrough()));
+            builder.decoration(TextDecoration.UNDERLINED, TextDecoration.State.byBoolean($access.accessor$underlined()));
+            builder.decoration(TextDecoration.ITALIC, TextDecoration.State.byBoolean($access.accessor$italic()));
             // events
             final HoverEvent hoverEvent = $this.getHoverEvent();
             if (hoverEvent != null) {

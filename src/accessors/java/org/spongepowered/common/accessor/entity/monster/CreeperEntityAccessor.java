@@ -28,12 +28,14 @@ import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(CreeperEntity.class)
 public interface CreeperEntityAccessor {
 
     @Accessor("DATA_IS_POWERED")
-    static DataParameter<Boolean> accessor$getDATA_IS_POWERED() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    static DataParameter<Boolean> accessor$DATA_IS_POWERED() {
+        throw new UntransformedAccessorError();
     }
+
 }

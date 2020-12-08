@@ -40,11 +40,11 @@ public final class EyeOfEnderData {
         registrator
                 .asMutable(EyeOfEnderEntityAccessor.class)
                     .create(Keys.WILL_SHATTER)
-                        .get(h -> !h.accessor$getSurviveAfterDeath())
-                        .set((h, v) -> h.accessor$setSurviveAfterDeath(!v))
+                        .get(h -> !h.accessor$surviveAfterDeath())
+                        .set((h, v) -> h.accessor$surviveAfterDeath(!v))
                     .create(Keys.DESPAWN_DELAY)
-                        .get(h -> new SpongeTicks(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - h.accessor$getLife()))
-                        .set((h, v) -> h.accessor$setLife(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - (int) v.getTicks()));
+                        .get(h -> new SpongeTicks(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - h.accessor$life()))
+                        .set((h, v) -> h.accessor$life(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - (int) v.getTicks()));
     }
     // @formatter:on
 }

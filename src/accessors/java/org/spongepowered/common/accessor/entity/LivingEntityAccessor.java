@@ -30,56 +30,64 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(LivingEntity.class)
 public interface LivingEntityAccessor {
 
-    @Accessor("DATA_LIVING_ENTITY_FLAGS") static DataParameter<Byte> accessor$getDATA_LIVING_ENTITY_FLAGS() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_LIVING_ENTITY_FLAGS")
+    static DataParameter<Byte> accessor$DATA_LIVING_ENTITY_FLAGS() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_HEALTH_ID") static DataParameter<Float> accessor$getDATA_HEALTH_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_HEALTH_ID")
+    static DataParameter<Float> accessor$DATA_HEALTH_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_EFFECT_COLOR_ID") static DataParameter<Integer> accessor$getDATA_EFFECT_COLOR_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_EFFECT_COLOR_ID")
+    static DataParameter<Integer> accessor$DATA_EFFECT_COLOR_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_EFFECT_AMBIENCE_ID") static DataParameter<Boolean> accessor$getDATA_EFFECT_AMBIENCE_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_EFFECT_AMBIENCE_ID")
+    static DataParameter<Boolean> accessor$DATA_EFFECT_AMBIENCE_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_ARROW_COUNT_ID") static DataParameter<Integer> accessor$getDATA_ARROW_COUNT_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_ARROW_COUNT_ID")
+    static DataParameter<Integer> accessor$DATA_ARROW_COUNT_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_STINGER_COUNT_ID") static DataParameter<Integer> accessor$getDATA_STINGER_COUNT_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_STINGER_COUNT_ID")
+    static DataParameter<Integer> accessor$DATA_STINGER_COUNT_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("SLEEPING_POS_ID") static DataParameter<Optional<BlockPos>> accessor$getSLEEPING_POS_ID() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("SLEEPING_POS_ID")
+    static DataParameter<Optional<BlockPos>> accessor$SLEEPING_POS_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("lastHurt") float accessor$getLastHurt();
+    @Accessor("dead") boolean accessor$dead();
 
-    @Accessor("lastHurt") void accessor$setLastHurt(float lastHurt);
+    @Accessor("lastHurt") float accessor$lastHurt();
 
-    @Accessor("dead") boolean accessor$getDead();
+    @Accessor("lastHurt") void accessor$lastHurt(final float lastHurt);
 
-    @Accessor("lastHurtByMob") @Nullable LivingEntity accessor$getLastHurtByMob();
+    @Accessor("lastHurtByMob") @Nullable LivingEntity accessor$lastHurtByMob();
 
-    @Accessor("useItem") void accessor$setUseItem(ItemStack useItem);
+    @Accessor("useItem") void accessor$useItem(final ItemStack useItem);
 
-    @Invoker("isDamageSourceBlocked")  boolean accessor$getIsDamageSourceBlocked(DamageSource isDamageSourceBlocked);
+    @Invoker("getExperienceReward") int invoker$getExperienceReward(final PlayerEntity player);
 
-    @Invoker("getExperienceReward") int accessor$getExperienceReward(PlayerEntity player);
+    @Invoker("isDamageSourceBlocked") boolean invoker$isDamageSourceBlocked(final DamageSource source);
+
 }

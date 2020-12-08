@@ -31,15 +31,16 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(RavagerEntity.class)
 public interface RavagerEntityAccessor {
 
-    @Accessor("attackTick") int accessor$getAttackTick();
+    @Accessor("attackTick") int accessor$attackTick();
 
-    @Accessor("attackTick") void accessor$setAttackTick(int attackTick);
+    @Accessor("attackTick") void accessor$attackTick(final int attackTick);
 
-    @Accessor("stunnedTick") int accessor$getStunnedTick();
+    @Accessor("stunnedTick") int accessor$stunnedTick();
 
-    @Accessor("stunnedTick") void accessor$setStunnedTick(int stunnedTick);
+    @Accessor("stunnedTick") void accessor$stunnedTick(final int stunnedTick);
 
-    @Accessor("roarTick") int accessor$getRoarTick();
+    @Accessor("roarTick") int accessor$roarTick();
 
-    @Accessor("roarTick") void accessor$setRoarTick(int roarTick);
+    @Accessor("roarTick") void accessor$roarTick(final int roarTick);
+
 }

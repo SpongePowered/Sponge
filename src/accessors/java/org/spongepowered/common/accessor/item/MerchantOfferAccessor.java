@@ -31,8 +31,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(MerchantOffer.class)
 public interface MerchantOfferAccessor {
 
-    @Accessor("rewardExp") void accessor$setRewardExp(boolean rewardExp);
+    @Accessor("rewardExp") void accessor$rewardExp(final boolean rewardExp);
 
-    @Accessor("demand") void accessor$setDemand(int demand);
+    @Accessor("demand") void accessor$demand(final int demand);
 
 }

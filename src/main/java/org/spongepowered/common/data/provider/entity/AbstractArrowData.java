@@ -46,7 +46,7 @@ public final class AbstractArrowData {
                         .get(AbstractArrowEntity::getIsCritical)
                         .set(AbstractArrowEntity::setIsCritical)
                     .create(Keys.KNOCKBACK_STRENGTH)
-                        .get(h -> (double) ((AbstractArrowEntityAccessor) h).accessor$getKnockback())
+                        .get(h -> (double) ((AbstractArrowEntityAccessor) h).accessor$knockback())
                         .set((h, v) -> h.setKnockbackStrength((int) Math.round(v)))
                     .create(Keys.PICKUP_RULE)
                         .get(h -> (PickupRule) (Object) h.pickupStatus)

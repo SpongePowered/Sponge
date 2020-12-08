@@ -116,21 +116,21 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     @Override
     protected void defineSynchedData() {
         // LivingEntity
-        this.entityData.define(LivingEntityAccessor.accessor$getDATA_LIVING_ENTITY_FLAGS(), (byte) 0);
-        this.entityData.define(LivingEntityAccessor.accessor$getDATA_HEALTH_ID(), 1.0F);
-        this.entityData.define(LivingEntityAccessor.accessor$getDATA_EFFECT_COLOR_ID(), 0);
-        this.entityData.define(LivingEntityAccessor.accessor$getDATA_EFFECT_AMBIENCE_ID(), Boolean.FALSE);
-        this.entityData.define(LivingEntityAccessor.accessor$getDATA_ARROW_COUNT_ID(), 0);
-        this.entityData.define(LivingEntityAccessor.accessor$getDATA_STINGER_COUNT_ID(), 0);
-        this.entityData.define(LivingEntityAccessor.accessor$getSLEEPING_POS_ID(), Optional.empty());
+        this.entityData.define(LivingEntityAccessor.accessor$DATA_LIVING_ENTITY_FLAGS(), (byte) 0);
+        this.entityData.define(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), 1.0F);
+        this.entityData.define(LivingEntityAccessor.accessor$DATA_EFFECT_COLOR_ID(), 0);
+        this.entityData.define(LivingEntityAccessor.accessor$DATA_EFFECT_AMBIENCE_ID(), Boolean.FALSE);
+        this.entityData.define(LivingEntityAccessor.accessor$DATA_ARROW_COUNT_ID(), 0);
+        this.entityData.define(LivingEntityAccessor.accessor$DATA_STINGER_COUNT_ID(), 0);
+        this.entityData.define(LivingEntityAccessor.accessor$SLEEPING_POS_ID(), Optional.empty());
 
         // PlayerEntity
-        this.entityData.define(PlayerEntityAccessor.accessor$getDATA_PLAYER_ABSORPTION_ID(), 0.0F);
-        this.entityData.define(PlayerEntityAccessor.accessor$getDATA_SCORE_ID(), 0);
-        this.entityData.define(PlayerEntityAccessor.accessor$getDATA_PLAYER_MODE_CUSTOMISATION(), Constants.Sponge.Entity.Human.PLAYER_MODEL_FLAG_ALL);
-        this.entityData.define(PlayerEntityAccessor.accessor$getDATA_PLAYER_MAIN_HAND(), (byte) 1);
-        this.entityData.define(PlayerEntityAccessor.accessor$getDATA_SHOULDER_LEFT(), new CompoundNBT());
-        this.entityData.define(PlayerEntityAccessor.accessor$getDATA_SHOULDER_RIGHT(), new CompoundNBT());
+        this.entityData.define(PlayerEntityAccessor.accessor$DATA_PLAYER_ABSORPTION_ID(), 0.0F);
+        this.entityData.define(PlayerEntityAccessor.accessor$DATA_SCORE_ID(), 0);
+        this.entityData.define(PlayerEntityAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), Constants.Sponge.Entity.Human.PLAYER_MODEL_FLAG_ALL);
+        this.entityData.define(PlayerEntityAccessor.accessor$DATA_PLAYER_MAIN_HAND(), (byte) 1);
+        this.entityData.define(PlayerEntityAccessor.accessor$DATA_SHOULDER_LEFT(), new CompoundNBT());
+        this.entityData.define(PlayerEntityAccessor.accessor$DATA_SHOULDER_RIGHT(), new CompoundNBT());
     }
 
     @Override
@@ -274,7 +274,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
 
     @Override
     public float getAbsorptionAmount() {
-        return this.getEntityData().get(PlayerEntityAccessor.accessor$getDATA_PLAYER_ABSORPTION_ID());
+        return this.getEntityData().get(PlayerEntityAccessor.accessor$DATA_PLAYER_ABSORPTION_ID());
     }
 
     @Override
@@ -282,7 +282,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
         if (amount < 0.0F) {
             amount = 0.0F;
         }
-        this.getEntityData().set(PlayerEntityAccessor.accessor$getDATA_PLAYER_ABSORPTION_ID(), amount);
+        this.getEntityData().set(PlayerEntityAccessor.accessor$DATA_PLAYER_ABSORPTION_ID(), amount);
     }
 
     @Override
@@ -448,13 +448,13 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     public SSpawnPlayerPacket createSpawnPacket() {
         final SSpawnPlayerPacket packet = new SSpawnPlayerPacket();
         final SSpawnPlayerPacketAccessor accessor = (SSpawnPlayerPacketAccessor) packet;
-        accessor.accessor$setEntityId(this.getId());
-        accessor.accessor$setPlayerId(this.fakeProfile.getId());
-        accessor.accessor$setX(this.getX());
-        accessor.accessor$setY(this.getY());
-        accessor.accessor$setZ(this.getZ());
-        accessor.accessor$setYaw((byte) ((int) (this.yRot * 256.0F / 360.0F)));
-        accessor.accessor$setPitch((byte) ((int) (this.xRot * 256.0F / 360.0F)));
+        accessor.accessor$entityId(this.getId());
+        accessor.accessor$playerId(this.fakeProfile.getId());
+        accessor.accessor$x(this.getX());
+        accessor.accessor$y(this.getY());
+        accessor.accessor$z(this.getZ());
+        accessor.accessor$yRot((byte) ((int) (this.yRot * 256.0F / 360.0F)));
+        accessor.accessor$xRot((byte) ((int) (this.xRot * 256.0F / 360.0F)));
         return packet;
     }
 
@@ -467,7 +467,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     @SuppressWarnings("ConstantConditions")
     public SPlayerListItemPacket createPlayerListPacket(final SPlayerListItemPacket.Action action) {
         final SPlayerListItemPacket packet = new SPlayerListItemPacket(action);
-        ((SPlayerListItemPacketAccessor) packet).accessor$getEntries()
+        ((SPlayerListItemPacketAccessor) packet).accessor$entries()
                 .add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }

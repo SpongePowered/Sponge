@@ -62,7 +62,7 @@ public final class SpongeRecordType extends SpongeCatalogType implements MusicDi
 
     @Override
     public SoundType getSound() {
-        return (SoundType) ((MusicDiscItemAccessor) this.item).accessor$getSound();
+        return (SoundType) ((MusicDiscItemAccessor) this.item).accessor$sound();
     }
 
     public static SPlaySoundEventPacket createPacket(Vector3i position, @Nullable MusicDisc recordType) {

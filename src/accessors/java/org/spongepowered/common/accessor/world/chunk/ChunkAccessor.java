@@ -34,6 +34,6 @@ import java.util.Map;
 @Mixin(Chunk.class)
 public interface ChunkAccessor {
 
-    @Accessor("heightmaps") Map<Heightmap.Type, Heightmap> accessor$getHeightmaps();
+    @Accessor("heightmaps") Map<Heightmap.Type, Heightmap> accessor$heightmaps();
 
 }

@@ -31,7 +31,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(LockCode.class)
 public interface LockCodeAccessor {
 
-    @Accessor("key") String accessor$getKey();
+    @Accessor("key") String accessor$key();
 
-    @Accessor("key") void accessor$setKey(String lock);
+    @Accessor("key") void accessor$key(final String key);
+
 }

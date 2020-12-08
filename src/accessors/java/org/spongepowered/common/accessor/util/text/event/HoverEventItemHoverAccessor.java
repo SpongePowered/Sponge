@@ -24,23 +24,27 @@
  */
 package org.spongepowered.common.accessor.util.text.event;
 
-import javax.annotation.Nullable;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.event.HoverEvent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(HoverEvent.ItemHover.class)
 public interface HoverEventItemHoverAccessor {
-    static @Invoker("<init>") HoverEvent.ItemHover accessor$init(final Item item, final int count, final @Nullable CompoundNBT tag) {
-        throw new AssertionError();
+
+    @Invoker("<init>")
+    static HoverEvent.ItemHover invoker$new(final Item item, final int count, final @Nullable CompoundNBT tag) {
+        throw new UntransformedInvokerError();
     }
 
-    @Accessor("item") Item accessor$getItem();
+    @Accessor("item") Item accessor$item();
 
-    @Accessor("count") int accessor$getCount();
+    @Accessor("count") int accessor$count();
 
-    @Accessor("tag") CompoundNBT accessor$getTag();
+    @Accessor("tag") CompoundNBT accessor$tag();
+
 }

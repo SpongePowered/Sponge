@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(MusicDiscItem.class)
 public interface MusicDiscItemAccessor {
 
-    @Accessor("sound") SoundEvent accessor$getSound();
+    @Accessor("sound") SoundEvent accessor$sound();
+
 }

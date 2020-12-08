@@ -325,7 +325,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
                     () -> String.format("TileEntityType[%s] creates a null TileEntity!", TileEntityType.getId(tile.getType()))
                 ).read(nbt);
                 if (this instanceof World) {
-                    ((TileEntityAccessor) cloned).accessor$setLevel((World) this);
+                    ((TileEntityAccessor) cloned).accessor$level((World) this);
                 }
                 backingVolume.addBlockEntity(pos.getX(), pos.getY(), pos.getZ(), (BlockEntity) cloned);
             } : (pos, tile) -> {},

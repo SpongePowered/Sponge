@@ -52,7 +52,7 @@ public final class LegacyTexts {
         final char[] lookup = new char[LegacyTexts.formatting.length];
 
         for (int i = 0; i < LegacyTexts.formatting.length; i++) {
-            lookup[i] = ((TextFormattingAccessor) (Object) LegacyTexts.formatting[i]).accessor$getCode();
+            lookup[i] = ((TextFormattingAccessor) (Object) LegacyTexts.formatting[i]).accessor$code();
         }
 
         LOOKUP = new String(lookup);
@@ -114,7 +114,7 @@ public final class LegacyTexts {
                             current = new StringTextComponent("");
                         }
 
-                        ((StringTextComponentAccessor) current).accessor$setText(text.substring(from, pos));
+                        ((StringTextComponentAccessor) current).accessor$text(text.substring(from, pos));
                     } else if (current == null) {
                         current = new StringTextComponent("");
                     }
@@ -185,7 +185,7 @@ public final class LegacyTexts {
                 ((StyleAccessor) style).accessor$setObfuscated(true);
                 break;
             default:
-                if (((StyleAccessor) style).accessor$getColor() == null) {
+                if (((StyleAccessor) style).accessor$color() == null) {
                     ((StyleAccessor) style).accessor$setColor(formatting);
                 }
                 return true;
