@@ -41,7 +41,7 @@ public final class CakeData {
                 .asImmutable(BlockState.class)
                     .create(Keys.LAYER)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.LAYER, CakeBlock.BITES))
-                        .get(h -> h.get(CakeBlock.BITES))
+                        .get(h -> h.getValue(CakeBlock.BITES))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, CakeBlock.BITES))
                         .supports(h -> h.getBlock() instanceof CakeBlock);
     }

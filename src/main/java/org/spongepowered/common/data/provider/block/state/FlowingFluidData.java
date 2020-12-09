@@ -41,8 +41,8 @@ public final class FlowingFluidData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.FLUID_LEVEL)
-                        .get(h -> ((FlowingFluidBlock) h.getBlock()).getFluidState(h).getLevel())
-                        .set((h, v) -> BoundedUtil.setInteger(((FlowingFluidBlock) h.getBlock()).getFluidState(h), v, FlowingFluid.LEVEL_1_8).getBlockState())
+                        .get(h -> ((FlowingFluidBlock) h.getBlock()).getFluidState(h).getAmount())
+                        .set((h, v) -> BoundedUtil.setInteger(((FlowingFluidBlock) h.getBlock()).getFluidState(h), v, FlowingFluid.LEVEL).createLegacyBlock())
                         .supports(h -> h.getBlock() instanceof FlowingFluidBlock);
     }
     // @formatter:on

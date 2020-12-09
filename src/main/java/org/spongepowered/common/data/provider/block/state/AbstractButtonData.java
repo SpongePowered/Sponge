@@ -39,8 +39,8 @@ public final class AbstractButtonData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(AbstractButtonBlock.POWERED))
-                        .set((h, v) -> h.with(AbstractButtonBlock.POWERED, v))
+                        .get(h -> h.getValue(AbstractButtonBlock.POWERED))
+                        .set((h, v) -> h.setValue(AbstractButtonBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof AbstractButtonBlock);
     }
     // @formatter:on

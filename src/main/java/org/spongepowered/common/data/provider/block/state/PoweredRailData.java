@@ -39,8 +39,8 @@ public final class PoweredRailData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(PoweredRailBlock.POWERED))
-                        .set((h, v) -> h.with(PoweredRailBlock.POWERED, v))
+                        .get(h -> h.getValue(PoweredRailBlock.POWERED))
+                        .set((h, v) -> h.setValue(PoweredRailBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof PoweredRailBlock);
     }
     // @formatter:on

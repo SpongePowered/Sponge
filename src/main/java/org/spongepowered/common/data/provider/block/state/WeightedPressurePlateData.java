@@ -41,7 +41,7 @@ public final class WeightedPressurePlateData {
                 .asImmutable(BlockState.class)
                     .create(Keys.POWER)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.POWER, WeightedPressurePlateBlock.POWER))
-                        .get(h -> h.get(WeightedPressurePlateBlock.POWER))
+                        .get(h -> h.getValue(WeightedPressurePlateBlock.POWER))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, WeightedPressurePlateBlock.POWER))
                         .supports(h -> h.getBlock() instanceof WeightedPressurePlateBlock);
     }

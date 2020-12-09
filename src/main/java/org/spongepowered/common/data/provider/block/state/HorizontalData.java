@@ -40,8 +40,8 @@ public final class HorizontalData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(HorizontalBlock.HORIZONTAL_FACING)))
-                        .set((h, v) -> DirectionUtil.set(h, v, HorizontalBlock.HORIZONTAL_FACING))
+                        .get(h -> DirectionUtil.getFor(h.getValue(HorizontalBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, HorizontalBlock.FACING))
                         .supports(h -> h.getBlock() instanceof HorizontalBlock);
     }
     // @formatter:on

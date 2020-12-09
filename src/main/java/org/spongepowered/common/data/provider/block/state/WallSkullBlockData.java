@@ -49,8 +49,8 @@ public final class WallSkullBlockData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> Constants.DirectionFunctions.getFor(h.get(WallSkullBlock.FACING)))
-                        .set((h, v) -> h.with(WallSkullBlock.FACING, Constants.DirectionFunctions.getFor(v)))
+                        .get(h -> Constants.DirectionFunctions.getFor(h.getValue(WallSkullBlock.FACING)))
+                        .set((h, v) -> h.setValue(WallSkullBlock.FACING, Constants.DirectionFunctions.getFor(v)))
                         .supports(h -> h.getBlock() instanceof WallSkullBlock)
                     .create(Keys.IS_ATTACHED)
                         .get(h -> h.getBlock() instanceof WallSkullBlock)
@@ -82,7 +82,7 @@ public final class WallSkullBlockData {
                                 return h;
                             }
                             final Block newType = v ? pair.wallBlock : pair.groundBlock;
-                            return StateUtil.copyStatesFrom(newType.getDefaultState(), h);
+                            return StateUtil.copyStatesFrom(newType.defaultBlockState(), h);
                         })
                         .supports(h -> h.getBlock() instanceof WallSkullBlock);
     }

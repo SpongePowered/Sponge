@@ -39,8 +39,8 @@ public final class SnowyDirtData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_SNOWY)
-                        .get(h -> h.get(SnowyDirtBlock.SNOWY))
-                        .set((h, v) -> h.with(SnowyDirtBlock.SNOWY, v))
+                        .get(h -> h.getValue(SnowyDirtBlock.SNOWY))
+                        .set((h, v) -> h.setValue(SnowyDirtBlock.SNOWY, v))
                         .supports(h -> h.getBlock() instanceof SnowyDirtBlock);
     }
     // @formatter:on

@@ -40,12 +40,12 @@ public final class AbstractFurnaceData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(AbstractFurnaceBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(AbstractFurnaceBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, AbstractFurnaceBlock.FACING))
                         .supports(h -> h.getBlock() instanceof AbstractFurnaceBlock)
                     .create(Keys.IS_LIT)
-                        .get(h -> h.get(AbstractFurnaceBlock.LIT))
-                        .set((h, v) -> h.with(AbstractFurnaceBlock.LIT, v))
+                        .get(h -> h.getValue(AbstractFurnaceBlock.LIT))
+                        .set((h, v) -> h.setValue(AbstractFurnaceBlock.LIT, v))
                         .supports(h -> h.getBlock() instanceof AbstractFurnaceBlock);
     }
     // @formatter:on

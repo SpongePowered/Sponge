@@ -52,10 +52,10 @@ public final class TorchData {
                                 return h;
                             }
                             if (block instanceof RedstoneTorchBlock) {
-                                return (isWallBlock ? Blocks.REDSTONE_WALL_TORCH : Blocks.REDSTONE_TORCH).getDefaultState()
-                                        .with(RedstoneTorchBlock.LIT, h.get(RedstoneTorchBlock.LIT));
+                                return (isWallBlock ? Blocks.REDSTONE_WALL_TORCH : Blocks.REDSTONE_TORCH).defaultBlockState()
+                                        .setValue(RedstoneTorchBlock.LIT, h.getValue(RedstoneTorchBlock.LIT));
                             }
-                            return (isWallBlock ? Blocks.WALL_TORCH : Blocks.TORCH).getDefaultState();
+                            return (isWallBlock ? Blocks.WALL_TORCH : Blocks.TORCH).defaultBlockState();
                         })
                         .supports(h -> h.getBlock() instanceof TorchBlock);
     }

@@ -40,8 +40,8 @@ public final class EnderDragonData {
         registrator
                 .asMutable(EnderDragonEntity.class)
                     .create(Keys.HEALING_CRYSTAL)
-                        .get(h -> (EndCrystal) h.closestEnderCrystal)
-                        .set((h, v) -> h.closestEnderCrystal = (EnderCrystalEntity) v);
+                        .get(h -> (EndCrystal) h.nearestCrystal)
+                        .set((h, v) -> h.nearestCrystal = (EnderCrystalEntity) v);
     }
     // @formatter:on
 }

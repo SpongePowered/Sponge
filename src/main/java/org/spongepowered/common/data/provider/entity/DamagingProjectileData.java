@@ -40,7 +40,7 @@ public final class DamagingProjectileData {
         registrator
                 .asMutable(DamagingProjectileEntity.class)
                     .create(Keys.ACCELERATION)
-                        .get(h -> new Vector3d(h.accelerationX, h.accelerationY, h.accelerationZ))
+                        .get(h -> new Vector3d(h.xPower, h.yPower, h.zPower))
                         .set((h, v) -> {
                             ((DamagingProjectileEntityAccessor) h).accessor$xPower(v.getX());
                             ((DamagingProjectileEntityAccessor) h).accessor$yPower(v.getY());

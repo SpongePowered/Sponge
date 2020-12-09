@@ -66,11 +66,11 @@ public final class ItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLICABLE_POTION_EFFECTS)
                         .get(h -> {
-                            if (h.isFood()) {
-                                final List<Pair<EffectInstance,Float>> itemEffects = h.getItem().getFood().getEffects();
+                            if (h.isEdible()) {
+                                final List<Pair<EffectInstance,Float>> itemEffects = h.getItem().getFoodProperties().getEffects();
                                 final WeightedTable<PotionEffect> effects = new WeightedTable<>();
                                 final ChanceTable<PotionEffect> chance = new ChanceTable<>();
-                                for (Pair<EffectInstance,Float> effect : itemEffects) {
+                                for (final Pair<EffectInstance,Float> effect : itemEffects) {
                                     chance.add((PotionEffect) effect.getFirst(), effect.getSecond());
                                 }
                                 effects.add(new NestedTableEntry<>(1, chance));
@@ -80,7 +80,7 @@ public final class ItemStackData {
                         })
                     .create(Keys.BURN_TIME)
                         .get(h -> {
-                            final Integer burnTime = AbstractFurnaceTileEntity.getBurnTimes().get(h.getItem());
+                            final Integer burnTime = AbstractFurnaceTileEntity.getFuel().get(h.getItem());
                             if (burnTime != null && burnTime > 0) {
                                 return burnTime;
                             }
@@ -95,13 +95,13 @@ public final class ItemStackData {
                             }
 
                             final Set<BlockType> blockTypes = Registry.BLOCK.stream()
-                                    .filter(b -> item.canHarvestBlock(b.getDefaultState()))
+                                    .filter(b -> item.isCorrectToolForDrops(b.defaultBlockState()))
                                     .map(BlockType.class::cast)
                                     .collect(ImmutableSet.toImmutableSet());
                             return blockTypes.isEmpty() ? null : blockTypes;
                         })
                     .create(Keys.CONTAINER_ITEM)
-                        .get(h -> (ItemType) h.getItem().getContainerItem())
+                        .get(h -> (ItemType) h.getItem().getCraftingRemainingItem())
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> {
                             if (h.getItem() == Items.WRITTEN_BOOK) {
@@ -116,7 +116,7 @@ public final class ItemStackData {
                         .setAnd((h, v) -> {
                             if (h.getItem() == Items.WRITTEN_BOOK) {
                                 final String legacy = SpongeAdventure.legacySection(v);
-                                h.setTagInfo(Constants.Item.Book.ITEM_BOOK_TITLE, StringNBT.valueOf(legacy));
+                                h.addTagElement(Constants.Item.Book.ITEM_BOOK_TITLE, StringNBT.valueOf(legacy));
                                 return true;
                             }
                             return false;
@@ -140,9 +140,9 @@ public final class ItemStackData {
                             }
                         })
                     .create(Keys.CUSTOM_NAME)
-                        .get(h -> h.hasDisplayName() ? SpongeAdventure.asAdventure(h.getDisplayName()) : null)
-                        .set((h, v) -> h.setDisplayName(SpongeAdventure.asVanilla(v)))
-                        .delete(ItemStack::clearCustomName)
+                        .get(h -> h.hasCustomHoverName() ? SpongeAdventure.asAdventure(h.getDisplayName()) : null)
+                        .set((h, v) -> h.setHoverName(SpongeAdventure.asVanilla(v)))
+                        .delete(ItemStack::resetHoverName)
                     .create(Keys.IS_UNBREAKABLE)
                         .get(h -> {
                             final CompoundNBT tag = h.getTag();
@@ -169,37 +169,37 @@ public final class ItemStackData {
                                 return;
                             }
                             final ListNBT list = SpongeAdventure.listTagJson(v);
-                            h.getOrCreateChildTag(Constants.Item.ITEM_DISPLAY).put(Constants.Item.ITEM_LORE, list);
+                            h.getOrCreateTagElement(Constants.Item.ITEM_DISPLAY).put(Constants.Item.ITEM_LORE, list);
                         })
                         .delete(ItemStackData::deleteLore)
                     .create(Keys.MAX_DURABILITY)
-                        .get(h -> h.getItem().isDamageable() ? h.getItem().getMaxDamage() : null)
-                        .supports(h -> h.getItem().isDamageable())
+                        .get(h -> h.getItem().canBeDepleted() ? h.getItem().getMaxDamage() : null)
+                        .supports(h -> h.getItem().canBeDepleted())
                     .create(Keys.ITEM_DURABILITY)
-                        .get(stack -> stack.getMaxDamage() - stack.getDamage())
-                        .set((stack, durability) -> stack.setDamage(stack.getMaxDamage() - durability))
-                        .supports(h -> h.getItem().isDamageable())
+                        .get(stack -> stack.getMaxDamage() - stack.getDamageValue())
+                        .set((stack, durability) -> stack.setDamageValue(stack.getMaxDamage() - durability))
+                        .supports(h -> h.getItem().canBeDepleted())
                     .create(Keys.REPLENISHED_FOOD)
                         .get(h -> {
-                            if (h.getItem().isFood()) {
-                                final Food food = h.getItem().getFood();
-                                return food == null ? null : food.getHealing();
+                            if (h.getItem().isEdible()) {
+                                final Food food = h.getItem().getFoodProperties();
+                                return food == null ? null : food.getNutrition();
                             }
                             return null;
                         })
-                        .supports(h -> h.getItem().isFood())
+                        .supports(h -> h.getItem().isEdible())
                     .create(Keys.REPLENISHED_SATURATION)
                         .get(h -> {
-                            if (h.getItem().isFood()) {
-                                final Food food = h.getItem().getFood();
+                            if (h.getItem().isEdible()) {
+                                final Food food = h.getItem().getFoodProperties();
                                 if (food != null) {
                                     // Translate's Minecraft's weird internal value to the actual saturation value
-                                    return food.getSaturation() * food.getHealing() * 2.0;
+                                    return food.getSaturationModifier() * food.getNutrition() * 2.0;
                                 }
                             }
                             return null;
                         })
-                    .supports(h -> h.getItem().isFood());
+                    .supports(h -> h.getItem().isEdible());
     }
     // @formatter:on
 

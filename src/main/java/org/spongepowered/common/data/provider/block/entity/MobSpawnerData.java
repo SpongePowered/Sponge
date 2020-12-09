@@ -92,11 +92,11 @@ public final class MobSpawnerData {
     private static WeightedSerializableObject<EntityArchetype> getNextEntity(final AbstractSpawnerAccessor logic) {
         final int weight = ((WeightedRandom_ItemAccessor) logic.accessor$nextSpawnData()).accessor$weight();
 
-        final String resourceLocation = logic.accessor$nextSpawnData().getNbt().getString(Constants.Entity.ENTITY_TYPE_ID);
+        final String resourceLocation = logic.accessor$nextSpawnData().getTag().getString(Constants.Entity.ENTITY_TYPE_ID);
         final EntityType<?> type =
-                Registry.ENTITY_TYPE.func_241873_b(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
+                Registry.ENTITY_TYPE.getOptional(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
-        final CompoundNBT data = logic.accessor$nextSpawnData().getNbt();
+        final CompoundNBT data = logic.accessor$nextSpawnData().getTag();
 
         final EntityArchetype archetype = EntityArchetype.builder()
                 .type(type)
@@ -120,11 +120,11 @@ public final class MobSpawnerData {
         final WeightedTable<EntityArchetype> possibleEntities = new WeightedTable<>();
         for (final WeightedSpawnerEntity weightedEntity : ((AbstractSpawnerAccessor) logic).accessor$spawnPotentials()) {
 
-            final CompoundNBT nbt = weightedEntity.getNbt();
+            final CompoundNBT nbt = weightedEntity.getTag();
 
             final String resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
             final EntityType<?> type =
-                    Registry.ENTITY_TYPE.func_241873_b(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
+                    Registry.ENTITY_TYPE.getOptional(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
             final EntityArchetype archetype = EntityArchetype.builder()
                     .type(type)

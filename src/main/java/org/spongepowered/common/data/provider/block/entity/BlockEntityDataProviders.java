@@ -27,10 +27,10 @@ package org.spongepowered.common.data.provider.block.entity;
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
 import org.spongepowered.common.util.Constants;
 
-public final class TileEntityDataProviders extends DataProviderRegistratorBuilder {
+public final class BlockEntityDataProviders extends DataProviderRegistratorBuilder {
 
-    public TileEntityDataProviders() {
-        super(Constants.Sponge.Entity.DataRegistration.TILEENTITY);
+    public BlockEntityDataProviders() {
+        super(Constants.Sponge.Entity.DataRegistration.BLOCKENTITY);
     }
 
     @Override

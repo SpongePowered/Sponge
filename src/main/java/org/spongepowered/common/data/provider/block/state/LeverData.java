@@ -39,8 +39,8 @@ public final class LeverData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(LeverBlock.POWERED))
-                        .set((h, v) -> h.with(LeverBlock.POWERED, v))
+                        .get(h -> h.getValue(LeverBlock.POWERED))
+                        .set((h, v) -> h.setValue(LeverBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof LeverBlock);
     }
     // @formatter:on

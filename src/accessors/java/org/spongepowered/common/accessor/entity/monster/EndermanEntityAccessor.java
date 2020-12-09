@@ -33,8 +33,8 @@ import org.spongepowered.common.UntransformedAccessorError;
 @Mixin(EndermanEntity.class)
 public interface EndermanEntityAccessor {
 
-    @Accessor("DATA_STARED_AT")
-    static DataParameter<Boolean> accessor$DATA_STARED_AT() {
+    @Accessor("DATA_CREEPY")
+    static DataParameter<Boolean> accessor$DATA_CREEPY() {
         throw new UntransformedAccessorError();
     }
 

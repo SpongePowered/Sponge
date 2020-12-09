@@ -42,13 +42,13 @@ public final class ZombieVillagerData {
                 .asMutable(ZombieVillagerEntity.class)
                     .create(Keys.PROFESSION_LEVEL)
                         .get(h -> h.getVillagerData().getLevel())
-                        .set((h, v) -> h.setVillagerData(h.getVillagerData().withLevel(v)))
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setLevel(v)))
                     .create(Keys.PROFESSION_TYPE)
                         .get(h -> (ProfessionType) h.getVillagerData().getProfession())
-                        .set((h, v) -> h.setVillagerData(h.getVillagerData().withProfession((VillagerProfession) v)))
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setProfession((VillagerProfession) v)))
                     .create(Keys.VILLAGER_TYPE)
                         .get(h -> (VillagerType) (Object) h.getVillagerData().getType())
-                        .set((h, v) -> h.setVillagerData(h.getVillagerData().withType((net.minecraft.entity.villager.VillagerType) (Object) v)));
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setType((net.minecraft.entity.villager.VillagerType) (Object) v)));
     }
     // @formatter:on
 }

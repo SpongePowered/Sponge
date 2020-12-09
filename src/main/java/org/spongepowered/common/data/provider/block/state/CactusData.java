@@ -41,7 +41,7 @@ public final class CactusData {
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, CactusBlock.AGE))
-                        .get(h -> h.get(CactusBlock.AGE))
+                        .get(h -> h.getValue(CactusBlock.AGE))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, CactusBlock.AGE))
                         .supports(h -> h.getBlock() instanceof CactusBlock);
     }

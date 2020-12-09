@@ -43,20 +43,20 @@ public final class StairsData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(StairsBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(StairsBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, StairsBlock.FACING))
                         .supports(h -> h.getBlock() instanceof StairsBlock)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(StairsBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(StairsBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(StairsBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(StairsBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof StairsBlock)
                     .create(Keys.PORTION_TYPE)
                         .get(h -> PortionTypeUtil.getFromHalfBlock(h, StairsBlock.HALF))
                         .set((h, v) -> PortionTypeUtil.setForHalfBlock(h, v, StairsBlock.HALF))
                         .supports(h -> h.getBlock() instanceof StairsBlock)
                     .create(Keys.STAIR_SHAPE)
-                        .get(h -> (StairShape) (Object) h.get(StairsBlock.SHAPE))
-                        .set((h, v) -> h.with(StairsBlock.SHAPE, (StairsShape) (Object) v))
+                        .get(h -> (StairShape) (Object) h.getValue(StairsBlock.SHAPE))
+                        .set((h, v) -> h.setValue(StairsBlock.SHAPE, (StairsShape) (Object) v))
                         .supports(h -> h.getBlock() instanceof StairsBlock);
     }
     // @formatter:on

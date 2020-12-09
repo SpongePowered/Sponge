@@ -41,16 +41,16 @@ public final class AbstractRaiderData {
         registrator
                 .asMutable(AbstractRaiderEntity.class)
                     .create(Keys.CAN_JOIN_RAID)
-                        .get(AbstractRaiderEntity::func_213658_ej)
-                        .set(AbstractRaiderEntity::func_213644_t)
+                        .get(AbstractRaiderEntity::canJoinRaid)
+                        .set(AbstractRaiderEntity::setCanJoinRaid)
                     .create(Keys.IS_CELEBRATING)
-                        .get(h -> h.getDataManager().get(AbstractRaiderEntityAccessor.accessor$IS_CELEBRATING()))
-                        .set(AbstractRaiderEntity::func_213655_u)
+                        .get(h -> h.getEntityData().get(AbstractRaiderEntityAccessor.accessor$IS_CELEBRATING()))
+                        .set(AbstractRaiderEntity::setCelebrating)
                     .create(Keys.IS_LEADER)
-                        .get(PatrollerEntity::isLeader)
-                        .set(PatrollerEntity::setLeader)
+                        .get(PatrollerEntity::isPatrolLeader)
+                        .set(PatrollerEntity::setPatrolLeader)
                     .create(Keys.RAID_WAVE)
-                        .get(h -> ((RaidBridge) h.getRaid()).bridge$getWaves().get(h.func_213642_em()));
+                        .get(h -> ((RaidBridge) h.getCurrentRaid()).bridge$getWaves().get(h.getWave()));
     }
     // @formatter:on
 }

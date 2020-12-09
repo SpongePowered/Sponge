@@ -40,7 +40,7 @@ public final class DirectionalData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(DirectionalBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(DirectionalBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, DirectionalBlock.FACING))
                         .supports(h -> h.getBlock() instanceof DirectionalBlock);
     }

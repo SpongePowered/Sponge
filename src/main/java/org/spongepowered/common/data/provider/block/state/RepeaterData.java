@@ -41,7 +41,7 @@ public final class RepeaterData {
                 .asImmutable(BlockState.class)
                     .create(Keys.REDSTONE_DELAY)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.REDSTONE_DELAY, RepeaterBlock.DELAY))
-                        .get(h -> h.get(RepeaterBlock.DELAY))
+                        .get(h -> h.getValue(RepeaterBlock.DELAY))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, RepeaterBlock.DELAY))
                         .supports(h -> h.getBlock() instanceof RepeaterBlock);
     }

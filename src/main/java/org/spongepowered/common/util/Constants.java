@@ -229,7 +229,7 @@ public final class Constants {
 
             public static final class DataRegistration {
                 public static final String INVENTORY = "inventory";
-                public static final String TILEENTITY = "tileentity";
+                public static final String BLOCKENTITY = "blockentity";
                 public static final String LOCATION = "location";
                 public static final String BLOCKSTATE = "blockstate";
                 public static final String ENTITY = "entity";

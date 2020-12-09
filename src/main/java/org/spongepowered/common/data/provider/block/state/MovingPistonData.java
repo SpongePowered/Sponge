@@ -40,7 +40,7 @@ public final class MovingPistonData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(MovingPistonBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(MovingPistonBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, MovingPistonBlock.FACING))
                         .supports(h -> h.getBlock() instanceof MovingPistonBlock);
     }

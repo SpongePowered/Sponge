@@ -39,8 +39,8 @@ public final class FourWayData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(FourWayBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(FourWayBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(FourWayBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(FourWayBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof FourWayBlock);
     }
     // @formatter:on

@@ -41,12 +41,12 @@ public final class SlabData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(SlabBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(SlabBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(SlabBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(SlabBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof SlabBlock)
                     .create(Keys.SLAB_PORTION)
-                        .get(h -> (SlabPortion) (Object) h.get(SlabBlock.TYPE))
-                        .set((h, v) -> h.with(SlabBlock.TYPE, (SlabType) (Object) v))
+                        .get(h -> (SlabPortion) (Object) h.getValue(SlabBlock.TYPE))
+                        .set((h, v) -> h.setValue(SlabBlock.TYPE, (SlabType) (Object) v))
                         .supports(h -> h.getBlock() instanceof SlabBlock);
     }
     // @formatter:on

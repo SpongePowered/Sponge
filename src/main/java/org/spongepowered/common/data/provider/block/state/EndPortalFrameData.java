@@ -40,12 +40,12 @@ public final class EndPortalFrameData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(EndPortalFrameBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(EndPortalFrameBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, EndPortalFrameBlock.FACING))
                         .supports(h -> h.getBlock() instanceof EndPortalFrameBlock)
                     .create(Keys.IS_FILLED)
-                        .get(h -> h.get(EndPortalFrameBlock.EYE))
-                        .set((h, v) -> h.with(EndPortalFrameBlock.EYE, v))
+                        .get(h -> h.getValue(EndPortalFrameBlock.HAS_EYE))
+                        .set((h, v) -> h.setValue(EndPortalFrameBlock.HAS_EYE, v))
                         .supports(h -> h.getBlock() instanceof EndPortalFrameBlock);
     }
     // @formatter:on

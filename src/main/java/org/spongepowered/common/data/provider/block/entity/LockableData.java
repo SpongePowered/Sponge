@@ -41,7 +41,7 @@ public final class LockableData {
                 .asMutable(LockableTileEntityAccessor.class)
                     .create(Keys.LOCK_TOKEN)
                         .get(h -> ((LockCodeAccessor) h.accessor$lockKey()).accessor$key())
-                        .set((h, v) -> h.accessor$lockKey(v.isEmpty() ? LockCode.EMPTY_CODE : new LockCode(v)));
+                        .set((h, v) -> h.accessor$lockKey(v.isEmpty() ? LockCode.NO_LOCK : new LockCode(v)));
     }
     // @formatter:on
 }

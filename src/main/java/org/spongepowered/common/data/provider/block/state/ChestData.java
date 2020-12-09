@@ -46,56 +46,56 @@ public final class ChestData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CHEST_ATTACHMENT_TYPE)
-                        .get(h -> (ChestAttachmentType) (Object) h.get(ChestBlock.TYPE))
-                        .set((h, v) -> h.with(ChestBlock.TYPE, (ChestType) (Object) v))
+                        .get(h -> (ChestAttachmentType) (Object) h.getValue(ChestBlock.TYPE))
+                        .set((h, v) -> h.setValue(ChestBlock.TYPE, (ChestType) (Object) v))
                         .supports(h -> h.getBlock() instanceof ChestBlock)
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
-                            if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
+                            if (h.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
                                 return null;
                             }
-                            return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)));
+                            return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getConnectedDirection(h)));
                         })
                         .supports(h -> h.getBlock() instanceof ChestBlock)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(ChestBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(ChestBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, ChestBlock.FACING))
                         .supports(h -> h.getBlock() instanceof ChestBlock)
                     .create(Keys.IS_CONNECTED_EAST)
                         .get(h -> {
-                            if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
+                            if (h.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
                                 return null;
                             }
-                            return Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)) == Direction.EAST;
+                            return Constants.DirectionFunctions.getFor(ChestBlock.getConnectedDirection(h)) == Direction.EAST;
                         })
                         .supports(h -> h.getBlock() instanceof ChestBlock)
                     .create(Keys.IS_CONNECTED_NORTH)
                         .get(h -> {
-                            if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
+                            if (h.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
                                 return null;
                             }
-                            return Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)) == Direction.NORTH;
+                            return Constants.DirectionFunctions.getFor(ChestBlock.getConnectedDirection(h)) == Direction.NORTH;
                         })
                         .supports(h -> h.getBlock() instanceof ChestBlock)
                     .create(Keys.IS_CONNECTED_SOUTH)
                         .get(h -> {
-                            if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
+                            if (h.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
                                 return null;
                             }
-                            return Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)) == Direction.SOUTH;
+                            return Constants.DirectionFunctions.getFor(ChestBlock.getConnectedDirection(h)) == Direction.SOUTH;
                         })
                         .supports(h -> h.getBlock() instanceof ChestBlock)
                     .create(Keys.IS_CONNECTED_WEST)
                         .get(h -> {
-                            if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
+                            if (h.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
                                 return null;
                             }
-                            return Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)) == Direction.WEST;
+                            return Constants.DirectionFunctions.getFor(ChestBlock.getConnectedDirection(h)) == Direction.WEST;
                         })
                         .supports(h -> h.getBlock() instanceof ChestBlock)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(ChestBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(ChestBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(ChestBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(ChestBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof ChestBlock);
     }
     // @formatter:on

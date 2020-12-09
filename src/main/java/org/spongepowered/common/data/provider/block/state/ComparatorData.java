@@ -40,8 +40,8 @@ public final class ComparatorData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.COMPARATOR_MODE)
-                        .get(h -> (ComparatorMode) (Object) h.get(ComparatorBlock.MODE))
-                        .set((h, v) -> h.with(ComparatorBlock.MODE, (net.minecraft.state.properties.ComparatorMode) (Object) v))
+                        .get(h -> (ComparatorMode) (Object) h.getValue(ComparatorBlock.MODE))
+                        .set((h, v) -> h.setValue(ComparatorBlock.MODE, (net.minecraft.state.properties.ComparatorMode) (Object) v))
                         .supports(h -> h.getBlock() instanceof ComparatorBlock);
     }
     // @formatter:on

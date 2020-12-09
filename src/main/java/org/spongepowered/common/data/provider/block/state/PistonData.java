@@ -43,16 +43,16 @@ public final class PistonData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_EXTENDED)
-                        .get(h -> h.get(PistonBlock.EXTENDED))
-                        .set((h, v) -> h.with(PistonBlock.EXTENDED, v))
+                        .get(h -> h.getValue(PistonBlock.EXTENDED))
+                        .set((h, v) -> h.setValue(PistonBlock.EXTENDED, v))
                         .supports(h -> h.getBlock() instanceof PistonBlock)
                     .create(Keys.PISTON_TYPE)
                         .get(h -> ((PistonBlockAccessor) h.getBlock()).accessor$isSticky() ? PistonTypes.STICKY.get() : PistonTypes.NORMAL.get())
                         .set((h, v) -> {
                             if (v == PistonTypes.NORMAL.get()) {
-                                return Blocks.PISTON.getDefaultState().with(DirectionalBlock.FACING, h.get(DirectionalBlock.FACING));
+                                return Blocks.PISTON.defaultBlockState().setValue(DirectionalBlock.FACING, h.getValue(DirectionalBlock.FACING));
                             } else {
-                                return Blocks.STICKY_PISTON.getDefaultState().with(DirectionalBlock.FACING, h.get(DirectionalBlock.FACING));
+                                return Blocks.STICKY_PISTON.defaultBlockState().setValue(DirectionalBlock.FACING, h.getValue(DirectionalBlock.FACING));
                             }
                         })
                         .supports(h -> h.getBlock() instanceof PistonBlock);

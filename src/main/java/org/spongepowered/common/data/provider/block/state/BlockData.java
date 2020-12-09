@@ -64,10 +64,10 @@ public final class BlockData {
                         .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$explosionResistance())
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
-                            if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
+                            if (h.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
                                 return null;
                             }
-                            return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)));
+                            return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getConnectedDirection(h)));
                         })
                         .supports(h -> h.hasProperty(ChestBlock.TYPE))
                     .create(Keys.DYE_COLOR)
@@ -87,7 +87,7 @@ public final class BlockData {
                     .create(Keys.IS_GRAVITY_AFFECTED)
                         .get(h -> h.getBlock() instanceof FallingBlock)
                     .create(Keys.IS_PASSABLE)
-                        .get(h -> !h.getMaterial().blocksMovement())
+                        .get(h -> !h.getMaterial().blocksMotion())
                     .create(Keys.IS_UNBREAKABLE)
                         .get(h -> ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$destroyTime() < 0)
                     .create(Keys.IS_FLAMMABLE)
@@ -99,7 +99,7 @@ public final class BlockData {
                     .create(Keys.IS_SURROGATE_BLOCK)
                         .get(h -> ((BlockBridge) h.getBlock()).bridge$isDummy())
                     .create(Keys.LIGHT_EMISSION)
-                        .get(BlockState::getLightValue)
+                        .get(BlockState::getLightEmission)
                     .create(Keys.MATTER_TYPE)
                         .get(h -> {
                             if (h.getBlock() instanceof FlowingFluidBlock) {

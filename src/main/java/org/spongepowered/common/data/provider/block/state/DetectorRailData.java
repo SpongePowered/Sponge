@@ -39,8 +39,8 @@ public final class DetectorRailData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(DetectorRailBlock.POWERED))
-                        .set((h, v) -> h.with(DetectorRailBlock.POWERED, v))
+                        .get(h -> h.getValue(DetectorRailBlock.POWERED))
+                        .set((h, v) -> h.setValue(DetectorRailBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof DetectorRailBlock);
     }
     // @formatter:on

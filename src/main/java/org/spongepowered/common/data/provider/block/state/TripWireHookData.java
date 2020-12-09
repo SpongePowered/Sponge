@@ -40,16 +40,16 @@ public final class TripWireHookData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(TripWireHookBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(TripWireHookBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, TripWireHookBlock.FACING))
                         .supports(h -> h.getBlock() instanceof TripWireHookBlock)
                     .create(Keys.IS_ATTACHED)
-                        .get(h -> h.get(TripWireHookBlock.ATTACHED))
-                        .set((h, v) -> h.with(TripWireHookBlock.ATTACHED, v))
+                        .get(h -> h.getValue(TripWireHookBlock.ATTACHED))
+                        .set((h, v) -> h.setValue(TripWireHookBlock.ATTACHED, v))
                         .supports(h -> h.getBlock() instanceof TripWireHookBlock)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(TripWireHookBlock.POWERED))
-                        .set((h, v) -> h.with(TripWireHookBlock.POWERED, v))
+                        .get(h -> h.getValue(TripWireHookBlock.POWERED))
+                        .set((h, v) -> h.setValue(TripWireHookBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof TripWireHookBlock);
     }
     // @formatter:on

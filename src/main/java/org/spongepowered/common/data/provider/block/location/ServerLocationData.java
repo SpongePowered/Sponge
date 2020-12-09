@@ -53,12 +53,12 @@ public final class ServerLocationData {
                             final World world = (World) h.getWorld();
                             final BlockPos pos = VecHelper.toBlockPos(h);
                             final Biome biome = world.getBiome(pos);
-                            return (double) biome.getDefaultTemperature();
+                            return (double) biome.getBaseTemperature();
                         })
                     .create(Keys.BLOCK_LIGHT)
                         .get(h -> {
                             final World world = (World) h.getWorld();
-                            return world.getLightFor(LightType.BLOCK, VecHelper.toBlockPos(h));
+                            return world.getBrightness(LightType.BLOCK, VecHelper.toBlockPos(h));
                         })
                     .create(Keys.BLOCK_TEMPERATURE)
                         .get(h -> {
@@ -71,20 +71,20 @@ public final class ServerLocationData {
                         .get(h -> {
                             final World world = (World) h.getWorld();
                             final BlockPos pos = VecHelper.toBlockPos(h);
-                            return world.getLightFor(LightType.SKY, pos);
+                            return world.getBrightness(LightType.SKY, pos);
                         })
                     .create(Keys.IS_FULL_BLOCK)
                         .get(h -> {
                             final BlockState block = (BlockState) h.getBlock();
                             final World world = (World) h.getWorld();
                             final BlockPos pos = VecHelper.toBlockPos(h.getPosition());
-                            return block.isOpaqueCube(world, pos);
+                            return block.isSolidRender(world, pos);
                         })
                     .create(Keys.IS_INDIRECTLY_POWERED)
                         .get(h -> {
                             final World world = (World) h.getWorld();
                             final BlockPos pos = VecHelper.toBlockPos(h);
-                            return world.getRedstonePowerFromNeighbors(pos) > 0;
+                            return world.getBestNeighborSignal(pos) > 0;
                         })
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(((INameable)h.getBlockEntity().get()).getDisplayName()))

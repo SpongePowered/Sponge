@@ -39,8 +39,8 @@ public final class TNTData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.UNSTABLE)
-                        .get(h -> h.get(TNTBlock.UNSTABLE))
-                        .set((h, v) -> h.with(TNTBlock.UNSTABLE, v))
+                        .get(h -> h.getValue(TNTBlock.UNSTABLE))
+                        .set((h, v) -> h.setValue(TNTBlock.UNSTABLE, v))
                         .supports(h -> h.getBlock() instanceof TNTBlock);
     }
     // @formatter:on

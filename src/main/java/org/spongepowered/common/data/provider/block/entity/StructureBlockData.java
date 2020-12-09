@@ -42,7 +42,7 @@ public final class StructureBlockData {
                 .asMutable(StructureBlockTileEntity.class)
                     .create(Keys.STRUCTURE_IGNORE_ENTITIES)
                         .get(h -> ((StructureBlockTileEntityAccessor) h).accessor$ignoreEntities())
-                        .set(StructureBlockTileEntity::setIgnoresEntities)
+                        .set(StructureBlockTileEntity::setIgnoreEntities)
                     .create(Keys.STRUCTURE_INTEGRITY)
                         .get(h -> (double) ((StructureBlockTileEntityAccessor) h).accessor$integrity())
                         .set((h, v) -> h.setIntegrity(v.floatValue()))

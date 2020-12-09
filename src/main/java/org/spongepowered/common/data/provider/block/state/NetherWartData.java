@@ -41,7 +41,7 @@ public final class NetherWartData {
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, NetherWartBlock.AGE))
-                        .get(h -> h.get(NetherWartBlock.AGE))
+                        .get(h -> h.getValue(NetherWartBlock.AGE))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, NetherWartBlock.AGE))
                         .supports(h -> h.getBlock() instanceof NetherWartBlock);
     }

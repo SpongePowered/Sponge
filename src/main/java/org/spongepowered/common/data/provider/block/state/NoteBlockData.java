@@ -44,19 +44,19 @@ public final class NoteBlockData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.INSTRUMENT_TYPE)
-                        .get(h -> (InstrumentType) (Object) h.get(NoteBlock.INSTRUMENT))
-                        .set((h, v) -> h.with(NoteBlock.INSTRUMENT, (NoteBlockInstrument) (Object) v))
+                        .get(h -> (InstrumentType) (Object) h.getValue(NoteBlock.INSTRUMENT))
+                        .set((h, v) -> h.setValue(NoteBlock.INSTRUMENT, (NoteBlockInstrument) (Object) v))
                         .supports(h -> h.getBlock() instanceof NoteBlock)
                     .create(Keys.NOTE_PITCH)
                         .get(h -> {
                             final SimpleRegistry<NotePitch> registry =
                                     SpongeCommon.getRegistry().getCatalogRegistry().requireRegistry(NotePitch.class);
-                            return registry.getByValue(h.get(NoteBlock.NOTE));
+                            return registry.byId(h.getValue(NoteBlock.NOTE));
                         })
                         .set((h, v) -> {
                             final SimpleRegistry<NotePitch> registry =
                                     SpongeCommon.getRegistry().getCatalogRegistry().requireRegistry(NotePitch.class);
-                            return h.with(NoteBlock.NOTE, registry.getId(v));
+                            return h.setValue(NoteBlock.NOTE, registry.getId(v));
                         })
                         .supports(h -> h.getBlock() instanceof NoteBlock);
     }

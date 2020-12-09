@@ -38,7 +38,7 @@ public final class AbstractVillagerData {
         registrator
                 .asMutable(AbstractVillagerEntity.class)
                     .create(Keys.IS_TRADING)
-                        .get(AbstractVillagerEntity::hasCustomer);
+                        .get(AbstractVillagerEntity::isTrading);
     }
     // @formatter:on
 }

@@ -44,16 +44,16 @@ public final class TrapDoorData {
                         .set((h, v) -> PortionTypeUtil.setForHalfBlock(h, v, TrapDoorBlock.HALF))
                         .supports(h -> h.getBlock() instanceof TrapDoorBlock)
                     .create(Keys.IS_OPEN)
-                        .get(h -> h.get(TrapDoorBlock.OPEN))
-                        .set((h, v) -> h.with(TrapDoorBlock.OPEN, v))
+                        .get(h -> h.getValue(TrapDoorBlock.OPEN))
+                        .set((h, v) -> h.setValue(TrapDoorBlock.OPEN, v))
                         .supports(h -> h.getBlock() instanceof TrapDoorBlock)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(TrapDoorBlock.POWERED))
-                        .set((h, v) -> h.with(TrapDoorBlock.POWERED, v))
+                        .get(h -> h.getValue(TrapDoorBlock.POWERED))
+                        .set((h, v) -> h.setValue(TrapDoorBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof TrapDoorBlock)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(TrapDoorBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(TrapDoorBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(TrapDoorBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(TrapDoorBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof TrapDoorBlock);
     }
     // @formatter:on

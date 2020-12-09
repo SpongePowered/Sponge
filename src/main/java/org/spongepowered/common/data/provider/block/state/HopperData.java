@@ -40,7 +40,7 @@ public final class HopperData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(HopperBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(HopperBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, HopperBlock.FACING))
                         .supports(h -> h.getBlock() instanceof HopperBlock);
     }

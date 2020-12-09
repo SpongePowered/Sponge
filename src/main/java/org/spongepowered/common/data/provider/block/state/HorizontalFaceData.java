@@ -41,8 +41,8 @@ public final class HorizontalFaceData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.ATTACHMENT_SURFACE)
-                        .get(h -> (AttachmentSurface) (Object) h.get(HorizontalFaceBlock.FACE))
-                        .set((h, v) -> h.with(HorizontalFaceBlock.FACE, (AttachFace) (Object) v))
+                        .get(h -> (AttachmentSurface) (Object) h.getValue(HorizontalFaceBlock.FACE))
+                        .set((h, v) -> h.setValue(HorizontalFaceBlock.FACE, (AttachFace) (Object) v))
                         .supports(h -> h.getBlock() instanceof HorizontalFaceBlock);
     }
     // @formatter:on

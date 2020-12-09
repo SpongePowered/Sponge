@@ -49,7 +49,7 @@ public final class JukeBoxData {
                                 return true;
                             }
                             if (record.isEmpty()) {
-                                h.clear();
+                                h.clearContent();
                                 return true;
                             }
                             return false;

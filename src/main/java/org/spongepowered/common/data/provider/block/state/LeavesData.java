@@ -40,12 +40,12 @@ public final class LeavesData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_PERSISTENT)
-                        .get(h -> h.get(LeavesBlock.PERSISTENT))
-                        .set((h, v) -> h.with(LeavesBlock.PERSISTENT, v))
+                        .get(h -> h.getValue(LeavesBlock.PERSISTENT))
+                        .set((h, v) -> h.setValue(LeavesBlock.PERSISTENT, v))
                         .supports(h -> h.getBlock() instanceof LeavesBlock)
                     .create(Keys.DECAY_DISTANCE)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.DECAY_DISTANCE, LeavesBlock.DISTANCE))
-                        .get(h -> h.get(LeavesBlock.DISTANCE))
+                        .get(h -> h.getValue(LeavesBlock.DISTANCE))
                         .set((h, v) -> BoundedUtil.setInteger(h, v,  LeavesBlock.DISTANCE))
                         .supports(h -> h.getBlock() instanceof LeavesBlock);
     }

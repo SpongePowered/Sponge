@@ -68,7 +68,7 @@ public final class BeaconData {
             return false;
         }
         setter.accept(accessor, (Effect) value);
-        holder.markDirty();
+        holder.setChanged();
         return true;
     }
 
@@ -77,7 +77,7 @@ public final class BeaconData {
         final BeaconTileEntityAccessor accessor = (BeaconTileEntityAccessor) holder;
         if (accessor.accessor$primaryPower() != null) {
             setter.accept(accessor, null);
-            holder.markDirty();
+            holder.setChanged();
         }
         return true;
     }

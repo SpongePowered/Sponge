@@ -39,8 +39,8 @@ public final class ScaffoldingData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(ScaffoldingBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(ScaffoldingBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(ScaffoldingBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(ScaffoldingBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof ScaffoldingBlock);
     }
     // @formatter:on
