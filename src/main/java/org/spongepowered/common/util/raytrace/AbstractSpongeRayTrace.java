@@ -149,7 +149,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     @Override
     @NonNull
     public final RayTrace<@NonNull T> select(@NonNull final Predicate<T> filter) {
-        if (this.select == null) {
+        if (this.select == this.defaultFilter) {
             this.select = filter;
         } else {
             this.select = this.select.or(filter);
