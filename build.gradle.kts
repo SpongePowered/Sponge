@@ -14,8 +14,8 @@ plugins {
 
 val apiProject = project.project("SpongeAPI")
 val commonProject = project
-val mcpType: String by project
-val mcpMappings: String by project
+val mappingsChannel: String by project
+val mappingsVersion: String by project
 val minecraftDep: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
@@ -28,7 +28,7 @@ val guavaVersion: String by project
 val junitVersion: String by project
 
 minecraft {
-    mappings(mcpType, mcpMappings)
+    mappings(mappingsChannel, mappingsVersion)
     project.sourceSets["main"].resources
             .filter { it.name.endsWith("_at.cfg") }
             .files
@@ -607,7 +607,7 @@ project("SpongeVanilla") {
     val vanillaAppLaunchRuntime by configurations.named(vanillaAppLaunch.runtimeConfigurationName)
 
     configure<net.minecraftforge.gradle.userdev.UserDevExtension> {
-        mappings(mcpType, mcpMappings)
+        mappings(mappingsChannel, mappingsVersion)
         runs {
             create("server") {
                 workingDirectory(vanillaProject.file("./run"))
@@ -1101,7 +1101,7 @@ if (spongeForge != null) {
         val forgeMixinsAnnotationProcessor by configurations.named(forgeMixins.annotationProcessorConfigurationName)
 
         configure<net.minecraftforge.gradle.userdev.UserDevExtension> {
-            mappings(mcpType, mcpMappings)
+            mappings(mappingsChannel, mappingsVersion)
             runs {
                 create("server") {
                     workingDirectory(forgeProject.file("./run"))
