@@ -42,8 +42,8 @@ public final class FoxData {
         registrator
                 .asMutable(FoxEntity.class)
                     .create(Keys.FIRST_TRUSTED)
-                        .get(h -> h.getDataManager().get(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_1()).orElse(null))
-                        .set((h, v) -> h.getDataManager().set(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_1(), Optional.ofNullable(v)))
+                        .get(h -> h.getEntityData().get(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_0()).orElse(null))
+                        .set((h, v) -> h.getEntityData().set(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_0(), Optional.ofNullable(v)))
                     .create(Keys.FOX_TYPE)
                         .get(h -> (FoxType) (Object) h.getFoxType())
                         .set((h, v) -> ((FoxEntityAccessor) h).invoker$setFoxType((FoxEntity.Type) (Object) v))
@@ -66,8 +66,8 @@ public final class FoxData {
                         .get(FoxEntity::isSleeping)
                         .set((h, v) -> ((FoxEntityAccessor) h).invoker$setSleeping(v))
                     .create(Keys.SECOND_TRUSTED)
-                        .get(h -> h.getDataManager().get(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_0()).orElse(null))
-                        .set((h, v) -> h.getDataManager().set(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_0(), Optional.ofNullable(v)));
+                        .get(h -> h.getEntityData().get(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_1()).orElse(null))
+                        .set((h, v) -> h.getEntityData().set(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_1(), Optional.ofNullable(v)));
     }
     // @formatter:on
 }

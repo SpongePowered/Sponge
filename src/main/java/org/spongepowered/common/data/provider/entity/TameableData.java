@@ -38,16 +38,16 @@ public final class TameableData {
         registrator
                 .asMutable(TameableEntity.class)
                     .create(Keys.IS_SITTING)
-                        .get(TameableEntity::isSitting)
-                        .set(TameableEntity::setSitting)
+                        .get(TameableEntity::isInSittingPose)
+                        .set(TameableEntity::setInSittingPose)
                     .create(Keys.IS_TAMED)
-                        .get(TameableEntity::isTamed)
-                        .set(TameableEntity::setTamed)
+                        .get(TameableEntity::isTame)
+                        .set(TameableEntity::setTame)
                     .create(Keys.TAMER)
-                        .get(TameableEntity::getOwnerId)
+                        .get(TameableEntity::getOwnerUUID)
                         .set((h, v) -> {
-                            h.setOwnerId(v);
-                            h.setTamed(v != null);
+                            h.setOwnerUUID(v);
+                            h.setTame(v != null);
                         });
     }
     // @formatter:on

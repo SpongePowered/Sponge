@@ -63,15 +63,15 @@ public final class LivingData {
                             return true;
                         })
                     .create(Keys.ACTIVE_ITEM)
-                        .get(h -> ItemStackUtil.snapshotOf(h.getActiveItemStack()))
+                        .get(h -> ItemStackUtil.snapshotOf(h.getUseItem()))
                         .setAnd((h, v) -> {
                             if (v.isEmpty()) {
-                                h.stopActiveHand();
+                                h.releaseUsingItem();
                                 return true;
                             }
                             return false;
                         })
-                        .delete(LivingEntity::stopActiveHand)
+                        .delete(LivingEntity::releaseUsingItem)
                     .create(Keys.BODY_ROTATIONS)
                         .get(h -> {
                             final double headYaw = h.getRotationYawHead();
@@ -122,12 +122,12 @@ public final class LivingData {
 
                             h.setHealth(v.floatValue());
                             if (v == 0) {
-                                h.attackEntityFrom(DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE, 1000F);
+                                h.hurt(DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE, 1000F);
                             }
                             return true;
                         })
                     .create(Keys.IS_ELYTRA_FLYING)
-                        .get(LivingEntity::isElytraFlying)
+                        .get(LivingEntity::isFallFlying)
                         .set((h, v) -> ((EntityAccessor) h).invoker$setSharedFlag(Constants.Entity.ELYTRA_FLYING_FLAG, v))
                     .create(Keys.LAST_ATTACKER)
                         .get(h -> (Entity) h.getRevengeTarget())
@@ -172,12 +172,12 @@ public final class LivingData {
                     .create(Keys.SCALE)
                         .get(h -> (double) h.getRenderScale())
                     .create(Keys.STUCK_ARROWS)
-                        .get(LivingEntity::getArrowCountInEntity)
+                        .get(LivingEntity::getArrowCount)
                         .setAnd((h, v) -> {
                             if (v < 0 || v > Integer.MAX_VALUE) {
                                 return false;
                             }
-                            h.setArrowCountInEntity(v);
+                            h.setArrowCount(v);
                             return true;
                         })
                     .create(Keys.WALKING_SPEED)

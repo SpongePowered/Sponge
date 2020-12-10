@@ -41,8 +41,8 @@ public final class FallingBlockData {
         registrator
                 .asMutable(FallingBlockEntity.class)
                     .create(Keys.CAN_DROP_AS_ITEM)
-                        .get(h -> h.shouldDropItem)
-                        .set((h, v) -> h.shouldDropItem = v)
+                        .get(h -> h.dropItem)
+                        .set((h, v) -> h.dropItem = v)
                 .asMutable(FallingBlockEntityAccessor.class)
                     .create(Keys.BLOCK_STATE)
                         .get(h -> (BlockState) h.accessor$blockState())

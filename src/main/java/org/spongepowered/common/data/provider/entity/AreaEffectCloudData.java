@@ -44,7 +44,7 @@ public final class AreaEffectCloudData {
                 .asMutable(AreaEffectCloudEntity.class)
                     .create(Keys.COLOR)
                         .get(h -> Color.ofRgb(h.getColor()))
-                        .set((h, v) -> h.setColor(v.getRgb()))
+                        .set((h, v) -> h.setFixedColor(v.getRgb()))
                     .create(Keys.DURATION)
                         .get(x -> new SpongeTicks(x.getDuration()))
                         .setAnd((h, v) -> {

@@ -40,7 +40,7 @@ public final class MooshroomData {
         registrator
                 .asMutable(MooshroomEntity.class)
                     .create(Keys.MOOSHROOM_TYPE)
-                        .get(h -> (MooshroomType) (Object) h.getMooshroomType())
+                        .get(h -> (MooshroomType) (Object) h.getMushroomType())
                         .set((h, v) -> ((MooshroomEntityAccessor) h).invoker$setMushroomType((MooshroomEntity.Type) (Object) v));
     }
     // @formatter:on

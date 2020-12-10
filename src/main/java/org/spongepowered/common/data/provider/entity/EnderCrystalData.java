@@ -48,14 +48,14 @@ public final class EnderCrystalData {
                                 return false;
                             }
                             if (v == 0) {
-                                h.attackEntityFrom(DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE, 1000F);
+                                h.hurt(DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE, 1000F);
                             } else {
                                 h.removed = false;
                             }
                             return true;
                         })
                     .create(Keys.SHOW_BOTTOM)
-                        .get(EnderCrystalEntity::shouldShowBottom)
+                        .get(EnderCrystalEntity::showsBottom)
                         .set(EnderCrystalEntity::setShowBottom)
                     .create(Keys.TARGET_POSITION)
                         .get(h -> VecHelper.toVector3i(h.getBeamTarget()))

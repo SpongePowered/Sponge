@@ -41,7 +41,7 @@ public final class TNTData {
         registrator
                 .asMutable(TNTEntity.class)
                     .create(Keys.DETONATOR)
-                        .get(h -> (Living) h.getTntPlacedBy())
+                        .get(h -> (Living) h.getOwner())
                         .set((h, v) -> ((TNTEntityAccessor) h).accessor$owner((LivingEntity) v))
                     .create(Keys.IS_PRIMED)
                         .get(h -> !h.removed && h.getFuse() > 0);

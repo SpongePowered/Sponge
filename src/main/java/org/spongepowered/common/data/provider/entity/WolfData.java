@@ -43,8 +43,8 @@ public final class WolfData {
                         .get(h -> (DyeColor) (Object) h.getCollarColor())
                         .set((h, v) -> h.setCollarColor((net.minecraft.item.DyeColor) (Object) v))
                     .create(Keys.IS_BEGGING_FOR_FOOD)
-                        .get(WolfEntity::isBegging)
-                        .set(WolfEntity::setBegging)
+                        .get(WolfEntity::isInterested)
+                        .set(WolfEntity::setIsInterested)
                     .create(Keys.IS_WET)
                         .get(h -> ((WolfEntityAccessor) h).accessor$isWet() || ((WolfEntityAccessor) h).accessor$isShaking())
                         .set((h, v) -> {

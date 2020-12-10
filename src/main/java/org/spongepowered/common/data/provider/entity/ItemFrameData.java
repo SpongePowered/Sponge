@@ -40,11 +40,11 @@ public final class ItemFrameData {
         registrator
                 .asMutable(ItemFrameEntity.class)
                     .create(Keys.ITEM_STACK_SNAPSHOT)
-                        .get(h -> ItemStackUtil.snapshotOf(h.getDisplayedItem()))
-                        .set((h, v) -> h.setDisplayedItem(ItemStackUtil.fromSnapshotToNative(v)))
+                        .get(h -> ItemStackUtil.snapshotOf(h.getItem()))
+                        .set((h, v) -> h.setItem(ItemStackUtil.fromSnapshotToNative(v)))
                     .create(Keys.ORIENTATION)
                         .get(h -> Orientation.fromDegrees(h.getRotation() * 45).orElse(null))
-                        .set((h, v) -> h.setItemRotation(v.getAngle() / 45));
+                        .set((h, v) -> h.setRotation(v.getAngle() / 45));
     }
     // @formatter:on
 }

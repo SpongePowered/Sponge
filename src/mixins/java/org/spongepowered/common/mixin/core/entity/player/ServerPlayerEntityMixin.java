@@ -37,7 +37,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CClientSettingsPacket;
 import net.minecraft.network.play.server.SCombatPacket;
-import net.minecraft.network.play.server.SSpawnPositionPacket;
 import net.minecraft.network.play.server.SUpdateBossInfoPacket;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreCriteria;
@@ -55,7 +54,6 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -123,15 +121,15 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     // @formatter:off
     @Shadow public ServerPlayNetHandler connection;
-    @Shadow @Final public PlayerInteractionManager interactionManager;
+    @Shadow @Final public PlayerInteractionManager gameMode;
     @Shadow @Final public MinecraftServer server;
-    @Shadow private int lastExperience;
+    @Shadow private int lastRecordedExperience;
 
-    @Shadow public abstract net.minecraft.world.server.ServerWorld shadow$getServerWorld();
-    @Shadow public abstract void shadow$setSpectatingEntity(Entity p_175399_1_);
+    @Shadow public abstract net.minecraft.world.server.ServerWorld shadow$getLevel();
+    @Shadow public abstract void shadow$setCamera(final Entity entity);
     @Shadow public abstract void shadow$stopRiding();
     @Shadow public abstract void shadow$closeContainer();
-    @Shadow public abstract void shadow$takeStat(Stat<?> stat);
+    @Shadow public abstract void shadow$resetStat(final Stat<?> statistic);
     // @formatter:on
 
     private final User impl$user = this.impl$getUserObjectOnConstruction();
@@ -203,9 +201,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
             Vector3d toPosition;
 
-            if (this.shadow$getServerWorld() != destinationWorld) {
+            if (this.shadow$getLevel() != destinationWorld) {
                 final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) this, (org.spongepowered.api.world.server.ServerWorld) this.shadow$getServerWorld(),
+                        (org.spongepowered.api.entity.Entity) this, (org.spongepowered.api.world.server.ServerWorld) this.shadow$getLevel(),
                         location.getWorld(), location.getWorld());
                 if (SpongeCommon.postEvent(event)) {
                     return false;
@@ -213,8 +211,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
                 final ChangeEntityWorldEvent.Reposition repositionEvent =
                         SpongeEventFactory.createChangeEntityWorldEventReposition(frame.getCurrentCause(),
-                                (org.spongepowered.api.entity.Entity) this, (org.spongepowered.api.world.server.ServerWorld) this.shadow$getServerWorld(),
-                                VecHelper.toVector3d(this.shadow$getPositionVector()), location.getPosition(), event.getOriginalDestinationWorld(),
+                                (org.spongepowered.api.entity.Entity) this, (org.spongepowered.api.world.server.ServerWorld) this.shadow$getLevel(),
+                                VecHelper.toVector3d(this.shadow$position()), location.getPosition(), event.getOriginalDestinationWorld(),
                                 location.getPosition(), event.getDestinationWorld());
 
                 if (SpongeCommon.postEvent(repositionEvent)) {
@@ -226,7 +224,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 toPosition = repositionEvent.getDestinationPosition();
             } else {
                 final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()),
+                        (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
                         location.getPosition(), location.getPosition());
                 if (SpongeCommon.postEvent(event)) {
                     return false;
@@ -242,17 +240,17 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             }
 
             final ChunkPos chunkPos = new ChunkPos((int) toPosition.getX() >> 4, (int) toPosition.getZ() >> 4);
-            destinationWorld.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((ServerPlayerEntity) (Object) this).getEntityId());
+            destinationWorld.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((ServerPlayerEntity) (Object) this).getId());
 
-            if (this.shadow$getServerWorld() != destinationWorld) {
+            if (this.shadow$getLevel() != destinationWorld) {
                 this.shadow$setLocationAndAngles(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.rotationYaw, this.rotationPitch);
 
-                EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) (Object) this, this.shadow$getServerWorld(),
+                EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) (Object) this, this.shadow$getLevel(),
                         (net.minecraft.world.server.ServerWorld) location.getWorld(), destinationWorld, false);
             } else {
-                this.connection.setPlayerLocation(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.rotationYaw, this.rotationPitch,
+                this.connection.teleport(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.rotationYaw, this.rotationPitch,
                         new HashSet<>());
-                this.connection.captureCurrentPosition();
+                this.connection.resetPosition();
             }
         }
 
@@ -261,7 +259,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Override
     public void bridge$refreshExp() {
-        this.lastExperience = -1;
+        this.lastRecordedExperience = -1;
     }
 
     @Override
@@ -328,7 +326,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public boolean bridge$keepInventory() {
         if (this.impl$keepInventory == null) {
-            return this.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
+            return this.world.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
         }
         return this.impl$keepInventory;
     }
@@ -346,7 +344,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         this.impl$targetedPosition = position;
 
         if (position != null) {
-            this.connection.sendPacket(new SSpawnPositionPacket(VecHelper.toBlockPos(position)));
+            this.connection.send(new SSpawnPositionPacket(VecHelper.toBlockPos(position)));
         }
     }
 
@@ -412,7 +410,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
             if (world == player.world) {
                 final MoveEntityEvent posEvent = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) player, VecHelper.toVector3d(player.getPositionVector()),
+                        (org.spongepowered.api.entity.Entity) player, VecHelper.toVector3d(player.position()),
                         new Vector3d(x, y, z), new Vector3d(x, y, z));
 
                 if (SpongeCommon.postEvent(posEvent)) {
@@ -451,7 +449,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 }
 
                 final MoveEntityEvent posEvent = SpongeEventFactory.createChangeEntityWorldEventReposition(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) player, preEvent.getOriginalWorld(), VecHelper.toVector3d(player.getPositionVector()),
+                        (org.spongepowered.api.entity.Entity) player, preEvent.getOriginalWorld(), VecHelper.toVector3d(player.position()),
                         new Vector3d(x, y, z), preEvent.getOriginalDestinationWorld(), new Vector3d(x, y, z), preEvent.getDestinationWorld());
 
                 final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
@@ -571,7 +569,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 // this.server.getPlayerList().sendMessage(itextcomponent);
             }
         } else {
-            this.connection.sendPacket(
+            this.connection.send(
                     new SCombatPacket(this.shadow$getCombatTracker(), SCombatPacket.Event.ENTITY_DIED));
         }
 
@@ -587,7 +585,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         // Sponge End
 
         this.shadow$getWorldScoreboard().forAllObjectives(
-                ScoreCriteria.DEATH_COUNT, this.shadow$getScoreboardName(), Score::incrementScore);
+                ScoreCriteria.DEATH_COUNT, this.shadow$getScoreboardName(), Score::increment);
         final LivingEntity livingentity = this.shadow$getAttackingEntity();
         if (livingentity != null) {
             this.shadow$addStat(Stats.ENTITY_KILLED_BY.get(livingentity.getType()));
@@ -595,13 +593,13 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             this.shadow$createWitherRose(livingentity);
         }
 
-        this.world.setEntityState((ServerPlayerEntity) (Object) this, (byte) 3);
+        this.world.broadcastEntityEvent((ServerPlayerEntity) (Object) this, (byte) 3);
         this.shadow$addStat(Stats.DEATHS);
-        this.shadow$takeStat(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH));
-        this.shadow$takeStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
+        this.shadow$resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH));
+        this.shadow$resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
         this.shadow$extinguish();
         this.shadow$setFlag(0, false);
-        this.shadow$getCombatTracker().reset();
+        this.shadow$getCombatTracker().recheckStatus();
     }
 
     @Redirect(method = "copyFrom",
@@ -612,9 +610,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         final boolean keep = ((PlayerEntityBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
         if (!keep) {
             // Copy corpse inventory to respawned player
-            this.inventory.copyInventory(corpse.inventory);
+            this.inventory.replaceWith(corpse.inventory);
             // Clear corpse so that mods do not copy from it again
-            corpse.inventory.clear();
+            corpse.inventory.clearContent();
         }
         return keep;
     }
@@ -643,13 +641,13 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     @SuppressWarnings({"ConstantConditions", "UnstableApiUsage"})
-    @Inject(method = "handleClientSettings", at = @At("HEAD"))
+    @Inject(method = "updateOptions", at = @At("HEAD"))
     private void impl$handleClientSettings(final CClientSettingsPacket packet, final CallbackInfo ci) {
         if (ShouldFire.PLAYER_CHANGE_CLIENT_SETTINGS_EVENT) {
             final Locale newLocale = LocaleCache.getLocale(packet.getLang());
             final ImmutableSet<SkinPart> skinParts = Sponge.getRegistry().getCatalogRegistry().streamAllOf(SkinPart.class)
                     .map(part -> (SpongeSkinPart) part)
-                    .filter(part -> part.test(packet.getModelPartFlags()))
+                    .filter(part -> part.test(packet.getModelCustomisation()))
                     .collect(ImmutableSet.toImmutableSet());
             final int viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$viewDistance();
 
@@ -662,22 +660,22 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                         skinParts,
                         newLocale,
                         (ServerPlayer) this,
-                        packet.isColorsEnabled(),
+                        packet.getChatColors(),
                         viewDistance);
                 SpongeCommon.postEvent(event);
             }
         }
     }
 
-    @Inject(method = "handleClientSettings", at = @At("TAIL"))
+    @Inject(method = "updateOptions", at = @At("TAIL"))
     private void impl$updateTrackedClientSettings(final CClientSettingsPacket packet, final CallbackInfo ci) {
         final Locale newLocale = LocaleCache.getLocale(packet.getLang());
         final int viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$viewDistance();
 
         // Update locale on Channel, used for sending localized messages
-        final Channel channel = ((NetworkManagerAccessor) this.connection.netManager).accessor$channel();
+        final Channel channel = ((NetworkManagerAccessor) this.connection.connection).accessor$channel();
         channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(newLocale);
-        SpongeAdventure.forEachBossBar(bar -> this.connection.sendPacket(new SUpdateBossInfoPacket(SUpdateBossInfoPacket.Operation.UPDATE_NAME, bar)));
+        SpongeAdventure.forEachBossBar(bar -> this.connection.send(new SUpdateBossInfoPacket(SUpdateBossInfoPacket.Operation.UPDATE_NAME, bar)));
 
         // Update the fields we track ourselves
         this.impl$viewDistance = viewDistance;

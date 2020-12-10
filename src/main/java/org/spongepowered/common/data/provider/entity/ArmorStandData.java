@@ -56,8 +56,8 @@ public final class ArmorStandData {
                     .create(Keys.BODY_ROTATIONS)
                         .get(h -> {
                             final Map<BodyPart, Vector3d> values = new HashMap<>();
-                            values.put(BodyParts.HEAD.get(), VecHelper.toVector3d(h.getHeadRotation()));
-                            values.put(BodyParts.CHEST.get(), VecHelper.toVector3d(h.getBodyRotation()));
+                            values.put(BodyParts.HEAD.get(), VecHelper.toVector3d(h.getHeadPose()));
+                            values.put(BodyParts.CHEST.get(), VecHelper.toVector3d(h.getBodyPose()));
                             values.put(BodyParts.LEFT_ARM.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$leftArmPose()));
                             values.put(BodyParts.RIGHT_ARM.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$rightArmPose()));
                             values.put(BodyParts.LEFT_LEG.get(), VecHelper.toVector3d(((ArmorStandEntityAccessor) h).accessor$leftLegPose()));
@@ -65,28 +65,28 @@ public final class ArmorStandData {
                             return values;
                         })
                         .set((h, v) -> {
-                            ArmorStandData.apply(v, BodyParts.HEAD.get(), h::setHeadRotation);
-                            ArmorStandData.apply(v, BodyParts.CHEST.get(), h::setBodyRotation);
-                            ArmorStandData.apply(v, BodyParts.LEFT_ARM.get(), h::setLeftArmRotation);
-                            ArmorStandData.apply(v, BodyParts.RIGHT_ARM.get(), h::setRightArmRotation);
-                            ArmorStandData.apply(v, BodyParts.LEFT_LEG.get(), h::setLeftLegRotation);
-                            ArmorStandData.apply(v, BodyParts.RIGHT_LEG.get(), h::setRightLegRotation);
+                            ArmorStandData.apply(v, BodyParts.HEAD.get(), h::setHeadPose);
+                            ArmorStandData.apply(v, BodyParts.CHEST.get(), h::setBodyPose);
+                            ArmorStandData.apply(v, BodyParts.LEFT_ARM.get(), h::setLeftArmPose);
+                            ArmorStandData.apply(v, BodyParts.RIGHT_ARM.get(), h::setRightArmPose);
+                            ArmorStandData.apply(v, BodyParts.LEFT_LEG.get(), h::setLeftLegPose);
+                            ArmorStandData.apply(v, BodyParts.RIGHT_LEG.get(), h::setRightLegPose);
                         })
                     .create(Keys.CHEST_ROTATION)
-                        .get(h -> VecHelper.toVector3d(h.getBodyRotation()))
-                        .set((h, v) -> h.setBodyRotation(VecHelper.toRotation(v)))
+                        .get(h -> VecHelper.toVector3d(h.getBodyPose()))
+                        .set((h, v) -> h.setBodyPose(VecHelper.toRotation(v)))
                     .create(Keys.HAS_ARMS)
-                        .get(ArmorStandEntity::getShowArms)
+                        .get(ArmorStandEntity::isShowArms)
                         .set((h, v) -> ((ArmorStandEntityAccessor) h).invoker$setShowArms(v))
                     .create(Keys.HAS_BASE_PLATE)
-                        .get(h -> !h.hasNoBasePlate())
+                        .get(h -> !h.isNoBasePlate())
                         .set((h, v) -> ((ArmorStandEntityAccessor) h).invoker$setNoBasePlate(!v))
                     .create(Keys.HAS_MARKER)
-                        .get(ArmorStandEntity::hasMarker)
+                        .get(ArmorStandEntity::isMarker)
                         .set((h, v) -> ((ArmorStandEntityAccessor) h).invoker$setMarker(v))
                     .create(Keys.HEAD_ROTATION)
-                        .get(h -> VecHelper.toVector3d(h.getHeadRotation()))
-                        .set((h, v) -> h.setHeadRotation(VecHelper.toRotation(v)))
+                        .get(h -> VecHelper.toVector3d(h.getHeadPose()))
+                        .set((h, v) -> h.setHeadPose(VecHelper.toRotation(v)))
                     .create(Keys.IS_PLACING_DISABLED)
                         .get(h -> Sponge.getRegistry().getCatalogRegistry()
                             .streamAllOf(EquipmentType.class)
@@ -147,17 +147,17 @@ public final class ArmorStandData {
                             ((ArmorStandEntityAccessor) h).accessor$disabledSlots(disabledSlots);
                         })
                     .create(Keys.LEFT_ARM_ROTATION)
-                        .get(h -> VecHelper.toVector3d(h.getLeftArmRotation()))
-                        .set((h, v) -> h.setLeftArmRotation(VecHelper.toRotation(v)))
+                        .get(h -> VecHelper.toVector3d(h.getLeftArmPose()))
+                        .set((h, v) -> h.setLeftArmPose(VecHelper.toRotation(v)))
                     .create(Keys.LEFT_LEG_ROTATION)
-                        .get(h -> VecHelper.toVector3d(h.getLeftLegRotation()))
-                        .set((h, v) -> h.setLeftLegRotation(VecHelper.toRotation(v)))
+                        .get(h -> VecHelper.toVector3d(h.getLeftLegPose()))
+                        .set((h, v) -> h.setLeftLegPose(VecHelper.toRotation(v)))
                     .create(Keys.RIGHT_ARM_ROTATION)
-                        .get(h -> VecHelper.toVector3d(h.getRightArmRotation()))
-                        .set((h, v) -> h.setRightArmRotation(VecHelper.toRotation(v)))
+                        .get(h -> VecHelper.toVector3d(h.getRightArmPose()))
+                        .set((h, v) -> h.setRightArmPose(VecHelper.toRotation(v)))
                     .create(Keys.RIGHT_LEG_ROTATION)
-                        .get(h -> VecHelper.toVector3d(h.getRightLegRotation()))
-                        .set((h, v) -> h.setRightLegRotation(VecHelper.toRotation(v)));
+                        .get(h -> VecHelper.toVector3d(h.getRightLegPose()))
+                        .set((h, v) -> h.setRightLegPose(VecHelper.toRotation(v)));
     }
     // @formatter:on
 

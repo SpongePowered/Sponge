@@ -44,7 +44,7 @@ public final class VanishableData {
                     .create(Keys.VANISH)
                         .get(VanishableBridge::bridge$isVanished)
                         .setAnd((h, v) -> {
-                            if (h instanceof Entity && ((Entity) h).world.isRemote) {
+                            if (h instanceof Entity && ((Entity) h).level.isClientSide) {
                                 return false;
                             }
                             h.bridge$setVanished(v);
@@ -53,7 +53,7 @@ public final class VanishableData {
                     .create(Keys.VANISH_IGNORES_COLLISION)
                         .get(VanishableBridge::bridge$isUncollideable)
                         .setAnd((h, v) -> {
-                            if (h instanceof Entity && ((Entity) h).world.isRemote) {
+                            if (h instanceof Entity && ((Entity) h).level.isClientSide) {
                                 return false;
                             }
                             if (!h.bridge$isVanished()) {
@@ -65,7 +65,7 @@ public final class VanishableData {
                     .create(Keys.VANISH_PREVENTS_TARGETING)
                         .get(VanishableBridge::bridge$isUntargetable)
                         .setAnd((h, v) -> {
-                            if (h instanceof Entity && ((Entity) h).world.isRemote) {
+                            if (h instanceof Entity && ((Entity) h).level.isClientSide) {
                                 return false;
                             }
                             if (!h.bridge$isVanished()) {

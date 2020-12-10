@@ -40,7 +40,7 @@ public final class PhantomData {
         registrator
                 .asMutable(PhantomEntity.class)
                     .create(Keys.SCALE)
-                        .get(h -> (double) (h.getWidth() + (0.2F * (float) h.getPhantomSize())) / h.getWidth())
+                        .get(h -> (double) (h.getBbWidth() + (0.2F * (float) h.getPhantomSize())) / h.getBbWidth())
                     .create(Keys.SIZE)
                         .get(PhantomEntity::getPhantomSize)
                         .set(PhantomEntity::setPhantomSize)

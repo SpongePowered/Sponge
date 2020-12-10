@@ -39,9 +39,9 @@ public final class SlimeData {
         registrator
                 .asMutable(SlimeEntity.class)
                     .create(Keys.SCALE)
-                        .get(h -> (double) (0.255F * (float) h.getSlimeSize()))
+                        .get(h -> (double) (0.255F * (float) h.getSize()))
                     .create(Keys.SIZE)
-                        .get(h -> h.getSlimeSize() - 1)
+                        .get(h -> h.getSize() - 1)
                         .set((h, v) -> ((SlimeEntityAccessor) h).invoker$setSize(v + 1, false));
     }
     // @formatter:on

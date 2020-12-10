@@ -40,7 +40,7 @@ public final class FishingBobberData {
         registrator
                 .asMutable(FishingBobberEntity.class)
                     .create(Keys.TARGET_ENTITY)
-                        .get(h -> (Entity) h.func_234607_k_())
+                        .get(h -> (Entity) h.getHookedIn())
                         .set((h, v) -> ((FishingBobberEntityAccessor) h).accessor$hookedIn((net.minecraft.entity.Entity) v));
     }
     // @formatter:on

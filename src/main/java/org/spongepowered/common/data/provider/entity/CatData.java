@@ -68,8 +68,8 @@ public final class CatData {
                             throw new MissingImplementationException("CatData", "IS_HISSING::setter");
                         })
                     .create(Keys.IS_LYING_DOWN)
-                        .get(CatEntity::func_213416_eg)
-                        .set(CatEntity::func_213419_u)
+                        .get(CatEntity::isLying)
+                        .set(CatEntity::setLying)
                     .create(Keys.IS_PURRING)
                         .get(h -> {
                             throw new MissingImplementationException("CatData", "IS_PURRING::getter");
@@ -78,8 +78,8 @@ public final class CatData {
                             throw new MissingImplementationException("CatData", "IS_PURRING::setter");
                         })
                     .create(Keys.IS_RELAXED)
-                        .get(CatEntity::func_213409_eh)
-                        .set(CatEntity::func_213415_v);
+                        .get(CatEntity::isRelaxStateOne)
+                        .set(CatEntity::setRelaxStateOne);
     }
     // @formatter:on
 }

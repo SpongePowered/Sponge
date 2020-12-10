@@ -39,10 +39,10 @@ public final class SheepData {
         registrator
                 .asMutable(SheepEntity.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) h.getFleeceColor())
-                        .set((h, v) -> h.setFleeceColor((net.minecraft.item.DyeColor) (Object) v))
+                        .get(h -> (DyeColor) (Object) h.getColor())
+                        .set((h, v) -> h.setColor((net.minecraft.item.DyeColor) (Object) v))
                     .create(Keys.IS_SHEARED)
-                        .get(SheepEntity::getSheared)
+                        .get(SheepEntity::isSheared)
                         .set(SheepEntity::setSheared);
     }
     // @formatter:on

@@ -43,13 +43,13 @@ public final class EndermiteData {
                 .asMutable(EndermiteEntity.class)
                     .create(Keys.DESPAWN_DELAY)
                         .get(h -> {
-                            if (h.isNoDespawnRequired()) {
+                            if (h.isPersistenceRequired()) {
                                 return null;
                             }
                             return new SpongeTicks(((EndermiteEntityAccessor) h).accessor$life());
                         })
                         .setAnd((h, v) -> {
-                            if (h.isNoDespawnRequired()) {
+                            if (h.isPersistenceRequired()) {
                                 return false;
                             }
                             final int ticks = (int) v.getTicks();

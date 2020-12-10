@@ -51,7 +51,7 @@ public final class SpellcastingIllagerData {
                 .asMutable(SpellcastingIllagerEntity.class)
                     .create(Keys.CURRENT_SPELL)
                         .get(h -> (SpellType) (Object) ((SpellcastingIllagerEntityAccessor) h).invoker$getCurrentSpell())
-                        .set((h, v) -> h.setSpellType((SpellcastingIllagerEntity.SpellType) (Object) v));
+                        .set((h, v) -> h.setIsCastingSpell((SpellcastingIllagerEntity.SpellType) (Object) v));
     }
     // @formatter:on
 }

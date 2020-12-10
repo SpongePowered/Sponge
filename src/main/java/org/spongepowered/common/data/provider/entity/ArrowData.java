@@ -50,14 +50,14 @@ public final class ArrowData {
                                 return null;
                             }
                             return effects.stream()
-                                    .map(effect -> (PotionEffect) new EffectInstance(effect.getPotion(), effect.getDuration(),
-                                            effect.getAmplifier(), effect.isAmbient(), effect.doesShowParticles()))
+                                    .map(effect -> (PotionEffect) new EffectInstance(effect.getEffect(), effect.getDuration(),
+                                            effect.getAmplifier(), effect.isAmbient(), effect.isVisible()))
                                     .collect(Collectors.toList());
                         })
                         .set((h, v) -> {
                             ((ArrowEntityAccessor) h).accessor$effects().clear();
                             for (final PotionEffect effect : v) {
-                                final EffectInstance mcEffect = new EffectInstance(((EffectInstance) effect).getPotion(), effect.getDuration(),
+                                final EffectInstance mcEffect = new EffectInstance(((EffectInstance) effect).getEffect(), effect.getDuration(),
                                         effect.getAmplifier(), effect.isAmbient(), effect.showsParticles());
                                 h.addEffect(mcEffect);
                             }

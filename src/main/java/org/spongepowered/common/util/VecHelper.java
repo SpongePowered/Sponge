@@ -83,20 +83,20 @@ public final class VecHelper {
     
     // === Rotations --> Flow Vector ===
 
-    public static Vector3d toVector3d(final Rotations rotation) {
+    public static org.spongepowered.math.vector.Vector3d toVector3d(final Rotations rotation) {
         if (rotation == null) {
             return null;
         }
-        return new Vector3d(rotation.getX(), rotation.getY(), rotation.getZ());
+        return new org.spongepowered.math.vector.Vector3d(rotation.getX(), rotation.getY(), rotation.getZ());
     }
 
     // === MC Vector3i --> Flow Vector3i ===
 
-    public static Vector3i toVector3i(final Vector3i vector) {
+    public static org.spongepowered.math.vector.Vector3i toVector3i(final Vector3i vector) {
         if (vector == null) {
             return null;
         }
-        return new Vector3i(vector.getX(), vector.getY(), vector.getZ());
+        return new org.spongepowered.math.vector.Vector3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
     // === Flow Vector3i --> MC Vector3i ===

@@ -40,8 +40,8 @@ public final class ProjectileData {
         registrator
                 .asMutable(ProjectileEntity.class)
                 .create(Keys.SHOOTER)
-                .get(h -> (ProjectileSource) h.func_234616_v_())
-                .set((h, v) -> h.setShooter((Entity) v));
+                .get(h -> (ProjectileSource) h.getOwner())
+                .set((h, v) -> h.setOwner((Entity) v));
     }
     // @formatter:on
 }

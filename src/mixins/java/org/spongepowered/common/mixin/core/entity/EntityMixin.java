@@ -150,7 +150,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected abstract void shadow$applyEnchantments(LivingEntity entityLivingBaseIn, Entity entityIn);
     @Shadow public abstract CommandSource shadow$getCommandSource();
     @Shadow public abstract World shadow$getEntityWorld();
-    @Shadow public abstract Vec3d shadow$getPositionVector();
+    @Shadow public abstract net.minecraft.util.math.vector.Vector3d shadow$position();
     @Shadow public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract void shadow$setWorld(World worldIn);
     @Shadow @Nullable public abstract ItemEntity shadow$entityDropItem(ItemStack stack, float offsetY);
@@ -206,7 +206,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             frame.pushCause(SpongeCommon.getActivePlugin());
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
 
-            final Vec3d originalPosition = this.shadow$getPositionVector();
+            final Vec3d originalPosition = this.shadow$position();
 
             net.minecraft.world.server.ServerWorld destinationWorld = (net.minecraft.world.server.ServerWorld) location.getWorld();
 
@@ -221,7 +221,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 final ChangeEntityWorldEvent.Reposition repositionEvent =
                         SpongeEventFactory.createChangeEntityWorldEventReposition(frame.getCurrentCause(),
                                 (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getEntityWorld(),
-                                VecHelper.toVector3d(this.shadow$getPositionVector()), location.getPosition(), event.getOriginalDestinationWorld(),
+                                VecHelper.toVector3d(this.shadow$position()), location.getPosition(), event.getOriginalDestinationWorld(),
                                 location.getPosition(), event.getDestinationWorld());
 
                 if (SpongeCommon.postEvent(repositionEvent)) {
@@ -234,7 +234,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                         repositionEvent.getDestinationPosition().getY(), repositionEvent.getDestinationPosition().getZ());
             } else {
                 final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()),
+                        (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
                         location.getPosition(), location.getPosition());
                 if (SpongeCommon.postEvent(event)) {
                     return false;
@@ -429,7 +429,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
 
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(server.getCurrentCause(),
-                    (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()), new Vector3d(x, y, z),
+                    (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()), new Vector3d(x, y, z),
                     new Vector3d(x, y, z));
 
             if (!hasMovementContext) {

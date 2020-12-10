@@ -59,10 +59,10 @@ public final class PotionData {
                             return true;
                         })
                     .create(Keys.POTION_EFFECTS)
-                        .get(h -> PotionUtils.getEffectsFromStack(h.getItem()).stream().map(PotionEffect.class::cast).collect(Collectors.toList()))
+                        .get(h -> PotionUtils.getMobEffects(h.getItem()).stream().map(PotionEffect.class::cast).collect(Collectors.toList()))
                         .set((h, v) -> {
-                            h.getItem().removeChildTag(Constants.Item.CUSTOM_POTION_EFFECTS);
-                            PotionUtils.appendEffects(h.getItem(), v.stream()
+                            h.getItem().removeTagKey(Constants.Item.CUSTOM_POTION_EFFECTS);
+                            PotionUtils.setCustomEffects(h.getItem(), v.stream()
                                     .map(EffectInstance.class::cast)
                                     .collect(Collectors.toList()));
                         });
