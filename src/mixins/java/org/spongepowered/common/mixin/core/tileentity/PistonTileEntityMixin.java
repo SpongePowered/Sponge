@@ -34,14 +34,14 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(PistonTileEntity.class)
 public abstract class PistonTileEntityMixin extends TileEntityMixin {
 
-    @Shadow private BlockState pistonState;
-    @Shadow private Direction pistonFacing;
+    @Shadow private BlockState movedState;
+    @Shadow private Direction direction;
 
     @Override
     public MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
         return super.getPrettyPrinterStringHelper()
-            .add("facing", this.pistonFacing)
-            .add("piston", this.pistonState)
+            .add("movedState", this.movedState)
+            .add("direction", this.direction)
             ;
     }
 }

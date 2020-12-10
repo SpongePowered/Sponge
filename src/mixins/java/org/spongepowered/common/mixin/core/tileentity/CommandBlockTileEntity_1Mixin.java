@@ -33,11 +33,11 @@ import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 @Mixin(targets = "net.minecraft.tileentity.CommandBlockTileEntity$1")
 public abstract class CommandBlockTileEntity_1Mixin implements CommandSourceProviderBridge {
 
-    @Shadow public abstract CommandSource shadow$getCommandSource();
+    @Shadow public abstract CommandSource shadow$createCommandSourceStack();
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.shadow$getCommandSource();
+        return this.shadow$createCommandSourceStack();
     }
 
 }
