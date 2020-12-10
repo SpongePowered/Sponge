@@ -66,7 +66,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
         // See NetHandlerPlayServerMixin processClickWindow redirect for rest of
         // fix.
         // --bloodmc
-        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
+        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
         if (!trackedInventory.bridge$capturingInventory()) {
             trackedInventory.bridge$getCapturedSlotTransactions().clear();
             return;
@@ -75,13 +75,13 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
         // TODO clear this shit out of the context
         final CEnchantItemPacket packetIn = context.getPacket();
         final ItemStackSnapshot lastCursor = context.getCursor();
-        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
+        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(lastCursor, newCursor);
 
-        final net.minecraft.inventory.container.Container openContainer = player.openContainer;
+        final net.minecraft.inventory.container.Container openContainer = player.containerMenu;
         final List<SlotTransaction> slotTransactions = trackedInventory.bridge$getCapturedSlotTransactions();
 
-        final int usedButton = packetIn.getButton();
+        final int usedButton = packetIn.getButtonId();
         final List<Entity> capturedItems = new ArrayList<>();
         final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
         try (CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame()) {
@@ -112,7 +112,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
                 // Therefore, we never add any 'fake' transactions, as the final
                 // packet has everything we want.
                 if (!(inventoryEvent instanceof ClickContainerEvent.Drag)) {
-                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getWindowId(), openContainer, inventoryEvent.getTransactions());
+                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getContainerId(), openContainer, inventoryEvent.getTransactions());
                 }
 
                 SpongeCommon.postEvent(inventoryEvent);

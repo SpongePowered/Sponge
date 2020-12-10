@@ -61,7 +61,7 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
 
     BlockEventBasedTransaction(final BlockPos affectedPosition, final BlockState originalState, final ResourceKey worldKey) {
         super(TransactionTypes.BLOCK.get(), worldKey);
-        this.affectedPosition = affectedPosition.toImmutable();
+        this.affectedPosition = affectedPosition.immutable();
         this.originalState = originalState;
     }
 

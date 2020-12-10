@@ -63,12 +63,12 @@ public final class RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect im
 
             while(iterator.hasNext()) {
                 final TileEntity tileentity = iterator.next();
-                if (tileentity.getPos().equals(pos)) {
-                    tileentity.remove();
+                if (tileentity.getBlockPos().equals(pos)) {
+                    tileentity.setRemoved();
                     iterator.remove();
                 }
             }
-            serverWorld.loadedTileEntityList.add(tileEntity);
+            serverWorld.blockEntityList.add(tileEntity);
             return EffectResult.NULL_RETURN;
         }
         return EffectResult.NULL_PASS;

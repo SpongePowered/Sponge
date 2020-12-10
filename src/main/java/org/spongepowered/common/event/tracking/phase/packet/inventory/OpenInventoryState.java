@@ -42,16 +42,16 @@ public final class OpenInventoryState extends BasicInventoryPacketState {
     public void unwind(InventoryPacketContext context) {
         final ServerPlayerEntity player = context.getPacketPlayer();
         final ItemStackSnapshot lastCursor = context.getCursor();
-        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
+        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             final InteractContainerEvent.Open event =
-                SpongeEventFactory.createInteractContainerEventOpen(frame.getCurrentCause(), ContainerUtil.fromNative(player.openContainer),
+                SpongeEventFactory.createInteractContainerEventOpen(frame.getCurrentCause(), ContainerUtil.fromNative(player.containerMenu),
                         cursorTransaction);
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
-                player.closeScreen();
+                player.closeContainer();
             } else {
                 // Custom cursor
                 final Transaction<ItemStackSnapshot> transaction = event.getCursorTransaction();

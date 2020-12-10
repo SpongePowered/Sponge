@@ -55,7 +55,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     private final BiConsumer<CauseStackManager.StackFrame, ExplosionContext> EXPLOSION_MODIFIER =
         super.getFrameModifier().andThen((frame, context) -> {
             final Explosion explosion = context.getExplosion();
-            final @Nullable LivingEntity placedBy = explosion.getExplosivePlacedBy();
+            final @Nullable LivingEntity placedBy = explosion.getSourceMob();
             if (placedBy != null) {
                 if (placedBy instanceof CreatorTrackedBridge) {
                     ((CreatorTrackedBridge) placedBy).tracked$getCreatorReference()
@@ -94,7 +94,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     @Override
     public void populateLootContext(final ExplosionContext phaseContext, final LootContext.Builder lootBuilder) {
         final Explosion explosion = phaseContext.getExplosion();
-        lootBuilder.withNullableParameter(LootParameters.THIS_ENTITY, ((ExplosionAccessor) explosion).accessor$source());
+        lootBuilder.withOptionalParameter(LootParameters.THIS_ENTITY, ((ExplosionAccessor) explosion).accessor$source());
 
         if (((ExplosionAccessor) explosion).accessor$blockInteraction() == net.minecraft.world.Explosion.Mode.DESTROY) {
             lootBuilder.withParameter(LootParameters.EXPLOSION_RADIUS, ((ExplosionAccessor) explosion).accessor$radius());

@@ -77,7 +77,7 @@ public final class RemoveTileEntity extends BlockEventBasedTransaction {
     @Override
     protected SpongeBlockSnapshot getResultingSnapshot() {
         return SpongeBlockSnapshotBuilder.pooled()
-            .world((ServerWorld) this.removed.getWorld())
+            .world((ServerWorld) this.removed.getLevel())
             .position(new Vector3i(this.affectedPosition.getX(), this.affectedPosition.getY(), this.affectedPosition.getZ()))
             .blockState(this.originalState)
             .build()

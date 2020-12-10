@@ -63,10 +63,10 @@ public final class AddBlockLootDropsEffect implements ProcessingSideEffect {
         final BlockPos pos = oldState.pos;
 
         final LootContext.Builder lootBuilder = (new LootContext.Builder(world))
-            .withRandom(world.rand)
-            .withParameter(LootParameters.field_237457_g_, VecHelper.toVanillaVector3d(pos))
+            .withRandom(world.random)
+            .withParameter(LootParameters.ORIGIN, VecHelper.toVanillaVector3d(pos))
             .withParameter(LootParameters.TOOL, ItemStack.EMPTY)
-            .withNullableParameter(LootParameters.BLOCK_ENTITY, existingTile);
+            .withOptionalParameter(LootParameters.BLOCK_ENTITY, existingTile);
 
         phaseContext.populateLootContext(lootBuilder);
 

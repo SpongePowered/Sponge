@@ -46,16 +46,16 @@ public final class InteractEntityPacketState extends BasicPacketState {
     public boolean isPacketIgnored(IPacket<?> packetIn, ServerPlayerEntity packetPlayer) {
         final CUseEntityPacket useEntityPacket = (CUseEntityPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.world);
+        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getTarget(packetPlayer.level);
         return entity == null;
     }
 
     @Override
     public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
         final CUseEntityPacket useEntityPacket = (CUseEntityPacket) packet;
-        net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
+        net.minecraft.entity.Entity entity = useEntityPacket.getTarget(playerMP.level);
         if (entity != null) {
-            final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
+            final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getItemInHand(useEntityPacket.getHand()));
             if (stack != null) {
                 context.itemUsed(stack);
             }
@@ -70,7 +70,7 @@ public final class InteractEntityPacketState extends BasicPacketState {
 
         final ServerPlayerEntity player = phaseContext.getPacketPlayer();
         final CUseEntityPacket useEntityPacket = phaseContext.getPacket();
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
+        final net.minecraft.entity.Entity entity = useEntityPacket.getTarget(player.level);
         if (entity == null) {
             // Something happened?
             return;
@@ -78,7 +78,7 @@ public final class InteractEntityPacketState extends BasicPacketState {
         if (entity instanceof CreatorTrackedBridge) {
             ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerEntityBridge) player).bridge$getUser());
         } else {
-            ((Entity) entity).offer(Keys.NOTIFIER, player.getUniqueID());
+            ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
         }
         TrackingUtil.processBlockCaptures(phaseContext);
     }

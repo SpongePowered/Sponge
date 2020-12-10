@@ -58,7 +58,7 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
     public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet,
         final InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
-        context.setOldHighlightedSlot(playerMP.inventory.currentItem);
+        context.setOldHighlightedSlot(playerMP.inventory.selected);
     }
 
     @Override
@@ -78,19 +78,19 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
         final ServerPlayerEntity player = context.getPacketPlayer();
         final CHeldItemChangePacket itemChange = context.getPacket();
         final int previousSlot = context.getOldHighlightedSlotId();
-        final net.minecraft.inventory.container.Container inventoryContainer = player.container;
+        final net.minecraft.inventory.container.Container inventoryContainer = player.containerMenu;
         final PlayerInventory inventory = player.inventory;
-        final int preHotbarSize = inventory.mainInventory.size() - PlayerInventory.getHotbarSize() + inventory.armorInventory.size() + 4 + 1; // Crafting Grid & Result
+        final int preHotbarSize = inventory.items.size() - PlayerInventory.getSelectionSize() + inventory.armor.size() + 4 + 1; // Crafting Grid & Result
         final Slot sourceSlot = inventoryContainer.getSlot(previousSlot + preHotbarSize);
-        final Slot targetSlot = inventoryContainer.getSlot(itemChange.getSlotId() + preHotbarSize);
+        final Slot targetSlot = inventoryContainer.getSlot(itemChange.getSlot() + preHotbarSize);
 
-        final ItemStackSnapshot sourceSnapshot = ItemStackUtil.snapshotOf(sourceSlot.getStack());
-        final ItemStackSnapshot targetSnapshot = ItemStackUtil.snapshotOf(targetSlot.getStack());
+        final ItemStackSnapshot sourceSnapshot = ItemStackUtil.snapshotOf(sourceSlot.getItem());
+        final ItemStackSnapshot targetSnapshot = ItemStackUtil.snapshotOf(targetSlot.getItem());
         final org.spongepowered.api.item.inventory.Slot slotPrev = ((InventoryAdapter) inventoryContainer).inventoryAdapter$getSlot(
             previousSlot + preHotbarSize).get();
         final SlotTransaction sourceTransaction = new SlotTransaction(slotPrev, sourceSnapshot, sourceSnapshot);
         final org.spongepowered.api.item.inventory.Slot slotNew = ((InventoryAdapter) inventoryContainer).inventoryAdapter$getSlot(
-            itemChange.getSlotId() + preHotbarSize).get();
+            itemChange.getSlot() + preHotbarSize).get();
         final SlotTransaction targetTransaction = new SlotTransaction(slotNew, targetSnapshot, targetSnapshot);
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
@@ -99,17 +99,17 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
             final ChangeInventoryEvent.Held changeInventoryEventHeld = SpongeEventFactory
                 .createChangeInventoryEventHeld(frame.getCurrentCause(), slotNew, (Inventory) inventoryContainer,
                     slotPrev, transactions);
-            final net.minecraft.inventory.container.Container openContainer = player.openContainer;
+            final net.minecraft.inventory.container.Container openContainer = player.containerMenu;
             SpongeCommon.postEvent(changeInventoryEventHeld);
             if (changeInventoryEventHeld.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
                 changeInventoryEventHeld.getTransactions())) {
-                player.connection.sendPacket(new SHeldItemChangePacket(previousSlot));
-                inventory.currentItem = previousSlot;
+                player.connection.send(new SHeldItemChangePacket(previousSlot));
+                inventory.selected = previousSlot;
             } else {
                 PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(),
                     false);
-                inventory.currentItem = itemChange.getSlotId();
-                player.markPlayerActive();
+                inventory.selected = itemChange.getSlot();
+                player.resetLastActionTime();
             }
             ((TrackedInventoryBridge) openContainer).bridge$setCaptureInventory(false);
         }

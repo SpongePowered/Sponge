@@ -174,29 +174,29 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
             final List<HangingEntity> hangingEntities = ((ServerWorld) tickingEntity.getWorld())
-                .getEntitiesWithinAABB(HangingEntity.class, new AxisAlignedBB(blockPos, blockPos).grow(1.1D, 1.1D, 1.1D),
+                .getEntitiesOfClass(HangingEntity.class, new AxisAlignedBB(blockPos, blockPos).inflate(1.1D, 1.1D, 1.1D),
                     entityIn -> {
                         if (entityIn == null) {
                             return false;
                         }
 
-                        final BlockPos entityPos = entityIn.getPosition();
+                        final BlockPos entityPos = entityIn.getPos();
                         // Hanging Neighbor Entity
-                        if (entityPos.equals(blockPos.add(0, 1, 0))) {
+                        if (entityPos.equals(blockPos.offset(0, 1, 0))) {
                             return true;
                         }
 
                         // Check around source block
-                        final Direction entityFacing = entityIn.getHorizontalFacing();
+                        final Direction entityFacing = entityIn.getDirection();
 
                         if (entityFacing == Direction.NORTH) {
-                            return entityPos.equals(blockPos.add(Constants.Entity.HANGING_OFFSET_NORTH));
+                            return entityPos.equals(blockPos.offset(Constants.Entity.HANGING_OFFSET_NORTH));
                         } else if (entityFacing == Direction.SOUTH) {
-                            return entityIn.getPosition().equals(blockPos.add(Constants.Entity.HANGING_OFFSET_SOUTH));
+                            return entityIn.getPos().equals(blockPos.offset(Constants.Entity.HANGING_OFFSET_SOUTH));
                         } else if (entityFacing == Direction.WEST) {
-                            return entityIn.getPosition().equals(blockPos.add(Constants.Entity.HANGING_OFFSET_WEST));
+                            return entityIn.getPos().equals(blockPos.offset(Constants.Entity.HANGING_OFFSET_WEST));
                         } else if (entityFacing == Direction.EAST) {
-                            return entityIn.getPosition().equals(blockPos.add(Constants.Entity.HANGING_OFFSET_EAST));
+                            return entityIn.getPos().equals(blockPos.offset(Constants.Entity.HANGING_OFFSET_EAST));
                         }
                         return false;
                     });

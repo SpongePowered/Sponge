@@ -65,19 +65,19 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
     @Override
     public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final InteractionPacketContext context) {
-        final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
+        final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getMainHandItem());
         if (stack != null) {
             context.itemUsed(stack);
         }
-        final ItemStack itemInUse = ItemStackUtil.cloneDefensive(playerMP.getActiveItemStack());
+        final ItemStack itemInUse = ItemStackUtil.cloneDefensive(playerMP.getUseItem());
         if (itemInUse != null) {
             context.activeItem(itemInUse);
         }
-        final BlockPos target = ((CPlayerDiggingPacket) packet).getPosition();
-        if (!playerMP.world.isBlockLoaded(target)) {
+        final BlockPos target = ((CPlayerDiggingPacket) packet).getPos();
+        if (!playerMP.level.isLoaded(target)) {
             context.targetBlock(BlockSnapshot.empty());
         } else {
-            context.targetBlock(((TrackedWorldBridge) playerMP.world).bridge$createSnapshot(target, BlockChangeFlags.NONE));
+            context.targetBlock(((TrackedWorldBridge) playerMP.level).bridge$createSnapshot(target, BlockChangeFlags.NONE));
         }
         context.handUsed(HandTypes.MAIN_HAND.get());
     }
@@ -103,7 +103,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         final Entity spongePlayer = (Entity) player;
         final BlockSnapshot targetBlock = phaseContext.getTargetBlock();
         
-        final net.minecraft.item.ItemStack endActiveItem = player.getActiveItemStack();
+        final net.minecraft.item.ItemStack endActiveItem = player.getUseItem();
         ((LivingEntityAccessor) player).accessor$useItem(ItemStackUtil.toNative(phaseContext.getActiveItem()));
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -121,7 +121,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                 }
             }
 
-            final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
+            final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
             trackedInventory.bridge$setCaptureInventory(false);
             trackedInventory.bridge$getCapturedSlotTransactions().clear();
         }

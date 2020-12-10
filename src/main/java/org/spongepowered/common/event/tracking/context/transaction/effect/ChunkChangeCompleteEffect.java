@@ -47,7 +47,7 @@ public final class ChunkChangeCompleteEffect implements ProcessingSideEffect {
         final SpongeBlockChangeFlag flag) {
 
         final Chunk chunk = pipeline.getAffectedChunk();
-        chunk.markDirty();
+        chunk.markUnsaved();
         return new EffectResult(oldState.state, true);
     }
 }

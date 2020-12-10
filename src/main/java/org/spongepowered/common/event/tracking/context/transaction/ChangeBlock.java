@@ -68,7 +68,7 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
         this.original = attachedSnapshot;
         this.newState = newState;
         this.blockChangeFlag = blockChange;
-        this.originalOpacity = this.originalState.getOpacity(this.original.getServerWorld().get(), this.affectedPosition);
+        this.originalOpacity = this.originalState.getLightBlock(this.original.getServerWorld().get(), this.affectedPosition);
     }
 
     public BlockState getNewState() {
@@ -107,7 +107,7 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
         if (this.queuedAdd != null) {
             return false;
         }
-        if (!this.affectedPosition.equals(tileEntity.getPos())) {
+        if (!this.affectedPosition.equals(tileEntity.getBlockPos())) {
             return false;
         }
         this.queuedAdd = tileEntity;
@@ -122,7 +122,7 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
         if (this.queuedRemoval != null) {
             return false;
         }
-        if (!this.affectedPosition.equals(tileentity.getPos())) {
+        if (!this.affectedPosition.equals(tileentity.getBlockPos())) {
             return false;
         }
         this.queuedRemoval = tileentity;

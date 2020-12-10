@@ -51,15 +51,15 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
         final SpongeBlockChangeFlag flag) {
         final ServerWorld serverWorld = pipeline.getServerWorld();
         final Chunk chunk = pipeline.getAffectedChunk();
-        final @Nullable TileEntity maybeNewTileEntity = chunk.getTileEntity(oldState.pos, Chunk.CreateEntityType.CHECK);
+        final @Nullable TileEntity maybeNewTileEntity = chunk.getBlockEntity(oldState.pos, Chunk.CreateEntityType.CHECK);
         if (((BlockStateBridge) newState).bridge$hasTileEntity()) {
             if (maybeNewTileEntity == null) {
                 // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world); // Vanilla
                 // tileentity1 = state.createTileEntity(this.world); // Forge
                 // We cast to our bridge for easy access
-                serverWorld.setTileEntity(oldState.pos, ((BlockStateBridge) newState).bridge$createNewTileEntity(serverWorld));
+                serverWorld.setBlockEntity(oldState.pos, ((BlockStateBridge) newState).bridge$createNewTileEntity(serverWorld));
             } else {
-                maybeNewTileEntity.updateContainingBlockInfo();
+                maybeNewTileEntity.clearCache();
             }
         }
         return EffectResult.NULL_PASS;

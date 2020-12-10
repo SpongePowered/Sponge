@@ -45,7 +45,7 @@ public final class BlockAddedEffect implements ProcessingSideEffect {
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
         if (flag.performBlockPhysics()) {
-            newState.onBlockAdded(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
+            newState.onPlace(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
         }
         return EffectResult.NULL_PASS;
     }

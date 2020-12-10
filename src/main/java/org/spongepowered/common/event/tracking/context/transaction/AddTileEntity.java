@@ -51,7 +51,7 @@ public final class AddTileEntity extends BlockEventBasedTransaction {
         final SpongeBlockSnapshot attachedSnapshot,
         final SpongeBlockSnapshot existing
     ) {
-        super(existing.getBlockPos(), (BlockState) existing.getState(), ((ServerWorld) added.getWorld()).getKey());
+        super(existing.getBlockPos(), (BlockState) existing.getState(), ((ServerWorld) added.getLevel()).getKey());
         this.added = added;
         this.addedSnapshot = attachedSnapshot;
         this.oldSnapshot = existing;

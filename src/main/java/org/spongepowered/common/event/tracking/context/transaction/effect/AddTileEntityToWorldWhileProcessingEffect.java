@@ -59,7 +59,7 @@ public final class AddTileEntityToWorldWhileProcessingEffect implements Processi
             ServerWorldAccessor.accessor$LOGGER().error(
                 "Adding block entity while ticking: {} @ {}",
                 () -> Registry.BLOCK_ENTITY_TYPE.getKey(tileEntity.getType()),
-                tileEntity::getPos
+                tileEntity::getBlockPos
             );
             final boolean add = ((WorldAccessor) serverWorld).accessor$pendingBlockEntities().add(tileEntity);
             if (add) {
