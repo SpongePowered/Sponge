@@ -50,8 +50,8 @@ public abstract class UserListMixin {
     }
 
     // Don't throw exception if user list file does not exist
-    @Inject(method = "readSavedFile", at = @At("HEAD"), cancellable = true)
-    private void onReadSavedFile(final CallbackInfo ci) {
+    @Inject(method = "load", at = @At("HEAD"), cancellable = true)
+    private void impl$onLoad(final CallbackInfo ci) {
         if (!this.saveFile.exists()) {
             UserListMixin.LOGGER.warn("{} does not exist, creating it.", this.saveFile.getName());
             ci.cancel();

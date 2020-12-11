@@ -67,9 +67,9 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
      * So, we store it to the interaction manager's fields, to avoid contaminating other interaction
      * manager's processes.
     */
-    @Inject(method = "func_225416_a", at = @At("HEAD"), cancellable = true)
-    private void impl$cancelIfInteractBlockPrimaryCancelled(BlockPos p_225416_1_, CPlayerDiggingPacket.Action p_225416_2_,
-            Direction p_225416_3_, int p_225416_4_, CallbackInfo ci) {
+    @Inject(method = "handleBlockBreakAction", at = @At("HEAD"), cancellable = true)
+    private void impl$cancelIfInteractBlockPrimaryCancelled(final BlockPos pos, final CPlayerDiggingPacket.Action action,
+                                                            final Direction direction, final int maxY, final CallbackInfo ci) {
         if (this.impl$interactBlockLeftClickEventCancelled) {
             this.impl$interactBlockLeftClickEventCancelled = false;
             ci.cancel();

@@ -31,6 +31,6 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(UserListEntry.class)
 public abstract class UserListEntryMixin<T> {
 
-    @Shadow abstract T getValue(); // Valid for subclass use, it's package
+    @Shadow abstract T getUser(); // Valid for subclass use, it's package
 
 }

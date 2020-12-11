@@ -37,12 +37,12 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(SpreadPlayersCommand.class)
 public abstract class SpreadPlayersCommandMixin {
 
-    @Redirect(method = "doSpreading", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;teleportKeepLoaded(DDD)V"))
-    private static void impl$createCauseFrameForTeleport(Entity entity, double x, double y, double z) {
+    @Redirect(method = "setPlayerPositions", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;teleportToWithTicket(DDD)V"))
+    private static void impl$createCauseFrameForTeleport(final Entity entity, final double x, final double y, final double z) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
 
-            entity.teleportKeepLoaded(x, y, z);
+            entity.teleportToWithTicket(x, y, z);
         }
     }
 }

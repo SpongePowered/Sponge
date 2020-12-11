@@ -37,14 +37,14 @@ import org.spongepowered.common.mixin.core.world.server.ServerBossInfoMixin;
 public abstract class CustomServerBossInfoMixin extends ServerBossInfoMixin {
     @Shadow private int max;
 
-    @Redirect(method = {"getValue", "write"},
+    @Redirect(method = {"getValue", "save"},
         at = @At(value = "FIELD", target = "Lnet/minecraft/server/CustomServerBossInfo;value:I"))
     private int impl$valueRead(final CustomServerBossInfo $this) {
-        return (int) (this.bridge$asAdventure().percent() * this.max);
+        return (int) (this.bridge$asAdventure().progress() * this.max);
     }
 
     @Redirect(
-        method = {"write"},
+        method = {"save"},
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/CustomServerBossInfo;name:Lnet/minecraft/util/text/ITextComponent;"
