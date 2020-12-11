@@ -150,9 +150,8 @@ import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.placeholder.PlaceholderParser;
-import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
-import org.spongepowered.api.registry.UnknownTypeException;
+import org.spongepowered.api.registry.TypeNotFoundException;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
@@ -178,7 +177,6 @@ import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.data.persistence.HoconDataFormat;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.persistence.NBTDataFormat;
-import org.spongepowered.common.event.lifecycle.RegisterCatalogEventImpl;
 import org.spongepowered.common.event.tracking.context.transaction.type.BlockTransactionTypeStreamGenerator;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.registry.builtin.sponge.AccountDeletionResultTypeStreamGenerator;
@@ -228,21 +226,7 @@ import org.spongepowered.common.registry.builtin.sponge.TeleportHelperFilterStre
 import org.spongepowered.common.registry.builtin.sponge.WeatherStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WorldArchetypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.EffectSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.EnchantmentSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.EntityTypeSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.FluidSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.ItemSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.PaintingTypeSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.ParticleTypeSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.RecipeTypeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.SoundEventSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.TileEntityTypeSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.VillagerProfessionSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.VillagerTypeSupplier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -288,14 +272,14 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         if (catalogSuppliers == null) {
             final String message = String.format("No suppliers found for type '%s'!", catalogClass);
             System.err.println(message);
-            throw new UnknownTypeException(message);
+            throw new TypeNotFoundException(message);
         }
 
         final Supplier<CatalogType> catalogSupplier = catalogSuppliers.get(suggestedId.toLowerCase());
         if (catalogSupplier == null) {
             final String message = String.format("Supplier for type '%s' with id '%s' has not been registered!", catalogClass, suggestedId);
             System.err.println(message);
-            throw new UnknownTypeException(message);
+            throw new TypeNotFoundException(message);
         }
 
         return (Supplier<E>) (Object) catalogSupplier;
@@ -525,7 +509,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         final Registry<C> registry = (Registry<C>) this.registriesByType.get(GenericTypeReflector.erase(catalog.getType()));
         if (registry == null) {
-            throw new UnknownTypeException(String.format("Catalog '%s' with id '%s' has no registry registered!", catalogType.getClass(), catalogType.getKey()));
+            throw new TypeNotFoundException(String.format("Catalog '%s' with id '%s' has no registry registered!", catalogType.getClass(), catalogType.getKey()));
         }
 
         return ((SimpleRegistry<C>) registry).register((ResourceLocation) (Object) catalogType.getKey(), catalogType);
@@ -692,7 +676,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         // Que the "I'm Vanilla and I'm fucking stupid" music
         CriteriaTriggersRegistrar.registerRegistry(this);
-        GeneratorModifierTypeRegistrar.registerRegistry(this);
         AttributeTypeRegistrar.registerRegistry(this);
         PhaseTypeRegistrar.registerRegistry(this);
     }
@@ -705,25 +688,9 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         // TODO Minecraft 1.15.2 - Stats are stupid, need to handle them manually
 
         // Class based/Likely for mods to override
-        BiomeSupplier.registerSuppliers(this);
-        BlockSupplier.registerSuppliers(this);
-        ContainerTypeSupplier.registerSuppliers(this);
         CriteriaTriggersRegistrar.registerSuppliers(this);
-        EffectSupplier.registerSuppliers(this);
-        EnchantmentSupplier.registerSuppliers(this);
-        EntityTypeSupplier.registerSuppliers(this);
-        FluidSupplier.registerSuppliers(this);
-        GeneratorModifierTypeRegistrar.registerSuppliers(this);
         AttributeTypeRegistrar.registerSuppliers(this);
-        ItemSupplier.registerSuppliers(this);
-        PaintingTypeSupplier.registerSuppliers(this);
-        ParticleTypeSupplier.registerSuppliers(this);
         PhaseTypeRegistrar.registerSuppliers(this);
-        SoundEventSupplier.registerSuppliers(this);
-        TileEntityTypeSupplier.registerSuppliers(this);
-        VillagerProfessionSupplier.registerSuppliers(this);
-        VillagerTypeSupplier.registerSuppliers(this);
-        RecipeTypeSupplier.registerSuppliers(this);
     }
 
     public <T extends CatalogType, E> SpongeCatalogRegistry generateRegistry(final Class<T> catalogClass, final ResourceKey key, final Stream<E> valueStream, final boolean generateSuppliers, final boolean isDynamic) {

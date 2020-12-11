@@ -22,32 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.lifecycle;
+package org.spongepowered.common.advancement;
 
-import com.google.common.base.Preconditions;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
-import org.spongepowered.api.registry.DuplicateRegistrationException;
-import org.spongepowered.common.registry.SpongeFactoryProvider;
+import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.common.advancement.criterion.SpongeCriterionBuilder;
+import org.spongepowered.common.advancement.criterion.SpongeEmptyCriterion;
 
-public final class RegisterFactoryEventImpl extends AbstractLifecycleEvent implements RegisterFactoryEvent {
+public final class SpongeAdvancementCriterionFactory implements AdvancementCriterion.Factory {
 
-    public RegisterFactoryEventImpl(final Cause cause, final Game game) {
-        super(cause, game);
-    }
-
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> T register(Class<T> factoryClass, T factory) throws DuplicateRegistrationException {
-        Preconditions.checkNotNull(factory);
-
-        return (T) ((SpongeFactoryProvider) Sponge.getRegistry().getFactoryRegistry()).registerFactory(factoryClass, factory);
+    public AdvancementCriterion empty() {
+        return new SpongeEmptyCriterion();
     }
 
     @Override
-    public String toString() {
-        return "RegisterFactoryEvent{cause=" + this.cause + "}";
+    public AdvancementCriterion dummy() {
+        return new SpongeCriterionBuilder().name("dummy").build();
     }
 }

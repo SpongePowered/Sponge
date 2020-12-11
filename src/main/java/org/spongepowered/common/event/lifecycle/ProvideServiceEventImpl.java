@@ -44,7 +44,7 @@ public class ProvideServiceEventImpl<T> extends AbstractLifecycleEvent implement
     }
 
     @Override
-    public TypeToken<T> getGenericType() {
+    public TypeToken<T> getParamType() {
         return this.token;
     }
 

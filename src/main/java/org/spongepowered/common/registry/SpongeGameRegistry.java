@@ -31,7 +31,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.AdventureRegistry;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
-import org.spongepowered.api.registry.FactoryRegistry;
+import org.spongepowered.api.registry.FactoryProvider;
 import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.common.adventure.AdventureRegistryImpl;
 
@@ -39,12 +39,12 @@ import org.spongepowered.common.adventure.AdventureRegistryImpl;
 public final class SpongeGameRegistry implements GameRegistry {
 
     private final SpongeCatalogRegistry catalogRegistry;
-    private final SpongeBuilderRegistry builderRegistry;
-    private final SpongeFactoryRegistry factoryRegistry;
+    private final SpongeBuilderProvider builderRegistry;
+    private final SpongeFactoryProvider factoryRegistry;
 
     @Inject
-    public SpongeGameRegistry(final SpongeCatalogRegistry catalogRegistry, final SpongeBuilderRegistry builderRegistry,
-        final SpongeFactoryRegistry factoryRegistry) {
+    public SpongeGameRegistry(final SpongeCatalogRegistry catalogRegistry, final SpongeBuilderProvider builderRegistry,
+        final SpongeFactoryProvider factoryRegistry) {
         this.catalogRegistry = catalogRegistry;
         this.builderRegistry = builderRegistry;
         this.factoryRegistry = factoryRegistry;
@@ -61,12 +61,12 @@ public final class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public SpongeBuilderRegistry getBuilderRegistry() {
+    public SpongeBuilderProvider getBuilderRegistry() {
         return this.builderRegistry;
     }
 
     @Override
-    public FactoryRegistry getFactoryRegistry() {
+    public FactoryProvider getFactoryRegistry() {
         return this.factoryRegistry;
     }
 

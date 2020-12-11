@@ -31,7 +31,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.util.ResettableBuilder;
-import org.spongepowered.common.registry.SpongeBuilderRegistry;
+import org.spongepowered.common.registry.SpongeBuilderProvider;
 
 import java.util.function.Supplier;
 
@@ -45,7 +45,7 @@ public final class RegisterBuilderEventImpl extends AbstractLifecycleEvent imple
     public <T extends ResettableBuilder<?, ? super T>> void register(Class<T> builderClass, Supplier<? super T> supplier) throws DuplicateRegistrationException {
         Preconditions.checkNotNull(supplier);
 
-        ((SpongeBuilderRegistry) Sponge.getRegistry().getBuilderRegistry()).register(builderClass, (Supplier<T>) supplier);
+        ((SpongeBuilderProvider) Sponge.getRegistry().getBuilderRegistry()).register(builderClass, (Supplier<T>) supplier);
     }
 
     @Override

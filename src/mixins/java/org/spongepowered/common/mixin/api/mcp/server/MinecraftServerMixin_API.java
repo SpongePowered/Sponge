@@ -34,6 +34,8 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
 import java.util.Collections;
+
+import com.mojang.serialization.Lifecycle;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
@@ -43,9 +45,12 @@ import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
 import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.server.ServerWorld;
@@ -56,6 +61,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.profile.GameProfileManager;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -77,6 +84,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.SpongeServer;
@@ -118,6 +126,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
     private SpongeUserManager api$userManager;
+    private RegistryHolder api$registryHolder;
 
     public MinecraftServerMixin_API(final String name) {
         super(name);
@@ -132,6 +141,8 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
         this.api$userManager = new SpongeUserManager(this);
+        this.api$registryHolder = new SpongeRegistryHolder(new SimpleRegistry<>(RegistryKey.createRegistryKey(
+                Registry.ROOT_REGISTRY_NAME), Lifecycle.stable()));
     }
 
     @Override
@@ -347,4 +358,13 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         return ((MinecraftServerBridge) this).bridge$getServiceProvider();
     }
 
+    @Override
+    public RegistryScope registryScope() {
+        return RegistryScope.ENGINE;
+    }
+
+    @Override
+    public RegistryHolder registries() {
+        return this.api$registryHolder;
+    }
 }

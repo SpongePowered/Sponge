@@ -22,24 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.vanilla;
+package org.spongepowered.vanilla.mixin.core.util.registry;
 
-import net.minecraft.fluid.Fluids;
-import org.spongepowered.api.fluid.FluidType;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.util.registry.RegistryBridge;
 
-public final class FluidSupplier {
+import java.util.Map;
 
-    private FluidSupplier() {
-    }
+@Mixin(Registry.class)
+public abstract class RegistryMixin_Vanilla<T> implements RegistryBridge<T> {
 
-    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
-        registry
-            .registerSupplier(FluidType.class, "empty", () -> (FluidType) Fluids.EMPTY)
-            .registerSupplier(FluidType.class, "flowing_water", () -> (FluidType) Fluids.FLOWING_WATER)
-            .registerSupplier(FluidType.class, "water", () -> (FluidType) Fluids.WATER)
-            .registerSupplier(FluidType.class, "flowing_lava", () -> (FluidType) Fluids.FLOWING_LAVA)
-            .registerSupplier(FluidType.class, "lava", () -> (FluidType) Fluids.LAVA)
-        ;
+    private final Map<ResourceKey, RegistryEntry<T>> vanilla$entries = new Object2ObjectOpenHashMap<>();
+
+    @Override
+    public Map<ResourceKey, RegistryEntry<T>> bridge$getEntries() {
+        return this.vanilla$entries;
     }
 }

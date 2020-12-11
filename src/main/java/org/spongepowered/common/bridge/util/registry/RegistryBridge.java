@@ -22,21 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.advancement;
+package org.spongepowered.common.bridge.util.registry;
 
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.advancement.criterion.SpongeCriterionBuilder;
-import org.spongepowered.common.advancement.criterion.SpongeEmptyCriterion;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryEntry;
 
-public final class SpongeAdvancementCriterionFactory implements AdvancementCriterion.Factory {
+import java.util.Map;
 
-    @Override
-    public AdvancementCriterion empty() {
-        return new SpongeEmptyCriterion();
-    }
+public interface RegistryBridge<T> {
 
-    @Override
-    public AdvancementCriterion dummy() {
-        return new SpongeCriterionBuilder().name("dummy").build();
-    }
+    Map<ResourceKey, RegistryEntry<T>> bridge$getEntries();
 }

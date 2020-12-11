@@ -7,11 +7,11 @@
     "compatibilityLevel": "JAVA_8",
     "priority": 1301,
     "client": [
+        "client.ClientBrandRetrieverMixin_Vanilla",
+        "client.MinecraftMixin_Vanilla",
         "client.gui.screen.MainMenuScreenMixin_Vanilla",
         "client.network.login.ClientLoginNetHandlerMixin_Vanilla",
         "client.network.play.ClientPlayNetHandlerMixin_Vanilla",
-        "client.ClientBrandRetrieverMixin_Vanilla",
-        "client.MinecraftMixin_Vanilla",
         "server.integrated.IntegratedServerMixin_Vanilla"
     ],
     "server": [
@@ -25,8 +25,10 @@
         "network.play.ServerPlayNetHandlerMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
         "util.registry.BootstrapMixin_Vanilla",
+        "util.registry.RegistryMixin_Vanilla",
+        "util.registry.SimpleRegistryMixin_Vanilla",
         "world.server.ServerChunkProviderMixin_Vanilla",
-        "util.registry.SimpleRegistryMixin_Vanilla"
+        "util.registry.MutableRegistryMixin_Vanilla"
     ],
     "injectors": {
         "defaultRequire": 1

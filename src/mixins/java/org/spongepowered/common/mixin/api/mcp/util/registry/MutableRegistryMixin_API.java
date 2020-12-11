@@ -22,11 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.bridge.util.registry;
+package org.spongepowered.common.mixin.api.mcp.util.registry;
 
-import java.util.Collection;
+import com.mojang.serialization.Lifecycle;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.MutableRegistry;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.util.registry.MutableRegistryBridge;
 
-public interface SimpleRegistryBridge {
+import java.util.Objects;
+import java.util.Optional;
 
-    <V> void bridge$removeAll(Collection<V> values);
+@Mixin(MutableRegistry.class)
+public abstract class MutableRegistryMixin_API<T> extends RegistryMixin_API<T> {
+
+    @Override
+    public boolean isDynamic() {
+        return ((MutableRegistryBridge<T>) this).bridge$isDynamic();
+    }
+
+    @Override
+    public <V extends T> Optional<RegistryEntry<V>> register(final ResourceKey key, final V value) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(value, "value");
+
+        return Optional.ofNullable(((MutableRegistryBridge<V>) this).bridge$register(RegistryKey.create((RegistryKey<? extends Registry<V>>) this
+                        .shadow$key(), (ResourceLocation) (Object) key), value, Lifecycle.stable()));
+    }
 }

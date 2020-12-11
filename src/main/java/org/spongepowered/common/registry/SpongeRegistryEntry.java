@@ -22,41 +22,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.lifecycle;
+package org.spongepowered.common.registry;
 
-import com.google.common.base.Preconditions;
-import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
-import org.spongepowered.api.registry.DuplicateRegistrationException;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryEntry;
 
-public final class RegisterCatalogEventImpl<C extends CatalogType> extends AbstractLifecycleEvent implements RegisterCatalogEvent<C> {
+import java.util.Objects;
+import java.util.StringJoiner;
 
-    private final TypeToken<C> token;
+public final class SpongeRegistryEntry<T> implements RegistryEntry<T> {
 
-    public RegisterCatalogEventImpl(final Cause cause, final Game game, final TypeToken<C> token) {
-        super(cause, game);
-        this.token = token;
+    private final ResourceKey key;
+    private final T value;
+
+    public SpongeRegistryEntry(final ResourceKey key, final T value) {
+        this.key = Objects.requireNonNull(key, "key");
+        this.value = Objects.requireNonNull(value, "value");
     }
 
     @Override
-    public TypeToken<C> getGenericType() {
-        return this.token;
+    public ResourceKey key() {
+        return this.key;
     }
 
     @Override
-    public C register(C catalog) throws DuplicateRegistrationException {
-        Preconditions.checkNotNull(catalog);
+    public T value() {
+        return this.value;
+    }
 
-        return ((SpongeCatalogRegistry) Sponge.getRegistry().getCatalogRegistry()).registerCatalog(this.token, catalog);
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.key);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+
+        final SpongeRegistryEntry other = (SpongeRegistryEntry) o;
+        return this.key.equals(other.key);
     }
 
     @Override
     public String toString() {
-        return "RegisterCatalogEvent{cause=" + this.cause + ", type=" + this.token + "}";
+        return new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]")
+                .add("key='" + this.key + "'")
+                .add("value='" + this.value + "'")
+                .toString();
     }
 }
