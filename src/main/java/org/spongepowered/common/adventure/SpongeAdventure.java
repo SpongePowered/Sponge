@@ -224,6 +224,17 @@ public final class SpongeAdventure {
         return TextColor.color(color.getValue());
     }
 
+    public static @Nullable TextColor asAdventure(final TextFormatting formatting) {
+        if (formatting == null) {
+            return null;
+        }
+        final Integer color = formatting.getColor();
+        if (color == null) {
+            return null;
+        }
+        return TextColor.color(color);
+    }
+
     public static @Nullable NamedTextColor asAdventureNamed(final @Nullable TextFormatting color) {
         if (color == null) {
             return null;
