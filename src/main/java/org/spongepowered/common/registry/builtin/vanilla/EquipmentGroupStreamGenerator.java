@@ -24,22 +24,27 @@
  */
 package org.spongepowered.common.registry.builtin.vanilla;
 
-import net.minecraft.fluid.Fluids;
-import org.spongepowered.api.fluid.FluidType;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
+import net.minecraft.inventory.EquipmentSlotType;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 
-public final class FluidSupplier {
+import java.util.stream.Stream;
 
-    private FluidSupplier() {
+public final class EquipmentGroupStreamGenerator {
+
+    private EquipmentGroupStreamGenerator() {
     }
 
-    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
-        registry
-            .registerSupplier(FluidType.class, "empty", () -> (FluidType) Fluids.EMPTY)
-            .registerSupplier(FluidType.class, "flowing_water", () -> (FluidType) Fluids.FLOWING_WATER)
-            .registerSupplier(FluidType.class, "water", () -> (FluidType) Fluids.WATER)
-            .registerSupplier(FluidType.class, "flowing_lava", () -> (FluidType) Fluids.FLOWING_LAVA)
-            .registerSupplier(FluidType.class, "lava", () -> (FluidType) Fluids.LAVA)
-        ;
+    public static Stream<EquipmentGroup> stream() {
+        return Stream.of(
+            EquipmentGroupStreamGenerator.newEquipmentGroup(EquipmentSlotType.Group.ARMOR, ResourceKey.minecraft("worn")),
+            EquipmentGroupStreamGenerator.newEquipmentGroup(EquipmentSlotType.Group.HAND, ResourceKey.minecraft("held"))
+        );
+    }
+
+    private static EquipmentGroup newEquipmentGroup(final EquipmentSlotType.Group type, final ResourceKey key) {
+        ((ResourceKeyBridge) (Object) type).bridge$setKey(key);
+        return (EquipmentGroup) (Object) type;
     }
 }

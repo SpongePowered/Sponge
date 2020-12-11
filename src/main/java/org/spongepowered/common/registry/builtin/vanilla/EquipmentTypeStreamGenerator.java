@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.registry.builtin.vanilla;
 
 import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.ResourceKey;

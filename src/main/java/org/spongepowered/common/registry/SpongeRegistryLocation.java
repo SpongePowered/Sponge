@@ -22,41 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.lifecycle;
+package org.spongepowered.common.registry;
 
-import com.google.common.base.Preconditions;
-import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
-import org.spongepowered.api.registry.DuplicateRegistrationException;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryLocation;
 
-public final class RegisterCatalogEventImpl<C extends CatalogType> extends AbstractLifecycleEvent implements RegisterCatalogEvent<C> {
+import java.util.Objects;
 
-    private final TypeToken<C> token;
+public final class SpongeRegistryLocation implements RegistryLocation {
 
-    public RegisterCatalogEventImpl(final Cause cause, final Game game, final TypeToken<C> token) {
-        super(cause, game);
-        this.token = token;
+    private final ResourceKey root, location;
+
+    public SpongeRegistryLocation(final ResourceKey root, final ResourceKey location) {
+        Objects.requireNonNull(root, "root");
+        Objects.requireNonNull(location, "location");
+
+        this.root = root;
+        this.location = location;
     }
 
     @Override
-    public TypeToken<C> getGenericType() {
-        return this.token;
+    public ResourceKey root() {
+        return this.root;
     }
 
     @Override
-    public C register(C catalog) throws DuplicateRegistrationException {
-        Preconditions.checkNotNull(catalog);
-
-        return ((SpongeCatalogRegistry) Sponge.getRegistry().getCatalogRegistry()).registerCatalog(this.token, catalog);
+    public ResourceKey location() {
+        return this.location;
     }
 
-    @Override
-    public String toString() {
-        return "RegisterCatalogEvent{cause=" + this.cause + ", type=" + this.token + "}";
+    public static final class FactoryImpl implements Factory {
+
+        @Override
+        public RegistryLocation create(final ResourceKey root, final ResourceKey location) {
+            Objects.requireNonNull(root, "root");
+            Objects.requireNonNull(location, "location");
+
+            return new SpongeRegistryLocation(root, location);
+        }
     }
 }

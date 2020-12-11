@@ -22,26 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.vanilla.mixin.core.util.registry;
 
-import net.minecraft.item.FireworkRocketItem;
-import org.spongepowered.api.item.FireworkShape;
-import org.spongepowered.api.util.Tuple;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.util.registry.RegistryBridge;
 
-import java.util.stream.Stream;
+import java.util.Map;
 
-public final class FireworkShapeStreamGenerator {
+@Mixin(Registry.class)
+public abstract class RegistryMixin_Vanilla<T> implements RegistryBridge<T> {
 
-    private FireworkShapeStreamGenerator() {
-    }
+    private final Map<ResourceKey, RegistryEntry<T>> vanilla$entries = new Object2ObjectOpenHashMap<>();
 
-    public static Stream<Tuple<FireworkShape, Byte>> stream() {
-        return Stream.of(
-                Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.SMALL_BALL, (byte) 0),
-                Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.LARGE_BALL, (byte) 1),
-                Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.STAR, (byte) 2),
-                Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.CREEPER, (byte) 3),
-                Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.BURST, (byte) 4)
-        );
+    @Override
+    public Map<ResourceKey, RegistryEntry<T>> bridge$getEntries() {
+        return this.vanilla$entries;
     }
 }

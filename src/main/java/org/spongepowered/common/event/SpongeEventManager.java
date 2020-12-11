@@ -383,7 +383,7 @@ public final class SpongeEventManager implements EventManager {
         final Class<? extends Event> eventClass = event.getClass();
         final EventType<? extends Event> eventType;
         if (event instanceof GenericEvent) {
-            eventType = new EventType(eventClass, checkNotNull(((GenericEvent) event).getGenericType().getType()));
+            eventType = new EventType(eventClass, checkNotNull(((GenericEvent) event).getParamType().getType()));
         } else {
             eventType = new EventType(eventClass, null);
         }

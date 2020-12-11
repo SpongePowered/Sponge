@@ -22,26 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry;
+package org.spongepowered.common.advancement;
 
-import com.google.inject.Singleton;
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.adventure.AdventureRegistry;
-import org.spongepowered.api.item.recipe.RecipeRegistry;
-import org.spongepowered.api.registry.GameRegistry;
-import org.spongepowered.common.adventure.AdventureRegistryImpl;
+import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.common.advancement.criterion.SpongeCriterionBuilder;
+import org.spongepowered.common.advancement.criterion.SpongeEmptyCriterion;
 
-@Singleton
-public final class SpongeGameRegistry implements GameRegistry {
+public final class SpongeAdvancementCriterionFactory implements AdvancementCriterion.Factory {
 
     @Override
-    public AdventureRegistry getAdventureRegistry() {
-        return AdventureRegistryImpl.INSTANCE;
+    public AdvancementCriterion empty() {
+        return new SpongeEmptyCriterion();
     }
 
     @Override
-    public RecipeRegistry getRecipeRegistry() {
-        return ((RecipeRegistry) ((MinecraftServer) Sponge.getServer()).getRecipeManager());
+    public AdvancementCriterion dummy() {
+        return new SpongeCriterionBuilder().name("dummy").build();
     }
 }

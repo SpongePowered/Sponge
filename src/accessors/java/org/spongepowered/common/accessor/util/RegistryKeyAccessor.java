@@ -22,29 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.accessor.util;
 
-import net.minecraft.inventory.EquipmentSlotType;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-import java.util.stream.Stream;
+@Mixin(RegistryKey.class)
+public interface RegistryKeyAccessor<T> {
 
-public final class EquipmentGroupStreamGenerator {
-
-    private EquipmentGroupStreamGenerator() {
-    }
-
-    public static Stream<EquipmentGroup> stream() {
-        return Stream.of(
-            EquipmentGroupStreamGenerator.newEquipmentGroup(EquipmentSlotType.Group.ARMOR, ResourceKey.minecraft("worn")),
-            EquipmentGroupStreamGenerator.newEquipmentGroup(EquipmentSlotType.Group.HAND, ResourceKey.minecraft("held"))
-        );
-    }
-
-    private static EquipmentGroup newEquipmentGroup(final EquipmentSlotType.Group type, final ResourceKey key) {
-        ((ResourceKeyBridge) (Object) type).bridge$setKey(key);
-        return (EquipmentGroup) (Object) type;
+    @Invoker("create") static <T> net.minecraft.util.RegistryKey<T> invoker$create(ResourceLocation p_240905_0_, ResourceLocation p_240905_1_) {
+        throw new UntransformedInvokerError();
     }
 }

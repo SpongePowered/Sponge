@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.registry;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Singleton;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
@@ -93,15 +92,15 @@ import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.api.placeholder.PlaceholderComponent;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
-import org.spongepowered.api.registry.BuilderRegistry;
+import org.spongepowered.api.registry.BuilderProvider;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
-import org.spongepowered.api.registry.UnknownTypeException;
+import org.spongepowered.api.registry.TypeNotFoundException;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.service.ban.Ban;
-import org.spongepowered.api.util.ResettableBuilder;
+import org.spongepowered.api.util.Builder;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
@@ -191,33 +190,31 @@ import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.volume.stream.SpongeStreamOptionsBuilder;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 @Singleton
 @SuppressWarnings("unchecked")
-public final class SpongeBuilderRegistry implements BuilderRegistry {
+public final class SpongeBuilderProvider implements BuilderProvider {
 
     private final Map<Class<?>, Supplier<?>> builders;
 
-    public SpongeBuilderRegistry() {
-        this.builders = new Object2ObjectArrayMap<>();
+    public SpongeBuilderProvider() {
+        this.builders = new Object2ObjectOpenHashMap<>();
     }
 
     @Override
-    public <T extends ResettableBuilder<?, ? super T>> T provideBuilder(final Class<T> builderClass) {
-        Preconditions.checkNotNull(builderClass);
-
+    public <T extends Builder<?, ? super T>> T provide(final Class<T> builderClass) {
         final Supplier<?> supplier = this.builders.get(builderClass);
         if (supplier == null) {
-            throw new UnknownTypeException(String.format("Type '%s' has no builder registered!", builderClass));
+            throw new TypeNotFoundException(String.format("Type '%s' has no builder registered!", builderClass));
         }
 
         return (T) supplier.get();
     }
 
-    public <T> SpongeBuilderRegistry register(final Class<T> builderClass, final Supplier<? extends T> supplier) {
-        Preconditions.checkNotNull(builderClass);
-        Preconditions.checkNotNull(supplier);
+    public <T> SpongeBuilderProvider register(final Class<T> builderClass, final Supplier<? extends T> supplier) {
+        Objects.requireNonNull(supplier, "supplier");
 
         if (this.builders.containsKey(builderClass)) {
             throw new DuplicateRegistrationException(String.format("Type '%s' has already been registered as a builder!", builderClass));

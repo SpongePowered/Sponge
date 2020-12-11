@@ -82,7 +82,6 @@ import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.server.WorldRegistration;
 import org.spongepowered.vanilla.accessor.server.MinecraftServerAccessor_Vanilla;
 import org.spongepowered.vanilla.accessor.world.storage.SaveFormatAccessor_Vanilla;
-import org.spongepowered.vanilla.bridge.util.registry.SimpleRegistryBridge;
 
 import java.io.File;
 import java.io.IOException;

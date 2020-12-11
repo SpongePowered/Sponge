@@ -26,7 +26,7 @@ package org.spongepowered.common.registry;
 
 import co.aikar.timings.TimingsFactory;
 import com.google.inject.Singleton;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
@@ -45,8 +45,11 @@ import org.spongepowered.api.network.channel.ChannelExceptionHandler;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
-import org.spongepowered.api.registry.FactoryRegistry;
-import org.spongepowered.api.registry.UnknownTypeException;
+import org.spongepowered.api.registry.FactoryProvider;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryLocation;
+import org.spongepowered.api.registry.RegistryRoots;
+import org.spongepowered.api.registry.TypeNotFoundException;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.state.StateMatcher;
 import org.spongepowered.api.util.AABB;
@@ -74,7 +77,7 @@ import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlerFactory;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
-import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
+import org.spongepowered.common.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.state.SpongeStateMatcherFactory;
@@ -91,26 +94,26 @@ import java.util.Objects;
 
 @Singleton
 @SuppressWarnings("unchecked")
-public final class SpongeFactoryRegistry implements FactoryRegistry {
+public final class SpongeFactoryProvider implements FactoryProvider {
 
     private final Map<Class<?>, Object> factories;
 
-    public SpongeFactoryRegistry() {
-        this.factories = new Object2ObjectArrayMap<>();
+    public SpongeFactoryProvider() {
+        this.factories = new Object2ObjectOpenHashMap<>();
     }
 
     @Override
-    public <T> T provideFactory(final Class<T> clazz) throws UnknownTypeException {
+    public <T> T provide(final Class<T> clazz) throws TypeNotFoundException {
         final Object duck = this.factories.get(clazz);
         if (duck == null) {
-            throw new UnknownTypeException(String.format("Type '%s' has no factory registered!", clazz));
+            throw new TypeNotFoundException(String.format("Type '%s' has no factory registered!", clazz));
         }
 
         return (T) duck;
     }
 
-    public <T> SpongeFactoryRegistry registerFactory(Class<T> factoryClass, T factory) {
-        Objects.requireNonNull(factory);
+    public <T> SpongeFactoryProvider registerFactory(Class<T> factoryClass, T factory) {
+        Objects.requireNonNull(factory, "factory");
 
         if (this.factories.containsKey(factoryClass)) {
             throw new DuplicateRegistrationException(String.format("Type '%s' has already been registered as a factory!", factoryClass));
@@ -151,6 +154,8 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(ProfileProperty.Factory.class, new SpongeProfilePropertyFactory())
             .registerFactory(RayTrace.Factory.class, new SpongeRayTraceFactory())
             .registerFactory(StateMatcher.Factory.class, new SpongeStateMatcherFactory())
+            .registerFactory(RegistryKey.Factory.class, new SpongeRegistryKey.FactoryImpl())
+            .registerFactory(RegistryLocation.Factory.class, new SpongeRegistryLocation.FactoryImpl());
         ;
     }
 

@@ -24,24 +24,55 @@
  */
 package org.spongepowered.common.registry;
 
-import com.google.inject.Singleton;
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.adventure.AdventureRegistry;
-import org.spongepowered.api.item.recipe.RecipeRegistry;
-import org.spongepowered.api.registry.GameRegistry;
-import org.spongepowered.common.adventure.AdventureRegistryImpl;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryEntry;
 
-@Singleton
-public final class SpongeGameRegistry implements GameRegistry {
+import java.util.Objects;
+import java.util.StringJoiner;
 
-    @Override
-    public AdventureRegistry getAdventureRegistry() {
-        return AdventureRegistryImpl.INSTANCE;
+public final class SpongeRegistryEntry<T> implements RegistryEntry<T> {
+
+    private final ResourceKey key;
+    private final T value;
+
+    public SpongeRegistryEntry(final ResourceKey key, final T value) {
+        this.key = Objects.requireNonNull(key, "key");
+        this.value = Objects.requireNonNull(value, "value");
     }
 
     @Override
-    public RecipeRegistry getRecipeRegistry() {
-        return ((RecipeRegistry) ((MinecraftServer) Sponge.getServer()).getRecipeManager());
+    public ResourceKey key() {
+        return this.key;
+    }
+
+    @Override
+    public T value() {
+        return this.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.key);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+
+        final SpongeRegistryEntry other = (SpongeRegistryEntry) o;
+        return this.key.equals(other.key);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]")
+                .add("key='" + this.key + "'")
+                .add("value='" + this.value + "'")
+                .toString();
     }
 }

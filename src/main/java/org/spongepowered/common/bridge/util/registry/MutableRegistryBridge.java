@@ -22,26 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.vanilla;
+package org.spongepowered.common.bridge.util.registry;
 
-import net.minecraft.item.crafting.IRecipeType;
-import org.spongepowered.api.item.recipe.RecipeType;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
+import com.mojang.serialization.Lifecycle;
+import net.minecraft.util.RegistryKey;
+import org.spongepowered.api.registry.RegistryEntry;
 
-public final class RecipeTypeSupplier {
+import javax.annotation.Nullable;
 
-    private RecipeTypeSupplier() {
-    }
+public interface MutableRegistryBridge<T> {
 
-    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
-        registry
-            .registerSupplier(RecipeType.class, "blasting", () -> (RecipeType) IRecipeType.BLASTING)
-            .registerSupplier(RecipeType.class, "campfire_cooking", () -> (RecipeType) IRecipeType.CAMPFIRE_COOKING)
-            .registerSupplier(RecipeType.class, "crafting", () -> (RecipeType) IRecipeType.CRAFTING)
-            .registerSupplier(RecipeType.class, "smelting", () -> (RecipeType) IRecipeType.SMELTING)
-            .registerSupplier(RecipeType.class, "smithing", () -> (RecipeType) IRecipeType.SMITHING)
-            .registerSupplier(RecipeType.class, "smoking", () -> (RecipeType) IRecipeType.SMOKING)
-            .registerSupplier(RecipeType.class, "stonecutting", () -> (RecipeType) IRecipeType.STONECUTTING)
-        ;
-    }
+    boolean bridge$isDynamic();
+
+    void bridge$setDynamic(boolean isDynamic);
+
+    @Nullable RegistryEntry<T> bridge$register(final RegistryKey<T> key, final T value, final Lifecycle lifecycle);
 }
