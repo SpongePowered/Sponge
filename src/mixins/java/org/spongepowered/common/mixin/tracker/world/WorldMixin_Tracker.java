@@ -34,7 +34,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.storage.WorldInfo;
+import net.minecraft.world.storage.ISpawnWorldInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,25 +53,27 @@ import java.util.function.Consumer;
 public abstract class WorldMixin_Tracker implements WorldBridge {
 
     // @formatter:off
-    @Shadow @Final public Random rand;
-    @Shadow @Final protected WorldInfo worldInfo;
-    @Shadow protected boolean processingLoadedTiles;
-    @Shadow @Final protected List<TileEntity> addedTileEntityList;
-    @Shadow @Final public List<TileEntity> loadedTileEntityList;
-    @Shadow @Final public List<TileEntity> tickableTileEntities;
+    @Shadow @Final public Random random;
+    @Shadow @Final protected ISpawnWorldInfo levelData;
+    @Shadow protected boolean updatingBlockEntities;
+    @Shadow @Final protected List<TileEntity> pendingBlockEntities;
+    @Shadow @Final public List<TileEntity> blockEntityList;
+    @Shadow @Final public List<TileEntity> tickableBlockEntities;
 
     @Shadow public abstract Chunk shadow$getChunk(int chunkX, int chunkZ);
     @Shadow public abstract IChunk shadow$getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull);
     @Shadow public abstract Chunk shadow$getChunkAt(BlockPos pos);
     @Shadow public abstract void shadow$guardEntityTick(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
-    @Shadow public boolean setBlockState(final BlockPos pos, final BlockState state, final int flags) { throw new IllegalStateException("Untransformed shadow!"); }
-    @Shadow public void shadow$removeTileEntity(final BlockPos pos) { } // shadowed
-    @Shadow public boolean shadow$addTileEntity(final TileEntity tile) { return false; }
-    @Shadow @Nullable public abstract TileEntity shadow$getTileEntity(BlockPos pos);
-    @Shadow public void shadow$setTileEntity(final BlockPos pos, @Nullable final TileEntity tileEntity) { } // Shadowed
+    @Shadow public boolean setBlock(final BlockPos pos, final BlockState state, final int flags) { throw new IllegalStateException("Untransformed shadow!"); }
+    @Shadow public void shadow$removeBlockEntity(final BlockPos pos) { } // shadowed
+    @Shadow public boolean shadow$addBlockEntity(final TileEntity tile) { return false; }
+    @Shadow @Nullable public abstract TileEntity shadow$getBlockEntity(BlockPos pos);
+    @Shadow public void shadow$setBlockEntity(final BlockPos pos, @Nullable final TileEntity tileEntity) { } // Shadowed
     @Shadow public void shadow$neighborChanged(final BlockPos pos, final Block blockIn, final BlockPos fromPos) { } // Shadowed
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
+    @Shadow public abstract boolean shadow$isDebug();
     // @formatter:on
+
 
     /**
      * We introduce the protected method to be overridden in

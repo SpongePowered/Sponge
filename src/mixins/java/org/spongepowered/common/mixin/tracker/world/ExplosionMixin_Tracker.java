@@ -56,15 +56,15 @@ import java.util.Random;
 @Mixin(Explosion.class)
 public abstract class ExplosionMixin_Tracker {
 
-    @Shadow @Final private World world;
+    @Shadow @Final private World level;
     @Shadow @Final private double x;
     @Shadow @Final private double y;
     @Shadow @Final private double z;
-    @Shadow @Final private Explosion.Mode mode;
-    @Shadow @Final private float size;
-    @Shadow @Final private List<BlockPos> affectedBlockPositions;
+    @Shadow @Final private Explosion.Mode blockInteraction;
+    @Shadow @Final private float radius;
+    @Shadow @Final private List<BlockPos> toBlow;
 
-    @Shadow @Final private boolean causesFire;
+    @Shadow @Final private boolean fire;
     @Shadow @Final private Random random;
 
     /**
@@ -73,38 +73,38 @@ public abstract class ExplosionMixin_Tracker {
      * @reason Run explosion logic through tracking
      */
     @Overwrite
-    public void doExplosionB(final boolean spawnParticles) {
+    public void finalizeExplosion(final boolean spawnParticles) {
         // Sponge Start - In Sponge, we no longer call doExplosionB client-side (kills client perf)
-        if (this.world.isRemote) {
+        if (this.level.isClientSide) {
             return;
         }
         // Sponge End
 
         // Sponge Start - Send the sound packet down. We must do this as we do not call doExplosionB client-side
-        this.world.playSound(null, this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS, 4.0F,
-                (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
+        this.level.playSound(null, this.x, this.y, this.z, SoundEvents.GENERIC_EXPLODE, SoundCategory.BLOCKS, 4.0F,
+                (1.0F + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2F) * 0.7F);
         // Sponge End
 
-        final boolean flag = this.mode != net.minecraft.world.Explosion.Mode.NONE;
+        final boolean flag = this.blockInteraction != net.minecraft.world.Explosion.Mode.NONE;
         if (spawnParticles) {
-            if (!(this.size < 2.0F) && (flag || ((ExplosionBridge) this).bridge$getShouldDamageBlocks())) {
+            if (!(this.radius < 2.0F) && (flag || ((ExplosionBridge) this).bridge$getShouldDamageBlocks())) {
                 // Sponge Start - Use WorldServer methods since we prune the explosion packets
                 // to avoid spamming/lagging the client out when some ~idiot~ decides to explode
                 // hundreds of explosions at once
-                if (this.world instanceof ServerWorld) {
-                    ((ServerWorld) this.world).spawnParticle(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
+                if (this.level instanceof ServerWorld) {
+                    ((ServerWorld) this.level).sendParticles(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
                 } else {
-                    this.world.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
+                    this.level.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
                 }
                 // Sponge End
             } else {
                 // Sponge Start - Use WorldServer methods since we prune the explosion packets
                 // to avoid spamming/lagging the client out when some ~idiot~ decides to explode
                 // hundreds of explosions at once
-                if (this.world instanceof ServerWorld) {
-                    ((ServerWorld) this.world).spawnParticle(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
+                if (this.level instanceof ServerWorld) {
+                    ((ServerWorld) this.level).sendParticles(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
                 } else {
-                    this.world.addParticle(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
+                    this.level.addParticle(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
                 }
                 // Sponge End
             }
@@ -114,14 +114,14 @@ public abstract class ExplosionMixin_Tracker {
             // Sponge Start - Forward changes through a WorldPipeline to associate side effects
             // Vanilla - uses a list of itemstacks to do a bunch of pre-merging
             // ObjectArrayList<Pair<ItemStack, BlockPos>> objectarraylist = new ObjectArrayList<>();
-            Collections.shuffle(this.affectedBlockPositions, this.world.rand);
+            Collections.shuffle(this.toBlow, this.level.random);
 
-            for (final BlockPos blockpos : this.affectedBlockPositions) {
-                final BlockState blockstate = this.world.getBlockState(blockpos);
+            for (final BlockPos blockpos : this.toBlow) {
+                final BlockState blockstate = this.level.getBlockState(blockpos);
                 // Block block = blockstate.getBlock(); // Sponge - we don't use this
                 if (!blockstate.isAir()) {
-                    final BlockPos blockpos1 = blockpos.toImmutable();
-                    this.world.getProfiler().startSection("explosion_blocks");
+                    final BlockPos blockpos1 = blockpos.immutable();
+                    this.level.getProfiler().push("explosion_blocks");
 
                     // Sponge - All of this is forwarded to the effects
                     // if (block.canDropFromExplosion(this) && this.world instanceof ServerWorld) {
@@ -137,11 +137,11 @@ public abstract class ExplosionMixin_Tracker {
                     //     });
                     // }
 
-                    //this.world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 3);
+                    //this.world.setBlock(blockpos, Blocks.AIR.getDefaultState(), 3);
                     //block.onExplosionDestroy(this.world, blockpos, this);
 
                     final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-                    ((TrackedWorldBridge) this.world).bridge$startBlockChange(blockpos1, Blocks.AIR.getDefaultState(), 3)
+                    ((TrackedWorldBridge) this.level).bridge$startBlockChange(blockpos1, Blocks.AIR.defaultBlockState(), 3)
                         .ifPresent(builder -> {
                             final WorldPipeline build = builder
                                 .addEffect(AddBlockLootDropsEffect.getInstance())
@@ -149,10 +149,10 @@ public abstract class ExplosionMixin_Tracker {
                                 .addEffect(SpawnDestructBlocksEffect.getInstance())
                                 .addEffect(WorldBlockChangeCompleteEffect.getInstance())
                                 .build();
-                            build.processEffects(context, blockstate, Blocks.AIR.getDefaultState(), blockpos1, BlockChangeFlagManager.fromNativeInt(3));
+                            build.processEffects(context, blockstate, Blocks.AIR.defaultBlockState(), blockpos1, BlockChangeFlagManager.fromNativeInt(3));
                         });
                     // Sponge End
-                    this.world.getProfiler().endSection();
+                    this.level.getProfiler().pop();
                 }
             }
             // Sponge Start - This is built into the SpawnDestructBlocksEffect
@@ -162,10 +162,10 @@ public abstract class ExplosionMixin_Tracker {
             // Sponge End
         }
 
-        if (this.causesFire) {
-            for(final BlockPos blockpos2 : this.affectedBlockPositions) {
-                if (this.random.nextInt(3) == 0 && this.world.getBlockState(blockpos2).isAir() && this.world.getBlockState(blockpos2.down()).isOpaqueCube(this.world, blockpos2.down())) {
-                    this.world.setBlockState(blockpos2, Blocks.FIRE.getDefaultState());
+        if (this.fire) {
+            for(final BlockPos blockpos2 : this.toBlow) {
+                if (this.random.nextInt(3) == 0 && this.level.getBlockState(blockpos2).isAir() && this.level.getBlockState(blockpos2.below()).isSolidRender(this.level, blockpos2.below())) {
+                    this.level.setBlockAndUpdate(blockpos2, Blocks.FIRE.defaultBlockState());
                 }
             }
         }

@@ -63,24 +63,24 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
     @Redirect(method = "tick",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;playerTick()V"))
     private void tracker$wrapPlayerTickWithPhase(final ServerPlayerEntity player) {
-        if (SpongeImplHooks.isFakePlayer(player) || ((WorldBridge) player.world).bridge$isFake()) {
-            player.playerTick();
+        if (SpongeImplHooks.isFakePlayer(player) || ((WorldBridge) player.level).bridge$isFake()) {
+            player.tick();
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
              final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.SERVER).source(player)) {
             context.buildAndSwitch();
             frame.pushCause(player);
-            player.playerTick();
+            player.tick();
         }
     }
 
-    @Redirect(method = "processTryUseItemOnBlock",
+    @Redirect(method = "handleUseItemOn",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerInteractionManager;func_219441_a(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Hand;Lnet/minecraft/util/math/BlockRayTraceResult;)Lnet/minecraft/util/ActionResultType;"))
+            target = "Lnet/minecraft/server/management/PlayerInteractionManager;useItemOn(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Hand;Lnet/minecraft/util/math/BlockRayTraceResult;)Lnet/minecraft/util/ActionResultType;"))
     private ActionResultType tracker$checkState(final PlayerInteractionManager interactionManager, final PlayerEntity playerIn,
              final net.minecraft.world.World worldIn, final ItemStack stack, final Hand hand, final BlockRayTraceResult rayTraceResult) {
-        final ActionResultType actionResult = interactionManager.func_219441_a(this.player, worldIn, stack, hand, rayTraceResult);
+        final ActionResultType actionResult = interactionManager.useItemOn(this.player, worldIn, stack, hand, rayTraceResult);
         if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
             return actionResult;
         }

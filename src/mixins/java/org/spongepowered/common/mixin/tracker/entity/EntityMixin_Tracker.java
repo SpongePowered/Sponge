@@ -32,7 +32,7 @@ import net.minecraft.entity.Pose;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -67,9 +67,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Shadow @Final private EntityType<?> type;
     @Shadow public World world;
     @Shadow public boolean removed;
-    @Shadow public double posX;
-    @Shadow public double posY;
-    @Shadow public double posZ;
+    @Shadow public Vector3d position;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
     @Shadow @Final protected Random rand;
@@ -78,13 +76,15 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Shadow protected abstract void shadow$setFlag(int flag, boolean set);
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract void shadow$setPosition(double x, double y, double z);
-    @Shadow public abstract void shadow$setMotion(Vec3d motionIn);
+    @Shadow public abstract void shadow$setMotion(Vector3d motionIn);
     @Shadow public abstract void shadow$setMotion(double x, double y, double z);
     @Shadow public abstract float getEyeHeight();
-    @Shadow public abstract UUID getUniqueID();
+    @Shadow public abstract UUID shadow$getUUID();
     @Shadow protected abstract void shadow$setPose(Pose pose);
     @Shadow protected abstract void shadow$recenterBoundingBox();
-
+    @Shadow public abstract double shadow$getEyeY();
+    @Shadow public abstract double shadow$getX();
+    @Shadow public abstract double shadow$getZ();
     private boolean tracker$trackedInWorld = false;
     @Nullable private Cause tracker$destructCause;
     //@formatter:on
@@ -116,7 +116,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(
-        method = "entityDropItem(Lnet/minecraft/item/ItemStack;F)Lnet/minecraft/entity/item/ItemEntity;",
+        method = "spawnAtLocation(Lnet/minecraft/item/ItemStack;F)Lnet/minecraft/entity/item/ItemEntity;",
         at = @At("HEAD")
     )
     private void tracker$logEntityDropTransactionIfNecessary(final ItemStack stack, final float offsetY,

@@ -53,7 +53,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
 
     @Redirect(method = "tick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/server/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+                    target = "Lnet/minecraft/world/server/ServerWorld;setBlock(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
     private boolean tracker$switchContextForDecay(final net.minecraft.world.server.ServerWorld serverWorld, final BlockPos pos,
             final net.minecraft.block.BlockState newState, final int flags) {
         final PhaseTracker instance = PhaseTracker.getInstance();
@@ -67,7 +67,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
             if (context != null) {
                 context.buildAndSwitch();
             }
-            return serverWorld.setBlockState(pos, newState, flags);
+            return serverWorld.setBlock(pos, newState, flags);
         }
     }
 
@@ -85,7 +85,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
      */
     @Overwrite
     public void randomTick(final net.minecraft.block.BlockState state, final net.minecraft.world.server.ServerWorld worldIn, final BlockPos pos, final Random random) {
-        if (!state.get(LeavesBlockMixin_Tracker.PERSISTENT) && state.get(LeavesBlockMixin_Tracker.DISTANCE) == 7) {
+        if (!state.getValue(LeavesBlockMixin_Tracker.PERSISTENT) && state.getValue(LeavesBlockMixin_Tracker.DISTANCE) == 7) {
             // Sponge Start - PhaseTracker checks and phase entry
             if (!((WorldBridge) worldIn).bridge$isFake()) {
                 final PhaseContext<@NonNull ?> peek = PhaseTracker.getInstance().getPhaseContext();
@@ -98,13 +98,13 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
                     if (context != null) {
                         context.buildAndSwitch();
                     }
-                    BlockMixin_Tracker.shadow$spawnDrops(state, worldIn, pos);
+                    BlockMixin_Tracker.shadow$dropResources(state, worldIn, pos);
                     worldIn.removeBlock(pos, false);
                 }
                 return;
             }
             // Sponge End
-            BlockMixin_Tracker.shadow$spawnDrops(state, worldIn, pos);
+            BlockMixin_Tracker.shadow$dropResources(state, worldIn, pos);
             worldIn.removeBlock(pos, false);
         }
 

@@ -80,11 +80,11 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
             cancellable = true
     )
     private void tracker$handleBlockCapture(final CallbackInfo ci) {
-        final BlockPos pos = new BlockPos((FallingBlockEntity) (Object) this);
+        final BlockPos pos = new BlockPos(this.getX(), this.getY(), this.getZ());
         // So, there's two cases here: either the world is not cared for, or the
         // ChangeBlockEvent is not being listened to. If it's not being listened to,
         // we need to specifically just proceed as normal.
-        if (((WorldBridge) this.world).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT) {
+        if (((WorldBridge) this.level).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT) {
             return;
         }
         // Ideally, at this point we should still be in the EntityTickState and only this block should
@@ -109,7 +109,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
             // then it's been captured/processed for single events. And if it's not air,
             // that means that single event was cancelled, so, the block needs to remain
             // and this entity needs to die.
-        } else if (this.world.getBlockState(pos) != Blocks.AIR.getDefaultState()) {
+        } else if (this.level.getBlockState(pos) != Blocks.AIR.defaultBlockState()) {
             this.remove();
             ci.cancel();
         }

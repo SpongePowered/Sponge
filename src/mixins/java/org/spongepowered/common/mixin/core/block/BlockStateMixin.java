@@ -24,38 +24,44 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.state.Property;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.block.BlockStateBridge;
 
 @Mixin(BlockState.class)
-public abstract class BlockStateMixin implements BlockStateBridge {
+public abstract class BlockStateMixin extends AbstractBlock.AbstractBlockState implements BlockStateBridge {
 
-    // @formatter: off
-    @Shadow public abstract Block shadow$getBlock();
-    @Shadow public abstract int shadow$getLightValue();
-    // @formatter: on
+    protected BlockStateMixin(Block p_i231870_1_,
+        ImmutableMap<Property<?>, Comparable<?>> p_i231870_2_,
+        MapCodec<BlockState> p_i231870_3_
+    ) {
+        super(p_i231870_1_, p_i231870_2_, p_i231870_3_);
+    }
+
 
     @Override
     public boolean bridge$hasTileEntity() {
-        return this.shadow$getBlock() instanceof ITileEntityProvider;
+        return this.getBlock() instanceof ITileEntityProvider;
     }
 
     @Override
     public @Nullable TileEntity bridge$createNewTileEntity(World world) {
-        return ((ITileEntityProvider) this.shadow$getBlock()).createNewTileEntity(world);
+        return ((ITileEntityProvider) this.getBlock()).newBlockEntity(world);
     }
 
     @Override
     public int bridge$getLightValue(ServerWorld world, BlockPos pos) {
-        return this.shadow$getLightValue();
+        return this.getLightEmission();
     }
 }

@@ -37,7 +37,7 @@ import org.spongepowered.common.hooks.SpongeImplHooks;
 @Mixin(ThreadTaskExecutor.class)
 public abstract class ThreadTaskExecutorMixin_Tracker<R extends Runnable> {
 
-    @Shadow protected void shadow$run(final R taskIn) {} // Shadow
+    @Shadow protected void shadow$doRunTask(final R taskIn) {} // Shadow
 
     @Redirect(method = "execute",
             at = @At(

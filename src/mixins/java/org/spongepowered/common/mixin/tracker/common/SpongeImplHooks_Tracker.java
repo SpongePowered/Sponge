@@ -50,7 +50,7 @@ public class SpongeImplHooks_Tracker {
             return false;
         }
         final MinecraftServer server = world.getServer();
-        if (server == null || !server.isOnExecutionThread()) {
+        if (server == null || !server.isSameThread()) {
             return PhaseTracker.getInstance().getPhaseContext().isRestoring();
         }
         return PhaseTracker.SERVER.getPhaseContext().isRestoring();

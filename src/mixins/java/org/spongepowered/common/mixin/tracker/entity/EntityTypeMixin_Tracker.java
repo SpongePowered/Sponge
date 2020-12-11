@@ -43,7 +43,7 @@ public abstract class EntityTypeMixin_Tracker {
      * @param cir The return value for the player tracking range, or do nothing
      */
     @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "RedundantCast", "rawtypes"})
-    @Inject(method = "getTrackingRange", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "clientTrackingRange", at = @At("HEAD"), cancellable = true)
     private void tracker$getHumanTrackingRange(final CallbackInfoReturnable<Integer> cir) {
         if (((EntityType) (Object) this) == EntityTypes.HUMAN.get()) {
             cir.setReturnValue(Constants.Entity.Player.TRACKING_RANGE);

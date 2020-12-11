@@ -35,11 +35,11 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(ServerTickList.class)
 public abstract class ServerTickListMixin_Tracker<T> {
 
-    @Shadow protected abstract void shadow$addEntry(NextTickListEntry<T> p_219504_1_);
+    @Shadow protected abstract void shadow$addTickData(NextTickListEntry<T> p_219504_1_);
 
-    @Redirect(method = "scheduleTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerTickList;addEntry(Lnet/minecraft/world/NextTickListEntry;)V"))
+    @Redirect(method = "scheduleTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerTickList;addTickData(Lnet/minecraft/world/NextTickListEntry;)V"))
     private void tracker$associatePhaseContextWithTickEntry(final ServerTickList<T> thisList, final NextTickListEntry<T> entry) {
         PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate(entry);
-        this.shadow$addEntry(entry);
+        this.shadow$addTickData(entry);
     }
 }

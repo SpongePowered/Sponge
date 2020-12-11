@@ -37,16 +37,15 @@ import org.spongepowered.common.event.tracking.phase.player.PlayerPhase;
 @Mixin(PlayerList.class)
 public class PlayerListMixin_Tracker {
 
-
-    @Redirect(method = "playerLoggedOut",
+    @Redirect(method = "remove",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/server/ServerWorld;removePlayer(Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
-    private void tracker$trackPlayerLogoutThroughPhaseTracker(ServerWorld world, ServerPlayerEntity player) {
+                    target = "Lnet/minecraft/world/server/ServerWorld;removePlayerImmediately(Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
+    private void tracker$trackPlayerLogoutThroughPhaseTracker(final ServerWorld world, final ServerPlayerEntity player) {
         try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT
                 .createPhaseContext(PhaseTracker.SERVER)
                 .source(player)) {
             context.buildAndSwitch();
-            world.removePlayer(player);
+            world.removePlayerImmediately(player);
         }
     }
 

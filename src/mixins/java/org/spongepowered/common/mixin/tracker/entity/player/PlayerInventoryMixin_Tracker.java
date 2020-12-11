@@ -46,7 +46,7 @@ public abstract class PlayerInventoryMixin_Tracker implements TrackedInventoryBr
 
 
     private Slot impl$getSpongeSlotByIndex(int index) {
-        final int hotbarSize = net.minecraft.entity.player.PlayerInventory.getHotbarSize();
+        final int hotbarSize = net.minecraft.entity.player.PlayerInventory.getSelectionSize();
         if (index < hotbarSize) {
             return ((PlayerInventory) this).getPrimary().getHotbar().getSlot(index).get();
         }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.realtime.tileentity;
 
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.util.math.MathHelper;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -117,7 +116,7 @@ public abstract class AbstractFurnaceTileEntityMixin_RealTime extends TileEntity
             ),
             to = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"
+                target = "Lnet/minecraft/world/World;setBlock(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"
             )
         )
     )

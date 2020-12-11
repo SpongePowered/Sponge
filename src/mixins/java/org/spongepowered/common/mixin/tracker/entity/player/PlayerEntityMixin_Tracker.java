@@ -29,11 +29,8 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.stats.Stat;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.IItemProvider;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.event.CauseStackManager;
@@ -64,20 +61,11 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
     //@formatter:off
     @Shadow @Final public PlayerInventory inventory;
 
-    @Shadow public abstract void shadow$addStat(Stat<?> stat);
-    @Shadow public abstract void shadow$addStat(ResourceLocation stat);
     @Shadow public abstract ITextComponent shadow$getDisplayName();
-    @Shadow protected abstract void shadow$spawnShoulderEntities();
-    @Shadow protected abstract void shadow$destroyVanishingCursedItems();
-    @Shadow public abstract String shadow$getScoreboardName();
-    @Shadow public abstract Scoreboard shadow$getWorldScoreboard();
-    @Shadow public abstract boolean shadow$isSpectator();
-    @Shadow public abstract void shadow$takeStat(Stat<?> stat);
-    @Shadow public abstract void shadow$addStat(Stat<?> stat, int amount);
     //@formatter:on
 
-    @Inject(method = "onDeath", at = @At("HEAD"), cancellable = true)
-    public void impl$callDestructEntityDeath(DamageSource cause, CallbackInfo ci) {
+    @Inject(method = "die", at = @At("HEAD"), cancellable = true)
+    public void impl$callDestructEntityDeath(final DamageSource cause, final CallbackInfo ci) {
         if (this.shadow$isServerWorld()) {
             // Sponge start - Fire DestructEntityEvent.Death
             final DestructEntityEvent.Death event = SpongeCommonEventFactory.callDestructEntityEventDeath((PlayerEntity) (Object) this, cause);
@@ -91,12 +79,12 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
      * @author gabizou - June 4th, 2016
      * @author i509VCB - February 17th, 2020 - 1.14.4
      *
-     * @reason When a player drops an item, all methods flow through here instead of {@link Entity#entityDropItem(IItemProvider, int)}
+     * @reason When a player drops an item, all methods flow through here instead of {@link Entity#spawnAtLocation(IItemProvider, int)}
      * because of the idea of {@code dropAround} and {@code traceItem}.
      */
     @Nullable
     @Overwrite
-    public ItemEntity dropItem(final ItemStack droppedItem, final boolean dropAround, final boolean traceItem) {
+    public ItemEntity drop(final ItemStack droppedItem, final boolean dropAround, final boolean traceItem) {
         if (droppedItem.isEmpty()) {
             return null;
         }
@@ -105,9 +93,9 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             ((PlayerEntityBridge) this).bridge$shouldRestoreInventory(false);
             final PlayerEntity player = (PlayerEntity) (PlayerEntityBridge) this;
 
-            final double posX1 = player.getPosX();
-            final double posY1 = player.getPosY() - 0.3 + player.getEyeHeight();
-            final double posZ1 = player.getPosZ();
+            final double posX1 = player.getX();
+            final double posY1 = player.getY() - 0.3 + player.getEyeHeight();
+            final double posZ1 = player.getZ();
             // Now the real fun begins.
             final ItemStack item;
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(droppedItem);
@@ -126,18 +114,18 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
                 // and only if those stacks can be stacked (count increased). Otherwise, we'll just continue to throw the entity item.
                 // For now, due to refactoring a majority of all of this code, pre-merging is disabled entirely.
 
-                final ItemEntity itemEntity = new ItemEntity(player.world, posX1, posY1, posZ1, droppedItem);
-                itemEntity.setPickupDelay(40);
+                final ItemEntity itemEntity = new ItemEntity(player.level, posX1, posY1, posZ1, droppedItem);
+                itemEntity.setPickUpDelay(40);
 
                 if (traceItem) {
-                    itemEntity.setThrowerId(player.getUniqueID());
+                    itemEntity.setThrower(player.getUUID());
                 }
 
-                final Random random = player.getRNG();
+                final Random random = player.getRandom();
                 if (dropAround) {
                     final float f = random.nextFloat() * 0.5F;
                     final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
-                    itemEntity.setMotion(-MathHelper.sin(f1) * f, 0.2F, MathHelper.cos(f1) * f);
+                    itemEntity.setDeltaMovement(-MathHelper.sin(f1) * f, 0.2F, MathHelper.cos(f1) * f);
                 } else {
                     final float f8 = MathHelper.sin(this.rotationPitch * ((float)Math.PI / 180F));
                     final float f2 = MathHelper.cos(this.rotationPitch * ((float)Math.PI / 180F));
@@ -145,25 +133,25 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
                     final float f4 = MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F));
                     final float f5 = this.rand.nextFloat() * ((float)Math.PI * 2F);
                     final float f6 = 0.02F * this.rand.nextFloat();
-                    itemEntity.setMotion((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
+                    itemEntity.setDeltaMovement((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
                 }
 
                 return itemEntity;
             }
         }
         // Sponge end
-        final double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
-        final ItemEntity itemEntity = new ItemEntity(this.world, this.posX, d0, this.posZ, droppedItem);
-        itemEntity.setPickupDelay(40);
+        final double d0 = this.shadow$getEyeY() - 0.30000001192092896D;
+        final ItemEntity itemEntity = new ItemEntity(this.world, this.shadow$getX(), d0, this.shadow$getZ(), droppedItem);
+        itemEntity.setPickUpDelay(40);
 
         if (traceItem) {
-            itemEntity.setThrowerId(this.getUniqueID());
+            itemEntity.setThrower(this.shadow$getUUID());
         }
 
         if (dropAround) {
             final float f = this.rand.nextFloat() * 0.5F;
             final float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
-            itemEntity.setMotion(-MathHelper.sin(f1) * f, 0.2F, MathHelper.cos(f1) * f);
+            itemEntity.setDeltaMovement(-MathHelper.sin(f1) * f, 0.2F, MathHelper.cos(f1) * f);
         } else {
             final float f8 = MathHelper.sin(this.rotationPitch * ((float)Math.PI / 180F));
             final float f2 = MathHelper.cos(this.rotationPitch * ((float)Math.PI / 180F));
@@ -171,7 +159,7 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             final float f4 = MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F));
             final float f5 = this.rand.nextFloat() * ((float)Math.PI * 2F);
             final float f6 = 0.02F * this.rand.nextFloat();
-            itemEntity.setMotion((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
+            itemEntity.setDeltaMovement((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
         }
 
         return itemEntity;

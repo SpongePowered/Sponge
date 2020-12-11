@@ -24,15 +24,12 @@
  */
 package org.spongepowered.common.mixin.tracker.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 
 @Mixin(BlockEventData.class)
@@ -41,9 +38,6 @@ public abstract class BlockEventDataMixin_Tracker implements TrackerBlockEventDa
     @Nullable private LocatableBlock bridge$TickingBlock = null;
     @Nullable private BlockEntity bridge$TileEntity = null;
     @Nullable private User bridge$sourceUser = null;
-
-    @Shadow public abstract BlockPos getPosition();
-    @Shadow public abstract Block getBlock();
 
     @Nullable
     @Override

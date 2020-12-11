@@ -59,15 +59,15 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
     private final List<Entity> impl$struckEntities = Lists.newArrayList();
     private boolean impl$effect = false;
 
-    @Redirect(method = "igniteBlocks",
+    @Redirect(method = "spawnFire",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
+            target = "Lnet/minecraft/world/World;setBlock(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
     private boolean impl$throwEventForChangingBlocks(final net.minecraft.world.World world, final BlockPos pos, final BlockState blockState) {
         return this.impl$strikeBlockAndAddSnapshot(world, pos, blockState);
     }
 
-    @Redirect(method = "igniteBlocks(I)V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
+    @Redirect(method = "spawnFire(I)V", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;setBlock(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
     private boolean impl$throwEventForChangingBlockDuringUpdate(final net.minecraft.world.World world, final BlockPos pos, final BlockState blockState) {
         return this.impl$strikeBlockAndAddSnapshot(world, pos, blockState);
     }
@@ -104,7 +104,7 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
 
     @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/LightningBoltEntity;remove()V"))
     private void impl$ThrowEventAndProcess(final CallbackInfo ci) {
-        if (this.removed || this.world.isRemote) {
+        if (this.removed || this.world.isClientSide) {
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {

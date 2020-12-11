@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.world.server;
 
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.spawner.WorldEntitySpawner;
@@ -43,33 +40,35 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 public abstract class ServerChunkProviderMixin_Tracker {
     
     @Redirect(
-        method = "*",
+        method = "tickChunks",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/spawner/WorldEntitySpawner;spawnEntitiesInChunk(Lnet/minecraft/entity/EntityClassification;Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;)V"
+            target = "Lnet/minecraft/world/spawner/WorldEntitySpawner;spawnForChunk(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/spawner/WorldEntitySpawner$EntityDensityManager;ZZZ)V"
         )
     )
     private void tracker$wrapEntitySpawner(
-        final EntityClassification classification,
         final ServerWorld serverWorld,
         final Chunk targetChunk,
-        final BlockPos targetPosition
+        final WorldEntitySpawner.EntityDensityManager manager,
+        final boolean something,
+        final boolean somethingElse,
+        final boolean somethingLast
     ) {
         try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext(PhaseTracker.SERVER)
             .world(serverWorld)) {
             context.buildAndSwitch();
-            WorldEntitySpawner.spawnEntitiesInChunk(classification, serverWorld, targetChunk, targetPosition);
+            WorldEntitySpawner.spawnForChunk(serverWorld, targetChunk, manager, something, somethingElse, somethingLast);
         }
     }
+
     @Redirect(
         method = "tickChunks",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/gen/ChunkGenerator;spawnMobs(Lnet/minecraft/world/server/ServerWorld;ZZ)V"
+            target = "Lnet/minecraft/world/server/ServerWorld;tickCustomSpawners(ZZ)V"
         )
     )
     private void tracker$wrapGeneratorEntitySpawner(
-        final ChunkGenerator<?> generator,
         final ServerWorld serverWorld,
         final boolean spawnHostileMobs,
         final boolean spawnPeacefulMobs
@@ -77,7 +76,7 @@ public abstract class ServerChunkProviderMixin_Tracker {
         try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext(PhaseTracker.SERVER)
             .world(serverWorld)) {
             context.buildAndSwitch();
-            generator.spawnMobs(serverWorld, spawnHostileMobs, spawnPeacefulMobs);
+            serverWorld.tickCustomSpawners(spawnHostileMobs, spawnPeacefulMobs);
         }
     }
 }

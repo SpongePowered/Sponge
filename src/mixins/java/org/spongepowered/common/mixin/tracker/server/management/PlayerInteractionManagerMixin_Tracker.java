@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracker.server.management;
 
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
@@ -54,7 +54,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
@@ -70,67 +69,30 @@ import org.spongepowered.math.vector.Vector3i;
 public abstract class PlayerInteractionManagerMixin_Tracker {
 
     @Shadow public ServerPlayerEntity player;
-    @Shadow public net.minecraft.world.server.ServerWorld world;
+    @Shadow public net.minecraft.world.server.ServerWorld level;
 
-    @Shadow private GameType gameType;
+    @Shadow private GameType gameModeForPlayer;
 
     @Shadow public abstract boolean isCreative();
 
-    // Handle Spectator opening a Container
-    @Inject(method = "func_219441_a", cancellable = true,
-            at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-                    target = "Lnet/minecraft/entity/player/PlayerEntity;openContainer(Lnet/minecraft/inventory/container/INamedContainerProvider;)Ljava/util/OptionalInt;"))
-    public void afterSpectatorOpenContainer(PlayerEntity playerIn, World worldIn, ItemStack stackIn, Hand handIn, BlockRayTraceResult blockRaytraceResultIn, CallbackInfoReturnable<ActionResultType> cir) {
-        final Vector3i pos = VecHelper.toVector3i(blockRaytraceResultIn.getPos());
-        final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
-        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(playerIn);
-            frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld)(worldIn)).createSnapshot(pos));
-            ((ContainerBridge) playerIn.openContainer).bridge$setOpenLocation(location);
-            if (!InventoryEventFactory.callInteractContainerOpenEvent(((ServerPlayerEntity) playerIn))) {
-                cir.setReturnValue(ActionResultType.PASS); // Container Open was cancelled
-            }
-        }
-    }
-
-    // Handle non-Spectator opening a Container
-    @Redirect(method = "func_219441_a",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/block/BlockState;onBlockActivated(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/math/BlockRayTraceResult;)Lnet/minecraft/util/ActionResultType;"))
-    public ActionResultType afterOpenContainer(BlockState blockState, World worldIn, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        final Container lastOpenContainer = player.openContainer;
-        final ActionResultType result = blockState.onBlockActivated(worldIn, player, handIn, hit);
-        if (result.isSuccess() && lastOpenContainer != player.openContainer) {
-            final Vector3i pos = VecHelper.toVector3i(hit.getPos());
-            final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
-            try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(player);
-                frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld) (worldIn)).createSnapshot(pos));
-                ((ContainerBridge) player.openContainer).bridge$setOpenLocation(location);
-                if (!InventoryEventFactory.callInteractContainerOpenEvent((ServerPlayerEntity) player)) {
-                    return ActionResultType.FAIL;
-                }
-            }
-        }
-        return result;
-    }
-
-    @Inject(method = "processRightClick", cancellable = true,
+    @Inject(method = "useItem", cancellable = true,
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/item/ItemStack;getCount()I", ordinal = 0))
-    public void onRightClick(PlayerEntity player, World worldIn, ItemStack stack, Hand hand, CallbackInfoReturnable<ActionResultType> cir) {
+    public void impl$callInteractItemSecondary(final ServerPlayerEntity player, final World p_187250_2_, final ItemStack stack, final Hand hand,
+        final CallbackInfoReturnable<ActionResultType> cir
+    ) {
         final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(player, stack, hand, null, null);
         if (event.isCancelled()) {
             cir.setReturnValue(ActionResultType.FAIL);
         }
     }
 
-    @Inject(method = "func_225416_a", cancellable = true, at = @At(value = "HEAD"))
-    public void onLeftClickBlock(BlockPos p_225416_1_, CPlayerDiggingPacket.Action p_225416_2_, Direction p_225416_3_, int p_225416_4_, CallbackInfo ci) {
-        final BlockSnapshot snapshot = ((ServerWorld) (this.world)).createSnapshot(VecHelper.toVector3i(p_225416_1_));
-        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(this.player, this.player.getHeldItem(Hand.MAIN_HAND), snapshot, Hand.MAIN_HAND, p_225416_3_, null);
+    @Inject(method = "handleBlockBreakAction", cancellable = true, at = @At(value = "HEAD"))
+    public void impl$callInteractBlockPrimaryEvent(final BlockPos p_225416_1_, final CPlayerDiggingPacket.Action p_225416_2_, final Direction p_225416_3_, final int p_225416_4_, final CallbackInfo ci) {
+        final BlockSnapshot snapshot = ((ServerWorld) (this.level)).createSnapshot(VecHelper.toVector3i(p_225416_1_));
+        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(this.player, this.player.getItemInHand(Hand.MAIN_HAND), snapshot, Hand.MAIN_HAND, p_225416_3_, null);
         if (event.isCancelled()) {
-            this.player.connection.sendPacket(new SPlayerDiggingPacket(p_225416_1_, this.world.getBlockState(p_225416_1_), p_225416_2_, false, "block action restricted"));
+            this.player.connection.send(new SPlayerDiggingPacket(p_225416_1_, this.level.getBlockState(p_225416_1_), p_225416_2_, false, "block action restricted"));
             ci.cancel();
         }
     }
@@ -140,53 +102,84 @@ public abstract class PlayerInteractionManagerMixin_Tracker {
      * @reason Fire interact block event.
      */
     @Overwrite
-    public ActionResultType func_219441_a(PlayerEntity playerIn, World worldIn, ItemStack stackIn, Hand handIn, BlockRayTraceResult blockRaytraceResultIn) {
-        BlockPos blockpos = blockRaytraceResultIn.getPos();
-        BlockState blockstate = worldIn.getBlockState(blockpos);
+    public ActionResultType useItemOn(final ServerPlayerEntity playerIn, final World worldIn, final ItemStack stackIn, final Hand handIn, final BlockRayTraceResult blockRaytraceResultIn) {
+        final BlockPos blockpos = blockRaytraceResultIn.getBlockPos();
+        final BlockState blockstate = worldIn.getBlockState(blockpos);
         // Sponge start
-        BlockSnapshot snapshot = ((ServerWorld) (worldIn)).createSnapshot(VecHelper.toVector3i(blockpos));
-        Vector3d hitVec = Vector3d.from(blockRaytraceResultIn.getHitVec().getX(), blockRaytraceResultIn.getHitVec().getY(), blockRaytraceResultIn.getHitVec().getZ());
-        final org.spongepowered.api.util.Direction direction = DirectionFacingProvider.getInstance().getKey(blockRaytraceResultIn.getFace()).get();
-        InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(playerIn, stackIn, hitVec, snapshot, direction, handIn);
+        final BlockSnapshot snapshot = ((ServerWorld) (worldIn)).createSnapshot(VecHelper.toVector3i(blockpos));
+        final Vector3d hitVec = Vector3d.from(blockRaytraceResultIn.getBlockPos().getX(), blockRaytraceResultIn.getBlockPos().getY(), blockRaytraceResultIn.getBlockPos().getZ());
+        final org.spongepowered.api.util.Direction direction = DirectionFacingProvider.getInstance().getKey(blockRaytraceResultIn.getDirection()).get();
+        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(playerIn, stackIn, hitVec, snapshot, direction, handIn);
         if (event.isCancelled()) {
             return ActionResultType.FAIL;
         }
-        Tristate useItem = event.getUseItemResult();
-        Tristate useBlock = event.getUseBlockResult();
+        final Tristate useItem = event.getUseItemResult();
+        final Tristate useBlock = event.getUseBlockResult();
         // Sponge end
-        if (this.gameType == GameType.SPECTATOR) {
-            INamedContainerProvider inamedcontainerprovider = blockstate.getContainer(worldIn, blockpos);
+        if (this.gameModeForPlayer == GameType.SPECTATOR) {
+            final INamedContainerProvider inamedcontainerprovider = blockstate.getMenuProvider(worldIn, blockpos);
             if (inamedcontainerprovider != null) {
-                playerIn.openContainer(inamedcontainerprovider);
+                playerIn.openMenu(inamedcontainerprovider);
+                final Vector3i pos = VecHelper.toVector3i(blockRaytraceResultIn.getBlockPos());
+                final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
+                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                    frame.pushCause(playerIn);
+                    frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld)(worldIn)).createSnapshot(pos));
+                    ((ContainerBridge) playerIn.containerMenu).bridge$setOpenLocation(location);
+                    if (!InventoryEventFactory.callInteractContainerOpenEvent(((ServerPlayerEntity) playerIn))) {
+                        return ActionResultType.SUCCESS;
+                    }
+                }
                 return ActionResultType.SUCCESS;
             } else {
                 return ActionResultType.PASS;
             }
         } else {
-            boolean flag = !playerIn.getHeldItemMainhand().isEmpty() || !playerIn.getHeldItemOffhand().isEmpty();
-            boolean flag1 = playerIn.isSecondaryUseActive() && flag;
+            final boolean flag = !playerIn.getMainHandItem().isEmpty() || !playerIn.getOffhandItem().isEmpty();
+            final boolean flag1 = playerIn.isSecondaryUseActive() && flag;
+            final ItemStack copiedStack = stackIn.copy();
             if (useBlock != Tristate.FALSE && !flag1) { // Sponge check useBlock
-                ActionResultType actionresulttype = blockstate.onBlockActivated(worldIn, playerIn, handIn, blockRaytraceResultIn);
-                if (actionresulttype.isSuccessOrConsume()) {
-                    return actionresulttype;
+                final Container lastOpenContainer = playerIn.containerMenu;
+                final ActionResultType result = blockstate.use(worldIn, playerIn, handIn, blockRaytraceResultIn);
+                if (result.consumesAction() && lastOpenContainer != playerIn.containerMenu) {
+                    final Vector3i pos = VecHelper.toVector3i(blockRaytraceResultIn.getBlockPos());
+                    final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
+                    try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                        frame.pushCause(playerIn);
+                        frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld) (worldIn)).createSnapshot(pos));
+                        ((ContainerBridge) playerIn.containerMenu).bridge$setOpenLocation(location);
+                        if (!InventoryEventFactory.callInteractContainerOpenEvent(playerIn)) {
+                            return ActionResultType.FAIL;
+                        }
+                    }
+                }
+                if (result.consumesAction()) {
+                    CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(playerIn, blockpos, copiedStack);
+                    return result;
                 }
             }
 
-            if (!stackIn.isEmpty() && !playerIn.getCooldownTracker().hasCooldown(stackIn.getItem())) {
+            if (!stackIn.isEmpty() && !playerIn.getCooldowns().isOnCooldown(stackIn.getItem())) {
                 // Sponge start
                 if (useItem == Tristate.FALSE) {
                     return ActionResultType.PASS;
                 }
                 // Sponge end
-                ItemUseContext itemusecontext = new ItemUseContext(playerIn, handIn, blockRaytraceResultIn);
+                final ItemUseContext itemusecontext = new ItemUseContext(playerIn, handIn, blockRaytraceResultIn);
+                final ActionResultType result;
                 if (this.isCreative()) {
-                    int i = stackIn.getCount();
-                    ActionResultType actionresulttype1 = stackIn.onItemUse(itemusecontext);
+                    final int i = stackIn.getCount();
+                    result = stackIn.useOn(itemusecontext);
                     stackIn.setCount(i);
-                    return actionresulttype1;
                 } else {
-                    return stackIn.onItemUse(itemusecontext);
+                    result = stackIn.useOn(itemusecontext);
                 }
+
+                if (result.consumesAction()) {
+                    CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(playerIn, blockpos, copiedStack);
+                }
+
+                return result;
             } else {
                 return ActionResultType.PASS;
             }

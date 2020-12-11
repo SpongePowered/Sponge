@@ -51,26 +51,26 @@ import java.util.function.BooleanSupplier;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMixin_Tracker {
 
-    @Shadow public abstract boolean shadow$isServerStopped();
+    @Shadow public abstract boolean shadow$isStopped();
 
-    @Shadow protected abstract void shadow$updateTimeLightAndEntities(BooleanSupplier hasTimeLeft);
+    @Shadow protected abstract void shadow$tickChildren(BooleanSupplier hasTimeLeft);
 
-    @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "fillReport", at = @At("RETURN"), cancellable = true)
     private void tracker$addPhaseTrackerToCrashReport(final CrashReport report, final CallbackInfoReturnable<CrashReport> cir) {
-        report.makeCategory("Sponge PhaseTracker").addDetail("Phase Stack", CauseTrackerCrashHandler.INSTANCE);
+        report.addCategory("Sponge PhaseTracker").setDetail("Phase Stack", CauseTrackerCrashHandler.INSTANCE);
         cir.setReturnValue(report);
     }
 
-    @Inject(method = "tick", at = @At("RETURN"))
+    @Inject(method = "tickServer", at = @At("RETURN"))
     private void tracker$ensurePhaseTrackerEmpty(final BooleanSupplier hasTimeLeft, final CallbackInfo ci) {
         PhaseTracker.SERVER.ensureEmpty();
     }
 
     @Redirect(
-        method = "tick",
+        method = "tickServer",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/MinecraftServer;updateTimeLightAndEntities(Ljava/util/function/BooleanSupplier;)V"
+            target = "Lnet/minecraft/server/MinecraftServer;tickChildren(Ljava/util/function/BooleanSupplier;)V"
         )
     )
     private void tracker$wrapUpdateTimeLightAndEntities(final MinecraftServer minecraftServer, final BooleanSupplier hasTimeLeft) {
@@ -80,12 +80,12 @@ public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMix
                 .server(minecraftServer)
         ) {
             context.buildAndSwitch();
-            this.shadow$updateTimeLightAndEntities(hasTimeLeft);
+            this.shadow$tickChildren(hasTimeLeft);
         }
     }
 
     @Redirect(
-        method = "updateTimeLightAndEntities",
+        method = "tickChildren",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/server/ServerWorld;tick(Ljava/util/function/BooleanSupplier;)V"
@@ -102,10 +102,8 @@ public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMix
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "wrapTask", at = @At("RETURN"))
-    private void tracker$associatePhaseContextWithWrappedTask(final Runnable runnable, final CallbackInfoReturnable<TickDelayedTask> cir) {
-        final TickDelayedTask returnValue = cir.getReturnValue();
+    @Inject(method = "wrapRunnable", at = @At("RETURN"))
+    private void tracker$associatePhaseContextWithWrappedTask(final Runnable runnable, final CallbackInfoReturnable<TickDelayedTask> cir) {        final TickDelayedTask returnValue = cir.getReturnValue();
         if (!PhaseTracker.SERVER.onSidedThread()) {
             final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
             if (phaseContext.isEmpty()) {
@@ -116,10 +114,10 @@ public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMix
     }
 
     @Redirect(
-        method = "run(Lnet/minecraft/util/concurrent/TickDelayedTask;)V",
+        method = "doRunTask(Lnet/minecraft/util/concurrent/TickDelayedTask;)V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/util/concurrent/RecursiveEventLoop;run(Ljava/lang/Runnable;)V"
+            target = "Lnet/minecraft/util/concurrent/RecursiveEventLoop;doRunTask(Ljava/lang/Runnable;)V"
         )
     )
     @SuppressWarnings("unchecked")
@@ -129,13 +127,13 @@ public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMix
             .setDelayedContextPopulator(((TrackedTickDelayedTaskBridge) runnable).bridge$getFrameModifier().orElse(null))
         ) {
             context.buildAndSwitch();
-            super.shadow$run(runnable);
+            super.shadow$doRunTask(runnable);
         }
     }
 
     @Override
     protected boolean tracker$isServerAndIsServerStopped() {
-        return this.shadow$isServerStopped();
+        return this.shadow$isStopped();
     }
 
 }

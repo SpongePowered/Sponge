@@ -39,12 +39,12 @@ import javax.annotation.Nullable;
 @Mixin(TNTEntity.class)
 public abstract class TNTEntityMixin_Tracker extends EntityMixin_Tracker {
 
-    @Shadow @Nullable private LivingEntity tntPlacedBy;
+    @Shadow @Nullable private LivingEntity owner;
 
     @Override
     public void populateFrameModifier(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
-        if (this.tntPlacedBy != null) {
-            frame.addContext(EventContextKeys.IGNITER, (Living) this.tntPlacedBy);
+        if (this.owner != null) {
+            frame.addContext(EventContextKeys.IGNITER, (Living) this.owner);
         }
     }
 }

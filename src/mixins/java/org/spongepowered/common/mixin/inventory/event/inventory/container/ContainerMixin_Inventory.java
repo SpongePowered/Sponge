@@ -62,10 +62,9 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 @Mixin(Container.class)
 public abstract class ContainerMixin_Inventory implements TrackedContainerBridge, InventoryAdapter, TrackedInventoryBridge {
@@ -149,12 +148,12 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
 
     // Called when changing a Slot while in creative mode
     // Captures the SlotTransaction for later event
-    @Inject(method = "putStackInSlot", at = @At(value = "HEAD") )
+    @Inject(method = "setItem", at = @At(value = "HEAD") )
     private void impl$addTransaction(final int slotId, final ItemStack itemstack, final CallbackInfo ci) {
         if (this.bridge$capturingInventory()) {
             final Slot slot = this.shadow$getSlot(slotId);
             if (slot != null) {
-                final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(slot.getStack());
+                final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(slot.getItem());
                 final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(itemstack);
 
                 final org.spongepowered.api.item.inventory.Slot adapter = this.inventoryAdapter$getSlot(slotId).get();
@@ -171,14 +170,14 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
     // Called when dropping a full itemstack out of the inventory ; PART 1/3
     // Restores the cursor item if needed
     @Nullable
-    @Redirect(method = "slotClick",
+    @Redirect(method = "doClick",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/PlayerEntity;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/ItemEntity;",
+                    target = "Lnet/minecraft/entity/player/PlayerEntity;drop(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/ItemEntity;",
                     ordinal = 0))
     private ItemEntity impl$RestoreOnDragDrop(final PlayerEntity player, final ItemStack itemStackIn, final boolean unused) {
         final ItemStackSnapshot original = ItemStackUtil.snapshotOf(itemStackIn);
-        final ItemEntity entityItem = player.dropItem(itemStackIn, unused);
+        final ItemEntity entityItem = player.drop(itemStackIn, unused);
         if (!((PlayerEntityBridge) player).bridge$shouldRestoreInventory()) {
             return entityItem;
         }
@@ -191,14 +190,14 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
 
     // Called when dropping a full itemstack out of the inventory ; PART 2/3
     // Resets Player and Container for canceled drop
-    @Redirect(method = "slotClick",
+    @Redirect(method = "doClick",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/PlayerInventory;setItemStack(Lnet/minecraft/item/ItemStack;)V",
+                    target = "Lnet/minecraft/entity/player/PlayerInventory;setItem(Lnet/minecraft/item/ItemStack;)V",
                     ordinal = 1))
     private void impl$ClearOnSlot(final PlayerInventory inventoryPlayer, final ItemStack itemStackIn) {
         if (!this.impl$dropCancelled || !((PlayerEntityBridge) inventoryPlayer.player).bridge$shouldRestoreInventory()) {
-            inventoryPlayer.setItemStack(itemStackIn); // original behaviour
+            inventoryPlayer.setCarried(itemStackIn); // original behaviour
         }
         ((PlayerEntityBridge) inventoryPlayer.player).bridge$shouldRestoreInventory(false);
         this.impl$dropCancelled = false;
@@ -206,27 +205,27 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
 
     // Called when splitting and dropping an itemstack out of the inventory ; PART 3/3
     // Restores the cursor item if needed and resets Player and Container for canceled drop
-    @Redirect(method = "slotClick",
+    @Redirect(method = "doClick",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/PlayerEntity;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/ItemEntity;",
+                    target = "Lnet/minecraft/entity/player/PlayerEntity;drop(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/ItemEntity;",
                     ordinal = 1))
     @Nullable
     private ItemEntity impl$restoreOnDragSplit(final PlayerEntity player, final ItemStack itemStackIn, final boolean unused) {
-        final ItemEntity entityItem = player.dropItem(itemStackIn, unused);
+        final ItemEntity entityItem = player.drop(itemStackIn, unused);
         if (!((PlayerEntityBridge) player).bridge$shouldRestoreInventory()) {
             return entityItem;
         }
         if (entityItem == null) {
             ItemStack original;
-            if (player.inventory.getItemStack().isEmpty()) {
+            if (player.inventory.getCarried().isEmpty()) {
                 original = itemStackIn;
             } else {
-                player.inventory.getItemStack().grow(1);
-                original = player.inventory.getItemStack();
+                player.inventory.getCarried().grow(1);
+                original = player.inventory.getCarried();
             }
-            player.inventory.setItemStack(original);
-            ((ServerPlayerEntity) player).connection.sendPacket(new SSetSlotPacket(-1, -1, original));
+            player.inventory.setCarried(original);
+            ((ServerPlayerEntity) player).connection.send(new SSetSlotPacket(-1, -1, original));
         }
         ((PlayerEntityBridge) player).bridge$shouldRestoreInventory(false);
         return entityItem;
@@ -239,13 +238,13 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
 
     // Called before the item is thrown ; PART 1/2
     // Captures the original state and affected slot
-    @Redirect(method = "slotClick", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/inventory/container/Slot;canTakeStack(Lnet/minecraft/entity/player/PlayerEntity;)Z",
+    @Redirect(method = "doClick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/inventory/container/Slot;mayPickup(Lnet/minecraft/entity/player/PlayerEntity;)Z",
             ordinal = 4))
     public boolean onCanTakeStack(final Slot slot, final PlayerEntity playerIn) {
-        final boolean result = slot.canTakeStack(playerIn);
+        final boolean result = slot.mayPickup(playerIn);
         if (result) {
-            this.impl$itemStackSnapshot = ItemStackUtil.snapshotOf(slot.getStack());
+            this.impl$itemStackSnapshot = ItemStackUtil.snapshotOf(slot.getItem());
             this.impl$lastSlotUsed = slot;
         } else {
             this.impl$itemStackSnapshot = ItemStackSnapshot.empty();
@@ -257,17 +256,17 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
     // Called dropping the item ; PART 2/2
     // Restores the slot if needed
     @Nullable
-    @Redirect(method = "slotClick", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/player/PlayerEntity;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/ItemEntity;",
+    @Redirect(method = "doClick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/player/PlayerEntity;drop(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/ItemEntity;",
             ordinal = 3))
     private ItemEntity onThrowClick(final PlayerEntity player, final ItemStack itemStackIn, final boolean unused) {
-        final ItemEntity entityItem = player.dropItem(itemStackIn, true);
+        final ItemEntity entityItem = player.drop(itemStackIn, true);
         if (entityItem == null && ((PlayerEntityBridge) player).bridge$shouldRestoreInventory()) {
             final ItemStack original = ItemStackUtil.fromSnapshotToNative(this.impl$itemStackSnapshot);
-            this.impl$lastSlotUsed.putStack(original);
-            player.openContainer.detectAndSendChanges(); // TODO check if this is needed?
-            ((ServerPlayerEntity) player).isChangingQuantityOnly = false;
-            ((ServerPlayerEntity) player).connection.sendPacket(new SSetSlotPacket(player.openContainer.windowId, this.impl$lastSlotUsed.slotNumber, original));
+            this.impl$lastSlotUsed.set(original);
+            player.containerMenu.broadcastChanges(); // TODO check if this is needed?
+            ((ServerPlayerEntity) player).ignoreSlotUpdateHack = false;
+            ((ServerPlayerEntity) player).connection.send(new SSetSlotPacket(player.contaienrMenu.windowId, this.impl$lastSlotUsed.slotNumber, original));
         }
         this.impl$itemStackSnapshot = ItemStackSnapshot.empty();
         this.impl$lastSlotUsed = null;
@@ -279,26 +278,26 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
 
     // Called when adding items to the cursor (pickup with item on cursor)
     // Captures the previous cursor for later use
-    @Inject(method = "slotClick",
+    @Inject(method = "doClick",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;grow(I)V", ordinal = 1))
     private void beforeOnTakeClickWithItem(
             final int slotId, final int dragType, final ClickType clickTypeIn, final PlayerEntity player, final CallbackInfoReturnable<Integer> cir) {
-        this.bridge$setPreviousCursor(player.inventory.getItemStack().copy()); // capture previous cursor for CraftItemEvent.Craft
+        this.bridge$setPreviousCursor(player.inventory.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
     }
 
     // Called when setting the cursor item (pickup with empty cursor)
     // Captures the previous cursor for later use
-    @Inject(method = "slotClick",
+    @Inject(method = "doClick",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;setItemStack(Lnet/minecraft/item/ItemStack;)V", ordinal = 3))
     private void beforeOnTakeClick(
             final int slotId, final int dragType, final ClickType clickTypeIn, final PlayerEntity player, final CallbackInfoReturnable<Integer> cir) {
-        this.bridge$setPreviousCursor(player.inventory.getItemStack().copy()); // capture previous cursor for CraftItemEvent.Craft
+        this.bridge$setPreviousCursor(player.inventory.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
     }
 
     // ClickType.THROW (for Crafting) -------------------------
     // Called when taking items out of a slot (only crafting-output slots relevant here)
     // When it is crafting check if it was cancelled and prevent item drop
-    @Redirect(method = "slotClick",
+    @Redirect(method = "doClick",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/inventory/container/Slot;onTake(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;",
                     ordinal = 5))
@@ -319,17 +318,17 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
     // ClickType.QUICK_MOVE (for Crafting) -------------------------
     // Called when Shift-Crafting - 2 Injection points
     // Crafting continues until the returned ItemStack is empty OR the returned ItemStack is not the same as the item in the output slot
-    @Redirect(method = "slotClick",
+    @Redirect(method = "doClick",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/inventory/container/Container;transferStackInSlot(Lnet/minecraft/entity/player/PlayerEntity;I)Lnet/minecraft/item/ItemStack;"))
     private ItemStack redirectTransferStackInSlot(final Container thisContainer, final PlayerEntity player, final int slotId) {
         final Slot slot = thisContainer.getSlot(slotId);
         if (!(slot instanceof CraftingResultSlot)) { // is this crafting?
-            return thisContainer.transferStackInSlot(player, slotId);
+            return thisContainer.quickMoveStack(player, slotId);
         }
         this.bridge$setLastCraft(null);
         this.bridge$setShiftCrafting(true);
-        ItemStack result = thisContainer.transferStackInSlot(player, slotId);
+        ItemStack result = thisContainer.quickMoveStack(player, slotId);
         CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
         if (lastCraft != null) {
             if (lastCraft.isCancelled()) {
@@ -343,7 +342,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
     }
 
     // cleanup after slot click was captured
-    @Inject(method = "slotClick", at = @At("RETURN"))
+    @Inject(method = "doClick", at = @At("RETURN"))
     private void onReturn(final int slotId, final int dragType, final ClickType clickTypeIn, final PlayerEntity player, final CallbackInfoReturnable<ItemStack> cir) {
         // Reset variables needed for CraftItemEvent.Craft
         this.bridge$setLastCraft(null);
@@ -354,9 +353,9 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
         if (((Object) this) instanceof WorkbenchContainer || ((Object) this) instanceof PlayerContainer) {
             for (IContainerListener listener : this.listeners) {
                 if (slotId == 0) {
-                    listener.sendAllContents((Container) (Object) this, this.shadow$getInventory());
+                    listener.refreshContainer((Container) (Object) this, this.shadow$getInventory());
                 } else {
-                    listener.sendSlotContents((Container) (Object) this, 0, this.shadow$getInventory().get(0));
+                    listener.slotChanged((Container) (Object) this, 0, this.shadow$getInventory().get(0));
                 }
             }
 
@@ -412,7 +411,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
             for (Integer i : changes) {
                 final Slot slot = this.inventorySlots.get(i);
                 final ItemStack oldStack = this.inventoryItemStacks.get(i);
-                slot.putStack(oldStack.copy());
+                slot.set(oldStack.copy());
                 // Send reverted slots to clients
                 this.impl$sendSlotContents(i, oldStack);
                 // Revert item in hand

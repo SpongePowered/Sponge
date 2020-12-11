@@ -68,7 +68,6 @@ import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -218,11 +217,11 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             final boolean shouldBreakBlocks = explosion.shouldBreakBlocks();
             // Sponge End
 
-            mcExplosion.doExplosionA();
-            mcExplosion.doExplosionB(true);
+            mcExplosion.explode();
+            mcExplosion.finalizeExplosion(true);
 
             if (!shouldBreakBlocks) {
-                mcExplosion.clearAffectedBlockPositions();
+                mcExplosion.clearToBlow();
             }
 
             // Sponge Start - end processing

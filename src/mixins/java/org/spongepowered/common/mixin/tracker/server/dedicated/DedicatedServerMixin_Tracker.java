@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.tracker.server.dedicated;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +41,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin_Tracker {
 
-    @Shadow public abstract int shadow$getSpawnProtectionSize();
+    @Shadow public abstract int shadow$getSpawnProtectionRadius();
 
     /**
      * @author zml - March 9th, 2016
@@ -51,7 +52,7 @@ public abstract class DedicatedServerMixin_Tracker {
      * will apply to any world. Additionally, fire a spawn protection event
      */
     @Overwrite
-    public boolean isBlockProtected(final net.minecraft.world.World worldIn, final BlockPos pos, final PlayerEntity playerIn) {
+    public boolean isUnderSpawnProtection(final ServerWorld worldIn, final BlockPos pos, final PlayerEntity playerIn) {
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
         final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
         if (!context.isInteraction()) {
@@ -61,8 +62,8 @@ public abstract class DedicatedServerMixin_Tracker {
             }
         }
 
-        final BlockPos spawnPoint = worldIn.getSpawnPoint();
-        final int protectionRadius = this.shadow$getSpawnProtectionSize();
+        final BlockPos spawnPoint = worldIn.getSharedSpawnPos();
+        final int protectionRadius = this.shadow$getSpawnProtectionRadius();
 
         return protectionRadius > 0
                 && Math.max(Math.abs(pos.getX() - spawnPoint.getX()), Math.abs(pos.getZ() - spawnPoint.getZ())) <= protectionRadius

@@ -37,7 +37,7 @@ public abstract class PacketThreadUtilMixin_Tracker {
 
     @Redirect(method = "*",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/network/IPacket;processPacket(Lnet/minecraft/network/INetHandler;)V"),
+            target = "Lnet/minecraft/network/IPacket;handle(Lnet/minecraft/network/INetHandler;)V"),
         expect = 1,
         require = 1
     )
