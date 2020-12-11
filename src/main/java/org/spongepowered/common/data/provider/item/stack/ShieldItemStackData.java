@@ -64,7 +64,7 @@ public final class ShieldItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.DYE_COLOR)
                         .get(h -> {
-                            final CompoundNBT tag = h.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);
+                            final CompoundNBT tag = h.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             if (tag == null || tag.contains(Constants.TileEntity.Banner.BANNER_PATTERNS, Constants.NBT.TAG_LIST)) {
                                 return DyeColors.WHITE.get();
                             }
@@ -72,13 +72,13 @@ public final class ShieldItemStackData {
                             return (DyeColor) (Object) net.minecraft.item.DyeColor.byId(id);
                         })
                         .set((h, v) -> {
-                            final CompoundNBT tag = h.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
+                            final CompoundNBT tag = h.getOrCreateTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             tag.putInt(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.item.DyeColor) (Object) v).getId());
                         })
                         .supports(h -> h.getItem() instanceof ShieldItem)
                     .create(Keys.BANNER_PATTERN_LAYERS)
                         .get(h -> {
-                            final CompoundNBT tag = h.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);
+                            final CompoundNBT tag = h.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             if (tag == null || !tag.contains(Constants.TileEntity.Banner.BANNER_PATTERNS, Constants.NBT.TAG_LIST)) {
                                 return new ArrayList<>();
                             }
@@ -92,7 +92,7 @@ public final class ShieldItemStackData {
                                     .filter(layer -> layer.getShape() != BannerPatternShapes.BASE.get())
                                     .map(ShieldItemStackData::layerToNbt)
                                     .collect(NBTCollectors.toTagList());
-                            final CompoundNBT blockEntity = h.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
+                            final CompoundNBT blockEntity = h.getOrCreateTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             blockEntity.put(Constants.TileEntity.Banner.BANNER_PATTERNS, layersTag);
                             if (h.getItem() instanceof ShieldItem) {
                                 // TODO reject BannerPatternShapes.BASE for BannerItem?

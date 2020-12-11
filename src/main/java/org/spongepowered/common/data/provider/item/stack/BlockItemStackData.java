@@ -55,7 +55,7 @@ public final class BlockItemStackData {
                         .supports(h -> h.getItem() instanceof BlockItem && !(h.getItem() instanceof BannerItem))
                     .create(Keys.LOCK_TOKEN)
                         .get(h -> {
-                            final CompoundNBT tag = h.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);
+                            final CompoundNBT tag = h.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             if (tag != null) {
                                 final String lock = tag.getString(Constants.Item.LOCK);
                                 if (!lock.isEmpty()) {
@@ -69,7 +69,7 @@ public final class BlockItemStackData {
                                 BlockItemStackData.deleteLockToken(h);
                                 return;
                             }
-                            new LockCode(v).write(h.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG));
+                            new LockCode(v).addToTag(h.getOrCreateTagElement(Constants.Item.BLOCK_ENTITY_TAG));
                         })
                         .delete(BlockItemStackData::deleteLockToken)
                         .supports(h -> {
@@ -81,7 +81,7 @@ public final class BlockItemStackData {
                                 return false;
                             }
                             try {
-                                final TileEntity tile = ((ITileEntityProvider) block).createNewTileEntity(null);
+                                final TileEntity tile = ((ITileEntityProvider) block).newBlockEntity(null);
                                 return tile instanceof LockableTileEntity;
                             } catch (final NullPointerException ex) {
                                 return false;
@@ -91,7 +91,7 @@ public final class BlockItemStackData {
     // @formatter:on
 
     private static void deleteLockToken(final ItemStack stack) {
-        final CompoundNBT tag = stack.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);
+        final CompoundNBT tag = stack.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
         if (tag != null) {
             tag.remove(Constants.Item.LOCK);
         }

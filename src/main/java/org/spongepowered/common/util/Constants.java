@@ -464,13 +464,6 @@ public final class Constants {
 
     public static final class Item {
 
-        public static final int HIDE_MISCELLANEOUS_FLAG = 32;
-
-        public static final int HIDE_CAN_PLACE_FLAG = 16;
-        public static final int HIDE_CAN_DESTROY_FLAG = 8;
-        public static final int HIDE_UNBREAKABLE_FLAG = 4;
-        public static final int HIDE_ATTRIBUTES_FLAG = 2;
-        public static final int HIDE_ENCHANTMENTS_FLAG = 1;
         // These are the various tag compound id's for getting to various places
         public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
         public static final String BLOCK_ENTITY_ID = "id";

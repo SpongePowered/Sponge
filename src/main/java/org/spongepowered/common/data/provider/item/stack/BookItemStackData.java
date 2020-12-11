@@ -59,7 +59,7 @@ public final class BookItemStackData {
                             }
                             return SpongeAdventure.legacySection(tag.getString(Constants.Item.Book.ITEM_BOOK_AUTHOR));
                         })
-                        .set((h, v) -> h.setTagInfo(Constants.Item.Book.ITEM_BOOK_AUTHOR, StringNBT.valueOf(SpongeAdventure.legacySection(v))))
+                        .set((h, v) -> h.addTagElement(Constants.Item.Book.ITEM_BOOK_AUTHOR, StringNBT.valueOf(SpongeAdventure.legacySection(v))))
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.GENERATION)
                         .get(h -> {
@@ -73,7 +73,7 @@ public final class BookItemStackData {
                             if (v < 0) {
                                 return false;
                             }
-                            h.setTagInfo(Constants.Item.Book.ITEM_BOOK_GENERATION, IntNBT.valueOf(v));
+                            h.addTagElement(Constants.Item.Book.ITEM_BOOK_GENERATION, IntNBT.valueOf(v));
                             return true;
                         })
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
@@ -97,7 +97,7 @@ public final class BookItemStackData {
         }
         final ListNBT list = tag.getList(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
         return list.stream()
-                .map(INBT::getString)
+                .map(INBT::getAsString)
                 .map(predicate)
                 .collect(Collectors.toList());
     }
@@ -107,7 +107,7 @@ public final class BookItemStackData {
                 .map(predicate)
                 .collect(NBTCollectors.toStringTagList());
 
-        holder.setTagInfo(Constants.Item.Book.ITEM_BOOK_PAGES, list);
+        holder.addTagElement(Constants.Item.Book.ITEM_BOOK_PAGES, list);
         final CompoundNBT compound = holder.getOrCreateTag();
         if (!compound.contains(Constants.Item.Book.ITEM_BOOK_TITLE)) {
             compound.putString(Constants.Item.Book.ITEM_BOOK_TITLE, Constants.Item.Book.INVALID_TITLE);

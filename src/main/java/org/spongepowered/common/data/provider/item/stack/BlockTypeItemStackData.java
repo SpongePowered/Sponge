@@ -69,16 +69,16 @@ public final class BlockTypeItemStackData {
             return null;
         }
         return NBTStreams.toStrings(list)
-                .map(ResourceLocation::tryCreate)
+                .map(ResourceLocation::tryParse)
                 .filter(Objects::nonNull)
-                .map(key -> (BlockType) Registry.BLOCK.func_241873_b(key).orElse(null))
+                .map(key -> (BlockType) Registry.BLOCK.getOptional(key).orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
     private static boolean set(final ItemStack stack, final String nbtKey, final Set<? extends BlockType> value) {
         if (value.isEmpty()) {
-            stack.removeChildTag(nbtKey);
+            stack.removeTagKey(nbtKey);
             return true;
         }
 

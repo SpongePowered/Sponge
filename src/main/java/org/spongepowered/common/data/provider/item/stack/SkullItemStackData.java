@@ -45,16 +45,16 @@ public final class SkullItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.GAME_PROFILE)
                         .get(h -> {
-                            final CompoundNBT tag = h.getChildTag(Constants.Item.Skull.ITEM_SKULL_OWNER);
+                            final CompoundNBT tag = h.getTagElement(Constants.Item.Skull.ITEM_SKULL_OWNER);
                             final GameProfile mcProfile = tag == null ? null : NBTUtil.readGameProfile(tag);
                             return mcProfile == null ? null : SpongeGameProfile.of(mcProfile);
                         })
                         .set((h, v) -> {
                             final com.mojang.authlib.GameProfile mcProfile = SpongeGameProfile.toMcProfile(v);
                             final CompoundNBT tag = NBTUtil.writeGameProfile(new CompoundNBT(), mcProfile);
-                            h.setTagInfo(Constants.Item.Skull.ITEM_SKULL_OWNER, tag);
+                            h.addTagElement(Constants.Item.Skull.ITEM_SKULL_OWNER, tag);
                         })
-                        .delete(h -> h.removeChildTag(Constants.Item.Skull.ITEM_SKULL_OWNER))
+                        .delete(h -> h.removeTagKey(Constants.Item.Skull.ITEM_SKULL_OWNER))
                         .supports(h -> h.getItem() instanceof SkullItem);
     }
     // @formatter:on

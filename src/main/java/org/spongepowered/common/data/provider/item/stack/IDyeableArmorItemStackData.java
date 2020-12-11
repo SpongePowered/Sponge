@@ -47,12 +47,12 @@ public final class IDyeableArmorItemStackData {
                         .set((h, v) -> {
                             final IDyeableArmorItem item = (IDyeableArmorItem) h.getItem();
                             if (v == null) {
-                                item.removeColor(h);
+                                item.clearColor(h);
                             } else {
                                 item.setColor(h, (((v.getRed() << 8) + v.getGreen()) << 8) + v.getBlue());
                             }
                         })
-                        .delete(h -> ((IDyeableArmorItem) h.getItem()).removeColor(h))
+                        .delete(h -> ((IDyeableArmorItem) h.getItem()).clearColor(h))
                         .supports(h -> h.getItem() instanceof IDyeableArmorItem);
     }
     // @formatter:on

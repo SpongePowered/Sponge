@@ -108,7 +108,7 @@ public final class BookPagesItemStackData {
     private static Enchantment enchantmentFromNbt(final CompoundNBT compound) {
         final String enchantmentId = compound.getString(Constants.Item.ITEM_ENCHANTMENT_ID);
         final int level = compound.getInt(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
-        final EnchantmentType enchantment = (EnchantmentType) Registry.ENCHANTMENT.func_241873_b(ResourceLocation.tryCreate(enchantmentId)).orElse(null);
+        final EnchantmentType enchantment = (EnchantmentType) Registry.ENCHANTMENT.getOptional(ResourceLocation.tryParse(enchantmentId)).orElse(null);
         return enchantment == null ? null : new SpongeEnchantment(enchantment, level);
     }
 
