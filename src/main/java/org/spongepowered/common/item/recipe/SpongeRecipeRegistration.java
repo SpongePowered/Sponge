@@ -55,42 +55,42 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, IF
     protected final ResourceLocation key;
     protected final IRecipeSerializer<?> serializer;
     protected final ResourceLocation advancementId;
-    protected final Advancement.Builder advancementBuilder = Advancement.Builder.builder();
+    protected final Advancement.Builder advancementBuilder = Advancement.Builder.advancement();
     protected final String group;
 
-    public static <S extends IRecipeSerializer<T>, T extends IRecipe<?>> S register(String spongeName, S recipeSerializer) {
-        return (S)(Registry.<IRecipeSerializer<?>>register(Registry.RECIPE_SERIALIZER, new ResourceLocation("sponge", spongeName), recipeSerializer));
+    public static <S extends IRecipeSerializer<T>, T extends IRecipe<?>> S register(final String spongeName, final S recipeSerializer) {
+        return (S)(Registry.<IRecipeSerializer<?>>register(Registry.RECIPE_SERIALIZER, new ResourceLocation("sponge", spongeName).toString(), recipeSerializer));
     }
-    public static <S extends IRecipeSerializer<T>, T extends IRecipe<?>> S register(ResourceLocation resourceLocation, S recipeSerializer) {
-        return (S)(Registry.<IRecipeSerializer<?>>register(Registry.RECIPE_SERIALIZER, resourceLocation, recipeSerializer));
+    public static <S extends IRecipeSerializer<T>, T extends IRecipe<?>> S register(final ResourceLocation resourceLocation, final S recipeSerializer) {
+        return (S)(Registry.<IRecipeSerializer<?>>register(Registry.RECIPE_SERIALIZER, resourceLocation.toString(), recipeSerializer));
     }
 
-    public SpongeRecipeRegistration(ResourceLocation key, IRecipeSerializer<?> serializer, Item resultItem, String group) {
+    public SpongeRecipeRegistration(final ResourceLocation key, final IRecipeSerializer<?> serializer, final Item resultItem, final String group) {
         this.key = key;
         this.serializer = serializer;
-        final ItemGroup itemGroup = resultItem.getGroup();
-        this.advancementId = new ResourceLocation(key.getNamespace(), "recipes/" + (itemGroup == null ? "uncategorized" : itemGroup.getPath()) + "/" + key.getPath());
+        final ItemGroup itemGroup = resultItem.getItemCategory();
+        this.advancementId = new ResourceLocation(key.getNamespace(), "recipes/" + (itemGroup == null ? "uncategorized" : itemGroup.getRecipeFolderName()) + "/" + key.getPath());
         this.advancementBuilder
-                .withCriterion("has_the_recipe", new RecipeUnlockedTrigger.Instance(key))
-                .withRewards(AdvancementRewards.Builder.recipe(key));
+                .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(key))
+                .rewards(AdvancementRewards.Builder.recipe(key));
         this.group = group == null ? "" : group;
     }
 
-    public static <C extends IInventory> IRecipeSerializer<?> determineSerializer(ItemStack resultStack,
-            Function<C, ItemStack> resultFunction,
-            Function<net.minecraft.inventory.CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction,
-            Map<Character, Ingredient> ingredients, IRecipeSerializer<?> vanilla, IRecipeSerializer<?> sponge) {
+    public static <C extends IInventory> IRecipeSerializer<?> determineSerializer(final ItemStack resultStack,
+                                                                                  final Function<C, ItemStack> resultFunction,
+                                                                                  final Function<net.minecraft.inventory.CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction,
+                                                                                  final Map<Character, Ingredient> ingredients, final IRecipeSerializer<?> vanilla, final IRecipeSerializer<?> sponge) {
         return SpongeRecipeRegistration.determineSerializer(resultStack, resultFunction, remainingItemsFunction, ingredients.values(), vanilla, sponge);
     }
 
-    public static <C extends IInventory> IRecipeSerializer<?> determineSerializer(ItemStack resultStack,
-            Function<C, ItemStack> resultFunction,
-            Function<net.minecraft.inventory.CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction,
-            Collection<Ingredient> ingredients, IRecipeSerializer<?> vanilla, IRecipeSerializer<?> sponge) {
+    public static <C extends IInventory> IRecipeSerializer<?> determineSerializer(final ItemStack resultStack,
+                                                                                  final Function<C, ItemStack> resultFunction,
+                                                                                  final Function<net.minecraft.inventory.CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction,
+                                                                                  final Collection<Ingredient> ingredients, final IRecipeSerializer<?> vanilla, final IRecipeSerializer<?> sponge) {
         if (resultStack.hasTag() || resultFunction != null || remainingItemsFunction != null) {
             return sponge;
         }
-        for (Ingredient value : ingredients) {
+        for (final Ingredient value : ingredients) {
             if (value instanceof SpongeIngredient) {
                 return sponge;
             }
@@ -99,7 +99,7 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, IF
     }
 
     @Override
-    public ResourceLocation getID() {
+    public ResourceLocation getId() {
         return this.key;
     }
 
@@ -109,20 +109,12 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, IF
     }
 
     @Override
-    public IRecipeSerializer<?> getSerializer() {
+    public IRecipeSerializer<?> getType() {
         return this.serializer;
     }
 
     @Override
-    public JsonObject getRecipeJson() {
-        final JsonObject jsonobject = new JsonObject();
-        jsonobject.addProperty("type", Registry.RECIPE_SERIALIZER.getKey(this.getSerializer()).toString());
-        this.serialize(jsonobject);
-        return jsonobject;
-    }
-
-    @Override
-    public void serialize(JsonObject json) {
+    public void serializeRecipeData(final JsonObject json) {
         if (!this.group.isEmpty()) {
             json.addProperty("group", this.group);
         }
@@ -133,16 +125,16 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, IF
 
     public abstract void serializeShape(JsonObject json);
     public abstract void serializeResult(JsonObject json);
-    public void serializeAdditional(JsonObject json) {
+    public void serializeAdditional(final JsonObject json) {
     }
 
     @Override
-    public JsonObject getAdvancementJson() {
-        return this.advancementBuilder.serialize();
+    public JsonObject serializeAdvancement() {
+        return this.advancementBuilder.serializeToJson();
     }
 
     @Override
-    public ResourceLocation getAdvancementID() {
+    public ResourceLocation getAdvancementId() {
         return this.advancementId;
     }
 
@@ -154,8 +146,8 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, IF
     @Override
     public DataContainer toContainer() {
         try {
-            return DataFormats.JSON.get().read(this.getRecipeJson().toString());
-        } catch (IOException e) {
+            return DataFormats.JSON.get().read(this.serializeRecipe().toString());
+        } catch (final IOException e) {
             throw new IllegalStateException(e);
         }
     }

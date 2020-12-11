@@ -50,9 +50,9 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
     private final ItemStack spongeResult;
     private final Function<IInventory, ItemStack> resultFunction;
 
-    public SpongeCookingRecipeRegistration(ResourceLocation key, IRecipeSerializer<?> serializer,
-            String group, Ingredient ingredient, float experience, int cookingTime,
-            ItemStack spongeResult, Function<IInventory, ItemStack> resultFunction) {
+    public SpongeCookingRecipeRegistration(final ResourceLocation key, final IRecipeSerializer<?> serializer,
+                                           final String group, final Ingredient ingredient, final float experience, final int cookingTime,
+                                           final ItemStack spongeResult, final Function<IInventory, ItemStack> resultFunction) {
         super(key, serializer, spongeResult.getItem(), group);
         this.ingredient = ingredient;
         this.result = spongeResult.getItem();
@@ -63,12 +63,12 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
     }
 
     @Override
-    public void serializeShape(JsonObject json) {
-        json.add(Constants.Recipe.COOKING_INGREDIENT, this.ingredient.serialize());
+    public void serializeShape(final JsonObject json) {
+        json.add(Constants.Recipe.COOKING_INGREDIENT, this.ingredient.toJson());
     }
 
     @Override
-    public void serializeResult(JsonObject json) {
+    public void serializeResult(final JsonObject json) {
         json.addProperty(Constants.Recipe.RESULT, Registry.ITEM.getKey(this.result).toString());
         // Sponge Recipe
         if (this.spongeResult != null) {
@@ -76,12 +76,12 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
             json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getID(), this.resultFunction));
+            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
         }
     }
 
     @Override
-    public void serializeAdditional(JsonObject json) {
+    public void serializeAdditional(final JsonObject json) {
         json.addProperty(Constants.Recipe.COOKING_EXP, this.experience);
         json.addProperty(Constants.Recipe.COOKING_TIME, this.cookingTime);
     }

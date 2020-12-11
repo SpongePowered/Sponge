@@ -53,92 +53,95 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
 
     private final int defaultCookingTime;
 
-    public SpongeCookingRecipeSerializer(int p_i50025_2_) {
-        this.defaultCookingTime = p_i50025_2_;
+    public SpongeCookingRecipeSerializer(final int defaultCookingTime) {
+        this.defaultCookingTime = defaultCookingTime;
     }
 
-    public R read(ResourceLocation recipeId, JsonObject json) {
-        final String group = JSONUtils.getString(json, Constants.Recipe.GROUP, "");
-        final JsonElement jsonelement = JSONUtils.isJsonArray(json, Constants.Recipe.COOKING_INGREDIENT) ? JSONUtils.getJsonArray(json, Constants.Recipe.COOKING_INGREDIENT) : JSONUtils.getJsonObject(json, Constants.Recipe.COOKING_INGREDIENT);
+    @Override
+    public R fromJson(final ResourceLocation recipeId, final JsonObject json) {
+        final String group = JSONUtils.getAsString(json, Constants.Recipe.GROUP, "");
+        final JsonElement jsonelement = JSONUtils.isArrayNode(json, Constants.Recipe.COOKING_INGREDIENT) ? JSONUtils.getAsJsonArray(json, Constants.Recipe.COOKING_INGREDIENT) : JSONUtils.getAsJsonObject(json, Constants.Recipe.COOKING_INGREDIENT);
         final Ingredient ingredient = IngredientUtil.spongeDeserialize(jsonelement);
-        final String result = JSONUtils.getString(json, Constants.Recipe.RESULT);
+        final String result = JSONUtils.getAsString(json, Constants.Recipe.RESULT);
         final ResourceLocation resourcelocation = new ResourceLocation(result);
-        final ItemStack itemstack = new ItemStack(Registry.ITEM.getValue(resourcelocation).orElseThrow(() -> new IllegalStateException("Item: " + result + " does not exist")));
+        final ItemStack itemstack = new ItemStack(Registry.ITEM.getOptional(resourcelocation).orElseThrow(() -> new IllegalStateException("Item: " + result + " does not exist")));
         final ItemStack spongeStack = ResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
         final Function<IInventory, ItemStack> resultFunction = ResultUtil.deserializeResultFunction(json);
-        final float exp = JSONUtils.getFloat(json, Constants.Recipe.COOKING_EXP, 0.0F);
-        final int cookTime = JSONUtils.getInt(json, Constants.Recipe.COOKING_TIME, this.defaultCookingTime);
-        return this.create(recipeId, group, ingredient, spongeStack == null ? itemstack : spongeStack, resultFunction, exp, cookTime);
+        final float exp = JSONUtils.getAsFloat(json, Constants.Recipe.COOKING_EXP, 0.0F);
+        final int cookTime = JSONUtils.getAsInt(json, Constants.Recipe.COOKING_TIME, this.defaultCookingTime);
+        return this.create(recipeId, group, ingredient, spongeStack == null ? itemstack : spongeStack, exp, cookTime, resultFunction);
     }
 
-    protected abstract R create(ResourceLocation recipeId, String group, Ingredient ingredient, ItemStack resultStack,
-            Function<IInventory, ItemStack> resultFunction, float experience, int cookingTime);
+    protected abstract R create(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result,
+                                final float experience, final int cookingTime, final Function<IInventory, ItemStack> resultFunction);
 
-    public R read(ResourceLocation recipeId, PacketBuffer buffer) {
+    @Override
+    public R fromNetwork(final ResourceLocation recipeId, final PacketBuffer buffer) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 
-    public void write(PacketBuffer buffer, R recipe) {
+    @Override
+    public void toNetwork(final PacketBuffer buffer, final R recipe) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 
     public static class Smelting extends SpongeCookingRecipeSerializer<FurnaceRecipe> {
 
-        public static SpongeCookingRecipeSerializer<FurnaceRecipe> SPONGE_SMELTING = SpongeRecipeRegistration.register("smelting", new Smelting());
+        public static final SpongeCookingRecipeSerializer<FurnaceRecipe> SPONGE_SMELTING = SpongeRecipeRegistration.register("smelting", new Smelting());
 
         public Smelting() {
             super(200);
         }
 
         @Override
-        protected FurnaceRecipe create(ResourceLocation recipeId, String group, Ingredient ingredient, ItemStack resultStack,
-                Function<IInventory, ItemStack> resultFunction, float experience, int cookingTime) {
-            return new SpongeFurnaceRecipe(recipeId, group, ingredient, resultStack, experience, cookingTime, resultFunction);
+        protected FurnaceRecipe create(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result,
+                                       final float experience, final int cookingTime, final Function<IInventory, ItemStack> resultFunction) {
+            return new SpongeFurnaceRecipe(id, group, ingredient, result, experience, cookingTime, resultFunction);
         }
     }
 
     public static class Blasting extends SpongeCookingRecipeSerializer<BlastingRecipe> {
 
-        public static SpongeCookingRecipeSerializer<BlastingRecipe> SPONGE_BLASTING = SpongeRecipeRegistration.register("blasting", new Blasting());
+        public static final SpongeCookingRecipeSerializer<BlastingRecipe> SPONGE_BLASTING = SpongeRecipeRegistration.register("blasting", new Blasting());
 
         public Blasting() {
             super(100);
         }
 
         @Override
-        protected BlastingRecipe create(ResourceLocation recipeId, String group, Ingredient ingredient, ItemStack resultStack,
-                Function<IInventory, ItemStack> resultFunction, float experience, int cookingTime) {
-            return new SpongeBlastingRecipe(recipeId, group, ingredient, resultStack, experience, cookingTime, resultFunction);
+        protected BlastingRecipe create(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result,
+                                        final float experience, final int cookingTime, final Function<IInventory, ItemStack> resultFunction) {
+            return new SpongeBlastingRecipe(id, group, ingredient, result, experience, cookingTime, resultFunction);
         }
     }
 
     public static class Smoking extends SpongeCookingRecipeSerializer<SmokingRecipe> {
 
-        public static SpongeCookingRecipeSerializer<SmokingRecipe> SPONGE_SMOKING = SpongeRecipeRegistration.register("smoking", new Smoking());
+        public static final SpongeCookingRecipeSerializer<SmokingRecipe> SPONGE_SMOKING = SpongeRecipeRegistration.register("smoking", new Smoking());
 
         public Smoking() {
             super(100);
         }
 
         @Override
-        protected SmokingRecipe create(ResourceLocation recipeId, String group, Ingredient ingredient, ItemStack resultStack,
-                Function<IInventory, ItemStack> resultFunction, float experience, int cookingTime) {
-            return new SpongeSmokingRecipe(recipeId, group, ingredient, resultStack, experience, cookingTime, resultFunction);
+        protected SmokingRecipe create(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result,
+                                       final float experience, final int cookingTime, final Function<IInventory, ItemStack> resultFunction) {
+            return new SpongeSmokingRecipe(id, group, ingredient, result, experience, cookingTime, resultFunction);
         }
     }
 
     public static class Campfire extends SpongeCookingRecipeSerializer<CampfireCookingRecipe> {
 
-        public static SpongeCookingRecipeSerializer<CampfireCookingRecipe> SPONGE_CAMPFIRE_COOKING = SpongeRecipeRegistration.register("campfire_cooking", new Campfire());
+        public static final SpongeCookingRecipeSerializer<CampfireCookingRecipe> SPONGE_CAMPFIRE_COOKING = SpongeRecipeRegistration.register("campfire_cooking", new Campfire());
 
         public Campfire() {
             super(100);
         }
 
         @Override
-        protected CampfireCookingRecipe create(ResourceLocation recipeId, String group, Ingredient ingredient, ItemStack resultStack,
-                Function<IInventory, ItemStack> resultFunction, float experience, int cookingTime) {
-            return new SpongeCampfireCookingRecipe(recipeId, group, ingredient, resultStack, experience, cookingTime, resultFunction);
+        protected CampfireCookingRecipe create(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result,
+                                               final float experience, final int cookingTime, final Function<IInventory, ItemStack> resultFunction) {
+            return new SpongeCampfireCookingRecipe(id, group, ingredient, result, experience, cookingTime, resultFunction);
         }
     }
 

@@ -36,26 +36,26 @@ public class SpongeCampfireCookingRecipe extends CampfireCookingRecipe {
 
     private final Function<IInventory, ItemStack> resultFunction;
 
-    public SpongeCampfireCookingRecipe(ResourceLocation p_i50030_1_, String p_i50030_2_, Ingredient p_i50030_3_, ItemStack p_i50030_4_, float p_i50030_5_, int p_i50030_6_, Function<IInventory, ItemStack> resultFunction) {
-        super(p_i50030_1_, p_i50030_2_, p_i50030_3_, p_i50030_4_, p_i50030_5_, p_i50030_6_);
+    public SpongeCampfireCookingRecipe(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<IInventory, ItemStack> resultFunction) {
+        super(id, group, ingredient, result, experience, cookingTime);
         this.resultFunction = resultFunction;
     }
 
     @Override
-    public ItemStack getCraftingResult(IInventory p_77572_1_) {
+    public ItemStack assemble(final IInventory container) {
         if (this.resultFunction != null) {
-            final ItemStack result = this.resultFunction.apply(p_77572_1_);
+            final ItemStack result = this.resultFunction.apply(container);
             result.setCount(1);
             return result;
         }
-        return super.getCraftingResult(p_77572_1_);
+        return super.assemble(container);
     }
 
     @Override
-    public ItemStack getRecipeOutput() {
+    public ItemStack getResultItem() {
         if (this.resultFunction != null) {
             return ItemStack.EMPTY;
         }
-        return super.getRecipeOutput();
+        return super.getResultItem();
     }
 }
