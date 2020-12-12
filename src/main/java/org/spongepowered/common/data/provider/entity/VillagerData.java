@@ -26,7 +26,6 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.merchant.villager.VillagerProfession;
-import net.minecraft.entity.villager.IVillagerType;
 import net.minecraft.item.MerchantOffer;
 import net.minecraft.item.MerchantOffers;
 import org.spongepowered.api.data.Keys;
@@ -48,29 +47,29 @@ public final class VillagerData {
                 .asMutable(VillagerEntity.class)
                     .create(Keys.PROFESSION_LEVEL)
                         .get(h -> h.getVillagerData().getLevel())
-                        .set((h, v) -> h.setVillagerData(h.getVillagerData().withLevel(v)))
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setLevel(v)))
                     .create(Keys.PROFESSION_TYPE)
                         .get(h -> (ProfessionType) h.getVillagerData().getProfession())
-                        .set((h, v) -> h.setVillagerData(h.getVillagerData().withProfession((VillagerProfession) v)))
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setProfession((VillagerProfession) v)))
                     .create(Keys.EXPERIENCE)
-                        .get(VillagerEntity::getXp)
-                        .set(VillagerEntity::setXp)
-                    .delete(h -> h.setXp(0))
+                        .get(VillagerEntity::getVillagerXp)
+                        .set(VillagerEntity::setVillagerXp)
+                    .delete(h -> h.setVillagerXp(0))
                     .create(Keys.EXPERIENCE_LEVEL)
                         .get(h -> h.getVillagerData().getLevel())
                         .setAnd((h, v) -> {
                             if (v < 1) {
                                 return false;
                             }
-                            h.setVillagerData(h.getVillagerData().withLevel(v));
+                            h.setVillagerData(h.getVillagerData().setLevel(v));
                             return true;
                         })
                     .create(Keys.TRADE_OFFERS)
                         .get(h -> h.getOffers().stream().map(TradeOffer.class::cast).collect(Collectors.toList()))
                         .set((h, v) -> h.setOffers(v.stream().map(MerchantOffer.class::cast).collect(Collectors.toCollection(MerchantOffers::new))))
                     .create(Keys.VILLAGER_TYPE)
-                        .get(h -> (VillagerType) h.getVillagerData().getType())
-                        .set((h, v) -> h.setVillagerData(h.getVillagerData().withType((IVillagerType) v)));
+                        .get(h -> (VillagerType) (Object) h.getVillagerData().getType())
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setType((net.minecraft.entity.villager.VillagerType) (Object) v)));
     }
     // @formatter:on
 }

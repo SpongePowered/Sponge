@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -155,7 +154,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
     }
 
     private void writeAttributeModifier(final ListNBT attributeModifiers, final net.minecraft.entity.ai.attributes.AttributeModifier attributeModifier, final EquipmentSlotType slot) {
-        final CompoundNBT modifierNbt = SharedMonsterAttributes.writeAttributeModifier(attributeModifier);
+        final CompoundNBT modifierNbt = attributeModifier.save();
         modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_NAME, attributeModifier.getName());
 
         if (slot != null) {
