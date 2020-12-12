@@ -47,10 +47,12 @@ import java.util.function.Supplier;
 @Mixin(value = Block.class, priority = 999)
 public abstract class BlockMixin_API extends AbstractBlockMixin_API {
 
+    // @formatter:off
     @Shadow @Final protected StateContainer<Block, net.minecraft.block.BlockState> stateDefinition;
     @Shadow public abstract Item shadow$asItem();
     @Shadow public abstract String shadow$getDescriptionId();
     @Shadow public abstract net.minecraft.block.BlockState shadow$defaultBlockState();
+    // @formatter:on
 
     private ResourceKey api$key;
 

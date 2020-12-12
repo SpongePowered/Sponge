@@ -40,12 +40,12 @@ import java.util.Objects;
 @Mixin(AbstractBlock.AbstractBlockState.class)
 public abstract class AbstractBlockStateMixin_API extends StateHolderMixin_API<BlockState, net.minecraft.block.BlockState> implements BlockState {
 
-    //@formatting:off
+    // @formatter:off
     @Shadow public abstract Block shadow$getBlock();
     @Shadow public abstract FluidState shadow$getFluidState();
     @Shadow public abstract net.minecraft.block.BlockState shadow$rotate(net.minecraft.util.Rotation rotation);
     @Shadow public abstract net.minecraft.block.BlockState shadow$mirror(net.minecraft.util.Mirror rotation);
-    //@formatting:on
+    // @formatter:on
 
     @Override
     public BlockType getType() {

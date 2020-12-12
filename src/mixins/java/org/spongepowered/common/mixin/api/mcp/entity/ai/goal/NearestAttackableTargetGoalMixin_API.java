@@ -37,48 +37,50 @@ import org.spongepowered.common.accessor.entity.EntityPredicateAccessor;
 
 import java.util.function.Predicate;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings("unchecked")
 @Mixin(NearestAttackableTargetGoal.class)
 public abstract class NearestAttackableTargetGoalMixin_API extends TargetGoalMixin_API<FindNearestAttackableTargetGoal>
         implements FindNearestAttackableTargetGoal {
 
     private static Predicate<? extends LivingEntity> ALWAYS_TRUE = e -> true;
 
-    @Shadow @Final @Mutable protected Class<? extends LivingEntity> targetClass;
-    @Shadow protected EntityPredicate targetEntitySelector;
-    @Shadow @Final @Mutable protected int targetChance;
+    // @formatter:off
+    @Shadow @Final @Mutable protected Class<? extends LivingEntity> targetType;
+    @Shadow protected EntityPredicate targetConditions;
+    @Shadow @Final @Mutable protected int randomInterval;
+    // @formatter:on
 
     @Override
     public Class<? extends Living> getTargetClass() {
-        return (Class<? extends Living>) this.targetClass;
+        return (Class<? extends Living>) this.targetType;
     }
 
     @Override
     public FindNearestAttackableTargetGoal setTargetClass(Class<? extends Living> targetClass) {
-        this.targetClass = (Class<? extends LivingEntity>) targetClass;
+        this.targetType = (Class<? extends LivingEntity>) targetClass;
         return this;
     }
 
     @Override
     public int getChance() {
-        return this.targetChance;
+        return this.randomInterval;
     }
 
     @Override
     public FindNearestAttackableTargetGoal setChance(int chance) {
-        this.targetChance = chance;
+        this.randomInterval = chance;
         return this;
     }
 
     @Override
     public FindNearestAttackableTargetGoal filter(Predicate<Living> predicate) {
-        this.targetEntitySelector.setCustomPredicate(((Predicate<LivingEntity>) (Object) predicate));
+        this.targetConditions.selector(((Predicate<LivingEntity>) (Object) predicate));
         return this;
     }
 
     @Override
     public Predicate<Living> getFilter() {
-        final Predicate<LivingEntity> predicate = ((EntityPredicateAccessor) this.targetEntitySelector).accessor$selector();
-        return (Predicate<Living>) (Object) (predicate == null ? NearestAttackableTargetGoalMixin_API.ALWAYS_TRUE : predicate);
+        final Predicate<LivingEntity> predicate = ((EntityPredicateAccessor) this.targetConditions).accessor$selector();
+        return (Predicate<Living>) (predicate == null ? NearestAttackableTargetGoalMixin_API.ALWAYS_TRUE : predicate);
     }
 }

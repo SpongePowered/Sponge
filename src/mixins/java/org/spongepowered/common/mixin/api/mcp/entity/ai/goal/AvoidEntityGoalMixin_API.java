@@ -37,59 +37,61 @@ import org.spongepowered.common.accessor.entity.EntityPredicateAccessor;
 
 import java.util.function.Predicate;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"unchecked"})
 @Mixin(net.minecraft.entity.ai.goal.AvoidEntityGoal.class)
-public abstract class AvoidLivingGoalMixin_API extends GoalMixin_API<Creature> implements AvoidLivingGoal {
+public abstract class AvoidEntityGoalMixin_API extends GoalMixin_API<Creature> implements AvoidLivingGoal {
 
     private static final Predicate<LivingEntity> ALWAYS_TRUE = e -> true;
 
-    @Shadow @Final @Mutable private double farSpeed;
-    @Shadow @Final @Mutable private double nearSpeed;
-    @Shadow @Final @Mutable protected float avoidDistance;
-    @Shadow @Final private EntityPredicate builtTargetSelector;
+    // @formatter:off
+    @Shadow @Final @Mutable private double walkSpeedModifier;
+    @Shadow @Final @Mutable private double sprintSpeedModifier;
+    @Shadow @Final @Mutable protected float maxDist;
+    @Shadow @Final private EntityPredicate avoidEntityTargeting;
+    // @formatter:on
 
     @Override
     public Predicate<Living> getTargetSelector() {
-        final Predicate<LivingEntity> predicate = ((EntityPredicateAccessor) this.builtTargetSelector).accessor$selector();
-        return (Predicate<Living>) (Object) (predicate == null ? AvoidLivingGoalMixin_API.ALWAYS_TRUE : predicate);
+        final Predicate<LivingEntity> predicate = ((EntityPredicateAccessor) this.avoidEntityTargeting).accessor$selector();
+        return (Predicate<Living>) (Object) (predicate == null ? AvoidEntityGoalMixin_API.ALWAYS_TRUE : predicate);
     }
 
     @Override
     public AvoidLivingGoal setTargetSelector(Predicate<Living> predicate) {
-        this.builtTargetSelector.setCustomPredicate((Predicate<LivingEntity>) (Object) predicate);
+        this.avoidEntityTargeting.selector((Predicate<LivingEntity>) (Object) predicate);
         return this;
     }
 
     @Override
     public float getSearchDistance() {
-        return this.avoidDistance;
+        return this.maxDist;
     }
 
     @Override
     public AvoidLivingGoal setSearchDistance(float distance) {
-        this.avoidDistance = distance;
+        this.maxDist = distance;
         return this;
     }
 
     @Override
     public double getCloseRangeSpeed() {
-        return this.nearSpeed;
+        return this.sprintSpeedModifier;
     }
 
     @Override
     public AvoidLivingGoal setCloseRangeSpeed(double speed) {
-       this.nearSpeed = speed;
+       this.sprintSpeedModifier = speed;
         return this;
     }
 
     @Override
     public double getFarRangeSpeed() {
-        return this.farSpeed;
+        return this.walkSpeedModifier;
     }
 
     @Override
     public AvoidLivingGoal setFarRangeSpeed(double speed) {
-        this.farSpeed = speed;
+        this.walkSpeedModifier = speed;
         return this;
     }
 }

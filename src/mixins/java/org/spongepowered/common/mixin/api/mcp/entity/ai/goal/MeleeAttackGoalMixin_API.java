@@ -34,28 +34,30 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(MeleeAttackGoal.class)
 public abstract class MeleeAttackGoalMixin_API implements AttackLivingGoal {
 
-    @Shadow @Final @Mutable private double speedTowardsTarget;
-    @Shadow @Final @Mutable private boolean longMemory;
+    // @formatter:off
+    @Shadow @Final @Mutable private double speedModifier;
+    @Shadow @Final @Mutable private boolean followingTargetEvenIfNotSeen;
+    // @formatter:on
 
     @Override
     public double getSpeed() {
-        return this.speedTowardsTarget;
+        return this.speedModifier;
     }
 
     @Override
     public AttackLivingGoal setSpeed(double speed) {
-        this.speedTowardsTarget = speed;
+        this.speedModifier = speed;
         return this;
     }
 
     @Override
     public boolean hasLongMemory() {
-        return this.longMemory;
+        return this.followingTargetEvenIfNotSeen;
     }
 
     @Override
     public AttackLivingGoal setLongMemory(boolean longMemory) {
-        this.longMemory = longMemory;
+        this.followingTargetEvenIfNotSeen = longMemory;
         return this;
     }
 }

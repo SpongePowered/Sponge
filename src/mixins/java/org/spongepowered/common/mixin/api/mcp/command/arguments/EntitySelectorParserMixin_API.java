@@ -77,6 +77,7 @@ import java.util.function.Supplier;
 @Mixin(EntitySelectorParser.class)
 public abstract class EntitySelectorParserMixin_API implements Selector.Builder {
 
+    // @formatter:off
     @Shadow @Final private StringReader reader;
     @Shadow private int maxResults;
     @Shadow private BiConsumer<Vector3d, List<? extends Entity>> order;
@@ -123,6 +124,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Shadow public abstract void shadow$setIncludesEntities(boolean includeNonPlayers);
     @Shadow public abstract EntitySelector shadow$getSelector();
     @Shadow public abstract void shadow$addPredicate(Predicate<Entity> p_197401_1_);
+    // @formatter:on
 
     @Nullable private Map<String, Range<@NonNull Integer>> api$scores;
     @Nullable private Object2BooleanOpenHashMap<String> api$advancement;

@@ -48,7 +48,7 @@ import java.util.Optional;
 @Mixin(net.minecraft.block.BlockState.class)
 public abstract class BlockStateMixin_API extends AbstractBlockStateMixin_API {
 
-    private String impl$serializedState;
+    private String api$serializedState;
 
     @Override
     public int getContentVersion() {
@@ -100,10 +100,10 @@ public abstract class BlockStateMixin_API extends AbstractBlockStateMixin_API {
     }
 
     public String impl$getSerializedString() {
-        if (this.impl$serializedState == null) {
-            this.impl$serializedState = BlockStateSerializerDeserializer.serialize(this);
+        if (this.api$serializedState == null) {
+            this.api$serializedState = BlockStateSerializerDeserializer.serialize(this);
         }
-        return this.impl$serializedState;
+        return this.api$serializedState;
     }
 
 }

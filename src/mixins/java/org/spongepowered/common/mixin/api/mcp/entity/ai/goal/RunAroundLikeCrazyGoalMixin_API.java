@@ -30,21 +30,22 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.core.entity.ai.goal.GoalMixin;
 
 @Mixin(net.minecraft.entity.ai.goal.RunAroundLikeCrazyGoal.class)
 public abstract class RunAroundLikeCrazyGoalMixin_API extends Goal implements RunAroundLikeCrazyGoal {
 
-    @Shadow @Final @Mutable private double speed;
+    // @formatter:off
+    @Shadow @Final @Mutable private double speedModifier;
+    // @formatter:on
 
     @Override
     public double getSpeed() {
-        return this.speed;
+        return this.speedModifier;
     }
 
     @Override
     public RunAroundLikeCrazyGoal setSpeed(double speed) {
-        this.speed = speed;
+        this.speedModifier = speed;
         return this;
     }
 }

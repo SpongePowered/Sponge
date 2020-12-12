@@ -45,8 +45,9 @@ import java.util.stream.Collectors;
 @Mixin(EntitySelector.class)
 public abstract class EntitySelectorMixin_API implements Selector {
 
-    @Shadow
-    public abstract List<? extends net.minecraft.entity.Entity> shadow$findEntities(CommandSource source) throws CommandSyntaxException;
+    // @formatter:off
+    @Shadow public abstract List<? extends net.minecraft.entity.Entity> shadow$findEntities(CommandSource source) throws CommandSyntaxException;
+    // @formatter:on
 
     @Override
     @NonNull

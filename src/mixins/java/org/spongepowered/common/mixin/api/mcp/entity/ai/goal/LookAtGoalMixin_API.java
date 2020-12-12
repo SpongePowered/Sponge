@@ -34,44 +34,46 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import net.minecraft.entity.ai.goal.Goal;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"unchecked"})
 @Mixin(net.minecraft.entity.ai.goal.LookAtGoal.class)
 public abstract class LookAtGoalMixin_API extends Goal implements LookAtGoal {
 
-    @Shadow @Final @Mutable protected Class<? extends LivingEntity> watchedClass;
-    @Shadow @Final @Mutable protected float maxDistance;
-    @Shadow @Final @Mutable private float chance;
+    // @formatter:off
+    @Shadow @Final @Mutable protected Class<? extends LivingEntity> lookAtType;
+    @Shadow @Final @Mutable protected float lookDistance;
+    @Shadow @Final @Mutable protected float probability;
+    // @formatter:on
 
     @Override
     public Class<? extends Living> getWatchedClass() {
-        return (Class<? extends Living>) this.watchedClass;
+        return (Class<? extends Living>) this.lookAtType;
     }
 
     @Override
     public LookAtGoal setWatchedClass(Class<? extends Living> watchedClass) {
-        this.watchedClass = (Class<? extends LivingEntity>) watchedClass;
+        this.lookAtType = (Class<? extends LivingEntity>) watchedClass;
         return this;
     }
 
     @Override
     public float getMaxDistance() {
-        return this.maxDistance;
+        return this.lookDistance;
     }
 
     @Override
     public LookAtGoal setMaxDistance(float maxDistance) {
-        this.maxDistance = maxDistance;
+        this.lookDistance = maxDistance;
         return this;
     }
 
     @Override
     public float getChance() {
-        return this.chance;
+        return this.probability;
     }
 
     @Override
     public LookAtGoal setChance(float chance) {
-        this.chance = chance;
+        this.probability = chance;
         return this;
     }
 }

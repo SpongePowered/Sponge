@@ -47,16 +47,17 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = EnchantmentType.class, prefix = "enchantment$"))
 public abstract class EnchantmentMixin_API implements EnchantmentType {
 
-    @Shadow protected String name;
+    // @formatter:off
     @Shadow @Final private net.minecraft.enchantment.Enchantment.Rarity rarity;
     @Shadow public abstract int shadow$getMinLevel();
     @Shadow public abstract int shadow$getMaxLevel();
-    @Shadow public abstract int shadow$getMinEnchantability(int level);
-    @Shadow public abstract int shadow$getMaxEnchantability(int level);
-    @Shadow protected abstract boolean shadow$canApplyTogether(net.minecraft.enchantment.Enchantment ench);
-    @Shadow public abstract String shadow$getName();
-    @Shadow public abstract boolean shadow$isTreasureEnchantment();
+    @Shadow public abstract int shadow$getMinCost(int level);
+    @Shadow public abstract int shadow$getMaxCost(int level);
+    @Shadow protected abstract boolean shadow$checkCompatibility(net.minecraft.enchantment.Enchantment ench);
+    @Shadow protected abstract String shadow$getOrCreateDescriptionId();
+    @Shadow public abstract boolean shadow$isTreasureOnly();
     @Shadow public abstract boolean shadow$isCurse();
+    // @formatter:on
 
     @Nullable private ResourceLocation api$id;
 
@@ -89,12 +90,12 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public int getMinimumEnchantabilityForLevel(final int level) {
-        return this.shadow$getMinEnchantability(level);
+        return this.shadow$getMinCost(level);
     }
 
     @Override
     public int getMaximumEnchantabilityForLevel(final int level) {
-        return this.shadow$getMaxEnchantability(level);
+        return this.shadow$getMaxCost(level);
     }
 
     @Override
@@ -109,17 +110,17 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public boolean isCompatibleWith(final EnchantmentType ench) {
-        return this.shadow$canApplyTogether((net.minecraft.enchantment.Enchantment) ench);
+        return this.shadow$checkCompatibility((net.minecraft.enchantment.Enchantment) ench);
     }
 
     @Override
     public Component asComponent() {
-        return Component.translatable(this.shadow$getName(), this.shadow$isCurse() ? NamedTextColor.RED : NamedTextColor.GRAY);
+        return Component.translatable(this.shadow$getOrCreateDescriptionId(), this.shadow$isCurse() ? NamedTextColor.RED : NamedTextColor.GRAY);
     }
 
     @Override
     public boolean isTreasure() {
-        return this.shadow$isTreasureEnchantment();
+        return this.shadow$isTreasureOnly();
     }
 
     @Intrinsic

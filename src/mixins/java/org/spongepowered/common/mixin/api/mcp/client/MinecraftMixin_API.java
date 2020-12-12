@@ -50,10 +50,12 @@ import javax.annotation.Nullable;
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> implements SpongeClient {
 
+    // @formatter:off
     @Shadow public net.minecraft.client.world.ClientWorld level;
     @Shadow public ClientPlayerEntity player;
     @Shadow @Nullable private NetworkManager pendingConnection;
     @Shadow @Nullable public abstract IntegratedServer shadow$getSingleplayerServer();
+    // @formatter:on
 
     private final ClientScheduler api$scheduler = new ClientScheduler();
 

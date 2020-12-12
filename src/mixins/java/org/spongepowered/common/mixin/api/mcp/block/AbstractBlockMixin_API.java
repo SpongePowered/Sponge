@@ -35,8 +35,10 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(value = AbstractBlock.class)
 public abstract class AbstractBlockMixin_API implements BlockType {
 
+    // @formatter:off
     @Shadow @Final @org.spongepowered.asm.mixin.Mutable protected boolean isRandomlyTicking;
     @Shadow @Final protected SoundType soundType;
+    // @formatter:on
 
     @Override
     public boolean doesUpdateRandomly() {

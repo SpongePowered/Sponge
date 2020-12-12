@@ -32,16 +32,19 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(RangedAttribute.class)
 public abstract class RangedAttributeMixin_API implements RangedAttributeType {
-    @Shadow @Final private double minimumValue;
-    @Shadow @Final private double maximumValue;
+
+    // @formatter:off
+    @Shadow @Final private double minValue;
+    @Shadow @Final private double maxValue;
+    // @formatter:on
 
     @Override
     public double getMinimumValue() {
-        return this.minimumValue;
+        return this.minValue;
     }
 
     @Override
     public double getMaximumValue() {
-        return this.maximumValue;
+        return this.maxValue;
     }
 }

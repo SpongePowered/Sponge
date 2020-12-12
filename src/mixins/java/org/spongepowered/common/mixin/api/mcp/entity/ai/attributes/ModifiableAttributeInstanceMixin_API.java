@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai.attributes;
 
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import org.spongepowered.api.entity.attribute.Attribute;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
@@ -40,77 +40,76 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-@Mixin(IAttributeInstance.class)
-@Implements(@Interface(iface = Attribute.class, prefix = "api$"))
-public interface IAttributeInstanceMixin_API extends Attribute {
+@Mixin(ModifiableAttributeInstance.class)
+@Implements(@Interface(iface = Attribute.class, prefix = "attribute$"))
+public abstract class ModifiableAttributeInstanceMixin_API implements Attribute {
 
-    @Shadow net.minecraft.entity.ai.attributes.Attribute shadow$getAttribute();
-    @Shadow double shadow$getBaseValue();
-    @Shadow void shadow$setBaseValue(double baseValue);
-    @Shadow double shadow$getValue();
-    @Shadow net.minecraft.entity.ai.attributes.AttributeModifier shadow$getModifier(UUID uuid);
-    @Shadow boolean shadow$hasModifier(net.minecraft.entity.ai.attributes.AttributeModifier modifier);
-    @Shadow void shadow$applyModifier(net.minecraft.entity.ai.attributes.AttributeModifier modifier);
-    @Shadow void shadow$removeModifier(net.minecraft.entity.ai.attributes.AttributeModifier modifier);
-    @Shadow void shadow$removeModifier(UUID uuid);
-
-    @Shadow Set<net.minecraft.entity.ai.attributes.AttributeModifier> shadow$func_225504_a_(
-            net.minecraft.entity.ai.attributes.AttributeModifier.Operation p_225504_1_);
-
-    @Shadow Set<net.minecraft.entity.ai.attributes.AttributeModifier> shadow$func_225505_c_();
+    // @formatter:off
+    @Shadow public abstract net.minecraft.entity.ai.attributes.Attribute shadow$getAttribute();
+    @Shadow public abstract double shadow$getBaseValue();
+    @Shadow public abstract void shadow$setBaseValue(double baseValue);
+    @Shadow public abstract double shadow$getValue();
+    @Shadow public abstract net.minecraft.entity.ai.attributes.AttributeModifier shadow$getModifier(UUID uuid);
+    @Shadow public abstract boolean shadow$hasModifier(net.minecraft.entity.ai.attributes.AttributeModifier modifier);
+    @Shadow protected abstract void shadow$addModifier(net.minecraft.entity.ai.attributes.AttributeModifier modifier);
+    @Shadow public abstract void shadow$removeModifier(net.minecraft.entity.ai.attributes.AttributeModifier modifier);
+    @Shadow public abstract void shadow$removeModifier(UUID uuid);
+    @Shadow public abstract Set<net.minecraft.entity.ai.attributes.AttributeModifier> shadow$getModifiers(net.minecraft.entity.ai.attributes.AttributeModifier.Operation p_225504_1_);
+    @Shadow public abstract Set<net.minecraft.entity.ai.attributes.AttributeModifier> shadow$getModifiers();
+    // @formatter:on
 
     @Override
-    default AttributeType getType() {
+    public AttributeType getType() {
         return (AttributeType) this.shadow$getAttribute();
     }
 
     @Intrinsic
-    default double api$getBaseValue() {
+    public double attribute$getBaseValue() {
         return this.shadow$getBaseValue();
     }
 
     @Intrinsic
-    default double api$getValue() {
+    public double attribute$getValue() {
         return this.shadow$getValue();
     }
 
     @Intrinsic
-    default void api$setBaseValue(final double baseValue) {
+    public void attribute$setBaseValue(final double baseValue) {
         this.shadow$setBaseValue(baseValue);
     }
 
     @Override
-    default Collection<AttributeModifier> getModifiers() {
-        return (Collection) this.shadow$func_225505_c_();
+    public Collection<AttributeModifier> getModifiers() {
+        return (Collection) this.shadow$getModifiers();
     }
 
     @Override
-    default Collection<AttributeModifier> getModifiers(final AttributeOperation operation) {
-        return (Collection) this.shadow$func_225504_a_((net.minecraft.entity.ai.attributes.AttributeModifier.Operation) (Object) operation);
+    public Collection<AttributeModifier> getModifiers(final AttributeOperation operation) {
+        return (Collection) this.shadow$getModifiers((net.minecraft.entity.ai.attributes.AttributeModifier.Operation) (Object) operation);
     }
 
     @Override
-    default boolean hasModifier(final AttributeModifier modifier) {
+    public boolean hasModifier(final AttributeModifier modifier) {
         return this.shadow$hasModifier((net.minecraft.entity.ai.attributes.AttributeModifier) modifier);
     }
 
     @Override
-    default Optional<AttributeModifier> getModifier(final UUID uniqueId) {
+    public Optional<AttributeModifier> getModifier(final UUID uniqueId) {
         return Optional.ofNullable((AttributeModifier) this.shadow$getModifier(uniqueId));
     }
 
     @Override
-    default void addModifier(final AttributeModifier modifier) {
-        this.shadow$applyModifier((net.minecraft.entity.ai.attributes.AttributeModifier) modifier);
+    public void addModifier(final AttributeModifier modifier) {
+        this.shadow$addModifier((net.minecraft.entity.ai.attributes.AttributeModifier) modifier);
     }
 
     @Override
-    default void removeModifier(final AttributeModifier modifier) {
+    public void removeModifier(final AttributeModifier modifier) {
         this.shadow$removeModifier((net.minecraft.entity.ai.attributes.AttributeModifier) modifier);
     }
 
     @Override
-    default void removeModifier(final UUID uniqueId) {
+    public void removeModifier(final UUID uniqueId) {
         this.shadow$removeModifier(uniqueId);
     }
 

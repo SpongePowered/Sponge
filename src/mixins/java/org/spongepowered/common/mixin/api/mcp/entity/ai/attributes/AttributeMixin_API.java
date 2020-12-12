@@ -26,29 +26,48 @@ package org.spongepowered.common.mixin.api.mcp.entity.ai.attributes;
 
 import com.google.common.base.CaseFormat;
 import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.IAttribute;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.attribute.type.AttributeType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 
 @Mixin(Attribute.class)
+@Implements(@Interface(iface = AttributeType.class, prefix = "attributeType$"))
 public abstract class AttributeMixin_API implements AttributeType {
+
+    // @formatter:off
+    @Shadow public abstract double shadow$getDefaultValue();
+    @Shadow public abstract double shadow$sanitizeValue(double value);
+    // @formatter:on
 
     // This is gonna break if someone extends IAttribute
     private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void api$setKey(IAttribute parentIn, String unlocalizedNameIn, double defaultValueIn, CallbackInfo ci) {
+    private void api$setKey(String descriptionId, double defaultValueIn, CallbackInfo ci) {
         // Thankfully in 1.16, mojang does not use camelCase in attributes.
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, unlocalizedNameIn));
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, descriptionId));
     }
 
     @Override
     public ResourceKey getKey() {
         return this.api$key;
+    }
+
+    @Intrinsic
+    public double attributeType$getDefaultValue() {
+        return this.shadow$getDefaultValue();
+    }
+
+    @Override
+    public double clampValue(final double value) {
+        return this.shadow$sanitizeValue(value);
     }
 }
