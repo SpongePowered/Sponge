@@ -49,7 +49,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeAndCriterionProgress;
@@ -63,13 +62,13 @@ import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.PlatformHooks;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(AdvancementProgress.class)
 public abstract class AdvancementProgressMixin implements AdvancementProgressBridge {
@@ -82,7 +81,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
     @Override
     public Advancement bridge$getAdvancement() {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
 
         final net.minecraft.advancements.Advancement advancement = SpongeCommon.getServer().getAdvancementManager().getAdvancement(this.impl$advancementKey);
@@ -94,26 +93,26 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
     @Override
     public PlayerAdvancements bridge$getPlayerAdvancements() {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         checkState(this.impl$playerAdvancements != null, "The playerAdvancements is not yet initialized");
         return this.impl$playerAdvancements;
     }
 
     @Override
     public void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements) {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         this.impl$playerAdvancements = playerAdvancements;
     }
 
     @Override
     public void bridge$setAdvancementId(ResourceLocation key) {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         this.impl$advancementKey = key;
     }
 
     @Override
     public void bridge$invalidateAchievedState() {
-        if (!SpongeImplHooks.onServerThread()) { // Ignore on the client
+        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) { // Ignore on the client
             return;
         }
         for (final ImplementationBackedCriterionProgress progress : this.impl$getProgressMap().values()) {
@@ -123,7 +122,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
     @Override
     public void bridge$updateProgressMap() {
-        if (!SpongeImplHooks.onServerThread()) {
+        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) {
             return;
         }
         final Optional<Advancement> advancement = this.getOptionalAdvancement();
@@ -197,7 +196,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      */
     @Inject(method = "isDone", at = @At("HEAD"), cancellable = true)
     private void impl$supportComplexCriteria(final CallbackInfoReturnable<Boolean> ci) {
-        if (this.impl$advancementKey == null || !SpongeImplHooks.onServerThread()) { // Use vanilla behavior on the client
+        if (this.impl$advancementKey == null || !PlatformHooks.getInstance().getGeneralHooks().onServerThread()) { // Use vanilla behavior on the client
             return;
         }
 
@@ -215,7 +214,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      */
     @Inject(method = "grantCriterion(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
     private void impl$grantScoreCriteriaAndCallEvents(String criterion, CallbackInfoReturnable<Boolean> ci) {
-        if (!SpongeImplHooks.onServerThread()) { // Use vanilla behavior on the client
+        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) { // Use vanilla behavior on the client
             return;
         }
         ci.setReturnValue(this.impl$grantCriterion(criterion));
@@ -270,7 +269,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      */
     @Inject(method = "revokeCriterion(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
     private void impl$removeScoreCriteriaAndCallEvents(String rawCriterion, CallbackInfoReturnable<Boolean> ci) {
-        if (!SpongeImplHooks.onServerThread()) { // Use vanilla behavior on the client
+        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) { // Use vanilla behavior on the client
             return;
         }
         ci.setReturnValue(this.impl$revokeCriterion(rawCriterion));
@@ -329,7 +328,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      * @return The advancement
      */
     private Optional<Advancement> getOptionalAdvancement() {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
         final net.minecraft.advancements.Advancement advancement = SpongeCommon.getServer().getAdvancementManager().getAdvancement(this.impl$advancementKey);
         return Optional.ofNullable((Advancement)advancement);

@@ -50,19 +50,18 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(PlayerAdvancements.class)
 public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
@@ -87,7 +86,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
                     target = "Lnet/minecraft/advancements/CriterionProgress;isObtained()Z"))
     private boolean impl$onUnregisterListenersGetProgress(final CriterionProgress progress) {
         final CriterionProgressBridge mixinCriterionProgress = (CriterionProgressBridge) progress;
-        if (SpongeImplHooks.isFakePlayer(this.player) || !mixinCriterionProgress.bridge$isCriterionAvailable()) {
+        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || !mixinCriterionProgress.bridge$isCriterionAvailable()) {
             return progress.isObtained();
         }
 
@@ -111,7 +110,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
                     target = "Lnet/minecraft/advancements/AdvancementProgress;getCriterionProgress(Ljava/lang/String;)"
                             + "Lnet/minecraft/advancements/CriterionProgress;"))
     private CriterionProgress impl$updateProgressOnUnregister(final AdvancementProgress advancementProgress, final String criterion) {
-        if (SpongeImplHooks.isFakePlayer(this.player)) {
+        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer()) {
             return advancementProgress.getCriterionProgress(criterion);
         }
 

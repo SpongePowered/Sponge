@@ -49,16 +49,19 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.hooks.SpongeHooks;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginContributor;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
+import javax.management.MBeanServer;
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -269,7 +272,19 @@ public class SpongeCommand {
                 "heap-dump-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.hprof");
         // src.sendMessage(Text.of("Writing JVM heap data to: ", file));
         SpongeCommon.getLogger().info("Writing JVM heap data to: {}", file.getAbsolutePath());
-        SpongeHooks.dumpHeap(file, true);
+        try {
+            if (file.getParentFile() != null) {
+                file.getParentFile().mkdirs();
+            }
+
+            final Class clazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
+            final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+            final Object hotspotMBean = ManagementFactory.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic", clazz);
+            final Method m = clazz.getMethod("dumpHeap", String.class, boolean.class);
+            m.invoke(hotspotMBean, file.getPath(), true);
+        } catch (final Throwable t) {
+            SpongeCommon.getLogger().fatal(MessageFormat.format("Could not write heap to {0}", file));
+        }
         // src.sendMessage(Text.of("Heap dump complete"));
         SpongeCommon.getLogger().info("Heap dump complete");
         return CommandResult.success();

@@ -22,34 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity;
+package org.spongepowered.common.hooks;
 
-import net.minecraft.entity.Entity;
+public final class PlatformHookException extends RuntimeException {
 
-/**
- * Bridge methods designed as hooks for various methods called on an {@link Entity}
- * where a platform would want to adjust logic
- */
-public interface PlatformEntityBridge {
+    private static final long serialVersionUID = -5485503225708645337L;
 
-    /**
-     * Called when the {@link Entity} is to be not marked as removed.
-     */
-    default void bridge$revive() {
-        ((Entity) this).removed = false;
+    public PlatformHookException(final String message) {
+        super(message);
     }
 
-    /**
-     * Called when the {@link Entity} is to be marked to be removed.
-     *
-     * @param keepData Specify to the platform that it should keep any specific
-     * data added to this entity when removing
-     */
-    default void bridge$remove(boolean keepData) {
-        ((Entity) this).remove();
+    public PlatformHookException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 
-    default boolean bridge$isFakePlayer() {
-        return false;
+    public PlatformHookException(final Throwable cause) {
+        super(cause);
     }
 }

@@ -30,7 +30,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -41,7 +40,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
 import org.spongepowered.common.data.AbstractArchetype;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -51,16 +49,16 @@ import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity> implements EntityArchetype,
         DataContainerHolder.Mutable {
@@ -128,7 +126,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @Override
     public Optional<org.spongepowered.api.entity.Entity> apply(final ServerLocation location) {
-        if (!SpongeImplHooks.onServerThread()) {
+        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) {
             return Optional.empty();
         }
         final org.spongepowered.api.world.server.ServerWorld spongeWorld = location.getWorld();

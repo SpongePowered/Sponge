@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.hooks.SpongeImplHooks;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
@@ -88,27 +88,27 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     }
 
     @Override
-    public int getMinimumEnchantabilityForLevel(int level) {
+    public int getMinimumEnchantabilityForLevel(final int level) {
         return this.shadow$getMinEnchantability(level);
     }
 
     @Override
-    public int getMaximumEnchantabilityForLevel(int level) {
+    public int getMaximumEnchantabilityForLevel(final int level) {
         return this.shadow$getMaxEnchantability(level);
     }
 
     @Override
-    public boolean canBeAppliedByTable(ItemStack stack) {
+    public boolean canBeAppliedByTable(final ItemStack stack) {
         return this.canBeAppliedToStack(stack);
     }
 
     @Override
-    public boolean canBeAppliedToStack(ItemStack stack) {
-        return SpongeImplHooks.canEnchantmentBeAppliedToItem((Enchantment) (Object) this, ItemStackUtil.toNative(stack));
+    public boolean canBeAppliedToStack(final ItemStack stack) {
+        return PlatformHooks.getInstance().getItemHooks().canEnchantmentBeAppliedToItem((Enchantment) (Object) this, ItemStackUtil.toNative(stack));
     }
 
     @Override
-    public boolean isCompatibleWith(EnchantmentType ench) {
+    public boolean isCompatibleWith(final EnchantmentType ench) {
         return this.shadow$canApplyTogether((net.minecraft.enchantment.Enchantment) ench);
     }
 

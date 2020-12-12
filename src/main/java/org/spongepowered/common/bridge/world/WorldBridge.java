@@ -32,7 +32,7 @@ public interface WorldBridge {
     /**
      * Gets whether this world is a usable world in the context of using
      * as {@link ServerWorldBridge} and an active server world. This
-     * lazy loads the flag if {@link World#isRemote} is {@code true},
+     * lazy loads the flag if {@link World#isClientSide} is {@code true},
      * {@link World#getWorldInfo()} returns {@code null},
      * {@link World#getWorldInfo()} has a null name, or
      * if this world is not an instance of {@link ServerWorldBridge}.

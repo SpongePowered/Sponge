@@ -47,9 +47,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(FireworkRocketEntity.class)
 public abstract class FireworkRocketEntityMixin extends EntityMixin implements FusedExplosiveBridge, ExplosiveBridge {
@@ -112,7 +111,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
             target = "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V")
     )
     private void impl$useSpongeExplosion(final World world, final Entity self, final byte state) {
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             world.setEntityState(self, state);
             return;
         }
@@ -132,7 +131,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$postPrimeEvent(final CallbackInfo ci) {
-        if (this.fireworkAge == 1 && !this.world.isRemote) {
+        if (this.fireworkAge == 1 && !this.world.isClientSide) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$projectileSource);

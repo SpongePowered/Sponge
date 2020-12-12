@@ -32,8 +32,8 @@ import net.minecraft.tileentity.EndGatewayTileEntity;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -83,7 +83,7 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
 
     @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/EndGatewayTileEntity;teleportEntity(Lnet/minecraft/entity/Entity;)V"))
     private void impl$createCauseFrameForGatewayTeleport(EndGatewayTileEntity endGatewayTileEntity, Entity entityIn) {
-        if (this.shadow$getEntityWorld().isRemote) {
+        if (this.shadow$getEntityWorld().isClientSide) {
             return;
         }
 
@@ -101,7 +101,7 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
             cancellable = true
     )
     private void impl$callMoveEntityEventForThrower(RayTraceResult result, CallbackInfo ci, LivingEntity entity) {
-        if (this.shadow$getEntityWorld().isRemote) {
+        if (this.shadow$getEntityWorld().isClientSide) {
             return;
         }
         

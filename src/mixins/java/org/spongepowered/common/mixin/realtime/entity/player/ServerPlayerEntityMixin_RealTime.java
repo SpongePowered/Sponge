@@ -30,8 +30,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
 @Mixin(ServerPlayerEntity.class)
@@ -55,7 +55,7 @@ public abstract class ServerPlayerEntityMixin_RealTime extends PlayerEntityMixin
         )
     )
     private void realTimeImpl$adjustForRealTimePortalCooldown(final ServerPlayerEntity self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer((ServerPlayerEntity) (Object) this) || ((WorldBridge) this.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) (ServerPlayerEntity) (Object) this).bridge$isFakePlayer() || ((WorldBridge) this.level).bridge$isFake()) {
             this.portalCooldown = modifier;
             return;
         }

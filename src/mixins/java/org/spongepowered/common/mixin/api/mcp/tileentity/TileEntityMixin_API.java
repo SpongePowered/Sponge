@@ -47,10 +47,9 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 public abstract class TileEntityMixin_API implements BlockEntity {
@@ -78,7 +77,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
             throw new RuntimeException("The TileEntity has not been spawned in a world yet!");
         }
 
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             throw new RuntimeException("You should not attempt to make a server-side location on the client!");
         }
 

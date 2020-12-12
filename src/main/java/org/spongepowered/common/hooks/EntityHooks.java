@@ -22,34 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity;
+package org.spongepowered.common.hooks;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 
-/**
- * Bridge methods designed as hooks for various methods called on an {@link Entity}
- * where a platform would want to adjust logic
- */
-public interface PlatformEntityBridge {
+public interface EntityHooks {
 
-    /**
-     * Called when the {@link Entity} is to be not marked as removed.
-     */
-    default void bridge$revive() {
-        ((Entity) this).removed = false;
+    default boolean checkAttackEntity(final PlayerEntity player, final Entity victim) {
+        return true;
     }
 
-    /**
-     * Called when the {@link Entity} is to be marked to be removed.
-     *
-     * @param keepData Specify to the platform that it should keep any specific
-     * data added to this entity when removing
-     */
-    default void bridge$remove(boolean keepData) {
-        ((Entity) this).remove();
-    }
-
-    default boolean bridge$isFakePlayer() {
-        return false;
-    }
 }

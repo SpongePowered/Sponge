@@ -271,7 +271,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public boolean bridge$dismountRidingEntity(final DismountType type) {
-        if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
+        if (!this.world.isClientSide && (ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
@@ -459,7 +459,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Nullable
     @Overwrite
     public Entity changeDimension(net.minecraft.world.server.ServerWorld destination) {
-        if (this.shadow$getEntityWorld().isRemote || this.removed) {
+        if (this.shadow$getEntityWorld().isClientSide || this.removed) {
             return null;
         }
 
@@ -489,7 +489,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     )
     private void impl$onStartRiding(final Entity vehicle, final boolean force,
         final CallbackInfoReturnable<Boolean> ci) {
-        if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_MOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
+        if (!this.world.isClientSide && (ShouldFire.RIDE_ENTITY_EVENT_MOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
             PhaseTracker.getCauseStackManager().pushCause(this);
             if (SpongeCommon.postEvent(SpongeEventFactory.createRideEntityEventMount(PhaseTracker.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
                 ci.cancel();
@@ -518,7 +518,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         at = @At("HEAD"),
         cancellable = true)
     private void impl$onSpongeMoveEntity(final MoverType type, final Vec3d vec3d, final CallbackInfo ci) {
-        if (!this.world.isRemote && !SpongeHooks.checkEntitySpeed(((Entity) (Object) this), vec3d.getX(), vec3d.getY(), vec3d.getZ())) {
+        if (!this.world.isClientSide && !SpongeHooks.checkEntitySpeed(((Entity) (Object) this), vec3d.getX(), vec3d.getY(), vec3d.getZ())) {
             ci.cancel();
         }
     }
@@ -530,7 +530,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         )
     )
     private boolean impl$createLavaBlockDamageSource(final Entity entity, final DamageSource source, final float damage) {
-        if (this.world.isRemote) { // Short circuit
+        if (this.world.isClientSide) { // Short circuit
             return entity.attackEntityFrom(source, damage);
         }
         try {
@@ -554,7 +554,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         )
     )
     private boolean impl$spongeRedirectForFireDamage(final Entity entity, final DamageSource source, final float damage) {
-        if (this.world.isRemote) { // Short Circuit
+        if (this.world.isClientSide) { // Short Circuit
             return entity.attackEntityFrom(source, damage);
         }
         try {
@@ -590,7 +590,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Inject(method = "tick",
         at = @At("RETURN"))
     private void impl$updateVanishState(final CallbackInfo callbackInfo) {
-        if (this.impl$pendingVisibilityUpdate && !this.world.isRemote) {
+        if (this.impl$pendingVisibilityUpdate && !this.world.isClientSide) {
             final EntityTrackerAccessor trackerAccessor = ((ChunkManagerAccessor) ((ServerWorld) this.world).getChunkProvider().chunkManager).accessor$getEntityTrackers().get(this.shadow$getEntityId());
             if (trackerAccessor != null && this.impl$visibilityTicks % 4 == 0) {
                 if (this.impl$isVanished) {
@@ -663,7 +663,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             return;
         }
 
-        if (world.isRemote) {
+        if (world.isClientSide) {
             block.onEntityWalk(world, pos, entity);
             return;
         }
@@ -688,7 +688,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             return;
         }
 
-        if (world.isRemote) {
+        if (world.isClientSide) {
             blockState.onEntityCollision(world, pos, entityIn);
             return;
         }
@@ -705,7 +705,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             target = "Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
     private void impl$onBlockFallenUpon(final Block block, final net.minecraft.world.World world, final BlockPos pos,
         final Entity entity, final float fallDistance) {
-        if (world.isRemote) {
+        if (world.isClientSide) {
             block.onFallenUpon(world, pos, entity, fallDistance);
             return;
         }
@@ -783,7 +783,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     public ItemEntity entityDropItem(final ItemStack stack, final float offsetY) {
         // Sponge Start
         // Gotta stick with the client side handling things
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             // Sponge End - resume normal client code. Server side we will handle it elsewhere
             if (stack.isEmpty()) {
                 return null;
@@ -849,7 +849,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     private boolean impl$ThrowDamageEventWithLightingSource(
         final Entity entity, final DamageSource source, final float damage, final LightningBoltEntity lightningBolt) {
-        if (!this.world.isRemote) {
+        if (!this.world.isClientSide) {
             return entity.attackEntityFrom(source, damage);
         }
         try {

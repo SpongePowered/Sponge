@@ -43,12 +43,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.advancement.SpongeFilteredTrigger;
 import org.spongepowered.common.advancement.SpongeTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.PlatformHooks;
 
 @Mixin(ICriterionTrigger.Listener.class)
 public abstract class ICriterionTrigger_ListenerMixin {
@@ -68,7 +68,7 @@ public abstract class ICriterionTrigger_ListenerMixin {
         if (criterionBridge.bridge$getScoreCriterion() != null) {
             advancementCriterion = criterionBridge.bridge$getScoreCriterion();
         }
-        if (!SpongeImplHooks.onServerThread()) {
+        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) {
             // Some mods do advancement granting on async threads, and we can't allow for the spam to be thrown.
             return;
         }

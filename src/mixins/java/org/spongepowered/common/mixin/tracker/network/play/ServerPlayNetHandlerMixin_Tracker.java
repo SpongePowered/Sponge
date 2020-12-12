@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -50,7 +51,6 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(ServerPlayNetHandler.class)
@@ -63,7 +63,7 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
     @Redirect(method = "tick",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;playerTick()V"))
     private void tracker$wrapPlayerTickWithPhase(final ServerPlayerEntity player) {
-        if (SpongeImplHooks.isFakePlayer(player) || ((WorldBridge) player.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) player).bridge$isFakePlayer() || ((WorldBridge) player.level).bridge$isFake()) {
             player.tick();
             return;
         }

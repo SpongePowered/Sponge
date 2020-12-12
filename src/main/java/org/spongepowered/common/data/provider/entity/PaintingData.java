@@ -57,7 +57,7 @@ public final class PaintingData {
                     .create(Keys.ART_TYPE)
                         .get(h -> (ArtType) h.art)
                         .setAnd((h, v) -> {
-                            if (!h.world.isRemote) {
+                            if (!h.world.isClientSide) {
                                 final PaintingType oldArt = h.art;
                                 h.art = (PaintingType) v;
                                 ((HangingEntityAccessor) h).invoker$setDirection(h.getHorizontalFacing());

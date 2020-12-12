@@ -41,7 +41,7 @@ import java.util.Random;
 public abstract class WorldMixin implements WorldBridge, IWorld {
 
     // @formatter: off
-    @Shadow @Final public boolean isRemote;
+    @Shadow @Final public boolean isClientSide;
     @Shadow @Final public Dimension dimension;
     @Shadow @Final public Random rand;
     @Shadow @Final protected WorldInfo worldInfo;
@@ -62,7 +62,7 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
         if (this.impl$hasCheckedFakeState) {
             return this.impl$isFake;
         }
-        this.impl$isFake = this.isRemote || this.shadow$getWorldInfo() == null || this.shadow$getWorldInfo().getWorldName() == null || !(this instanceof TrackedWorldBridge);
+        this.impl$isFake = this.isClientSide || this.shadow$getWorldInfo() == null || this.shadow$getWorldInfo().getWorldName() == null || !(this instanceof TrackedWorldBridge);
         this.impl$hasCheckedFakeState = true;
         return this.impl$isFake;
     }

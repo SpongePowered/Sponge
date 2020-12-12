@@ -67,7 +67,6 @@ import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridg
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -186,9 +185,6 @@ public final class PacketPhaseUtil {
             }
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(packetPlayer);
-                if (SpongeImplHooks.creativeExploitCheck(packetIn, packetPlayer)) {
-                    return;
-                }
 
                 // Don't process movement capture logic if player hasn't moved
                 final boolean ignoreMovementCapture;

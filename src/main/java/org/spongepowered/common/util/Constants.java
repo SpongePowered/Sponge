@@ -862,8 +862,8 @@ public final class Constants {
 
         /* TODO - Re-evaluate how the flags are used, The current flow of a World#setBlockState with an example of 3
             goes as follows:
-            (3 & 2 != 0) && (!world.isRemote || 3 & 4 == 0) && (world.isRemote || chunk.getLocationType().isTicking) ? world.notifyBlockUpdate() (send update to client)
-            (!world.isRemote && (3 & 1 != 0)) ? world.notifyNeighbors()
+            (3 & 2 != 0) && (!world.isClientSide || 3 & 4 == 0) && (world.isClientSide || chunk.getLocationType().isTicking) ? world.notifyBlockUpdate() (send update to client)
+            (!world.isClientSide && (3 & 1 != 0)) ? world.notifyNeighbors()
             3 & 16 == 0 ? {
               newFlag = 3 & -2 = 2;
               originalState.updateDiagonal(world, pos, 2);

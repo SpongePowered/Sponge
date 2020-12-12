@@ -52,7 +52,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NBTTranslator;
-import org.spongepowered.common.hooks.SpongeImplHooks;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 
@@ -323,7 +323,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         if (this.compound != null && this.compound.contains(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
             final CompoundNBT compoundTag = this.compound.getCompound(Constants.Forge.FORGE_CAPS);
             if (compoundTag != null) {
-                SpongeImplHooks.setCapabilitiesFromSpongeBuilder((net.minecraft.item.ItemStack) (Object) stack, compoundTag);
+                PlatformHooks.getInstance().getItemHooks().setCapabilitiesFromSpongeBuilder((net.minecraft.item.ItemStack) (Object) stack, compoundTag);
             }
         }
 

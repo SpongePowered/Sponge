@@ -64,12 +64,12 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
 import org.spongepowered.api.event.entity.living.player.PlayerChangeClientSettingsEvent;
@@ -483,7 +483,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @javax.annotation.Nullable
     @Overwrite
     public Entity changeDimension(ServerWorld destination) {
-        if (this.shadow$getEntityWorld().isRemote || this.removed) {
+        if (this.shadow$getEntityWorld().isClientSide || this.removed) {
             return (ServerPlayerEntity) (Object) this;
         }
 
@@ -580,16 +580,16 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         this.impl$keepInventory = event.getKeepInventory();
 
         if (!this.shadow$isSpectator()) {
-            this.shadow$spawnDrops(cause);
+            this.shadow$dropAllDeathLoot(cause);
         }
         // Sponge End
 
         this.shadow$getWorldScoreboard().forAllObjectives(
                 ScoreCriteria.DEATH_COUNT, this.shadow$getScoreboardName(), Score::increment);
-        final LivingEntity livingentity = this.shadow$getAttackingEntity();
+        final LivingEntity livingentity = this.shadow$getKillCredit();
         if (livingentity != null) {
             this.shadow$addStat(Stats.ENTITY_KILLED_BY.get(livingentity.getType()));
-            livingentity.awardKillScore((ServerPlayerEntity) (Object) this, this.scoreValue, cause);
+            livingentity.awardKillScore((ServerPlayerEntity) (Object) this, this.deathScore, cause);
             this.shadow$createWitherRose(livingentity);
         }
 

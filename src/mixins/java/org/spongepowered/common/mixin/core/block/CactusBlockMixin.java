@@ -43,7 +43,7 @@ public abstract class CactusBlockMixin extends BlockMixin {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     private boolean impl$reAssignForBlockDamageSource(Entity this$, DamageSource source, float damage,
         net.minecraft.world.World world, BlockPos pos, net.minecraft.block.BlockState state, Entity entity) {
-        if (world.isRemote()) {
+        if (world.isClientSide()) {
             return entity.attackEntityFrom(source, damage);
         }
         try {

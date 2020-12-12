@@ -66,12 +66,11 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @Mixin(FishingBobberEntity.class)
 public abstract class FishingBobberEntityMixin extends EntityMixin {
@@ -103,7 +102,7 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
      */
     @Overwrite
     public int handleHookRetraction(ItemStack stack) {
-        if (!this.world.isRemote && this.angler != null) {
+        if (!this.world.isClientSide && this.angler != null) {
             int i = 0;
 
             // Sponge start

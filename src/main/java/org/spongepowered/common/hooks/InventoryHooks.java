@@ -22,34 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity;
+package org.spongepowered.common.hooks;
 
-import net.minecraft.entity.Entity;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 
-/**
- * Bridge methods designed as hooks for various methods called on an {@link Entity}
- * where a platform would want to adjust logic
- */
-public interface PlatformEntityBridge {
+public interface InventoryHooks {
 
-    /**
-     * Called when the {@link Entity} is to be not marked as removed.
-     */
-    default void bridge$revive() {
-        ((Entity) this).removed = false;
+    default Inventory toInventory(final Object inventory, @Nullable final Object forgeItemHandler) {
+        SpongeCommon.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
+        throw new PlatformHookException("Unreachable case for retrieving a container's mod id: " + inventory.getClass());
     }
 
-    /**
-     * Called when the {@link Entity} is to be marked to be removed.
-     *
-     * @param keepData Specify to the platform that it should keep any specific
-     * data added to this entity when removing
-     */
-    default void bridge$remove(boolean keepData) {
-        ((Entity) this).remove();
+    default InventoryAdapter findInventoryAdapter(final Object inventory) {
+        SpongeCommon.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
+        throw new PlatformHookException("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
     }
 
-    default boolean bridge$isFakePlayer() {
-        return false;
+    default String getModIdFromInventory(final Class<?> aClass) {
+        throw new PlatformHookException("Unreachable case for retrieving a container's mod id: " + aClass);
     }
 }

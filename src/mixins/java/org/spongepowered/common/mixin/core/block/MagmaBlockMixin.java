@@ -49,7 +49,7 @@ public abstract class MagmaBlockMixin extends BlockMixin {
         )
     )
     private boolean impl$swapDamageSourceForMagma(Entity entity, DamageSource source, float damage, World world, BlockPos pos, Entity original) {
-        if (!world.isRemote) {
+        if (!world.isClientSide) {
             try {
                 final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
                 final MinecraftBlockDamageSource hotFloor = new MinecraftBlockDamageSource("hotFloor", location);

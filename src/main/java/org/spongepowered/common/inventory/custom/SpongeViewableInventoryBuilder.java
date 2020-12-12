@@ -385,9 +385,9 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         // create the internal MerchantInventory (3 slots)
         // create the MerchantResultSlot
         // used to check if player is customer
-        // trigger sound (casted to Entity when !getWorld().isRemote) !!!
+        // trigger sound (casted to Entity when !getWorld().isClientSide) !!!
         // reset customer on close
-        // when closing and !getWorld().isRemote drop items back into world !!!
+        // when closing and !getWorld().isClientSide drop items back into world !!!
         // getOffers
         IMerchant merchant = null;
         ContainerTypeInfo.of(0, 0,

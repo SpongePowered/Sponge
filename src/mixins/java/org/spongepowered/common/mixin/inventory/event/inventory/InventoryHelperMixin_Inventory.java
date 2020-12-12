@@ -32,7 +32,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.hooks.SpongeImplHooks;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 
 @Mixin(InventoryHelper.class)
@@ -45,7 +45,7 @@ public abstract class InventoryHelperMixin_Inventory {
     private static void impl$dropItemsAndThrowEvents(final World world, final double x, final double y, final double z, final IInventory inventory) {
         if (world instanceof ServerWorld) {
             // Don't drop items if we are restoring blocks
-            if (SpongeImplHooks.isRestoringBlocks(world)) {
+            if (PlatformHooks.getInstance().getWorldHooks().isRestoringBlocks(world)) {
                 return;
             }
             ContainerUtil.performBlockInventoryDrops((ServerWorld) world, x, y, z, inventory);

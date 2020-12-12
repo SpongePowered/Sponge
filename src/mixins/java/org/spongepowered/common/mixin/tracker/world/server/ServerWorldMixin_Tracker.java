@@ -77,6 +77,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.bridge.block.TrackedBlockBridge;
 import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -118,7 +119,6 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Pipe
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.TileEntityPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.mixin.tracker.world.WorldMixin_Tracker;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
@@ -208,9 +208,6 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
 
     @Override
     protected void tracker$wrapTileEntityTick(final ITickableTileEntity tileEntity) {
-        if (!SpongeImplHooks.shouldTickTile(tileEntity)) {
-            return;
-        }
         final PhaseContext<@NonNull ?> state = PhaseTracker.SERVER.getPhaseContext();
         if (state.alreadyCapturingTileTicks()) {
             tileEntity.tick();
@@ -342,7 +339,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final BlockState state = this.shadow$getBlockState(pos);
         if (((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
             blockEvent.bridge$setSourceUser(currentContext.getActiveUser());
-            if (SpongeImplHooks.hasBlockTileEntity(state)) {
+            if (((BlockStateBridge) state).bridge$hasTileEntity()) {
                 blockEvent.bridge$setTileEntity((BlockEntity) this.shadow$getBlockEntity(pos));
             }
             if (blockEvent.bridge$getTileEntity() == null) {
@@ -463,7 +460,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     public Optional<WorldPipeline.Builder> bridge$startBlockChange(final BlockPos pos, final BlockState newState, final int flags) {
         if (World.isOutsideBuildHeight(pos)) {
             return Optional.empty();
-        } else if (this.shadow$isDebug()) { // isRemote is always false since this is WorldServer
+        } else if (this.shadow$isDebug()) { // isClientSide is always false since this is WorldServer
             return Optional.empty();
         }
         // Sponge Start - Sanity check against the PhaseTracker for instances
@@ -524,7 +521,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     public boolean setBlock(final BlockPos pos, final net.minecraft.block.BlockState newState, final int flags) {
         if (World.isOutsideBuildHeight(pos)) {
             return false;
-        } else if (this.shadow$isDebug()) { // isRemote is always false since this is WorldServer
+        } else if (this.shadow$isDebug()) { // isClientSide is always false since this is WorldServer
             return false;
         }
         // Sponge Start - Sanity check against the PhaseTracker for instances
@@ -566,7 +563,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final Optional<UUID> notifier = ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos);
         creator.ifPresent(builder::creator);
         notifier.ifPresent(builder::notifier);
-        final boolean hasTileEntity = SpongeImplHooks.hasBlockTileEntity(state);
+        final boolean hasTileEntity = ((BlockStateBridge) state).bridge$hasTileEntity();
         final TileEntity tileEntity = chunk.getBlockEntity(pos, Chunk.CreateEntityType.CHECK);
         if (hasTileEntity || tileEntity != null) {
             // We MUST only check to see if a TE exists to avoid creating a new one.

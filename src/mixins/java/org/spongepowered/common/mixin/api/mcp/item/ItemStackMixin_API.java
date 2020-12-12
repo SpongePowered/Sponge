@@ -48,7 +48,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.persistence.NBTTranslator;
-import org.spongepowered.common.hooks.SpongeImplHooks;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.Constants;
 
@@ -187,7 +187,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 //            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
 //        }
         try {
-            SpongeImplHooks.writeItemStackCapabilitiesToDataView(container, (net.minecraft.item.ItemStack) (Object) this);
+            PlatformHooks.getInstance().getItemHooks().writeItemStackCapabilitiesToDataView(container, (net.minecraft.item.ItemStack) (Object) this);
         } catch (final Exception e) {
             e.printStackTrace();
         }
@@ -199,7 +199,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     }
 
     public boolean itemStack$equalTo(final ItemStack that) {
-        return net.minecraft.item.ItemStack.areItemStacksEqual(
+        return net.minecraft.item.ItemStack.tagMatches(
                 (net.minecraft.item.ItemStack) (Object) this,
                 (net.minecraft.item.ItemStack) (Object) that
         );

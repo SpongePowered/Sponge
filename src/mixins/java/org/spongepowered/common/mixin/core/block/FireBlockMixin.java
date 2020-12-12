@@ -74,7 +74,7 @@ public abstract class FireBlockMixin extends BlockMixin {
         cancellable = true)
     private void impl$onCatchFirePreCheck(
         final World world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
-        if (!world.isRemote) {
+        if (!world.isClientSide) {
             if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }
@@ -90,7 +90,7 @@ public abstract class FireBlockMixin extends BlockMixin {
         cancellable = true)
     private void impl$onCatchFirePreCheckOther(
         final World world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
-        if (!world.isRemote) {
+        if (!world.isClientSide) {
             if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }

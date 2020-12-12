@@ -118,6 +118,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
@@ -133,8 +134,6 @@ import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.hooks.SpongeHooks;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -412,7 +411,7 @@ public final class SpongeCommonEventFactory {
             frame.pushCause(source);
             if (source instanceof Player) {
                 player = (PlayerEntity) source;
-                if (SpongeImplHooks.isFakePlayer(player)) {
+                if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
                     frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
                 }
             }
@@ -582,7 +581,7 @@ public final class SpongeCommonEventFactory {
     public static InteractItemEvent.Primary callInteractItemEventPrimary(final PlayerEntity player, final ItemStack stack, final Hand hand,
         @Nullable final Vector3d hitVec, final Object hitTarget) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            if (SpongeImplHooks.isFakePlayer(player)) {
+            if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
@@ -612,7 +611,7 @@ public final class SpongeCommonEventFactory {
         @Nullable final Vector3d hitVec, final Object hitTarget) {
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            if (SpongeImplHooks.isFakePlayer(player)) {
+            if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
@@ -648,7 +647,7 @@ public final class SpongeCommonEventFactory {
             @Nullable final net.minecraft.util.Direction side, @Nullable final Vector3d hitVec) {
         final HandType handType = (HandType) (Object) hand;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            if (SpongeImplHooks.isFakePlayer(player)) {
+            if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
@@ -685,7 +684,7 @@ public final class SpongeCommonEventFactory {
             final Tristate originalUseItemResult, final Tristate useItemResult, @Nullable final Vector3d hitVec, final BlockSnapshot targetBlock,
             final Direction targetSide, final Hand hand) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            if (SpongeImplHooks.isFakePlayer(player)) {
+            if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
@@ -802,9 +801,6 @@ public final class SpongeCommonEventFactory {
                     originalChannel, Optional.of(originalChannel), originalMessage, originalMessage, (Living) entity,
                     entity.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY), messageCancelled);
             SpongeCommon.postEvent(event);
-            if (!event.isCancelled()) {
-                SpongeHooks.logEntityDeath(entity);
-            }
 
             return event;
         }

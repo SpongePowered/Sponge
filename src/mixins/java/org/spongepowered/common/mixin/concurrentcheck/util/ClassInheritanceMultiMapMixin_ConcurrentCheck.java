@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
+import org.spongepowered.common.hooks.PlatformHooks;
 
 @Mixin(ClassInheritanceMultiMap.class)
 public abstract class ClassInheritanceMultiMapMixin_ConcurrentCheck {
@@ -39,7 +39,9 @@ public abstract class ClassInheritanceMultiMapMixin_ConcurrentCheck {
     @Inject(method = "add", at = @At("HEAD"), cancellable = true)
     private void concurrentCheck$checkThreadOnAdd(final Object entity, final CallbackInfoReturnable<Boolean> cir) {
         // This class gets used on the client, but we only care about the server
-        if (SpongeCommon.getGame().getPlatform().getExecutionType() != Platform.Type.CLIENT && !SpongeImplHooks.onServerThread()) {
+        if (SpongeCommon.getGame().getPlatform().getExecutionType() != Platform.Type.CLIENT && !PlatformHooks.getInstance()
+            .getGeneralHooks()
+            .onServerThread()) {
             Thread.dumpStack();
             SpongeCommon.getLogger().error("Detected attempt to add entity '" + entity + "' to ClassInheritanceMultiMap asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
@@ -50,7 +52,9 @@ public abstract class ClassInheritanceMultiMapMixin_ConcurrentCheck {
 
     @Inject(method = "remove", at = @At("HEAD"), cancellable = true)
     private void concurrentCheck$checkServerThreadSide(final Object entity, final CallbackInfoReturnable<Boolean> cir) {
-        if (SpongeCommon.getGame().getPlatform().getExecutionType() != Platform.Type.CLIENT && !SpongeImplHooks.onServerThread()) {
+        if (SpongeCommon.getGame().getPlatform().getExecutionType() != Platform.Type.CLIENT && !PlatformHooks.getInstance()
+            .getGeneralHooks()
+            .onServerThread()) {
             Thread.dumpStack();
             SpongeCommon.getLogger().error("Detected attempt to remove entity '" + entity + "' from ClassInheritanceMultiMap asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"

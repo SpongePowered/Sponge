@@ -22,37 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.common;
+package org.spongepowered.common.hooks;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 
-@Mixin(SpongeImplHooks.class)
-public class SpongeImplHooks_Tracker {
+public interface WorldHooks {
 
-    /**
-     * @author gabizou - February 22nd, 2020 - Minecraft 1.14.3
-     * @reason PhaseTracker is somewhat optionally enabled, so the restoring
-     * is potentially not even available.
-     *
-     * @param world The world object
-     * @return True if the tracker is currently working on that world and restoring
-     */
-    @Overwrite(remap = false)
-    @SuppressWarnings("unused") // overridden to be used in MixinSpongeImplHooks.
-    public static boolean isRestoringBlocks(World world) {
-        if (((WorldBridge) world).bridge$isFake()) {
-            return false;
-        }
-        final MinecraftServer server = world.getServer();
-        if (server == null || !server.isSameThread()) {
-            return PhaseTracker.getInstance().getPhaseContext().isRestoring();
-        }
-        return PhaseTracker.SERVER.getPhaseContext().isRestoring();
+    default Entity getCustomEntityIfItem(final Entity entity) {
+        return null;
+    }
+
+    default boolean isRestoringBlocks(final World world) {
+        return PhaseTracker.getInstance().getPhaseContext().isRestoring();
     }
 }

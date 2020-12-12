@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.hooks.SpongeImplHooks;
+import org.spongepowered.common.hooks.PlatformHooks;
 
 @Mixin(ThreadTaskExecutor.class)
 public abstract class ThreadTaskExecutorMixin_Tracker<R extends Runnable> {
@@ -46,7 +46,7 @@ public abstract class ThreadTaskExecutorMixin_Tracker<R extends Runnable> {
                     remap = false))
     private void tracker$callOnMainThreadWithPhaseState(final Runnable runnable) {
         // This method can be called async while server is stopping
-        if (this.tracker$isServerAndIsServerStopped() && !SpongeImplHooks.onServerThread()) {
+        if (this.tracker$isServerAndIsServerStopped() && !PlatformHooks.getInstance().getGeneralHooks().onServerThread()) {
             runnable.run();
             return;
         }

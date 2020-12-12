@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.hooks;
 
-import java.util.Set;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SJoinGamePacket;
 import net.minecraft.network.play.server.SRespawnPacket;
@@ -33,6 +32,8 @@ import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
+
+import java.util.Set;
 
 public interface PacketHooks {
 
@@ -95,4 +96,5 @@ public interface PacketHooks {
               keepAllPlayerData
         );
     }
+
 }

@@ -61,7 +61,6 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.hooks.PlatformHooks;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionChangeResult;
 import org.spongepowered.common.world.portal.PortalHelper;
@@ -273,7 +272,7 @@ public final class EntityUtil {
         if (minecraftEntity instanceof ItemEntity) {
             final ItemStack item = ((ItemEntity) minecraftEntity).getItem();
             if (!item.isEmpty()) {
-                final Optional<Entity> customEntityItem = Optional.ofNullable(SpongeImplHooks.getCustomEntityIfItem(minecraftEntity));
+                final Optional<Entity> customEntityItem = Optional.ofNullable(PlatformHooks.getInstance().getWorldHooks().getCustomEntityIfItem(minecraftEntity));
                 if (customEntityItem.isPresent()) {
                     // Bypass spawning the entity item, since it is established that the custom entity is spawned.
                     final Entity entityToSpawn = customEntityItem.get();

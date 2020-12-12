@@ -33,7 +33,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.FishingBobber;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -64,7 +63,7 @@ public abstract class FishingRodItemMixin {
             target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", ordinal = 1),
             cancellable = true)
     private void onThrowEvent(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
-        if (world.isRemote) {
+        if (world.isClientSide) {
             // Only fire event on server-side to avoid crash on client
             return;
         }

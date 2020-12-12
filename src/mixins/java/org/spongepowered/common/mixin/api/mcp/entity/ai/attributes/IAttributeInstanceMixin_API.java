@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai.attributes;
 
-import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import org.spongepowered.api.entity.attribute.Attribute;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
@@ -45,7 +44,7 @@ import java.util.UUID;
 @Implements(@Interface(iface = Attribute.class, prefix = "api$"))
 public interface IAttributeInstanceMixin_API extends Attribute {
 
-    @Shadow IAttribute shadow$getAttribute();
+    @Shadow net.minecraft.entity.ai.attributes.Attribute shadow$getAttribute();
     @Shadow double shadow$getBaseValue();
     @Shadow void shadow$setBaseValue(double baseValue);
     @Shadow double shadow$getValue();

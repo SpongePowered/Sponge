@@ -31,8 +31,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.entity.LivingEntityMixin_RealTime;
 
@@ -45,7 +45,7 @@ public abstract class PlayerEntityMixin_RealTime extends LivingEntityMixin_RealT
     @Redirect(method = "tick",
         at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerEntity;takeXpDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void realTimeImpl$adjustForRealTimeXpCooldown(final PlayerEntity self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this) || ((WorldBridge) this.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) (PlayerEntity) (Object) this).bridge$isFakePlayer() || ((WorldBridge) this.level).bridge$isFake()) {
             this.takeXpDelay = modifier;
         }
         final int ticks = (int) ((RealTimeTrackingBridge) self.getCommandSenderWorld()).realTimeBridge$getRealTimeTicks();
@@ -72,7 +72,7 @@ public abstract class PlayerEntityMixin_RealTime extends LivingEntityMixin_RealT
         )
     )
     private void realTimeImpl$adjustForRealTimeSleepTimer(final PlayerEntity self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this) || ((WorldBridge) this.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) (PlayerEntity) (Object) this).bridge$isFakePlayer() || ((WorldBridge) this.level).bridge$isFake()) {
             this.sleepCounter = modifier;
         }
         final int ticks = (int) ((RealTimeTrackingBridge) self.getCommandSenderWorld()).realTimeBridge$getRealTimeTicks();
@@ -99,7 +99,7 @@ public abstract class PlayerEntityMixin_RealTime extends LivingEntityMixin_RealT
         )
     )
     private void realTimeImpl$adjustForRealTimeWakeTimer(final PlayerEntity self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this) || ((WorldBridge) this.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) (PlayerEntity) (Object) this).bridge$isFakePlayer() || ((WorldBridge) this.level).bridge$isFake()) {
             this.sleepCounter = modifier;
         }
         final int ticks = (int) ((RealTimeTrackingBridge) self.getCommandSenderWorld()).realTimeBridge$getRealTimeTicks();

@@ -22,34 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity;
+package org.spongepowered.common.hooks;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import org.spongepowered.api.data.persistence.DataContainer;
 
-/**
- * Bridge methods designed as hooks for various methods called on an {@link Entity}
- * where a platform would want to adjust logic
- */
-public interface PlatformEntityBridge {
+public interface ItemHooks {
 
-    /**
-     * Called when the {@link Entity} is to be not marked as removed.
-     */
-    default void bridge$revive() {
-        ((Entity) this).removed = false;
+    default void setCapabilitiesFromSpongeBuilder(final ItemStack stack, final CompoundNBT compound) { }
+
+    default boolean canEnchantmentBeAppliedToItem(final Enchantment enchantment, final ItemStack stack) {
+        return enchantment.canEnchant(stack);
     }
 
-    /**
-     * Called when the {@link Entity} is to be marked to be removed.
-     *
-     * @param keepData Specify to the platform that it should keep any specific
-     * data added to this entity when removing
-     */
-    default void bridge$remove(boolean keepData) {
-        ((Entity) this).remove();
-    }
-
-    default boolean bridge$isFakePlayer() {
-        return false;
-    }
+    default void writeItemStackCapabilitiesToDataView(final DataContainer container, final ItemStack stack) { }
 }

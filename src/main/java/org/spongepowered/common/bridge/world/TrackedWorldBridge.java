@@ -35,8 +35,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
@@ -81,7 +81,7 @@ public interface TrackedWorldBridge {
      * Creates a {@link BlockSnapshot} but performs an additional {@link Chunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
      * lookup if the providing {@link BlockState#getBlock()} {@code instanceof} is
      * {@code true} for being an {@link ITileEntityProvider} or
-     * {@link SpongeImplHooks#hasBlockTileEntity(BlockState)}, and associates
+     * {@link BlockStateBridge#bridge$hasTileEntity()}, and associates
      * the resulting snapshot of said Tile with the snapshot. This is useful for in-progress
      * snapshot creation during transaction building for {@link TransactionalCaptureSupplier}.
      *

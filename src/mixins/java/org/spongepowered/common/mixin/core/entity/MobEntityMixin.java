@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.entity;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.GoalSelector;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
@@ -68,10 +68,9 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 @Mixin(MobEntity.class)
 public abstract class MobEntityMixin extends LivingEntityMixin {
@@ -110,7 +109,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         ),
         cancellable = true)
     private void impl$ThrowUnleashEvent(final boolean sendPacket, final boolean dropLead, final CallbackInfo ci) {
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             return;
         }
 
@@ -140,7 +139,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
      */
     @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
     private void onSetAttackTarget(@Nullable final LivingEntity entitylivingbaseIn, final CallbackInfo ci) {
-        if (this.world.isRemote || entitylivingbaseIn == null) {
+        if (this.world.isClientSide || entitylivingbaseIn == null) {
             return;
         }
         //noinspection ConstantConditions
@@ -209,16 +208,16 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @Overwrite
     public boolean attackEntityAsMob(final net.minecraft.entity.Entity targetEntity) {
         // Sponge Start - Prepare our event values
-        // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
-        final double originalBaseDamage = this.shadow$getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+        // float baseDamage = this.getEntityAttribute(Attributes.attackDamage).getAttributeValue();
+        final double originalBaseDamage = this.shadow$getAttribute(Attributes.ATTACK_DAMAGE).getValue();
         final List<DamageFunction> originalFunctions = new ArrayList<>();
         // Sponge End
-        float knockbackModifier = (float) this.shadow$getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).getValue();
+        float knockbackModifier = (float) this.shadow$getAttribute(Attributes.ATTACK_KNOCKBACK).getValue();
 
         if (targetEntity instanceof LivingEntity) {
             // Sponge Start - Gather modifiers
             originalFunctions.addAll(DamageEventHandler
-                .createAttackEnchantmentFunction(this.shadow$getHeldItemMainhand(), ((LivingEntity) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
+                .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), ((LivingEntity) targetEntity).getMobType(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
             // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
             knockbackModifier += EnchantmentHelper.getKnockbackModifier((MobEntity) (Object) this);
         }
@@ -252,7 +251,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
 
             if (targetEntity instanceof PlayerEntity) {
                 final PlayerEntity playerentity = (PlayerEntity) targetEntity;
-                final ItemStack itemstack = this.shadow$getHeldItemMainhand();
+                final ItemStack itemstack = this.shadow$getMainHandItem();
                 final ItemStack itemstack1 = playerentity.isHandActive() ? playerentity.getActiveItemStack() : ItemStack.EMPTY;
                 if (!itemstack.isEmpty() && !itemstack1.isEmpty() && itemstack.getItem() instanceof AxeItem && itemstack1.getItem() == Items.SHIELD) {
                     final float f2 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier((MobEntity) (Object) this) * 0.05F;
@@ -264,7 +263,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
             }
 
             this.shadow$applyEnchantments((MobEntity) (Object) this, targetEntity);
-            this.shadow$setLastAttackedEntity(targetEntity);
+            this.shadow$setLastHurtMob(targetEntity);
         }
 
         return attackSucceeded;
@@ -272,7 +271,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
 
     @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(final double value) {
-        if (!this.world.isRemote) {
+        if (!this.world.isClientSide) {
             return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getHardDespawnRange(), 2);
         }
         return value;
@@ -281,7 +280,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     // Note that this should inject twice.
     @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(final double value) {
-        if (!this.world.isRemote) {
+        if (!this.world.isClientSide) {
             return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getSoftDespawnRange(), 2);
         }
         return value;
@@ -289,7 +288,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
 
     @ModifyConstant(method = "checkDespawn", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(final int value) {
-        if (!this.world.isRemote) {
+        if (!this.world.isClientSide) {
             return ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getMinimumLife() * 20;
         }
         return value;

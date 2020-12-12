@@ -108,7 +108,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     public void doExplosionA() {
 
         // Sponge Start - Do not run calculation logic on client thread
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             return;
         }
         // Sponge End

@@ -41,7 +41,7 @@ public abstract class MobEntityMixin_RealTime extends LivingEntityMixin_RealTime
         method = "updateEntityActionState",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/entity/MobEntity;idleTime:I",
+            target = "Lnet/minecraft/entity/MobEntity;noActionTime:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(

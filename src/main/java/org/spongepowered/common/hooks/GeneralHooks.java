@@ -26,6 +26,7 @@ package org.spongepowered.common.hooks;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import org.spongepowered.api.Sponge;
 
 public interface GeneralHooks {
 
@@ -36,5 +37,12 @@ public interface GeneralHooks {
         }
 
         return d0;
+    }
+
+    default boolean onServerThread() {
+        // Return true when the server isn't yet initialized, this means on a client
+        // that the game is still being loaded. This is needed to support initialization
+        // events with cause tracking.
+        return !Sponge.isServerAvailable() || Sponge.getServer().onMainThread();
     }
 }

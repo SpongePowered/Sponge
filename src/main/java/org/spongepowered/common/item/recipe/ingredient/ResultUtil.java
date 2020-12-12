@@ -33,11 +33,12 @@ import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.hooks.SpongeHooks;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -78,7 +79,10 @@ public class ResultUtil {
 
     public static <C extends IInventory> String cacheResultFunction(ResourceLocation id, Function<C, net.minecraft.item.ItemStack> resultFunction) {
         if (ResultUtil.cachedResultFunctions.put(id.toString(), resultFunction) != null) {
-            SpongeHooks.logWarning("Duplicate cache result registration! " + id.toString() + " was replaced.");
+            SpongeCommon.getLogger().warn(MessageFormat.format(
+                "Duplicate cache result registration! " + id.toString() + " was replaced.",
+                new Object[]{ }
+            ));
         }
         return id.toString();
     }
@@ -96,7 +100,10 @@ public class ResultUtil {
 
     public static <C extends IInventory> String cacheRemainingItemsFunction(ResourceLocation id, Function<C, NonNullList<net.minecraft.item.ItemStack>> resultFunction) {
         if (ResultUtil.cachedRemainingItemsFunctions.put(id.toString(), resultFunction) != null) {
-            SpongeHooks.logWarning("Duplicate cache result registration! " + id.toString() + " was replaced.");
+            SpongeCommon.getLogger().warn(MessageFormat.format(
+                "Duplicate cache result registration! " + id.toString() + " was replaced.",
+                new Object[]{ }
+            ));
         }
         return id.toString();
     }

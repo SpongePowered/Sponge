@@ -46,14 +46,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.advancement.criterion.DefaultedAdvancementCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeScoreCriterion;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
+import org.spongepowered.common.hooks.PlatformHooks;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,8 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(Advancement.class)
 public abstract class AdvancementMixin implements AdvancementBridge {
@@ -84,7 +83,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
     private void impl$setUpSpongeFields(ResourceLocation location, @Nullable Advancement parent, @Nullable DisplayInfo displayInfo,
             AdvancementRewards rewards, Map<String, Criterion> criteria, String[][] requirements, CallbackInfo ci) {
         // Don't do anything on the client, unless we're performing registry initialization
-        if (!SpongeImplHooks.onServerThread()) {
+        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) {
             return;
         }
         if (displayInfo != null) {
@@ -141,31 +140,31 @@ public abstract class AdvancementMixin implements AdvancementBridge {
 
     @Override
     public Optional<Advancement> bridge$getParent() {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         return Optional.ofNullable(this.parent);
     }
 
     @Override
     public void bridge$setParent(@Nullable final Advancement advancement) {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         this.parent = advancement;
     }
 
     @Override
     public AdvancementCriterion bridge$getCriterion() {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         return this.impl$criterion;
     }
 
     @Override
     public void bridge$setCriterion(final AdvancementCriterion criterion) {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         this.impl$criterion = criterion;
     }
 
     @Override
     public List<Component> bridge$getToastText() {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         return this.impl$toastText;
     }
 

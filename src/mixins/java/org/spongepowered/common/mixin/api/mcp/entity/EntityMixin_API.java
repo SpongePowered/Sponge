@@ -64,14 +64,13 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.entity.Entity.class)
 @Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$"))
@@ -194,7 +193,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             ((ServerPlayerEntity) (Entity) (Object) this).connection.setPlayerLocation(this.getPosition().getX(), this.getPosition().getY(),
                     this.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class));
         } else {
-            if (!this.shadow$getEntityWorld().isRemote) { // We can't set the rotation update on client worlds.
+            if (!this.shadow$getEntityWorld().isClientSide) { // We can't set the rotation update on client worlds.
                 ((ServerWorldBridge) this.getWorld()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
             }
 

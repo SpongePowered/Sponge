@@ -87,7 +87,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
         PATH_CANONICALIZERS = ImmutableMap.of("h2", (plugin, orig) -> {
             // Bleh if only h2 had a better way of supplying a base directory... oh well...
             final org.h2.engine.ConnectionInfo h2Info = new org.h2.engine.ConnectionInfo(orig);
-            if (!h2Info.isPersistent() || h2Info.isRemote()) {
+            if (!h2Info.isPersistent() || h2Info.isClientSide()) {
                 return orig;
             }
             if (orig.startsWith("file:")) {

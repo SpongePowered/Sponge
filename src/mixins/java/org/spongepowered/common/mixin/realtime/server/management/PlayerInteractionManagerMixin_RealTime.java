@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
 @Mixin(PlayerInteractionManager.class)
@@ -61,7 +61,7 @@ public abstract class PlayerInteractionManagerMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeDiggingTime(final PlayerInteractionManager self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((WorldBridge) this.level).bridge$isFake()) {
             this.gameTicks = modifier;
             return;
         }
