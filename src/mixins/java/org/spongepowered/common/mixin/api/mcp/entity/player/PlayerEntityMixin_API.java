@@ -41,21 +41,23 @@ import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.LivingEntityMixin_API;
 
 @Mixin(PlayerEntity.class)
-@Implements(@Interface(iface = Player.class, prefix = "api$"))
+@Implements(@Interface(iface = Player.class, prefix = "player$"))
 public abstract class PlayerEntityMixin_API extends LivingEntityMixin_API {
 
-    @Shadow public Container openContainer;
-    @Shadow public float experience;
+    // @formatter:off
+    @Shadow public Container containerMenu;
+    @Shadow public float experienceProgress;
     @Shadow @Final public PlayerAbilities abilities;
     @Shadow @Final public PlayerInventory inventory;
-    @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
+    @Shadow public abstract CooldownTracker shadow$getCooldowns();
     @Shadow public abstract ITextComponent shadow$getDisplayName();
     @Shadow public abstract ITextComponent shadow$getName();
+    // @formatter:on
 
     final boolean impl$isFake = ((PlatformEntityBridge) (PlayerEntity) (Object) this).bridge$isFakePlayer();
 
     @Intrinsic
-    public String api$getName() {
+    public String player$getName() {
         return this.shadow$getName().getString();
     }
 

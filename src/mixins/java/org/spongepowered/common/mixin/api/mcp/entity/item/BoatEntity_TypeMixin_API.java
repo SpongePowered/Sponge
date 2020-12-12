@@ -40,7 +40,10 @@ import org.spongepowered.common.SpongeCommon;
 @Mixin(BoatEntity.Type.class)
 public abstract class BoatEntity_TypeMixin_API implements BoatType {
 
-    @Shadow @Final private Block block;
+    // @formatter:off
+    @Shadow @Final private Block planks;
+    // @formatter:on
+
     private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -55,6 +58,6 @@ public abstract class BoatEntity_TypeMixin_API implements BoatType {
 
     @Override
     public BlockType getRepresentedBlock() {
-        return (BlockType) this.block;
+        return (BlockType) this.planks;
     }
 }

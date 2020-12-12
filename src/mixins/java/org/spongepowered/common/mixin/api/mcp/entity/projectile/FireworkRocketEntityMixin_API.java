@@ -36,15 +36,15 @@ import java.util.Set;
 public abstract class FireworkRocketEntityMixin_API extends ProjectileEntityMixin_API implements FireworkRocket {
 
     // @formatter:off
-    @Shadow private int fireworkAge;
+    @Shadow private int life;
     @Shadow private int lifetime;
-    @Shadow protected abstract void shadow$func_213893_k();
+    @Shadow protected abstract void shadow$explode();
     // @formatter:on
 
     @Override
     public void detonate() {
-        this.fireworkAge = this.lifetime + 1;
-        this.shadow$func_213893_k();
+        this.life = this.lifetime + 1;
+        this.shadow$explode();
     }
 
     @Override

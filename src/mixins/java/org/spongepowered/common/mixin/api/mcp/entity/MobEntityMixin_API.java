@@ -42,8 +42,10 @@ import java.util.Set;
 @Mixin(MobEntity.class)
 public abstract class MobEntityMixin_API extends LivingEntityMixin_API implements Agent {
 
+    // @formatter:off
     @Shadow @Final protected GoalSelector goalSelector;
     @Shadow @Final protected GoalSelector targetSelector;
+    // @formatter:on
 
     @Override
     public <T extends Agent> Optional<GoalExecutor<T>> getGoal(GoalExecutorType type) {

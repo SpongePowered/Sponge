@@ -35,12 +35,14 @@ import java.util.Set;
 @Mixin(SpellcastingIllagerEntity.class)
 public abstract class SpellcastingIllagerEntityMixin_API extends AbstractIllagerEntityMixin_API implements Spellcaster {
 
-    @Shadow protected int spellTicks;
+    // @formatter:off
+    @Shadow protected int spellCastingTickCount;
+    // @formatter:on
 
     @Override
     public void castSpell(boolean castSpell) {
         if (!castSpell) {
-            this.spellTicks = 0;
+            this.spellCastingTickCount = 0;
             return;
         }
 

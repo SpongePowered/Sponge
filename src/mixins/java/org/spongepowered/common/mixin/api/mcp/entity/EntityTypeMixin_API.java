@@ -31,21 +31,21 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 
 @Mixin(net.minecraft.entity.EntityType.class)
-@Implements(@Interface(iface = EntityType.class, prefix = "entitytype$"))
 public abstract class EntityTypeMixin_API<T extends Entity> implements EntityType<T> {
 
-    @Shadow public abstract ITextComponent shadow$getName();
-    @Shadow public abstract boolean shadow$func_225437_d();
-    @Shadow public abstract boolean shadow$isSerializable();
-    @Shadow public abstract boolean shadow$isImmuneToFire();
-    @Shadow public abstract boolean shadow$isSummonable();
+    // @formatter:off
+    @Shadow public abstract ITextComponent shadow$getDescription();
+    @Shadow public abstract boolean shadow$canSpawnFarFromPlayer();
+    @Shadow public abstract boolean shadow$canSerialize();
+    @Shadow public abstract boolean shadow$fireImmune();
+    @Shadow public abstract boolean shadow$canSummon();
+    // @formatter:on
 
     @Override
     public ResourceKey getKey() {
@@ -54,26 +54,26 @@ public abstract class EntityTypeMixin_API<T extends Entity> implements EntityTyp
 
     @Override
     public Component asComponent() {
-        return SpongeAdventure.asAdventure(this.shadow$getName());
+        return SpongeAdventure.asAdventure(this.shadow$getDescription());
     }
 
     @Override
     public boolean isTransient() {
-        return !this.shadow$isSerializable();
+        return !this.shadow$canSerialize();
     }
 
     @Override
     public boolean isFlammable() {
-        return !this.shadow$isImmuneToFire();
+        return !this.shadow$fireImmune();
     }
 
     @Override
     public boolean canSpawnAwayFromPlayer() {
-        return this.shadow$func_225437_d();
+        return this.shadow$canSpawnFarFromPlayer();
     }
 
-    @Intrinsic
-    public boolean entitytype$isSummonable() {
-        return this.shadow$isSummonable();
+    @Override
+    public boolean isSummonable() {
+        return this.shadow$canSummon();
     }
 }

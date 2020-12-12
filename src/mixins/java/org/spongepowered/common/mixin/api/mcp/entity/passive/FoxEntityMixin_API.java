@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 import net.minecraft.entity.passive.FoxEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Fox;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -36,11 +37,14 @@ import java.util.UUID;
 @Mixin(FoxEntity.class)
 public abstract class FoxEntityMixin_API extends AnimalEntityMixin_API implements Fox {
 
-    @Shadow protected abstract boolean shadow$isTrustedUUID(UUID p_213468_1_);
+    // @formatter:off
+    @Shadow protected abstract boolean shadow$trusts(UUID p_213468_1_);
+    // @formatter:on
 
     @Override
+    @Intrinsic
     public boolean trusts(UUID uniqueId) {
-        return this.shadow$isTrustedUUID(uniqueId);
+        return this.shadow$trusts(uniqueId);
     }
 
     @Override

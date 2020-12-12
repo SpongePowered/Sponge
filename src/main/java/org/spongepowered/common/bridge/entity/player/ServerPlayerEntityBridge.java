@@ -126,7 +126,7 @@ public interface ServerPlayerEntityBridge {
                 isFlat, keepPlayerData));
     }
 
-    default void bridge$sendViewerEnvironment(final SpongeDimensionType dimensionType) {
+    default void bridge$sendViewerEnvironment(final DimensionType dimensionType) {
     }
 
     boolean bridge$kick(final Component message);

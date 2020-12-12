@@ -30,7 +30,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(VillagerType.class)
-public class VillagerTypeMixin_API implements org.spongepowered.api.data.type.VillagerType {
+public abstract class VillagerTypeMixin_API implements org.spongepowered.api.data.type.VillagerType {
 
     @Override
     public ResourceKey getKey() {

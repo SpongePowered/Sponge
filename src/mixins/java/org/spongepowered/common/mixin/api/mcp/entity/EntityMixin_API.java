@@ -34,7 +34,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -78,30 +77,29 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     // @formatter:off
 
-    @Shadow public float rotationYaw;
-    @Shadow public float rotationPitch;
+    @Shadow public float yRot;
+    @Shadow public float xRot;
     @Shadow public boolean removed;
-    @Final @Shadow protected Random rand;
-    @Shadow public int ticksExisted;
-    @Shadow public DimensionType dimension;
-    @Shadow protected UUID entityUniqueID;
+    @Final @Shadow protected Random random;
+    @Shadow public int tickCount;
+    @Shadow protected UUID uuid;
     @Shadow @Final private net.minecraft.entity.EntityType<?> type;
 
-    @Shadow public abstract double shadow$getPosX();
-    @Shadow public abstract double shadow$getPosY();
-    @Shadow public abstract double shadow$getPosZ();
-    @Shadow public abstract net.minecraft.world.World shadow$getEntityWorld();
+    @Shadow public abstract double shadow$getX();
+    @Shadow public abstract double shadow$getY();
+    @Shadow public abstract double shadow$getZ();
+    @Shadow public abstract net.minecraft.world.World shadow$getCommandSenderWorld();
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
-    @Shadow public abstract void shadow$setPosition(double x, double y, double z);
+    @Shadow public abstract void shadow$setPos(double x, double y, double z);
     @Shadow public abstract void shadow$remove();
-    @Shadow public abstract UUID shadow$getUniqueID();
-    @Shadow public abstract void shadow$setFire(int seconds);
-    @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
-    @Shadow public abstract int shadow$getEntityId();
+    @Shadow public abstract UUID shadow$getUUID();
+    @Shadow public abstract void shadow$setRemainingFireTicks(int ticks);
+    @Shadow public abstract boolean shadow$hurt(DamageSource source, float amount);
+    @Shadow public abstract int shadow$getId();
     @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
-    @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow protected abstract void shadow$setRot(float yaw, float pitch);
     @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
-    @Shadow public abstract boolean shadow$writeUnlessRemoved(CompoundNBT compound);
+    @Shadow public abstract boolean shadow$saveAsPassenger(CompoundNBT compound);
     @Shadow @Nullable public abstract ITextComponent shadow$getCustomName();
     @Shadow public abstract ITextComponent shadow$getDisplayName();
 
@@ -109,17 +107,17 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public Random getRandom() {
-        return this.rand;
+        return this.random;
     }
 
     @Override
     public Vector3d getPosition() {
-        return new Vector3d(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ());
+        return new Vector3d(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
     }
 
     @Override
     public ServerLocation getLocation() {
-        return ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.shadow$getEntityWorld(), this.getPosition());
+        return ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.shadow$getCommandSenderWorld(), this.getPosition());
     }
 
     @Override
@@ -159,11 +157,11 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         Preconditions.checkNotNull(transform, "The transform cannot be null!");
         final Vector3d position = transform.getPosition();
-        this.shadow$setPosition(position.getX(), position.getY(), position.getZ());
+        this.shadow$setPos(position.getX(), position.getY(), position.getZ());
         this.setRotation(transform.getRotation());
         this.setScale(transform.getScale());
-        if (!((WorldBridge) this.shadow$getEntityWorld()).bridge$isFake()) {
-            ((ServerWorld) this.shadow$getEntityWorld()).chunkCheck((Entity) (Object) this);
+        if (!((WorldBridge) this.shadow$getCommandSenderWorld()).bridge$isFake()) {
+            ((ServerWorld) this.shadow$getCommandSenderWorld()).updateChunkPos((Entity) (Object) this);
         }
 
         return true;
@@ -178,7 +176,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public Vector3d getRotation() {
-        return new Vector3d(this.rotationPitch, this.rotationYaw, 0);
+        return new Vector3d(this.xRot, this.yRot, 0);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -190,15 +188,15 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         if (((Entity) (Object) this) instanceof ServerPlayerEntity && ((ServerPlayerEntity) (Entity) (Object) this).connection != null) {
             // Force an update, this also set the rotation in this entity
-            ((ServerPlayerEntity) (Entity) (Object) this).connection.setPlayerLocation(this.getPosition().getX(), this.getPosition().getY(),
+            ((ServerPlayerEntity) (Entity) (Object) this).connection.teleport(this.getPosition().getX(), this.getPosition().getY(),
                     this.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class));
         } else {
-            if (!this.shadow$getEntityWorld().isClientSide) { // We can't set the rotation update on client worlds.
+            if (!this.shadow$getCommandSenderWorld().isClientSide) { // We can't set the rotation update on client worlds.
                 ((ServerWorldBridge) this.getWorld()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
             }
 
             // Let the entity tracker do its job, this just updates the variables
-            this.shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
+            this.shadow$setRot((float) rotation.getY(), (float) rotation.getX());
         }
     }
 
@@ -239,7 +237,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             return false;
         }
         // Causes at this point should already be pushed from plugins before this point with the cause system.
-        return this.shadow$attackEntityFrom((DamageSource) damageSource, (float) damage);
+        return this.shadow$hurt((DamageSource) damageSource, (float) damage);
     }
 
     @Override
@@ -249,7 +247,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public UUID getUniqueId() {
-        return this.entityUniqueID;
+        return this.uuid;
     }
 
     @Override
@@ -261,7 +259,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public DataContainer toContainer() {
         final Transform transform = this.getTransform();
         final CompoundNBT compound = new CompoundNBT();
-        this.shadow$writeUnlessRemoved(compound);
+        this.shadow$saveAsPassenger(compound);
         final DataContainer unsafeNbt = NBTTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
@@ -294,10 +292,10 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         try {
             final CompoundNBT compound = new CompoundNBT();
-            this.shadow$writeUnlessRemoved(compound);
-            final Entity entity = net.minecraft.entity.EntityType.loadEntityAndExecute(compound, this.shadow$getEntityWorld(), (createdEntity) -> {
-                compound.putUniqueId(Constants.UUID, createdEntity.getUniqueID());
-                createdEntity.read(compound);
+            this.shadow$saveAsPassenger(compound);
+            final Entity entity = net.minecraft.entity.EntityType.loadEntityRecursive(compound, this.shadow$getCommandSenderWorld(), (createdEntity) -> {
+                compound.putUUID(Constants.UUID, createdEntity.getUUID());
+                createdEntity.load(compound);
                 return createdEntity;
             });
             return (org.spongepowered.api.entity.Entity) entity;

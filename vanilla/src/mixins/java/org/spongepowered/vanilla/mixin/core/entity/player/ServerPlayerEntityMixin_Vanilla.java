@@ -35,6 +35,7 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -68,7 +69,7 @@ public abstract class ServerPlayerEntityMixin_Vanilla implements ServerPlayerEnt
     }
 
     @Override
-    public void bridge$sendViewerEnvironment(final SpongeDimensionType dimensionType) {
+    public void bridge$sendViewerEnvironment(final DimensionType dimensionType) {
         if (this.bridge$getClientType() == ClientType.SPONGE_VANILLA) {
             SpongePacketHandler.getChannel().sendTo((ServerPlayer) this, new ChangeViewerEnvironmentPacket(dimensionType));
         } else {

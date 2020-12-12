@@ -36,9 +36,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 
 @Mixin(TropicalFishEntity.Type.class)
-public abstract class TropicalFishEntityMixin_TypeMixin_API implements TropicalFishShape {
+public abstract class TropicalFishEntity_TypeMixin_API implements TropicalFishShape {
 
-    @Shadow @Final private int field_212552_m;
+    // @formatter:off
+    @Shadow @Final private int base;
+    // @formatter:on
 
     private ResourceKey api$key;
 
@@ -54,6 +56,6 @@ public abstract class TropicalFishEntityMixin_TypeMixin_API implements TropicalF
 
     @Override
     public boolean isLarge() {
-        return this.field_212552_m == 1;
+        return this.base == 1;
     }
 }

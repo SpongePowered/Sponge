@@ -60,7 +60,6 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.PlayerChatRouter;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -75,8 +74,6 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -110,12 +107,13 @@ import java.util.Optional;
 import java.util.Set;
 
 @Mixin(ServerPlayerEntity.class)
-@Implements(@Interface(iface = Player.class, prefix = "player$"))
 public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API implements ServerPlayer {
 
+    // @formatter:off
     @Shadow @Final public MinecraftServer server;
     @Shadow @Final private PlayerAdvancements advancements;
     @Shadow public ServerPlayNetHandler connection;
+    // @formatter:on
 
     private PlayerChatRouter api$chatRouter;
     private final TabList api$tabList = new SpongeTabList((ServerPlayerEntity) (Object) this);
@@ -134,7 +132,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         final List<IPacket<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
 
         if (!packets.isEmpty()) {
-            if (position.sub(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ()).lengthSquared() < (long) radius * (long) radius) {
+            if (position.sub(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ()).lengthSquared() < (long) radius * (long) radius) {
                 for (final IPacket<?> packet : packets) {
                     this.connection.send(packet);
                 }
@@ -149,7 +147,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public boolean isOnline() {
-        return this.server.getPlayerList().getPlayer(this.entityUniqueID) == (ServerPlayerEntity) (Object) this;
+        return this.server.getPlayerList().getPlayer(this.uuid) == (ServerPlayerEntity) (Object) this;
     }
 
     @Override
@@ -159,7 +157,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void sendEnvironment(final DimensionType dimensionType) {
-        ((ServerPlayerEntityBridge) this).bridge$sendViewerEnvironment((SpongeDimensionType) dimensionType);
+        ((ServerPlayerEntityBridge) this).bridge$sendViewerEnvironment((net.minecraft.world.DimensionType) dimensionType);
     }
 
     @Override
@@ -269,7 +267,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void resetBlockChange(final int x, final int y, final int z) {
-        final SChangeBlockPacket packet = new SChangeBlockPacket(this.shadow$getEntityWorld(), new BlockPos(x, y, z));
+        final SChangeBlockPacket packet = new SChangeBlockPacket(this.shadow$getCommandSenderWorld(), new BlockPos(x, y, z));
         this.connection.send(packet);
     }
 
@@ -278,7 +276,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         if (this.shadow$getHealth() > 0.0F) {
             return false;
         }
-        this.connection.player = this.server.getPlayerList().respawn((ServerPlayerEntity) (Object) this, this.dimension, false);
+        this.connection.player = this.server.getPlayerList().respawn((ServerPlayerEntity) (Object) this, false);
         return true;
     }
 
@@ -317,7 +315,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public CooldownTracker getCooldownTracker() {
-        return (CooldownTracker) this.shadow$getCooldownTracker();
+        return (CooldownTracker) this.shadow$getCooldowns();
     }
 
     @Override
@@ -351,7 +349,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
                                 SWorldBorderPacket.Action.INITIALIZE));
             } else { //unset the border if null
                 this.connection.send(
-                        new SWorldBorderPacket(this.shadow$getEntityWorld().getWorldBorder(), SWorldBorderPacket.Action.INITIALIZE));
+                        new SWorldBorderPacket(this.shadow$getCommandSenderWorld().getWorldBorder(), SWorldBorderPacket.Action.INITIALIZE));
             }
         }
     }
@@ -475,7 +473,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void playSound(final Sound sound) {
-        this.playSound(sound, this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ());
+        this.playSound(sound, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
     }
 
     @Override

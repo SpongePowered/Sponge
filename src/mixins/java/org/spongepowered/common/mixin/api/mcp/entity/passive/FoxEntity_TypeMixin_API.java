@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.FoxEntity;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.FoxType;
@@ -40,7 +41,7 @@ public abstract class FoxEntity_TypeMixin_API implements FoxType {
     private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, int indexIn, String name, Biome[] spawnBiomesIn, CallbackInfo ci) {
+    private void api$setKey(String enumName, int ordinal, int indexIn, String name, RegistryKey<Biome>[] spawnBiomesIn, CallbackInfo ci) {
         this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name.toLowerCase());
     }
 

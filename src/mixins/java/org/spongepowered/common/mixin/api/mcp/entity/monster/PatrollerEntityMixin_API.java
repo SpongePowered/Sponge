@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.PatrollerEntity;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Patroller;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -36,11 +36,14 @@ import java.util.Set;
 @Mixin(PatrollerEntity.class)
 public abstract class PatrollerEntityMixin_API extends MonsterEntityMixin_API implements Patroller {
 
-    @Shadow public abstract void shadow$resetPatrolTarget();
+    // @formatter:off
+    @Shadow public abstract void shadow$findPatrolTarget();
+    // @formatter:on
 
     @Override
+    @Intrinsic
     public void findPatrolTarget() {
-        this.shadow$resetPatrolTarget();
+        this.shadow$findPatrolTarget();
     }
 
     @Override
