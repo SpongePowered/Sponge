@@ -27,9 +27,11 @@ package org.spongepowered.common.adventure;
 import net.kyori.adventure.text.renderer.TranslatableComponentRenderer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.event.HoverEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -41,7 +43,9 @@ import java.util.Locale;
 /**
  * An implementation of the functionality of {@link TranslatableComponentRenderer} on native MC chat components.
  *
- * This performs *in-place modification* of components. Only pass cloned components in
+ * <p>This will perform in-place modification of input components -- use
+ * {@link #apply(ITextComponent, Locale)} to safely handle copying when
+ * necessary.</p>
  *
  * @param <C>
  */
@@ -53,6 +57,14 @@ public abstract class NativeComponentRenderer<C> {
             return GlobalTranslator.get().translate(key, locale);
         }
     };
+
+    public static @NonNull ITextComponent apply(final ITextComponent input, final Locale locale) {
+        if (input instanceof AdventureTextComponent) {
+            return ((AdventureTextComponent) input).rendered(locale);
+        } else {
+            return NativeComponentRenderer.get().render(input.copy(), locale);
+        }
+    }
 
     /**
      * Gets the default translatable component renderer.
@@ -73,34 +85,47 @@ public abstract class NativeComponentRenderer<C> {
      */
     protected abstract @Nullable MessageFormat translate(final @NonNull String key, final @NonNull C context);
 
-    public ITextComponent render(@NonNull ITextComponent component, final @NonNull C context) {
+    public ITextComponent render(@NonNull IFormattableTextComponent component, final @NonNull C context) {
         if (component instanceof TranslationTextComponent) {
             component = this.renderTranslatable((TranslationTextComponent) component, context);
         } else {
             this.renderSiblings(component, context);
         }
 
+
         final net.minecraft.util.text.event.HoverEvent hover = component.getStyle().getHoverEvent();
-        if (hover != null) {
-            final ITextComponent original = hover.getValue();
-            final ITextComponent rendered = this.render(original, context);
-            if (original != rendered) {
-                component.getStyle().setHoverEvent(new net.minecraft.util.text.event.HoverEvent(hover.getAction(), rendered));
-            }
+        if (hover != null)  {
+            component.setStyle(component.getStyle().withHoverEvent(this.renderHoverEvent(hover, context)));
         }
         return component;
     }
 
-    protected @NonNull ITextComponent renderTranslatable(final @NonNull TranslationTextComponent component, final @NonNull C context) {
+    private HoverEvent renderHoverEvent(final HoverEvent input, final @NonNull C context) {
+        final HoverEvent.Action<?> action = input.getAction();
+        if (action == HoverEvent.Action.SHOW_TEXT) {
+            final ITextComponent original = input.getValue(HoverEvent.Action.SHOW_TEXT);
+            return new HoverEvent(HoverEvent.Action.SHOW_TEXT, this.render(original.copy(), context));
+        } else if (action == HoverEvent.Action.SHOW_ENTITY) {
+           final HoverEvent.EntityHover data = input.getValue(HoverEvent.Action.SHOW_ENTITY);
+           if (data.name != null) {
+               final ITextComponent rendered = this.render(data.name.copy(), context);
+               return new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityHover(data.type, data.id, rendered));
+           }
+        }
+
+        return input;
+    }
+
+    protected @NonNull IFormattableTextComponent renderTranslatable(final @NonNull TranslationTextComponent component, final @NonNull C context) {
         final /* @Nullable */ MessageFormat format = this.translate(component.getKey(), context);
         if (format == null) {
             // we don't have a translation for this component, but the arguments or children
             // of this component might need additional rendering
-            final Object[] args = component.getFormatArgs();
+            final Object[] args = component.getArgs();
             if (args.length > 0) {
                 for (int i = 0, size = args.length; i < size; i++) {
                     if (args[i] instanceof ITextComponent) {
-                        args[i] = this.render((ITextComponent) args[i], context);
+                        args[i] = this.render(((ITextComponent) args[i]).copy(), context);
                     }
                 }
             }
@@ -108,7 +133,7 @@ public abstract class NativeComponentRenderer<C> {
             return component;
         }
 
-        final Object[] args = component.getFormatArgs();
+        final Object[] args = component.getArgs();
         final StringTextComponent result;
         // no arguments makes this render very simple
         if(args.length == 0) {
@@ -124,16 +149,16 @@ public abstract class NativeComponentRenderer<C> {
                 final int end = it.getRunLimit();
                 final Integer index = (Integer) it.getAttribute(MessageFormat.Field.ARGUMENT);
                 if (index != null && args[index] instanceof ITextComponent) {
-                    result.appendSibling(this.render((ITextComponent) args[index], context));
+                    result.append(this.render(((ITextComponent) args[index]).copy(), context));
                 } else {
-                    result.appendSibling(new StringTextComponent(sb.substring(it.getIndex(), end)));
+                    result.append(new StringTextComponent(sb.substring(it.getIndex(), end)));
                 }
                 it.setIndex(end);
             }
         }
 
         result.setStyle(component.getStyle());
-        this.renderSiblings(component, context, (idx, rendered) -> result.appendSibling(rendered));
+        this.renderSiblings(component, context, (idx, rendered) -> result.append(rendered));
 
         return result;
     }
@@ -146,7 +171,7 @@ public abstract class NativeComponentRenderer<C> {
         final List<ITextComponent> siblings = component.getSiblings();
         for (int i = 0; i < siblings.size(); i++) {
             final ITextComponent original = siblings.get(i);
-            final ITextComponent rendered = this.render(original, context);
+            final ITextComponent rendered = this.render(original.copy(), context);
             consumer.accept(i, rendered);
         }
     }

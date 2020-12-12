@@ -35,6 +35,7 @@ import net.kyori.adventure.text.SelectorComponent;
 import net.kyori.adventure.text.StorageNBTComponent;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.NBTTextComponent;
@@ -52,7 +53,7 @@ import java.util.List;
 
 @Mixin(AbstractComponent.class)
 public abstract class AbstractComponentMixin implements ComponentBridge {
-    private ITextComponent bridge$vanillaComponent;
+    private IFormattableTextComponent bridge$vanillaComponent;
 
     @Override
     @SuppressWarnings("ConstantConditions")
@@ -73,7 +74,7 @@ public abstract class AbstractComponentMixin implements ComponentBridge {
             } else if (this instanceof ScoreComponent) {
                 final ScoreComponent $this = (ScoreComponent) this;
                 this.bridge$vanillaComponent = new ScoreTextComponent($this.name(), $this.objective());
-                ((ScoreTextComponent) this.bridge$vanillaComponent).setValue($this.value());
+                // ((ScoreTextComponent) this.bridge$vanillaComponent).($this.value()); // value removed
             } else if (this instanceof SelectorComponent) {
                 this.bridge$vanillaComponent = new SelectorTextComponent(((SelectorComponent) this).pattern());
             } else if (this instanceof NBTComponent<?, ?>) {
@@ -92,13 +93,13 @@ public abstract class AbstractComponentMixin implements ComponentBridge {
                 }
             }
             for (final Component child : ((Component) this).children()) {
-                this.bridge$vanillaComponent.appendSibling(SpongeAdventure.asVanilla(child));
+                this.bridge$vanillaComponent.append(SpongeAdventure.asVanilla(child));
             }
             this.bridge$vanillaComponent.setStyle(((StyleBridge) (Object) ((Component) this).style()).bridge$asVanilla());
         }
         // To prevent potential issues with using this mutable component as part of another text component,
         // of if Minecraft or a mod decides to change this text component, we make a deep copy so that this
         // cache and its siblings are not affected (particularly important for TextComponent#setStyle).
-        return this.bridge$vanillaComponent.deepCopy();
+        return this.bridge$vanillaComponent.copy();
     }
 }

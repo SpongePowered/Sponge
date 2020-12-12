@@ -42,6 +42,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.Codec;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
@@ -61,7 +62,6 @@ import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.common.accessor.util.text.event.HoverEventItemHoverAccessor;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
-import org.spongepowered.common.bridge.adventure.ComponentBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
 import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
@@ -162,7 +162,7 @@ public final class SpongeAdventure {
     }
 
     public static ITextComponent asVanilla(final Component component) {
-        return ((ComponentBridge) component).bridge$asVanillaComponent();
+        return new AdventureTextComponent(component, GlobalTranslator.renderer());
     }
 
     public static Component asAdventure(final ITextComponent component) {

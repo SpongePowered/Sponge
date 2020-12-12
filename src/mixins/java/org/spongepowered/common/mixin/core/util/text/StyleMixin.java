@@ -45,7 +45,7 @@ public class StyleMixin implements StyleBridge {
             final Style $this = (Style) (Object) this;
             final StyleAccessor $access = (StyleAccessor) this;
             // font
-            builder.font(SpongeAdventure.asAdventure($this.getFontId()));
+            builder.font(SpongeAdventure.asAdventure($this.getFont()));
             // color
             builder.color(SpongeAdventure.asAdventure($this.getColor()));
             // decorations

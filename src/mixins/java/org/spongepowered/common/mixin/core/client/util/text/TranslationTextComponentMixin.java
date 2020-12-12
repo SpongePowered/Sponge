@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.client.util.text;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.spongepowered.api.util.locale.Locales;
@@ -40,7 +41,10 @@ import org.spongepowered.common.adventure.NativeComponentRenderer;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
+
+import javax.swing.text.html.Option;
 
 @Mixin(TranslationTextComponent.class)
 public abstract class TranslationTextComponentMixin extends TextComponent {
@@ -49,17 +53,16 @@ public abstract class TranslationTextComponentMixin extends TextComponent {
     private String impl$lastLocale;
     private ITextComponent impl$translated = this;
 
-    @Inject(method = "stream", at = @At("HEAD"), cancellable = true)
-    private void impl$translateForRendering(final CallbackInfoReturnable<Stream<ITextComponent>> ci) {
-        // TODO(zml): For 1.16, this logic moves to the styled visitor-accepting methods
-        final String currentLocale = Minecraft.getInstance().gameSettings.language;
+    @Inject(method = "visitSelf(Lnet/minecraft/util/text/ITextProperties$IStyledTextAcceptor;Lnet/minecraft/util/text/Style;)Ljava/util/Optional;", at = @At("HEAD"), cancellable = true)
+    private <T> void impl$translateForRendering(final IStyledTextAcceptor<T> visitor, final Style style, final CallbackInfoReturnable<Optional<T>> ci) {
+        final String currentLocale = Minecraft.getInstance().options.languageCode;
         if (!Objects.equals(currentLocale, this.impl$lastLocale)) { // retranslate
             this.impl$lastLocale = currentLocale;
             final Locale actualLocale = Locales.of(currentLocale);
 
             // Only do a deep copy if actually necessary
             if (GlobalTranslator.get().translate(this.key, actualLocale) != null) {
-                this.impl$translated = NativeComponentRenderer.get().render(this.deepCopy(), Locales.of(currentLocale));
+                this.impl$translated = NativeComponentRenderer.apply(this, Locales.of(currentLocale));
             } else {
                 this.impl$translated = this;
             }
@@ -67,7 +70,7 @@ public abstract class TranslationTextComponentMixin extends TextComponent {
 
         // If the result is a non-translated component, then Adventure found a translation that we should use
         if (!(this.impl$translated instanceof TranslationTextComponent)) {
-            ci.setReturnValue(this.impl$translated.stream());
+            ci.setReturnValue(this.impl$translated.visitSelf(visitor, style));
         }
     }
 }

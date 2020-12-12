@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.common.adventure.AdventureTextComponent;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.bridge.network.PacketBufferBridge;
 
@@ -40,15 +41,16 @@ public abstract class PacketBufferMixin implements PacketBufferBridge {
 
     private @Nullable Locale impl$locale;
 
-    @ModifyVariable(method = "writeTextComponent", at = @At("HEAD"), argsOnly = true)
+    @ModifyVariable(method = "writeComponent", at = @At("HEAD"), argsOnly = true)
     private ITextComponent localizeComponent(final ITextComponent input) {
         if(this.impl$locale != null) {
-            return NativeComponentRenderer.get().render(input.deepCopy(), this.impl$locale);
+            return NativeComponentRenderer.apply(input, this.impl$locale);
         }
         return input;
     }
 
-    @Override public void bridge$setLocale(final Locale locale) {
+    @Override
+    public void bridge$setLocale(final Locale locale) {
         this.impl$locale = locale;
     }
 }

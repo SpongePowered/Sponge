@@ -41,7 +41,7 @@ public final class AudiencesFactory implements Audiences.Factory {
     }
 
     @Override
-    public Audience withPermission(String permission) {
+    public Audience withPermission(final String permission) {
         return (ForwardingAudience) () -> SpongeCommon.getServer().getPlayerList().getPlayers().stream()
                 .map(p -> (ServerPlayer) p)
                 .filter(p -> p.hasPermission(permission))

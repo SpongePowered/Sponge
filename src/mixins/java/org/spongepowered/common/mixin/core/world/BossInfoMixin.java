@@ -89,7 +89,7 @@ public abstract class BossInfoMixin implements BossInfoBridge {
 
     @Redirect(method = "setPercent", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;percent:F"))
     private void adventurePercent(final BossInfo $this, final float percent) {
-        this.bridge$asAdventure().percent(percent);
+        this.bridge$asAdventure().progress(percent);
     }
 
     @Redirect(method = "setColor", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;color:Lnet/minecraft/world/BossInfo$Color;"))
@@ -103,7 +103,7 @@ public abstract class BossInfoMixin implements BossInfoBridge {
     }
 
     @Redirect(method = "setDarkenScreen", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;darkenScreen:Z"))
-    private void adventureDarkenSky(final BossInfo $this, final boolean darkenScreen) {
+    private void adventureDarkenScreen(final BossInfo $this, final boolean darkenScreen) {
         if (darkenScreen) {
             this.bridge$asAdventure().addFlag(BossBar.Flag.DARKEN_SCREEN);
         } else {
@@ -112,7 +112,7 @@ public abstract class BossInfoMixin implements BossInfoBridge {
     }
 
     @Redirect(method = "setPlayBossMusic", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;playBossMusic:Z"))
-    private void adventurePlayEndBossMusic(final BossInfo $this, final boolean playBossMusic) {
+    private void adventurePlayBossMusic(final BossInfo $this, final boolean playBossMusic) {
         if (playBossMusic) {
             this.bridge$asAdventure().addFlag(BossBar.Flag.PLAY_BOSS_MUSIC);
         } else {
@@ -121,7 +121,7 @@ public abstract class BossInfoMixin implements BossInfoBridge {
     }
 
     @Redirect(method = "setCreateWorldFog", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;createWorldFog:Z"))
-    private void adventureCreateFog(final BossInfo $this, final boolean createWorldFog) {
+    private void adventureCreateWorldFog(final BossInfo $this, final boolean createWorldFog) {
         if (createWorldFog) {
             this.bridge$asAdventure().addFlag(BossBar.Flag.CREATE_WORLD_FOG);
         } else {

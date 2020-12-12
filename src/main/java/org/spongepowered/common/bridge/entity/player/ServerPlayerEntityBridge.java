@@ -47,6 +47,7 @@ import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Set;
 
 public interface ServerPlayerEntityBridge {
@@ -57,7 +58,7 @@ public interface ServerPlayerEntityBridge {
             return ClientType.VANILLA;
         }
 
-        return ((NetworkManagerBridge) mPlayer.connection.netManager).bridge$getClientType();
+        return ((NetworkManagerBridge) mPlayer.connection.connection).bridge$getClientType();
     }
 
     int bridge$getViewDistance();
@@ -65,9 +66,9 @@ public interface ServerPlayerEntityBridge {
     @Nullable
     User bridge$getUserObject();
 
-    String bridge$getLanguage();
+    Locale bridge$getLanguage();
 
-    void bridge$setLanguage(String language);
+    void bridge$setLanguage(Locale language);
 
     void bridge$sendBlockChange(BlockPos pos, BlockState state);
 
@@ -121,7 +122,7 @@ public interface ServerPlayerEntityBridge {
 
     default void bridge$sendChangeDimension(final DimensionType dimensionType, final RegistryKey<World> key, final long hashedSeed,
             final GameType gameType, final GameType previousGameType, final boolean isDebug, final boolean isFlat, final boolean keepPlayerData) {
-        ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(dimensionType, key, hashedSeed, gameType, previousGameType, isDebug,
+        ((ServerPlayerEntity) this).connection.send(new SRespawnPacket(dimensionType, key, hashedSeed, gameType, previousGameType, isDebug,
                 isFlat, keepPlayerData));
     }
 

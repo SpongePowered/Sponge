@@ -338,7 +338,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      */
     @ModifyVariable(method = "sendMessage", at = @At("HEAD"), argsOnly = true)
     private ITextComponent impl$applyTranslation(final ITextComponent input) {
-        return NativeComponentRenderer.get().render(input.deepCopy(), Locale.getDefault());
+        return NativeComponentRenderer.apply(input.copy(), Locale.getDefault());
     }
 
     @Override

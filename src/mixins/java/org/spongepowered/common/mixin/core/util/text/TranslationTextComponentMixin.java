@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.util.text;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,15 +36,14 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(TranslationTextComponent.class)
 public class TranslationTextComponentMixin {
-    @Shadow @Final private Object[] formatArgs;
+    @Shadow @Final private Object[] args;
 
     @Inject(method = "<init>(Ljava/lang/String;[Ljava/lang/Object;)V", at = @At("TAIL"))
     private void sponge$convertAdventureToVanilla(final String key, final Object[] args, final CallbackInfo ci) {
-        for (int i = 0, length = this.formatArgs.length; i < length; i++) {
-            final Object object = this.formatArgs[i];
+        for (int i = 0, length = this.args.length; i < length; i++) {
+            final Object object = this.args[i];
             if (object instanceof Component) {
-                this.formatArgs[i] = SpongeAdventure.asVanilla((Component) object);
-                ((ITextComponent) this.formatArgs[i]).getStyle().setParentStyle(((ITextComponent) this).getStyle());
+                this.args[i] = SpongeAdventure.asVanilla((Component) object);
             }
         }
     }

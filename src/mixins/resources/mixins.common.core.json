@@ -134,6 +134,7 @@
     "util.EntityPredicatesMixin",
     "util.IndirectEntityDamageSourceMixin",
     "util.datafix.versions.V1125Mixin",
+    "util.text.ITextComponentSerializerMixin",
     "util.text.StyleMixin",
     "util.text.TextComponentMixin",
     "util.text.TranslationTextComponentMixin",

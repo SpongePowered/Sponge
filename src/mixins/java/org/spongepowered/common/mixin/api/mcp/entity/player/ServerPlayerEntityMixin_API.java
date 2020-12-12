@@ -48,7 +48,6 @@ import net.minecraft.network.play.server.SWorldBorderPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.server.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -137,7 +136,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         if (!packets.isEmpty()) {
             if (position.sub(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ()).lengthSquared() < (long) radius * (long) radius) {
                 for (final IPacket<?> packet : packets) {
-                    this.connection.sendPacket(packet);
+                    this.connection.send(packet);
                 }
             }
         }
@@ -150,7 +149,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public boolean isOnline() {
-        return this.server.getPlayerList().getPlayerByUUID(this.entityUniqueID) == (ServerPlayerEntity) (Object) this;
+        return this.server.getPlayerList().getPlayer(this.entityUniqueID) == (ServerPlayerEntity) (Object) this;
     }
 
     @Override
@@ -183,8 +182,8 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
      *     inspecting SocketAddress#toString()) to support IPv6 addresses
      */
     @Overwrite
-    public String getPlayerIP() {
-        return NetworkUtil.getHostString(this.connection.netManager.getRemoteAddress());
+    public String getIpAddress() {
+        return NetworkUtil.getHostString(this.connection.connection.getRemoteAddress());
     }
 
     @Override
@@ -230,14 +229,14 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     private void playRecord0(final Vector3i position, @Nullable final MusicDisc recordType) {
-        this.connection.sendPacket(SpongeRecordType.createPacket(position, recordType));
+        this.connection.send(SpongeRecordType.createPacket(position, recordType));
     }
 
     @Override
     public void sendResourcePack(final ResourcePack pack) {
         final SSendResourcePackPacket packet = new SSendResourcePackPacket();
         ((SSendResourcePackPacketBridge) packet).bridge$setSpongePack(pack);
-        this.connection.sendPacket(packet);
+        this.connection.send(packet);
     }
 
     @Override
@@ -259,7 +258,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         final SChangeBlockPacketAccessor accessor = (SChangeBlockPacketAccessor) packet;
         accessor.accessor$pos(pos);
         accessor.accessor$blockState(state);
-        this.connection.sendPacket(packet);
+        this.connection.send(packet);
     }
 
     @Override
@@ -271,7 +270,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public void resetBlockChange(final int x, final int y, final int z) {
         final SChangeBlockPacket packet = new SChangeBlockPacket(this.shadow$getEntityWorld(), new BlockPos(x, y, z));
-        this.connection.sendPacket(packet);
+        this.connection.send(packet);
     }
 
     @Override
@@ -279,7 +278,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         if (this.shadow$getHealth() > 0.0F) {
             return false;
         }
-        this.connection.player = this.server.getPlayerList().recreatePlayerEntity((ServerPlayerEntity) (Object) this, this.dimension, false);
+        this.connection.player = this.server.getPlayerList().respawn((ServerPlayerEntity) (Object) this, this.dimension, false);
         return true;
     }
 
@@ -324,7 +323,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public AdvancementProgress getProgress(final Advancement advancement) {
         Preconditions.checkNotNull(advancement, "advancement");
-        return (AdvancementProgress) this.advancements.getProgress((net.minecraft.advancements.Advancement) advancement);
+        return (AdvancementProgress) this.advancements.getOrStartProgress((net.minecraft.advancements.Advancement) advancement);
     }
 
     @Override
@@ -333,7 +332,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public void setWorldBorder(@Nullable WorldBorder border) {
+    public void setWorldBorder(final @Nullable WorldBorder border) {
         if (this.api$worldBorder == border) {
             return; //do not fire an event since nothing would have changed
         }
@@ -347,11 +346,11 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
             if (this.api$worldBorder != null) {
                 ((net.minecraft.world.border.WorldBorder) this.api$worldBorder).addListener(
                         ((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener());
-                this.connection.sendPacket(
+                this.connection.send(
                         new SWorldBorderPacket((net.minecraft.world.border.WorldBorder) this.api$worldBorder,
                                 SWorldBorderPacket.Action.INITIALIZE));
             } else { //unset the border if null
-                this.connection.sendPacket(
+                this.connection.send(
                         new SWorldBorderPacket(this.shadow$getEntityWorld().getWorldBorder(), SWorldBorderPacket.Action.INITIALIZE));
             }
         }
@@ -388,7 +387,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         }
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(type, "type");
-        this.connection.sendPacket(new SChatPacket(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type))); // TODO(1.16) use identity
+        this.connection.send(new SChatPacket(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type), identity.uuid()));
     }
 
     @Override
@@ -397,7 +396,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
             return;
         }
         Objects.requireNonNull(message, "message");
-        this.connection.sendPacket(new STitlePacket(STitlePacket.Type.ACTIONBAR, SpongeAdventure.asVanilla(message)));
+        this.connection.send(new STitlePacket(STitlePacket.Type.ACTIONBAR, SpongeAdventure.asVanilla(message)));
     }
 
     @Override
@@ -423,12 +422,12 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         Objects.requireNonNull(title, "title");
         final Title.Times times = title.times();
         if (times != null) {
-            this.connection.sendPacket(new STitlePacket(
+            this.connection.send(new STitlePacket(
                 ServerPlayerEntityMixin_API.ticks(times.fadeIn()),
                 ServerPlayerEntityMixin_API.ticks(times.stay()), ServerPlayerEntityMixin_API.ticks(times.fadeOut())));
         }
-        this.connection.sendPacket(new STitlePacket(STitlePacket.Type.SUBTITLE, SpongeAdventure.asVanilla(title.subtitle())));
-        this.connection.sendPacket(new STitlePacket(STitlePacket.Type.TITLE, SpongeAdventure.asVanilla(title.title())));
+        this.connection.send(new STitlePacket(STitlePacket.Type.SUBTITLE, SpongeAdventure.asVanilla(title.subtitle())));
+        this.connection.send(new STitlePacket(STitlePacket.Type.TITLE, SpongeAdventure.asVanilla(title.title())));
     }
 
     private static int ticks(final Duration duration) {
@@ -443,7 +442,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         if (this.impl$isFake) {
             return;
         }
-        this.connection.sendPacket(new STitlePacket(STitlePacket.Type.CLEAR, null));
+        this.connection.send(new STitlePacket(STitlePacket.Type.CLEAR, null));
     }
 
     @Override
@@ -451,7 +450,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         if (this.impl$isFake) {
             return;
         }
-        this.connection.sendPacket(new STitlePacket(STitlePacket.Type.RESET, null));
+        this.connection.send(new STitlePacket(STitlePacket.Type.RESET, null));
     }
 
     @Override
@@ -485,15 +484,15 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
             return;
         }
         Objects.requireNonNull(sound, "sound");
-        final Optional<SoundEvent> event = Registry.SOUND_EVENT.getValue(SpongeAdventure.asVanilla(sound.name()));
+        final Optional<SoundEvent> event = Registry.SOUND_EVENT.getOptional(SpongeAdventure.asVanilla(sound.name()));
         if (event.isPresent()) {
             // Check if the event is registered
-            this.connection.sendPacket(new SPlaySoundEffectPacket(event.get(), SpongeAdventure.asVanilla(sound.source()),
+            this.connection.send(new SPlaySoundEffectPacket(event.get(), SpongeAdventure.asVanilla(sound.source()),
                     x, y, z, sound.volume(), sound.pitch()));
         } else {
             // Otherwise send it as a custom sound
-            this.connection.sendPacket(new SPlaySoundPacket(SpongeAdventure.asVanilla(sound.name()), SpongeAdventure.asVanilla(sound.source()),
-                    new Vec3d(x, y, z), sound.volume(), sound.pitch()));
+            this.connection.send(new SPlaySoundPacket(SpongeAdventure.asVanilla(sound.name()), SpongeAdventure.asVanilla(sound.source()),
+                                                      new net.minecraft.util.math.vector.Vector3d(x, y, z), sound.volume(), sound.pitch()));
         }
     }
 
@@ -503,7 +502,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
             return;
         }
         Objects.requireNonNull(stop, "stop");
-        this.connection.sendPacket(new SStopSoundPacket(SpongeAdventure.asVanillaNullable(stop.sound()), SpongeAdventure.asVanillaNullable(stop.source())));
+        this.connection.send(new SStopSoundPacket(SpongeAdventure.asVanillaNullable(stop.sound()), SpongeAdventure.asVanillaNullable(stop.source())));
     }
 
     @Override

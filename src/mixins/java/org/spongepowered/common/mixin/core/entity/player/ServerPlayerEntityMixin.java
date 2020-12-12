@@ -76,6 +76,7 @@ import org.spongepowered.api.event.entity.living.player.PlayerChangeClientSettin
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -134,7 +135,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private @Nullable ITextComponent impl$connectionMessage;
-    private String impl$language = "en_us";
+    private Locale impl$language = Locales.EN_US;
     private Scoreboard impl$scoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
     @Nullable private Boolean impl$keepInventory = null;
     // Used to restore original item received in a packet after canceling an event
@@ -284,12 +285,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     @Override
-    public String bridge$getLanguage() {
+    public Locale bridge$getLanguage() {
         return this.impl$language;
     }
 
     @Override
-    public void bridge$setLanguage(final String language) {
+    public void bridge$setLanguage(final Locale language) {
         this.impl$language = language;
     }
 
@@ -644,12 +645,13 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Inject(method = "updateOptions", at = @At("HEAD"))
     private void impl$handleClientSettings(final CClientSettingsPacket packet, final CallbackInfo ci) {
         if (ShouldFire.PLAYER_CHANGE_CLIENT_SETTINGS_EVENT) {
-            final Locale newLocale = LocaleCache.getLocale(packet.getLang());
+            final CClientSettingsPacketAccessor $packet = (CClientSettingsPacketAccessor) packet;
+            final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
             final ImmutableSet<SkinPart> skinParts = Sponge.getRegistry().getCatalogRegistry().streamAllOf(SkinPart.class)
                     .map(part -> (SpongeSkinPart) part)
                     .filter(part -> part.test(packet.getModelCustomisation()))
                     .collect(ImmutableSet.toImmutableSet());
-            final int viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$viewDistance();
+            final int viewDistance = $packet.accessor$viewDistance();
 
             // Post before the player values are updated
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -669,8 +671,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Inject(method = "updateOptions", at = @At("TAIL"))
     private void impl$updateTrackedClientSettings(final CClientSettingsPacket packet, final CallbackInfo ci) {
-        final Locale newLocale = LocaleCache.getLocale(packet.getLang());
-        final int viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$viewDistance();
+        final CClientSettingsPacketAccessor $packet = (CClientSettingsPacketAccessor) packet;
+        final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
+        final int viewDistance = $packet.accessor$viewDistance();
 
         // Update locale on Channel, used for sending localized messages
         final Channel channel = ((NetworkManagerAccessor) this.connection.connection).accessor$channel();
@@ -679,6 +682,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
         // Update the fields we track ourselves
         this.impl$viewDistance = viewDistance;
-        // TODO(1.16): The locale field is gone, we'll have to track it ourselves too
+        this.impl$language = newLocale;
     }
 }

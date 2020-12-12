@@ -50,7 +50,7 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
 
     private float impl$lastSentProgress = 0f;
 
-    @Shadow protected abstract void sendUpdate(final SUpdateBossInfoPacket.Operation operation);
+    @Shadow protected abstract void broadcast(final SUpdateBossInfoPacket.Operation operation);
     @Shadow @Final private Set<ServerPlayerEntity> players;
     @Shadow private boolean visible;
 
@@ -81,24 +81,24 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
         }
     }
 
-    @Inject(method = "setDarkenSky", at = @At("HEAD"))
+    @Inject(method = "setDarkenScreen", at = @At("HEAD"))
     private void impl$forceDarkenSkyUpdate(final boolean darkenSky, final CallbackInfoReturnable<BossInfo> ci) {
-        this.darkenSky = !darkenSky;
+        this.darkenScreen = !darkenSky;
     }
 
-    @Inject(method = "setPlayEndBossMusic", at = @At("HEAD"))
+    @Inject(method = "setPlayBossMusic", at = @At("HEAD"))
     private void forcePlayEndBossMusicUpdate(final boolean endBossMusic, final CallbackInfoReturnable<BossInfo> ci) {
-        this.playEndBossMusic = !endBossMusic;
+        this.playBossMusic = !endBossMusic;
     }
 
-    @Inject(method = "setCreateFog", at = @At("HEAD"))
+    @Inject(method = "setCreateWorldFog", at = @At("HEAD"))
     private void forceCreateFogUpdate(final boolean createFog, final CallbackInfoReturnable<BossInfo> ci) {
-        this.createFog = !createFog;
+        this.createWorldFog = !createFog;
     }
 
     // Convert to using BossBar.Listener
 
-    @Redirect(method = {"setPercent", "setColor", "setOverlay", "setDarkenSky", "setPlayEndBossMusic", "setCreateFog", "setName"},
+    @Redirect(method = {"setPercent", "setColor", "setOverlay", "setDarkenScreen", "setPlayBossMusic", "setCreateWorldFog", "setName"},
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerBossInfo;sendUpdate(Lnet/minecraft/network/play/server/SUpdateBossInfoPacket$Operation;)V"))
     private void redirectUpdatePacket(final ServerBossInfo $this, final SUpdateBossInfoPacket.Operation op) {
         // This becomes a no-op, the Adventure BossBar's listener calls this update operation
@@ -106,30 +106,30 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
 
     @Override
     public void bossBarNameChanged(final BossBar bar, final Component oldName, final Component newName) {
-        this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_NAME);
+        this.broadcast(SUpdateBossInfoPacket.Operation.UPDATE_NAME);
     }
 
     @Override
     public void bossBarProgressChanged(final BossBar bar, final float oldProgress, final float newProgress) {
         if (Math.abs(newProgress - this.impl$lastSentProgress) > ServerBossInfoMixin.EPSILON) {
             this.impl$lastSentProgress = newProgress;
-            this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_PCT);
+            this.broadcast(SUpdateBossInfoPacket.Operation.UPDATE_PCT);
         }
     }
 
     @Override
     public void bossBarColorChanged(final BossBar bar, final BossBar.Color oldColor, final BossBar.Color newColor) {
-        this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
+        this.broadcast(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
     }
 
     @Override
     public void bossBarOverlayChanged(final BossBar bar, final BossBar.Overlay oldOverlay, final BossBar.Overlay newOverlay) {
-        this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
+        this.broadcast(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
     }
 
     @Override
     public void bossBarFlagsChanged(final BossBar bar, final Set<BossBar.Flag> flagsAdded, final Set<BossBar.Flag> flagsRemoved) {
-        this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_PROPERTIES);
+        this.broadcast(SUpdateBossInfoPacket.Operation.UPDATE_PROPERTIES);
     }
 
     // Tracking for registration (designed for localization handling)
