@@ -34,10 +34,10 @@ import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 @Mixin(ClientHandshakeNetHandler.class)
 public abstract class ClientHandshakeNetHandlerMixin implements NetworkManagerHolderBridge {
 
-    @Shadow @Final private NetworkManager networkManager;
+    @Shadow @Final private NetworkManager connection;
 
     @Override
     public NetworkManager bridge$getNetworkManager() {
-        return this.networkManager;
+        return this.connection;
     }
 }

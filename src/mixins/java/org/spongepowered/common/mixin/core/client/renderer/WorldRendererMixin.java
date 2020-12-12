@@ -38,14 +38,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
 
-    @Shadow @Final private Minecraft mc;
+    @Shadow @Final private Minecraft minecraft;
 
-    @Shadow protected abstract void shadow$renderSkyEnd(MatrixStack matrixStackIn);
+    @Shadow protected abstract void shadow$renderEndSky(MatrixStack matrixStackIn);
 
     @Inject(method = "renderSky(Lcom/mojang/blaze3d/matrix/MatrixStack;F)V", at = @At("HEAD"), cancellable = true)
     private void impl$renderEndSkyboxForAllEndDimensions(MatrixStack matrixStackIn, float partialTicks, CallbackInfo ci) {
-        if (this.mc.world.dimension instanceof EndDimension) {
-            this.shadow$renderSkyEnd(matrixStackIn);
+        if (this.minecraft.level.dimension instanceof EndDimension) {
+            this.shadow$renderEndSky(matrixStackIn);
             ci.cancel();
         }
     }
