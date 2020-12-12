@@ -22,24 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.merchant.villager;
+package org.spongepowered.common.mixin.api.world;
 
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
-@Mixin(VillagerEntity.class)
-public abstract class VillagerEntityMixin extends AbstractVillagerEntityMixin {
+@Mixin(value = LocatableBlock.class, remap = false)
+public interface LocatableBlockMixin_API {
 
-    @Redirect(method = "die",
-        at = @At(value = "INVOKE",
-            target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V",
-            remap = false
-        )
-    )
-    private void impl$silenceMojangSpam(final Logger logger, final String message, final Object p0, final Object p1) {
-        //noop
+    /**
+     * @author gabizou - August 17th, 2018
+     * @reason Due to locatable blocks being created thousands of times per tick,
+     * we need this to be stupid fast.
+     */
+    @Overwrite
+    static LocatableBlock.Builder builder() {
+        return new SpongeLocatableBlockBuilder();
     }
 }

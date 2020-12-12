@@ -22,24 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.merchant.villager;
-
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-
-@Mixin(VillagerEntity.class)
-public abstract class VillagerEntityMixin extends AbstractVillagerEntityMixin {
-
-    @Redirect(method = "die",
-        at = @At(value = "INVOKE",
-            target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V",
-            remap = false
-        )
-    )
-    private void impl$silenceMojangSpam(final Logger logger, final String message, final Object p0, final Object p1) {
-        //noop
-    }
-}
+@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
+package org.spongepowered.common.item.merchant;

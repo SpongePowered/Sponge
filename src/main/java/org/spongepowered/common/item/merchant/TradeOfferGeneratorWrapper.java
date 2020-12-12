@@ -22,27 +22,63 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
+package org.spongepowered.common.item.merchant;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.merchant.villager.VillagerTrades;
 import net.minecraft.item.MerchantOffer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Random;
+import java.util.StringJoiner;
 
-@Mixin(VillagerTrades.ITrade.class)
-public interface VillagerTrades_ITradeMixin_API extends TradeOfferGenerator {
+public final class TradeOfferGeneratorWrapper implements VillagerTrades.ITrade, TradeOfferGenerator {
 
-    @Shadow @Nullable MerchantOffer shadow$getOffer(Entity entity, Random random);
+    private final TradeOfferGenerator generator;
 
-    @Override
-    default TradeOffer apply(final org.spongepowered.api.entity.Entity merchant, final Random random) {
-        return (TradeOffer) this.shadow$getOffer((Entity) merchant, random);
+    public TradeOfferGeneratorWrapper(final TradeOfferGenerator generator) {
+        this.generator = generator;
     }
 
+    @Nullable
+    @Override
+    public MerchantOffer getOffer(final Entity trader, final Random rand) {
+        return (MerchantOffer) this.generator.apply((org.spongepowered.api.entity.Entity) trader, rand);
+    }
+
+    @Override
+    public TradeOffer apply(final org.spongepowered.api.entity.Entity entity, final Random random) {
+        return this.generator.apply(entity, random);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final TradeOfferGeneratorWrapper that = (TradeOfferGeneratorWrapper) o;
+        return Objects.equals(this.generator, that.generator);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.generator);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(
+            ", ",
+            TradeOfferGeneratorWrapper.class.getSimpleName() + "[",
+            "]"
+        )
+            .add("generator=" + this.generator)
+            .toString();
+    }
 }
