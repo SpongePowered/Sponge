@@ -48,25 +48,25 @@ public class ServerPlayNetHandlerMixin_Inventory {
     @Shadow public ServerPlayerEntity player;
 
     // before if(flag1 && flag2)
-    @Inject(method = "processCreativeInventoryAction", cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CCreativeInventoryActionPacket;getSlotId()I", ordinal = 1))
+    @Inject(method = "handleSetCreativeModeSlot", cancellable = true,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CCreativeInventoryActionPacket;getSlotNum()I", ordinal = 1))
     private void onProcessCreativeInventoryAction(CCreativeInventoryActionPacket packetIn, CallbackInfo ci) {
-        final ItemStack itemstack = packetIn.getStack();
-        boolean flag2 = itemstack.isEmpty() || itemstack.getDamage() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
+        final ItemStack itemstack = packetIn.getItem();
+        boolean flag2 = itemstack.isEmpty() || itemstack.getDamageValue() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
         if (flag2) {
             // TODO handle vanilla sending a bunch of creative events (previously ignoring events within 100ms)
             final ClickContainerEvent.Creative clickEvent = InventoryEventFactory.callCreativeClickContainerEvent(this.player, packetIn);
             if (clickEvent.isCancelled()) {
                 // Reset slot on client
-                if (packetIn.getSlotId() >= 0 && packetIn.getSlotId() < this.player.container.inventorySlots.size()) {
-                    this.player.connection.sendPacket(
-                            new SSetSlotPacket(this.player.container.windowId, packetIn.getSlotId(),
-                                    this.player.container.getSlot(packetIn.getSlotId()).getStack()));
-                    this.player.connection.sendPacket(new SSetSlotPacket(-1, -1, ItemStack.EMPTY));
+                if (packetIn.getSlotNum() >= 0 && packetIn.getSlotNum() < this.player.containerMenu.slots.size()) {
+                    this.player.connection.send(
+                            new SSetSlotPacket(this.player.containerMenu.containerId, packetIn.getSlotNum(),
+                                    this.player.containerMenu.getSlot(packetIn.getSlotNum()).getItem()));
+                    this.player.connection.send(new SSetSlotPacket(-1, -1, ItemStack.EMPTY));
                 }
                 ci.cancel();
             } else {
-                if (PacketPhaseUtil.handleSlotRestore(this.player, this.player.container, clickEvent.getTransactions(), false)) {
+                if (PacketPhaseUtil.handleSlotRestore(this.player, this.player.containerMenu, clickEvent.getTransactions(), false)) {
                     ci.cancel();
                 }
                 final Transaction<ItemStackSnapshot> cursorTransaction = clickEvent.getCursorTransaction();
@@ -81,14 +81,14 @@ public class ServerPlayNetHandlerMixin_Inventory {
         }
     }
 
-    @Inject(method = "processClickWindow", 
+    @Inject(method = "handleContainerClick",
         at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/ints/Int2ShortMap;put(IS)S", remap = false))
     private void impl$updateOpenContainer(final CClickWindowPacket packet, final CallbackInfo ci) {
         // We want to treat an 'invalid' click just like a regular click - we still fire events, do restores, etc.
 
         // Vanilla doesn't call detectAndSendChanges for 'invalid' clicks, since it restores the entire inventory
         // Passing 'captureOnly' as 'true' allows capturing to happen for event firing, but doesn't send any pointless packets
-        ((TrackedContainerBridge) this.player.openContainer).bridge$detectAndSendChanges(true);
+        ((TrackedContainerBridge) this.player.containerMenu).bridge$detectAndSendChanges(true);
     }
 
 }

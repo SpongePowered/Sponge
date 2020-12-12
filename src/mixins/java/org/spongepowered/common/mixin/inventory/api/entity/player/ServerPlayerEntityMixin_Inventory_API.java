@@ -54,7 +54,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
 
     @Override
     public Optional<Container> getOpenInventory() {
-        return Optional.ofNullable((Container) this.openContainer);
+        return Optional.ofNullable((Container) this.containerMenu);
     }
 
     @Override
@@ -65,7 +65,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
     @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
     @Override
     public Optional<Container> openInventory(final Inventory inventory, final Component displayName) {
-        final ContainerBridge openContainer = (ContainerBridge) this.openContainer;
+        final ContainerBridge openContainer = (ContainerBridge) this.containerMenu;
         if (openContainer.bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
@@ -85,7 +85,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
-        final net.minecraft.inventory.container.Container openContainer = this.openContainer;
+        final net.minecraft.inventory.container.Container openContainer = this.containerMenu;
         if (((ContainerBridge) openContainer).bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
@@ -107,7 +107,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
         ) {
             ctx.buildAndSwitch();
             final PlayerInventory inventory = this.inventory;
-            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(inventory.getItemStack());
+            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(inventory.getCarried());
             return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(openContainer, (ServerPlayerEntity) (Object) this, cursor, cursor, false).isCancelled();
         }
     }

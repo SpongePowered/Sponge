@@ -42,9 +42,9 @@ import javax.annotation.Nullable;
 @Mixin(Container.class)
 public abstract class ContainerMixin_Fabric_Inventory implements Fabric, InventoryBridge {
 
-    @Shadow public abstract Slot getSlot(int slotId);
-    @Shadow public List<Slot> inventorySlots;
-    @Shadow public abstract void detectAndSendChanges();
+    @Shadow public List<Slot> slots;
+    @Shadow public abstract Slot shadow$getSlot(int slotId);
+    @Shadow public abstract void shadow$broadcastChanges();
 
     @Nullable private Set<InventoryBridge> all;
 
@@ -52,9 +52,9 @@ public abstract class ContainerMixin_Fabric_Inventory implements Fabric, Invento
     public Collection<InventoryBridge> fabric$allInventories() {
         if (this.all == null) {
             ImmutableSet.Builder<InventoryBridge> builder = ImmutableSet.builder();
-            for (Slot slot : this.inventorySlots) {
-                if (slot.inventory != null) {
-                    builder.add((InventoryBridge) slot.inventory);
+            for (Slot slot : this.slots) {
+                if (slot.container != null) {
+                    builder.add((InventoryBridge) slot.container);
                 }
             }
             this.all = builder.build();
@@ -64,20 +64,20 @@ public abstract class ContainerMixin_Fabric_Inventory implements Fabric, Invento
 
     @Override
     public InventoryBridge fabric$get(int index) {
-        if (this.inventorySlots.isEmpty()) {
+        if (this.slots.isEmpty()) {
             return null; // Somehow we got an empty container
         }
-        return (InventoryBridge) this.getSlot(index).inventory;
+        return (InventoryBridge) this.shadow$getSlot(index).container;
     }
 
     @Override
     public ItemStack fabric$getStack(int index) {
-        return this.getSlot(index).getStack();
+        return this.shadow$getSlot(index).getItem();
     }
 
     @Override
     public void fabric$setStack(int index, ItemStack stack) {
-        this.getSlot(index).putStack(stack);
+        this.shadow$getSlot(index).set(stack);
     }
 
     @Override
@@ -88,19 +88,19 @@ public abstract class ContainerMixin_Fabric_Inventory implements Fabric, Invento
 
     @Override
     public int fabric$getSize() {
-        return this.inventorySlots.size();
+        return this.slots.size();
     }
 
     @Override
     public void fabric$clear() {
-        for (Slot slot : this.inventorySlots) {
-            slot.putStack(ItemStack.EMPTY);
+        for (Slot slot : this.slots) {
+            slot.set(ItemStack.EMPTY);
         }
     }
 
     @Override
     public void fabric$markDirty() {
-        this.detectAndSendChanges();
+        this.shadow$broadcastChanges();
     }
 
 }

@@ -53,7 +53,7 @@ import javax.annotation.Nullable;
 @Mixin(Container.class)
 public abstract class ContainerMixin_Adapter_Inventory implements InventoryBridge, LensGeneratorBridge, InventoryAdapter, ContainerBridge {
 
-    @Shadow public abstract NonNullList<ItemStack> getInventory();
+    @Shadow public abstract NonNullList<ItemStack> shadow$getItems();
 
     private boolean impl$isLensInitialized;
     private boolean impl$spectatorChest;
@@ -65,7 +65,7 @@ public abstract class ContainerMixin_Adapter_Inventory implements InventoryBridg
 
     @Override
     public SlotLensProvider lensGeneratorBridge$generateSlotLensProvider() {
-        return new LensRegistrar.BasicSlotLensProvider(this.getInventory().size());
+        return new LensRegistrar.BasicSlotLensProvider(this.shadow$getItems().size());
     }
 
     @Inject(method = "addSlot", at = @At(value = "HEAD"))
@@ -89,7 +89,7 @@ public abstract class ContainerMixin_Adapter_Inventory implements InventoryBridg
             return null;
         }
 
-        return LensRegistrar.getLens(this, slotLensProvider, this.getInventory().size());
+        return LensRegistrar.getLens(this, slotLensProvider, this.shadow$getItems().size());
     }
 
     private final Map<Integer, org.spongepowered.api.item.inventory.Slot> impl$slots = new Int2ObjectArrayMap<>();

@@ -22,23 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.impl.inventory.container;
+package org.spongepowered.common.mixin.inventory.event.inventory.container;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.CraftResultInventory;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.AbstractRepairContainer;
+import net.minecraft.inventory.container.RepairContainer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.IntReferenceHolder;
+import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
-import org.spongepowered.common.bridge.inventory.container.PlayerContainerBridge;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.inventory.InventoryEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
-@Mixin(PlayerContainer.class)
-public abstract class PlayerContainerMixin_Bridge_Inventory implements PlayerContainerBridge {
+@Mixin(AbstractRepairContainer.class)
+public abstract class AbstractRepairContainerMixin_Inventory {
 
-    @Shadow @Final private PlayerEntity owner;
+    @Shadow @Final protected CraftResultInventory resultSlots;
+    @Shadow @Final protected IInventory inputSlots;
 
-    @Override
-    public void bridge$markClean() {
-        ((PlayerInventoryBridge) this.owner.inventory).bridge$markClean();
-    }
+
 }

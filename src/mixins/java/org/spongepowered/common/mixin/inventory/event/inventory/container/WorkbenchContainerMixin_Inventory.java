@@ -62,22 +62,22 @@ public abstract class WorkbenchContainerMixin_Inventory {
      *
      * old method name: Container#slotChangedCraftingGrid
      */
-    @Inject(method = "updateCraftingResult", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/CraftResultInventory;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
+    @Inject(method = "slotChangedCraftingGrid", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/CraftResultInventory;setItem(ILnet/minecraft/item/ItemStack;)V"))
     private static void beforeSlotChangedCraftingGrid(int p_217066_0_, final World p_217066_1_, final PlayerEntity p_217066_2_,
             final net.minecraft.inventory.CraftingInventory p_217066_3_, final CraftResultInventory p_217066_4_, final CallbackInfo ci,
             ServerPlayerEntity serverPlayerEntity, ItemStack itemStack) {
-        TrackedInventoryBridge trackedContainer = (TrackedInventoryBridge) p_217066_2_.openContainer;
-        TrackedContainerBridge container = (TrackedContainerBridge) p_217066_2_.openContainer;
+        TrackedInventoryBridge trackedContainer = (TrackedInventoryBridge) p_217066_2_.containerMenu;
+        TrackedContainerBridge container = (TrackedContainerBridge) p_217066_2_.containerMenu;
 
         // Capture Inventory is true when caused by a vanilla inventory packet
         // This is to prevent infinite loops when a client mod re-requests the recipe result after we modified/cancelled it
         if (trackedContainer.bridge$capturingInventory()) {
             List<SlotTransaction> craftPreviewTransactions = container.bridge$getPreviewTransactions();
             craftPreviewTransactions.clear();
-            final ItemStackSnapshot orig = ItemStackUtil.snapshotOf(p_217066_4_.getStackInSlot(0));
+            final ItemStackSnapshot orig = ItemStackUtil.snapshotOf(p_217066_4_.getItem(0));
             final ItemStackSnapshot repl = ItemStackUtil.snapshotOf(itemStack);
-            Slot slot = ((InventoryAdapter) p_217066_2_.openContainer).inventoryAdapter$getSlot(0).get();
+            Slot slot = ((InventoryAdapter) p_217066_2_.containerMenu).inventoryAdapter$getSlot(0).get();
             craftPreviewTransactions.add(new SlotTransaction(slot, orig, repl));
         }
     }
@@ -87,31 +87,31 @@ public abstract class WorkbenchContainerMixin_Inventory {
      *
      * old method name: Container#slotChangedCraftingGrid
      */
-    @Inject(method = "updateCraftingResult", cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;sendPacket(Lnet/minecraft/network/IPacket;)V"))
+    @Inject(method = "slotChangedCraftingGrid", cancellable = true,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;send(Lnet/minecraft/network/IPacket;)V"))
     private static void afterSlotChangedCraftingGrid(int p_217066_0_,
             final World world, final PlayerEntity player, final net.minecraft.inventory.CraftingInventory craftingInventory, final CraftResultInventory output, final CallbackInfo ci) {
 
-        TrackedContainerBridge container = (TrackedContainerBridge) player.openContainer;
+        TrackedContainerBridge container = (TrackedContainerBridge) player.containerMenu;
 
         List<SlotTransaction> craftPreviewTransactions = container.bridge$getPreviewTransactions();
         if (container.bridge$firePreview() && !craftPreviewTransactions.isEmpty()) {
             // TODO can we just check the craftingInventory variable?
-            for (net.minecraft.inventory.container.Slot slot : player.openContainer.inventorySlots) {
+            for (net.minecraft.inventory.container.Slot slot : player.containerMenu.slots) {
 
             }
 
-            final Inventory inv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
+            final Inventory inv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
             if (!(inv instanceof CraftingInventory)) {
-                SpongeCommon.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + player.openContainer.getClass().getName());
+                SpongeCommon.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + player.containerMenu.getClass().getName());
                 return;
             }
             final SlotTransaction previewTransaction = craftPreviewTransactions.get(craftPreviewTransactions.size() - 1);
 
-            final ICraftingRecipe recipe = world.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING, craftingInventory, world).orElse(null);
+            final ICraftingRecipe recipe = world.getServer().getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, craftingInventory, world).orElse(null);
             InventoryEventFactory.callCraftEventPre(
                     player, ((CraftingInventory) inv), previewTransaction, ((CraftingRecipe) recipe),
-                    player.openContainer, craftPreviewTransactions);
+                    player.containerMenu, craftPreviewTransactions);
             craftPreviewTransactions.clear();
         }
     }

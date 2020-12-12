@@ -65,7 +65,7 @@ import java.util.function.Predicate;
 public abstract class TraitMixin_ContainerBridge_Inventory implements ContainerBridge {
 
     // Container#canInteractWith is abstract so we have to target the Containers individually
-    @Inject(method = "canInteractWith", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "stillValid", at = @At("HEAD"), cancellable = true)
     private void impl$canInteractWith(final PlayerEntity playerIn, final CallbackInfoReturnable<Boolean> cir) {
         Predicate<PlayerEntity> predicate = this.bridge$getCanInteractWith();
         if (predicate != null) {

@@ -53,8 +53,8 @@ import javax.annotation.Nullable;
 @Mixin(Container.class)
 public abstract class ContainerMixin_Bridge_Inventory implements CarriedBridge, ContainerBridge, InventoryAdapter {
 
-    @Shadow @Final public List<Slot> inventorySlots;
-    @Shadow @Final private List<IContainerListener> listeners;
+    @Shadow @Final public List<Slot> slots;
+    @Shadow @Final private List<IContainerListener> containerListeners;
 
     @Nullable private Carrier impl$carrier;
 
@@ -73,7 +73,7 @@ public abstract class ContainerMixin_Bridge_Inventory implements CarriedBridge, 
     public LinkedHashMap<IInventory, Set<Slot>> bridge$getInventories() {
         if (this.impl$allInventories == null) {
             this.impl$allInventories = new LinkedHashMap<>();
-            this.inventorySlots.forEach(slot -> this.impl$allInventories.computeIfAbsent(slot.inventory, (i) -> new HashSet<>()).add(slot));
+            this.slots.forEach(slot -> this.impl$allInventories.computeIfAbsent(slot.container, (i) -> new HashSet<>()).add(slot));
         }
         return this.impl$allInventories;
     }
@@ -115,7 +115,7 @@ public abstract class ContainerMixin_Bridge_Inventory implements CarriedBridge, 
 
     @Override
     public List<ServerPlayerEntity> bridge$listeners() {
-        return this.listeners.stream().filter(ServerPlayerEntity.class::isInstance)
+        return this.containerListeners.stream().filter(ServerPlayerEntity.class::isInstance)
                 .map(ServerPlayerEntity.class::cast)
                 .collect(Collectors.toList());
     }

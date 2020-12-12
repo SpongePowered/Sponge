@@ -35,11 +35,11 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 @Mixin(AbstractHorseEntity.class)
 public abstract class AbstractHorseEntityMixin_Carrier_Inventory_API implements Carrier {
 
-    @Shadow protected Inventory horseChest;
+    @Shadow protected Inventory inventory;
 
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
-        return InventoryUtil.carriedWrapperInventory(this.horseChest, this);
+        return InventoryUtil.carriedWrapperInventory(this.inventory, this);
     }
 
 }

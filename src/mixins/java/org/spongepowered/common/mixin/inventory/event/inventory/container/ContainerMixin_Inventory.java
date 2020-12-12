@@ -193,7 +193,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
     @Redirect(method = "doClick",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/PlayerInventory;setItem(Lnet/minecraft/item/ItemStack;)V",
+                    target = "Lnet/minecraft/entity/player/PlayerInventory;setCarried(Lnet/minecraft/item/ItemStack;)V",
                     ordinal = 1))
     private void impl$ClearOnSlot(final PlayerInventory inventoryPlayer, final ItemStack itemStackIn) {
         if (!this.impl$dropCancelled || !((PlayerEntityBridge) inventoryPlayer.player).bridge$shouldRestoreInventory()) {
@@ -266,7 +266,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
             this.impl$lastSlotUsed.set(original);
             player.containerMenu.broadcastChanges(); // TODO check if this is needed?
             ((ServerPlayerEntity) player).ignoreSlotUpdateHack = false;
-            ((ServerPlayerEntity) player).connection.send(new SSetSlotPacket(player.contaienrMenu.windowId, this.impl$lastSlotUsed.slotNumber, original));
+            ((ServerPlayerEntity) player).connection.send(new SSetSlotPacket(player.containerMenu.containerId, this.impl$lastSlotUsed.index, original));
         }
         this.impl$itemStackSnapshot = ItemStackSnapshot.empty();
         this.impl$lastSlotUsed = null;
@@ -288,7 +288,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
     // Called when setting the cursor item (pickup with empty cursor)
     // Captures the previous cursor for later use
     @Inject(method = "doClick",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;setItemStack(Lnet/minecraft/item/ItemStack;)V", ordinal = 3))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;setItem(ILnet/minecraft/item/ItemStack;)V", ordinal = 3))
     private void beforeOnTakeClick(
             final int slotId, final int dragType, final ClickType clickTypeIn, final PlayerEntity player, final CallbackInfoReturnable<Integer> cir) {
         this.bridge$setPreviousCursor(player.inventory.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
@@ -320,7 +320,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
     // Crafting continues until the returned ItemStack is empty OR the returned ItemStack is not the same as the item in the output slot
     @Redirect(method = "doClick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/inventory/container/Container;transferStackInSlot(Lnet/minecraft/entity/player/PlayerEntity;I)Lnet/minecraft/item/ItemStack;"))
+                    target = "Lnet/minecraft/inventory/container/Container;quickMoveStack(Lnet/minecraft/entity/player/PlayerEntity;I)Lnet/minecraft/item/ItemStack;"))
     private ItemStack redirectTransferStackInSlot(final Container thisContainer, final PlayerEntity player, final int slotId) {
         final Slot slot = thisContainer.getSlot(slotId);
         if (!(slot instanceof CraftingResultSlot)) { // is this crafting?
@@ -351,11 +351,11 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
         // TODO check if when canceling crafting etc. the client is getting informed correctly already - maybe this is not needed
         // previously from CraftingContainerMixin
         if (((Object) this) instanceof WorkbenchContainer || ((Object) this) instanceof PlayerContainer) {
-            for (IContainerListener listener : this.listeners) {
+            for (IContainerListener listener : this.containerListeners) {
                 if (slotId == 0) {
-                    listener.refreshContainer((Container) (Object) this, this.shadow$getInventory());
+                    listener.refreshContainer((Container) (Object) this, this.shadow$getItems());
                 } else {
-                    listener.slotChanged((Container) (Object) this, 0, this.shadow$getInventory().get(0));
+                    listener.slotChanged((Container) (Object) this, 0, this.shadow$getItems().get(0));
                 }
             }
 
@@ -371,17 +371,17 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
      * should be touching this method.
      */
     @Overwrite
-    public void detectAndSendChanges() {
+    public void broadcastChanges() {
         this.bridge$detectAndSendChanges(false);
         this.bridge$setCapturePossible(); // Detect mod overrides
     }
 
-    @Final @Shadow private NonNullList<ItemStack> inventoryItemStacks;
-    @Final @Shadow public List<Slot> inventorySlots;
-    @Final @Shadow private List<IContainerListener> listeners;
-    @Final @Shadow private List<IntReferenceHolder> trackedIntReferences;
+    @Final @Shadow private NonNullList<ItemStack> lastSlots;
+    @Final @Shadow public List<Slot> slots;
+    @Final @Shadow private List<IContainerListener> containerListeners;
+    @Final @Shadow private List<IntReferenceHolder> dataSlots;
 
-    @Shadow public abstract NonNullList<ItemStack> shadow$getInventory();
+    @Shadow public abstract NonNullList<ItemStack> shadow$getItems();
 
     @Override
     public void bridge$detectAndSendChanges(final boolean captureOnly) {
@@ -392,14 +392,14 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
         boolean readOnlyCancel = false;
         List<Integer> changes = new ArrayList<>();
 
-        for (int i = 0; i < this.inventorySlots.size(); ++i) {
-            final Slot slot = this.inventorySlots.get(i);
-            final ItemStack newStack = slot.getStack();
-            ItemStack oldStack = this.inventoryItemStacks.get(i);
-            if (!ItemStack.areItemStacksEqual(oldStack, newStack)) {
+        for (int i = 0; i < this.slots.size(); ++i) {
+            final Slot slot = this.slots.get(i);
+            final ItemStack newStack = slot.getItem();
+            ItemStack oldStack = this.lastSlots.get(i);
+            if (!ItemStack.matches(oldStack, newStack)) {
                 changes.add(i);
                 if (menu != null && menu.isReadOnly()) { // readonly menu cancels if there is any change outside of the players inventory
-                    if (slot.inventory == menu.getInventory()) {
+                    if (slot.container == menu.getInventory()) {
                         readOnlyCancel = true;
                     }
                 }
@@ -409,29 +409,29 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
         if (readOnlyCancel) {
             // revert all changes if readonly
             for (Integer i : changes) {
-                final Slot slot = this.inventorySlots.get(i);
-                final ItemStack oldStack = this.inventoryItemStacks.get(i);
+                final Slot slot = this.slots.get(i);
+                final ItemStack oldStack = this.lastSlots.get(i);
                 slot.set(oldStack.copy());
                 // Send reverted slots to clients
                 this.impl$sendSlotContents(i, oldStack);
                 // Revert item in hand
-                for (IContainerListener listener : this.listeners) {
+                for (IContainerListener listener : this.containerListeners) {
                     if (listener instanceof ServerPlayerEntity) {
-                        ((ServerPlayerEntity) listener).inventory.setItemStack(menu.getOldCursor());
-                        ((ServerPlayerEntity) listener).updateHeldItem();
+                        ((ServerPlayerEntity) listener).inventory.setCarried(menu.getOldCursor());
+                        ((ServerPlayerEntity) listener).broadcastCarriedItem();
                     }
                 }
             }
         } else {
             // For each change
             for (Integer i : changes) {
-                final Slot slot = this.inventorySlots.get(i);
-                ItemStack newStack = slot.getStack();
-                ItemStack oldStack = this.inventoryItemStacks.get(i);
+                final Slot slot = this.slots.get(i);
+                ItemStack newStack = slot.getItem();
+                ItemStack oldStack = this.lastSlots.get(i);
 
                 // Check for on change menu callbacks
                 if (menu != null && !menu.onChange(newStack, oldStack, (org.spongepowered.api.item.inventory.Container) this, i, slot)) {
-                    this.inventoryItemStacks.set(i, oldStack.copy());  // revert changes
+                    this.lastSlots.set(i, oldStack.copy());  // revert changes
                     // Send reverted slots to clients
                     this.impl$sendSlotContents(i, oldStack);
                 } else {
@@ -445,10 +445,10 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
                     }
                     // Perform vanilla logic - updating inventory stack - notify listeners
                     oldStack = newStack.isEmpty() ? ItemStack.EMPTY : newStack.copy();
-                    this.inventoryItemStacks.set(i, oldStack);
+                    this.lastSlots.set(i, oldStack);
                     // TODO forge checks !itemstack1.equals(itemstack, true) before doing this
-                    for (IContainerListener listener : this.listeners) {
-                        listener.sendSlotContents(((Container) (Object) this), i, oldStack);
+                    for (IContainerListener listener : this.containerListeners) {
+                        listener.slotChanged(((Container) (Object) this), i, oldStack);
                     }
                 }
             }
@@ -467,25 +467,25 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
 
     public void impl$sendSlotContents(Integer i, ItemStack oldStack) {
 
-        for (IContainerListener listener : this.listeners) {
+        for (IContainerListener listener : this.containerListeners) {
             boolean isChangingQuantityOnly = true;
             if (listener instanceof ServerPlayerEntity) {
-                isChangingQuantityOnly = ((ServerPlayerEntity) listener).isChangingQuantityOnly;
-                ((ServerPlayerEntity) listener).isChangingQuantityOnly = false;
+                isChangingQuantityOnly = ((ServerPlayerEntity) listener).ignoreSlotUpdateHack;
+                ((ServerPlayerEntity) listener).ignoreSlotUpdateHack = false;
             }
-            listener.sendSlotContents(((Container) (Object) this), i, oldStack);
+            listener.slotChanged(((Container) (Object) this), i, oldStack);
             if (listener instanceof ServerPlayerEntity) {
-                ((ServerPlayerEntity) listener).isChangingQuantityOnly = isChangingQuantityOnly;
+                ((ServerPlayerEntity) listener).ignoreSlotUpdateHack = isChangingQuantityOnly;
             }
         }
     }
 
     private void impl$detectAndSendPropertyChanges() {
-        for(int j = 0; j < this.trackedIntReferences.size(); ++j) {
-            IntReferenceHolder intreferenceholder = this.trackedIntReferences.get(j);
-            if (intreferenceholder.isDirty()) {
-                for(IContainerListener icontainerlistener1 : this.listeners) {
-                    icontainerlistener1.sendWindowProperty((Container) (Object) this, j, intreferenceholder.get());
+        for(int j = 0; j < this.dataSlots.size(); ++j) {
+            IntReferenceHolder intreferenceholder = this.dataSlots.get(j);
+            if (intreferenceholder.checkAndClearUpdateFlag()) {
+                for(IContainerListener icontainerlistener1 : this.containerListeners) {
+                    icontainerlistener1.setContainerData((Container) (Object) this, j, intreferenceholder.get());
                 }
             }
         }

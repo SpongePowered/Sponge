@@ -46,6 +46,7 @@
     "event.entity.item.ItemEntityMixin_Inventory",
     "event.entity.player.PlayerEntityMixin_Inventory",
     "event.inventory.InventoryHelperMixin_Inventory",
+    "event.inventory.container.AbstractRepairContainerMixin_Inventory",
     "event.inventory.container.ContainerMixin_Inventory",
     "event.inventory.container.CraftingResultSlotMixin_Inventory",
     "event.inventory.container.EnchantmentContainerMixin_Inventory",

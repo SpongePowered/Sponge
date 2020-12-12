@@ -36,11 +36,11 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 @Mixin(AbstractVillagerEntity.class)
 public abstract class AbstractVillagerEntity_Carrier_Inventory_API implements Carrier {
 
-    @Shadow @Final private Inventory villagerInventory;
+    @Shadow @Final private Inventory inventory;
 
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
-        return InventoryUtil.carriedWrapperInventory(this.villagerInventory, this);
+        return InventoryUtil.carriedWrapperInventory(this.inventory, this);
     }
 
 }

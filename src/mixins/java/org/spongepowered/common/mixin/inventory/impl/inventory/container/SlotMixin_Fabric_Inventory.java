@@ -38,11 +38,11 @@ import java.util.Collections;
 
 @Mixin(Slot.class)
 public abstract class SlotMixin_Fabric_Inventory implements Fabric, InventoryBridge {
-    @Shadow @Final public IInventory inventory;
-    @Shadow public abstract ItemStack getStack();
-    @Shadow public abstract void putStack(ItemStack stack);
-    @Shadow public abstract int getSlotStackLimit();
-    @Shadow public abstract void onSlotChanged();
+    @Shadow @Final public IInventory container;
+    @Shadow public abstract ItemStack shadow$getItem();
+    @Shadow public abstract void shadow$set(ItemStack stack);
+    @Shadow public abstract int shadow$getMaxStackSize();
+    @Shadow public abstract void shadow$setChanged();
 
     @Override
     public Collection<InventoryBridge> fabric$allInventories() {
@@ -51,8 +51,8 @@ public abstract class SlotMixin_Fabric_Inventory implements Fabric, InventoryBri
 
     @Override
     public InventoryBridge fabric$get(final int index) {
-        if (this.inventory != null) {
-            return (InventoryBridge) this.inventory;
+        if (this.container != null) {
+            return (InventoryBridge) this.container;
         }
 
         throw new UnsupportedOperationException("Unable to access slot at " + index + " for delegating fabric of " + this.getClass());
@@ -60,17 +60,17 @@ public abstract class SlotMixin_Fabric_Inventory implements Fabric, InventoryBri
 
     @Override
     public ItemStack fabric$getStack(final int index) {
-        return this.getStack();
+        return this.shadow$getItem();
     }
 
     @Override
     public void fabric$setStack(final int index, final ItemStack stack) {
-        this.putStack(stack);
+        this.shadow$set(stack);
     }
 
     @Override
     public int fabric$getMaxStackSize() {
-        return this.getSlotStackLimit();
+        return this.shadow$getMaxStackSize();
     }
 
     @Override
@@ -80,11 +80,11 @@ public abstract class SlotMixin_Fabric_Inventory implements Fabric, InventoryBri
 
     @Override
     public void fabric$clear() {
-        this.putStack(ItemStack.EMPTY);
+        this.shadow$set(ItemStack.EMPTY);
     }
 
     @Override
     public void fabric$markDirty() {
-        this.onSlotChanged();
+        this.shadow$setChanged();
     }
 }

@@ -51,13 +51,13 @@ import javax.annotation.Nullable;
 @Mixin(HopperTileEntity.class)
 public abstract class HopperTileEntityMixin_Inventory {
 
-    @Shadow protected abstract boolean shadow$isInventoryFull(IInventory inventoryIn, Direction side);
+    @Shadow protected abstract boolean shadow$isFullContainer(IInventory inventoryIn, Direction side);
 
     // Call PreEvents
 
-    @Redirect(method = "pullItems",
+    @Redirect(method = "suckInItems",
             at = @At(value = "INVOKE",
-                     target = "Lnet/minecraft/tileentity/HopperTileEntity;isInventoryEmpty(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/Direction;)Z"))
+                     target = "Lnet/minecraft/tileentity/HopperTileEntity;isEmptyContainer(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/Direction;)Z"))
     private static boolean impl$throwTransferPreIfNotEmpty(final IInventory inventory, final Direction facing, final IHopper hopper) {
         final boolean result = HopperTileEntityAccessor.invoker$isEmptyContainer(inventory, facing);
         if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
@@ -66,11 +66,11 @@ public abstract class HopperTileEntityMixin_Inventory {
         return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(inventory), InventoryUtil.toInventory(hopper)).isCancelled();
     }
 
-    @Redirect(method = "transferItemsOut",
+    @Redirect(method = "ejectItems",
             at = @At(value = "INVOKE",
-                     target = "Lnet/minecraft/tileentity/HopperTileEntity;isInventoryFull(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/Direction;)Z"))
+                     target = "Lnet/minecraft/tileentity/HopperTileEntity;isFullContainer(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/Direction;)Z"))
     private boolean impl$throwTransferPreIfNotFull(final HopperTileEntity hopper, final IInventory inventory, final Direction enumfacing) {
-        final boolean result = this.shadow$isInventoryFull(inventory, enumfacing);
+        final boolean result = this.shadow$isFullContainer(inventory, enumfacing);
         if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
             return result;
         }
@@ -79,9 +79,9 @@ public abstract class HopperTileEntityMixin_Inventory {
 
     // Capture Transactions
 
-    @Redirect(method = "putStackInInventoryAllSlots",
+    @Redirect(method = "addItem(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/inventory/IInventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Direction;)Lnet/minecraft/item/ItemStack;",
             at = @At(value = "INVOKE",
-                     target = "Lnet/minecraft/tileentity/HopperTileEntity;insertStack(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/inventory/IInventory;Lnet/minecraft/item/ItemStack;ILnet/minecraft/util/Direction;)Lnet/minecraft/item/ItemStack;"))
+                     target = "Lnet/minecraft/tileentity/HopperTileEntity;tryMoveInItem(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/inventory/IInventory;Lnet/minecraft/item/ItemStack;ILnet/minecraft/util/Direction;)Lnet/minecraft/item/ItemStack;"))
     private static ItemStack impl$throwEventsForInsertion(final IInventory source, final IInventory destination, final ItemStack stack,
             final int index, final Direction direction) {
         // capture Transaction
@@ -101,7 +101,7 @@ public abstract class HopperTileEntityMixin_Inventory {
 
     // Post Captured Transactions
 
-    @Inject(method = "transferItemsOut", locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+    @Inject(method = "ejectItems", locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE",
                      target = "Lnet/minecraft/item/ItemStack;isEmpty()Z",
                      ordinal = 1))
@@ -117,7 +117,7 @@ public abstract class HopperTileEntityMixin_Inventory {
         }
     }
 
-    @Inject(method = "pullItemFromSlot",
+    @Inject(method = "tryTakeInItemFromSlot",
             locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE",
                      target = "Lnet/minecraft/item/ItemStack;isEmpty()Z",
@@ -135,12 +135,10 @@ public abstract class HopperTileEntityMixin_Inventory {
         }
     }
 
-    @Redirect(method = "captureItem",
-              at = @At(value = "INVOKE",
-                       target = "Lnet/minecraft/tileentity/HopperTileEntity;putStackInInventoryAllSlots(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/inventory/IInventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Direction;)Lnet/minecraft/item/ItemStack;"))
-    private static ItemStack impl$onPutStackInInventoryAllSlots(
-            final IInventory source, final IInventory destination, final ItemStack stack, final Direction direction,
-            final IInventory d2, final ItemEntity entity) {
+    @Redirect(method = "addItem(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/entity/item/ItemEntity;)Z",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/tileentity/HopperTileEntity;addItem(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/inventory/IInventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Direction;)Lnet/minecraft/item/ItemStack;"))
+    private static ItemStack impl$onPutStackInInventoryAllSlots( final IInventory source, final IInventory destination, final ItemStack stack, final Direction direction, final boolean flag, final IInventory d2, final ItemEntity entity) {
         return InventoryEventFactory.callInventoryPickupEvent(destination, entity, stack);
     }
 
