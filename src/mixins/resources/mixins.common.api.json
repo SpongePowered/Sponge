@@ -25,6 +25,8 @@
         "mcp.advancements.FrameTypeMixin_API",
         "mcp.advancements.ICriterionInstanceMixin_API",
         "mcp.advancements.ICriterionTriggerMixin_API",
+        "mcp.block.AbstractBlockMixin_API",
+        "mcp.block.AbstractBlockStateMixin_API",
         "mcp.block.BlockMixin_API",
         "mcp.block.BlockStateMixin_API",
         "mcp.command.CommandSourceMixin_API",
