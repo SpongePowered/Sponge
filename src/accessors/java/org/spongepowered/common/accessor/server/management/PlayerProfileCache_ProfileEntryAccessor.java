@@ -37,4 +37,6 @@ public interface PlayerProfileCache_ProfileEntryAccessor {
 
     @Invoker("getExpirationDate") Date invoker$getExpirationDate();
 
+    @Invoker("setLastAccess") void invoker$setLastAccess(final long lastAccessMs);
+
 }

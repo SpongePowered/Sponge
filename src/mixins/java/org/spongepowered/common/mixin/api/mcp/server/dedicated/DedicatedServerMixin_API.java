@@ -40,19 +40,19 @@ import java.util.Optional;
 @Implements(@Interface(iface = Server.class, prefix = "server$"))
 public abstract class DedicatedServerMixin_API extends MinecraftServerMixin_API implements Server {
 
-    @Shadow public abstract String shadow$getHostname();
-    @Shadow public abstract int shadow$getPort();
+    @Shadow public abstract String shadow$getServerIp();
+    @Shadow public abstract int shadow$getServerPort();
 
-    public DedicatedServerMixin_API(String name) {
+    public DedicatedServerMixin_API(final String name) {
         super(name);
     }
 
     @Override
     public Optional<InetSocketAddress> getBoundAddress() {
-        if (this.shadow$getHostname() == null) {
+        if (this.shadow$getServerIp() == null) {
             return Optional.empty();
         }
-        return Optional.of(new InetSocketAddress(this.shadow$getHostname(), this.shadow$getPort()));
+        return Optional.of(new InetSocketAddress(this.shadow$getServerIp(), this.shadow$getServerPort()));
     }
 
     @Intrinsic

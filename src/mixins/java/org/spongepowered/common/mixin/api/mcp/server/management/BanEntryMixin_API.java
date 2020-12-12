@@ -39,8 +39,8 @@ import java.util.Optional;
 @Mixin(BanEntry.class)
 public abstract class BanEntryMixin_API<T> extends UserListEntryMixin_API<T> implements Ban {
 
-    @Shadow @Final protected Date banStartDate;
-    @Shadow @Final protected Date banEndDate;
+    @Shadow @Final protected Date created;
+    @Shadow @Final protected Date expires;
 
     @Override
     public Optional<Component> getReason() {
@@ -49,7 +49,7 @@ public abstract class BanEntryMixin_API<T> extends UserListEntryMixin_API<T> imp
 
     @Override
     public Instant getCreationDate() {
-        return this.banStartDate.toInstant();
+        return this.created.toInstant();
     }
 
     @Override
@@ -59,6 +59,6 @@ public abstract class BanEntryMixin_API<T> extends UserListEntryMixin_API<T> imp
 
     @Override
     public Optional<Instant> getExpirationDate() {
-        return Optional.ofNullable(this.banEndDate == null ? null : this.banEndDate.toInstant());
+        return Optional.ofNullable(this.expires == null ? null : this.expires.toInstant());
     }
 }

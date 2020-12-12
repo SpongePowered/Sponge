@@ -56,18 +56,18 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     @Shadow public abstract PacketBuffer shadow$writeByteArray(byte[] array);
     @Shadow public abstract PacketBuffer shadow$writeVarInt(int input);
     @Shadow public abstract PacketBuffer shadow$writeVarLong(long input);
-    @Shadow public abstract PacketBuffer shadow$writeString(String string);
-    @Shadow public abstract PacketBuffer shadow$writeCompoundTag(@Nullable CompoundNBT nbt);
-    @Shadow public abstract PacketBuffer shadow$writeUniqueId(UUID uniqueId);
+    @Shadow public abstract PacketBuffer shadow$writeUtf(String string);
+    @Shadow public abstract PacketBuffer shadow$writeNbt(@Nullable CompoundNBT nbt);
+    @Shadow public abstract PacketBuffer shadow$writeUUID(UUID uniqueId);
     
     // mojang methods, non-fluent
     @Shadow public abstract byte[] shadow$readByteArray();
     @Shadow public abstract byte[] shadow$readByteArray(int limit);
     @Shadow public abstract int shadow$readVarInt();
     @Shadow public abstract long shadow$readVarLong();
-    @Shadow public abstract String shadow$readString(int maxLength);
-    @Shadow public abstract CompoundNBT shadow$readCompoundTag() throws IOException;
-    @Shadow public abstract UUID shadow$readUniqueId();
+    @Shadow public abstract String shadow$readUtf(int maxLength);
+    @Shadow public abstract CompoundNBT shadow$readNbt() throws IOException;
+    @Shadow public abstract UUID shadow$readUUID();
 
     @Intrinsic
     public int cbuf$capacity() {
@@ -523,32 +523,32 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     public ChannelBuf cbuf$writeString(final String data) {
-        return (ChannelBuf) this.shadow$writeString(checkNotNull(data)); // fluent in target
+        return (ChannelBuf) this.shadow$writeUtf(checkNotNull(data)); // fluent in target
     }
 
-    public ChannelBuf cbuf$setString(int index, String data) {
+    public ChannelBuf cbuf$setString(final int index, final String data) {
         checkNotNull(data);
         final int oldIndex = this.writerIndex();
         this.writerIndex(index);
-        this.shadow$writeString(data);
+        this.shadow$writeUtf(data);
         this.writerIndex(oldIndex);
         return (ChannelBuf) this;
     }
 
     public String cbuf$readString() {
-        return this.shadow$readString(Constants.Networking.MAX_STRING_LENGTH);
+        return this.shadow$readUtf(Constants.Networking.MAX_STRING_LENGTH);
     }
 
     public String cbuf$getString(final int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
-        final String value = this.shadow$readString(Constants.Networking.MAX_STRING_LENGTH);
+        final String value = this.shadow$readUtf(Constants.Networking.MAX_STRING_LENGTH);
         this.readerIndex(oldIndex);
         return value;
     }
 
     public ChannelBuf cbuf$writeUTF(final String data) {
-        byte[] bytes = data.getBytes(Charsets.UTF_8);
+        final byte[] bytes = data.getBytes(Charsets.UTF_8);
         if (bytes.length > Constants.Networking.MAX_STRING_LENGTH_BYTES) {
             throw new EncoderException("String too big (was " + data.length() + " bytes encoded, max "
                                        + Constants.Networking.MAX_STRING_LENGTH_BYTES + ")");
@@ -587,34 +587,34 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
 
     public ChannelBuf cbuf$writeUniqueId(final UUID data) {
         checkNotNull(data, "data");
-        return (ChannelBuf) this.shadow$writeUniqueId(data); // fluent in target
+        return (ChannelBuf) this.shadow$writeUUID(data); // fluent in target
     }
 
     public ChannelBuf cbuf$setUniqueId(final int index, final UUID data) {
         checkNotNull(data, "data");
         final int oldIndex = this.writerIndex();
         this.writerIndex(index);
-        this.shadow$writeUniqueId(data);
+        this.shadow$writeUUID(data);
         this.writerIndex(oldIndex);
         return (ChannelBuf) this;
     }
 
     @Intrinsic
     public UUID cbuf$readUniqueId() {
-        return this.shadow$readUniqueId();
+        return this.shadow$readUUID();
     }
 
     public UUID getUniqueId(final int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
-        final UUID data = this.shadow$readUniqueId();
+        final UUID data = this.shadow$readUUID();
         this.readerIndex(oldIndex);
         return data;
     }
 
     public ChannelBuf cbuf$writeDataView(final DataView data) {
         final CompoundNBT compound = NBTTranslator.getInstance().translate(checkNotNull(data, "data"));
-        this.shadow$writeCompoundTag(compound);
+        this.shadow$writeNbt(compound);
         return (ChannelBuf) this;
     }
 
@@ -629,8 +629,8 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
 
     public DataView cbuf$readDataView() {
         try {
-            return NBTTranslator.getInstance().translateFrom(this.shadow$readCompoundTag());
-        } catch (IOException e) {
+            return NBTTranslator.getInstance().translateFrom(this.shadow$readNbt());
+        } catch (final IOException e) {
             throw new DecoderException(e);
         }
     }

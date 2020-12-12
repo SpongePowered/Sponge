@@ -56,20 +56,20 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
 
     @Nullable @Shadow @Final @Mutable private Scoreboard scoreboard;
     @Shadow @Final private String name;
-    @Shadow @Final private Set<String> membershipSet;
+    @Shadow @Final private Set<String> players;
 
     @Shadow public abstract void shadow$setAllowFriendlyFire(boolean friendlyFire);
-    @Shadow public abstract void shadow$setSeeFriendlyInvisiblesEnabled(boolean friendlyInvisibles);
+    @Shadow public abstract void shadow$setSeeFriendlyInvisibles(boolean friendlyInvisibles);
     @Shadow public abstract void shadow$setNameTagVisibility(net.minecraft.scoreboard.Team.Visible visibility);
     @Shadow public abstract void shadow$setDeathMessageVisibility(net.minecraft.scoreboard.Team.Visible visibility);
     @Shadow public abstract void shadow$setCollisionRule(net.minecraft.scoreboard.Team.CollisionRule rule);
     @Shadow public abstract void shadow$setDisplayName(ITextComponent text);
-    @Shadow public abstract boolean shadow$getAllowFriendlyFire();
-    @Shadow public abstract boolean shadow$getSeeFriendlyInvisiblesEnabled();
+    @Shadow public abstract boolean shadow$isAllowFriendlyFire();
+    @Shadow public abstract boolean shadow$canSeeFriendlyInvisibles();
     @Shadow public abstract net.minecraft.scoreboard.Team.Visible shadow$getNameTagVisibility();
     @Shadow public abstract net.minecraft.scoreboard.Team.Visible shadow$getDeathMessageVisibility();
     @Shadow public abstract net.minecraft.scoreboard.Team.CollisionRule shadow$getCollisionRule();
-    @Shadow public abstract Collection<String> shadow$getMembershipCollection();
+    @Shadow public abstract Collection<String> shadow$getPlayers();
 
     @Intrinsic
     public String team$getName() {
@@ -120,7 +120,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
 
     @Override
     public boolean allowFriendlyFire() {
-        return this.shadow$getAllowFriendlyFire();
+        return this.shadow$isAllowFriendlyFire();
     }
 
     @Intrinsic
@@ -130,12 +130,12 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
 
     @Override
     public boolean canSeeFriendlyInvisibles() {
-        return this.shadow$getSeeFriendlyInvisiblesEnabled();
+        return this.shadow$canSeeFriendlyInvisibles();
     }
 
     @Override
     public void setCanSeeFriendlyInvisibles(final boolean enabled) {
-        this.shadow$setSeeFriendlyInvisiblesEnabled(enabled);
+        this.shadow$setSeeFriendlyInvisibles(enabled);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -176,7 +176,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
 
     @Override
     public Set<Component> getMembers() {
-        return this.shadow$getMembershipCollection().stream().map(SpongeAdventure::legacySection).collect(Collectors.toSet());
+        return this.shadow$getPlayers().stream().map(SpongeAdventure::legacySection).collect(Collectors.toSet());
     }
 
     @Override
@@ -188,7 +188,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
         if (this.scoreboard != null) {
             this.scoreboard.addPlayerToTeam(legacyName, (ScorePlayerTeam) (Object) this);
         } else {
-            this.membershipSet.add(legacyName); // this is normally done by addPlayerToTeam
+            this.players.add(legacyName); // this is normally done by addPlayerToTeam
         }
     }
 
@@ -205,7 +205,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
             }
             return false;
         }
-        return this.membershipSet.remove(legacyName);
+        return this.players.remove(legacyName);
     }
 
     @Override
@@ -218,7 +218,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
         if (this.scoreboard == null) {
             return false;
         }
-        this.scoreboard.removeTeam((ScorePlayerTeam) (Object) this);
+        this.scoreboard.removePlayerTeam((ScorePlayerTeam) (Object) this);
         this.scoreboard = null;
         return true;
     }

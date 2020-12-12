@@ -62,7 +62,7 @@ public abstract class EffectMixin_API implements PotionEffectType {
             .build();
 
 
-    @Shadow public abstract boolean shadow$isInstant();
+    @Shadow public abstract boolean shadow$isInstantaneous();
     @Shadow public abstract ITextComponent shadow$getDisplayName();
 
     private ResourceKey api$key;
@@ -70,14 +70,13 @@ public abstract class EffectMixin_API implements PotionEffectType {
     @Override
     public ResourceKey getKey() {
         if (this.api$key == null) {
-            this.api$key = (ResourceKey) (Object) Registry.EFFECTS.getKey((Effect) (Object) this);
+            this.api$key = (ResourceKey) (Object) Registry.MOB_EFFECT.getKey((Effect) (Object) this);
         }
         return this.api$key;
     }
 
-    @Intrinsic
     public boolean potionEffectType$isInstant() {
-        return this.shadow$isInstant();
+        return this.shadow$isInstantaneous();
     }
 
     @Override

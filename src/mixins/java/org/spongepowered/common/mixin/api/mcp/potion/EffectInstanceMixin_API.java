@@ -41,15 +41,15 @@ import org.spongepowered.common.util.Constants;
 @Implements(@Interface(iface = PotionEffect.class, prefix = "potionEffect$"))
 public abstract class EffectInstanceMixin_API implements PotionEffect {
 
-    @Shadow @Final private Effect potion;
+    @Shadow @Final private Effect effect;
     @Shadow private int duration;
     @Shadow private int amplifier;
     @Shadow private boolean ambient;
-    @Shadow private boolean showParticles;
+    @Shadow private boolean visible;
 
     @Override
     public PotionEffectType getType() {
-        return (PotionEffectType) this.potion;
+        return (PotionEffectType) this.effect;
     }
 
     @Intrinsic
@@ -69,7 +69,7 @@ public abstract class EffectInstanceMixin_API implements PotionEffect {
 
     @Override
     public boolean showsParticles() {
-        return this.showParticles;
+        return this.visible;
     }
 
     @Override
@@ -85,6 +85,6 @@ public abstract class EffectInstanceMixin_API implements PotionEffect {
                 .set(Constants.Item.Potions.POTION_DURATION, this.duration)
                 .set(Constants.Item.Potions.POTION_AMPLIFIER, this.amplifier)
                 .set(Constants.Item.Potions.POTION_AMBIANCE, this.ambient)
-                .set(Constants.Item.Potions.POTION_SHOWS_PARTICLES, this.showParticles);
+                .set(Constants.Item.Potions.POTION_SHOWS_PARTICLES, this.visible);
     }
 }

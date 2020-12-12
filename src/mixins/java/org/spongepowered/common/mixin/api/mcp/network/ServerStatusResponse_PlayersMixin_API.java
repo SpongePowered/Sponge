@@ -42,19 +42,19 @@ import javax.annotation.Nullable;
 @Mixin(ServerStatusResponse.Players.class)
 public abstract class ServerStatusResponse_PlayersMixin_API implements ClientPingServerEvent.Response.Players {
 
-    @Shadow @Final @Mutable private int onlinePlayerCount;
+    @Shadow @Final @Mutable private int numPlayers;
     @Shadow @Final @Mutable private int maxPlayers;
 
     @Nullable private List<org.spongepowered.api.profile.GameProfile> profiles;
 
     @Override
     public int getOnline() {
-        return this.onlinePlayerCount;
+        return this.numPlayers;
     }
 
     @Override
     public void setOnline(final int online) {
-        this.onlinePlayerCount = online;
+        this.numPlayers = online;
     }
 
     @Override
@@ -83,7 +83,7 @@ public abstract class ServerStatusResponse_PlayersMixin_API implements ClientPin
      * @return The profiles
      */
     @Overwrite
-    public GameProfile[] getPlayers() {
+    public GameProfile[] getSample() {
         if (this.profiles == null) {
             return new GameProfile[0];
         }
@@ -102,7 +102,7 @@ public abstract class ServerStatusResponse_PlayersMixin_API implements ClientPin
      * @param playersIn The players to set
      */
     @Overwrite
-    public void setPlayers(final GameProfile[] playersIn) {
+    public void setSample(final GameProfile[] playersIn) {
         if (this.profiles == null) {
             this.profiles = new ArrayList<>(playersIn.length);
         } else {

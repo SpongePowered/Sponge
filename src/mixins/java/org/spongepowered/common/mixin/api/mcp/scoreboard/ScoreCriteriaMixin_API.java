@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 public abstract class ScoreCriteriaMixin_API implements Criterion {
 
     // @formatter:off
-    @Shadow public abstract ScoreCriteria.RenderType shadow$getRenderType();
+    @Shadow public abstract ScoreCriteria.RenderType shadow$getDefaultRenderType();
     // @formatter:on
 
     @Override
@@ -46,6 +46,6 @@ public abstract class ScoreCriteriaMixin_API implements Criterion {
 
     @Override
     public ObjectiveDisplayMode getDisplayMode() {
-        return (ObjectiveDisplayMode) (Object) this.shadow$getRenderType();
+        return (ObjectiveDisplayMode) (Object) this.shadow$getDefaultRenderType();
     }
 }
