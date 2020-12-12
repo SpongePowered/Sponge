@@ -28,10 +28,14 @@ import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.item.recipe.cooking.CookingResult;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
@@ -40,11 +44,15 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.Optional;
 
 @Mixin(AbstractCookingRecipe.class)
+@Implements(@Interface(iface = CookingRecipe.class, prefix = "cookingRecipe$"))
 public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
 
+    // @formatter:off
     @Shadow @Final protected Ingredient ingredient;
     @Shadow @Final protected ResourceLocation id;
     @Shadow public abstract float shadow$getExperience();
+    @Shadow public abstract int shadow$getCookingTime();
+    // @formatter:on
 
     @Override
     public org.spongepowered.api.item.recipe.crafting.Ingredient getIngredient() {
@@ -64,14 +72,15 @@ public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
         return Optional.empty();
     }
 
-//    @Override
-//    public int getCookingTime() {
-//        return this.shadow$getCookingTime();
-//    }
+    @Intrinsic
+    public int cookingRecipe$getCookingTime() {
+        return this.shadow$getCookingTime();
+    }
 
-//    public float recipe$getExperience() {
-//        return this.shadow$getExperience();
-//    }
+    @Intrinsic
+    public float cookingRecipe$getExperience() {
+        return this.shadow$getExperience();
+    }
 
     @Override
     public ResourceKey getKey() {

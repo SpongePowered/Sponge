@@ -26,11 +26,9 @@ package org.spongepowered.common.mixin.api.mcp.fluid;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.IFluidState;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.state.StateProperty;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -40,26 +38,28 @@ import java.util.Optional;
 @Mixin(Fluid.class)
 public abstract class FluidMixin_API implements FluidType {
 
-    @Shadow public abstract net.minecraft.state.StateContainer<Fluid, IFluidState> shadow$getStateContainer();
-    @Shadow public abstract net.minecraft.fluid.IFluidState shadow$getDefaultState();
+    // @formatter:off
+    @Shadow public abstract net.minecraft.state.StateContainer<Fluid, net.minecraft.fluid.FluidState> shadow$getStateDefinition();
+    @Shadow public abstract net.minecraft.fluid.FluidState shadow$defaultFluidState();
+    // @formatter:on
 
     @Override
     public ImmutableList<FluidState> getValidStates() {
-        return (ImmutableList) this.shadow$getStateContainer().getValidStates();
+        return (ImmutableList) this.shadow$getStateDefinition().getPossibleStates();
     }
 
     @Override
     public FluidState getDefaultState() {
-        return (FluidState) this.shadow$getDefaultState();
+        return (FluidState) (Object) this.shadow$defaultFluidState();
     }
 
     @Override
     public Collection<StateProperty<?>> getStateProperties() {
-        return (Collection) this.shadow$getStateContainer().getProperties();
+        return (Collection) this.shadow$getStateDefinition().getProperties();
     }
 
     @Override
     public Optional<StateProperty<?>> getStatePropertyByName(String name) {
-        return Optional.ofNullable((StateProperty) this.shadow$getStateContainer().getProperty(name));
+        return Optional.ofNullable((StateProperty) this.shadow$getStateDefinition().getProperty(name));
     }
 }

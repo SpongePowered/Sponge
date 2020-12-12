@@ -39,7 +39,9 @@ import org.spongepowered.math.GenericMath;
 @Mixin(net.minecraft.item.DyeColor.class)
 public abstract class DyeColorMixin_API implements DyeColor {
 
-    @Shadow public abstract float[] shadow$getColorComponentValues();
+    // @formatter:off
+    @Shadow public abstract float[] shadow$getTextureDiffuseColors();
+    // @formatter:on
 
     private ResourceKey api$key;
 
@@ -55,7 +57,7 @@ public abstract class DyeColorMixin_API implements DyeColor {
 
     @Override
     public Color getColor() {
-        float[] components = this.shadow$getColorComponentValues();
+        float[] components = this.shadow$getTextureDiffuseColors();
         int r = GenericMath.floor(components[0] * 255);
         int g = GenericMath.floor(components[1] * 255);
         int b = GenericMath.floor(components[2] * 255);

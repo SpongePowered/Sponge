@@ -45,39 +45,40 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = TradeOffer.class, prefix = "tradeOffer$"))
 public abstract class MerchantOfferMixin_API implements TradeOffer {
 
-    @Shadow public abstract net.minecraft.item.ItemStack shadow$getBuyingStackFirst();
-    @Shadow @Nullable public abstract net.minecraft.item.ItemStack shadow$getBuyingStackSecond();
-    @Shadow public abstract net.minecraft.item.ItemStack shadow$getSellingStack();
+    // @formatter:off
+    @Shadow public abstract net.minecraft.item.ItemStack shadow$getCostA();
+    @Shadow @Nullable public abstract net.minecraft.item.ItemStack shadow$getCostB();
+    @Shadow public abstract net.minecraft.item.ItemStack shadow$getResult();
     @Shadow public abstract int shadow$getUses();
-    @Shadow public abstract int shadow$func_222214_i();
-    @Shadow public abstract boolean shadow$hasNoUsesLeft();
-    @Shadow public abstract boolean shadow$getDoesRewardExp();
-    @Shadow public abstract int shadow$getGivenExp();
+    @Shadow public abstract int shadow$getMaxUses();
+    @Shadow public abstract boolean shadow$isOutOfStock();
+    @Shadow public abstract boolean shadow$shouldRewardExp();
+    @Shadow public abstract int shadow$getXp();
     @Shadow public abstract float shadow$getPriceMultiplier();
-
     @Shadow public abstract int shadow$getDemand();
+    // @formatter:on
 
     @Override
     public ItemStackSnapshot getFirstBuyingItem() {
-        return ((ItemStack) (Object) this.shadow$getBuyingStackFirst()).createSnapshot();
+        return ((ItemStack) (Object) this.shadow$getCostA()).createSnapshot();
     }
 
     @Override
     public boolean hasSecondItem() {
-        return this.shadow$getBuyingStackSecond() != net.minecraft.item.ItemStack.EMPTY;
+        return this.shadow$getCostB() != net.minecraft.item.ItemStack.EMPTY;
     }
 
     @Override
     public Optional<ItemStackSnapshot> getSecondBuyingItem() {
-        if (this.shadow$getBuyingStackSecond() == null) {
+        if (this.shadow$getCostB() == null) {
             return Optional.empty();
         }
-        return Optional.of(((ItemStack) (Object) this.shadow$getBuyingStackSecond()).createSnapshot());
+        return Optional.of(((ItemStack) (Object) this.shadow$getCostB()).createSnapshot());
     }
 
     @Override
     public ItemStackSnapshot getSellingItem() {
-        return ((ItemStack) (Object) this.shadow$getSellingStack()).createSnapshot();
+        return ((ItemStack) (Object) this.shadow$getResult()).createSnapshot();
     }
 
     @Intrinsic
@@ -87,22 +88,22 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
 
     @Override
     public int getMaxUses() {
-        return this.shadow$func_222214_i();
+        return this.shadow$getMaxUses();
     }
 
     @Override
     public boolean hasExpired() {
-        return this.shadow$hasNoUsesLeft();
+        return this.shadow$isOutOfStock();
     }
 
     @Override
     public boolean doesGrantExperience() {
-        return this.shadow$getDoesRewardExp();
+        return this.shadow$shouldRewardExp();
     }
 
     @Override
     public int getExperienceGrantedToMerchant() {
-        return this.shadow$getGivenExp();
+        return this.shadow$getXp();
     }
 
     @Override
@@ -126,11 +127,11 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Constants.Item.TradeOffer.FIRST_QUERY, this.getFirstBuyingItem())
             .set(Constants.Item.TradeOffer.SECOND_QUERY, this.hasSecondItem() ? this.getSecondBuyingItem().get() : "none")
-            .set(Constants.Item.TradeOffer.BUYING_QUERY, this.shadow$getBuyingStackFirst())
+            .set(Constants.Item.TradeOffer.BUYING_QUERY, this.shadow$getCostA())
             .set(Constants.Item.TradeOffer.EXPERIENCE_QUERY, this.doesGrantExperience())
-            .set(Constants.Item.TradeOffer.MAX_QUERY, this.shadow$func_222214_i())
+            .set(Constants.Item.TradeOffer.MAX_QUERY, this.shadow$getMaxUses())
             .set(Constants.Item.TradeOffer.USES_QUERY, this.getUses())
-            .set(Constants.Item.TradeOffer.EXPERIENCE_GRANTED_TO_MERCHANT_QUERY, this.shadow$getGivenExp())
+            .set(Constants.Item.TradeOffer.EXPERIENCE_GRANTED_TO_MERCHANT_QUERY, this.shadow$getXp())
             .set(Constants.Item.TradeOffer.PRICE_GROWTH_MULTIPLIER_QUERY, this.shadow$getPriceMultiplier())
             .set(Constants.Item.TradeOffer.DEMAND_BONUS_QUERY, this.shadow$getDemand());
     }

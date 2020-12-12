@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.item;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
@@ -58,11 +59,12 @@ import java.util.Collection;
 @Implements(@Interface(iface = ItemStack.class, prefix = "itemStack$")) // We need to soft implement this interface due to a synthetic bridge method
 public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutable {       // conflict from overriding ValueContainer#copy() from DataHolder
 
+    // @formatter:off
     @Shadow public abstract int shadow$getCount();
     @Shadow public abstract void shadow$setCount(int size); // Do not use field directly as Minecraft tracks the empty state
-    @Shadow public abstract void shadow$setDamage(int meta);
+    @Shadow public abstract void shadow$setDamageValue(int meta);
     @Shadow public abstract void shadow$setTag(@Nullable CompoundNBT compound);
-    @Shadow public abstract int shadow$getDamage();
+    @Shadow public abstract int shadow$getDamageValue();
     @Shadow public abstract int shadow$getMaxStackSize();
     @Shadow public abstract boolean shadow$hasTag();
     @Shadow public abstract boolean shadow$isEmpty();
@@ -70,7 +72,8 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
     @Shadow public abstract Multimap<String, net.minecraft.entity.ai.attributes.AttributeModifier> shadow$getAttributeModifiers(EquipmentSlotType equipmentSlot);
-    @Shadow public abstract void shadow$addAttributeModifier(String attributeName, net.minecraft.entity.ai.attributes.AttributeModifier modifier, @Nullable EquipmentSlotType equipmentSlot);
+    @Shadow public abstract void shadow$addAttributeModifier(Attribute attribute, net.minecraft.entity.ai.attributes.AttributeModifier modifier, @Nullable EquipmentSlotType equipmentSlot);
+    // @formatter:on
 
     public int itemStack$getQuantity() {
         return this.shadow$getCount();
@@ -106,8 +109,8 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         }
         final DataView nbtData = container.getView(Constants.Sponge.UNSAFE_NBT).get();
         try {
-            final int integer = container.getInt(Constants.ItemStack.DAMAGE_VALUE).orElse(this.shadow$getDamage());
-            this.shadow$setDamage(integer);
+            final int integer = container.getInt(Constants.ItemStack.DAMAGE_VALUE).orElse(this.shadow$getDamageValue());
+            this.shadow$setDamageValue(integer);
             final CompoundNBT stackCompound = NBTTranslator.getInstance().translate(nbtData);
             this.shadow$setTag(stackCompound);
         } catch (final Exception e) {
@@ -166,7 +169,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.ItemStack.TYPE, this.itemStack$getType().getKey().toString())
                 .set(Constants.ItemStack.COUNT, this.itemStack$getQuantity())
-                .set(Constants.ItemStack.DAMAGE_VALUE, this.shadow$getDamage());
+                .set(Constants.ItemStack.DAMAGE_VALUE, this.shadow$getDamageValue());
         if (this.shadow$hasTag()) { // no tag? no data, simple as that.
             final CompoundNBT compound = this.shadow$getTag().copy();
             if (compound.contains(Constants.Sponge.SPONGE_DATA)) {

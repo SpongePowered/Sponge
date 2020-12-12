@@ -40,7 +40,9 @@ import java.util.function.Supplier;
 @Mixin(ItemTier.class)
 public abstract class ItemTierMixin_API implements ToolType {
 
-    @Shadow public abstract Ingredient shadow$getRepairMaterial();
+    // @formatter:off
+    @Shadow public abstract Ingredient shadow$getRepairIngredient();
+    // @formatter:on
 
     private ResourceKey api$key;
 
@@ -57,6 +59,6 @@ public abstract class ItemTierMixin_API implements ToolType {
 
     @Override
     public org.spongepowered.api.item.recipe.crafting.Ingredient getRepairIngredient() {
-        return (org.spongepowered.api.item.recipe.crafting.Ingredient) (Object) this.shadow$getRepairMaterial();
+        return (org.spongepowered.api.item.recipe.crafting.Ingredient) (Object) this.shadow$getRepairIngredient();
     }
 }

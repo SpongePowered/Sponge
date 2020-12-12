@@ -35,9 +35,11 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(ShapedRecipe.class)
 public abstract class ShapedRecipeMixin_API implements ShapedCraftingRecipe {
 
+    // @formatter:off
     @Shadow @Final private int width;
     @Shadow @Final private int height;
     @Shadow @Final private NonNullList<Ingredient> recipeItems;
+    // @formatter:on
 
     @SuppressWarnings("ConstantConditions")
     @Override

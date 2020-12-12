@@ -56,6 +56,7 @@ import javax.annotation.Nonnull;
 @Implements(@Interface(iface = Recipe.class, prefix = "recipe$"))
 public interface IRecipeMixin_API<C extends IInventory> {
 
+    // @formatter:off
     @Shadow ItemStack shadow$assemble(C inv);
     @Shadow net.minecraft.item.ItemStack shadow$getResultItem();
     @Shadow ResourceLocation shadow$getId();
@@ -64,6 +65,7 @@ public interface IRecipeMixin_API<C extends IInventory> {
     @Shadow NonNullList<ItemStack> shadow$getRemainingItems(C inv);
     @Shadow IRecipeType<?> shadow$getType();
     @Shadow NonNullList<net.minecraft.item.crafting.Ingredient> shadow$getIngredients();
+    // @formatter:on
 
     @Nonnull
     default ItemStackSnapshot recipe$getExemplaryResult() {

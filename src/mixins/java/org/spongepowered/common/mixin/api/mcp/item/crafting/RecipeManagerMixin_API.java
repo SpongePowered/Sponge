@@ -60,10 +60,12 @@ import java.util.stream.Collectors;
 @Mixin(RecipeManager.class)
 public abstract class RecipeManagerMixin_API implements RecipeRegistry {
 
+    // @formatter:off
     @Shadow public abstract Optional<? extends IRecipe<?>> shadow$byKey(ResourceLocation recipeId);
     @Shadow protected abstract <C extends IInventory, T extends IRecipe<C>> Map<ResourceLocation, IRecipe<C>> shadow$byType(IRecipeType<T> recipeTypeIn);
     @Shadow public abstract Collection<IRecipe<?>> shadow$getRecipes();
     @Shadow public abstract <C extends IInventory, T extends IRecipe<C>> Optional<T> shadow$getRecipeFor(IRecipeType<T> recipeTypeIn, C inventoryIn, net.minecraft.world.World worldIn);
+    // @formatter:on
 
     @Override
     public Optional<Recipe> getByKey(ResourceKey key) {
