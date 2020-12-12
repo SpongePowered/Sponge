@@ -28,5 +28,5 @@ import net.minecraft.network.NetworkManager;
 
 public interface NetworkManagerHolderBridge {
 
-    NetworkManager bridge$getNetworkManager();
+    NetworkManager bridge$getConnection();
 }

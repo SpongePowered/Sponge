@@ -29,7 +29,10 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.dimension.DimensionTypes;
+
+import java.util.Objects;
 
 /**
  * Dimension hooks to handle differences in logic between Sponge's Multi-World system
@@ -55,7 +58,9 @@ public interface DimensionHooks {
 
     default RegistryKey<World> getRespawnDimension(final ServerPlayerEntity entity, final RegistryKey<World> worldKey,
             final boolean keepAllPlayerData) {
-        final ServerWorld world = entity.getServer().getWorld(entity.func_241141_L_());
+        final RegistryKey<World> respawnDimension = keepAllPlayerData ? World.OVERWORLD : entity.getRespawnDimension();
+        final @Nullable ServerWorld world = Objects.requireNonNull(entity.getServer(), "Entity server cannot be null").getLevel(
+            respawnDimension);
         if (world == null) {
             // Should be impossible but be defensive
             return world.func_234923_W_();

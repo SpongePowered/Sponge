@@ -100,6 +100,7 @@
     "network.login.ServerLoginNetHandler_1Mixin",
     "network.login.ServerLoginNetHandlerMixin",
     "network.play.ServerPlayNetHandlerMixin",
+    "network.play.server.SSendResourcePackPacketMixin",
     "network.rcon.ClientThreadMixin",
     "network.rcon.RConConsoleSourceMixin",
     "network.status.ServerStatusNetHandlerMixin",
@@ -173,7 +174,6 @@
     "client.network.handshake.ClientHandshakeNetHandlerMixin",
     "client.network.login.ClientLoginNetHandlerMixin",
     "client.network.play.ClientPlayNetHandlerMixin",
-    "client.renderer.LightTextureMixin",
     "client.renderer.WorldRendererMixin",
     "client.util.text.TranslationTextComponentMixin",
     "client.world.ClientWorldMixin"

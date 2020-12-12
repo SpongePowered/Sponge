@@ -31,5 +31,5 @@ public interface PlayerListBridge {
 
     void bridge$reloadAdvancementProgress();
 
-    void bridge$setOriginalDestinationDimensionForRespawn(RegistryKey<World> key);
+    void bridge$setNewDestinationDimensionKey(RegistryKey<World> key);
 }

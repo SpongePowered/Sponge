@@ -33,26 +33,26 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge;
 import org.spongepowered.common.accessor.network.handshake.client.CHandshakePacketAccessor;
+import org.spongepowered.common.bridge.network.NetworkManagerBridge;
 import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 import org.spongepowered.common.util.NetworkUtil;
 
 @Mixin(ServerHandshakeNetHandler.class)
 public abstract class ServerHandshakeNetHandlerMixin implements NetworkManagerHolderBridge {
 
-    @Shadow @Final private NetworkManager networkManager;
+    @Shadow @Final private NetworkManager connection;
 
-    @Inject(method = "processHandshake", at = @At("HEAD"))
+    @Inject(method = "handleIntention", at = @At("HEAD"))
     private void impl$updateVersionAndHost(final CHandshakePacket packetIn, final CallbackInfo ci) {
-        final NetworkManagerBridge info = (NetworkManagerBridge) this.networkManager;
+        final NetworkManagerBridge info = (NetworkManagerBridge) this.connection;
         info.bridge$setVersion(packetIn.getProtocolVersion());
         info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(
                 ((CHandshakePacketAccessor) packetIn).accessor$hostName()), ((CHandshakePacketAccessor) packetIn).accessor$port());
     }
 
     @Override
-    public NetworkManager bridge$getNetworkManager() {
-        return this.networkManager;
+    public NetworkManager bridge$getConnection() {
+        return this.connection;
     }
 }

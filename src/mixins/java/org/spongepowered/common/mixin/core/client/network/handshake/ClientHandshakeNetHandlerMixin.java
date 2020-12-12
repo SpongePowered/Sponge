@@ -37,7 +37,7 @@ public abstract class ClientHandshakeNetHandlerMixin implements NetworkManagerHo
     @Shadow @Final private NetworkManager connection;
 
     @Override
-    public NetworkManager bridge$getNetworkManager() {
+    public NetworkManager bridge$getConnection() {
         return this.connection;
     }
 }

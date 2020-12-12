@@ -55,18 +55,18 @@ import java.net.SocketAddress;
 public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandlerBridge, NetworkManagerHolderBridge {
 
     @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final public NetworkManager networkManager;
-    @Shadow private com.mojang.authlib.GameProfile loginGameProfile;
+    @Shadow @Final public NetworkManager connection;
+    @Shadow private com.mojang.authlib.GameProfile gameProfile;
 
-    @Shadow public abstract String getConnectionInfo();
-    @Shadow protected abstract com.mojang.authlib.GameProfile getOfflineProfile(com.mojang.authlib.GameProfile profile);
+    @Shadow public abstract String shadow$getUserName();
+    @Shadow protected abstract com.mojang.authlib.GameProfile shadow$createFakeProfile(com.mojang.authlib.GameProfile profile);
 
     @Override
-    public NetworkManager bridge$getNetworkManager() {
-        return this.networkManager;
+    public NetworkManager bridge$getConnection() {
+        return this.connection;
     }
 
-    @Redirect(method = "tryAcceptPlayer",
+    @Redirect(method = "handleAcceptedLogin()V",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/server/management/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/util/text/ITextComponent;"))
@@ -76,9 +76,9 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
 
     private void impl$closeConnection(final ITextComponent reason) {
         try {
-            ServerLoginNetHandlerMixin.LOGGER.info("Disconnecting " + this.getConnectionInfo() + ": " + reason.getUnformattedComponentText());
-            this.networkManager.sendPacket(new SDisconnectPacket(reason));
-            this.networkManager.closeChannel(reason);
+            ServerLoginNetHandlerMixin.LOGGER.info("Disconnecting " + this.shadow$getUserName() + ": " + reason.getString());
+            this.connection.send(new SDisconnectPacket(reason));
+            this.connection.disconnect(reason);
         } catch (Exception exception) {
             ServerLoginNetHandlerMixin.LOGGER.error("Error whilst disconnecting player", exception);
         }
@@ -102,17 +102,17 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
         return event.isCancelled();
     }
 
-    @Inject(method = "processLoginStart",
+    @Inject(method = "handleHello(Lnet/minecraft/network/login/client/CLoginStartPacket;)V",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/network/login/ServerLoginNetHandler;currentLoginState:Lnet/minecraft/network/login/ServerLoginNetHandler$State;",
+            target = "Lnet/minecraft/network/login/ServerLoginNetHandler;state:Lnet/minecraft/network/login/ServerLoginNetHandler$State;",
             opcode = Opcodes.PUTFIELD,
             ordinal = 1),
         cancellable = true)
     private void impl$fireAuthEventOffline(final CallbackInfo ci) {
         // Move this check up here, so that the UUID isn't null when we fire the event
-        if (!this.loginGameProfile.isComplete()) {
-            this.loginGameProfile = this.getOfflineProfile(this.loginGameProfile);
+        if (!this.gameProfile.isComplete()) {
+            this.gameProfile = this.shadow$createFakeProfile(this.gameProfile);
         }
 
         if (this.bridge$fireAuthEvent()) {
