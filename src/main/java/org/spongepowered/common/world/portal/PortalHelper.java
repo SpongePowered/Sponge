@@ -271,7 +271,7 @@ public final class PortalHelper {
         }
     }
 
-    public static Function<Boolean, Entity> createVanillaEntityPortalLogic(final Entity entity, final Vec3d destination,
+    public static Function<Boolean, Entity> createVanillaEntityPortalLogic(final Entity entity, final net.minecraft.util.math.vector.Vector3d destination,
             final ServerWorld fromWorld, final ServerWorld toWorld, final PortalType portal) {
 
         return spawnInPortal -> {
@@ -378,7 +378,7 @@ public final class PortalHelper {
         };
     }
 
-    public static Function<Boolean, Entity> createVanillaPlayerPortalLogic(final ServerPlayerEntity player, final Vector3d destination,
+    public static Function<Boolean, Entity> createVanillaPlayerPortalLogic(final ServerPlayerEntity player, final net.minecraft.util.math.vector.Vector3d destination,
         final ServerWorld fromWorld, final ServerWorld toWorld, final PortalType portal) {
 
         return spawnInPortal -> {

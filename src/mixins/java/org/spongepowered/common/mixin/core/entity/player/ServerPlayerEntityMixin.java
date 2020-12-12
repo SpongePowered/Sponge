@@ -482,13 +482,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
      */
     @javax.annotation.Nullable
     @Overwrite
-    public Entity changeDimension(DimensionType destination) {
+    public Entity changeDimension(ServerWorld destination) {
         if (this.shadow$getEntityWorld().isRemote || this.removed) {
             return (ServerPlayerEntity) (Object) this;
         }
 
-        final WrappedITeleporterPortalType portalType = new WrappedITeleporterPortalType((PlatformITeleporterBridge) this.shadow$getServer()
-                .getWorld(destination).getDefaultTeleporter(), null);
+        final WrappedITeleporterPortalType portalType = new WrappedITeleporterPortalType((PlatformITeleporterBridge) destination.getPortalForcer(), null);
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);

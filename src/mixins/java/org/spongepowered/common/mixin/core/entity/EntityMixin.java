@@ -45,6 +45,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.TicketType;
@@ -457,7 +458,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      */
     @Nullable
     @Overwrite
-    public Entity changeDimension(DimensionType destination) {
+    public Entity changeDimension(net.minecraft.world.server.ServerWorld destination) {
         if (this.shadow$getEntityWorld().isRemote || this.removed) {
             return null;
         }
@@ -466,8 +467,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             frame.pushCause(this);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PORTAL);
 
+            Teleporter p = destination.getPortalForcer()
             final DimensionChangeResult<Entity> result = EntityUtil.invokePortalTo((Entity) (Object) this, new WrappedITeleporterPortalType(
-                    (PlatformITeleporterBridge) this.shadow$getServer().getWorld(destination).getDefaultTeleporter(), null), destination);
+                    (PlatformITeleporterBridge) destination.getPortalForcer(), null), destination);
 
             if (!result.isSuccess() && result.shouldRemove()) {
                 return null;
