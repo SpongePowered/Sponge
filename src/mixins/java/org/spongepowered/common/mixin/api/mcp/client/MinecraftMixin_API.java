@@ -35,7 +35,6 @@ import org.spongepowered.api.client.LocalServer;
 import org.spongepowered.api.entity.living.player.client.LocalPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.network.ClientSideConnection;
-import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.world.client.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,7 +42,6 @@ import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.scheduler.ClientScheduler;
-import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import java.util.Optional;
 
@@ -52,10 +50,10 @@ import javax.annotation.Nullable;
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> implements SpongeClient {
 
-    @Shadow public net.minecraft.client.world.ClientWorld world;
+    @Shadow public net.minecraft.client.world.ClientWorld level;
     @Shadow public ClientPlayerEntity player;
-    @Shadow @Nullable private NetworkManager networkManager;
-    @Shadow @Nullable public abstract IntegratedServer shadow$getIntegratedServer();
+    @Shadow @Nullable private NetworkManager pendingConnection;
+    @Shadow @Nullable public abstract IntegratedServer shadow$getSingleplayerServer();
 
     private final ClientScheduler api$scheduler = new ClientScheduler();
 
@@ -76,20 +74,20 @@ public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> im
             return (Optional<LocalServer>) (Object) Optional.ofNullable(integratedServer);
         }
 
-        return (Optional<LocalServer>) (Object) Optional.ofNullable(this.shadow$getIntegratedServer());
+        return (Optional<LocalServer>) (Object) Optional.ofNullable(this.shadow$getSingleplayerServer());
     }
 
     @Override
     public Optional<ClientWorld> getWorld() {
-        return Optional.ofNullable((ClientWorld) this.world);
+        return Optional.ofNullable((ClientWorld) this.level);
     }
 
     @Override
     public Optional<ClientSideConnection> getConnection() {
-        if (this.networkManager == null) {
+        if (this.pendingConnection == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((ClientSideConnection) this.networkManager.getNetHandler());
+        return Optional.ofNullable((ClientSideConnection) this.pendingConnection.getPacketListener());
     }
 
     @Override
@@ -109,6 +107,6 @@ public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> im
 
     @Override
     public boolean onMainThread() {
-        return this.isOnExecutionThread();
+        return this.isSameThread();
     }
 }

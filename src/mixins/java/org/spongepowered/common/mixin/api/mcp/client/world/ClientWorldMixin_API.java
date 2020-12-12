@@ -34,6 +34,6 @@ public abstract class ClientWorldMixin_API implements org.spongepowered.api.worl
 
     @Override
     public boolean isLoaded() {
-        return Minecraft.getInstance().world == (Object) this;
+        return Minecraft.getInstance().level == (Object) this;
     }
 }

@@ -41,13 +41,13 @@ public abstract class ClientNetHandlerMixin_API implements ClientSideConnection 
 
     @Override
     public void close() {
-        ((NetworkManagerHolderBridge) this).bridge$getConnection().closeChannel(
+        ((NetworkManagerHolderBridge) this).bridge$getConnection().disconnect(
                 new TranslationTextComponent("disconnect.disconnected"));
     }
 
     @Override
     public void close(final Component reason) {
-        ((NetworkManagerHolderBridge) this).bridge$getConnection().closeChannel(SpongeAdventure.asVanilla(reason));
+        ((NetworkManagerHolderBridge) this).bridge$getConnection().disconnect(SpongeAdventure.asVanilla(reason));
     }
 
     @Override

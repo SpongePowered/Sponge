@@ -34,10 +34,10 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(ClientPlayNetHandler.class)
 public abstract class ClientPlayNetHandlerMixin_API implements LocalPlayerConnection {
 
-    @Shadow private Minecraft client;
+    @Shadow private Minecraft minecraft;
 
     @Override
     public LocalPlayer getPlayer() {
-        return (LocalPlayer) this.client.player;
+        return (LocalPlayer) this.minecraft.player;
     }
 }
