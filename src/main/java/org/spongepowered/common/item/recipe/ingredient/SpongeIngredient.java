@@ -55,14 +55,14 @@ public class SpongeIngredient extends Ingredient {
             return false;
         }
 
-        for (IItemList acceptedItem : this.acceptedItems) {
+        for (IItemList acceptedItem : this.values) {
             if (acceptedItem instanceof SpongeItemList) {
                 if (((SpongeItemList) acceptedItem).test(testStack)) {
                     return true;
                 }
             } else {
                 // TODO caching (relevant for TagList)
-                for (ItemStack stack : acceptedItem.getStacks()) {
+                for (ItemStack stack : acceptedItem.getItems()) {
                     if (stack.getItem() == testStack.getItem()) {
                         return true;
                     }

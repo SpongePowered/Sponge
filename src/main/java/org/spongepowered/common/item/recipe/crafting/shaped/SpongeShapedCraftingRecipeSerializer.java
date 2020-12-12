@@ -58,15 +58,15 @@ public class SpongeShapedCraftingRecipeSerializer extends ShapedRecipe.Serialize
     public static IRecipeSerializer<?> SPONGE_CRAFTING_SHAPED = SpongeRecipeRegistration.register("crafting_shaped", new SpongeShapedCraftingRecipeSerializer());
 
     @Override
-    public ShapedRecipe read(ResourceLocation recipeId, JsonObject json) {
-        final String s = JSONUtils.getString(json, Constants.Recipe.GROUP, "");
-        final JsonObject ingredientKey = JSONUtils.getJsonObject(json, Constants.Recipe.SHAPED_INGREDIENTS);
+    public ShapedRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
+        final String s = JSONUtils.getAsString(json, Constants.Recipe.GROUP, "");
+        final JsonObject ingredientKey = JSONUtils.getAsJsonObject(json, Constants.Recipe.SHAPED_INGREDIENTS);
         final Map<String, Ingredient> map = this.deserializeIngredientKey(ingredientKey);
-        final String[] astring = ShapedRecipeAccessor.invoker$shrink(ShapedRecipeAccessor.invoker$patternFromJson(JSONUtils.getJsonArray(json, Constants.Recipe.SHAPED_PATTERN)));
+        final String[] astring = ShapedRecipeAccessor.invoker$shrink(ShapedRecipeAccessor.invoker$patternFromJson(JSONUtils.getAsJsonArray(json, Constants.Recipe.SHAPED_PATTERN)));
         final int i = astring[0].length();
         final int j = astring.length;
         final NonNullList<Ingredient> nonnulllist = ShapedRecipeAccessor.invoker$dissolvePattern(astring, map, i, j);
-        final ItemStack itemstack = ShapedRecipe.deserializeItem(JSONUtils.getJsonObject(json, Constants.Recipe.RESULT));
+        final ItemStack itemstack = ShapedRecipe.itemFromJson(JSONUtils.getAsJsonObject(json, Constants.Recipe.RESULT));
         final ItemStack spongeStack = ResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
         final Function<CraftingInventory, ItemStack> resultFunction = ResultUtil.deserializeResultFunction(json);
         final Function<CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction = ResultUtil.deserializeRemainingItemsFunction(json);
@@ -93,12 +93,12 @@ public class SpongeShapedCraftingRecipeSerializer extends ShapedRecipe.Serialize
     }
 
     @Override
-    public ShapedRecipe read(ResourceLocation p_199426_1_, PacketBuffer p_199426_2_) {
+    public ShapedRecipe fromNetwork(ResourceLocation p_199426_1_, PacketBuffer p_199426_2_) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 
     @Override
-    public void write(PacketBuffer p_199427_1_, ShapedRecipe p_199427_2_) {
+    public void toNetwork(PacketBuffer p_199427_1_, ShapedRecipe p_199427_2_) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 }

@@ -45,7 +45,6 @@ public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
     @Shadow @Final protected Ingredient ingredient;
     @Shadow @Final protected ResourceLocation id;
     @Shadow public abstract float shadow$getExperience();
-    @Shadow public abstract int shadow$getCookTime();
 
     @Override
     public org.spongepowered.api.item.recipe.crafting.Ingredient getIngredient() {
@@ -65,10 +64,10 @@ public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
         return Optional.empty();
     }
 
-    @Override
-    public int getCookingTime() {
-        return this.shadow$getCookTime();
-    }
+//    @Override
+//    public int getCookingTime() {
+//        return this.shadow$getCookingTime();
+//    }
 
 //    public float recipe$getExperience() {
 //        return this.shadow$getExperience();

@@ -60,16 +60,15 @@ import java.util.stream.Collectors;
 @Mixin(RecipeManager.class)
 public abstract class RecipeManagerMixin_API implements RecipeRegistry {
 
-    @Shadow public abstract Optional<? extends IRecipe<?>> shadow$getRecipe(ResourceLocation recipeId);
-    @Shadow protected abstract <C extends IInventory, T extends IRecipe<C>> Map<ResourceLocation, IRecipe<C>> shadow$getRecipes(IRecipeType<T> recipeTypeIn);
+    @Shadow public abstract Optional<? extends IRecipe<?>> shadow$byKey(ResourceLocation recipeId);
+    @Shadow protected abstract <C extends IInventory, T extends IRecipe<C>> Map<ResourceLocation, IRecipe<C>> shadow$byType(IRecipeType<T> recipeTypeIn);
     @Shadow public abstract Collection<IRecipe<?>> shadow$getRecipes();
-    @Shadow public abstract <C extends IInventory, T extends IRecipe<C>> Optional<T> shadow$getRecipe(IRecipeType<T> recipeTypeIn, C inventoryIn,
-            net.minecraft.world.World worldIn);
+    @Shadow public abstract <C extends IInventory, T extends IRecipe<C>> Optional<T> shadow$getRecipeFor(IRecipeType<T> recipeTypeIn, C inventoryIn, net.minecraft.world.World worldIn);
 
     @Override
     public Optional<Recipe> getByKey(ResourceKey key) {
         Preconditions.checkNotNull(key);
-        return this.shadow$getRecipe((ResourceLocation) (Object) key).map(Recipe.class::cast);
+        return this.shadow$byKey((ResourceLocation) (Object) key).map(Recipe.class::cast);
     }
 
     @Override
@@ -82,7 +81,7 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public <T extends Recipe> Collection<T> getAllOfType(RecipeType<T> type) {
         Preconditions.checkNotNull(type);
-        return this.shadow$getRecipes((IRecipeType)type).values();
+        return this.shadow$byType((IRecipeType)type).values();
     }
 
     @Override
@@ -100,22 +99,22 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
         Preconditions.checkNotNull(world);
         if (inventory instanceof AbstractFurnaceTileEntity) {
             final IRecipeType<? extends AbstractCookingRecipe> type = ((AbstractFurnaceTileEntityAccessor) inventory).accessor$recipeType();
-            return this.shadow$getRecipe(type, (IInventory) inventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
+            return this.shadow$getRecipeFor(type, (IInventory) inventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
         if (inventory instanceof CampfireTileEntity) {
-            return this.shadow$getRecipe(IRecipeType.CAMPFIRE_COOKING, (IInventory) inventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
+            return this.shadow$getRecipeFor(IRecipeType.CAMPFIRE_COOKING, (IInventory) inventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
         if (inventory instanceof WorkbenchContainer) {
             final CraftingInventory craftingInventory = ((WorkbenchContainerAccessor) inventory).accessor$craftSlots();
-            return this.shadow$getRecipe(IRecipeType.CRAFTING, craftingInventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
+            return this.shadow$getRecipeFor(IRecipeType.CRAFTING, craftingInventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
         if (inventory instanceof PlayerContainer) {
             final CraftingInventory craftingInventory = ((PlayerContainerAccessor) inventory).accessor$craftSlots();
-            return this.shadow$getRecipe(IRecipeType.CRAFTING, craftingInventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
+            return this.shadow$getRecipeFor(IRecipeType.CRAFTING, craftingInventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
         if (inventory instanceof StonecutterContainer) {
-            final IInventory stonecutterInventory = ((StonecutterContainer) inventory).inputInventory;
-            return this.shadow$getRecipe(IRecipeType.STONECUTTING, stonecutterInventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
+            final IInventory stonecutterInventory = ((StonecutterContainer) inventory).container;
+            return this.shadow$getRecipeFor(IRecipeType.STONECUTTING, stonecutterInventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
 
         return Optional.empty();
@@ -130,7 +129,7 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
         if (!(inventory instanceof IInventory)) {
             return Optional.empty();
         }
-        return this.shadow$getRecipe((IRecipeType) type, (IInventory) inventory, (net.minecraft.world.World) world);
+        return this.shadow$getRecipeFor((IRecipeType) type, (IInventory) inventory, (net.minecraft.world.World) world);
     }
 
     @Override
@@ -139,7 +138,7 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(ingredient);
         final net.minecraft.inventory.Inventory fakeFurnace = new net.minecraft.inventory.Inventory(1);
-        fakeFurnace.setInventorySlotContents(0, ItemStackUtil.fromSnapshotToNative(ingredient));
-        return this.shadow$getRecipe((IRecipeType) type, fakeFurnace, null);
+        fakeFurnace.setItem(0, ItemStackUtil.fromSnapshotToNative(ingredient));
+        return this.shadow$getRecipeFor((IRecipeType) type, fakeFurnace, null);
     }
 }

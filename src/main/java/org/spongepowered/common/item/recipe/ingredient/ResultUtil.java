@@ -59,7 +59,7 @@ public class ResultUtil {
     public static JsonElement serializeItemStack(net.minecraft.item.ItemStack spongeResult) {
         final DataContainer dataContainer = ItemStackUtil.fromNative(spongeResult).toContainer();
         try {
-            return JSONUtils.fromJson(DataFormats.JSON.get().write(dataContainer));
+            return JSONUtils.parse(DataFormats.JSON.get().write(dataContainer));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -70,7 +70,7 @@ public class ResultUtil {
     @SuppressWarnings("unchecked")
     public static <C extends IInventory> Function<C, net.minecraft.item.ItemStack> deserializeResultFunction(JsonObject json) {
         if (json.has(Constants.Recipe.SPONGE_RESULTFUNCTION)) {
-            final String id = JSONUtils.getString(json, Constants.Recipe.SPONGE_RESULTFUNCTION);
+            final String id = JSONUtils.getAsString(json, Constants.Recipe.SPONGE_RESULTFUNCTION);
             return ((Function<C, net.minecraft.item.ItemStack>) ResultUtil.cachedResultFunctions.get(id));
         }
         return null;
@@ -88,7 +88,7 @@ public class ResultUtil {
     @SuppressWarnings("unchecked")
     public static <C extends IInventory> Function<C, NonNullList<net.minecraft.item.ItemStack>> deserializeRemainingItemsFunction(JsonObject json) {
         if (json.has(Constants.Recipe.SPONGE_REMAINING_ITEMS)) {
-            final String id = JSONUtils.getString(json, Constants.Recipe.SPONGE_REMAINING_ITEMS);
+            final String id = JSONUtils.getAsString(json, Constants.Recipe.SPONGE_REMAINING_ITEMS);
             return ((Function<C, NonNullList<net.minecraft.item.ItemStack>>) ResultUtil.cachedRemainingItemsFunctions.get(id));
         }
         return null;

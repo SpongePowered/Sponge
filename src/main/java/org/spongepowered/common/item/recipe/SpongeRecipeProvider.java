@@ -64,13 +64,13 @@ public class SpongeRecipeProvider {
     }
 
     private static void save(Path datpackPath, IFinishedRecipe recipe) {
-        final Path namespacedData = datpackPath.resolve("data").resolve(recipe.getID().getNamespace());
-        final Path recipeFile = namespacedData.resolve("recipes").resolve(recipe.getID().getPath() + ".json");
+        final Path namespacedData = datpackPath.resolve("data").resolve(recipe.getId().getNamespace());
+        final Path recipeFile = namespacedData.resolve("recipes").resolve(recipe.getId().getPath() + ".json");
 
-        SpongeRecipeProvider.saveToFile(recipe.getRecipeJson(), recipeFile);
-        final JsonObject jsonobject = recipe.getAdvancementJson();
+        SpongeRecipeProvider.saveToFile(recipe.serializeRecipe(), recipeFile);
+        final JsonObject jsonobject = recipe.serializeAdvancement();
         if (jsonobject != null) {
-            final Path advancementFile = namespacedData.resolve("advancements").resolve(recipe.getAdvancementID().getPath() + ".json");
+            final Path advancementFile = namespacedData.resolve("advancements").resolve(recipe.getAdvancementId().getPath() + ".json");
             SpongeRecipeProvider.saveToFile(jsonobject, advancementFile);
         }
     }

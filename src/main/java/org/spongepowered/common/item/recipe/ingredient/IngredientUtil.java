@@ -31,6 +31,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.IItemProvider;
@@ -62,16 +63,16 @@ public class IngredientUtil {
 
     public static org.spongepowered.api.item.recipe.crafting.Ingredient of(ItemType... items) {
         IItemProvider[] providers = Arrays.stream(items).map(item -> (IItemProvider) () -> ((Item) item)).toArray(IItemProvider[]::new);
-        return IngredientUtil.fromNative(Ingredient.fromItems(providers));
+        return IngredientUtil.fromNative(Ingredient.of(providers));
     }
 
     @Nullable
     public static org.spongepowered.api.item.recipe.crafting.Ingredient of(ResourceKey tagKey) {
-        Tag<Item> itemTag = ItemTags.getCollection().get(((ResourceLocation) (Object) tagKey));
+        ITag<Item> itemTag = ItemTags.getAllTags().getTag(((ResourceLocation) (Object) tagKey));
         if (itemTag == null) {
             return null;
         }
-        return IngredientUtil.fromNative(Ingredient.fromTag(itemTag));
+        return IngredientUtil.fromNative(Ingredient.of(itemTag));
     }
 
     private static net.minecraft.item.ItemStack[] toNativeStacks(ItemStack[] stacks) {
@@ -98,7 +99,7 @@ public class IngredientUtil {
             if (ingredientJson.has(SpongeItemList.INGREDIENT_TYPE)) {
 
                 // Sponge Ingredient
-                final String type = JSONUtils.getString(ingredientJson, SpongeItemList.INGREDIENT_TYPE);
+                final String type = JSONUtils.getAsString(ingredientJson, SpongeItemList.INGREDIENT_TYPE);
                 switch (type) {
                     case SpongeStackItemList.TYPE_STACK:
                         return new SpongeIngredient(IngredientUtil.spongeDeserializeItemList(ingredientJson));
@@ -110,7 +111,7 @@ public class IngredientUtil {
 
             } else {
                 // Vanilla Ingredient
-                final Ingredient.IItemList itemList = Ingredient.deserializeItemList(ingredientJson);
+                final Ingredient.IItemList itemList = IngredientAccessor.invoker$valueFromJson(ingredientJson);
                 return IngredientAccessor.invoker$fromValues(Stream.of(itemList));
             }
         }
@@ -120,7 +121,7 @@ public class IngredientUtil {
                 throw new JsonSyntaxException("Item array cannot be empty, at least one item must be defined");
             }
             return IngredientAccessor.invoker$fromValues(StreamSupport.stream(jsonarray.spliterator(), false).map((p_209355_0_) ->
-                    Ingredient.deserializeItemList(JSONUtils.getJsonObject(p_209355_0_, "item"))));
+                    IngredientAccessor.invoker$valueFromJson(JSONUtils.convertToJsonObject(p_209355_0_, "item"))));
         }
         throw new JsonSyntaxException("Expected item to be object or array of objects");
     }
@@ -135,7 +136,7 @@ public class IngredientUtil {
         if (!json.get(SpongeItemList.INGREDIENT_ITEM).isJsonArray()) {
             throw new JsonParseException("Sponge Ingredient " + SpongeItemList.INGREDIENT_ITEM + " is not an object");
         }
-        final String id = JSONUtils.getString(json, SpongePredicateItemList.INGREDIENT_PREDICATE);
+        final String id = JSONUtils.getAsString(json, SpongePredicateItemList.INGREDIENT_PREDICATE);
         final Predicate<net.minecraft.item.ItemStack> predicate = SpongeIngredient.getCachedPredicate(id);
         if (predicate == null) {
             throw new JsonParseException("Sponge Ingredient Predicate not found: " + id);

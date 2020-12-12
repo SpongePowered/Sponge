@@ -67,8 +67,8 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
             return super.matches(inv, p_77569_2_);
         }
         List<ItemStack> items = new ArrayList<>();
-        for(int j = 0; j < inv.getSizeInventory(); ++j) {
-            final ItemStack itemstack = inv.getStackInSlot(j);
+        for(int j = 0; j < inv.getContainerSize(); ++j) {
+            final ItemStack itemstack = inv.getItem(j);
             if (!itemstack.isEmpty()) {
                 items.add(itemstack);
             }
@@ -85,19 +85,19 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public ItemStack getCraftingResult(CraftingInventory p_77572_1_) {
+    public ItemStack assemble(CraftingInventory p_77572_1_) {
         if (this.resultFunction != null) {
             return this.resultFunction.apply(p_77572_1_);
         }
-        return super.getCraftingResult(p_77572_1_);
+        return super.assemble(p_77572_1_);
     }
 
     @Override
-    public ItemStack getRecipeOutput() {
+    public ItemStack getResultItem() {
         if (this.resultFunction != null) {
             return ItemStack.EMPTY;
         }
-        return super.getRecipeOutput();
+        return super.getResultItem();
     }
 
     private static boolean matches(List<ItemStack> stacks, List<Ingredient> ingredients) {

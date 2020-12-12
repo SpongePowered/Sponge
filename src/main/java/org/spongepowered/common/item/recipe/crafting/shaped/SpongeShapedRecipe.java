@@ -65,18 +65,18 @@ public class SpongeShapedRecipe extends ShapedRecipe {
     }
 
     @Override
-    public ItemStack getCraftingResult(CraftingInventory p_77572_1_) {
+    public ItemStack assemble(CraftingInventory p_77572_1_) {
         if (this.resultFunction != null) {
             return this.resultFunction.apply(p_77572_1_);
         }
-        return super.getCraftingResult(p_77572_1_);
+        return super.assemble(p_77572_1_);
     }
 
     @Override
-    public ItemStack getRecipeOutput() {
+    public ItemStack getResultItem() {
         if (this.resultFunction != null) {
             return ItemStack.EMPTY;
         }
-        return super.getRecipeOutput();
+        return super.getResultItem();
     }
 }

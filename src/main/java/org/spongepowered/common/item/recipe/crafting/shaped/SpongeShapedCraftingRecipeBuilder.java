@@ -202,7 +202,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
 //        ingredientsMap.putIfAbsent(' ', net.minecraft.item.crafting.Ingredient.EMPTY);
         final net.minecraft.item.ItemStack resultStack = ItemStackUtil.toNative(this.result);
         final IRecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction, ingredientsMap,
-                IRecipeSerializer.CRAFTING_SHAPED, SpongeShapedCraftingRecipeSerializer.SPONGE_CRAFTING_SHAPED);
+                IRecipeSerializer.SHAPED_RECIPE, SpongeShapedCraftingRecipeSerializer.SPONGE_CRAFTING_SHAPED);
         return new SpongeShapedCraftingRecipeRegistration((ResourceLocation)(Object) key, serializer, this.group, this.aisle, ingredientsMap, resultStack, this.resultFunction, this.remainingItemsFunction);
     }
 

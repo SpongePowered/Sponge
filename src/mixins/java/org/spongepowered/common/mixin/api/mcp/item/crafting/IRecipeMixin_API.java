@@ -56,10 +56,10 @@ import javax.annotation.Nonnull;
 @Implements(@Interface(iface = Recipe.class, prefix = "recipe$"))
 public interface IRecipeMixin_API<C extends IInventory> {
 
-    @Shadow ItemStack shadow$getCraftingResult(C inv);
-    @Shadow net.minecraft.item.ItemStack shadow$getRecipeOutput();
+    @Shadow ItemStack shadow$assemble(C inv);
+    @Shadow net.minecraft.item.ItemStack shadow$getResultItem();
     @Shadow ResourceLocation shadow$getId();
-    @Shadow boolean shadow$isDynamic();
+    @Shadow boolean shadow$isSpecial();
     @Shadow boolean shadow$matches(C inv, net.minecraft.world.World worldIn);
     @Shadow NonNullList<ItemStack> shadow$getRemainingItems(C inv);
     @Shadow IRecipeType<?> shadow$getType();
@@ -67,7 +67,7 @@ public interface IRecipeMixin_API<C extends IInventory> {
 
     @Nonnull
     default ItemStackSnapshot recipe$getExemplaryResult() {
-        return ItemStackUtil.snapshotOf(this.shadow$getRecipeOutput());
+        return ItemStackUtil.snapshotOf(this.shadow$getResultItem());
     }
 
     default boolean recipe$isValid(@Nonnull Inventory inv, @Nonnull ServerWorld world) {
@@ -76,7 +76,7 @@ public interface IRecipeMixin_API<C extends IInventory> {
 
     @Nonnull
     default ItemStackSnapshot recipe$getResult(@Nonnull Inventory inv) {
-        return ItemStackUtil.snapshotOf(this.shadow$getCraftingResult(toNativeInventory(inv)));
+        return ItemStackUtil.snapshotOf(this.shadow$assemble(toNativeInventory(inv)));
     }
 
     @Nonnull
@@ -97,7 +97,7 @@ public interface IRecipeMixin_API<C extends IInventory> {
 
     @Intrinsic
     default boolean recipe$isDynamic() {
-        return this.shadow$isDynamic();
+        return this.shadow$isSpecial();
     }
 
     default RecipeType<? extends Recipe> recipe$getType() {

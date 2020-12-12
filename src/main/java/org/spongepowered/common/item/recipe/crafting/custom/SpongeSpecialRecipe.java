@@ -66,13 +66,13 @@ public final class SpongeSpecialRecipe extends SpecialRecipe {
     }
 
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv) {
+    public ItemStack assemble(CraftingInventory inv) {
         return ItemStackUtil.toNative(this.resultFunction.apply(InventoryUtil.toSpongeInventory(inv)));
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public boolean canFit(int width, int height) {
+    public boolean canCraftInDimensions(int width, int height) {
         throw new MissingImplementationException("SpongeSpecialRecipe", "canFit");
     }
 
@@ -92,6 +92,6 @@ public final class SpongeSpecialRecipe extends SpecialRecipe {
         // Fake special crafting serializer
         // because of Unknown recipe serializer when using our serializer with a vanilla client
         // return Registry.RECIPE_SERIALIZER.getOrDefault(this.getId());
-        return IRecipeSerializer.CRAFTING_SPECIAL_BANNERDUPLICATE;
+        return IRecipeSerializer.BANNER_DUPLICATE;
     }
 }
