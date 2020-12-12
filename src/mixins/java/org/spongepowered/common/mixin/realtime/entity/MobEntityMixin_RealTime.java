@@ -53,7 +53,7 @@ public abstract class MobEntityMixin_RealTime extends LivingEntityMixin_RealTime
         )
     )
     private void realTimeImpl$adjustForRealTimeEntityDespawnAge(final MobEntity self, final int modifier) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.level).bridge$isFake()) {
             this.idleTime = modifier;
             return;
         }

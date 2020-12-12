@@ -40,8 +40,8 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 @Mixin(ServerPlayNetHandler.class)
 public abstract class ServerPlayNetHandlerMixin_RealTime {
 
-    @Shadow private int chatSpamThresholdCount;
-    @Shadow private int itemDropThreshold;
+    @Shadow private int chatSpamTickCount;
+    @Shadow private int dropSpamTickCount;
     @Shadow @Final private MinecraftServer server;
     @Shadow public ServerPlayerEntity player;
 
@@ -49,35 +49,35 @@ public abstract class ServerPlayNetHandlerMixin_RealTime {
         method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;chatSpamThresholdCount:I",
+            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;chatSpamTickCount:I",
             opcode = Opcodes.PUTFIELD,
             ordinal = 0
         )
     )
     private void realTimeImpl$adjustForRealTimeChatSpamCheck(final ServerPlayNetHandler self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.player.world).bridge$isFake()) {
-            this.chatSpamThresholdCount = modifier;
+        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.player.level).bridge$isFake()) {
+            this.chatSpamTickCount = modifier;
             return;
         }
         final int ticks = (int) ((RealTimeTrackingBridge) this.server).realTimeBridge$getRealTimeTicks();
-        this.chatSpamThresholdCount = Math.max(0, this.chatSpamThresholdCount - ticks);
+        this.chatSpamTickCount = Math.max(0, this.chatSpamTickCount - ticks);
     }
 
     @Redirect(
         method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;itemDropThreshold:I",
+            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;dropSpamTickCount:I",
             opcode = Opcodes.PUTFIELD, ordinal = 0
         )
     )
     private void realTimeImpl$adjustForRealTimeDropSpamCheck(final ServerPlayNetHandler self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.player.world).bridge$isFake()) {
-            this.itemDropThreshold = modifier;
+        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.player.level).bridge$isFake()) {
+            this.dropSpamTickCount = modifier;
             return;
         }
         final int ticks = (int) ((RealTimeTrackingBridge) this.server).realTimeBridge$getRealTimeTicks();
-        this.itemDropThreshold = Math.max(0, this.itemDropThreshold - ticks);
+        this.dropSpamTickCount = Math.max(0, this.dropSpamTickCount - ticks);
     }
 
 }

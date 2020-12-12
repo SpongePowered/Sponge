@@ -38,7 +38,7 @@ import org.spongepowered.common.mixin.realtime.entity.LivingEntityMixin_RealTime
 @Mixin(ZombieVillagerEntity.class)
 public abstract class ZombieVillagerEntityMixin_RealTime extends LivingEntityMixin_RealTime {
 
-    @Shadow protected abstract int getConversionProgress();
+    @Shadow protected abstract int shadow$getConversionProgress();
 
     @Redirect(
         method = "tick",
@@ -54,17 +54,17 @@ public abstract class ZombieVillagerEntityMixin_RealTime extends LivingEntityMix
             ),
             to = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/entity/monster/ZombieVillagerEntity;conversionTime:I",
+                target = "Lnet/minecraft/entity/monster/ZombieVillagerEntity;villagerConversionTime:I",
                 opcode = Opcodes.GETFIELD
             )
         )
     )
     private int realTimeImpl$adjustForRealTimeConversionTimeBoost(final ZombieVillagerEntity self) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
-            return this.getConversionProgress();
+        if (((WorldBridge) this.level).bridge$isFake()) {
+            return this.shadow$getConversionProgress();
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
-        return this.getConversionProgress() * ticks;
+        final int ticks = (int) ((RealTimeTrackingBridge) self.getCommandSenderWorld()).realTimeBridge$getRealTimeTicks();
+        return this.shadow$getConversionProgress() * ticks;
     }
 
 }
