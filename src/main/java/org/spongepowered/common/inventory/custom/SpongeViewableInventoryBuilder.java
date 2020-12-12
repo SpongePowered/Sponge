@@ -395,7 +395,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     }
     
     private static IWorldPosCallable toPos(PlayerEntity p) {
-        return IWorldPosCallable.create(p.level, p.getPosition());
+        return IWorldPosCallable.create(p.level, p.blockPosition());
     }
 
     @FunctionalInterface

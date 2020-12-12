@@ -121,7 +121,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     @Override
     public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final InventoryPacketContext context) {
-        ((TrackedInventoryBridge) playerMP.openContainer).bridge$setCaptureInventory(true);
+        ((TrackedInventoryBridge) playerMP.containerMenu).bridge$setCaptureInventory(true);
     }
 
     @Override
@@ -151,7 +151,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         // firing invalid events.
         // See NetHandlerPlayServerMixin processClickWindow redirect for rest of fix.
         // --bloodmc
-        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
+        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
         if (!trackedInventory.bridge$capturingInventory() && !context.hasCaptures()) {
             trackedInventory.bridge$getCapturedSlotTransactions().clear();
             return;
@@ -160,10 +160,10 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         final CClickWindowPacket packetIn = context.getPacket();
         final Transaction<ItemStackSnapshot> cursorTransaction = this.getCursorTransaction(context, player);
 
-        final net.minecraft.inventory.container.Container openContainer = player.openContainer;
+        final net.minecraft.inventory.container.Container openContainer = player.containerMenu;
         final List<SlotTransaction> slotTransactions = trackedInventory.bridge$getCapturedSlotTransactions();
 
-        final int usedButton = packetIn.getUsedButton();
+        final int usedButton = packetIn.getButtonNum();
         final List<Entity> capturedItems = new ArrayList<>();
         // MAKE SURE THAT THIS IS KEPT IN SYNC WITH THE REST OF THE METHOD
         // If you add any logic that does something even if no event listenres
@@ -178,7 +178,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                     if (entiy instanceof CreatorTrackedBridge) {
                         ((CreatorTrackedBridge) entiy).tracked$setCreatorReference(((ServerPlayer) player).getUser());
                     } else {
-                        entiy.offer(Keys.CREATOR, player.getUniqueID());
+                        entiy.offer(Keys.CREATOR, player.getUUID());
                     }
                 }
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -194,8 +194,8 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         }
 
         Slot slot = null;
-        if (packetIn.getSlotId() >= 0) {
-            slot = ((InventoryAdapter) trackedInventory).inventoryAdapter$getSlot(packetIn.getSlotId()).orElse(null);
+        if (packetIn.getButtonNum() >= 0) {
+            slot = ((InventoryAdapter) trackedInventory).inventoryAdapter$getSlot(packetIn.getSlotNum()).orElse(null);
         }
         // else TODO slot for ClickContainerEvent.Drag
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -206,8 +206,8 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             // We can only proceed with normal if and only if there are no entities spawned,
             // slot transactions exist, and or the slot id being touched is greater than
             // 0, avoiding idiotic negative slot id's.
-            if (slotTransactions.isEmpty() && packetIn.getSlotId() >= 0 && capturedItems.isEmpty()) {
-                if (player.openContainer.windowId != packetIn.getWindowId()) {
+            if (slotTransactions.isEmpty() && packetIn.getSlotNum() >= 0 && capturedItems.isEmpty()) {
+                if (player.containerMenu.containerId != packetIn.getContainerId()) {
                     return; // Container mismatch - ignore this.
                 }
                 if (!((TrackedContainerBridge) trackedInventory).bridge$capturePossible()) {
@@ -236,7 +236,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 // Therefore, we never add any 'fake' transactions, as the final
                 // packet has everything we want.
                 if (!(inventoryEvent instanceof ClickContainerEvent.Drag)) {
-                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, inventoryEvent.getTransactions());
+                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotNum(), openContainer, inventoryEvent.getTransactions());
                 }
 
                 SpongeCommon.postEvent(inventoryEvent);
@@ -271,7 +271,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     public Transaction<ItemStackSnapshot> getCursorTransaction(final InventoryPacketContext context, final ServerPlayerEntity player) {
         final ItemStackSnapshot lastCursor = context.getCursor();
-        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
+        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         return new Transaction<>(lastCursor, newCursor);
     }
 }
