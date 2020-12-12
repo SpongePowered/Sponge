@@ -126,7 +126,7 @@ public final class ServerUserProvider {
         this.userCache.invalidateAll();
 
         // Add all known profiles from the data files
-        final String[] uuids = this.getSaveHandler().getSeenPlayerUUIDs();
+        final String[] uuids = this.getSaveHandler().getSeenPlayers();
         for (final String playerUuid : uuids) {
 
             // If the filename contains a period, we can fail fast. Vanilla code fixes the Strings that have ".dat" to strip that out
@@ -149,7 +149,7 @@ public final class ServerUserProvider {
     }
 
     Optional<User> getUser(final String lastKnownName) {
-        final com.mojang.authlib.GameProfile gameProfile = this.server.getPlayerProfileCache().getGameProfileForUsername(lastKnownName);
+        final com.mojang.authlib.GameProfile gameProfile = this.server.getProfileCache().get(lastKnownName);
         if (gameProfile == null) {
             return Optional.empty();
         }
@@ -157,7 +157,7 @@ public final class ServerUserProvider {
     }
 
     Optional<User> getUser(final UUID uuid) {
-        final com.mojang.authlib.GameProfile gameProfile = this.server.getPlayerProfileCache().getProfileByUUID(uuid);
+        final com.mojang.authlib.GameProfile gameProfile = this.server.getProfileCache().get(uuid);
         return this.getUser(gameProfile == null ? null : SpongeGameProfile.of(gameProfile));
     }
 
@@ -179,7 +179,7 @@ public final class ServerUserProvider {
                 return currentUser;
             }
             // ensure the profile is what we expect it to be
-            final com.mojang.authlib.GameProfile p = this.server.getPlayerProfileCache().getProfileByUUID(userID);
+            final com.mojang.authlib.GameProfile p = this.server.getProfileCache().get(userID);
             resolvedProfile = p == null ? SpongeGameProfile.toMcProfile(profile) : p;
         } else {
             resolvedProfile = SpongeGameProfile.toMcProfile(profile);

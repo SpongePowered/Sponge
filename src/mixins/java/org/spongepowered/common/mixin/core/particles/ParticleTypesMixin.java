@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.particles;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
@@ -35,17 +36,20 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 
+import java.util.function.Function;
+
 @Mixin(ParticleTypes.class)
 public class ParticleTypesMixin {
 
-    @Inject(method = "register(Ljava/lang/String;Lnet/minecraft/particles/IParticleData$IDeserializer;)Lnet/minecraft/particles/ParticleType;", at = @At("RETURN"))
-    private static <T extends IParticleData> void inpl$setCatalogKey(String key, IParticleData.IDeserializer<T> deserializer, CallbackInfoReturnable<ParticleType<T>> cir) {
+    @Inject(method = "register(Ljava/lang/String;Lnet/minecraft/particles/IParticleData$IDeserializer;Ljava/util/function/Function;)Lnet/minecraft/particles/ParticleType;", at = @At("RETURN"))
+    private static <T extends IParticleData> void inpl$setCatalogKey(final String key, final IParticleData.IDeserializer<T> deserializer,
+            final Function<ParticleType<T>, Codec<T>> codec, final CallbackInfoReturnable<ParticleType<T>> cir) {
         final ParticleType<T> returnValue = cir.getReturnValue();
         ((ResourceKeyBridge) returnValue).bridge$setKey(ResourceKey.minecraft(key));
     }
 
     @Inject(method = "register(Ljava/lang/String;Z)Lnet/minecraft/particles/BasicParticleType;", at = @At("RETURN"))
-    private static void inpl$setCatalogKey2(String key, boolean alwaysShow, CallbackInfoReturnable<BasicParticleType> cir) {
+    private static void inpl$setCatalogKey2(final String key, final boolean alwaysShow, final CallbackInfoReturnable<BasicParticleType> cir) {
         final BasicParticleType returnValue = cir.getReturnValue();
         ((ResourceKeyBridge) returnValue).bridge$setKey(ResourceKey.minecraft(key));
     }

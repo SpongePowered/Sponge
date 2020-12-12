@@ -55,7 +55,7 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$initializeDescriptionText(final CallbackInfo ci) {
-        this.setServerDescription(null);
+        this.setDescription(null);
     }
 
     /**
@@ -65,7 +65,7 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
      * @param motd The message of the day to set
      */
     @Overwrite
-    public void setServerDescription(@Nullable final ITextComponent motd) {
+    public void setDescription(@Nullable final ITextComponent motd) {
         if (motd != null) {
             this.description = motd;
             this.impl$descriptionText = SpongeAdventure.asAdventure(motd);

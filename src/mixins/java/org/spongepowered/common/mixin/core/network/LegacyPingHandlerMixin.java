@@ -47,10 +47,10 @@ import java.net.InetSocketAddress;
 public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapter {
 
     @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final private NetworkSystem networkSystem;
+    @Shadow @Final private NetworkSystem serverConnectionListener;
 
-    @Shadow private void writeAndFlush(final ChannelHandlerContext ctx, final ByteBuf data) { }
-    @Shadow private ByteBuf getStringBuffer(final String string) {
+    @Shadow private void shadow$sendFlushAndClose(final ChannelHandlerContext ctx, final ByteBuf data) { }
+    @Shadow private ByteBuf shadow$createReply(final String string) {
         return null; // Shadowed
     }
 
@@ -108,7 +108,7 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
             return false;
         }
 
-        final MinecraftServer server = this.networkSystem.getServer();
+        final MinecraftServer server = this.serverConnectionListener.getServer();
         final InetSocketAddress client = (InetSocketAddress) ctx.channel().remoteAddress();
         final ServerStatusResponse response;
 
@@ -121,7 +121,7 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
                 if (response != null) {
                     this.writeResponse(ctx, String.format("%s§%d§%d",
                             SpongeStatusResponse.getUnformattedMotd(response),
-                            response.getPlayers().getOnlinePlayerCount(),
+                            response.getPlayers().getNumPlayers(),
                             response.getPlayers().getMaxPlayers()));
                 } else {
                     ctx.close();
@@ -141,7 +141,7 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
                             response.getVersion().getProtocol(),
                             response.getVersion().getName(),
                             SpongeStatusResponse.getMotd(response),
-                            response.getPlayers().getOnlinePlayerCount(),
+                            response.getPlayers().getNumPlayers(),
                             response.getPlayers().getMaxPlayers()));
                 } else {
                     ctx.close();
@@ -186,7 +186,7 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
                             response.getVersion().getProtocol(),
                             response.getVersion().getName(),
                             SpongeStatusResponse.getMotd(response),
-                            response.getPlayers().getOnlinePlayerCount(),
+                            response.getPlayers().getNumPlayers(),
                             response.getPlayers().getMaxPlayers()));
                 } else {
                     ctx.close();
@@ -199,7 +199,7 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
     }
 
     private void writeResponse(final ChannelHandlerContext ctx, final String response) {
-        this.writeAndFlush(ctx, this.getStringBuffer(response));
+        this.shadow$sendFlushAndClose(ctx, this.shadow$createReply(response));
     }
 
 }

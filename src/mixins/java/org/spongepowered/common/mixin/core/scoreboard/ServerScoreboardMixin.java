@@ -80,7 +80,7 @@ import javax.annotation.Nullable;
 @Mixin(ServerScoreboard.class)
 public abstract class ServerScoreboardMixin extends Scoreboard implements ServerScoreboardBridge {
 
-    @Shadow protected abstract void shadow$markSaveDataDirty();
+    @Shadow protected abstract void shadow$setDirty();
 
     private final List<ServerPlayerEntity> impl$players = new ArrayList<>();
 
@@ -148,11 +148,9 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         final ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
         ((ScoreboardAccessor) this).accessor$objectivesByName().remove(scoreObjective.getName());
 
-        for (int i = 0; i < 19; ++i)
-        {
-            if (this.getObjectiveInDisplaySlot(i) == scoreObjective)
-            {
-                this.setObjectiveInDisplaySlot(i, null);
+        for (int i = 0; i < 19; ++i) {
+            if (this.getDisplayObjective(i) == scoreObjective) {
+                this.setDisplayObjective(i, null);
             }
         }
 
@@ -172,7 +170,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             }
         }
 
-        this.shadow$markSaveDataDirty();
+        this.shadow$setDirty();
 
         ((SpongeObjective) objective).removeObjectiveFor(this);
     }
@@ -182,7 +180,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Override
     public void bridge$registerTeam(final Team spongeTeam) {
         final ScorePlayerTeam team = (ScorePlayerTeam) spongeTeam;
-        if (this.getTeam(spongeTeam.getName()) != null) {
+        if (this.getPlayerTeam(spongeTeam.getName()) != null) {
             throw new IllegalArgumentException(String.format("A team with the name '%s' already exists!", spongeTeam.getName()));
         }
 
@@ -193,7 +191,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         ((ScorePlayerTeamAccessor) team).accessor$scoreboard(this);
         ((ScoreboardAccessor) this).accessor$teamsByName().put(team.getName(), team);
 
-        for (final String entry: team.getMembershipCollection()) {
+        for (final String entry : team.getPlayers()) {
             this.addPlayerToTeam(entry, team);
         }
         this.onTeamAdded(team);
@@ -202,7 +200,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Override
     public void bridge$sendToPlayers(final IPacket<?> packet) {
         for (final ServerPlayerEntity player: this.impl$players) {
-            player.connection.sendPacket(packet);
+            player.connection.send(packet);
         }
     }
 
@@ -210,23 +208,26 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     public void bridge$addPlayer(final ServerPlayerEntity player, final boolean sendPackets) {
         this.impl$players.add(player);
         if (sendPackets) {
-            for (final ScorePlayerTeam team: this.getTeams()) {
-                player.connection.sendPacket(new STeamsPacket(team, 0));
+            for (final ScorePlayerTeam team : this.getPlayerTeams()) {
+                player.connection.send(new STeamsPacket(team, 0));
             }
 
-            for (final ScoreObjective objective: this.getScoreObjectives()) {
-                player.connection.sendPacket(new SScoreboardObjectivePacket(objective, 0));
+            for (final ScoreObjective objective : this.getObjectives()) {
+                player.connection.send(new SScoreboardObjectivePacket(objective, 0));
                 for (int i = 0; i < 19; ++i) {
-                    if (this.getObjectiveInDisplaySlot(i) == objective) {
-                        player.connection.sendPacket(new SDisplayObjectivePacket(i, objective));
+                    if (this.getDisplayObjective(i) == objective) {
+                        player.connection.send(new SDisplayObjectivePacket(i, objective));
                     }
                 }
-                for (final Score score: this.getSortedScores(objective)) {
-                    final SUpdateScorePacket packetIn = new SUpdateScorePacket(Action.CHANGE, score.getObjective().getName(), score.getPlayerName(), score.getScorePoints());
-                    player.connection.sendPacket(packetIn);
+                for (final Score score : this.getPlayerScores(objective)) {
+                    final SUpdateScorePacket packetIn = new SUpdateScorePacket(
+                            Action.CHANGE,
+                            score.getObjective().getName(),
+                            score.getOwner(),
+                            score.getScore());
+                    player.connection.send(packetIn);
                 }
             }
-
         }
     }
 
@@ -239,7 +240,8 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     }
 
     @Override
-    public ScoreObjective addObjective(final String name, final ScoreCriteria criteria, ITextComponent text, ScoreCriteria.RenderType type) {
+    public ScoreObjective addObjective(final String name, final ScoreCriteria criteria, final ITextComponent text,
+            final ScoreCriteria.RenderType type) {
         final SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
         objective.setDisplayMode((ObjectiveDisplayMode) (Object) type);
         objective.setDisplayName(SpongeAdventure.asAdventure(text));
@@ -253,19 +255,19 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     }
 
     @Override
-    public void removeTeam(final ScorePlayerTeam team) {
-        super.removeTeam(team);
+    public void removePlayerTeam(final ScorePlayerTeam team) {
+        super.removePlayerTeam(team);
         ((ScorePlayerTeamAccessor) team).accessor$scoreboard(null);
     }
 
     @Override
-    public Score getOrCreateScore(final String name, final ScoreObjective objective) {
+    public Score getOrCreatePlayerScore(final String name, final ScoreObjective objective) {
         return ((SpongeScore) ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective().getOrCreateScore(SpongeAdventure.legacySection(name)))
                 .getScoreFor(objective);
     }
 
     @Override
-    public void removeObjectiveFromEntity(final String name, final ScoreObjective objective) {
+    public void resetPlayerScore(final String name, final ScoreObjective objective) {
         if (objective != null) {
             final SpongeObjective spongeObjective = ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
             final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.getScore(SpongeAdventure.legacySection(name));
@@ -276,14 +278,14 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             }
         } else {
             final Component textName = SpongeAdventure.legacySection(name);
-            for (final ScoreObjective scoreObjective: this.getScoreObjectives()) {
+            for (final ScoreObjective scoreObjective : this.getObjectives()) {
                 ((ScoreObjectiveBridge) scoreObjective).bridge$getSpongeObjective().removeScore(textName);
             }
         }
     }
 
     @Redirect(method = "onScoreChanged",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;broadcastAll(Lnet/minecraft/network/IPacket;)V"))
     private void onUpdateScoreValue(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
@@ -294,13 +296,13 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     }
 
     @Redirect(method = "onPlayerRemoved",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;broadcastAll(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updatePlayersOnRemoval(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
     @Redirect(method = "onPlayerScoreRemoved",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;broadcastAll(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updatePlayersOnRemovalOfObjective(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
@@ -324,7 +326,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
      */
     @Override
     @Overwrite
-    public void setObjectiveInDisplaySlot(final int slot, @Nullable final ScoreObjective objective) {
+    public void setDisplayObjective(final int slot, @Nullable final ScoreObjective objective) {
         final Objective apiObjective = objective == null ? null : ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
         final MappedRegistry<DisplaySlot, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(DisplaySlot.class);
         final DisplaySlot displaySlot = registry.getReverseMapping(slot);
@@ -332,19 +334,19 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     }
 
     @Redirect(method = "addPlayerToTeam",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;broadcastAll(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updatePlayersOnPlayerAdd(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
     @Redirect(method = "removePlayerFromTeam",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;broadcastAll(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updatePlayersOnPlayerRemoval(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
     @Redirect(method = "onObjectiveChanged",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;broadcastAll(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updatePlayersOnObjectiveDisplay(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
@@ -362,30 +364,30 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     }
 
     @Redirect(method = "onTeamAdded",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;broadcastAll(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updateAllPlayersOnTeamCreation(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
     @Redirect(method = "onTeamChanged",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;broadcastAll(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updateAllPlayersOnTeamInfo(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
     @Redirect(method = "onTeamRemoved",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;broadcastAll(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updateAllPlayersOnTeamRemoval(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
-    @Redirect(method = "addObjective",
+    @Redirect(method = "startTrackingObjective",
         at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap = false))
     private Iterator impl$useOurScoreboardForPlayers(final List list) {
         return this.impl$players.iterator();
     }
 
-    @Redirect(method = "sendDisplaySlotRemovalPackets",
+    @Redirect(method = "stopTrackingObjective",
         at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap = false))
     private Iterator impl$useOurScoreboardForPlayersOnRemoval(final List list) {
         return this.impl$players.iterator();
@@ -397,14 +399,14 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     }
 
     private void impl$removeTeams(final ServerPlayerEntity player) {
-        for (final ScorePlayerTeam team: this.getTeams()) {
-            player.connection.sendPacket(new STeamsPacket(team, 1));
+        for (final ScorePlayerTeam team : this.getPlayerTeams()) {
+            player.connection.send(new STeamsPacket(team, 1));
         }
     }
 
     private void impl$removeObjectives(final ServerPlayerEntity player) {
-        for (final ScoreObjective objective: this.getScoreObjectives()) {
-            player.connection.sendPacket(new SScoreboardObjectivePacket(objective, 1));
+        for (final ScoreObjective objective : this.getObjectives()) {
+            player.connection.send(new SScoreboardObjectivePacket(objective, 1));
         }
     }
 }
