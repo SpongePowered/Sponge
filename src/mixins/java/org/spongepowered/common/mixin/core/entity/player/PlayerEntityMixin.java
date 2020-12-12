@@ -105,7 +105,6 @@ import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.LivingEntityMixin;
-import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -226,11 +225,6 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         return world.getEntitiesWithinAABBExcludingEntity(entityIn, bb);
     }
 */
-
-    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
-    private void impl$getDisplayNameWithParsing(final CallbackInfoReturnable<ITextComponent> ci) {
-        ci.setReturnValue(LegacyTexts.parseComponent((StringTextComponent) ci.getReturnValue(), LegacyComponentSerializer.SECTION_CHAR));
-    }
 
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;isSleeping()Z"))
     private boolean impl$postSleepingEvent(final PlayerEntity self) {
