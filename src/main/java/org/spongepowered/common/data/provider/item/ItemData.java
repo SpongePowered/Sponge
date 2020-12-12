@@ -40,7 +40,7 @@ public final class ItemData {
         registrator
                 .asMutable(Item.class)
                     .create(Keys.DISPLAY_NAME)
-                        .get(h -> SpongeAdventure.asAdventure(h.getDisplayName(new ItemStack(h))))
+                        .get(h -> SpongeAdventure.asAdventure(h.getName(new ItemStack(h))))
                         .setAnd((h, v) -> false);
     }
     // @formatter:on

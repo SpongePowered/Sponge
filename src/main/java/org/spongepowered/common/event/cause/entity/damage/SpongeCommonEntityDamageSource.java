@@ -61,14 +61,14 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
     }
 
     public void bridge$setDamageIsAbsolute() {
-        this.setDamageIsAbsolute();
+        this.bypassMagic();
     }
     public void bridge$setDamageBypassesArmor() {
-        this.setDamageBypassesArmor();
+        this.bypassArmor();
     }
 
     @Override
-    public Entity getTrueSource() {
+    public Entity getEntity() {
         return (Entity) this.getSource();
     }
 
@@ -78,32 +78,27 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
     }
 
     @Override
-    public boolean isUnblockable() {
+    public boolean isBypassArmor() {
         return this.isBypassingArmor();
     }
 
     @Override
-    public boolean canHarmInCreative() {
+    public boolean isBypassInvul() {
         return this.doesAffectCreative();
     }
 
     @Override
-    public boolean isDamageAbsolute() {
+    public boolean isBypassMagic() {
         return this.isAbsolute();
     }
 
     @Override
-    public boolean isDifficultyScaled() {
+    public boolean scalesWithDifficulty() {
         return this.isScaledByDifficulty();
     }
 
     @Override
-    public boolean isMagicDamage() {
-        return this.isMagic();
-    }
-
-    @Override
-    public float getHungerDamage() {
+    public float getFoodExhaustion() {
         return (float) this.getExhaustion();
     }
 

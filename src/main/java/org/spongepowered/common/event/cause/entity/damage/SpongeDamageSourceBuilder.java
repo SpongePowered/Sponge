@@ -61,7 +61,7 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
                 && this.exhaustion == null
                 && this.damageType.equals(DamageTypes.DRYOUT.get())
         ) {
-            return (DamageSource) net.minecraft.util.DamageSource.DRYOUT;
+            return (DamageSource) net.minecraft.util.DamageSource.DRY_OUT;
         }
         if (!this.scales
                 && !this.bypasses
@@ -157,10 +157,10 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
             accessor.invoker$bypassInvul();
         }
         if (this.magical) {
-            source.setMagicDamage();
+            source.setMagic();
         }
         if (this.scales) {
-            source.setDifficultyScaled();
+            source.setScalesWithDifficulty();
         }
         if (this.explosion) {
             source.setExplosion();

@@ -158,15 +158,15 @@ public final class LivingData {
                         })
                         .delete(LivingEntity::clearActivePotions)
                     .create(Keys.REMAINING_AIR)
-                        .get(h -> Math.max(0, h.getAir()))
+                        .get(h -> Math.max(0, h.getAirSupply()))
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > h.getMaxAir()) {
+                            if (v < 0 || v > h.getMaxAirSupply()) {
                                 return false;
                             }
-                            if (v == 0 && h.getAir() < 0) {
+                            if (v == 0 && h.getAirSupply() < 0) {
                                 return false;
                             }
-                            h.setAir(v);
+                            h.setAirSupply(v);
                             return true;
                         })
                     .create(Keys.SCALE)

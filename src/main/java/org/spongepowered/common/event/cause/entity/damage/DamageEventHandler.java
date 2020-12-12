@@ -92,12 +92,12 @@ public final class DamageEventHandler {
     public static Optional<DamageFunction> createHardHatModifier(final LivingEntity entityLivingBase,
         final DamageSource damageSource
     ) {
-        if ((damageSource instanceof FallingBlockDamageSource) && !entityLivingBase.getItemStackFromSlot(EquipmentSlotType.HEAD)
+        if ((damageSource instanceof FallingBlockDamageSource) && !entityLivingBase.getItemBySlot(EquipmentSlotType.HEAD)
             .isEmpty()) {
             final DamageModifier modifier = DamageModifier.builder()
                 .cause(Cause.of(
                     EventContext.empty(),
-                    ((ItemStack) (Object) entityLivingBase.getItemStackFromSlot(EquipmentSlotType.HEAD)).createSnapshot()
+                    ((ItemStack) (Object) entityLivingBase.getItemBySlot(EquipmentSlotType.HEAD)).createSnapshot()
                 ))
                 .type(DamageModifierTypes.HARD_HAT)
                 .build();
@@ -109,8 +109,8 @@ public final class DamageEventHandler {
     public static Optional<DamageFunction> createArmorModifiers(final LivingEntity entityLivingBase,
         final DamageSource damageSource
     ) {
-        if (!damageSource.isUnblockable()) {
-            final int totalArmorValue = entityLivingBase.getTotalArmorValue();
+        if (!damageSource.isBypassArmor()) {
+            final int totalArmorValue = entityLivingBase.getArmorValue();
             final float totalArmor = (float) totalArmorValue;
             final ModifiableAttributeInstance attribute = entityLivingBase.getAttribute(Attributes.ARMOR_TOUGHNESS);
             final double armorToughness = attribute.getValue();
@@ -139,8 +139,8 @@ public final class DamageEventHandler {
     }
 
     public static Optional<DamageFunction> createResistanceModifier(final LivingEntity entityLivingBase, final DamageSource damageSource) {
-        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(Effects.RESISTANCE) && damageSource != DamageSource.OUT_OF_WORLD) {
-            final PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(Effects.RESISTANCE));
+        if (!damageSource.isBypassMagic() && entityLivingBase.hasEffect(Effects.DAMAGE_RESISTANCE) && damageSource != DamageSource.OUT_OF_WORLD) {
+            final PotionEffect effect = ((PotionEffect) entityLivingBase.getEffect(Effects.DAMAGE_RESISTANCE));
             return Optional.of(new DamageFunction(DamageModifier.builder()
                 .cause(Cause.of(EventContext.empty(), effect))
                 .type(DamageModifierTypes.DEFENSIVE_POTION_EFFECT)
@@ -155,9 +155,9 @@ public final class DamageEventHandler {
         final LivingEntity living,
         final DamageSource damageSource
     ) {
-        if (!damageSource.isDamageAbsolute()) {
-            final Iterable<net.minecraft.item.ItemStack> inventory = living.getArmorInventoryList();
-            if (EnchantmentHelper.getEnchantmentModifierDamage(inventory, damageSource) <= 0) {
+        if (!damageSource.isBypassMagic()) {
+            final Iterable<net.minecraft.item.ItemStack> inventory = living.getArmorSlots();
+            if (EnchantmentHelper.getDamageProtection(inventory, damageSource) <= 0) {
                 return Optional.empty();
             }
             final List<DamageFunction> modifiers = new ArrayList<>();
@@ -168,7 +168,7 @@ public final class DamageEventHandler {
                     continue;
                 }
                 final Multimap<Enchantment, Short> enchantments = LinkedHashMultimap.create();
-                final ListNBT enchantmentList = itemStack.getEnchantmentTagList();
+                final ListNBT enchantmentList = itemStack.getEnchantmentTags();
                 if (enchantmentList.isEmpty()) {
                     continue;
                 }
@@ -177,10 +177,10 @@ public final class DamageEventHandler {
                     final short enchantmentId = enchantmentList.getCompound(i).getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
                     final short level = enchantmentList.getCompound(i).getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
 
-                    final Enchantment enchantment = Registry.ENCHANTMENT.getByValue(enchantmentId);
+                    final Enchantment enchantment = Registry.ENCHANTMENT.byId(enchantmentId);
                     if (enchantment != null) {
                         // Ok, we have an enchantment!
-                        final int temp = enchantment.calcModifierDamage(level, damageSource);
+                        final int temp = enchantment.getDamageProtection(level, damageSource);
                         if (temp != 0) {
                             enchantments.put(enchantment, level);
                         }
@@ -192,7 +192,7 @@ public final class DamageEventHandler {
                     final DamageObject object = new DamageObject();
                     int modifierTemp = 0;
                     for (final short level : enchantment.getValue()) {
-                        modifierTemp += enchantment.getKey().calcModifierDamage(level, damageSource);
+                        modifierTemp += enchantment.getKey().getDamageProtection(level, damageSource);
                     }
                     final int modifier = modifierTemp;
                     object.previousDamage = totalModifier;
@@ -262,7 +262,7 @@ public final class DamageEventHandler {
         final int l = MathHelper.floor(bb.maxY + 1.0D);
         final int i1 = MathHelper.floor(bb.minZ);
         final int j1 = MathHelper.floor(bb.maxZ + 1.0D);
-        final AbstractChunkProvider spongeChunkProvider = entity.world.getChunkProvider();
+        final AbstractChunkProvider spongeChunkProvider = entity.level.getChunkSource();
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
@@ -276,7 +276,7 @@ public final class DamageEventHandler {
                         continue;
                     }
                     if (predicate.test(chunk.getBlockState(blockPos))) {
-                        return ServerLocation.of((ServerWorld) entity.world, k1, l1, i2);
+                        return ServerLocation.of((ServerWorld) entity.level, k1, l1, i2);
                     }
                 }
             }
@@ -296,14 +296,14 @@ public final class DamageEventHandler {
      */
     public static void generateCauseFor(final DamageSource damageSource, final CauseStackManager.StackFrame frame) {
         if (damageSource instanceof IndirectEntityDamageSource) {
-            final net.minecraft.entity.Entity source = damageSource.getTrueSource();
+            final net.minecraft.entity.Entity source = damageSource.getEntity();
             if (!(source instanceof PlayerEntity) && source instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) source;
                 creatorBridge.tracked$getCreatorReference().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
                 creatorBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             }
         } else if (damageSource instanceof EntityDamageSource) {
-            final net.minecraft.entity.Entity source = damageSource.getTrueSource();
+            final net.minecraft.entity.Entity source = damageSource.getEntity();
             if (!(source instanceof PlayerEntity) && source instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) source;
                 creatorBridge.tracked$getCreatorReference().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
@@ -325,7 +325,7 @@ public final class DamageEventHandler {
         final Multimap<Enchantment, Integer> enchantments = LinkedHashMultimap.create();
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
         if (!heldItem.isEmpty()) {
-            final ListNBT nbttaglist = heldItem.getEnchantmentTagList();
+            final ListNBT nbttaglist = heldItem.getEnchantmentTags();
             if (nbttaglist.isEmpty()) {
                 return ImmutableList.of();
             }
@@ -334,7 +334,7 @@ public final class DamageEventHandler {
                 final int j = nbttaglist.getCompound(i).getShort("id");
                 final int enchantmentLevel = nbttaglist.getCompound(i).getShort("lvl");
 
-                final Enchantment enchantment = Registry.ENCHANTMENT.getByValue(j);
+                final Enchantment enchantment = Registry.ENCHANTMENT.byId(j);
                 if (enchantment != null) {
                     enchantments.put(enchantment, enchantmentLevel);
                 }
@@ -352,7 +352,7 @@ public final class DamageEventHandler {
                 final DoubleUnaryOperator enchantmentFunction = (damage) -> {
                     double totalDamage = 0;
                     for (final int level : enchantment.getValue()) {
-                        totalDamage += (double) enchantment.getKey().calcDamageByCreature(level, creatureAttribute) * attackStrength;
+                        totalDamage += (double) enchantment.getKey().getDamageBonus(level, creatureAttribute) * attackStrength;
                     }
                     return totalDamage;
                 };
@@ -387,9 +387,9 @@ public final class DamageEventHandler {
 
     @SuppressWarnings("ConstantConditions")
     public static Optional<DamageFunction> createShieldFunction(final LivingEntity entity, final DamageSource source, final float amount) {
-        if (entity.isActiveItemStackBlocking() && amount > 0.0 && ((LivingEntityAccessor) entity).invoker$isDamageSourceBlocked(source)) {
+        if (entity.isBlocking() && amount > 0.0 && ((LivingEntityAccessor) entity).invoker$isDamageSourceBlocked(source)) {
             final DamageModifier modifier = DamageModifier.builder()
-                .cause(Cause.of(EventContext.empty(), entity, ((ItemStack) (Object) entity.getActiveItemStack()).createSnapshot()))
+                .cause(Cause.of(EventContext.empty(), entity, ((ItemStack) (Object) entity.getUseItem()).createSnapshot()))
                 .type(DamageModifierTypes.SHIELD)
                 .build();
             return Optional.of(new DamageFunction(modifier, (damage) -> -damage));

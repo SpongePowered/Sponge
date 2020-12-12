@@ -47,7 +47,7 @@ public final class SpongeWhitelistService implements WhitelistService {
     public Collection<GameProfile> getWhitelistedProfiles() {
         final List<GameProfile> profiles = new ArrayList<>();
 
-        final WhiteList list = SpongeCommon.getServer().getPlayerList().getWhitelistedPlayers();
+        final WhiteList list = SpongeCommon.getServer().getPlayerList().getWhiteList();
         for (final WhitelistEntry entry: ((UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry>) list).accessor$map().values()) {
             profiles.add(SpongeGameProfile.of(((UserListEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$user()));
         }
@@ -80,6 +80,6 @@ public final class SpongeWhitelistService implements WhitelistService {
     }
 
     private static WhiteList getWhitelist() {
-        return SpongeCommon.getServer().getPlayerList().getWhitelistedPlayers();
+        return SpongeCommon.getServer().getPlayerList().getWhiteList();
     }
 }

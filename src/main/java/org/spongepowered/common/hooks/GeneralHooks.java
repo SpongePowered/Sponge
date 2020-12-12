@@ -31,7 +31,7 @@ public interface GeneralHooks {
 
     default double getEntityReachDistanceSq(ServerPlayerEntity player, Entity targeted) {
         double d0 = 36.0d; // 6 blocks
-        if (!player.canEntityBeSeen(targeted)) {
+        if (!player.canSee(targeted)) {
             d0 = 9.0D; // 3 blocks
         }
 

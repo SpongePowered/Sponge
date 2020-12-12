@@ -32,6 +32,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(TurtleEntity.class)
 public interface TurtleEntityAccessor {
 
+    @Invoker("getHomePos") BlockPos invoker$getHomePos();
+
     @Invoker("getTravelPos") BlockPos invoker$getTravelPos();
 
     @Invoker("setTravelPos") void invoker$setTravelPos(final BlockPos travelPos);

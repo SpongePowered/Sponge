@@ -41,10 +41,10 @@ public interface WorldGenerationHooks {
                 ImmutableList.of("Monument", "Stronghold", "Village", "Mineshaft", "Temple", "Mansion"),
                 ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument")
             );
-        } else if (dimensionType == World.THE_NETHER) {
+        } else if (dimensionType == World.NETHER) {
             final List<String> keys = ImmutableList.of("Fortress");
             return new LegacyStructureDataUtil(savedData, keys, keys);
-        } else if (dimensionType == World.THE_END) {
+        } else if (dimensionType == World.END) {
             final List<String> keys = ImmutableList.of("EndCity");
             return new LegacyStructureDataUtil(savedData, keys, keys);
         } else {

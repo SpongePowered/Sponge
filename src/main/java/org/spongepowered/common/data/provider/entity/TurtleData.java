@@ -43,7 +43,7 @@ public final class TurtleData {
                         .get(TurtleEntity::hasEgg)
                         .set((h, v) -> ((TurtleEntityAccessor) h).invoker$setHasEgg(v))
                     .create(Keys.HOME_POSITION)
-                        .get(h -> VecHelper.toVector3i(h.getHomePosition()))
+                        .get(h -> VecHelper.toVector3i(((TurtleEntityAccessor) h).invoker$getHomePos()))
                         .set((h, v) -> h.setHomePos(VecHelper.toBlockPos(v)))
                     .create(Keys.IS_LAYING_EGG)
                         .get(TurtleEntity::isLayingEgg)

@@ -56,10 +56,10 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
             accessor.invoker$bypassInvul();
         }
         if (this.scales) {
-            damageSource.setDifficultyScaled();
+            damageSource.setScalesWithDifficulty();
         }
         if (this.magical) {
-            damageSource.setMagicDamage();
+            damageSource.setMagic();
         }
         if (this.bypasses) {
             accessor.invoker$bypassArmor();
