@@ -88,7 +88,7 @@
         "mcp.entity.item.minecart.ContainerMinecartMixin_API",
         "mcp.entity.item.minecart.FurnaceMinecartEntityMixin_API",
         "mcp.entity.item.minecart.HopperMinecartEntityMixin_API",
-        "mcp.entity.item.minecart.MinecartCommandBlockEntityMixin_API",
+        "mcp.entity.item.minecart.CommandBlockMinecartEntityMixin_API",
         "mcp.entity.item.minecart.MinecartEntityMixin_API",
         "mcp.entity.item.minecart.SpawnerMinecartEntityMixin_API",
         "mcp.entity.item.minecart.TNTMinecartEntityMixin_API",
