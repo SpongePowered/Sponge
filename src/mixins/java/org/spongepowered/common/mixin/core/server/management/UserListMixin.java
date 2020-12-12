@@ -41,19 +41,19 @@ import java.util.List;
 public abstract class UserListMixin {
 
     @Shadow @Final public static Logger LOGGER;
-    @Shadow @Final private File saveFile;
-    @Shadow protected abstract String getObjectKey(Object obj);
+    @Shadow @Final private File file;
+    @Shadow protected abstract String shadow$getKeyForUser(Object obj);
 
     @Redirect(method = "removeExpired", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false))
     private boolean impl$fixAddingToList(final List<Object> list, final Object object) {
-        return list.add(this.getObjectKey(object)); // Mojang didn't implement this correctly, so we'll fix it
+        return list.add(this.shadow$getKeyForUser(object)); // Mojang didn't implement this correctly, so we'll fix it
     }
 
     // Don't throw exception if user list file does not exist
     @Inject(method = "load", at = @At("HEAD"), cancellable = true)
     private void impl$onLoad(final CallbackInfo ci) {
-        if (!this.saveFile.exists()) {
-            UserListMixin.LOGGER.warn("{} does not exist, creating it.", this.saveFile.getName());
+        if (!this.file.exists()) {
+            UserListMixin.LOGGER.warn("{} does not exist, creating it.", this.file.getName());
             ci.cancel();
         }
     }

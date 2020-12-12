@@ -119,6 +119,7 @@
     "server.management.PlayerListMixin",
     "server.management.PlayerProfileCache_ProfileEntryMixin",
     "server.management.PlayerProfileCacheMixin",
+    "server.management.UserListMixin",
     "service.permission.SubjectMixin",
     "tileentity.AbstractFurnaceTileEntityMixin",
     "tileentity.BannerTileEntityMixin",
