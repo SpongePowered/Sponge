@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.portal;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.ResourceKey;
@@ -33,6 +34,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
+import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.common.SpongeCommon;
@@ -43,6 +45,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.util.AxisUtil;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Objects;
@@ -56,9 +59,13 @@ public final class NetherPortalType extends VanillaPortalType {
     }
 
     @Override
-    public void generatePortal(final ServerLocation location) {
+    public void generatePortal(final ServerLocation location, final Axis axis) {
         Objects.requireNonNull(location);
-        PortalHelper.generateNetherPortal((ServerWorld) location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), true);
+        Direction.Axis mcAxis = AxisUtil.getFor(axis);
+        if (mcAxis == Direction.Axis.Y) {
+            mcAxis = Direction.Axis.X;
+        }
+        PortalHelper.generateNetherPortal((ServerWorld) location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), mcAxis, true);
     }
 
     @Override
@@ -76,7 +83,7 @@ public final class NetherPortalType extends VanillaPortalType {
         final net.minecraft.entity.Entity mEntity = (net.minecraft.entity.Entity) entity;
 
         // Nether Portal Block Collision Rules
-        if (mEntity.isPassenger() || mEntity.isBeingRidden() || !mEntity.isNonBoss()) {
+        if (mEntity.isPassenger() || mEntity.isVehicle() || !mEntity.canChangeDimensions()) {
             return false;
         }
 
@@ -111,7 +118,7 @@ public final class NetherPortalType extends VanillaPortalType {
                         (ServerWorld) actualDestination.getWorld(), this);
             }
 
-            ((net.minecraft.entity.Entity) entity).setPortal(VecHelper.toBlockPos(previousLocation.getPosition()));
+            ((net.minecraft.entity.Entity) entity).handleInsidePortal(VecHelper.toBlockPos(previousLocation.getPosition()));
 
             if (entity instanceof ServerPlayerEntity) {
                 ((ServerPlayerEntityAccessor) entity).accessor$isChangingDimension(true);
@@ -135,7 +142,7 @@ public final class NetherPortalType extends VanillaPortalType {
             }
 
             if (!worldChange) {
-                ((EntityAccessor) entity).accessor$portalEntrancePos(new BlockPos(mEntity.getPosX(), mEntity.getPosY(), mEntity.getPosZ()));
+                ((EntityAccessor) entity).accessor$portalEntrancePos(new BlockPos(mEntity.getX(), mEntity.getY(), mEntity.getZ()));
                 ((EntityAccessor) entity).accessor$portalTime(Integer.MAX_VALUE);
 
                 return true;
@@ -150,12 +157,12 @@ public final class NetherPortalType extends VanillaPortalType {
                         (ServerWorld) destination.getWorld(), (ServerWorld) actualDestination.getWorld(), false);
             } else {
                 // The portal logic handles re-creating the entity in the other dimension, this is simply cleanup
-                ((net.minecraft.entity.Entity) entity).detach();
-                ((PlatformEntityBridge) entity).bridge$remove(false);
-                ((ServerWorld) previousLocation.getWorld()).getProfiler().endSection();
-                ((ServerWorld) previousLocation.getWorld()).resetUpdateEntityTick();
-                ((ServerWorld) result.getEntityWorld()).resetUpdateEntityTick();
-                ((ServerWorld) previousLocation.getWorld()).getProfiler().endSection();
+                ((net.minecraft.entity.Entity) entity).unRide();
+                ((EntityAccessor) entity).invoker$removeAfterChangingDimensions();
+                ((ServerWorld) previousLocation.getWorld()).getProfiler().pop();
+                ((ServerWorld) previousLocation.getWorld()).resetEmptyTime();
+                ((ServerWorld) result.level).resetEmptyTime();
+                ((ServerWorld) previousLocation.getWorld()).getProfiler().pop();
             }
 
             return true;

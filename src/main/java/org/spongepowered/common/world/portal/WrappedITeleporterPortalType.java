@@ -30,6 +30,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalType;
@@ -58,13 +59,12 @@ public final class WrappedITeleporterPortalType implements PortalType {
     }
 
     @Override
-    public void generatePortal(ServerLocation location) {
+    public void generatePortal(ServerLocation location, Axis axis) {
         if (this.logicType != null) {
-            this.logicType.generatePortal(location);
+            this.logicType.generatePortal(location, axis);
         } else if (this.teleporter instanceof Teleporter) {
             final Teleporter mTeleporter = (Teleporter) this.teleporter;
-
-
+            // TODO
         }
     }
 

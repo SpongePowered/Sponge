@@ -91,4 +91,6 @@ public interface EntityAccessor {
 
     @Invoker("getPermissionLevel") int invoker$getPermissionLevel();
 
+    @Invoker("removeAfterChangingDimensions") void invoker$removeAfterChangingDimensions();
+
 }

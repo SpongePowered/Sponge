@@ -34,14 +34,9 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.dimension.EndDimension;
-import net.minecraft.world.dimension.NetherDimension;
-import net.minecraft.world.dimension.OverworldDimension;
+import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
@@ -59,11 +54,11 @@ import java.util.function.Function;
 // Because Vanilla doesn't move this stuff out...
 public final class PortalHelper {
 
-    private static final BlockState northEndFrame = Blocks.END_PORTAL_FRAME.getDefaultState().with(EndPortalFrameBlock.FACING, Direction.NORTH);
-    private static final BlockState southEndFrame = Blocks.END_PORTAL_FRAME.getDefaultState().with(EndPortalFrameBlock.FACING, Direction.SOUTH);
-    private static final BlockState eastEndFrame = Blocks.END_PORTAL_FRAME.getDefaultState().with(EndPortalFrameBlock.FACING, Direction.EAST);
-    private static final BlockState westEndFrame = Blocks.END_PORTAL_FRAME.getDefaultState().with(EndPortalFrameBlock.FACING, Direction.WEST);
-    private static final BlockState endPortal = Blocks.END_PORTAL.getDefaultState();
+    private static final BlockState northEndFrame = Blocks.END_PORTAL_FRAME.defaultBlockState().setValue(EndPortalFrameBlock.FACING, Direction.NORTH);
+    private static final BlockState southEndFrame = Blocks.END_PORTAL_FRAME.defaultBlockState().setValue(EndPortalFrameBlock.FACING, Direction.SOUTH);
+    private static final BlockState eastEndFrame = Blocks.END_PORTAL_FRAME.defaultBlockState().setValue(EndPortalFrameBlock.FACING, Direction.EAST);
+    private static final BlockState westEndFrame = Blocks.END_PORTAL_FRAME.defaultBlockState().setValue(EndPortalFrameBlock.FACING, Direction.WEST);
+    private static final BlockState endPortal = Blocks.END_PORTAL.defaultBlockState();
 
     public static void generateEndPortal(final ServerWorld world, final int x, final int y, final int z, final boolean placePortalBlocks) {
         // Sponge Start - Recreate logic for making an end portal frame since Vanilla assumes you are in a stronghold
@@ -72,200 +67,153 @@ public final class PortalHelper {
 
         for (int bx = 0; bx < 5; bx++) {
             for (int by = 0; by < 5; by++) {
-                origin.setPos(x + bx, y, z + by);
+                origin.set(x + bx, y, z + by);
 
                 if (bx == 0 && (by > 0 && by < 4)) {
-                    world.setBlockState(origin, PortalHelper.southEndFrame.with(EndPortalFrameBlock.EYE, world.rand.nextFloat() > 0.9F), 2);
+                    world.setBlock(origin, PortalHelper.southEndFrame.setValue(EndPortalFrameBlock.HAS_EYE, world.random.nextFloat() > 0.9F), 2);
                     continue;
                 }
 
                 if (bx == 1 || bx == 2 || bx == 3) {
                     if (by == 0) {
-                        world.setBlockState(origin, PortalHelper.eastEndFrame.with(EndPortalFrameBlock.EYE, world.rand.nextFloat() > 0.9F), 2);
+                        world.setBlock(origin, PortalHelper.eastEndFrame.setValue(EndPortalFrameBlock.HAS_EYE, world.random.nextFloat() > 0.9F), 2);
                     } else if (by == 4) {
-                        world.setBlockState(origin, PortalHelper.westEndFrame.with(EndPortalFrameBlock.EYE, world.rand.nextFloat() > 0.9F), 2);
+                        world.setBlock(origin, PortalHelper.westEndFrame.setValue(EndPortalFrameBlock.HAS_EYE, world.random.nextFloat() > 0.9F), 2);
                     } else if (placePortalBlocks) {
-                        world.setBlockState(origin, PortalHelper.endPortal, 2);
+                        world.setBlock(origin, PortalHelper.endPortal, 2);
                     }
 
                     continue;
                 }
 
                 if (bx == 4 && (by > 0 && by < 4)) {
-                    world.setBlockState(origin, PortalHelper.northEndFrame.with(EndPortalFrameBlock.EYE, world.rand.nextFloat() > 0.9F), 2);
+                    world.setBlock(origin, PortalHelper.northEndFrame.setValue(EndPortalFrameBlock.HAS_EYE, world.random.nextFloat() > 0.9F), 2);
                 }
             }
         }
     }
 
-    public static void generateNetherPortal(final ServerWorld world, final int x, final int y, final int z, final boolean placePortalBlocks) {
-        int i = 16;
+    // see Teleporter#createPortal
+    public static void generateNetherPortal(final ServerWorld world, final int x, final int y, final int z, final Direction.Axis axis, final boolean placePortalBlocks) {
+        BlockPos portalPos = new BlockPos(x, y, z);
+        Direction direction = Direction.get(Direction.AxisDirection.POSITIVE, axis);
         double d0 = -1.0D;
-        int j = x;
-        int k = y;
-        int l = z;
-        int i1 = j;
-        int j1 = k;
-        int k1 = l;
-        int l1 = 0;
-        int i2 = world.rand.nextInt(4);
-        BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
+        BlockPos blockpos = null;
+        double d1 = -1.0D;
+        BlockPos blockpos1 = null;
+        WorldBorder worldborder = world.getWorldBorder();
+        int i = world.getHeight() - 1;
+        BlockPos.Mutable blockpos$mutable = portalPos.mutable();
 
-        for(int j2 = j - 16; j2 <= j + 16; ++j2) {
-            double d1 = (double)j2 + 0.5D - x;
+        for(BlockPos.Mutable blockpos$mutable1 : BlockPos.spiralAround(portalPos, 16, Direction.EAST, Direction.SOUTH)) {
+            int j = Math.min(i, world.getHeight(Heightmap.Type.MOTION_BLOCKING, blockpos$mutable1.getX(), blockpos$mutable1.getZ()));
+            int k = 1;
+            if (worldborder.isWithinBounds(blockpos$mutable1) && worldborder.isWithinBounds(blockpos$mutable1.move(direction, 1))) {
+                blockpos$mutable1.move(direction.getOpposite(), 1);
 
-            for(int l2 = l - 16; l2 <= l + 16; ++l2) {
-                double d2 = (double)l2 + 0.5D - z;
-
-                label276:
-                for(int j3 = world.getActualHeight() - 1; j3 >= 0; --j3) {
-                    if (world.isAirBlock(blockpos$mutable.setPos(j2, j3, l2))) {
-                        while(j3 > 0 && world.isAirBlock(blockpos$mutable.setPos(j2, j3 - 1, l2))) {
-                            --j3;
+                for(int l = j; l >= 0; --l) {
+                    blockpos$mutable1.setY(l);
+                    if (world.isEmptyBlock(blockpos$mutable1)) {
+                        int i1;
+                        for(i1 = l; l > 0 && world.isEmptyBlock(blockpos$mutable1.move(Direction.DOWN)); --l) {
                         }
 
-                        for(int k3 = i2; k3 < i2 + 4; ++k3) {
-                            int l3 = k3 % 2;
-                            int i4 = 1 - l3;
-                            if (k3 % 4 >= 2) {
-                                l3 = -l3;
-                                i4 = -i4;
-                            }
+                        if (l + 4 <= i) {
+                            int j1 = i1 - l;
+                            if (j1 <= 0 || j1 >= 3) {
+                                blockpos$mutable1.setY(l);
+                                if (PortalHelper.canHostFrame(world, blockpos$mutable1, blockpos$mutable, direction, 0)) {
+                                    double d2 = portalPos.distSqr(blockpos$mutable1);
+                                    if (PortalHelper.canHostFrame(world, blockpos$mutable1, blockpos$mutable, direction, -1) && PortalHelper.canHostFrame(world, blockpos$mutable1, blockpos$mutable, direction, 1) && (d0 == -1.0D || d0 > d2)) {
+                                        d0 = d2;
+                                        blockpos = blockpos$mutable1.immutable();
+                                    }
 
-                            for(int j4 = 0; j4 < 3; ++j4) {
-                                for(int k4 = 0; k4 < 4; ++k4) {
-                                    for(int l4 = -1; l4 < 4; ++l4) {
-                                        int i5 = j2 + (k4 - 1) * l3 + j4 * i4;
-                                        int j5 = j3 + l4;
-                                        int k5 = l2 + (k4 - 1) * i4 - j4 * l3;
-                                        blockpos$mutable.setPos(i5, j5, k5);
-                                        if (l4 < 0 && !world.getBlockState(blockpos$mutable).getMaterial().isSolid() || l4 >= 0 && !world.isAirBlock(blockpos$mutable)) {
-                                            continue label276;
-                                        }
+                                    if (d0 == -1.0D && (d1 == -1.0D || d1 > d2)) {
+                                        d1 = d2;
+                                        blockpos1 = blockpos$mutable1.immutable();
                                     }
                                 }
                             }
-
-                            double d5 = (double)j3 + 0.5D - y;
-                            double d7 = d1 * d1 + d5 * d5 + d2 * d2;
-                            if (d0 < 0.0D || d7 < d0) {
-                                d0 = d7;
-                                i1 = j2;
-                                j1 = j3;
-                                k1 = l2;
-                                l1 = k3 % 4;
-                            }
                         }
                     }
                 }
             }
         }
 
-        if (d0 < 0.0D) {
-            for(int l5 = j - 16; l5 <= j + 16; ++l5) {
-                double d3 = (double)l5 + 0.5D - x;
+        if (d0 == -1.0D && d1 != -1.0D) {
+            blockpos = blockpos1;
+            d0 = d1;
+        }
 
-                for(int j6 = l - 16; j6 <= l + 16; ++j6) {
-                    double d4 = (double)j6 + 0.5D - z;
+        if (d0 == -1.0D) {
+            blockpos = (new BlockPos(portalPos.getX(), MathHelper.clamp(portalPos.getY(), 70, world.getHeight() - 10), portalPos.getZ())).immutable();
+            Direction direction1 = direction.getClockWise();
+            if (!worldborder.isWithinBounds(blockpos)) {
+                return;
+            }
 
-                    label214:
-                    for(int i7 = world.getActualHeight() - 1; i7 >= 0; --i7) {
-                        if (world.isAirBlock(blockpos$mutable.setPos(l5, i7, j6))) {
-                            while(i7 > 0 && world.isAirBlock(blockpos$mutable.setPos(l5, i7 - 1, j6))) {
-                                --i7;
-                            }
-
-                            for(int l7 = i2; l7 < i2 + 2; ++l7) {
-                                int l8 = l7 % 2;
-                                int k9 = 1 - l8;
-
-                                for(int i10 = 0; i10 < 4; ++i10) {
-                                    for(int k10 = -1; k10 < 4; ++k10) {
-                                        int i11 = l5 + (i10 - 1) * l8;
-                                        int j11 = i7 + k10;
-                                        int k11 = j6 + (i10 - 1) * k9;
-                                        blockpos$mutable.setPos(i11, j11, k11);
-                                        if (k10 < 0 && !world.getBlockState(blockpos$mutable).getMaterial().isSolid() || k10 >= 0 && !world.isAirBlock(blockpos$mutable)) {
-                                            continue label214;
-                                        }
-                                    }
-                                }
-
-                                double d6 = (double)i7 + 0.5D - y;
-                                double d8 = d3 * d3 + d6 * d6 + d4 * d4;
-                                if (d0 < 0.0D || d8 < d0) {
-                                    d0 = d8;
-                                    i1 = l5;
-                                    j1 = i7;
-                                    k1 = j6;
-                                    l1 = l7 % 2;
-                                }
-                            }
-                        }
+            for(int l1 = -1; l1 < 2; ++l1) {
+                for(int k2 = 0; k2 < 2; ++k2) {
+                    for(int i3 = -1; i3 < 3; ++i3) {
+                        BlockState blockstate1 = i3 < 0 ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.AIR.defaultBlockState();
+                        blockpos$mutable.setWithOffset(blockpos, k2 * direction.getStepX() + l1 * direction1.getStepX(), i3, k2 * direction.getStepZ() + l1 * direction1.getStepZ());
+                        world.setBlockAndUpdate(blockpos$mutable, blockstate1);
                     }
                 }
             }
         }
 
-        int i6 = i1;
-        int k2 = j1;
-        int k6 = k1;
-        int l6 = l1 % 2;
-        int i3 = 1 - l6;
-        if (l1 % 4 >= 2) {
-            l6 = -l6;
-            i3 = -i3;
-        }
-
-        if (d0 < 0.0D) {
-            j1 = MathHelper.clamp(j1, 70, world.getActualHeight() - 10);
-            k2 = j1;
-
-            for(int j7 = -1; j7 <= 1; ++j7) {
-                for(int i8 = 1; i8 < 3; ++i8) {
-                    for(int i9 = -1; i9 < 3; ++i9) {
-                        int l9 = i6 + (i8 - 1) * l6 + j7 * i3;
-                        int j10 = k2 + i9;
-                        int l10 = k6 + (i8 - 1) * i3 - j7 * l6;
-                        boolean flag = i9 < 0;
-                        blockpos$mutable.setPos(l9, j10, l10);
-                        world.setBlockState(blockpos$mutable, flag ? Blocks.OBSIDIAN.getDefaultState() : Blocks.AIR.getDefaultState());
-                    }
-                }
-            }
-        }
-
-        for(int k7 = -1; k7 < 3; ++k7) {
-            for(int j8 = -1; j8 < 4; ++j8) {
-                if (k7 == -1 || k7 == 2 || j8 == -1 || j8 == 3) {
-                    blockpos$mutable.setPos(i6 + k7 * l6, k2 + j8, k6 + k7 * i3);
-                    world.setBlockState(blockpos$mutable, Blocks.OBSIDIAN.getDefaultState(), 3);
+        for(int k1 = -1; k1 < 3; ++k1) {
+            for(int i2 = -1; i2 < 4; ++i2) {
+                if (k1 == -1 || k1 == 2 || i2 == -1 || i2 == 3) {
+                    blockpos$mutable.setWithOffset(blockpos, k1 * direction.getStepX(), i2, k1 * direction.getStepZ());
+                    world.setBlock(blockpos$mutable, Blocks.OBSIDIAN.defaultBlockState(), 3);
                 }
             }
         }
 
         if (placePortalBlocks) {
-            BlockState blockstate =
-                    Blocks.NETHER_PORTAL.getDefaultState().with(NetherPortalBlock.AXIS, l6 == 0 ? Direction.Axis.Z : Direction.Axis.X);
+            BlockState blockstate = Blocks.NETHER_PORTAL.defaultBlockState().setValue(NetherPortalBlock.AXIS, axis);
 
-            for (int k8 = 0; k8 < 2; ++k8) {
-                for (int j9 = 0; j9 < 3; ++j9) {
-                    blockpos$mutable.setPos(i6 + k8 * l6, k2 + j9, k6 + k8 * i3);
-                    world.setBlockState(blockpos$mutable, blockstate, 18);
+            for(int j2 = 0; j2 < 2; ++j2) {
+                for(int l2 = 0; l2 < 3; ++l2) {
+                    blockpos$mutable.setWithOffset(blockpos, j2 * direction.getStepX(), l2, j2 * direction.getStepZ());
+                    world.setBlock(blockpos$mutable, blockstate, 18);
                 }
             }
         }
+
     }
 
+    private static boolean canHostFrame(ServerWorld world, BlockPos p_242955_1_, BlockPos.Mutable p_242955_2_, Direction p_242955_3_, int p_242955_4_) {
+        Direction direction = p_242955_3_.getClockWise();
+
+        for(int i = -1; i < 3; ++i) {
+            for(int j = -1; j < 4; ++j) {
+                p_242955_2_.setWithOffset(p_242955_1_, p_242955_3_.getStepX() * i + direction.getStepX() * p_242955_4_, j, p_242955_3_.getStepZ() * i + direction.getStepZ() * p_242955_4_);
+                if (j < 0 && !world.getBlockState(p_242955_2_).getMaterial().isSolid()) {
+                    return false;
+                }
+
+                if (j >= 0 && !world.isEmptyBlock(p_242955_2_)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // see ServerPlayerEntity#createEndPlatform
     public static void generateEndObsidianPlatform(final ServerWorld world, final int x, final int y, final int z) {
-        for (int j1 = -2; j1 <= 2; ++j1) {
-            for (int k1 = -2; k1 <= 2; ++k1) {
-                for (int l1 = -1; l1 < 3; ++l1) {
-                    int i2 = x + k1 * 1 + j1 * 0;
-                    int j2 = (y - 1) + l1;
-                    int k2 = z + k1 * 0 - j1 * 1;
-                    final boolean flag = l1 < 0;
-                    world.setBlockState(new BlockPos(i2, j2, k2), flag ? Blocks.OBSIDIAN.getDefaultState() : Blocks.AIR.getDefaultState());
+        final BlockPos.Mutable blockpos$mutable = new BlockPos(x, y, z).mutable();
+
+        for(int i = -2; i <= 2; ++i) {
+            for(int j = -2; j <= 2; ++j) {
+                for(int k = -1; k < 3; ++k) {
+                    BlockState blockstate = k == -1 ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.AIR.defaultBlockState();
+                    world.setBlockAndUpdate(blockpos$mutable.set(x, y, z).move(j, k, i), blockstate);
                 }
             }
         }
@@ -278,11 +226,11 @@ public final class PortalHelper {
             double x = destination.x;
             double y = destination.y;
             double z = destination.z;
-            float pitch = entity.rotationPitch;
-            float yaw = entity.rotationYaw;
-            Vec3d motion = entity.getMotion();
+            float pitch = entity.xRot;
+            float yaw = entity.yRot;
+            net.minecraft.util.math.vector.Vector3d motion = entity.getDeltaMovement();
 
-            fromWorld.getProfiler().startSection("moving");
+            fromWorld.getProfiler().push("moving");
 
             // Entering an end portal from THE_END to OVERWORLD after exiting
             if (!(portal instanceof NetherPortalType) && fromWorld.getDimension().getType() == DimensionType.THE_END && toWorld.getDimension().getType() == DimensionType.OVERWORLD) {

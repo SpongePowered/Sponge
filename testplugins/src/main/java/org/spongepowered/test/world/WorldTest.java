@@ -39,6 +39,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -95,7 +96,7 @@ public final class WorldTest {
                     .setExecutor(context -> {
                         final ServerLocation location = context.requireOne(locationParameter);
                         final PortalType portalType = context.requireOne(portalTypeParameter);
-                        portalType.generatePortal(location);
+                        portalType.generatePortal(location, Axis.X);
                         return CommandResult.success();
                     })
                     .build()
