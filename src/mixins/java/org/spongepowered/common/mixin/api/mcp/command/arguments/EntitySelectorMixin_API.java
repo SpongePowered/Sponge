@@ -46,20 +46,20 @@ import java.util.stream.Collectors;
 public abstract class EntitySelectorMixin_API implements Selector {
 
     @Shadow
-    public abstract List<? extends net.minecraft.entity.Entity> shadow$select(CommandSource source) throws CommandSyntaxException;
+    public abstract List<? extends net.minecraft.entity.Entity> shadow$findEntities(CommandSource source) throws CommandSyntaxException;
 
     @Override
     @NonNull
     public Collection<Entity> select(@NonNull final ServerLocation location) throws IllegalStateException {
-        return this.api$select(((MinecraftServer) Sponge.getServer()).getCommandSource()
-                .withWorld((net.minecraft.world.server.ServerWorld) location.getWorld())
-                .withPos(VecHelper.toVec3d(location.getPosition())));
+        return this.api$select(((MinecraftServer) Sponge.getServer()).createCommandSourceStack()
+                .withLevel((net.minecraft.world.server.ServerWorld) location.getWorld())
+                .withPosition(VecHelper.toVanillaVector3d(location.getPosition())));
     }
 
     @Override
     @NonNull
     public Collection<Entity> select(@NonNull final Entity entity) throws IllegalStateException {
-        return this.api$select(((net.minecraft.entity.Entity) entity).getCommandSource());
+        return this.api$select(((net.minecraft.entity.Entity) entity).createCommandSourceStack());
     }
 
     @Override
@@ -71,7 +71,7 @@ public abstract class EntitySelectorMixin_API implements Selector {
     private Collection<Entity> api$select(@NonNull final CommandSource source) {
         try {
             // ensures we have the correct type and avoids compiler errors if we just try to cast directly.
-            return this.shadow$select(source).stream().map(x -> (Entity) x).collect(Collectors.toList());
+            return this.shadow$findEntities(source).stream().map(x -> (Entity) x).collect(Collectors.toList());
         } catch (final CommandSyntaxException commandSyntaxException) {
             throw new IllegalArgumentException(commandSyntaxException.getMessage(), commandSyntaxException);
         }

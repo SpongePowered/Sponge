@@ -78,26 +78,26 @@ import java.util.function.Supplier;
 public abstract class EntitySelectorParserMixin_API implements Selector.Builder {
 
     @Shadow @Final private StringReader reader;
-    @Shadow private int limit;
-    @Shadow private BiConsumer<Vector3d, List<? extends Entity>> sorter;
+    @Shadow private int maxResults;
+    @Shadow private BiConsumer<Vector3d, List<? extends Entity>> order;
     @Shadow private MinMaxBounds.FloatBound distance;
     @Shadow private MinMaxBounds.IntBound level;
-    @Shadow private boolean includeNonPlayers;
-    @Shadow private boolean currentWorldOnly;
+    @Shadow private boolean includesEntities;
+    @Shadow private boolean worldLimited;
     @Shadow @Nullable private Double x;
     @Shadow @Nullable private Double y;
     @Shadow @Nullable private Double z;
-    @Shadow @Nullable private Double dx;
-    @Shadow @Nullable private Double dy;
-    @Shadow @Nullable private Double dz;
-    @Shadow private MinMaxBoundsWrapped xRotation = MinMaxBoundsWrapped.UNBOUNDED;
-    @Shadow private MinMaxBoundsWrapped yRotation = MinMaxBoundsWrapped.UNBOUNDED;
-    @Shadow private Predicate<Entity> filter;
-    @Shadow private boolean self;
-    @Shadow @Nullable private String username;
-    @Shadow private int cursorStart;
-    @Shadow @Nullable private UUID uuid;
-    @Shadow private BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> suggestionHandler;
+    @Shadow @Nullable private Double deltaX;
+    @Shadow @Nullable private Double deltaY;
+    @Shadow @Nullable private Double deltaZ;
+    @Shadow private MinMaxBoundsWrapped rotX = MinMaxBoundsWrapped.ANY;
+    @Shadow private MinMaxBoundsWrapped rotY = MinMaxBoundsWrapped.ANY;
+    @Shadow private Predicate<Entity> predicate;
+    @Shadow private boolean currentEntity;
+    @Shadow @Nullable private String playerName;
+    @Shadow private int startPosition;
+    @Shadow @Nullable private UUID entityUUID;
+    @Shadow private BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> suggestions;
     @Shadow private boolean hasNameEquals;
     @Shadow private boolean hasNameNotEquals;
     @Shadow private boolean isLimited;
@@ -110,19 +110,19 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Shadow private boolean typeInverse;
     @Shadow private boolean hasScores;
     @Shadow private boolean hasAdvancements;
-    @Shadow private boolean checkPermission;
+    @Shadow private boolean usesSelectors;
 
     @Shadow public abstract void shadow$setLimited(boolean value);
     @Shadow public abstract void shadow$setSorted(boolean value);
     @Shadow public abstract void shadow$setX(double xIn);
     @Shadow public abstract void shadow$setY(double yIn);
     @Shadow public abstract void shadow$setZ(double zIn);
-    @Shadow public abstract void shadow$setDx(double dxIn);
-    @Shadow public abstract void shadow$setDy(double dyIn);
-    @Shadow public abstract void shadow$setDz(double dzIn);
-    @Shadow public abstract void shadow$setIncludeNonPlayers(boolean includeNonPlayers);
-    @Shadow public abstract EntitySelector shadow$build();
-    @Shadow public abstract void shadow$addFilter(Predicate<Entity> p_197401_1_);
+    @Shadow public abstract void shadow$setDeltaX(double dxIn);
+    @Shadow public abstract void shadow$setDeltaY(double dyIn);
+    @Shadow public abstract void shadow$setDeltaZ(double dzIn);
+    @Shadow public abstract void shadow$setIncludesEntities(boolean includeNonPlayers);
+    @Shadow public abstract EntitySelector shadow$getSelector();
+    @Shadow public abstract void shadow$addPredicate(Predicate<Entity> p_197401_1_);
 
     @Nullable private Map<String, Range<@NonNull Integer>> api$scores;
     @Nullable private Object2BooleanOpenHashMap<String> api$advancement;
@@ -152,7 +152,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Override
     public Selector.@NonNull Builder setLimit(final int limit) {
-        this.limit = limit;
+        this.maxResults = limit;
         this.shadow$setLimited(limit != Integer.MAX_VALUE);
         return this;
     }
@@ -175,9 +175,9 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         this.shadow$setX(minPoint.getX());
         this.shadow$setY(minPoint.getY());
         this.shadow$setZ(minPoint.getZ());
-        this.shadow$setDx(distance.getX());
-        this.shadow$setDy(distance.getY());
-        this.shadow$setDz(distance.getZ());
+        this.shadow$setDeltaX(distance.getX());
+        this.shadow$setDeltaY(distance.getY());
+        this.shadow$setDeltaZ(distance.getZ());
         return this;
     }
 
@@ -190,7 +190,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     public Selector.@NonNull Builder setSortAlgorithm(@NonNull final SelectorSortAlgorithm algorithm) {
         Preconditions.checkArgument(algorithm instanceof SpongeSelectorSortAlgorithm, "Must be a SpongeSelectorSortAlgorithm");
         this.shadow$setSorted(true);
-        this.sorter = ((SpongeSelectorSortAlgorithm) algorithm).getSortAlgorithm();
+        this.order = ((SpongeSelectorSortAlgorithm) algorithm).getSortAlgorithm();
         return this;
     }
 
@@ -253,7 +253,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         Preconditions.checkArgument(range.getMin() == null || range.getMin() >= 0, "min must be non-negative");
         Preconditions.checkArgument(range.getMax() == null || range.getMax() >= 0, "max must be non-negative");
         this.level = MinMaxBounds_IntBoundAccessor.invoker$new(range.getMin(), range.getMax());
-        this.shadow$setIncludeNonPlayers(false);
+        this.shadow$setIncludesEntities(false);
         return this;
     }
 
@@ -339,19 +339,19 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Override
     public Selector.@NonNull Builder setPitch(@NonNull final Range<@NonNull Double> range) {
-        this.xRotation = this.api$getWrappedBounds(range);
+        this.rotX = this.api$getWrappedBounds(range);
         return this;
     }
 
     @Override
     public Selector.@NonNull Builder setYaw(@NonNull final Range<@NonNull Double> range) {
-        this.yRotation = this.api$getWrappedBounds(range);
+        this.rotY = this.api$getWrappedBounds(range);
         return this;
     }
 
     @Override
     public Selector.@NonNull Builder filter(@NonNull final Predicate<org.spongepowered.api.entity.@NonNull Entity> filter) {
-        this.shadow$addFilter((Predicate<Entity>) (Object) filter);
+        this.shadow$addPredicate((Predicate<Entity>) (Object) filter);
         return this;
     }
 
@@ -381,32 +381,32 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         }
 
         if (this.api$forceSelf) {
-            this.self = true;
+            this.currentEntity = true;
         }
 
-        return (Selector) this.shadow$build();
+        return (Selector) this.shadow$getSelector();
     }
 
     @Override
     public Selector.@NonNull Builder reset() {
-        this.sorter = EntitySelectorParser.ARBITRARY;
-        this.distance = MinMaxBounds.FloatBound.UNBOUNDED;
-        this.level = MinMaxBounds.IntBound.UNBOUNDED;
-        this.includeNonPlayers = false;
-        this.currentWorldOnly = false;
+        this.order = EntitySelectorParser.ORDER_ARBITRARY;
+        this.distance = MinMaxBounds.FloatBound.ANY;
+        this.level = MinMaxBounds.IntBound.ANY;
+        this.includesEntities = false;
+        this.worldLimited = false;
         this.x = null;
         this.y = null;
         this.z = null;
-        this.dx = null;
-        this.dy = null;
-        this.dz = null;
-        this.xRotation = MinMaxBoundsWrapped.UNBOUNDED;
-        this.yRotation = MinMaxBoundsWrapped.UNBOUNDED;
-        this.filter = x -> true;
-        this.self = false;
-        this.username = null;
-        this.cursorStart = 0;
-        this.uuid = null;
+        this.deltaX = null;
+        this.deltaY = null;
+        this.deltaZ = null;
+        this.rotX = MinMaxBoundsWrapped.ANY;
+        this.rotY = MinMaxBoundsWrapped.ANY;
+        this.predicate = x -> true;
+        this.currentEntity = false;
+        this.playerName = null;
+        this.startPosition = 0;
+        this.entityUUID = null;
         this.hasNameEquals = false;
         this.hasNameNotEquals = false;
         this.isLimited = false;
@@ -419,9 +419,9 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         this.typeInverse = false;
         this.hasScores = false;
         this.hasAdvancements = false;
-        this.checkPermission = false;
+        this.usesSelectors = false;
         this.reader.setCursor(0);
-        this.suggestionHandler = EntitySelectorParser.SUGGEST_NONE;
+        this.suggestions = EntitySelectorParser.SUGGEST_NOTHING;
         this.api$forceSelf = false;
         return this;
     }
