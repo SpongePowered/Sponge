@@ -41,21 +41,21 @@ import java.util.List;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_EntityCollision extends EntityMixin_EntityCollision {
 
-    @Shadow protected abstract void shadow$collideWithEntity(Entity entity);
+    @Shadow protected abstract void shadow$doPush(Entity entity);
 
     private boolean runningCollideWithNearby = false;
 
-    @Inject(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;collideWithNearbyEntities()V"))
-    private void collisions$canUpdateCollisions(CallbackInfo ci) {
+    @Inject(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;collideWithNearbyEntities()V"))
+    private void collisions$canUpdateCollisions(final CallbackInfo ci) {
         this.runningCollideWithNearby = true;
     }
 
-    @Inject(method = "livingTick",
+    @Inject(method = "aiStep",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/LivingEntity;collideWithNearbyEntities()V",
+            target = "Lnet/minecraft/entity/LivingEntity;pushEntities()V",
             shift = Shift.AFTER))
-    private void collisions$resetCanUpdateCollisions(CallbackInfo ci) {
+    private void collisions$resetCanUpdateCollisions(final CallbackInfo ci) {
         this.runningCollideWithNearby = false;
     }
 
@@ -65,16 +65,16 @@ public abstract class LivingEntityMixin_EntityCollision extends EntityMixin_Enti
     }
 
     // This injection allows maxEntityCramming to be applied first before checking for max collisions
-    @Redirect(method = "collideWithNearbyEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I", remap = false))
-    private int collisions$collideWithNearbyUseOurCache(List<Entity> list) {
+    @Redirect(method = "pushEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I", remap = false))
+    private int collisions$pushEntities(final List<Entity> list) {
         for (final Entity entity: list) {
             // ignore players and entities with parts (ex. EnderDragon)
-            if (this.shadow$getEntityWorld().isRemote() || entity == null || entity instanceof PlayerEntity || entity instanceof EnderDragonEntity) {
+            if (this.shadow$getCommandSenderWorld().isClientSide() || entity == null || entity instanceof PlayerEntity || entity instanceof EnderDragonEntity) {
                 continue;
             }
 
             if (this.collision$requiresCollisionsCacheRefresh()) {
-                this.collision$initializeCollisionState(this.shadow$getEntityWorld());
+                this.collision$initializeCollisionState(this.shadow$getCommandSenderWorld());
                 this.collision$requiresCollisionsCacheRefresh(false);
             }
 
@@ -82,7 +82,7 @@ public abstract class LivingEntityMixin_EntityCollision extends EntityMixin_Enti
                 // Don't process any more collisions
                 break;
             }
-            this.shadow$collideWithEntity(entity);
+            this.shadow$doPush(entity);
         }
         // We always return '0' to prevent the original loop from running.
         return 0;

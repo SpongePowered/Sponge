@@ -96,8 +96,8 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
     }
 
     private AbstractCookingRecipe impl$getCurrentRecipe() {
-        return this.world.getRecipeManager().getRecipeFor((IRecipeType<AbstractCookingRecipe>) this.recipeType,
-                (AbstractFurnaceTileEntity) (Object) this, this.world).orElse(null);
+        return this.level.getRecipeManager().getRecipeFor((IRecipeType<AbstractCookingRecipe>) this.recipeType,
+                (AbstractFurnaceTileEntity) (Object) this, this.level).orElse(null);
     }
 
     // Tick up and Start

@@ -39,7 +39,7 @@ import java.util.UUID;
 @Mixin(TameableEntity.class)
 public abstract class TameableEntity_Optimization_Owner extends AgeableEntityMixin {
 
-    @Shadow @Final protected static DataParameter<Optional<UUID>> OWNER_UNIQUE_ID;
+    @Shadow @Final protected static DataParameter<Optional<UUID>> DATA_OWNERUUID_ID;
     @Nullable private UUID cachedOwner$OwnerId;
 
     /**
@@ -50,9 +50,9 @@ public abstract class TameableEntity_Optimization_Owner extends AgeableEntityMix
      */
     @Nullable
     @Overwrite
-    public UUID getOwnerId() {
+    public UUID getOwnerUUID() {
         if (this.cachedOwner$OwnerId == null) {
-            this.cachedOwner$OwnerId = this.dataManager.get(TameableEntity_Optimization_Owner.OWNER_UNIQUE_ID).orNull();
+            this.cachedOwner$OwnerId = this.dataManager.get(TameableEntity_Optimization_Owner.DATA_OWNERUUID_ID).orNull();
         }
         return this.cachedOwner$OwnerId;
     }
@@ -64,9 +64,9 @@ public abstract class TameableEntity_Optimization_Owner extends AgeableEntityMix
      * @param ownerUuid The owner id to set
      */
     @Overwrite
-    public void setOwnerId(@Nullable final UUID ownerUuid) {
+    public void setOwnerUUID(@Nullable final UUID ownerUuid) {
         this.cachedOwner$OwnerId = ownerUuid;
-        this.dataManager.set(TameableEntity_Optimization_Owner.OWNER_UNIQUE_ID, Optional.fromNullable(ownerUuid));
+        this.dataManager.set(TameableEntity_Optimization_Owner.DATA_OWNERUUID_ID, Optional.fromNullable(ownerUuid));
     }
 
 }

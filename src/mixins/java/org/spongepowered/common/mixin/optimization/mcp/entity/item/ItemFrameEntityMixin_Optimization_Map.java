@@ -39,18 +39,18 @@ import org.spongepowered.common.mixin.core.entity.item.HangingEntityMixin;
 @Mixin(ItemFrameEntity.class)
 public abstract class ItemFrameEntityMixin_Optimization_Map extends HangingEntityMixin {
 
-    @Shadow public abstract ItemStack getDisplayedItem();
+    @Shadow public abstract ItemStack shadow$getItem();
 
-    @Inject(method = "setDisplayedItemWithUpdate", at = @At(value = "HEAD"))
+    @Inject(method = "setItem(Lnet/minecraft/item/ItemStack;Z)V", at = @At(value = "HEAD"))
     private void mapOptimization$SetItemUpdateMapData(final ItemStack stack, final boolean p_174864_2_, final CallbackInfo ci) {
         if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
 
-        final OptimizedMapDataBridge mapData = (OptimizedMapDataBridge) FilledMapItem.getMapData(stack, this.world);
+        final OptimizedMapDataBridge mapData = (OptimizedMapDataBridge) FilledMapItem.getOrCreateSavedData(stack, this.world);
         if (stack.getItem() instanceof FilledMapItem) {
             mapData.mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) (Object) this);
-        } else if (this.getDisplayedItem().getItem() instanceof FilledMapItem && stack.isEmpty()) {
+        } else if (this.shadow$getItem().getItem() instanceof FilledMapItem && stack.isEmpty()) {
             mapData.mapOptimizationBridge$removeItemFrame((ItemFrameEntity) (Object) this);
         }
     }

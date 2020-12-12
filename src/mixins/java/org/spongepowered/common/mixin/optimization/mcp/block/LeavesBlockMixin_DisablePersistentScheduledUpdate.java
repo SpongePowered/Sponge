@@ -46,8 +46,7 @@ import java.util.Random;
 public abstract class LeavesBlockMixin_DisablePersistentScheduledUpdate {
 
     // @formatter:off
-    @Shadow
-    private static int shadow$getDistance(BlockState neighbor) {
+    @Shadow private static int shadow$getDistanceAt(final BlockState neighbor) {
         return 0;
     }
 
@@ -64,16 +63,17 @@ public abstract class LeavesBlockMixin_DisablePersistentScheduledUpdate {
      * circuit the placement
      */
     @Overwrite
-    public BlockState updatePostPlacement(final BlockState stateIn, final Direction facing, final BlockState facingState, final IWorld worldIn, final BlockPos currentPos, final BlockPos facingPos) {
-        final int i = LeavesBlockMixin_DisablePersistentScheduledUpdate.shadow$getDistance(facingState) + 1;
+    public BlockState updateShape(final BlockState stateIn, final Direction facing, final BlockState facingState, final IWorld worldIn,
+            final BlockPos currentPos, final BlockPos facingPos) {
+        final int i = LeavesBlockMixin_DisablePersistentScheduledUpdate.shadow$getDistanceAt(facingState) + 1;
 
-        if (i != 1 || stateIn.get(LeavesBlockMixin_DisablePersistentScheduledUpdate.DISTANCE) != i) {
+        if (i != 1 || stateIn.getValue(LeavesBlockMixin_DisablePersistentScheduledUpdate.DISTANCE) != i) {
             // Sponge Start - Directly provide the updated distance instead of scheduling an update
-            if (facingState.get(LeavesBlockMixin_DisablePersistentScheduledUpdate.PERSISTENT)) {
-                return facingState.with(LeavesBlockMixin_DisablePersistentScheduledUpdate.DISTANCE, i);
+            if (facingState.getValue(LeavesBlockMixin_DisablePersistentScheduledUpdate.PERSISTENT)) {
+                return facingState.setValue(LeavesBlockMixin_DisablePersistentScheduledUpdate.DISTANCE, i);
             }
             // Sponge End
-            worldIn.getPendingBlockTicks().scheduleTick(currentPos, (LeavesBlock) (Object) this, 1);
+            worldIn.getBlockTicks().scheduleTick(currentPos, (LeavesBlock) (Object) this, 1);
         }
 
         return stateIn;
@@ -92,7 +92,7 @@ public abstract class LeavesBlockMixin_DisablePersistentScheduledUpdate {
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     private void optimization$disableTickForPersistentLeaves(final BlockState state, final ServerWorld worldIn, final BlockPos pos,
         final Random rand, final CallbackInfo ci) {
-        if (state.get(LeavesBlockMixin_DisablePersistentScheduledUpdate.PERSISTENT)) {
+        if (state.getValue(LeavesBlockMixin_DisablePersistentScheduledUpdate.PERSISTENT)) {
             ci.cancel();
         }
     }

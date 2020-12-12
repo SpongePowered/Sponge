@@ -15,7 +15,7 @@
         "mcp.tileentity.HopperTileEntityMixin_Optimization_Hopper",
         "mcp.tileentity.TileEntityMixin_Optimization_Hopper",
         "mcp.world.IBlockReaderMixin_RayTraceChunkLoadOptimizations",
-        "mcp.world.WorldMixin_Optimization_Collision",
+        "mcp.world.IWorldReaderMixin_Optimization_Collision",
         "mcp.world.server.ServerWorldMixin_Optimization_Collision",
         "mcp.world.storage.MapData_MapInfoMixin_Optimization_Map"
     ],

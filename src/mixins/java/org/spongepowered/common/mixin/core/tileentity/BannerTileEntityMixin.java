@@ -62,9 +62,9 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
     }
 
     private void impl$markDirtyAndUpdate() {
-        this.shadow$markDirty();
-        if (this.world != null && !this.world.isClientSide) {
-            ((ServerWorld) this.world).getChunkSource().blockChanged(this.shadow$getPos());
+        this.shadow$setChanged();
+        if (this.level != null && !this.level.isClientSide) {
+            ((ServerWorld) this.level).getChunkSource().blockChanged(this.shadow$getBlockPos());
         }
     }
 

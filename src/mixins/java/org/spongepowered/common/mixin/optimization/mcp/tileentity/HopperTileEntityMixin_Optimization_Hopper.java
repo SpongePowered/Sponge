@@ -35,15 +35,15 @@ import org.spongepowered.common.bridge.optimization.HopperOptimizationBridge;
 @Mixin(value = HopperTileEntity.class, priority = 1300)
 public abstract class HopperTileEntityMixin_Optimization_Hopper extends TileEntityMixin_Optimization_Hopper {
 
-    @Redirect(method = "insertStack",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
-    private static void hopper$FlipMarkUpdateWhenInserting(final IInventory iInventory, final int index, final ItemStack stack) {
-        if (iInventory instanceof HopperOptimizationBridge) {
-            ((HopperOptimizationBridge) iInventory).hopperBridge$setCancelDirtyUpdate(true);
+    @Redirect(method = "tryMoveInItem",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;setItem(ILnet/minecraft/item/ItemStack;)V"))
+    private static void hopper$FlipMarkUpdateWhenInserting(final IInventory destination, final int index, final ItemStack stack) {
+        if (destination instanceof HopperOptimizationBridge) {
+            ((HopperOptimizationBridge) destination).hopperBridge$setCancelDirtyUpdate(true);
         }
-        iInventory.setInventorySlotContents(index, stack);
-        if (iInventory instanceof HopperOptimizationBridge) {
-            ((HopperOptimizationBridge) iInventory).hopperBridge$setCancelDirtyUpdate(false);
+        destination.setItem(index, stack);
+        if (destination instanceof HopperOptimizationBridge) {
+            ((HopperOptimizationBridge) destination).hopperBridge$setCancelDirtyUpdate(false);
         }
     }
 

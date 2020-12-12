@@ -24,23 +24,28 @@
  */
 package org.spongepowered.common.mixin.optimization.mcp.world;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import net.minecraft.world.gen.WorldGenRegion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(value = World.class, priority = 1500)
-public abstract class WorldMixin_Optimization_Collision {
+import java.util.stream.Stream;
 
-    @Shadow public boolean isFlammableWithin(final AxisAlignedBB bb) { return false; } // shadow
+@Mixin(value = IWorldReader.class, priority = 1500)
+public interface IWorldReaderMixin_Optimization_Collision {
 
-    @Redirect(method = "isFlammableWithin", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(IIIIII)Z"))
-    private boolean activeCollision$IgnoreIsAreaLoaded(final World world, final int xStart, final int yStart, final int zStart,
+    @Shadow default Stream<BlockState> getBlockStatesIfLoaded(final AxisAlignedBB aabb) { throw new AssertionError(); }
+
+    // TODO: Mixin probably doesn't support this yet......... so may have to become an overwrite
+    @SuppressWarnings("deprecation")
+    @Redirect(method = "getBlockStatesIfLoaded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IWorldReader;hasChunksAt(IIIIII)Z"))
+    default boolean activeCollision$ignoreHasChunksAt(final IWorldReader world, final int xStart, final int yStart, final int zStart,
         final int xEnd, final int yEnd, final int zEnd) {
-        return true;
+        return !(world instanceof WorldGenRegion) || world.hasChunksAt(xStart, yStart, zStart, xEnd, yEnd, zEnd);
     }
 
 }

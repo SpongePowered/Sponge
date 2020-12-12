@@ -39,10 +39,10 @@ import org.spongepowered.common.mixin.core.tileentity.TileEntityMixin;
 @Mixin(EnderChestTileEntity.class)
 public abstract class EnderChestTileEntityMixin_Optimization_TileEntity extends TileEntityMixin {
 
-    @Shadow public float lidAngle;
-    @Shadow public int numPlayersUsing;
-    @Shadow public float prevLidAngle;
-    @Shadow private int ticksSinceSync;
+    @Shadow public float openness;
+    @Shadow public int openCount;
+    @Shadow public float oOpenness;
+    @Shadow private int tickInterval;
 
     /**
      * @author bloodmc - July 21st, 2016
@@ -51,66 +51,71 @@ public abstract class EnderChestTileEntityMixin_Optimization_TileEntity extends 
      * @reason Overwritten in case ender chests ever attempt to tick
      */
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
-    private void impl$IgnoreTicking(CallbackInfo ci) {
-        if (++this.ticksSinceSync % 20 * 4 == 0) {
-            this.world.addBlockEvent(this.pos, Blocks.ENDER_CHEST, 1, this.numPlayersUsing);
+    private void impl$IgnoreTicking(final CallbackInfo ci) {
+        if (++this.tickInterval % 20 * 4 == 0) {
+            this.level.blockEvent(this.worldPosition, Blocks.ENDER_CHEST, 1, this.openCount);
         }
-        this.prevLidAngle = this.lidAngle;
+        this.oOpenness = this.openness;
         ci.cancel();
     }
 
 
-    @Inject(method = "openChest", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"))
-    private void impl$onOpenChest(CallbackInfo ci) {
+    @Inject(method = "startOpen", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;blockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"))
+    private void impl$onOpenChest(final CallbackInfo ci) {
         this.impl$doOpenLogic();
     }
 
-    @Inject(method = "closeChest", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"))
-    private void impl$onCloseChest(CallbackInfo ci) {
+    @Inject(method = "stopOpen", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;blockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"))
+    private void impl$onCloseChest(final CallbackInfo ci) {
         this.impl$doCloseLogic();
     }
 
     // Moved out of tick loop
     private void impl$doOpenLogic() {
-        int i = this.pos.getX();
-        int j = this.pos.getY();
-        int k = this.pos.getZ();
-        float f = 0.1F;
-        if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F) {
-            double d0 = (double)i + 0.5D;
-            double d1 = (double)k + 0.5D;
-            this.world.playSound((PlayerEntity)null, d0, (double)j + 0.5D, d1, SoundEvents.BLOCK_ENDER_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+        final int lvt_1_1_ = this.worldPosition.getX();
+        final int lvt_2_1_ = this.worldPosition.getY();
+        final int lvt_3_1_ = this.worldPosition.getZ();
+        // final float lvt_4_1_ = 0.1F; // compiler-inlined
+        final double lvt_7_2_;
+        if (this.openCount > 0 && this.openness == 0.0F) {
+            final double lvt_5_1_ = (double)lvt_1_1_ + 0.5D;
+            lvt_7_2_ = (double)lvt_3_1_ + 0.5D;
+            this.level.playSound((PlayerEntity)null, lvt_5_1_, (double)lvt_2_1_ + 0.5D, lvt_7_2_, SoundEvents.ENDER_CHEST_OPEN,
+                    SoundCategory.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
         }
     }
 
     // Moved out of tick loop
     private void impl$doCloseLogic() {
-        int i = this.pos.getX();
-        int j = this.pos.getY();
-        int k = this.pos.getZ();
+        final int lvt_1_1_ = this.worldPosition.getX();
+        final int lvt_2_1_ = this.worldPosition.getY();
+        final int lvt_3_1_ = this.worldPosition.getZ();
+        final double lvt_7_2_;
 
-        if (this.numPlayersUsing == 0) { /*&& this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F) {
-            float f2 = this.lidAngle;
-            if (this.numPlayersUsing > 0) {
-                this.lidAngle += 0.1F;
+        if (this.openCount == 0) { /*&& this.openness > 0.0F || this.openCount > 0 && this.openness < 1.0F) {
+            float lvt_5_2_ = this.openness;
+            if (this.openCount > 0) {
+                this.openness += 0.1F;
             } else {
-                this.lidAngle -= 0.1F;
+                this.openness -= 0.1F;
             }
 
-            if (this.lidAngle > 1.0F) {
-                this.lidAngle = 1.0F;
+            if (this.openness > 1.0F) {
+                this.openness = 1.0F;
             }
 
-            float f1 = 0.5F;
-            if (this.lidAngle < 0.5F && f2 >= 0.5F) {
-            */
-                double d3 = (double)i + 0.5D;
-                double d2 = (double)k + 0.5D;
-                this.world.playSound((PlayerEntity)null, d3, (double)j + 0.5D, d2, SoundEvents.BLOCK_ENDER_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
-//            }
+            float lvt_6_1_ = 0.5F;
+            if (this.openness < 0.5F && lvt_5_2_ >= 0.5F) {*/
+                lvt_7_2_ = (double)lvt_1_1_ + 0.5D;
+                final double lvt_9_1_ = (double)lvt_3_1_ + 0.5D;
+                this.level.playSound((PlayerEntity)null, lvt_7_2_, (double)lvt_2_1_ + 0.5D, lvt_9_1_, SoundEvents.ENDER_CHEST_CLOSE,
+                        SoundCategory.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
+            // }
 
-            if (this.lidAngle < 0.0F) {
-                this.lidAngle = 0.0F;
+            if (this.openness < 0.0F) {
+                this.openness = 0.0F;
             }
         }
     }

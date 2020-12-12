@@ -40,37 +40,37 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
 
     @Shadow public ServerPlayerEntity player;
 
-    @Redirect(method = "processPlayer",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isInvulnerableDimensionChange()Z", ordinal = 0))
-    private boolean movementCheck$onPlayerMovedTooQuicklyCheck(ServerPlayerEntity player) {
-        if (SpongeGameConfigs.getForWorld(this.player.world).get().getMovementChecks().playerMovedTooQuickly()) {
-            return player.isInvulnerableDimensionChange();
+    @Redirect(method = "handleMovePlayer",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isChangingDimension()Z", ordinal = 0))
+    private boolean movementCheck$onPlayerMovedTooQuicklyCheck(final ServerPlayerEntity player) {
+        if (SpongeGameConfigs.getForWorld(this.player.level).get().getMovementChecks().playerMovedTooQuickly()) {
+            return player.isChangingDimension();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
     }
 
-    @Redirect(method = "processPlayer",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isInvulnerableDimensionChange()Z", ordinal = 1))
-    private boolean movementCheck$onMovedWronglyCheck(ServerPlayerEntity player) {
-        if (SpongeGameConfigs.getForWorld(this.player.world).get().getMovementChecks().movedWrongly()) {
-            return player.isInvulnerableDimensionChange();
+    @Redirect(method = "handleMovePlayer",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isChangingDimension()Z", ordinal = 1))
+    private boolean movementCheck$onMovedWronglyCheck(final ServerPlayerEntity player) {
+        if (SpongeGameConfigs.getForWorld(this.player.level).get().getMovementChecks().movedWrongly()) {
+            return player.isChangingDimension();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
     }
 
-    @ModifyConstant(method = "processVehicleMove", constant = @Constant(doubleValue = 100, ordinal = 0), slice =
+    @ModifyConstant(method = "handleMoveVehicle", constant = @Constant(doubleValue = 100, ordinal = 0), slice =
         @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;lengthSquared()D", ordinal = 1),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;isServerOwner()Z", ordinal = 0))
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;lengthSqr()D", ordinal = 1),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;isSingleplayerOwner()Z", ordinal = 0))
     )
-    private double movementCheck$onVehicleMovedTooQuicklyCheck(double val) {
-        if (SpongeGameConfigs.getForWorld(this.player.world).get().getMovementChecks().playerVehicleMovedTooQuickly()) {
+    private double movementCheck$onVehicleMovedTooQuicklyCheck(final double val) {
+        if (SpongeGameConfigs.getForWorld(this.player.level).get().getMovementChecks().playerVehicleMovedTooQuickly()) {
             return val;
         }
         return Double.NaN; // The 'vehicle moved too quickly' check only executes if the squared difference of the motion vectors lengths is greater than 100
     }
 
-    @ModifyConstant(method = "processVehicleMove",
+    @ModifyConstant(method = "handleMoveVehicle",
         constant = @Constant(doubleValue = 0.0625D, ordinal = 0),
         slice = @Slice(
             from = @At(
@@ -83,8 +83,8 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
                 ordinal = 0,
                 remap = false)
     ))
-    private double movementCheck$onMovedWronglySecond(double val) {
-        if (SpongeGameConfigs.getForWorld(this.player.world).get().getMovementChecks().movedWrongly()) {
+    private double movementCheck$onMovedWronglySecond(final double val) {
+        if (SpongeGameConfigs.getForWorld(this.player.level).get().getMovementChecks().movedWrongly()) {
             return val;
         }
         return Double.NaN; // The second 'moved wrongly' check only executes if the length of the movement vector is greater than 0.0625D

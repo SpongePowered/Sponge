@@ -45,30 +45,30 @@ import java.util.UUID;
 public abstract class ServerLoginNetHandlerMixin_Bungee {
 
     @Shadow @Final private MinecraftServer server;
-    @Shadow @Final public NetworkManager networkManager;
-    @Shadow private GameProfile loginGameProfile;
+    @Shadow @Final public NetworkManager connection;
+    @Shadow private GameProfile gameProfile;
 
-    @Inject(method = "processLoginStart",
+    @Inject(method = "handleHello",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/network/login/ServerLoginNetHandler;loginGameProfile:Lcom/mojang/authlib/GameProfile;",
+            target = "Lnet/minecraft/network/login/ServerLoginNetHandler;gameProfile:Lcom/mojang/authlib/GameProfile;",
             opcode = Opcodes.PUTFIELD,
             ordinal = 0,
             shift = At.Shift.AFTER))
     private void bungee$initUuid(final CallbackInfo ci) {
-        if (!this.server.isServerInOnlineMode()) {
+        if (!this.server.usesAuthentication()) {
             final UUID uuid;
-            if (((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$getSpoofedUUID() != null) {
-                uuid = ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$getSpoofedUUID();
+            if (((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$getSpoofedUUID() != null) {
+                uuid = ((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$getSpoofedUUID();
             } else {
-                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.loginGameProfile.getName()).getBytes(Charsets.UTF_8));
+                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.gameProfile.getName()).getBytes(Charsets.UTF_8));
             }
 
-            this.loginGameProfile = new GameProfile(uuid, this.loginGameProfile.getName());
+            this.gameProfile = new GameProfile(uuid, this.gameProfile.getName());
 
-            if (((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$getSpoofedProfile() != null) {
-                for (final Property property : ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$getSpoofedProfile()) {
-                    this.loginGameProfile.getProperties().put(property.getName(), property);
+            if (((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$getSpoofedProfile() != null) {
+                for (final Property property : ((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$getSpoofedProfile()) {
+                    this.gameProfile.getProperties().put(property.getName(), property);
                 }
             }
         }

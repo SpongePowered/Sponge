@@ -50,28 +50,28 @@ public abstract class ServerHandshakeNetHandlerMixin_Bungee {
 
     private static final Gson gson = new Gson();
 
-    @Shadow @Final private NetworkManager networkManager;
+    @Shadow @Final private NetworkManager connection;
 
-    @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
-    private void bungee$patchHandshake(CHandshakePacket packet, CallbackInfo ci) {
-        if (SpongeConfigs.getCommon().get().getBungeeCord().getIpForwarding() && packet.getRequestedState().equals(ProtocolType.LOGIN)) {
+    @Inject(method = "handleIntention", at = @At(value = "HEAD"), cancellable = true)
+    private void bungee$patchHandshake(final CHandshakePacket packet, final CallbackInfo ci) {
+        if (SpongeConfigs.getCommon().get().getBungeeCord().getIpForwarding() && packet.getIntention().equals(ProtocolType.LOGIN)) {
             final String ip = ((CHandshakePacketAccessor) packet).accessor$hostName();
             final String[] split = ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
             if (split.length == 3 || split.length == 4) {
                 ((CHandshakePacketAccessor) packet).accessor$hostName(split[0]);
-                ((NetworkManagerAccessor) this.networkManager).accessor$address(new InetSocketAddress(split[1],
-                        ((InetSocketAddress) this.networkManager.getRemoteAddress()).getPort()));
-                ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
+                ((NetworkManagerAccessor) this.connection).accessor$address(new InetSocketAddress(split[1],
+                        ((InetSocketAddress) this.connection.getRemoteAddress()).getPort()));
+                ((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
 
                 if (split.length == 4) {
-                    ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setSpoofedProfile(ServerHandshakeNetHandlerMixin_Bungee.gson
+                    ((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$setSpoofedProfile(ServerHandshakeNetHandlerMixin_Bungee.gson
                         .fromJson(split[3], Property[].class));
                 }
             } else {
                 final StringTextComponent chatcomponenttext =
                         new StringTextComponent("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
-                this.networkManager.closeChannel(chatcomponenttext);
+                this.connection.disconnect(chatcomponenttext);
             }
         }
     }
