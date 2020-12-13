@@ -47,7 +47,7 @@ public abstract class DifficultyCommandMixin {
     @Overwrite
     public static int setDifficulty(CommandSource source, Difficulty difficulty) throws CommandSyntaxException {
         if (source.getWorld().getDifficulty() == difficulty) {
-            throw FAILED_EXCEPTION.create(difficulty.getTranslationKey());
+            throw DifficultyCommandMixin.FAILED_EXCEPTION.create(difficulty.getTranslationKey());
         } else {
             source.getWorld().getWorldInfo().setDifficulty(difficulty);
             source.sendFeedback(new TranslationTextComponent("commands.difficulty.success", difficulty.getDisplayName()), true);

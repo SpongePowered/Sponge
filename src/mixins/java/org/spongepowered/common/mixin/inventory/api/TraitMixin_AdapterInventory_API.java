@@ -26,13 +26,11 @@ package org.spongepowered.common.mixin.inventory.api;
 
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 
-@Mixin({
-    ArmorStandEntity.class,
-    MobEntity.class
-})
+@Mixin({ArmorStandEntity.class, MobEntity.class, PlayerEntity.class})
 public abstract class TraitMixin_AdapterInventory_API implements DefaultImplementedAdapterInventory.WithClear {
 
 }

@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.world;
 
+import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -47,6 +49,8 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.ChunkLayout;
+import org.spongepowered.common.bridge.api.LocationBridge;
+import org.spongepowered.common.util.MemoizedSupplier;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -64,7 +68,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
-public final class SpongeServerLocation extends SpongeLocation<ServerWorld> implements ServerLocation {
+public final class SpongeServerLocation extends SpongeLocation<ServerWorld> implements ServerLocation, LocationBridge {
+
+    private final Supplier<BlockPos> posSupplier = MemoizedSupplier.memoize(() -> {
+        final Vector3i blockPosition = this.getBlockPosition();
+        return new BlockPos(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ());
+    });
 
     SpongeServerLocation(final ServerWorld world, final ChunkLayout chunkLayout, final Vector3d position) {
         super(world, chunkLayout, position);
@@ -174,9 +183,8 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
     }
 
     @Override
-    public Entity createEntity(final EntityType<?> type) {
+    public <E extends Entity> E createEntity(final EntityType<E> type) {
         return this.getWorld().createEntity(type, this.getPosition());
-
     }
 
     @Override
@@ -187,7 +195,6 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
     @Override
     public Collection<Entity> spawnEntities(final Iterable<? extends Entity> entities) {
         return this.getWorld().spawnEntities(entities);
-
     }
 
     @Override
@@ -198,7 +205,6 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
     @Override
     public BlockSnapshot createSnapshot() {
         return this.getWorld().createSnapshot(this.getBlockPosition());
-
     }
 
     @Override
@@ -212,9 +218,7 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
     }
 
     @Override
-    public ScheduledUpdate<BlockType> scheduleBlockUpdate(final int delay, final TemporalUnit temporalUnit,
-        final TaskPriority priority
-    ) {
+    public ScheduledUpdate<BlockType> scheduleBlockUpdate(final int delay, final TemporalUnit temporalUnit, final TaskPriority priority) {
         throw new MissingImplementationException("ServerLocation", "scheduleBlockUpdate");
     }
 
@@ -448,4 +452,53 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
                    .toString();
     }
 
+    @Override
+    public BlockPos bridge$getBlockPos() {
+        return this.posSupplier.get();
+    }
+
+    public static final class Factory implements ServerLocation.Factory {
+
+        @Override
+        public ServerLocation create(final ServerWorld world, final Vector3d position) {
+            Objects.requireNonNull(world);
+            Objects.requireNonNull(position);
+
+            return new SpongeServerLocation(world, world.getEngine().getChunkLayout(), position);
+        }
+
+        @Override
+        public ServerLocation create(final ServerWorld world, final Vector3i blockPosition) {
+            Objects.requireNonNull(world);
+            Objects.requireNonNull(blockPosition);
+
+            final ChunkLayout chunkLayout = world.getEngine().getChunkLayout();
+            final Vector3d position = blockPosition.toDouble();
+            return new SpongeServerLocation(world, chunkLayout, position);
+        }
+
+        @Override
+        public ServerLocation create(final ResourceKey worldKey, final Vector3d position) {
+            Objects.requireNonNull(worldKey);
+            Objects.requireNonNull(position);
+
+            final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(worldKey);
+            if (!world.isPresent()) {
+                throw new IllegalStateException("Unknown world for key: " + worldKey.toString());
+            }
+            return new SpongeServerLocation(world.get(), world.get().getEngine().getChunkLayout(), position);
+        }
+
+        @Override
+        public ServerLocation create(final ResourceKey worldKey, final Vector3i blockPosition) {
+            Objects.requireNonNull(worldKey);
+            Objects.requireNonNull(blockPosition);
+
+            final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(worldKey);
+            if (!world.isPresent()) {
+                throw new IllegalStateException("Unknown world for key: " + worldKey.toString());
+            }
+            return new SpongeServerLocation(world.get(), world.get().getEngine().getChunkLayout(), blockPosition.toDouble());
+        }
+    }
 }

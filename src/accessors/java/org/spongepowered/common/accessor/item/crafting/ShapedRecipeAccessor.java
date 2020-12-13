@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.accessor.item.crafting;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.NonNullList;
@@ -37,6 +39,18 @@ import java.util.Map;
 public interface ShapedRecipeAccessor {
 
     @Accessor("group") String accessor$getGroup();
+
+    @Invoker("deserializeKey")  static Map<String, Ingredient> accessor$deserializeKey(JsonObject json) {
+        throw new IllegalStateException("Untransformed Accessor");
+    }
+
+    @Invoker("patternFromJson") static String[] accessor$patternFromJson(JsonArray jsonArr) {
+        throw new IllegalStateException("Untransformed Accessor");
+    }
+
+    @Invoker("shrink") static String[] accessor$shrink(String...  toShrink) {
+        throw new IllegalStateException("Untransformed Accessor");
+    }
 
     @Invoker("deserializeIngredients") static NonNullList<Ingredient> accessor$deserializeIngredients(String[] pattern, Map<String, Ingredient> keys, int patternWidth, int patternHeight) {
         throw new IllegalStateException("Untransformed Accessor");

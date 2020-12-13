@@ -26,14 +26,14 @@ package org.spongepowered.common.mixin.api.mcp.entity.item.minecart;
 
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartEntity;
+import org.spongepowered.api.entity.vehicle.minecart.MinecartLike;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
 import java.util.Set;
 
 @Mixin(AbstractMinecartEntity.class)
-public abstract class AbstractMinecartEntityMixin_API extends EntityMixin_API implements MinecartEntity {
+public abstract class AbstractMinecartEntityMixin_API extends EntityMixin_API implements MinecartLike {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

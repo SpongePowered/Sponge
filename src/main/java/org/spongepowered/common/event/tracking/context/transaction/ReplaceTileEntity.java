@@ -49,7 +49,7 @@ public final class ReplaceTileEntity extends BlockEventBasedTransaction {
     ReplaceTileEntity(final TileEntity added, final @Nullable TileEntity removed,
         final SpongeBlockSnapshot attachedSnapshot
     ) {
-        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
+        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState(), attachedSnapshot.getWorld());
         this.added = added;
         this.removed = removed;
         this.removedSnapshot = attachedSnapshot;
@@ -69,7 +69,9 @@ public final class ReplaceTileEntity extends BlockEventBasedTransaction {
     }
 
     @Override
-    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
+    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
+        @Nullable GameTransaction<@NonNull ?> parent
+    ) {
         return Optional.empty();
     }
 

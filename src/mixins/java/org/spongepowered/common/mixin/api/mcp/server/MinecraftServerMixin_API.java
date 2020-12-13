@@ -36,6 +36,7 @@ import com.mojang.datafixers.DataFixer;
 import java.util.Collections;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.Commands;
 import net.minecraft.resources.IReloadableResourceManager;
@@ -252,6 +253,11 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
+    public int getTargetTicksPerSecond() {
+        return 20;
+    }
+
+    @Override
     public void shutdown() {
         this.shadow$initiateShutdown(false);
     }
@@ -343,7 +349,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public void sendMessage(final Component message, final MessageType type) {
+    public void sendMessage(final Identity identity, final Component message, final MessageType type) {
         this.shadow$getPlayerList().sendMessage(SpongeAdventure.asVanilla(message));
     }
 

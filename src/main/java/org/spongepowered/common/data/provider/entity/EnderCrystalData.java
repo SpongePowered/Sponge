@@ -42,9 +42,9 @@ public final class EnderCrystalData {
         registrator
                 .asMutable(EnderCrystalEntity.class)
                     .create(Keys.HEALTH)
-                        .get(h -> h.removed ? 0.0 : ALIVE_HEALTH)
+                        .get(h -> h.removed ? 0.0 : EnderCrystalData.ALIVE_HEALTH)
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > ALIVE_HEALTH) {
+                            if (v < 0 || v > EnderCrystalData.ALIVE_HEALTH) {
                                 return false;
                             }
                             if (v == 0) {

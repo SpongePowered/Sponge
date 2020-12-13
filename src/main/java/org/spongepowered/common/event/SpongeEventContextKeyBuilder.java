@@ -27,23 +27,34 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.EventContextKey;
+import org.spongepowered.common.util.TypeTokenUtil;
+
+import java.lang.reflect.Type;
 
 import javax.annotation.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Builder<T> {
 
-    @Nullable TypeToken<T> typeClass;
+    @Nullable Type typeClass;
     @Nullable ResourceKey key;
 
     @SuppressWarnings("unchecked")
     @Override
-    public <N> SpongeEventContextKeyBuilder<N> type(TypeToken<N> aClass) {
+    public <N> SpongeEventContextKeyBuilder<N> type(final TypeToken<N> aClass) {
         checkArgument(aClass != null, "Class cannot be null!");
-        this.typeClass = (TypeToken<T>) aClass;
+        this.typeClass = aClass.getType();
+        return (SpongeEventContextKeyBuilder<N>) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <N> SpongeEventContextKeyBuilder<N> type(final Class<N> aClass) {
+        checkArgument(aClass != null, "Class cannot be null!");
+        this.typeClass = TypeTokenUtil.requireCompleteGenerics(aClass);
         return (SpongeEventContextKeyBuilder<N>) this;
     }
 

@@ -62,24 +62,24 @@ public interface IPropertyMixin_API<T extends Comparable<T>> extends IProperty<T
 
     @Intrinsic
     default String state$getName() {
-        return getName();
+        return this.getName();
     }
 
     default Collection<T> state$getPossibleValues() {
-        return getAllowedValues();
+        return this.getAllowedValues();
     }
 
     @Intrinsic
     default Class<T> state$getValueClass() {
-        return getValueClass();
+        return this.getValueClass();
     }
 
     default Predicate<T> state$getPredicate() {
-        return Functional.predicateIn(getAllowedValues());
+        return Functional.predicateIn(this.getAllowedValues());
     }
 
     @Intrinsic
     default Optional<T> state$parseValue(final String value) {
-        return parseValue(value);
+        return this.parseValue(value);
     }
 }

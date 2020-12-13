@@ -29,7 +29,9 @@ import net.minecraft.server.management.WhitelistEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
+import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -48,7 +50,7 @@ public class SpongeUserListWhitelist extends WhiteList {
 
     @Override
     protected boolean hasEntry(final com.mojang.authlib.GameProfile entry) {
-        return Sponge.getServer().getServiceProvider().whitelistService().isWhitelisted((GameProfile) entry);
+        return Sponge.getServer().getServiceProvider().whitelistService().isWhitelisted(SpongeGameProfile.of(entry));
     }
 
     @Override
@@ -68,7 +70,7 @@ public class SpongeUserListWhitelist extends WhiteList {
 
     @Override
     public void removeEntry(final com.mojang.authlib.GameProfile entry) {
-        Sponge.getServer().getServiceProvider().whitelistService().removeProfile((GameProfile) entry);
+        Sponge.getServer().getServiceProvider().whitelistService().removeProfile(SpongeGameProfile.of(entry));
     }
 
     @Override

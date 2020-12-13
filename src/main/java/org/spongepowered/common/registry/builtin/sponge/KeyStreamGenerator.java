@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
@@ -90,6 +90,8 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("can_place_as_block"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("casting_time"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("cat_type"), TypeTokens.CAT_TYPE_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("chat_colors_enabled"), TypeTokens.BOOLEAN_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("chat_visibility"), TypeTokens.CHAT_VISIBILITY_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("chest_attachment_type"), TypeTokens.CHEST_ATTACHMENT_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("chest_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("color"), TypeTokens.COLOR_VALUE_TOKEN));
@@ -101,6 +103,8 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("creator"), TypeTokens.UUID_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("current_spell"), TypeTokens.SPELL_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("custom_attack_damage"), TypeTokens.MAP_ENTITY_TYPE_DOUBLE_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("custom_model_data"), TypeTokens.INTEGER_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("custom_name"), TypeTokens.COMPONENT_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("damage_absorption"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("damage_per_block"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("decay_distance"), TypeTokens.INTEGER_VALUE_TOKEN));
@@ -132,6 +136,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("fall_time"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("firework_effects"), TypeTokens.LIST_FIREWORK_EFFECT_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("firework_flight_modifier"), TypeTokens.INTEGER_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("firework_shape"), TypeTokens.FIREWORK_SHAPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("fire_damage_delay"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("fire_ticks"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("first_date_joined"), TypeTokens.INSTANT_VALUE_TOKEN));
@@ -163,7 +168,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("has_pores_west"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("has_viewed_credits"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("head_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN));
-        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("healing_crystal"), TypeTokens.ENDER_CRYSTAL_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("healing_crystal"), TypeTokens.END_CRYSTAL_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("health"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("health_scale"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("height"), TypeTokens.DOUBLE_VALUE_TOKEN));
@@ -287,16 +292,20 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("life_ticks"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("light_emission"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("llama_type"), TypeTokens.LLAMA_TYPE_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("locale"), TypeTokens.LOCALE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("lock_token"), TypeTokens.STRING_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("lore"), TypeTokens.LIST_COMPONENT_VALUE_TOKEN));
-        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("matter_state"), TypeTokens.MATTER_STATE_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("matter_type"), TypeTokens.MATTER_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_air"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_burn_time"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_cook_time"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_durability"), TypeTokens.INTEGER_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_exhaustion"), TypeTokens.DOUBLE_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_food_level"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_fall_damage"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_health"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_nearby_entities"), TypeTokens.INTEGER_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_saturation"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_spawn_delay"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_speed"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_stack_size"), TypeTokens.INTEGER_VALUE_TOKEN));
@@ -310,6 +319,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("notifier"), TypeTokens.UUID_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("occupied_deceleration"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("on_ground"), TypeTokens.BOOLEAN_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("orientation"), TypeTokens.ORIENTATION_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("pages"), TypeTokens.LIST_COMPONENT_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("parrot_type"), TypeTokens.PARROT_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("particle_effect"), TypeTokens.PARTICLE_EFFECT_VALUE_TOKEN));
@@ -351,7 +361,6 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("right_arm_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("right_leg_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("roaring_time"), TypeTokens.INTEGER_VALUE_TOKEN));
-        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("rotation"), TypeTokens.ROTATION_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("saturation"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("scale"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("scoreboard_tags"), TypeTokens.SET_STRING_VALUE_TOKEN));
@@ -361,6 +370,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("show_bottom"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("sign_lines"), TypeTokens.LIST_COMPONENT_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("size"), TypeTokens.INTEGER_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("skin_parts"), TypeTokens.SET_SKIN_PARTS_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("skin_profile_property"), TypeTokens.PROFILE_PROPERTY_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("skin_moisture"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("sky_light"), TypeTokens.INTEGER_VALUE_TOKEN));
@@ -413,6 +423,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("vanish_ignores_collision"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("vanish_prevents_targeting"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("vehicle"), TypeTokens.ENTITY_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("view_distance"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("velocity"), TypeTokens.VECTOR_3D_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("villager_type"), TypeTokens.VILLAGER_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("wait_time"), TypeTokens.INTEGER_VALUE_TOKEN));

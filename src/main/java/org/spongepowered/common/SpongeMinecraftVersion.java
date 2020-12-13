@@ -72,7 +72,7 @@ public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion, M
 
     @Override
     public int compareTo(MinecraftVersion o) {
-        return compare(this, o);
+        return SpongeMinecraftVersion.compare(this, o);
     }
 
     @Override

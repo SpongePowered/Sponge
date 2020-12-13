@@ -42,14 +42,15 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
     private static final int CRAFTING_GRID = 2;
 
     public ContainerPlayerInventoryLens(int size, Class<? extends Inventory> adapter, SlotLensProvider slots) {
-        super(size, adapter, slots, lenses(size, slots));
+        super(size, adapter, slots, ContainerPlayerInventoryLens.lenses(size, slots));
         this.init(slots);
     }
 
     private static List<Lens> lenses(int size, SlotLensProvider slots) {
-        int base = CRAFTING_OUTPUT; // 1
-        final CraftingInventoryLens crafting = new CraftingInventoryLens(0, base, CRAFTING_GRID, CRAFTING_GRID, slots);
-        base += CRAFTING_GRID * CRAFTING_GRID; // 4
+        int base = ContainerPlayerInventoryLens.CRAFTING_OUTPUT; // 1
+        final CraftingInventoryLens crafting = new CraftingInventoryLens(0, base, ContainerPlayerInventoryLens.CRAFTING_GRID,
+            ContainerPlayerInventoryLens.CRAFTING_GRID, slots);
+        base += ContainerPlayerInventoryLens.CRAFTING_GRID * ContainerPlayerInventoryLens.CRAFTING_GRID; // 4
         final PlayerInventoryLens player = new PlayerInventoryLens(base, size - base, slots);
         return Arrays.asList(crafting, player);
     }

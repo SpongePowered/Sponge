@@ -29,8 +29,8 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
-import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
+import org.spongepowered.common.data.datasync.DataParameterConverter;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,19 +44,19 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
     @Override
     public Optional<DataTransactionResult> createTransaction(final Entity entity, final Byte currentValue, final Byte value) {
         // TODO - on fire and elytra are not represented in the API, maybe we should?
-        final boolean onFire = this.getFlag(currentValue, ON_FIRE_MASK);
-        final boolean isSneaking = this.getFlag(currentValue, CROUCHED_MASK);
-        final boolean sprinting = this.getFlag(currentValue, SPRINTING_MASK);
-        final boolean invisible = this.getFlag(currentValue, INVISIBLE_MASK);
-        final boolean glowing = this.getFlag(currentValue, GLOWING_MASK);
-        final boolean elytra = this.getFlag(currentValue, FLYING_ELYTRA_MASK);
+        final boolean onFire = this.getFlag(currentValue, EntityFlagsConverter.ON_FIRE_MASK);
+        final boolean isSneaking = this.getFlag(currentValue, EntityFlagsConverter.CROUCHED_MASK);
+        final boolean sprinting = this.getFlag(currentValue, EntityFlagsConverter.SPRINTING_MASK);
+        final boolean invisible = this.getFlag(currentValue, EntityFlagsConverter.INVISIBLE_MASK);
+        final boolean glowing = this.getFlag(currentValue, EntityFlagsConverter.GLOWING_MASK);
+        final boolean elytra = this.getFlag(currentValue, EntityFlagsConverter.FLYING_ELYTRA_MASK);
 
-        final boolean newOnFire = this.getFlag(value, ON_FIRE_MASK);
-        final boolean newIsSneaking = this.getFlag(value, CROUCHED_MASK);
-        final boolean newSprinting = this.getFlag(value, SPRINTING_MASK);
-        final boolean newInvisible = this.getFlag(value, INVISIBLE_MASK);
-        final boolean newGlowing = this.getFlag(value, GLOWING_MASK);
-        final boolean newElytra = this.getFlag(value, FLYING_ELYTRA_MASK);
+        final boolean newOnFire = this.getFlag(value, EntityFlagsConverter.ON_FIRE_MASK);
+        final boolean newIsSneaking = this.getFlag(value, EntityFlagsConverter.CROUCHED_MASK);
+        final boolean newSprinting = this.getFlag(value, EntityFlagsConverter.SPRINTING_MASK);
+        final boolean newInvisible = this.getFlag(value, EntityFlagsConverter.INVISIBLE_MASK);
+        final boolean newGlowing = this.getFlag(value, EntityFlagsConverter.GLOWING_MASK);
+        final boolean newElytra = this.getFlag(value, EntityFlagsConverter.FLYING_ELYTRA_MASK);
 
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         boolean changed = false;
@@ -95,12 +95,12 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
             // Short circuit when there are no changes.
             return originalValue;
         }
-        final boolean onFire = this.getFlag(originalValue, ON_FIRE_MASK);
-        boolean newIsSneaking = this.getFlag(originalValue, CROUCHED_MASK);
-        boolean newSprinting = this.getFlag(originalValue, SPRINTING_MASK);
-        boolean newInvisible = this.getFlag(originalValue, INVISIBLE_MASK);
-        boolean newGlowing = this.getFlag(originalValue, GLOWING_MASK);
-        boolean newElytra = this.getFlag(originalValue, FLYING_ELYTRA_MASK);
+        final boolean onFire = this.getFlag(originalValue, EntityFlagsConverter.ON_FIRE_MASK);
+        boolean newIsSneaking = this.getFlag(originalValue, EntityFlagsConverter.CROUCHED_MASK);
+        boolean newSprinting = this.getFlag(originalValue, EntityFlagsConverter.SPRINTING_MASK);
+        boolean newInvisible = this.getFlag(originalValue, EntityFlagsConverter.INVISIBLE_MASK);
+        boolean newGlowing = this.getFlag(originalValue, EntityFlagsConverter.GLOWING_MASK);
+        boolean newElytra = this.getFlag(originalValue, EntityFlagsConverter.FLYING_ELYTRA_MASK);
         for (final Immutable<?> immutableValue : immutableValues) {
             if (immutableValue.getKey() == Keys.IS_SNEAKING.get()) {
                 newIsSneaking = ((Boolean) immutableValue.get());
@@ -118,12 +118,14 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
                 newElytra = (Boolean) immutableValue.get();
             }
         }
-        byte newValue = (byte) (onFire ?  ON_FIRE_MASK : 0);
-        newValue = (byte) (newIsSneaking ? newValue | CROUCHED_MASK : newValue & ~CROUCHED_MASK);
-        newValue = (byte) (newSprinting ? newValue | SPRINTING_MASK : newValue & ~SPRINTING_MASK);
-        newValue = (byte) (newInvisible ? newValue | INVISIBLE_MASK : newValue & ~INVISIBLE_MASK);
-        newValue = (byte) (newGlowing ? newValue | GLOWING_MASK : newValue & ~GLOWING_MASK);
-        newValue = (byte) (newElytra ? newValue | FLYING_ELYTRA_MASK : newValue & ~FLYING_ELYTRA_MASK);
+        byte newValue = (byte) (onFire ? EntityFlagsConverter.ON_FIRE_MASK : 0);
+        newValue = (byte) (newIsSneaking ? newValue | EntityFlagsConverter.CROUCHED_MASK : newValue & ~EntityFlagsConverter.CROUCHED_MASK);
+        newValue = (byte) (newSprinting ? newValue | EntityFlagsConverter.SPRINTING_MASK : newValue & ~EntityFlagsConverter.SPRINTING_MASK);
+        newValue = (byte) (newInvisible ? newValue | EntityFlagsConverter.INVISIBLE_MASK : newValue & ~EntityFlagsConverter.INVISIBLE_MASK);
+        newValue = (byte) (newGlowing ? newValue | EntityFlagsConverter.GLOWING_MASK : newValue & ~EntityFlagsConverter.GLOWING_MASK);
+        newValue = (byte) (newElytra ? newValue | EntityFlagsConverter.FLYING_ELYTRA_MASK
+            : newValue & ~EntityFlagsConverter.FLYING_ELYTRA_MASK
+        );
         return newValue;
     }
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inject;
 
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Module;
@@ -35,14 +34,13 @@ import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProvisionListener;
 
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 /**
  * Allows injecting the {@link SpongeInjectionPoint} in {@link Provider}s.
@@ -65,7 +63,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
     @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
         try {
-            this.injectionPoint = findInjectionPoint(provision.getDependencyChain());
+            this.injectionPoint = InjectionPointProvider.findInjectionPoint(provision.getDependencyChain());
             provision.provision();
         } finally {
             this.injectionPoint = null;
@@ -86,17 +84,17 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
             }
             final com.google.inject.spi.InjectionPoint spiInjectionPoint = dependency.getInjectionPoint();
             if (spiInjectionPoint != null) {
-                final TypeToken<?> source = TypeToken.of(spiInjectionPoint.getDeclaringType().getType());
+                final Type source = spiInjectionPoint.getDeclaringType().getType();
                 final Member member = spiInjectionPoint.getMember();
                 if (member instanceof Field) {
                     final Field field = (Field) member;
-                    return new SpongeInjectionPoint(source, TypeToken.of(field.getGenericType()), field.getAnnotations());
+                    return new SpongeInjectionPoint(source, field.getGenericType(), field.getAnnotations());
                 } else if (member instanceof Executable) {
                     final Executable executable = (Executable) member;
                     final Annotation[][] parameterAnnotations = executable.getParameterAnnotations();
                     final Type[] parameterTypes = executable.getGenericParameterTypes();
                     final int index = dependency.getParameterIndex();
-                    return new SpongeInjectionPoint(source, TypeToken.of(parameterTypes[index]), parameterAnnotations[index]);
+                    return new SpongeInjectionPoint(source, parameterTypes[index], parameterAnnotations[index]);
                 } else {
                     throw new IllegalStateException("Unsupported Member type: " + member.getClass().getName());
                 }

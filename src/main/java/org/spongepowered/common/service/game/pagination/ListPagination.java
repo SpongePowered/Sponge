@@ -27,7 +27,6 @@ package org.spongepowered.common.service.game.pagination;
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.spongepowered.api.command.exception.CommandException;
 
 import java.util.ArrayList;
@@ -85,9 +84,9 @@ final class ListPagination extends ActivePagination {
         if (size == 0) {
             return ImmutableList.of();
         } else if (page < 1) {
-            throw new CommandException(TextComponent.of(String.format("Page %s does not exist!", page)));
+            throw new CommandException(Component.text(String.format("Page %s does not exist!", page)));
         } else if (page > size) {
-            throw new CommandException(TextComponent.of(String.format("Page %s is greater than the max of %s!", page, size)));
+            throw new CommandException(Component.text(String.format("Page %s is greater than the max of %s!", page, size)));
         }
         return this.pages.get(page - 1);
     }

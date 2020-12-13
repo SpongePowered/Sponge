@@ -24,19 +24,26 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import net.kyori.adventure.text.TextComponent;
+import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
+import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.util.blockray.RayTrace;
+import org.spongepowered.api.util.blockray.RayTraceResult;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.command.brigadier.argument.CatalogedZeroAdvanceValueParameter;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
-// TODO: When BlockRay returns
 public final class SpongeTargetBlockValueParameter extends CatalogedZeroAdvanceValueParameter<ServerLocation> {
 
     private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("target_block");
@@ -49,15 +56,30 @@ public final class SpongeTargetBlockValueParameter extends CatalogedZeroAdvanceV
 
     @Override
     @NonNull
-    public Optional<? extends ServerLocation> getValue(final CommandContext.@NonNull Builder context, final ArgumentReader.@NonNull Mutable reader)
+    public Optional<? extends ServerLocation> getValue(final CommandContext.@NonNull Builder context,
+            final ArgumentReader.@NonNull Mutable reader)
             throws ArgumentParseException {
+
         final Object root = context.getCause().getCause().root();
         if (root instanceof Living) {
-            // TODO: BlockRay, where art thou?
-            throw reader.createException(TextComponent.of("The cause root is not looking at a block!"));
+            final Living living = (Living) root;
+            final Optional<RayTraceResult<@NonNull LocatableBlock>> rayTraceResult =
+                    RayTrace.block()
+                            .sourceEyePosition(living)
+                            .direction(living.getHeadDirection())
+                            .limit(30)
+                            .continueWhileBlock(RayTrace.onlyAir())
+                            .select(RayTrace.nonAir())
+                            .continueWhileEntity(r -> false)
+                            .execute();
+            if (rayTraceResult.isPresent()) {
+                return rayTraceResult.map(x -> x.getSelectedObject().getServerLocation());
+            }
+
+            throw reader.createException(Component.text("The cause root is not looking at a block!"));
         }
 
-        throw reader.createException(TextComponent.of("The cause root must be a Living!"));
+        throw reader.createException(Component.text("The cause root must be a Living!"));
     }
 
 }

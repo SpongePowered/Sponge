@@ -28,15 +28,11 @@ import net.minecraft.state.properties.RailShape;
 import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.RailDirection;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(RailShape.class)
 public abstract class RailShapeMixin_API implements RailDirection {

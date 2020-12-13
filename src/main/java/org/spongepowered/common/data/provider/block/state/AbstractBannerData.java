@@ -28,6 +28,7 @@ import net.minecraft.block.AbstractBannerBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.WallBannerBlock;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class AbstractBannerData {
@@ -39,6 +40,9 @@ public final class AbstractBannerData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asImmutable(BlockState.class)
+                    .create(Keys.DYE_COLOR)
+                        .get(h -> (DyeColor) (Object) ((AbstractBannerBlock) h.getBlock()).getColor())
+                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock)
                     .create(Keys.IS_ATTACHED)
                         .get(h -> h.getBlock() instanceof WallBannerBlock)
                         .set((h, v) -> null)

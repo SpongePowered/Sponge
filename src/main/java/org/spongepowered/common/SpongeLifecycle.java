@@ -24,26 +24,29 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.reflect.TypeToken;
+import co.aikar.timings.TimingsFactory;
+import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.common.advancement.SpongeAdvancementProvider;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterCatalogRegistryEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
-import org.spongepowered.common.event.lifecycle.StartedEngineEventImpl;
-import org.spongepowered.common.event.lifecycle.StartingEngineEventImpl;
-import org.spongepowered.common.event.lifecycle.StoppingEngineEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.item.recipe.SpongeRecipeProvider;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeBuilderRegistry;
@@ -51,7 +54,6 @@ import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.registry.SpongeFactoryRegistry;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.service.SpongeServiceProvider;
-import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collection;
@@ -75,6 +77,7 @@ public final class SpongeLifecycle {
 
     public void establishBuilders() {
         ((SpongeBuilderRegistry) this.game.getRegistry().getBuilderRegistry()).registerDefaultBuilders();
+        ((SpongeDataManager) this.game.getDataManager()).registerDefaultBuilders();
     }
 
     public void callRegisterFactoryEvent() {
@@ -86,12 +89,23 @@ public final class SpongeLifecycle {
     }
 
     public void establishRegistries() {
-        ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).registerDefaultRegistries();
-        ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).registerDefaultSuppliers();
+        final SpongeCatalogRegistry spongeCatalogRegistry = (SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry();
+
+        spongeCatalogRegistry.registerDefaultRegistries();
+        spongeCatalogRegistry.registerDefaultSuppliers();
 
         this.game.getEventManager().post(new RegisterCatalogRegistryEventImpl(Cause.of(EventContext.empty(), this.game), this.game));
 
-        ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).callRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
+        spongeCatalogRegistry.callRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
+    }
+
+    public void establishDataPackRegistries() {
+        final SpongeCatalogRegistry spongeCatalogRegistry = (SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry();
+        spongeCatalogRegistry.callDataPackRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
+
+        // After all plugins registered their recipes we serialize them
+        SpongeRecipeProvider.registerRecipes(spongeCatalogRegistry.getRegistry(RecipeRegistration.class));
+        SpongeAdvancementProvider.registerAdvancements(spongeCatalogRegistry.getRegistry(Advancement.class));
     }
 
     public void callRegisterChannelEvent() {
@@ -99,10 +113,10 @@ public final class SpongeLifecycle {
     }
 
     public void initTimings() {
-        SpongeTimingsFactory.INSTANCE.init();
+        ((SpongeTimingsFactory) Sponge.getRegistry().getFactoryRegistry().provideFactory(TimingsFactory.class)).init();
     }
 
-    public void establishGlobalServices() {
+    public void establishGameServices() {
         ((SpongeServiceProvider) this.game.getServiceProvider()).init();
     }
 
@@ -111,7 +125,6 @@ public final class SpongeLifecycle {
     }
 
     public void establishServerFeatures() {
-        //Sponge.getSystemSubject().getContainingCollection();
         // Yes this looks odd but prevents having to do sided lifecycle solely to always point at the Server
         ((SpongeServer) this.game.getServer()).getUsernameCache().load();
     }
@@ -136,11 +149,13 @@ public final class SpongeLifecycle {
     }
 
     public void callStartingEngineEvent(final Engine engine) {
-        this.game.getEventManager().post(new StartingEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), this.game, engine, (TypeToken<Engine>) TypeToken.of(engine.getClass())));
+        this.game.getEventManager().post(SpongeEventFactory.createStartingEngineEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }
 
     public void callStartedEngineEvent(final Engine engine) {
-        this.game.getEventManager().post(new StartedEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), this.game, engine, (TypeToken<Engine>) TypeToken.of(engine.getClass())));
+        this.game.getEventManager().post(SpongeEventFactory.createStartedEngineEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }
 
     public void callLoadedGameEvent() {
@@ -148,7 +163,8 @@ public final class SpongeLifecycle {
     }
 
     public void callStoppingEngineEvent(final Engine engine) {
-        this.game.getEventManager().post(new StoppingEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), this.game, engine, (TypeToken<Engine>) TypeToken.of(engine.getClass())));
+        this.game.getEventManager().post(SpongeEventFactory.createStoppingEngineEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }
 
     private Collection<PluginContainer> filterInternalPlugins(final Collection<PluginContainer> plugins) {
@@ -159,6 +175,10 @@ public final class SpongeLifecycle {
     }
 
     public void establishDataProviders() {
-        DataProviderRegistry.get().registerDefaultProviders();
+        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerDefaultProviders();
+    }
+
+    public void establishDataKeyListeners() {
+        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerKeyListeners();
     }
 }

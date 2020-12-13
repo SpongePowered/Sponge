@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.bridge.entity;
 
-import net.kyori.adventure.text.Component;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.DismountType;
@@ -44,13 +42,9 @@ public interface EntityBridge {
 
     void bridge$setImplVelocity(Vector3d velocity);
 
-    @Nullable Component bridge$getDisplayNameText();
-
-    void bridge$setDisplayName(@Nullable Component displayName);
-
     @Nullable BlockPos bridge$getLastCollidedBlockPos();
 
-    void bridge$setLocationAndAngles(Transform transform);
+    void bridge$setTransform(Transform transform);
 
     void bridge$setFireImmuneTicks(int ticks);
 
@@ -74,4 +68,6 @@ public interface EntityBridge {
     }
 
     void bridge$setTransient(boolean value);
+
+    boolean bridge$dismountRidingEntity(DismountType type);
 }

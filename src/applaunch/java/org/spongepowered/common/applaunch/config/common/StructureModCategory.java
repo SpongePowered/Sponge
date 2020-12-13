@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,21 +34,23 @@ import java.util.Map;
 @ConfigSerializable
 public class StructureModCategory {
 
-    @Setting(value = "enabled", comment = "If 'false', this mod will never save its structures. This may\n"
+    @Setting("enabled")
+    @Comment("If 'false', this mod will never save its structures. This may\n"
                                           + "break some mod functionalities when requesting to locate their\n"
                                           + "structures in a World. If true, allows structures not overridden\n"
                                           + "in the section below to be saved by default. If you wish to find\n"
                                           + "a structure to prevent it being saved, enable 'auto-populate' and\n"
                                           + "restart the server/world instance.")
     private boolean isEnabled = true;
-    @Setting(value = "structures", comment = "Per structure override. Having the value of 'false' will prevent\n"
+    @Setting("structures")
+    @Comment("Per structure override. Having the value of 'false' will prevent\n"
                                              + "that specific named structure from saving.")
     private Map<String, Boolean> structureList = new HashMap<>();
 
     public StructureModCategory() {
     }
 
-    public StructureModCategory(String modId) {
+    public StructureModCategory(final String modId) {
         if (modId.equals("minecraft")) {
             this.structureList.put("mineshaft", false);
         }

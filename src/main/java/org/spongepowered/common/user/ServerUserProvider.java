@@ -26,10 +26,7 @@ package org.spongepowered.common.user;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.world.storage.SaveHandler;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
@@ -40,6 +37,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.management.PlayerListAccessor;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -51,9 +49,7 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -157,11 +153,12 @@ public final class ServerUserProvider {
         if (gameProfile == null) {
             return Optional.empty();
         }
-        return this.getUser((GameProfile) gameProfile);
+        return this.getUser(SpongeGameProfile.of(gameProfile));
     }
 
     Optional<User> getUser(final UUID uuid) {
-        return this.getUser((GameProfile) this.server.getPlayerProfileCache().getProfileByUUID(uuid));
+        final com.mojang.authlib.GameProfile gameProfile = this.server.getPlayerProfileCache().getProfileByUUID(uuid);
+        return this.getUser(gameProfile == null ? null : SpongeGameProfile.of(gameProfile));
     }
 
     Optional<User> getUser(@Nullable final GameProfile profile) {
@@ -174,7 +171,7 @@ public final class ServerUserProvider {
     }
 
     User getOrCreateUser(final GameProfile profile, final boolean force) {
-        final GameProfile resolvedProfile;
+        final com.mojang.authlib.GameProfile resolvedProfile;
         if (!force) {
             final UUID userID = profile.getUniqueId();
             final User currentUser = this.userCache.getIfPresent(userID);
@@ -182,14 +179,14 @@ public final class ServerUserProvider {
                 return currentUser;
             }
             // ensure the profile is what we expect it to be
-            final GameProfile p = (GameProfile) this.server.getPlayerProfileCache().getProfileByUUID(userID);
-            resolvedProfile = p == null ? profile : p;
+            final com.mojang.authlib.GameProfile p = this.server.getPlayerProfileCache().getProfileByUUID(userID);
+            resolvedProfile = p == null ? SpongeGameProfile.toMcProfile(profile) : p;
         } else {
-            resolvedProfile = profile;
+            resolvedProfile = SpongeGameProfile.toMcProfile(profile);
         }
 
         this.pollFilesystemWatcher();
-        final User user = new SpongeUser((com.mojang.authlib.GameProfile) resolvedProfile);
+        final User user = new SpongeUser(resolvedProfile);
         this.userCache.put(profile.getUniqueId(), user);
         this.knownUUIDs.add(profile.getUniqueId());
         return user;

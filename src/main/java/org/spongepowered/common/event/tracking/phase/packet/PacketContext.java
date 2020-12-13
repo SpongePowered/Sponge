@@ -48,7 +48,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     private boolean ignoreCreative;
     private boolean interactItemChanged;
 
-    protected PacketContext(final PacketState<? extends P> state, final PhaseTracker tracker) {
+    protected PacketContext(final PacketState<P> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 

@@ -25,19 +25,14 @@
 package org.spongepowered.common.registry.type.advancement;
 
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.advancement.SpongeCriterionBuilder;
-import org.spongepowered.common.advancement.SpongeEmptyCriterion;
+import org.spongepowered.common.advancement.criterion.SpongeCriterionBuilder;
+import org.spongepowered.common.advancement.criterion.SpongeEmptyCriterion;
 
 public final class SpongeAdvancementCriterionFactory implements AdvancementCriterion.Factory {
 
-    public static final AdvancementCriterion.Factory INSTANCE = new SpongeAdvancementCriterionFactory();
-
-    private SpongeAdvancementCriterionFactory() {
-    }
-
     @Override
     public AdvancementCriterion empty() {
-        return SpongeEmptyCriterion.INSTANCE;
+        return new SpongeEmptyCriterion();
     }
 
     @Override

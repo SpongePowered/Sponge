@@ -49,7 +49,7 @@ public class BlockPropertyIdProvider  {
     }
 
     public static String getIdFor(final IProperty<?> iProperty) {
-        return getInstance().propertyIdMap.get(iProperty);
+        return BlockPropertyIdProvider.getInstance().propertyIdMap.get(iProperty);
     }
 
     public Optional<String> get(final IProperty<?> key) {
@@ -65,7 +65,7 @@ public class BlockPropertyIdProvider  {
     }
 
     public static String getIdAndTryRegistration(final IProperty<?> property, final Block block, final String blockId) {
-        final BlockPropertyIdProvider instance = getInstance();
+        final BlockPropertyIdProvider instance = BlockPropertyIdProvider.getInstance();
         checkNotNull(property, "Property is null! Cannot retrieve a registration for a null property!");
         checkNotNull(block, "Block cannot be null!");
         checkNotNull(blockId, "Block id cannot be null!");

@@ -24,10 +24,31 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
+import net.kyori.adventure.audience.Audience;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.EventContextKey;
-import org.spongepowered.api.util.TypeTokens;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.entity.DismountType;
+import org.spongepowered.api.event.cause.entity.MovementType;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.SpongeEventContextKey;
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.stream.Stream;
 
@@ -36,48 +57,43 @@ public final class EventContextKeyStreamGenerator {
     public static Stream<EventContextKey<?>> stream() {
         // @formatter:off
         return Stream.of(
-            new SpongeEventContextKey<>(ResourceKey.sponge("audience"), TypeTokens.AUDIENCE),
-            new SpongeEventContextKey<>(ResourceKey.sponge("block_event_process"), TypeTokens.LOCATABLE_BLOCK_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("block_event_queue"), TypeTokens.LOCATABLE_BLOCK_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("block_hit"), TypeTokens.BLOCK_SNAPSHOT_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("block_target"), TypeTokens.BLOCK_SNAPSHOT_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("break_event"), TypeTokens.CHANGE_BLOCK_EVENT_BREAK_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("command"), TypeTokens.STRING_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("creator"), TypeTokens.USER_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("damage_type"), TypeTokens.DAMAGE_TYPE_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("decay_event"), TypeTokens.CHANGE_BLOCK_EVENT_DECAY_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("dismount_type"), TypeTokens.DISMOUNT_TYPE_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("entity_hit"), TypeTokens.ENTITY_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("fake_player"), TypeTokens.PLAYER_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("fire_spread"), TypeTokens.SERVER_WORLD_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("growth_origin"), TypeTokens.BLOCK_SNAPSHOT_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("grow_event"), TypeTokens.CHANGE_BLOCK_EVENT_GROW_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("igniter"), TypeTokens.LIVING_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("last_damage_source"), TypeTokens.DAMAGE_SOURCE_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("leaves_decay"), TypeTokens.SERVER_WORLD_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("liquid_break"), TypeTokens.SERVER_WORLD_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("liquid_flow"), TypeTokens.SERVER_WORLD_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("liquid_mix"), TypeTokens.SERVER_WORLD_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("location"), TypeTokens.SERVER_LOCATION_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("modify_event"), TypeTokens.CHANGE_BLOCK_EVENT_MODIFY_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("movement_type"), TypeTokens.MOVEMENT_TYPE_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("neighbor_notify_source"), TypeTokens.BLOCK_SNAPSHOT_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("notifier"), TypeTokens.USER_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("piston_extend"), TypeTokens.SERVER_WORLD_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("piston_retract"), TypeTokens.SERVER_WORLD_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("place_event"), TypeTokens.CHANGE_BLOCK_EVENT_PLACE_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("player"), TypeTokens.PLAYER_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("player_break"), TypeTokens.SERVER_WORLD_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("player_place"), TypeTokens.SERVER_WORLD_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("plugin"), TypeTokens.PLUGIN_CONTAINER_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("projectile_source"), TypeTokens.PROJECTILE_SOURCE_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("rotation"), TypeTokens.VECTOR_3D_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("simulated_player"), TypeTokens.GAME_PROFILE_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("spawn_type"), TypeTokens.SPAWN_TYPE_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("subject"), TypeTokens.SUBJECT_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("used_hand"), TypeTokens.HAND_TYPE_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("used_item"), TypeTokens.ITEM_STACK_SNAPSHOT_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("weapon"), TypeTokens.ITEM_STACK_SNAPSHOT_TOKEN)
+            new SpongeEventContextKey<>(ResourceKey.sponge("audience"), Audience.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("block_event_process"), LocatableBlock.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("block_event_queue"), LocatableBlock.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("block_hit"), BlockSnapshot.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("block_target"), BlockSnapshot.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("command"), String.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("creator"), User.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("damage_type"), DamageType.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("dismount_type"), DismountType.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("entity_hit"), Entity.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("fake_player"), Player.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("fire_spread"), ServerWorld.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("growth_origin"), BlockSnapshot.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("igniter"), Living.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("last_damage_source"), DamageSource.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("leaves_decay"), ServerWorld.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("liquid_break"), ServerWorld.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("liquid_flow"), ServerWorld.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("liquid_mix"), ServerWorld.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("location"), ServerLocation.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("movement_type"), MovementType.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("neighbor_notify_source"), BlockSnapshot.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("notifier"), User.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("piston_extend"), ServerWorld.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("piston_retract"), ServerWorld.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("player"), Player.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("player_break"), ServerWorld.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("player_place"), ServerWorld.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("plugin"), PluginContainer.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("projectile_source"), ProjectileSource.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("rotation"), Vector3d.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("simulated_player"), GameProfile.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("spawn_type"), SpawnType.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("subject"), Subject.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("used_hand"), HandType.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("used_item"), ItemStackSnapshot.class),
+            new SpongeEventContextKey<>(ResourceKey.sponge("weapon"), ItemStackSnapshot.class)
         );
         // @formatter:on
     }

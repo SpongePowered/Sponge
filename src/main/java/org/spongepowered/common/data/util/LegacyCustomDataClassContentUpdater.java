@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.util;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataView;
@@ -32,7 +33,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class LegacyCustomDataClassContentUpdater implements DataContentUpdater {
+public final class LegacyCustomDataClassContentUpdater implements DataContentUpdater {
 
     @Override
     public int getInputVersion() {
@@ -46,10 +47,10 @@ public class LegacyCustomDataClassContentUpdater implements DataContentUpdater {
 
     @SuppressWarnings("deprecation")
     @Override
-    public DataView update(DataView content) {
+    public DataView update(final DataView content) {
         final String className = content.getString(Constants.Sponge.DATA_CLASS).get();
 
-        final Optional<DataRegistration> registration = SpongeDataManager.getInstance().getRegistrationForLegacyId(className);
+        final Optional<DataRegistration> registration = ((SpongeDataManager) Sponge.getGame().getDataManager()).getRegistrationForLegacyId(className);
         if (!registration.isPresent()) {
             return content;
         }

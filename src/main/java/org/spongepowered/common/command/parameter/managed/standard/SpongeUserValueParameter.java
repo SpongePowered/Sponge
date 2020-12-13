@@ -29,16 +29,18 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.minecraft.command.arguments.EntityArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.user.UserManager;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
@@ -48,6 +50,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public final class SpongeUserValueParameter extends CatalogedArgumentParser<User> {
 
@@ -69,8 +72,9 @@ public final class SpongeUserValueParameter extends CatalogedArgumentParser<User
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        return ImmutableList.of();
+    public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
+        return Sponge.getServer().getUserManager().streamOfMatches(currentInput).filter(GameProfile::hasName)
+                .map(x -> x.getName().orElse("")).collect(Collectors.toList());
     }
 
     @Override
@@ -88,7 +92,7 @@ public final class SpongeUserValueParameter extends CatalogedArgumentParser<User
                                 .selectOnePlayer(((SpongeCommandContextBuilder) context).getSource()));
                 return Optional.of(entity.getUser());
             } catch (final CommandSyntaxException e) {
-                throw reader.createException(TextComponent.of(e.getContext()));
+                throw reader.createException(Component.text(e.getContext()));
             }
         }
 
@@ -106,7 +110,7 @@ public final class SpongeUserValueParameter extends CatalogedArgumentParser<User
             return user;
         }
 
-        throw reader.createException(TextComponent.of("Could not find user with user name \"" + peek + "\""));
+        throw reader.createException(Component.text("Could not find user with user name \"" + peek + "\""));
     }
 
 }

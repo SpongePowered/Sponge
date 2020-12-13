@@ -40,7 +40,7 @@ public final class CallbackRegistry<T> extends SimpleRegistry<T> {
     @Override
     public <V extends T> V register(int id, ResourceLocation name, V instance) {
         V value = super.register(id, name, instance);
-        callback.accept(name, instance);
+        this.callback.accept(name, instance);
         return value;
     }
 }

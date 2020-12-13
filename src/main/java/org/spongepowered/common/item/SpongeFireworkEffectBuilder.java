@@ -42,7 +42,7 @@ public class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
     private boolean flicker = false;
     private List<Color> colors = Lists.newArrayList();
     private List<Color> fades = Lists.newArrayList();
-    private Supplier<? extends FireworkShape> shape = FireworkShapes.BALL;
+    private Supplier<? extends FireworkShape> shape = FireworkShapes.SMALL_BALL;
 
     @Override
     public SpongeFireworkEffectBuilder trail(final boolean trail) {
@@ -129,7 +129,7 @@ public class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
         this.flicker = false;
         this.colors = Lists.newArrayList();
         this.fades = Lists.newArrayList();
-        this.shape = FireworkShapes.BALL;
+        this.shape = FireworkShapes.SMALL_BALL;
         return this;
     }
 }

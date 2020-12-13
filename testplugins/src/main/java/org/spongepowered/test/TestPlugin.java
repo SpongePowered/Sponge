@@ -25,7 +25,8 @@
 package org.spongepowered.test;
 
 import com.google.inject.Inject;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
@@ -53,8 +54,9 @@ public final class TestPlugin {
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<PluginContainer> pluginKey = Parameter.plugin().setKey("plugin").setSuggestions(
-                context -> Sponge.getPluginManager().getPlugins().stream()
+                (context, currentInput) -> Sponge.getPluginManager().getPlugins().stream()
                         .filter(pc -> pc.getInstance() instanceof LoadableModule)
+                        .filter(x -> x.getMetadata().getId().startsWith(currentInput))
                         .map(x -> x.getMetadata().getId()).collect(Collectors.toList())).build();
         final Command.Parameterized enableCommand = Command.builder().parameter(pluginKey)
                 .setExecutor(context -> {
@@ -62,9 +64,9 @@ public final class TestPlugin {
                     if (pc.getInstance() instanceof LoadableModule) {
                         if (this.enabledPlugins.add(pc.getMetadata().getId())) {
                             ((LoadableModule) pc.getInstance()).enable(context);
-                            context.sendMessage(TextComponent.of("Enabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Identity.nil(), Component.text("Enabled " + pc.getMetadata().getId()));
                         } else {
-                            context.sendMessage(TextComponent.of("Already enabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Identity.nil(), Component.text("Already enabled " + pc.getMetadata().getId()));
                         }
                     }
                     return CommandResult.success();
@@ -75,9 +77,9 @@ public final class TestPlugin {
                     if (pc.getInstance() instanceof LoadableModule) {
                         if (this.enabledPlugins.remove(pc.getMetadata().getId())) {
                             ((LoadableModule) pc.getInstance()).disable(context);
-                            context.sendMessage(TextComponent.of("Disabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Identity.nil(), Component.text("Disabled " + pc.getMetadata().getId()));
                         } else {
-                            context.sendMessage(TextComponent.of("Already disabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Identity.nil(), Component.text("Already disabled " + pc.getMetadata().getId()));
                         }
                     }
                     return CommandResult.success();
@@ -89,11 +91,11 @@ public final class TestPlugin {
                         if (this.enabledPlugins.contains(pc.getMetadata().getId())) {
                             this.enabledPlugins.remove(pc.getMetadata().getId());
                             ((LoadableModule) pc.getInstance()).disable(context);
-                            context.sendMessage(TextComponent.of("Disabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Identity.nil(), Component.text("Disabled " + pc.getMetadata().getId()));
                         } else {
                             this.enabledPlugins.add(pc.getMetadata().getId());
                             ((LoadableModule) pc.getInstance()).enable(context);
-                            context.sendMessage(TextComponent.of("Enabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Identity.nil(), Component.text("Enabled " + pc.getMetadata().getId()));
                         }
                     }
                     return CommandResult.success();
@@ -104,7 +106,7 @@ public final class TestPlugin {
                 .child(disableCommand, "disable")
                 .child(toggleCommand, "toggle")
                 .parameter(pluginKey)
-                .setExecutor(toggleCommand)
+                .setExecutor(toggleCommand.getExecutor().get())
                 .build();
         event.register(this.plugin, testPluginCommand, "testplugins");
     }

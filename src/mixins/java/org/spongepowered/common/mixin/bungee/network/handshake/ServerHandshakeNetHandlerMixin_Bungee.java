@@ -38,10 +38,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
 import org.spongepowered.common.accessor.network.NetworkManagerAccessor;
 import org.spongepowered.common.accessor.network.handshake.client.CHandshakePacketAccessor;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
 
 import java.net.InetSocketAddress;
 
@@ -65,7 +65,8 @@ public abstract class ServerHandshakeNetHandlerMixin_Bungee {
                 ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
 
                 if (split.length == 4) {
-                    ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setSpoofedProfile(gson.fromJson(split[3], Property[].class));
+                    ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setSpoofedProfile(ServerHandshakeNetHandlerMixin_Bungee.gson
+                        .fromJson(split[3], Property[].class));
                 }
             } else {
                 final StringTextComponent chatcomponenttext =

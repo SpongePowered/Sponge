@@ -41,13 +41,16 @@ public final class INameableData {
                 .asMutable(INameable.class)
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
+                    .create(Keys.CUSTOM_NAME)
+                        .get(h -> h.hasCustomName() ? SpongeAdventure.asAdventure(h.getCustomName()) : null)
                         .setAnd((h, v) -> {
                             if (h instanceof CustomNameableBridge) {
                                 ((CustomNameableBridge) h).bridge$setCustomDisplayName(SpongeAdventure.asVanilla(v));
                                 return true;
                             }
                             return false;
-                        });
+                        })
+        ;
     }
     // @formatter:on
 }

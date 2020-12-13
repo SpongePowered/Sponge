@@ -39,20 +39,15 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
@@ -62,22 +57,15 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
-import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionChangeResult;
 import org.spongepowered.common.world.portal.PortalHelper;
 import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
@@ -230,7 +218,7 @@ public final class EntityUtil {
         playerlist.sendWorldInfo(player, toWorld);
         playerlist.sendInventory(player);
 
-        for (EffectInstance effectinstance : player.getActivePotionEffects()) {
+        for (final EffectInstance effectinstance : player.getActivePotionEffects()) {
             player.connection.sendPacket(new SPlayEntityEffectPacket(player.getEntityId(), effectinstance));
         }
 
@@ -250,6 +238,10 @@ public final class EntityUtil {
             player.connection.captureCurrentPosition();
         }
 
+        if (player.openContainer != player.container) {
+            player.closeContainer();
+        }
+
         // Sponge Start - Call platform event hook after changing dimensions
         PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(player, fromWorld, originalToWorld);
         // Sponge End
@@ -267,13 +259,13 @@ public final class EntityUtil {
         boolean spawnedAny = false;
         for (final org.spongepowered.api.entity.Entity entity : event.getEntities()) {
             // Here is where we need to handle the custom items potentially having custom entities
-            spawnedAny = processEntitySpawn(entity, entityCreatorSupplier);
+            spawnedAny = EntityUtil.processEntitySpawn(entity, entityCreatorSupplier);
         }
         return spawnedAny;
     }
 
     public static boolean processEntitySpawnsFromEvent(final PhaseContext<?> context, final SpawnEntityEvent destruct) {
-        return processEntitySpawnsFromEvent(destruct, ENTITY_CREATOR_FUNCTION.apply(context));
+        return EntityUtil.processEntitySpawnsFromEvent(destruct, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
     }
 
     @SuppressWarnings("ConstantConditions")

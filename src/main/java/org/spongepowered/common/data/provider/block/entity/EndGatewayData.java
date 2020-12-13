@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.block.entity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.tileentity.EndGatewayTileEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 
 public final class EndGatewayData {
@@ -39,24 +40,26 @@ public final class EndGatewayData {
         registrator
                 .asMutable(EndGatewayTileEntityAccessor.class)
                     .create(Keys.COOLDOWN)
-                        .get(EndGatewayTileEntityAccessor::accessor$getTeleportCooldown)
+                        .get(x -> new SpongeTicks(x.accessor$getTeleportCooldown()))
                         .setAnd((h, v) -> {
-                            if (v < 0) {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0) {
                                 return false;
                             }
-                            h.accessor$setTeleportCooldown(v);
+                            h.accessor$setTeleportCooldown(ticks);
                             return true;
                         })
                     .create(Keys.DO_EXACT_TELEPORT)
                         .get(EndGatewayTileEntityAccessor::accessor$getExactTeleport)
                         .set(EndGatewayTileEntityAccessor::accessor$setExactTeleport)
                     .create(Keys.END_GATEWAY_AGE)
-                        .get(EndGatewayTileEntityAccessor::accessor$getAge)
+                        .get(x -> new SpongeTicks(x.accessor$getAge()))
                         .setAnd((h, v) -> {
-                            if (v < 0) {
+                            final long ticks = v.getTicks();
+                            if (ticks < 0) {
                                 return false;
                             }
-                            h.accessor$setAge(v);
+                            h.accessor$setAge(ticks);
                             return true;
                         })
                     .create(Keys.TARGET_POSITION)

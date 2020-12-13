@@ -30,6 +30,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
@@ -43,23 +44,23 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.hooks.SpongeHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.SpongeHooks;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,7 +82,7 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
         if (((WorldBridge) this.shadow$getWorld()).bridge$isFake()) {
             return;
         }
-        if (!PhaseTracker.getInstance().getCurrentState().tracksCreatorsAndNotifiers()) {
+        if (!PhaseTracker.getInstance().getPhaseContext().tracksCreatorsAndNotifiers()) {
             // Don't track chunk gen
             return;
         }
@@ -380,12 +381,12 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
                 .log(SpongeCommon.getLogger(), Level.ERROR);
             return;
         }
-        if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+        if (PhaseTracker.getInstance().getPhaseContext() == GenerationPhase.State.CHUNK_LOADING) {
             return;
         }
         GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)
             .source(this)
-            .world(this.shadow$getWorld())
+            .world((ServerWorld) this.shadow$getWorld())
             .chunk((net.minecraft.world.chunk.Chunk) (Object) this)
             .buildAndSwitch();
     }
@@ -393,7 +394,7 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
     @Inject(method = "setLoaded(Z)V", at = @At("RETURN"))
     private void tracker$endLoad(final boolean loaded, final CallbackInfo callbackInfo) {
         if (!((WorldBridge) this.shadow$getWorld()).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
-            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_LOADING) {
                 return;
             }
             // IF we're not on the main thread,

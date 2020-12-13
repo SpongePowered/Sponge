@@ -26,14 +26,27 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class WorldBlockChangeCompleteEffect implements ProcessingSideEffect{
+
+    private static final class Holder {
+        static final WorldBlockChangeCompleteEffect INSTANCE = new WorldBlockChangeCompleteEffect();
+    }
+
+    public static WorldBlockChangeCompleteEffect getInstance() {
+        return WorldBlockChangeCompleteEffect.Holder.INSTANCE;
+    }
+
+    WorldBlockChangeCompleteEffect() {}
+
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
-        pipeline.getServerWorld().onBlockStateChange(oldState.pos, oldState.state, newState);
-
+        if (flag.notifyPathfinding()) {
+            pipeline.getServerWorld().onBlockStateChange(oldState.pos, oldState.state, newState);
+        }
         return new EffectResult(oldState.state, true);
     }
 }

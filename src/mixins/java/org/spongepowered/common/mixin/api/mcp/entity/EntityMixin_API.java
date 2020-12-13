@@ -26,21 +26,22 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SPlayerPositionLookPacket;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
@@ -63,13 +64,14 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.entity.Entity.class)
 @Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$"))
@@ -101,6 +103,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
     @Shadow public abstract boolean shadow$writeUnlessRemoved(CompoundNBT compound);
+    @Shadow @Nullable public abstract ITextComponent shadow$getCustomName();
+    @Shadow public abstract ITextComponent shadow$getDisplayName();
 
     // @formatter:on
 
@@ -123,6 +127,15 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public boolean setLocation(ServerLocation location) {
         Preconditions.checkNotNull(location, "The location was null!");
         return ((EntityBridge) this).bridge$setLocation(location);
+    }
+
+    @Override
+    public boolean setLocationAndRotation(ServerLocation location, Vector3d rotation) {
+        if (this.setLocation(location)) {
+            this.setRotation(rotation);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -250,7 +263,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         final Transform transform = this.getTransform();
         final CompoundNBT compound = new CompoundNBT();
         this.shadow$writeUnlessRemoved(compound);
-        Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
@@ -271,12 +283,10 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 .set(Queries.POSITION_Y, transform.getScale().getY())
                 .set(Queries.POSITION_Z, transform.getScale().getZ())
                 .getContainer()
-                .set(Constants.Entity.TYPE, net.minecraft.entity.EntityType.getKey(this.type).toString())
+                .set(Constants.Entity.TYPE, this.getType().getKey())
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
-        // TODO - Custom data store
         return container;
     }
-
 
     @Override
     public org.spongepowered.api.entity.Entity copy() {
@@ -308,6 +318,16 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public Set<Value.Immutable<?>> getValues() {
         // TODO: Merge custom and Vanilla values and return the merged result.
         return this.api$getVanillaValues();
+    }
+
+    @Override
+    public EntitySnapshot createSnapshot() {
+        return EntitySnapshot.builder().from(this).build();
+    }
+
+    @Override
+    public EntityArchetype createArchetype() {
+        return EntityArchetype.builder().from(this).build();
     }
 
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

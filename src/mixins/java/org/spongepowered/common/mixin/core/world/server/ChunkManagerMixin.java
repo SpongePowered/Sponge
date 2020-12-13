@@ -24,37 +24,73 @@
  */
 package org.spongepowered.common.mixin.core.world.server;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.village.PointOfInterestManager;
+import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.chunk.storage.ChunkSerializer;
 import net.minecraft.world.server.ChunkManager;
+import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+
+import java.io.IOException;
+
+import javax.annotation.Nullable;
 
 @Mixin(ChunkManager.class)
 public abstract class ChunkManagerMixin {
 
-    @Inject(method = "track(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"), cancellable = true)
-    private void onAddEntityToTracker(final Entity entityIn, final CallbackInfo ci) {
-        if (!SpongeCommon.getServer().isServerStopped() && !SpongeCommon.getServer().isOnExecutionThread()) {
-            Thread.dumpStack();
-            SpongeCommon.getLogger().error("Detected attempt to add entity '" + entityIn + "' to tracker asynchronously.\n"
-                    + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
-                    + " Skipping...");
-            ci.cancel();
+    // @formatter:off
+    @Shadow @Final private ServerWorld world;
+    @Shadow protected abstract boolean shadow$chunkSave(IChunk chunkIn);
+    @Shadow @Nullable protected abstract CompoundNBT loadChunkData(ChunkPos pos) throws IOException;
+    // @formatter:on
+
+    @Redirect(method = "chunkSave", at = @At(value = "INVOKE", target = "Lnet/minecraft/village/PointOfInterestManager;saveIfDirty(Lnet/minecraft/util/math/ChunkPos;)V"))
+    private void impl$useSerializationBehaviorForPOI(PointOfInterestManager pointOfInterestManager, ChunkPos p_219112_1_) {
+        final WorldInfoBridge infoBridge = (WorldInfoBridge) this.world.getWorldInfo();
+        final SerializationBehavior serializationBehavior = infoBridge.bridge$getSerializationBehavior();
+        if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
+            pointOfInterestManager.saveIfDirty(p_219112_1_);
         }
     }
 
-    @Inject(method = "untrack", at = @At("HEAD"), cancellable = true)
-    private void impl$onUntrackEntity(final Entity entityIn, final CallbackInfo ci) {
-        if (!SpongeCommon.getServer().isServerStopped() && !SpongeCommon.getServer().isOnExecutionThread() ) {
-            Thread.dumpStack();
-            SpongeCommon.getLogger().error("Detected attempt to untrack entity '" + entityIn + "' asynchronously.\n"
-                    + "This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
-                    + " Skipping...");
-            ci.cancel();
+    @Redirect(method = "chunkSave", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ChunkManager;loadChunkData(Lnet/minecraft/util/math/ChunkPos;)Lnet/minecraft/nbt/CompoundNBT;"))
+    private CompoundNBT impl$useSerializationBehaviorForChunkSave(ChunkManager chunkManager, ChunkPos pos) throws IOException {
+        final WorldInfoBridge infoBridge = (WorldInfoBridge) this.world.getWorldInfo();
+        final SerializationBehavior serializationBehavior = infoBridge.bridge$getSerializationBehavior();
+        if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
+            return this.loadChunkData(pos);
         }
+
+        // Returning null will cause the saveChunk to return false whose return value is ignored in Vanilla but is ultimately the truth...we do not
+        // save
+        return null;
     }
 
+    @Redirect(method = "chunkSave", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/storage/ChunkSerializer;write(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/world/chunk/IChunk;)Lnet/minecraft/nbt/CompoundNBT;"))
+    private CompoundNBT impl$useSerializationBehaviorForChunkSave(ServerWorld worldIn, IChunk chunkIn) {
+        final WorldInfoBridge infoBridge = (WorldInfoBridge) worldIn.getWorldInfo();
+        final SerializationBehavior serializationBehavior = infoBridge.bridge$getSerializationBehavior();
+        if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
+            return ChunkSerializer.write(worldIn, chunkIn);
+        }
+
+        return null;
+    }
+
+    @Redirect(method = "chunkSave", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ChunkManager;writeChunk(Lnet/minecraft/util/math/ChunkPos;Lnet/minecraft/nbt/CompoundNBT;)V"))
+    private void impl$doNotWriteIfWeHaveNoData(ChunkManager chunkManager, ChunkPos pos, CompoundNBT compound) {
+        if (compound == null) {
+            return;
+        }
+
+        chunkManager.writeChunk(pos, compound);
+    }
 }

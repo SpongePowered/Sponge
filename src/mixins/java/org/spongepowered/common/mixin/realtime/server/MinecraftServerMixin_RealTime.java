@@ -40,15 +40,15 @@ public abstract class MinecraftServerMixin_RealTime implements RealTimeTrackingB
     @Inject(method = "tick", at = @At("HEAD"))
     private void realTimeImpl$adjustTickForRealTimeTicks(final CallbackInfo ci) {
         final long currentNanos = System.nanoTime();
-        realTimeTicks = (currentNanos - lastTickNanos) / 50000000;
-        if (realTimeTicks < 1) {
-            realTimeTicks = 1;
+        MinecraftServerMixin_RealTime.realTimeTicks = (currentNanos - MinecraftServerMixin_RealTime.lastTickNanos) / 50000000;
+        if (MinecraftServerMixin_RealTime.realTimeTicks < 1) {
+            MinecraftServerMixin_RealTime.realTimeTicks = 1;
         }
-        lastTickNanos = currentNanos;
+        MinecraftServerMixin_RealTime.lastTickNanos = currentNanos;
     }
 
     @Override
     public long realTimeBridge$getRealTimeTicks() {
-        return realTimeTicks;
+        return MinecraftServerMixin_RealTime.realTimeTicks;
     }
 }

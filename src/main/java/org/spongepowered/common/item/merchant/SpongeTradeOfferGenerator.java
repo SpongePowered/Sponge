@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.item.merchant;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
-import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
 
-import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Random;
 
 public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
@@ -48,6 +49,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
     final double experience;
     final VariableAmount baseUses;
     final VariableAmount maxUses;
+    final VariableAmount grantedExperience;
 
     SpongeTradeOfferGenerator(final org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator.Builder builder) {
         this.firstItemGenerator = builder.firstGenerator;
@@ -56,18 +58,22 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
         this.experience = builder.experience;
         this.baseUses = builder.baseUses;
         this.maxUses = builder.maxUses;
+        this.grantedExperience = builder.grantedExperience == null ? VariableAmount.fixed(0) : builder.grantedExperience;
     }
 
     @Override
-    public TradeOffer apply(final Random random, final Merchant merchant) {
-        checkNotNull(random, "Random cannot be null!");
+    public TradeOffer apply(final Entity merchant, final Random random) {
+        Objects.requireNonNull(random, "Random cannot be null!");
         final TradeOffer.Builder builder = TradeOffer.builder();
         builder.firstBuyingItem(this.firstItemGenerator.apply(random));
         if (this.secondItemGenerator != null) {
             builder.secondBuyingItem(this.secondItemGenerator.apply(random));
         }
         builder.sellingItem(this.sellingItemGenerator.apply(random));
-        builder.canGrantExperience(random.nextDouble() < this.experience);
+        if (random.nextDouble() < this.experience) {
+            builder.merchantExperienceGranted(this.grantedExperience.getFlooredAmount(random));
+        }
+
         builder.uses(this.baseUses.getFlooredAmount(random));
         builder.maxUses(this.maxUses.getFlooredAmount(random));
         return builder.build();
@@ -76,28 +82,29 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
     // basically, should be able to just prattle on with BiConsumers
     public static final class Builder implements TradeOfferGenerator.Builder {
 
-        ItemStackGenerator firstGenerator;
+        @MonotonicNonNull ItemStackGenerator firstGenerator;
         @Nullable ItemStackGenerator secondGenerator;
-        ItemStackGenerator sellingGenerator;
+        @MonotonicNonNull ItemStackGenerator sellingGenerator;
         double experience;
-        VariableAmount baseUses;
-        VariableAmount maxUses;
+        @MonotonicNonNull VariableAmount baseUses;
+        @MonotonicNonNull VariableAmount maxUses;
+        @Nullable VariableAmount grantedExperience;
 
         @Override
-        public TradeOfferGenerator.Builder setPrimaryItemGenerator(final ItemStackGenerator generator) {
-            this.firstGenerator = checkNotNull(generator, "ItemStackGenerator cannot be null!");
+        public TradeOfferGenerator.Builder firstBuyingItemGenerator(final ItemStackGenerator generator) {
+            this.firstGenerator = Objects.requireNonNull(generator, "ItemStackGenerator cannot be null!");
             return this;
         }
 
         @Override
-        public TradeOfferGenerator.Builder setSecondItemGenerator(@Nullable final ItemStackGenerator generator) {
+        public TradeOfferGenerator.Builder secondBuyingItemGenerator(@Nullable final ItemStackGenerator generator) {
             this.secondGenerator = generator;
             return this;
         }
 
         @Override
-        public TradeOfferGenerator.Builder setSellingGenerator(final ItemStackGenerator sellingGenerator) {
-            this.sellingGenerator = checkNotNull(sellingGenerator, "ItemStackGenerator cannot be null!");
+        public TradeOfferGenerator.Builder sellingItemGenerator(final ItemStackGenerator sellingGenerator) {
+            this.sellingGenerator = Objects.requireNonNull(sellingGenerator, "ItemStackGenerator cannot be null!");
             return this;
         }
 
@@ -108,14 +115,20 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
         }
 
         @Override
+        public TradeOfferGenerator.Builder grantedExperience(VariableAmount amount) {
+            this.grantedExperience = Objects.requireNonNull(amount, "Granted experience cannot be null");
+            return this;
+        }
+
+        @Override
         public TradeOfferGenerator.Builder startingUses(final VariableAmount amount) {
-            this.baseUses = checkNotNull(amount, "Variable amount cannot be null!");
+            this.baseUses = Objects.requireNonNull(amount, "Variable amount cannot be null!");
             return this;
         }
 
         @Override
         public TradeOfferGenerator.Builder maxUses(final VariableAmount amount) {
-            this.maxUses = checkNotNull(amount, "Variable amount cannot be null!");
+            this.maxUses = Objects.requireNonNull(amount, "Variable amount cannot be null!");
             return this;
         }
 
@@ -152,6 +165,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
             this.experience = 0.5D;
             this.baseUses = null;
             this.maxUses = null;
+            this.grantedExperience = null;
             return this;
         }
     }

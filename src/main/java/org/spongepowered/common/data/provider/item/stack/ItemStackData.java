@@ -48,8 +48,8 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.accessor.item.ToolItemAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.NbtCollectors;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.NBTCollectors;
 
 import java.util.List;
 import java.util.Set;
@@ -113,20 +113,36 @@ public final class ItemStackData {
                             }
                             return SpongeAdventure.asAdventure(h.getDisplayName());
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             if (h.getItem() == Items.WRITTEN_BOOK) {
                                 final String legacy = SpongeAdventure.legacySection(v);
                                 h.setTagInfo(Constants.Item.Book.ITEM_BOOK_TITLE, StringNBT.valueOf(legacy));
-                            } else {
-                                h.setDisplayName(SpongeAdventure.asVanilla(v));
+                                return true;
                             }
+                            return false;
+                        })
+                    .create(Keys.CUSTOM_MODEL_DATA)
+                        .get(h -> {
+                            final CompoundNBT tag = h.getTag();
+                            if (tag == null || !tag.contains(Constants.Item.CUSTOM_MODEL_DATA, Constants.NBT.TAG_INT)) {
+                                return null;
+                            }
+                            return tag.getInt(Constants.Item.CUSTOM_MODEL_DATA);
+                        })
+                        .set((h, v) -> {
+                            final CompoundNBT tag = h.getOrCreateTag();
+                            tag.putInt(Constants.Item.CUSTOM_MODEL_DATA, v);
                         })
                         .delete(h -> {
-                            final CompoundNBT tag = h.getChildTag(Constants.Item.ITEM_DISPLAY);
+                            final CompoundNBT tag = h.getTag();
                             if (tag != null) {
-                                tag.remove(Constants.Item.ITEM_DISPLAY_NAME);
+                                tag.remove(Constants.Item.CUSTOM_MODEL_DATA);
                             }
                         })
+                    .create(Keys.CUSTOM_NAME)
+                        .get(h -> h.hasDisplayName() ? SpongeAdventure.asAdventure(h.getDisplayName()) : null)
+                        .set((h, v) -> h.setDisplayName(SpongeAdventure.asVanilla(v)))
+                        .delete(ItemStack::clearCustomName)
                     .create(Keys.IS_UNBREAKABLE)
                         .get(h -> {
                             final CompoundNBT tag = h.getTag();
@@ -136,7 +152,7 @@ public final class ItemStackData {
                             return tag.getBoolean(Constants.Item.ITEM_UNBREAKABLE);
                         })
                         .set(ItemStackData::setIsUnbrekable)
-                        .delete(h -> setIsUnbrekable(h, false))
+                        .delete(h -> ItemStackData.setIsUnbrekable(h, false))
                     .create(Keys.LORE)
                         .get(h -> {
                             final CompoundNBT tag = h.getTag();
@@ -145,11 +161,11 @@ public final class ItemStackData {
                             }
 
                             final ListNBT list = tag.getList(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
-                            return list.isEmpty() ? null : SpongeAdventure.json(list.stream().collect(NbtCollectors.toStringList()));
+                            return list.isEmpty() ? null : SpongeAdventure.json(list.stream().collect(NBTCollectors.toStringList()));
                         })
                         .set((h, v) -> {
                             if (v.isEmpty()) {
-                                deleteLore(h);
+                                ItemStackData.deleteLore(h);
                                 return;
                             }
                             final ListNBT list = SpongeAdventure.listTagJson(v);
@@ -160,8 +176,8 @@ public final class ItemStackData {
                         .get(h -> h.getItem().isDamageable() ? h.getItem().getMaxDamage() : null)
                         .supports(h -> h.getItem().isDamageable())
                     .create(Keys.ITEM_DURABILITY)
-                        .get(ItemStack::getDamage)
-                        .set(ItemStack::setDamage)
+                        .get(stack -> stack.getMaxDamage() - stack.getDamage())
+                        .set((stack, durability) -> stack.setDamage(stack.getMaxDamage() - durability))
                         .supports(h -> h.getItem().isDamageable())
                     .create(Keys.REPLENISHED_FOOD)
                         .get(h -> {

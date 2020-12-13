@@ -39,9 +39,8 @@ import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.UUID;
-
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 public class ProjectileSourceSerializer {
 
@@ -82,7 +81,7 @@ public class ProjectileSourceSerializer {
         if (projectileSource == null && potentialEntity instanceof ProjectileSource) {
             projectileSource = (ProjectileSource) potentialEntity;
         }
-        final INBT projectileNbt = toNbt(projectileSource);
+        final INBT projectileNbt = ProjectileSourceSerializer.toNbt(projectileSource);
         if (projectileNbt != null) {
             compound.put(Constants.Sponge.Entity.Projectile.PROJECTILE_SOURCE, projectileNbt);
         }
@@ -93,7 +92,7 @@ public class ProjectileSourceSerializer {
         if (projectileSource == null && entityUid != null) {
             projectileNbt = StringNBT.valueOf(entityUid.toString());
         } else {
-            projectileNbt = toNbt(projectileSource);
+            projectileNbt = ProjectileSourceSerializer.toNbt(projectileSource);
         }
         if (projectileNbt != null) {
             compound.put(Constants.Sponge.Entity.Projectile.PROJECTILE_SOURCE, projectileNbt);
@@ -102,7 +101,8 @@ public class ProjectileSourceSerializer {
 
     public static void readSourceFromNbt(final CompoundNBT compound, final Projectile projectile) {
         if (compound.contains(Constants.Sponge.Entity.Projectile.PROJECTILE_SOURCE)) {
-            projectile.offer(Keys.SHOOTER, fromNbt((World) projectile.getWorld(), compound.get(Constants.Sponge.Entity.Projectile.PROJECTILE_SOURCE)));
+            projectile.offer(Keys.SHOOTER,
+                ProjectileSourceSerializer.fromNbt((World) projectile.getWorld(), compound.get(Constants.Sponge.Entity.Projectile.PROJECTILE_SOURCE)));
         }
     }
 }

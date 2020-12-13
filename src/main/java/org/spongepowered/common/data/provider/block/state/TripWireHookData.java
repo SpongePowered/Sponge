@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.TripWireHookBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class TripWireHookData {
 
@@ -40,8 +40,8 @@ public final class TripWireHookData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(TripWireHookBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, TripWireHookBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.get(TripWireHookBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, TripWireHookBlock.FACING))
                         .supports(h -> h.getBlock() instanceof TripWireHookBlock)
                     .create(Keys.IS_ATTACHED)
                         .get(h -> h.get(TripWireHookBlock.ATTACHED))

@@ -47,9 +47,12 @@ import java.util.Objects;
 public final class PlatformHooks {
 
     private static final PlatformHooks instance = new PlatformHooks();
+
     private DimensionHooks dimensionHooks = new DimensionHooks() {};
     private EventHooks eventHooks = new EventHooks() {};
+    private GeneralHooks generalHooks = new GeneralHooks() {};
     private PacketHooks packetHooks = new PacketHooks() {};
+    private WorldGenerationHooks worldGenerationHooks = new WorldGenerationHooks() {};
 
     public static PlatformHooks getInstance() {
         return PlatformHooks.instance;
@@ -75,7 +78,23 @@ public final class PlatformHooks {
         return this.packetHooks;
     }
 
-    public void setPacketHooks(PacketHooks packetHooks) {
+    public void setPacketHooks(final PacketHooks packetHooks) {
         this.packetHooks = Objects.requireNonNull(packetHooks);
+    }
+
+    public GeneralHooks getGeneralHooks() {
+        return this.generalHooks;
+    }
+
+    public void setGeneralHooks(final GeneralHooks generalHooks) {
+        this.generalHooks = Objects.requireNonNull(generalHooks);
+    }
+
+    public WorldGenerationHooks getWorldGenerationHooks() {
+        return this.worldGenerationHooks;
+    }
+
+    public void setWorldGenerationHooks(final WorldGenerationHooks worldGenerationHooks) {
+        this.worldGenerationHooks = Objects.requireNonNull(worldGenerationHooks);
     }
 }

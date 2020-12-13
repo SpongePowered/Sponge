@@ -30,9 +30,7 @@ import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.entity.UserInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.entity.player.SpongeUserInventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -41,28 +39,22 @@ import org.spongepowered.common.inventory.adapter.impl.comp.PrimaryPlayerInvento
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
-@SuppressWarnings("rawtypes")
-@Mixin(SpongeUserInventory.class)
+import javax.annotation.Nullable;
+
+@Mixin(value = SpongeUserInventory.class, remap = false)
 public abstract class SpongeUserInventoryMixin_Inventory_API implements UserInventory, InventoryAdapter {
 
-    @Nullable private User impl$carrier;
+    @Shadow public SpongeUser user;
     @Nullable private PrimaryPlayerInventoryAdapter impl$grid;
     @Nullable private EquipmentInventoryAdapter impl$armor;
     @Nullable private EquipmentInventoryAdapter impl$equipment;
     @Nullable private SlotAdapter impl$offhand;
 
-    @SuppressWarnings("unchecked")
-    @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
-    private void onConstructed(final SpongeUser playerIn, final CallbackInfo ci) {
-        this.impl$carrier = playerIn;
-    }
-
     @Override
     public Optional<User> getCarrier() {
-        return Optional.ofNullable(this.impl$carrier);
+        return Optional.ofNullable(this.user);
     }
 
     @Override

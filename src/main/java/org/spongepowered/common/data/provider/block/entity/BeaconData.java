@@ -44,14 +44,14 @@ public final class BeaconData {
         registrator
                 .asMutable(BeaconTileEntity.class)
                     .create(Keys.PRIMARY_POTION_EFFECT_TYPE)
-                        .get(h -> get(h, BeaconTileEntityAccessor::accessor$getPrimaryEffect))
-                        .setAnd((h, v) -> set(h, v, BeaconTileEntityAccessor::accessor$setPrimaryEffect))
-                        .deleteAnd(h -> delete(h, BeaconTileEntityAccessor::accessor$getPrimaryEffect,
+                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$getPrimaryEffect))
+                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$setPrimaryEffect))
+                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$getPrimaryEffect,
                                 BeaconTileEntityAccessor::accessor$setPrimaryEffect))
                     .create(Keys.SECONDARY_POTION_EFFECT_TYPE)
-                        .get(h -> get(h, BeaconTileEntityAccessor::accessor$getSecondaryEffect))
-                        .setAnd((h, v) -> set(h, v, BeaconTileEntityAccessor::accessor$setSecondaryEffect))
-                        .deleteAnd(h -> delete(h, BeaconTileEntityAccessor::accessor$getSecondaryEffect,
+                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$getSecondaryEffect))
+                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$setSecondaryEffect))
+                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$getSecondaryEffect,
                                 BeaconTileEntityAccessor::accessor$setSecondaryEffect));
     }
     // @formatter:on

@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Singleton
 public final class VanillaPluginManager implements SpongePluginManager {
@@ -132,12 +133,14 @@ public final class VanillaPluginManager implements SpongePluginManager {
 
                 try {
                     pluginLoader.loadPlugin(engine.getPluginEnvironment(), plugin, VanillaLaunch.getInstance().getClass().getClassLoader());
-                    engine.getPluginEnvironment().getLogger().info("Loaded plugin '{}'", plugin.getMetadata().getId());
                     this.addPlugin(plugin);
                 } catch (final InvalidPluginException e) {
                     e.printStackTrace();
                 }
             }
         }
+
+        engine.getPluginEnvironment().getLogger().info("Loaded plugin(s): {}",
+                this.sortedPlugins.stream().map(p -> p.getMetadata().getId()).collect(Collectors.toList()));
     }
 }

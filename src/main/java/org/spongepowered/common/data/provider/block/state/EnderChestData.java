@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.EnderChestBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class EnderChestData {
 
@@ -40,8 +40,8 @@ public final class EnderChestData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(EnderChestBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, EnderChestBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.get(EnderChestBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, EnderChestBlock.FACING))
                         .supports(h -> h.getBlock() instanceof EnderChestBlock)
                     .create(Keys.IS_WATERLOGGED)
                         .get(h -> h.get(EnderChestBlock.WATERLOGGED))

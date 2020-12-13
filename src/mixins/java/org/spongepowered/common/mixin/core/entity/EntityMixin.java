@@ -25,15 +25,20 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import co.aikar.timings.Timing;
-import net.kyori.adventure.text.Component;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.material.Material;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -47,11 +52,13 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.entity.DismountType;
 import org.spongepowered.api.event.cause.entity.DismountTypes;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -64,9 +71,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
@@ -74,32 +82,36 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.provider.nbt.NBTDataType;
+import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionChangeResult;
 import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
-
-import javax.annotation.Nullable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, InvulnerableTrackedBridge,
         TimingBridge, CommandSourceProviderBridge, DataCompoundHolder {
 
     // @formatter:off
-
     @Shadow public net.minecraft.world.World world;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
+    @Shadow public int hurtResistantTime;
     @Shadow public boolean removed;
     @Shadow public float prevDistanceWalkedModified;
     @Shadow public float distanceWalkedModified;
@@ -109,12 +121,15 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public float prevRotationYaw;
     @Shadow protected int portalCounter;
     @Shadow public boolean collided;
+    @Shadow @Nullable private Entity ridingEntity;
+    @Shadow @Final private List<Entity> passengers;
+    @Shadow public boolean onGround;
+    @Shadow public float fallDistance;
 
     @Shadow public abstract void shadow$setPosition(double x, double y, double z);
     @Shadow public abstract double shadow$getPosX();
     @Shadow public abstract double shadow$getPosZ();
     @Shadow public abstract double shadow$getPosY();
-
     @Shadow public abstract void shadow$remove();
     @Shadow public abstract void shadow$setCustomName(@Nullable ITextComponent name);
     @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
@@ -138,6 +153,21 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract Vec3d shadow$getPositionVector();
     @Shadow public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract void shadow$setWorld(World worldIn);
+    @Shadow @Nullable public abstract ItemEntity shadow$entityDropItem(ItemStack stack, float offsetY);
+    @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow @Nullable public abstract Entity shadow$getRidingEntity();
+    @Shadow public abstract boolean shadow$isInvulnerableTo(DamageSource source);
+    @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
+    @Shadow public abstract boolean shadow$isSprinting();
+    @Shadow public abstract boolean shadow$isOnSameTeam(Entity entityIn);
+    @Shadow public abstract double shadow$getDistanceSq(Entity entityIn);
+    @Shadow public abstract SoundCategory shadow$getSoundCategory();
+    @Shadow @Nullable public abstract Team shadow$getTeam();
+    @Shadow public abstract void shadow$extinguish();
+    @Shadow protected abstract void shadow$setFlag(int flag, boolean set);
+    @Shadow public abstract EntityDataManager shadow$getDataManager();
+    @Shadow public abstract void shadow$setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
+    // @formatter:on
 
     private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
@@ -145,14 +175,26 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private boolean impl$pendingVisibilityUpdate = false;
     private int impl$visibilityTicks = 0;
     private boolean impl$collision = true;
-    private Component impl$displayName;
-    private boolean impl$skipSettingCustomNameTag;
     private boolean impl$invulnerable = false;
     private boolean impl$transient = false;
     protected boolean impl$hasCustomFireImmuneTicks = false;
     protected short impl$fireImmuneTicks = 0;
 
-    // @formatter:on
+    // When changing custom data it is serialized on to this.
+    // On writeInternal the SpongeData tag is added to the new CompoundNBT accordingly
+    // In a Forge environment the ForgeData tag is managed by forge
+    // Structure: tileNbt - ForgeData - SpongeData - customdata
+    private CompoundNBT impl$customDataCompound;
+
+    @Override
+    public boolean bridge$isConstructing() {
+        return this.impl$isConstructing;
+    }
+
+    @Override
+    public void bridge$fireConstructors() {
+        this.impl$isConstructing = false;
+    }
 
     @Override
     public boolean bridge$setLocation(final ServerLocation location) {
@@ -226,6 +268,149 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return true;
     }
 
+    @Override
+    public boolean bridge$dismountRidingEntity(final DismountType type) {
+        if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(this);
+                frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
+                if (SpongeCommon.postEvent(SpongeEventFactory.
+                        createRideEntityEventDismount(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this.shadow$getRidingEntity()))) {
+                    return false;
+                }
+            }
+        }
+
+        final Entity tempEntity = this.shadow$getRidingEntity();
+        if (tempEntity != null) {
+            this.ridingEntity = null;
+            ((EntityAccessor) tempEntity).accessor$removePassenger((Entity) (Object) this);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean bridge$removePassengers(final DismountType type) {
+        boolean dismount = false;
+        for (int i = this.passengers.size() - 1; i >= 0; --i) {
+            dismount = ((EntityBridge) this.passengers.get(i)).bridge$dismountRidingEntity(type) || dismount;
+        }
+        return dismount;
+    }
+
+    @Override
+    public boolean bridge$getIsInvulnerable() {
+        return this.impl$invulnerable;
+    }
+
+    @Override
+    public boolean bridge$isInvisible() {
+        return this.shadow$isInvisible();
+    }
+
+    @Override
+    public void bridge$setInvisible(final boolean invisible) {
+        this.shadow$setInvisible(invisible);
+        if (invisible) {
+            final CompoundNBT spongeData = this.data$getSpongeData();
+            spongeData.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
+        } else {
+            if (this.data$hasSpongeData()) {
+                this.data$getSpongeData().remove(Constants.Sponge.Entity.IS_INVISIBLE);
+            }
+        }
+    }
+
+    @Override
+    public boolean bridge$isVanished() {
+        return this.impl$isVanished;
+    }
+
+    @Override
+    public void bridge$setVanished(final boolean vanished) {
+        this.impl$isVanished = vanished;
+        this.impl$pendingVisibilityUpdate = true;
+        this.impl$visibilityTicks = 20;
+        if (vanished) {
+            final CompoundNBT spongeData = this.data$getSpongeData();
+            spongeData.putBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
+        } else {
+            if (this.data$hasSpongeData()) {
+                final CompoundNBT spongeData = this.data$getSpongeData();
+                spongeData.remove(Constants.Sponge.Entity.IS_VANISHED);
+                spongeData.remove(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
+                spongeData.remove(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
+            }
+        }
+    }
+
+    @Override
+    public boolean bridge$isUncollideable() {
+        return this.impl$collision;
+    }
+
+    @Override
+    public void bridge$setUncollideable(final boolean prevents) {
+        this.impl$collision = prevents;
+    }
+
+    @Override
+    public boolean bridge$isUntargetable() {
+        return this.impl$untargetable;
+    }
+
+    @Override
+    public void bridge$setUntargetable(final boolean untargetable) {
+        this.impl$untargetable = untargetable;
+    }
+
+    @Override
+    public Timing bridge$getTimingsHandler() {
+        return ((EntityTypeBridge) this.shadow$getType()).bridge$getTimings();
+    }
+
+    @Override
+    public void bridge$setInvulnerable(final boolean value) {
+        this.impl$invulnerable = value;
+    }
+
+    @Override
+    public void bridge$setTransient(final boolean value) {
+        this.impl$transient = value;
+    }
+
+    @Override
+    public void bridge$setFireImmuneTicks(final int ticks) {
+        this.impl$hasCustomFireImmuneTicks = true;
+        this.impl$fireImmuneTicks = (short) ticks;
+    }
+
+    @Override
+    public CommandSource bridge$getCommandSource(final Cause cause) {
+        return this.shadow$getCommandSource();
+    }
+
+    @Override
+    public void bridge$setTransform(final Transform transform) {
+        this.shadow$setPosition(transform.getPosition().getX(), transform.getPosition().getY(), transform.getPosition().getZ());
+        this.shadow$setRotation((float) transform.getYaw(), (float) transform.getPitch());
+    }
+
+    @Override
+    public CompoundNBT data$getCompound() {
+        return this.impl$customDataCompound;
+    }
+
+    @Override
+    public void data$setCompound(CompoundNBT nbt) {
+        this.impl$customDataCompound = nbt;
+    }
+
+    @Override
+    public NBTDataType data$getNBTDataType() {
+        return NBTDataTypes.ENTITY;
+    }
+
     /**
      * @author Zidane
      * @reason This is a catch-all method to ensure MoveEntityEvent is fired with
@@ -234,6 +419,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Overwrite
     public final void teleportKeepLoaded(double x, double y, double z) {
         if (this.world instanceof net.minecraft.world.server.ServerWorld) {
+            // Sponge start
             final PhaseTracker server = PhaseTracker.SERVER;
             boolean hasMovementContext = true;
             if (!server.getCurrentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
@@ -256,6 +442,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
 
             final Vector3d destinationPosition = event.getDestinationPosition();
+            // Sponge end
             ChunkPos chunkpos = new ChunkPos(new BlockPos(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ()));
             ((net.minecraft.world.server.ServerWorld)this.world).getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkpos, 0,
                     this.shadow$getEntityId());
@@ -290,18 +477,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
-    @Override
-    public boolean bridge$isConstructing() {
-        return this.impl$isConstructing;
-    }
-
-    @Override
-    public void bridge$fireConstructors() {
-        this.impl$isConstructing = false;
-    }
-/*
-
-
     @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z",
         at = @At(
             value = "FIELD",
@@ -321,54 +496,22 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
-    */
-/**
+    /**
      * @author rexbut - December 16th, 2016
      * @reason - adjusted to support {@link DismountTypes}
-     *//*
-
+     */
     @Overwrite
     public void stopRiding() {
-        if (this.ridingEntity != null) {
-            if (this.getRidingEntity().removed) {
-                this.impl$dismountRidingEntity(DismountTypes.DEATH.get());
+        if (this.shadow$getRidingEntity() != null) {
+            if (this.shadow$getRidingEntity().removed) {
+                this.bridge$dismountRidingEntity(DismountTypes.DEATH.get());
             } else {
-                this.impl$dismountRidingEntity(DismountTypes.PLAYER.get());
+                this.bridge$dismountRidingEntity(DismountTypes.PLAYER.get());
             }
         }
     }
 
-    @SuppressWarnings("ConstantConditions")
-    private boolean impl$dismountRidingEntity(final DismountType type) {
-        if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(this);
-                frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
-                if (SpongeCommon.postEvent(SpongeEventFactory.
-                    createRideEntityEventDismount(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this.getRidingEntity()))) {
-                    return false;
-                }
-            }
-        }
-
-        if (this.ridingEntity != null) {
-            final EntityMixin entity = (EntityMixin) (Object) this.ridingEntity;
-            this.ridingEntity = null;
-            entity.shadow$removePassenger((Entity) (Object) this);
-        }
-        return true;
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public boolean bridge$removePassengers(final DismountType type) {
-        boolean dismount = false;
-        for (int i = this.passengers.size() - 1; i >= 0; --i) {
-            dismount = ((EntityMixin) (Object) this.passengers.get(i)).impl$dismountRidingEntity(type) || dismount;
-        }
-        return dismount;
-    }
-
+/*
     @Inject(method = "move",
         at = @At("HEAD"),
         cancellable = true)
@@ -377,7 +520,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             ci.cancel();
         }
     }
-
+*/
     @Redirect(method = "setOnFireFromLava",
         at = @At(
             value = "INVOKE",
@@ -427,6 +570,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     }
 
+    /*
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "setPosition",
         at = @At("HEAD"))
@@ -480,11 +624,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     */
 
-    @Override
-    public boolean bridge$getIsInvulnerable() {
-        return this.impl$invulnerable;
-    }
-
     /**
      * Hooks into vanilla's writeToNBT to call {@link #impl$writeToSpongeCompound}.
      *
@@ -502,83 +641,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         this.impl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
     }
 
-    */
-    /**
-     * Hooks into vanilla's readFromNBT to call {@link #impl$readFromSpongeCompound}.
-     *
-     * <p> This makes it easier for other entity mixins to override readSpongeNBT
-     * without having to specify the <code>@Inject</code> annotation. </p>
-     *
-     * @param compound The compound vanilla reads from (unused because we read
-     *     from SpongeData)
-     * @param ci (Unused) callback info
-     *//*
-
-    @Inject(method = "read(Lnet/minecraft/nbt/CompoundNBT;)V",
-        at = @At("RETURN"))
-    private void impl$spongeReadFromNBT(final CompoundNBT compound, final CallbackInfo ci) {
-        if (this.impl$isConstructing) {
-            this.bridge$fireConstructors(); // Do this early as possible
-        }
-        this.impl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
-    }
-
-    */
-    /**
-     * Read extra data (SpongeData) from the entity's NBT tag. This is
-     * meant to be overridden for each impl based mixin that has to store
-     * custom fields based on it's implementation. Examples can include:
-     * vanishing booleans, maximum air, maximum boat speeds and modifiers,
-     * etc.
-     *
-     * @param compound The SpongeData compound to read from
-     */
-
-    protected void impl$readFromSpongeCompound(final CompoundNBT compound) {
-        SpongeDataManager.getInstance().deserializeCustomData(compound, this);
-
-        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.contains(Constants.Sponge.Entity.CAN_GRIEF)) {
-            ((GrieferBridge) this).bridge$setCanGrief(compound.getBoolean(Constants.Sponge.Entity.CAN_GRIEF));
-        }
-        if (compound.contains(Constants.Sponge.Entity.IS_VANISHED, Constants.NBT.TAG_BYTE)) {
-            this.bridge$setVanished(compound.getBoolean(Constants.Sponge.Entity.IS_VANISHED));
-            this.bridge$setUncollideable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE));
-            this.bridge$setUntargetable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE));
-        }
-        if (compound.contains(Constants.Sponge.Entity.IS_INVISIBLE, Constants.NBT.TAG_BYTE)) {
-            this.bridge$setInvisible(compound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE));
-        }
-
-        SpongeDataManager.getInstance().syncCustomToTag(this);
-    }
-
-
-    /**
-     * Write extra data (SpongeData) to the entity's NBT tag. This is
-     * meant to be overridden for each impl based mixin that has to store
-     * custom fields based on it's implementation. Examples can include:
-     * vanishing booleans, maximum air, maximum boat speeds and modifiers,
-     * etc.
-     *
-     * @param compound The SpongeData compound to write to
-     */
-
-    protected void impl$writeToSpongeCompound(final CompoundNBT compound) {
-        SpongeDataManager.getInstance().serializeCustomData(compound, this);
-
-        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && ((GrieferBridge) this).bridge$canGrief()) {
-            compound.putBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
-        }
-        if (this.bridge$isVanished()) {
-            compound.putBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
-            compound.putBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, this.bridge$isUncollideable());
-            compound.putBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, this.bridge$isUntargetable());
-        }
-        if (this.shadow$isInvisible()) {
-            compound.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
-        }
-    }
-/*
     @Override
     public void bridge$setImplVelocity(final Vector3d velocity) {
         this.motion = VecHelper.toVec3d(velocity);
@@ -655,67 +717,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 */
 
-    @Override
-    public boolean bridge$isInvisible() {
-        return this.shadow$isInvisible();
-    }
-
-    @Override
-    public void bridge$setInvisible(final boolean invisible) {
-        this.shadow$setInvisible(invisible);
-        if (invisible) {
-            final CompoundNBT spongeData = this.data$getSpongeData();
-            spongeData.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
-        } else {
-            if (this.data$hasSpongeData()) {
-                this.data$getSpongeData().remove(Constants.Sponge.Entity.IS_INVISIBLE);
-            }
-        }
-    }
-
-    @Override
-    public boolean bridge$isVanished() {
-        return this.impl$isVanished;
-    }
-
-    @Override
-    public void bridge$setVanished(final boolean vanished) {
-        this.impl$isVanished = vanished;
-        this.impl$pendingVisibilityUpdate = true;
-        this.impl$visibilityTicks = 20;
-        if (vanished) {
-            final CompoundNBT spongeData = this.data$getSpongeData();
-            spongeData.putBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
-        } else {
-            if (this.data$hasSpongeData()) {
-                final CompoundNBT spongeData = this.data$getSpongeData();
-                spongeData.remove(Constants.Sponge.Entity.IS_VANISHED);
-                spongeData.remove(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
-                spongeData.remove(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
-            }
-        }
-    }
-
-    @Override
-    public boolean bridge$isUncollideable() {
-        return this.impl$collision;
-    }
-
-    @Override
-    public void bridge$setUncollideable(final boolean prevents) {
-        this.impl$collision = prevents;
-    }
-
-    @Override
-    public boolean bridge$isUntargetable() {
-        return this.impl$untargetable;
-    }
-
-    @Override
-    public void bridge$setUntargetable(final boolean untargetable) {
-        this.impl$untargetable = untargetable;
-    }
-
     /**
          * @author gabizou - January 4th, 2016
          * @reason gabizou - January 27th, 2016 - Rewrite to a redirect
@@ -761,34 +762,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
     */
 
-    @Nullable
-    @Override
-    public Component bridge$getDisplayNameText() {
-        return this.impl$displayName;
-    }
-
-    @Override
-    public void bridge$setDisplayName(@Nullable final Component displayName) {
-        this.impl$displayName = displayName;
-
-        this.impl$skipSettingCustomNameTag = true;
-        if (this.impl$displayName == null) {
-            this.shadow$setCustomName(null);
-        } else {
-            this.shadow$setCustomName(SpongeAdventure.asVanilla(this.impl$displayName));
-        }
-
-        this.impl$skipSettingCustomNameTag = false;
-    }
-
-    @Inject(method = "setCustomName",
-        at = @At("RETURN"))
-    private void impl$UpdatedisplayNameText(final ITextComponent name, final CallbackInfo ci) {
-        if (!this.impl$skipSettingCustomNameTag) {
-            this.impl$displayName = SpongeAdventure.asAdventure(name);
-        }
-    }
-
     /**
      * @return
      * @author gabizou - January 30th, 2016
@@ -829,15 +802,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return this.impl$lastCollidedBlockPos;
     }
 */
-    @Override
-    public Timing bridge$getTimingsHandler() {
-        return ((EntityTypeBridge) this.shadow$getType()).bridge$getTimings();
-    }
-
-    @Override
-    public void bridge$setInvulnerable(final boolean value) {
-        this.impl$invulnerable = value;
-    }
 
 /*
     @Redirect(method = "setFire",
@@ -868,11 +832,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     */
 
-    @Override
-    public void bridge$setTransient(final boolean value) {
-        this.impl$transient = value;
-    }
-
     @Redirect(method = "getEntityString", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityType;isSerializable()Z"))
     private boolean impl$respectTransientFlag(final EntityType entityType) {
         if (!entityType.isSerializable()) {
@@ -882,18 +841,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return !this.impl$transient;
     }
 
-    /**
-     * Overridden method for Players to determine whether this entity is immune to fire
-     * such that {@link IgniteEntityEvent}s are not needed to be thrown as they cannot
-     * take fire damage, nor do they light on fire.
-     *
-     * @return True if this entity is immune to fire.
-     *//*
-
-    protected boolean impl$isImmuneToFireForIgniteEvent() { // Since normal entities don't have the concept of having game modes...
-        return false;
-    }
-
+    /*
     @Redirect(method = "onStruckByLightning",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
@@ -930,39 +878,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
-    @Override
-    public void bridge$setFireImmuneTicks(final int ticks) {
-        this.impl$hasCustomFireImmuneTicks = true;
-        this.impl$fireImmuneTicks = (short) ticks;
-    }
-
-    @Override
-    public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.shadow$getCommandSource();
-    }
-
-    // When changing custom data it is serialized on to this.
-    // On writeInternal the SpongeData tag is added to the new CompoundNBT accordingly
-    // In a Forge environment the ForgeData tag is managed by forge
-    // Structure: tileNbt - ForgeData - SpongeData - customdata
-    private CompoundNBT impl$nbt;
-
     // TODO overrides for ForgeData
     // @Shadow private CompoundNBT customEntityData;
     // @Override CompoundNBT data$getForgeData()
     // @Override CompoundNBT data$getForgeData()
     // @Override CompoundNBT data$hasForgeData()
     // @Override CompoundNBT cleanEmptySpongeData()
-
-    @Override
-    public CompoundNBT data$getCompound() {
-        return this.impl$nbt;
-    }
-
-    @Override
-    public void data$setCompound(CompoundNBT nbt) {
-        this.impl$nbt = nbt;
-    }
 
     @Inject(method = "writeWithoutTypeId", at = @At("RETURN"))
     private void impl$WriteSpongeDataToCompound(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
@@ -985,12 +906,76 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         this.data$setCompound(compound); // For vanilla we set the incoming nbt
         if (this.data$hasSpongeData()) {
             // Deserialize our data...
-            SpongeDataManager.getInstance().deserializeCustomData(this.data$getSpongeData(), this);
+            CustomDataHolderBridge.syncTagToCustom(this);
             this.data$setCompound(null); // For vanilla this will be recreated empty in the next call - for Forge it reuses the existing compound instead
             // ReSync our data (includes failed data)
-            SpongeDataManager.getInstance().syncCustomToTag(this);
+            CustomDataHolderBridge.syncCustomToTag(this);
         } else {
             this.data$setCompound(null); // No data? No need to keep the nbt
         }
+    }
+
+    /**
+     * Read extra data (SpongeData) from the entity's NBT tag. This is
+     * meant to be overridden for each impl based mixin that has to store
+     * custom fields based on it's implementation. Examples can include:
+     * vanishing booleans, maximum air, maximum boat speeds and modifiers,
+     * etc.
+     *
+     * @param compound The SpongeData compound to read from
+     */
+
+    protected void impl$readFromSpongeCompound(final CompoundNBT compound) {
+        CustomDataHolderBridge.syncTagToCustom(this);
+
+        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.contains(Constants.Sponge.Entity.CAN_GRIEF)) {
+            ((GrieferBridge) this).bridge$setCanGrief(compound.getBoolean(Constants.Sponge.Entity.CAN_GRIEF));
+        }
+        if (compound.contains(Constants.Sponge.Entity.IS_VANISHED, Constants.NBT.TAG_BYTE)) {
+            this.bridge$setVanished(compound.getBoolean(Constants.Sponge.Entity.IS_VANISHED));
+            this.bridge$setUncollideable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE));
+            this.bridge$setUntargetable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE));
+        }
+        if (compound.contains(Constants.Sponge.Entity.IS_INVISIBLE, Constants.NBT.TAG_BYTE)) {
+            this.bridge$setInvisible(compound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE));
+        }
+
+        CustomDataHolderBridge.syncCustomToTag(this);
+    }
+
+    /**
+     * Write extra data (SpongeData) to the entity's NBT tag. This is
+     * meant to be overridden for each impl based mixin that has to store
+     * custom fields based on it's implementation. Examples can include:
+     * vanishing booleans, maximum air, maximum boat speeds and modifiers,
+     * etc.
+     *
+     * @param compound The SpongeData compound to write to
+     */
+    protected void impl$writeToSpongeCompound(final CompoundNBT compound) {
+        CustomDataHolderBridge.syncCustomToTag(this);
+
+        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && ((GrieferBridge) this).bridge$canGrief()) {
+            compound.putBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
+        }
+        if (this.bridge$isVanished()) {
+            compound.putBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
+            compound.putBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, this.bridge$isUncollideable());
+            compound.putBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, this.bridge$isUntargetable());
+        }
+        if (this.shadow$isInvisible()) {
+            compound.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
+        }
+    }
+
+    /**
+     * Overridden method for Players to determine whether this entity is immune to fire
+     * such that {@link IgniteEntityEvent}s are not needed to be thrown as they cannot
+     * take fire damage, nor do they light on fire.
+     *
+     * @return True if this entity is immune to fire.
+     */
+    protected boolean impl$canCallIgniteEntityEvent() {
+        return false;
     }
 }

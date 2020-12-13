@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 public class BlockWorkerPhaseState extends BasicPluginState {
@@ -32,12 +36,25 @@ public class BlockWorkerPhaseState extends BasicPluginState {
     }
 
     @Override
-    public void unwind(BasicPluginContext phaseContext) {
+    public void unwind(final BasicPluginContext phaseContext) {
         TrackingUtil.processBlockCaptures(phaseContext);
     }
 
     @Override
     public boolean handlesOwnStateCompletion() {
         return true;
+    }
+
+    @Nullable
+    public PhaseContext<@NonNull ?> switchIfNecessary(final PhaseTracker server) {
+
+        final PhaseTracker instance = PhaseTracker.getInstance();
+        if (!server.onSidedThread()) {
+            return null;
+        }
+        if (this == instance.getCurrentState()) {
+            return null;
+        }
+        return this.createPhaseContext(server);
     }
 }

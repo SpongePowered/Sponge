@@ -61,7 +61,6 @@ public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin 
      * we have to modify the arguments passed in (the two booleans). There may be a better way,
      * which may include redirecting the world.newExplosion method call instead of modifyargs,
      * but, it is what it is.
-     * @return
      */
     @Redirect(method = "onImpact",
         at = @At(value = "INVOKE",

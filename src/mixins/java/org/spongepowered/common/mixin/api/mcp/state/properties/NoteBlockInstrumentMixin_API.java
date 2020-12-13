@@ -35,8 +35,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(NoteBlockInstrument.class)
 public abstract class NoteBlockInstrumentMixin_API implements InstrumentType {

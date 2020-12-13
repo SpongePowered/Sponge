@@ -33,9 +33,9 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.NbtCollectors;
-import org.spongepowered.common.data.util.NbtStreams;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.NBTCollectors;
+import org.spongepowered.common.util.NBTStreams;
 
 import java.util.Objects;
 import java.util.Set;
@@ -51,11 +51,11 @@ public final class BlockTypeItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.BREAKABLE_BLOCK_TYPES)
-                        .get(h -> get(h, Constants.Item.ITEM_BREAKABLE_BLOCKS))
-                        .set((h, v) -> set(h, Constants.Item.ITEM_BREAKABLE_BLOCKS, v))
+                        .get(h -> BlockTypeItemStackData.get(h, Constants.Item.ITEM_BREAKABLE_BLOCKS))
+                        .set((h, v) -> BlockTypeItemStackData.set(h, Constants.Item.ITEM_BREAKABLE_BLOCKS, v))
                     .create(Keys.PLACEABLE_BLOCK_TYPES)
-                        .get(h -> get(h, Constants.Item.ITEM_PLACEABLE_BLOCKS))
-                        .set((h, v) -> set(h, Constants.Item.ITEM_PLACEABLE_BLOCKS, v));
+                        .get(h -> BlockTypeItemStackData.get(h, Constants.Item.ITEM_PLACEABLE_BLOCKS))
+                        .set((h, v) -> BlockTypeItemStackData.set(h, Constants.Item.ITEM_PLACEABLE_BLOCKS, v));
     }
     // @formatter:on
 
@@ -68,7 +68,7 @@ public final class BlockTypeItemStackData {
         if (list.isEmpty()) {
             return null;
         }
-        return NbtStreams.toStrings(list)
+        return NBTStreams.toStrings(list)
                 .map(ResourceLocation::tryCreate)
                 .filter(Objects::nonNull)
                 .map(key -> (BlockType) Registry.BLOCK.getValue(key).orElse(null))
@@ -92,7 +92,7 @@ public final class BlockTypeItemStackData {
                         return key.getFormatted();
                     }
                 })
-                .collect(NbtCollectors.toStringTagList());
+                .collect(NBTCollectors.toStringTagList());
         tag.put(nbtKey, list);
         return true;
     }

@@ -40,6 +40,7 @@ import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.scoreboard.ServerScoreboard.Action;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
@@ -53,31 +54,190 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.scoreboard.ScorePlayerTeamAccessor;
+import org.spongepowered.common.accessor.scoreboard.ScoreboardAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.registry.MappedRegistry;
+import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings({"ConstantConditions", "rawtypes"})
 @Mixin(ServerScoreboard.class)
 public abstract class ServerScoreboardMixin extends Scoreboard implements ServerScoreboardBridge {
 
-    @Shadow protected abstract void markSaveDataDirty();
+    @Shadow protected abstract void shadow$markSaveDataDirty();
 
-    private List<ServerPlayerEntity> impl$scoreboardPlayers = new ArrayList<>();
+    private final List<ServerPlayerEntity> impl$players = new ArrayList<>();
 
+    // Update objective in display slot
 
-    @SuppressWarnings("ConstantConditions")
+    @Override
+    public void bridge$updateDisplaySlot(@Nullable final Objective objective, final DisplaySlot displaySlot) throws IllegalStateException {
+        if (objective != null && !objective.getScoreboards().contains(this)) {
+            throw new IllegalStateException("Attempting to set an objective's display slot that does not exist on this scoreboard!");
+        }
+        final int index = ((SpongeDisplaySlot) displaySlot).getIndex();
+        ((ScoreboardAccessor) this).accessor$getObjectiveDisplaySlots()[index] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
+        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SDisplayObjectivePacket(index, ((ScoreboardAccessor) this).accessor$getObjectiveDisplaySlots()[index]));
+    }
+
+    // Get objectives
+
+    @Override
+    public void bridge$addObjective(final Objective objective) {
+        final ScoreObjective nmsObjective = this.getObjective(objective.getName());
+
+        if (nmsObjective != null) {
+            throw new IllegalArgumentException(String.format("An objective with the name '%s' already exists!", objective.getName()));
+        }
+        final ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
+        List<ScoreObjective> objectives = ((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().get(objective.getCriterion());
+        if (objectives == null) {
+            objectives = new ArrayList<>();
+            ((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().put((ScoreCriteria) objective.getCriterion(), objectives);
+        }
+
+        objectives.add(scoreObjective);
+        ((ScoreboardAccessor) this).accessor$getScoreObjectives().put(objective.getName(), scoreObjective);
+        this.onObjectiveAdded(scoreObjective);
+
+        ((SpongeObjective) objective).updateScores(this);
+    }
+
+    @Override
+    public Optional<Objective> bridge$getObjective(final String name) {
+        final ScoreObjective objective = this.getObjective(name);
+        return Optional.ofNullable(objective == null ? null : ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
+    }
+
+    @Override
+    public Optional<Objective> bridge$getObjective(final DisplaySlot slot) {
+        final ScoreObjective objective = ((ScoreboardAccessor) this).accessor$getObjectiveDisplaySlots()[((SpongeDisplaySlot) slot).getIndex()];
+        if (objective != null) {
+            return Optional.of(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Set<Objective> bridge$getObjectivesByCriterion(final Criterion criterion) {
+        if (((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().containsKey(criterion)) {
+            return ((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().get(criterion).stream()
+                .map(objective -> ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective()).collect(Collectors.toSet());
+        }
+        return new HashSet<>();
+    }
+
+    @Override
+    public void bridge$removeObjective(final Objective objective) {
+        final ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
+        ((ScoreboardAccessor) this).accessor$getScoreObjectives().remove(scoreObjective.getName());
+
+        for (int i = 0; i < 19; ++i)
+        {
+            if (this.getObjectiveInDisplaySlot(i) == scoreObjective)
+            {
+                this.setObjectiveInDisplaySlot(i, null);
+            }
+        }
+
+        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SScoreboardObjectivePacket(scoreObjective, Constants.Scoreboards.OBJECTIVE_PACKET_REMOVE));
+
+        final List list = ((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().get(scoreObjective.getCriteria());
+
+        if (list != null)
+        {
+            list.remove(scoreObjective);
+        }
+
+        for (final Map<ScoreObjective, Score> scoreMap : ((ScoreboardAccessor) this).accessor$getEntitiesScoreObjectives().values()) {
+            final Score score = scoreMap.remove(scoreObjective);
+            if (score != null) {
+                ((ScoreBridge) score).bridge$getSpongeScore().removeScoreFor(scoreObjective);
+            }
+        }
+
+        this.shadow$markSaveDataDirty();
+
+        ((SpongeObjective) objective).removeObjectiveFor(this);
+    }
+
+    // Add team
+
+    @Override
+    public void bridge$registerTeam(final Team spongeTeam) {
+        final ScorePlayerTeam team = (ScorePlayerTeam) spongeTeam;
+        if (this.getTeam(spongeTeam.getName()) != null) {
+            throw new IllegalArgumentException(String.format("A team with the name '%s' already exists!", spongeTeam.getName()));
+        }
+
+        if (((ScorePlayerTeamAccessor) team).accessor$getScoreboard() != null) {
+            throw new IllegalArgumentException("The passed in team is already registered to a scoreboard!");
+        }
+
+        ((ScorePlayerTeamAccessor) team).accessor$setScoreboard(this);
+        ((ScoreboardAccessor) this).accessor$getTeams().put(team.getName(), team);
+
+        for (final String entry: team.getMembershipCollection()) {
+            this.addPlayerToTeam(entry, team);
+        }
+        this.onTeamAdded(team);
+    }
+
+    @Override
+    public void bridge$sendToPlayers(final IPacket<?> packet) {
+        for (final ServerPlayerEntity player: this.impl$players) {
+            player.connection.sendPacket(packet);
+        }
+    }
+
+    @Override
+    public void bridge$addPlayer(final ServerPlayerEntity player, final boolean sendPackets) {
+        this.impl$players.add(player);
+        if (sendPackets) {
+            for (final ScorePlayerTeam team: this.getTeams()) {
+                player.connection.sendPacket(new STeamsPacket(team, 0));
+            }
+
+            for (final ScoreObjective objective: this.getScoreObjectives()) {
+                player.connection.sendPacket(new SScoreboardObjectivePacket(objective, 0));
+                for (int i = 0; i < 19; ++i) {
+                    if (this.getObjectiveInDisplaySlot(i) == objective) {
+                        player.connection.sendPacket(new SDisplayObjectivePacket(i, objective));
+                    }
+                }
+                for (final Score score: this.getSortedScores(objective)) {
+                    final SUpdateScorePacket packetIn = new SUpdateScorePacket(Action.CHANGE, score.getObjective().getName(), score.getPlayerName(), score.getScorePoints());
+                    player.connection.sendPacket(packetIn);
+                }
+            }
+
+        }
+    }
+
+    @Override
+    public void bridge$removePlayer(final ServerPlayerEntity player, final boolean sendPackets) {
+        this.impl$players.remove(player);
+        if (sendPackets) {
+            this.impl$removeScoreboard(player);
+        }
+    }
+
     @Override
     public ScoreObjective addObjective(final String name, final ScoreCriteria criteria, ITextComponent text, ScoreCriteria.RenderType type) {
         final SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
@@ -87,30 +247,9 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         return objective.getObjectiveFor(this);
     }
 
-    @Inject(method = "onObjectiveAdded", at = @At("RETURN"))
-    private void impl$UpdatePlayersScoreObjective(final ScoreObjective objective, final CallbackInfo ci) {
-        this.bridge$sendToPlayers(new SScoreboardObjectivePacket(objective, Constants.Scoreboards.OBJECTIVE_PACKET_ADD));
-    }
-
-    /**
-     * @author Aaron1011 - December 28th, 2015
-     * @reason use our mixin scoreboard implementation.
-     *
-     * @param slot The slot of the display
-     * @param objective The objective
-     */
-    @Override
-    @Overwrite
-    public void setObjectiveInDisplaySlot(final int slot, @Nullable final ScoreObjective objective) {
-        final Objective apiObjective = objective == null ? null : ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
-        final MappedRegistry<DisplaySlot, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(DisplaySlot.class);
-        final DisplaySlot displaySlot = registry.getReverseMapping(slot);
-        ((org.spongepowered.api.scoreboard.Scoreboard) this).updateDisplaySlot(apiObjective, displaySlot);
-    }
-
     @Override
     public void removeObjective(final ScoreObjective objective) {
-        ((org.spongepowered.api.scoreboard.Scoreboard) this).removeObjective(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
+        this.bridge$removeObjective(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
     }
 
     @Override
@@ -133,7 +272,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             if (score.isPresent()) {
                 spongeObjective.removeScore(score.get());
             } else {
-                SpongeCommon.getLogger().warn("Objective " + objective + " did have have the score " + name);
+                SpongeCommon.getLogger().warn("Objective {} did have have the score", name);
             }
         } else {
             final Component textName = SpongeAdventure.legacySection(name);
@@ -142,63 +281,6 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             }
         }
     }
-
-
-    @Override
-    public void bridge$sendToPlayers(final IPacket<?> packet) {
-        for (final ServerPlayerEntity player: this.impl$scoreboardPlayers) {
-            player.connection.sendPacket(packet);
-        }
-    }
-
-    @Override
-    public void bridge$addPlayer(final ServerPlayerEntity player, final boolean sendPackets) {
-        this.impl$scoreboardPlayers.add(player);
-        if (sendPackets) {
-            for (final ScorePlayerTeam team: this.getTeams()) {
-                player.connection.sendPacket(new STeamsPacket(team, 0));
-            }
-
-            for (final ScoreObjective objective: this.getScoreObjectives()) {
-                player.connection.sendPacket(new SScoreboardObjectivePacket(objective, 0));
-                for (final Score score: this.getSortedScores(objective)) {
-                    final SUpdateScorePacket packetIn = new SUpdateScorePacket(Action.CHANGE, score.getObjective().getName(), score.getPlayerName(), score.getScorePoints());
-                    player.connection.sendPacket(packetIn);
-                }
-            }
-
-            for (int i = 0; i < 19; ++i) {
-                player.connection.sendPacket(new SDisplayObjectivePacket(i, this.getObjectiveInDisplaySlot(i)));
-            }
-        }
-    }
-
-
-    @Override
-    public void bridge$removePlayer(final ServerPlayerEntity player, final boolean sendPackets) {
-        this.impl$scoreboardPlayers.remove(player);
-        if (sendPackets) {
-            this.impl$removeScoreboard(player);
-        }
-    }
-
-    private void impl$removeScoreboard(final ServerPlayerEntity player) {
-        this.impl$removeTeams(player);
-        this.impl$removeObjectives(player);
-    }
-
-    private void impl$removeTeams(final ServerPlayerEntity player) {
-        for (final ScorePlayerTeam team: this.getTeams()) {
-            player.connection.sendPacket(new STeamsPacket(team, 1));
-        }
-    }
-
-    private void impl$removeObjectives(final ServerPlayerEntity player) {
-        for (final ScoreObjective objective: this.getScoreObjectives()) {
-            player.connection.sendPacket(new SScoreboardObjectivePacket(objective, 1));
-        }
-    }
-
 
     @Redirect(method = "onScoreChanged",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
@@ -227,6 +309,27 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     /*public void onSetObjectiveInDisplaySlot(PlayerList manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }*/
+
+    @Inject(method = "onObjectiveAdded", at = @At("RETURN"))
+    private void impl$UpdatePlayersScoreObjective(final ScoreObjective objective, final CallbackInfo ci) {
+        this.bridge$sendToPlayers(new SScoreboardObjectivePacket(objective, Constants.Scoreboards.OBJECTIVE_PACKET_ADD));
+    }
+
+    /**
+     * @author Aaron1011 - December 28th, 2015
+     * @reason use our mixin scoreboard implementation.
+     *
+     * @param slot The slot of the display
+     * @param objective The objective
+     */
+    @Override
+    @Overwrite
+    public void setObjectiveInDisplaySlot(final int slot, @Nullable final ScoreObjective objective) {
+        final Objective apiObjective = objective == null ? null : ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
+        final MappedRegistry<DisplaySlot, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(DisplaySlot.class);
+        final DisplaySlot displaySlot = registry.getReverseMapping(slot);
+        this.bridge$updateDisplaySlot(apiObjective, displaySlot);
+    }
 
     @Redirect(method = "addPlayerToTeam",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
@@ -276,18 +379,32 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         this.bridge$sendToPlayers(packet);
     }
 
-    @SuppressWarnings("rawtypes")
     @Redirect(method = "addObjective",
         at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap = false))
     private Iterator impl$useOurScoreboardForPlayers(final List list) {
-        return this.impl$scoreboardPlayers.iterator();
+        return this.impl$players.iterator();
     }
 
-    @SuppressWarnings("rawtypes")
     @Redirect(method = "sendDisplaySlotRemovalPackets",
         at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap = false))
     private Iterator impl$useOurScoreboardForPlayersOnRemoval(final List list) {
-        return this.impl$scoreboardPlayers.iterator();
+        return this.impl$players.iterator();
     }
 
+    private void impl$removeScoreboard(final ServerPlayerEntity player) {
+        this.impl$removeTeams(player);
+        this.impl$removeObjectives(player);
+    }
+
+    private void impl$removeTeams(final ServerPlayerEntity player) {
+        for (final ScorePlayerTeam team: this.getTeams()) {
+            player.connection.sendPacket(new STeamsPacket(team, 1));
+        }
+    }
+
+    private void impl$removeObjectives(final ServerPlayerEntity player) {
+        for (final ScoreObjective objective: this.getScoreObjectives()) {
+            player.connection.sendPacket(new SScoreboardObjectivePacket(objective, 1));
+        }
+    }
 }

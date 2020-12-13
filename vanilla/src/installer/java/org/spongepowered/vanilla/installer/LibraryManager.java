@@ -91,7 +91,7 @@ public final class LibraryManager {
         final ExecutorService workerPool = Executors.newFixedThreadPool(4);
 
         for (final Libraries.Dependency dependency : dependencies.dependencies) {
-            operations.add(asyncFailableFuture(() -> {
+            operations.add(this.asyncFailableFuture(() -> {
                 final String groupPath = dependency.group.replace(".", "/");
                 final Path depDirectory =
                     this.rootDirectory.resolve(groupPath).resolve(dependency.module).resolve(dependency.version);

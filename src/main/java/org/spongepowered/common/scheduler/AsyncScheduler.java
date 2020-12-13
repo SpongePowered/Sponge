@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.scheduler;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -46,7 +49,11 @@ public final class AsyncScheduler extends SpongeScheduler {
     private final Condition condition = this.lock.newCondition();
     private final AtomicBoolean stateChanged = new AtomicBoolean(false);
     // The dynamic thread pooling executor of asynchronous tasks.
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
+                                                                                   .setNameFormat("Sponge-AsyncScheduler-%d")
+                                                                                   .build());
+    private volatile boolean running = true;
+
     // Adjustable timeout for pending Tasks
     private long minimumTimeout = Long.MAX_VALUE;
     private long lastProcessingTimestamp;
@@ -62,7 +69,7 @@ public final class AsyncScheduler extends SpongeScheduler {
 
     private void mainLoop() {
         this.lastProcessingTimestamp = System.nanoTime();
-        while (true) {
+        while (this.running) {
             this.recalibrateMinimumTimeout();
             this.runTick();
         }
@@ -111,7 +118,7 @@ public final class AsyncScheduler extends SpongeScheduler {
     }
 
     @Override
-    protected void addTask(SpongeScheduledTask task) {
+    protected void addTask(final SpongeScheduledTask task) {
         this.lock.lock();
         try {
             super.addTask(task);
@@ -132,7 +139,7 @@ public final class AsyncScheduler extends SpongeScheduler {
             }
             // We're processing now. Set to false.
             this.stateChanged.set(false);
-        } catch (InterruptedException ignored) {
+        } catch (final InterruptedException ignored) {
             // The taskMap has been modified; there is work to do.
             // Continue on without handling the Exception.
         } catch (IllegalMonitorStateException e) {
@@ -151,7 +158,7 @@ public final class AsyncScheduler extends SpongeScheduler {
     }
 
     @Override
-    protected void onTaskCompletion(SpongeScheduledTask task) {
+    protected void onTaskCompletion(final SpongeScheduledTask task) {
         if (task.getState() == SpongeScheduledTask.ScheduledTaskState.RUNNING) {
             this.lock.lock();
             try {
@@ -170,5 +177,30 @@ public final class AsyncScheduler extends SpongeScheduler {
 
     public <T> CompletableFuture<T> submit(Callable<T> callable) {
         return Functional.asyncFailableFuture(callable, this.executor);
+    }
+
+    public void close() {
+        this.running = false;
+        // Cancel all tasks
+        final Set<ScheduledTask> tasks = this.getTasks();
+        tasks.forEach(ScheduledTask::cancel);
+
+        // Shut down the executor
+        this.executor.shutdown();
+
+        try {
+            if (!this.executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                new PrettyPrinter()
+                        .add("Sponge async scheduler failed to shut down in 10 seconds! Tasks that may have been active:")
+                        .addWithIndices(tasks)
+                        .add()
+                        .add("We will now attempt immediate shutdown.")
+                        .log(SpongeCommon.getLogger(), Level.WARN);
+
+                this.executor.shutdownNow();
+            }
+        } catch (final InterruptedException e) {
+            SpongeCommon.getLogger().error("The async scheduler was interrupted while awaiting shutdown!");
+        }
     }
 }

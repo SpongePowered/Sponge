@@ -31,7 +31,6 @@ import net.minecraft.network.rcon.RConThread;
 import net.minecraft.network.rcon.RConUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.network.rcon.RconConnectionEvent;
@@ -218,7 +217,7 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
             } catch (IOException e) {
                 break;
             } catch (Exception e) {
-                LOGGER.error("Exception whilst parsing RCON input", e);
+                ClientThreadMixin.LOGGER.error("Exception whilst parsing RCON input", e);
                 break;
             }
         }

@@ -38,7 +38,7 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.NbtCollectors;
+import org.spongepowered.common.util.NBTCollectors;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -74,7 +74,7 @@ public final class PotionItemStackData {
                                         ((EffectInstance) effect).write(potionTag);
                                         return potionTag;
                                     })
-                                    .collect(NbtCollectors.toTagList());
+                                    .collect(NBTCollectors.toTagList());
                             tag.put(Constants.Item.CUSTOM_POTION_EFFECTS, list);
                         })
                         .delete(h -> h.removeChildTag(Constants.Item.CUSTOM_POTION_EFFECTS))

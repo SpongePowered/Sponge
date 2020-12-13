@@ -43,9 +43,8 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.util.MemoizedSupplier;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
 
@@ -65,9 +64,9 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unchecked")
 @DefaultQualifier(NonNull.class)
-public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
+public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<P>, AutoCloseable {
 
-    @MonotonicNonNull private static PhaseContext<@NonNull ?> EMPTY;
+    @MonotonicNonNull private static Supplier<PhaseContext<@NonNull ?>> EMPTY = MemoizedSupplier.memoize(() -> new EmptyContext(new PhaseTracker()).markEmpty());
     protected final PhaseTracker createdTracker;
     @MonotonicNonNull private TransactionalCaptureSupplier transactor;
 
@@ -75,15 +74,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
      */
     public static PhaseContext<@NonNull ?> empty() {
-        if (PhaseContext.EMPTY == null) {
-            PhaseContext.EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE, new PhaseTracker()).markEmpty();
-        }
-        return PhaseContext.EMPTY;
+        return PhaseContext.EMPTY.get();
     }
 
-
-
-    public final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
+    protected final IPhaseState<P> state; // Only temporary to verify the state creation with constructors
     protected boolean isCompleted = false;
     // Only used in hard debugging instances.
     @Nullable private StackTraceElement[] stackTrace;
@@ -352,7 +346,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         }
     }
 
-    protected PhaseContext(final IPhaseState<? extends P> state, final PhaseTracker tracker) {
+    protected PhaseContext(final IPhaseState<P> state, final PhaseTracker tracker) {
         this.state = state;
         this.createdTracker = checkNotNull(tracker, "Null PhaseTracker!");
     }
@@ -387,10 +381,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public boolean isEmpty() {
-        if (this == PhaseContext.EMPTY) {
-            return true;
-        }
-        return false;
+        return this == PhaseContext.EMPTY.get();
     }
 
     @SuppressWarnings("rawtypes")
@@ -406,7 +397,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         }
         final PhaseTracker instance = PhaseTracker.getInstance();
         instance.completePhase(this);
-        if (!((IPhaseState) this.state).shouldProvideModifiers(this)) {
+        if (!this.shouldProvideModifiers()) {
             if (this.usedFrame != null) {
                 this.usedFrame.iterator().forEachRemaining(instance::popCauseFrame);
             }
@@ -471,5 +462,15 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         // tODO - blah
 
         return newCopy;
+    }
+
+    @Override
+    public IPhaseState<P> getState() {
+        return this.state;
+    }
+
+    @Override
+    public P asContext() {
+        return (P) this;
     }
 }

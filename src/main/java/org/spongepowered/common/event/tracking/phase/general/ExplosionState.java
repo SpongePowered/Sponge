@@ -25,21 +25,52 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.storage.loot.LootContext;
+import net.minecraft.world.storage.loot.LootParameters;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.accessor.world.ExplosionAccessor;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 final class ExplosionState extends GeneralState<ExplosionContext> {
 
     private final BiConsumer<CauseStackManager.StackFrame, ExplosionContext> EXPLOSION_MODIFIER =
-        super.getFrameModifier().andThen((frame, context) -> frame.pushCause(context.getExplosion()));
+        super.getFrameModifier().andThen((frame, context) -> {
+            final Explosion explosion = context.getExplosion();
+            final @Nullable LivingEntity placedBy = explosion.getExplosivePlacedBy();
+            if (placedBy != null) {
+                if (placedBy instanceof CreatorTrackedBridge) {
+                    ((CreatorTrackedBridge) placedBy).tracked$getCreatorReference()
+                        .ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
+                    ((CreatorTrackedBridge) placedBy).tracked$getNotifierReference()
+                        .ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+                }
+                frame.addContext(EventContextKeys.IGNITER, (Living) placedBy);
+            }
+            final @Nullable Entity exploder = ((ExplosionAccessor) explosion).accessor$getExploder();
+            if (exploder != null) {
+                frame.pushCause(exploder);
+            }
+            frame.pushCause(explosion);
+        });
 
     @Override
     public ExplosionContext createNewContext(final PhaseTracker tracker) {
@@ -61,8 +92,14 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public boolean ignoresEntityCollisions() {
-        return true;
+    public void populateLootContext(final ExplosionContext phaseContext, final LootContext.Builder lootBuilder) {
+        final Explosion explosion = phaseContext.getExplosion();
+        lootBuilder.withNullableParameter(LootParameters.THIS_ENTITY, ((ExplosionAccessor) explosion).accessor$getExploder());
+
+        if (((ExplosionAccessor) explosion).accessor$getMode() == net.minecraft.world.Explosion.Mode.DESTROY) {
+            lootBuilder.withParameter(LootParameters.EXPLOSION_RADIUS, ((ExplosionAccessor) explosion).accessor$getSize());
+        }
+
     }
 
     @Override
@@ -95,9 +132,19 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public ChangeBlockEvent.Post createChangeBlockPostEvent(final ExplosionContext context, final ImmutableList<Transaction<BlockSnapshot>> transactions,
-        final Cause cause) {
-        return SpongeEventFactory.createExplosionEventPost(cause, context.getSpongeExplosion(), transactions);
+    public SpawnEntityEvent createSpawnEvent(
+        final ExplosionContext context,
+        final GameTransaction<@NonNull ?> parent,
+        final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
+        final Cause currentCause
+    ) {
+        if (parent instanceof ChangeBlock) {
+            return SpongeEventFactory.createDropItemEventDestruct(currentCause,
+                collect.stream()
+                    .map(t -> (org.spongepowered.api.entity.Entity) t.getFirst())
+                    .collect(Collectors.toList()));
+        }
+        return super.createSpawnEvent(context, parent, collect, currentCause);
     }
 
 }

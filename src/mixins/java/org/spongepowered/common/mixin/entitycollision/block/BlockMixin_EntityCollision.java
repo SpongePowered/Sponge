@@ -30,12 +30,12 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
-import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
-import org.spongepowered.common.applaunch.config.inheritable.CollisionModCategory;
-import org.spongepowered.common.applaunch.config.inheritable.EntityCollisionCategory;
-import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
+import org.spongepowered.common.config.inheritable.CollisionModCategory;
+import org.spongepowered.common.config.inheritable.EntityCollisionCategory;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 
 @Mixin(Block.class)

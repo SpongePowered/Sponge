@@ -25,7 +25,7 @@
 package org.spongepowered.common.command.parameter;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
@@ -61,10 +61,10 @@ public final class SpongeDefaultValueParser<T> implements ValueParser<T> {
             result = this.defaultFunction.apply(context.getCause());
         } catch (final Exception ex) {
             throw ((SpongeStringReader) reader)
-                    .createException(TextComponent.of("An exception was thrown obtaining a default value for " + parameterKey.key()), ex);
+                    .createException(Component.text("An exception was thrown obtaining a default value for " + parameterKey.key()), ex);
         }
         if (result == null) {
-            throw reader.createException(TextComponent.of("No default value was supplied for " + parameterKey.key()));
+            throw reader.createException(Component.text("No default value was supplied for " + parameterKey.key()));
         }
         return Optional.of(result);
     }

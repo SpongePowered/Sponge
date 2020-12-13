@@ -24,34 +24,37 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.attribute.Attribute;
 import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.entity.projectile.ProjectileUtil;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 import java.util.Set;
 
-@Mixin(value = LivingEntity.class, priority = 999)
+@Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_API extends EntityMixin_API implements Living {
 
-    @Shadow public abstract ItemStack shadow$getHeldItem(Hand hand);
     @Shadow public abstract float shadow$getHealth();
     @Shadow public abstract IAttributeInstance shadow$getAttribute(IAttribute attribute);
 
     @Override
     public Component getTeamRepresentation() {
-        return TextComponent.of(this.shadow$getUniqueID().toString());
+        return Component.text(this.shadow$getUniqueID().toString());
     }
 
     @Override
@@ -74,4 +77,19 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
         return values;
     }
 
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType) {
+        return ProjectileUtil.launch(requireNonNull(projectileType, "projectileType"), this, null);
+    }
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType, final Vector3d velocity) {
+        return ProjectileUtil.launch(requireNonNull(projectileType, "projectileType"), this, requireNonNull(velocity, "velocity"));
+    }
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectileTo(final EntityType<T> projectileType, final Entity target) {
+        // TODO implement this for all LivingEntities ?
+        return Optional.empty();
+    }
 }

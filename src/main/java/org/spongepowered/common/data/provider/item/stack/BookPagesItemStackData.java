@@ -34,17 +34,16 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.NbtCollectors;
-import org.spongepowered.common.data.util.NbtStreams;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.NBTCollectors;
+import org.spongepowered.common.util.NBTStreams;
 import org.spongepowered.common.util.Predicates;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -62,13 +61,13 @@ public final class BookPagesItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLIED_ENCHANTMENTS)
-                        .get(h -> get(h, NBTKeyAppliedEnchantments))
-                        .set((h, v) -> set(h, v, iv -> iv.stream().filter(Predicates.distinctBy(Enchantment::getType)), NBTKeyAppliedEnchantments))
-                        .delete(h -> delete(h, NBTKeyAppliedEnchantments))
+                        .get(h -> BookPagesItemStackData.get(h, BookPagesItemStackData.NBTKeyAppliedEnchantments))
+                        .set((h, v) -> BookPagesItemStackData.set(h, v, iv -> iv.stream().filter(Predicates.distinctBy(Enchantment::getType)), BookPagesItemStackData.NBTKeyAppliedEnchantments))
+                        .delete(h -> BookPagesItemStackData.delete(h, BookPagesItemStackData.NBTKeyAppliedEnchantments))
                     .create(Keys.STORED_ENCHANTMENTS)
-                        .get(h -> get(h, NBTKeyStoredEnchantments))
-                        .set((h, v) -> set(h, v, Collection::stream, NBTKeyStoredEnchantments))
-                        .delete(h -> delete(h, NBTKeyStoredEnchantments))
+                        .get(h -> BookPagesItemStackData.get(h, BookPagesItemStackData.NBTKeyStoredEnchantments))
+                        .set((h, v) -> BookPagesItemStackData.set(h, v, Collection::stream, BookPagesItemStackData.NBTKeyStoredEnchantments))
+                        .delete(h -> BookPagesItemStackData.delete(h, BookPagesItemStackData.NBTKeyStoredEnchantments))
                         .supports(h -> h.getItem() == Items.ENCHANTED_BOOK);
     }
     // @formatter:on
@@ -79,7 +78,7 @@ public final class BookPagesItemStackData {
             return new ArrayList<>();
         }
         final ListNBT list = tag.getList(nbtKey, Constants.NBT.TAG_COMPOUND);
-        return NbtStreams.toCompounds(list)
+        return NBTStreams.toCompounds(list)
                 .map(BookPagesItemStackData::enchantmentFromNbt)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -88,12 +87,12 @@ public final class BookPagesItemStackData {
     private static boolean set(final ItemStack holder, final List<Enchantment> value, final Function<List<Enchantment>, Stream<Enchantment>> filter,
             final String nbtKey) {
         if (value.isEmpty()) {
-            return delete(holder, nbtKey);
+            return BookPagesItemStackData.delete(holder, nbtKey);
         }
         final CompoundNBT tag = holder.getOrCreateTag();
         final ListNBT list = filter.apply(value)
                 .map(BookPagesItemStackData::enchantmentToNbt)
-                .collect(NbtCollectors.toTagList());
+                .collect(NBTCollectors.toTagList());
         tag.put(nbtKey, list);
         return true;
     }

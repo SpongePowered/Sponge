@@ -56,9 +56,10 @@ public class PrimaryPlayerInventoryLens extends AbstractLens {
         int base = this.base;
 
         if (this.isContainer) {
-            this.mainGrid = new GridInventoryLens(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, slots);
-            base += INVENTORY_WIDTH * 3;
-            this.hotbar = new HotbarLens(base, INVENTORY_WIDTH, slots);
+            this.mainGrid = new GridInventoryLens(base,
+                PrimaryPlayerInventoryLens.INVENTORY_WIDTH, PrimaryPlayerInventoryLens.MAIN_INVENTORY_HEIGHT, slots);
+            base += PrimaryPlayerInventoryLens.INVENTORY_WIDTH * 3;
+            this.hotbar = new HotbarLens(base, PrimaryPlayerInventoryLens.INVENTORY_WIDTH, slots);
             /*
             1 |G|G|G|G|G|G|G|G|G|
             2 |G|G|G|G|G|G|G|G|G|
@@ -69,13 +70,15 @@ public class PrimaryPlayerInventoryLens extends AbstractLens {
             this.addSpanningChild(this.mainGrid);
             this.addSpanningChild(this.hotbar);
 
-            this.fullGrid = new GridInventoryLens(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, slots);
+            this.fullGrid = new GridInventoryLens(this.base,
+                PrimaryPlayerInventoryLens.INVENTORY_WIDTH, PrimaryPlayerInventoryLens.MAIN_INVENTORY_HEIGHT + 1, slots);
             this.addChild(this.fullGrid);
 
         } else {
-            this.hotbar = new HotbarLens(base, INVENTORY_WIDTH, slots);
-            base += INVENTORY_WIDTH;
-            this.mainGrid = new GridInventoryLens(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, slots);
+            this.hotbar = new HotbarLens(base, PrimaryPlayerInventoryLens.INVENTORY_WIDTH, slots);
+            base += PrimaryPlayerInventoryLens.INVENTORY_WIDTH;
+            this.mainGrid = new GridInventoryLens(base,
+                PrimaryPlayerInventoryLens.INVENTORY_WIDTH, PrimaryPlayerInventoryLens.MAIN_INVENTORY_HEIGHT, slots);
 
             /*
             2 |G|G|G|G|G|G|G|G|G|
@@ -88,8 +91,10 @@ public class PrimaryPlayerInventoryLens extends AbstractLens {
             this.addSpanningChild(this.mainGrid);
 
             // Shift slots so that Hotbar is always after the MainGrid
-            ShiftedSlotProvider shiftedSlots = new ShiftedSlotProvider(slots, INVENTORY_WIDTH, INVENTORY_WIDTH * 4);
-            this.fullGrid = new GridInventoryLens(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, shiftedSlots);
+            ShiftedSlotProvider shiftedSlots = new ShiftedSlotProvider(slots,
+                PrimaryPlayerInventoryLens.INVENTORY_WIDTH, PrimaryPlayerInventoryLens.INVENTORY_WIDTH * 4);
+            this.fullGrid = new GridInventoryLens(this.base, PrimaryPlayerInventoryLens.INVENTORY_WIDTH,
+                PrimaryPlayerInventoryLens.MAIN_INVENTORY_HEIGHT + 1, shiftedSlots);
             this.addChild(this.fullGrid);
         }
     }

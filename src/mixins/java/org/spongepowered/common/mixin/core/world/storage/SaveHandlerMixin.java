@@ -46,10 +46,8 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,11 +59,9 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
-import java.util.UUID;
 
 @Mixin(SaveHandler.class)
-public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFileData {
+public abstract class SaveHandlerMixin implements IPlayerFileData {
 
     @Shadow public abstract File shadow$getWorldDirectory();
 
@@ -74,18 +70,18 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
 
     @ModifyArg(method = "checkSessionLock",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SessionLockException;<init>(Ljava/lang/String;)V", ordinal = 0, remap = false))
-    private String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
+    private String modifyMinecraftExceptionOutputIfNotInitializationTime(final String message) {
         return "The save folder for world " + this.shadow$getWorldDirectory() + " is being accessed from another location, aborting";
     }
 
     @ModifyArg(method = "checkSessionLock",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SessionLockException;<init>(Ljava/lang/String;)V", ordinal = 1, remap = false))
-    private String modifyMinecraftExceptionOutputIfIOException(String message) {
+    private String modifyMinecraftExceptionOutputIfIOException(final String message) {
         return "Failed to check session lock for world " + this.shadow$getWorldDirectory() + ", aborting";
     }
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
-    private void impl$saveSpongeLevelData(WorldInfo info, CompoundNBT compound, CallbackInfo ci) {
+    private void impl$saveSpongeLevelData(final WorldInfo info, final CompoundNBT compound, final CallbackInfo ci) {
         if (!Sponge.isServerAvailable() || !((WorldInfoBridge) info).bridge$isValid()) {
             return;
         }
@@ -150,7 +146,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
     }
 
     @Inject(method = "loadWorldInfo", at = @At("RETURN"))
-    private void impl$loadSpongeLevelDataBeforeVanilla(CallbackInfoReturnable<WorldInfo> cir) {
+    private void impl$loadSpongeLevelDataBeforeVanilla(final CallbackInfoReturnable<WorldInfo> cir) {
         if (!Sponge.isServerAvailable()) {
             return;
         }
@@ -199,68 +195,27 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
     /**
      * Redirects the {@link File#exists()} checking that if the file exists, grab
      * the file for later usage to read the file attributes for pre-existing data.
-     *
-     * @param localFile The local file
-     * @return True if the file exists
      */
     @Redirect(method = "readPlayerData", at = @At(value = "INVOKE", target = "Ljava/io/File;isFile()Z", remap = false))
-    private boolean impl$grabFileToField(File localFile) {
+    private boolean impl$grabFileToField(final File localFile) {
         final boolean isFile = localFile.isFile();
         this.impl$file = isFile ? localFile.toPath() : null;
         return isFile;
     }
 
-    /**
-     * Redirects the reader such that since the player file existed already, we can safely assume
-     * we can grab the file attributes and check if the first join time exists in the sponge compound,
-     * if it does not, then we add it to the sponge data part of the compound.
-     *
-     * @param inputStream The input stream to direct to compressed stream tools
-     * @return The compound that may be modified
-     * @throws IOException for reasons
-     */
-    @Redirect(method = "readPlayerData", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompressedStreamTools;readCompressed(Ljava/io/InputStream;)Lnet/minecraft/nbt/CompoundNBT;"))
-    private CompoundNBT impl$readLegacyDataAndOrSpongeData(InputStream inputStream) throws IOException {
-        Instant creation = this.impl$file == null ? Instant.now() : Files.readAttributes(this.impl$file, BasicFileAttributes.class).creationTime().toInstant();
-        final CompoundNBT compound = CompressedStreamTools.readCompressed(inputStream);
-        Instant lastPlayed = Instant.now();
-        // first try to migrate bukkit join data stuff
-        if (compound.contains(Constants.Bukkit.BUKKIT, Constants.NBT.TAG_COMPOUND)) {
-            final CompoundNBT bukkitCompound = compound.getCompound(Constants.Bukkit.BUKKIT);
-            creation = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_FIRST_PLAYED));
-            lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_LAST_PLAYED));
-        }
-        // migrate canary join data
-        if (compound.contains(Constants.Canary.ROOT, Constants.NBT.TAG_COMPOUND)) {
-            final CompoundNBT canaryCompound = compound.getCompound(Constants.Canary.ROOT);
-            creation = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.FIRST_JOINED));
-            lastPlayed = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.LAST_JOINED));
-        }
-        @Nullable UUID playerId = null;
-        if (compound.hasUniqueId(Constants.UUID)) {
-            playerId = compound.getUniqueId(Constants.UUID);
-        }
-        if (playerId != null) {
-            final SpongePlayerDataManager playerDataManager = ((SpongeServer) Sponge.getServer()).getPlayerDataManager();
-            final Optional<Instant> savedFirst = playerDataManager.getFirstJoined(playerId);
-            if (savedFirst.isPresent()) {
-                creation = savedFirst.get();
-            }
-            final Optional<Instant> savedJoined = playerDataManager.getLastPlayed(playerId);
-            if (savedJoined.isPresent()) {
-                lastPlayed = savedJoined.get();
-            }
-            playerDataManager.setPlayerInfo(playerId, creation, lastPlayed);
-        }
+    @Redirect(method = "readPlayerData", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;read(Lnet/minecraft/nbt/CompoundNBT;)V"))
+    private void impl$readSpongePlayerData(final PlayerEntity playerEntity, final CompoundNBT compound) throws IOException {
+        playerEntity.read(compound);
+        ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().readPlayerData(compound, null, this.impl$file == null ? null :
+                Files.readAttributes(this.impl$file, BasicFileAttributes.class).creationTime().toInstant());
         this.impl$file = null;
-        return compound;
     }
 
     @Inject(method = "writePlayerData",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/nbt/CompressedStreamTools;writeCompressed(Lnet/minecraft/nbt/CompoundNBT;Ljava/io/OutputStream;)V",
             shift = At.Shift.AFTER))
-    private void impl$saveSpongePlayerData(PlayerEntity player, CallbackInfo callbackInfo) {
+    private void impl$saveSpongePlayerData(final PlayerEntity player, final CallbackInfo callbackInfo) {
         ((SpongeServer) Sponge.getServer()).getPlayerDataManager().savePlayer(player.getUniqueID());
     }
 
@@ -270,7 +225,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
             target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
             remap = false),
         locals = LocalCapture.CAPTURE_FAILHARD)
-    private void impl$trackExceptionForLogging(PlayerEntity player, CallbackInfo ci, Exception exception) {
+    private void impl$trackExceptionForLogging(final PlayerEntity player, final CallbackInfo ci, final Exception exception) {
         this.impl$capturedException = exception;
     }
 
@@ -282,18 +237,9 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
             remap = false
         )
     )
-    private void impl$useStoredException(Logger logger, String message, Object param) {
+    private void impl$useStoredException(final Logger logger, final String message, final Object param) {
         logger.warn(message, param, this.impl$capturedException);
         this.impl$capturedException = null;
-    }
-
-    // SF overrides getWorldDirectory for mod compatibility.
-    // In order to avoid conflicts, we simply use another method to guarantee
-    // the sponge world directory is returned for the corresponding save handler.
-    // AnvilSaveHandlerMixin#getChunkLoader is one example where we must use this method.
-    @Override
-    public File bridge$getWorldDirectory() {
-        return this.shadow$getWorldDirectory();
     }
 
     private boolean impl$loadSpongeLevelData(final WorldInfo info, final Path levelFile, final boolean isCurrent) {

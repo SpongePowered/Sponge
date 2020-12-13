@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.placeholder.PlaceholderParser;
@@ -45,13 +45,13 @@ public final class PlaceholderParserStreamGenerator {
                         .key(ResourceKey.sponge("name"))
                         .parser(placeholderText -> placeholderText.getAssociatedObject()
                                 .filter(x -> x instanceof Nameable)
-                                .map(x -> TextComponent.of(((Nameable) x).getName()))
-                                .orElse(TextComponent.empty()))
+                                .map(x -> Component.text(((Nameable) x).getName()))
+                                .orElse(Component.empty()))
                         .build(),
                 new SpongePlaceholderParserBuilder()
                         .key(ResourceKey.sponge("current_world"))
                         .parser(placeholderText ->
-                                TextComponent.of(
+                                Component.text(
                                     placeholderText.getAssociatedObject().filter(x -> x instanceof Locatable)
                                         .map(x -> ((Locatable) x).getServerLocation().getWorldKey())
                                         .orElseGet(() -> Sponge.getServer().getWorldManager().getDefaultPropertiesKey()).toString()))

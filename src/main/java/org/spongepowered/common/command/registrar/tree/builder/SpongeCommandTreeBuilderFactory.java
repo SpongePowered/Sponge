@@ -29,11 +29,6 @@ import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
 public final class SpongeCommandTreeBuilderFactory implements CommandTreeNode.NodeFactory {
 
-    public final static SpongeCommandTreeBuilderFactory INSTANCE = new SpongeCommandTreeBuilderFactory();
-
-    private SpongeCommandTreeBuilderFactory() {
-    }
-
     @Override
     @NonNull
     public CommandTreeNode<CommandTreeNode.@NonNull Root> createRoot() {

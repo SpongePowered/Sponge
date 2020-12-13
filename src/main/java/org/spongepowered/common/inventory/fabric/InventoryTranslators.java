@@ -33,18 +33,18 @@ public class InventoryTranslators {
     private static final Map<Class<?>, InventoryTranslator<?>> fabricTranslators = new HashMap<>();
 
     static {
-        register(IInventory.class, new IInventoryTranslator());
+        InventoryTranslators.register(IInventory.class, new IInventoryTranslator());
     }
 
     public static void register(Class<?> inventoryInterface, InventoryTranslator<?> translator) {
-        fabricTranslators.put(inventoryInterface, translator);
+        InventoryTranslators.fabricTranslators.put(inventoryInterface, translator);
     }
 
     @SuppressWarnings("rawtypes")
     public static InventoryTranslator getTranslator(Class clazz) {
-        for (Class<?> registered : fabricTranslators.keySet()) {
+        for (Class<?> registered : InventoryTranslators.fabricTranslators.keySet()) {
             if (registered.isAssignableFrom(clazz)) {
-                return fabricTranslators.get(registered);
+                return InventoryTranslators.fabricTranslators.get(registered);
             }
         }
         throw new IllegalArgumentException("No Fabric Translator found for " + clazz);

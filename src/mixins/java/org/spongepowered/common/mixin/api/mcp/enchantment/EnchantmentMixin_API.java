@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.enchantment;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.util.ResourceLocation;
@@ -39,7 +38,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
@@ -115,7 +114,7 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public Component asComponent() {
-        return TranslatableComponent.of(this.shadow$getName(), this.shadow$isCurse() ? NamedTextColor.RED : NamedTextColor.GRAY);
+        return Component.translatable(this.shadow$getName(), this.shadow$isCurse() ? NamedTextColor.RED : NamedTextColor.GRAY);
     }
 
     @Override

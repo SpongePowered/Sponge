@@ -25,7 +25,9 @@
 package org.spongepowered.common.data.key;
 
 import com.google.common.base.Preconditions;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeFactory;
+import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
@@ -36,27 +38,40 @@ import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilder<Key<V>, Key.Builder<E, V>> implements Key.Builder<E, V> {
 
-    private static final TypeVariable<?> valueElementParameter = Value.class.getTypeParameters()[0];
-
-    @Nullable private TypeToken<V> valueToken;
+    private @Nullable Type valueType;
+    private @Nullable Type elementType;
     @Nullable private Comparator<? super E> comparator;
     @Nullable private BiPredicate<? super E, ? super E> includesTester;
 
     @Override
     public <T, B extends Value<T>> SpongeKeyBuilder<T, B> type(final TypeToken<B> token) {
-        Preconditions.checkNotNull(token);
-        this.valueToken = (TypeToken<V>) token;
+        Objects.requireNonNull(token);
+        this.valueType = token.getType();
+        final Type valueTypeAsSuper = GenericTypeReflector.getExactSuperType(this.valueType, Value.class);
+        if (!(valueTypeAsSuper instanceof ParameterizedType)) {
+            throw new IllegalArgumentException("Raw type " + this.valueType + " provided when registering Key " + this.key);
+        }
+        this.elementType = ((ParameterizedType) valueTypeAsSuper).getActualTypeArguments()[0];
         return (SpongeKeyBuilder<T, B>) this;
+    }
+
+    @Override public <T> Key.Builder<T, Value<T>> elementType(final Class<T> type) {
+        Objects.requireNonNull(type, "type");
+        this.valueType = TypeFactory.parameterizedClass(Value.class, type);
+        this.elementType = type;
+        return (SpongeKeyBuilder<T, Value<T>>) this;
     }
 
     @Override
@@ -81,9 +96,9 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
 
     @Override
     protected Key<V> build(final ResourceKey key) {
-        Preconditions.checkNotNull(this.valueToken, "The value token must be set");
+        Objects.requireNonNull(this.valueType, "The value type must be set");
+        Objects.requireNonNull(this.elementType, "The element type must be set");
 
-        final TypeToken<E> elementToken = (TypeToken<E>) this.valueToken.resolveType(valueElementParameter);
 
         BiPredicate<? super E, ? super E> includesTester = this.includesTester;
         if (includesTester == null) {
@@ -92,7 +107,7 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
 
         Comparator<? super E> comparator = this.comparator;
         if (comparator == null) {
-            if (Comparable.class.isAssignableFrom(elementToken.getRawType())) {
+            if (Comparable.class.isAssignableFrom(GenericTypeReflector.erase(this.elementType))) {
                 //noinspection unchecked
                 comparator = Comparator.comparing(o -> ((Comparable) o));
             } else {
@@ -108,20 +123,21 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
         }
 
         Supplier<E> defaultValueSupplier = () -> null;
-        if (ListValue.class.isAssignableFrom(this.valueToken.getRawType())) {
+        final Class<?> rawType = GenericTypeReflector.erase(this.valueType);
+        if (ListValue.class.isAssignableFrom(rawType)) {
             defaultValueSupplier = () -> (E) new ArrayList();
-        } else if (SetValue.class.isAssignableFrom(this.valueToken.getRawType())) {
+        } else if (SetValue.class.isAssignableFrom(rawType)) {
             defaultValueSupplier = () -> (E) new HashSet();
-        } else if (WeightedCollectionValue.class.isAssignableFrom(this.valueToken.getRawType())) {
+        } else if (WeightedCollectionValue.class.isAssignableFrom(rawType)) {
             defaultValueSupplier = () -> (E) new WeightedTable();
         }
 
-        return new SpongeKey<>(key, this.valueToken, elementToken, comparator, includesTester, defaultValueSupplier);
+        return new SpongeKey<>(key, this.valueType, this.elementType, comparator, includesTester, defaultValueSupplier);
     }
 
     @Override
     public Key.Builder<E, V> reset() {
-        this.valueToken = null;
+        this.valueType = null;
         this.includesTester = null;
         this.comparator = null;
         return super.reset();

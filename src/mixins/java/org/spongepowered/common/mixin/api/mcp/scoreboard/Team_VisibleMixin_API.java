@@ -46,7 +46,7 @@ public abstract class Team_VisibleMixin_API implements Visibility {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, String name, int idIn, CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name.toLowerCase());
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), enumName.toLowerCase());
     }
 
     @Override

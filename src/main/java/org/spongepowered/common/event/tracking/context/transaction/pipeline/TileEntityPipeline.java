@@ -34,7 +34,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
-import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -71,7 +70,7 @@ public final class TileEntityPipeline implements BlockPipeline {
         final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld de-referenced");
         final Supplier<Chunk> chunkSupplier = () -> Objects.requireNonNull(chunkRef.get(), "Chunk de-referenced");
         final Supplier<ChunkSection> chunkSectionSupplier = () -> Objects.requireNonNull(sectionRef.get(), "ChunkSection de-referenced");
-        return builder()
+        return TileEntityPipeline.builder()
             .chunk(chunkSupplier)
             .world(worldSupplier)
             .chunkSection(chunkSectionSupplier);

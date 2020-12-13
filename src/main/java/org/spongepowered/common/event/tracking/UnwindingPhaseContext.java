@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -39,27 +40,25 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
     }
 
     @Nullable
-    static UnwindingPhaseContext unwind(final IPhaseState<?> state, final PhaseContext<?> context, final boolean hasCaptures) {
-        if (!state.requiresPost() || !hasCaptures) {
+    static UnwindingPhaseContext unwind(final PhaseContext<@NonNull ?> context, final boolean hasCaptures) {
+        if (!context.requiresPost() || !hasCaptures) {
             return null;
         }
-        return new UnwindingPhaseContext(state, context)
+        return new UnwindingPhaseContext(context)
                 .source(context.getSource())
                 .addCaptures()
                 .addEntityDropCaptures()
                 .buildAndSwitch();
     }
 
-    private final IPhaseState<?> unwindingState;
-    private final PhaseContext<?> unwindingContext;
-    private boolean hasGotten = true;
+    private final IPhaseState<@NonNull ?> unwindingState;
+    private final PhaseContext<@NonNull ?> unwindingContext;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private UnwindingPhaseContext(final IPhaseState<?> unwindingState, final PhaseContext<?> unwindingContext) {
+    private UnwindingPhaseContext(final PhaseContext<@NonNull ?> unwindingContext) {
         super(GeneralPhase.Post.UNWINDING, unwindingContext.createdTracker);
-        this.unwindingState = unwindingState;
+        this.unwindingState = unwindingContext.state;
         this.unwindingContext = unwindingContext;
-        this.setBlockEvents(((IPhaseState) unwindingState).doesBlockEventTracking(unwindingContext));
+        this.setBlockEvents(unwindingContext.doesBlockEventTracking());
         // Basically put, the post state needs to understand that if we're expecting potentially chained block changes
         // to worlds, AND we're potentially getting any neighbor notification requests OR tile entity requests,
         // we'll need to switch on to capture such objects. If for example, we do not track tile changes, but we track

@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import org.spongepowered.api.scoreboard.CollisionRule;
@@ -44,7 +43,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
-public class SpongeTeamBuilder implements Team.Builder {
+public final class SpongeTeamBuilder implements Team.Builder {
 
     @Nullable private String name;
     @Nullable private Component displayName;
@@ -67,7 +66,7 @@ public class SpongeTeamBuilder implements Team.Builder {
         this.name = checkNotNull(name, "Name cannot be null!");
         checkState(name.length() < 17, "Name is " + name.length() + " characters long! It must be at most 16.");
         if (this.displayName == null) {
-            this.displayName = TextComponent.of(this.name);
+            this.displayName = Component.text(this.name);
         }
         return this;
     }
@@ -159,8 +158,8 @@ public class SpongeTeamBuilder implements Team.Builder {
         this.name = null;
         this.displayName = null;
         this.color = NamedTextColor.WHITE;
-        this.prefix = TextComponent.empty();
-        this.suffix = TextComponent.empty();
+        this.prefix = Component.empty();
+        this.suffix = Component.empty();
         this.allowFriendlyFire = false;
         this.showFriendlyInvisibles = false;
         this.nameTagVisibility = Visibilities.ALWAYS;

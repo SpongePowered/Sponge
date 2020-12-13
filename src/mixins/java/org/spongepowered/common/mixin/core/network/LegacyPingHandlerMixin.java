@@ -115,7 +115,7 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
         final int i = buf.readableBytes();
         switch (i) {
             case 0:
-                LOGGER.debug("Ping: (<=1.3) from {}:{}", client.getAddress(), client.getPort());
+                LegacyPingHandlerMixin.LOGGER.debug("Ping: (<=1.3) from {}:{}", client.getAddress(), client.getPort());
 
                 response = SpongeStatusResponse.postLegacy(server, client, SpongeLegacyMinecraftVersion.V1_3, null);
                 if (response != null) {
@@ -133,7 +133,7 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
                     return false;
                 }
 
-                LOGGER.debug("Ping: (1.4-1.5) from {}:{}", client.getAddress(), client.getPort());
+                LegacyPingHandlerMixin.LOGGER.debug("Ping: (1.4-1.5) from {}:{}", client.getAddress(), client.getPort());
 
                 response = SpongeStatusResponse.postLegacy(server, client, SpongeLegacyMinecraftVersion.V1_5, null);
                 if (response != null) {
@@ -175,7 +175,7 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
                 final String host = buf.readBytes(length * 2).toString(Charsets.UTF_16BE);
                 final int port = buf.readInt();
 
-                LOGGER.debug("Ping: (1.6) from {}:{}", client.getAddress(), client.getPort());
+                LegacyPingHandlerMixin.LOGGER.debug("Ping: (1.6) from {}:{}", client.getAddress(), client.getPort());
 
                 response =
                         SpongeStatusResponse.postLegacy(server, client,

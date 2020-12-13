@@ -25,16 +25,17 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.util.Constants;
 
 public final class ItemStackDataProviders extends DataProviderRegistratorBuilder {
 
-    public ItemStackDataProviders(final DataProviderRegistry registry) {
-        super(registry);
+    public ItemStackDataProviders() {
+        super(Constants.Sponge.Entity.DataRegistration.ITEMSTACK);
     }
 
     @Override
-    public void register() {
+    public void registerProviders() {
+        AbstractBannerItemStackData.register(this.registrator);
         ArmorItemStackData.register(this.registrator);
         BlockItemStackData.register(this.registrator);
         BlockTypeItemStackData.register(this.registrator);
@@ -51,5 +52,6 @@ public final class ItemStackDataProviders extends DataProviderRegistratorBuilder
         SkullItemStackData.register(this.registrator);
         TieredItemStackData.register(this.registrator);
         ToolItemStackData.register(this.registrator);
+        WoolItemStackData.register(this.registrator);
     }
 }

@@ -39,6 +39,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -135,7 +136,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
                         PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
                     }
                     if (inventoryEvent instanceof SpawnEntityEvent) {
-                        processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
+                        PacketState.processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
                     } else {
 //                        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
 //                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);

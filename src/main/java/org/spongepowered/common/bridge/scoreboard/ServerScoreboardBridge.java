@@ -24,14 +24,44 @@
  */
 package org.spongepowered.common.bridge.scoreboard;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
+import org.spongepowered.api.scoreboard.Team;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
+import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
+import org.spongepowered.api.scoreboard.objective.Objective;
+
+import java.util.Optional;
+import java.util.Set;
+
+import javax.annotation.Nullable;
 
 public interface ServerScoreboardBridge {
 
     void bridge$addPlayer(ServerPlayerEntity player, boolean sendPackets);
 
     void bridge$removePlayer(ServerPlayerEntity player, boolean sendPackets);
+
+    Optional<Objective> bridge$getObjective(String name);
+
+    void bridge$addObjective(Objective objective);
+
+    void bridge$updateDisplaySlot(@Nullable Objective objective, DisplaySlot displaySlot) throws IllegalStateException;
+
+    Optional<Objective> bridge$getObjective(DisplaySlot slot);
+
+    Set<Objective> bridge$getObjectivesByCriterion(Criterion criterion);
+
+    void bridge$removeObjective(Objective objective);
+
+    void bridge$registerTeam(Team spongeTeam);
+
+    Set<org.spongepowered.api.scoreboard.Score> bridge$getScores();
+
+    Set<org.spongepowered.api.scoreboard.Score> bridge$getScores(Component name);
+
+    void bridge$removeScores(Component name);
 
     void bridge$sendToPlayers(IPacket<?> packet);
 }

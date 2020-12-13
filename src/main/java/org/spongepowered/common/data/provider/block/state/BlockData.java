@@ -38,16 +38,16 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
-import org.spongepowered.api.data.type.MatterStates;
+import org.spongepowered.api.data.type.MatterTypes;
 import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.accessor.block.BlockAccessor;
 import org.spongepowered.common.accessor.block.FireBlockAccessor;
 import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Collections;
 
@@ -69,6 +69,10 @@ public final class BlockData {
                             }
                             return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)));
                         })
+                        .supports(h -> h.has(ChestBlock.TYPE))
+                    .create(Keys.DYE_COLOR)
+                        .get(h -> ((DyeColorBlockBridge) h.getBlock()).bridge$getDyeColor().orElse(null))
+                        .supports(h -> h.getBlock() instanceof DyeColorBlockBridge)
                     .create(Keys.HARDNESS)
                         .get(h -> (double) ((BlockAccessor) h.getBlock()).accessor$getBlockHardness())
                     .create(Keys.HELD_ITEM)
@@ -96,14 +100,14 @@ public final class BlockData {
                         .get(h -> ((BlockBridge) h.getBlock()).bridge$isDummy())
                     .create(Keys.LIGHT_EMISSION)
                         .get(BlockState::getLightValue)
-                    .create(Keys.MATTER_STATE)
+                    .create(Keys.MATTER_TYPE)
                         .get(h -> {
                             if (h.getBlock() instanceof FlowingFluidBlock) {
-                                return MatterStates.LIQUID.get();
+                                return MatterTypes.LIQUID.get();
                             } else if (h.getMaterial() == Material.AIR) {
-                                return MatterStates.GAS.get();
+                                return MatterTypes.GAS.get();
                             } else {
-                                return MatterStates.SOLID.get();
+                                return MatterTypes.SOLID.get();
                             }
                         })
                     .create(Keys.REPRESENTED_INSTRUMENT)

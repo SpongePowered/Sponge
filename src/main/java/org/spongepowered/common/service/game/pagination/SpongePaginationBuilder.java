@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.pagination.PaginationList;
 
@@ -37,7 +36,7 @@ import javax.annotation.Nullable;
 
 public final class SpongePaginationBuilder implements PaginationList.Builder {
 
-    private static final @NonNull TextComponent EQUALS_TEXT = TextComponent.of("=");
+    private static final @NonNull Component EQUALS_TEXT = Component.text("=");
 
     private final SpongePaginationService service;
     @Nullable

@@ -1,0 +1,68 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ api-8 ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ${{ github.workspace}}/buildSrc/.gradle/caches
+            ${{ github.workspace}}/build/fg_cache
+            ${{ github.workspace}}/forge/build/fg_cache
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Setup workspace
+        run : |
+          echo "GIT_COMMIT=${GITHUB_SHA}" >> $GITHUB_ENV
+          echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+      - name: Build with Gradle
+        run: |
+          ./gradlew -PenableTestPlugins=true -PenableSpongeForge=true -s build
+        env:
+          CI_SYSTEM: Github Actions
+      - name: Add artifacts to build
+        uses: actions/upload-artifact@v2
+        with:
+          name: Sponge Jars
+          path: |
+            ${{ github.workspace }}/SpongeAPI/build/libs/*.jar
+            ${{ github.workspace }}/build/libs/*.jar
+            ${{ github.workspace }}/vanilla/build/libs/*.jar
+      - name: SpongeVanilla Production Jar
+        uses: actions/upload-artifact@v2
+        with:
+          name: SpongeVanilla Production Jar
+          path: ${{ github.workspace }}/vanilla/build/libs/*-universal.jar
+      # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
+      # the publishing section of your build.gradle
+      - name: Publish to Sponge Maven & GitHub Packages
+        run: ./gradlew -s -PenableSpongeForge=true :publish :SpongeVanilla:publish :SpongeForge:publish
+        env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ORG_GRADLE_PROJECT_spongeSnapshotRepo: ${{ secrets.SPONGE_MAVEN_SNAPSHOT_REPO_URL }}
+          ORG_GRADLE_PROJECT_spongeReleaseRepo: ${{ secrets.SPONGE_MAVEN_RELEASE_REPO_URL }}
+          ORG_GRADLE_PROJECT_spongeUsername: ${{ secrets.SPONGE_MAVEN_REPO_USER }}
+          ORG_GRADLE_PROJECT_spongePassword: ${{ secrets.SPONGE_MAVEN_REPO_PASSWORD }}
+
+

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
@@ -36,10 +34,9 @@ import org.spongepowered.api.data.value.ValueContainer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-public class ImmutableDataManipulatorFactory implements DataManipulator.Immutable.Factory {
-
-    public static final DataManipulator.Immutable.Factory INSTANCE = new ImmutableDataManipulatorFactory();
+public final class ImmutableDataManipulatorFactory implements DataManipulator.Immutable.Factory {
 
     @Override
     public DataManipulator.Immutable of() {
@@ -54,7 +51,7 @@ public class ImmutableDataManipulatorFactory implements DataManipulator.Immutabl
 
     @Override
     public DataManipulator.Immutable of(final ValueContainer valueContainer) {
-        checkNotNull(valueContainer, "valueContainer");
+        Objects.requireNonNull(valueContainer);
         if (valueContainer instanceof DataManipulator.Immutable) {
             return (DataManipulator.Immutable) valueContainer;
         }

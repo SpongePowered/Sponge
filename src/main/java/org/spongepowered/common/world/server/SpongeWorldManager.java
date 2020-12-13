@@ -37,6 +37,7 @@ import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.storage.WorldProperties;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.UUID;
 
@@ -55,6 +56,8 @@ public interface SpongeWorldManager extends WorldManager {
 
     @Nullable
     ServerWorld getWorld0(final ResourceKey key);
+
+    void unloadWorld0(final ServerWorld world) throws IOException;
 
     @Nullable
     ServerWorld getDefaultWorld();

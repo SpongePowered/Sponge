@@ -53,6 +53,7 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -61,15 +62,11 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.chunk.Chunk;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -77,7 +74,6 @@ import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketA
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
@@ -87,11 +83,11 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
@@ -127,6 +123,8 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Shadow public abstract Dimension shadow$getDimension();
     @Shadow public abstract Random shadow$getRandom();
     @Shadow public abstract boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<BlockState> p_217375_2_);
+    @Shadow public abstract void shadow$setTileEntity(BlockPos pos, @javax.annotation.Nullable TileEntity tileEntityIn);
+    @Shadow public abstract void removeTileEntity(BlockPos pos);
 
     private Context impl$context;
 
@@ -149,9 +147,8 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
         }
         final BlockPos pos = new BlockPos(x, y, z);
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
-        builder
-                .world(((ServerWorld) this).getKey())
-                .position(new Vector3i(x, y, z));
+        builder.world((ServerWorld) (Object) this)
+               .position(new Vector3i(x, y, z));
         final net.minecraft.world.chunk.Chunk chunk = this.shadow$getChunkAt(pos);
         final net.minecraft.block.BlockState state = chunk.getBlockState(pos);
         builder.blockState(state);
@@ -267,22 +264,22 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     }
 
     @Override
-    public void playMusicDisc(Vector3i position, MusicDisc musicDiscType) {
+    public void playMusicDisc(final Vector3i position, final MusicDisc musicDiscType) {
         this.api$playRecord(position, Preconditions.checkNotNull(musicDiscType, "recordType"));
     }
 
     @Override
-    public void playMusicDisc(Vector3i position, Supplier<? extends MusicDisc> musicDiscType) {
+    public void playMusicDisc(final Vector3i position, final Supplier<? extends MusicDisc> musicDiscType) {
         this.playMusicDisc(position, musicDiscType.get());
     }
 
     @Override
-    public void stopMusicDisc(Vector3i position) {
+    public void stopMusicDisc(final Vector3i position) {
         this.api$playRecord(position, null);
     }
 
     @Override
-    public void sendBlockChange(int x, int y, int z, org.spongepowered.api.block.BlockState state) {
+    public void sendBlockChange(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState state) {
         Preconditions.checkNotNull(state, "state");
         final SChangeBlockPacket packet = new SChangeBlockPacket();
         ((SChangeBlockPacketAccessor) packet).accessor$setPos(new BlockPos(x, y, z));
@@ -295,8 +292,8 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     }
 
     @Override
-    public void resetBlockChange(int x, int y, int z) {
-        SChangeBlockPacket packet = new SChangeBlockPacket((IWorldReader) this, new BlockPos(x, y, z));
+    public void resetBlockChange(final int x, final int y, final int z) {
+        final SChangeBlockPacket packet = new SChangeBlockPacket((IWorldReader) this, new BlockPos(x, y, z));
 
         ((net.minecraft.world.World) (Object) this).getPlayers().stream()
                 .filter(ServerPlayerEntity.class::isInstance)
@@ -353,5 +350,12 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Override
     public boolean isSurfaceWorld() {
         return this.shadow$getDimension().isSurfaceWorld();
+    }
+
+    @Override
+    public void addBlockEntity(final int x, final int y, final int z, final BlockEntity blockEntity) {
+        Objects.requireNonNull(blockEntity, "BlockEntity cannot be null!");
+        final TileEntity tileEntity = (TileEntity) blockEntity;
+        this.shadow$setTileEntity(new BlockPos(x, y, z), tileEntity);
     }
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.brigadier.dispatcher;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.RedirectModifier;
@@ -60,6 +61,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 // For use on the Brigadier dispatcher
 public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSource> {
@@ -107,22 +109,24 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
     public int execute(final StringReader input, final CommandSource source) throws CommandSyntaxException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final CommandSourceBridge sourceBridge = (CommandSourceBridge) source;
-            frame.pushCause(sourceBridge.bridge$getICommandSource());
-            frame.addContext(EventContextKeys.COMMAND, input.getString());
-            return ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).process(sourceBridge.bridge$asCommandCause(), input.getRemaining()).getResult();
+            frame.addContext(EventContextKeys.COMMAND.get(), input.getString());
+            sourceBridge.bridge$updateFrameFromICommandSource(frame);
+            return ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).process(sourceBridge.bridge$withCurrentCause(), input.getRemaining()).getResult();
         } catch (final CommandException e) {
-            throw new net.minecraft.command.CommandException(SpongeAdventure.asVanilla(e.getText()));
+            throw new net.minecraft.command.CommandException(SpongeAdventure.asVanilla(e.componentMessage()));
         }
     }
 
     public int execute(final ParseResults<CommandSource> parse) throws CommandSyntaxException {
         if (parse.getReader().canRead()) {
+            // TODO plugin exception handling here
             if (parse.getExceptions().size() == 1) {
                 throw parse.getExceptions().values().iterator().next();
             } else if (parse.getContext().getRange().isEmpty()) {
                 throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(parse.getReader());
             } else {
                 throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parse.getReader());
+//                throw new SimpleCommandExceptionType(new LiteralMessage("Too many arguments")).createWithContext(parse.getReader());
             }
         }
 
@@ -232,17 +236,16 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         final Collection<? extends CommandNode<CommandSource>> nodes;
         if (isSuggestion && node instanceof SpongeNode) {
             nodes = ((SpongeNode) node).getRelevantNodesForSuggestions(originalReader);
-        } else {
+        } else if (originalReader.canRead()) {
             nodes = node.getRelevantNodes(originalReader);
+        } else { // Reader cannot read anymore so ONLY nodes with parsers that do not read can be processed
+            nodes = node.getChildren().stream().filter(n -> n instanceof SpongeArgumentCommandNode &&
+                    ((SpongeArgumentCommandNode<?>) n).getParser().doesNotRead()).collect(Collectors.toList());
         }
 
         for (final CommandNode<CommandSource> child : nodes) {
             final boolean doesNotRead =
                     child instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) child).getParser().doesNotRead();
-            // If we've got a potential result, don't try a default.
-            if (doesNotRead && potentials != null) {
-                continue;
-            }
             // We need to do a little more scaffolding for permissions
             // if (!child.canUse(source)) {
             if (!SpongeNodePermissionCache.canUse(isRoot, this, child, source)) {
@@ -306,7 +309,13 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                     childContext.applySpongeElementsTo(context, true);
                     // Sponge End
                     context.withChild(parse.getContext());
-                    return new ParseResults<>(context, parse.getReader(), parse.getExceptions());
+                    final ParseResults<CommandSource> parse2 = new ParseResults<>(context, parse.getReader(), parse.getExceptions());
+                    if (doesNotRead && potentials != null) {
+                        // If this is a optional or default parameter we only add the redirect as a potential option
+                        potentials.add(parse2);
+                        continue;
+                    }
+                    return parse2;
                 } else {
                     final ParseResults<CommandSource> parse = this.parseNodes(false, isSuggestion, child, reader, context);
                     if (potentials == null) {
@@ -337,6 +346,17 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                     if (!a.getExceptions().isEmpty() && b.getExceptions().isEmpty()) {
                         return 1;
                     }
+                    // If we get here both potentials parsed everything and there was no exception
+                    // BUT if parsing stopped at a non-terminal node this will cause an error later
+                    // see at the end of #execute() where !foundCommand
+                    // Instead we attempt to sort commands before that happens
+                    final Command<CommandSource> aCommand = SpongeCommandDispatcher.getCommand(a.getContext());
+                    final Command<CommandSource> bCommand = SpongeCommandDispatcher.getCommand(b.getContext());
+                    if (aCommand == null && bCommand != null) {
+                        return 1;
+                    } else if (aCommand != null && bCommand == null) {
+                        return -1;
+                    }
                     return 0;
                 });
             }
@@ -344,6 +364,14 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         }
 
         return new ParseResults<>(contextSoFar, originalReader, errors == null ? Collections.emptyMap() : errors);
+    }
+
+    private static Command<CommandSource> getCommand(CommandContextBuilder<CommandSource> context) {
+        final Command<CommandSource> command = context.getCommand();
+        if (command == null && context.getChild() != null) {
+            return SpongeCommandDispatcher.getCommand(context.getChild());
+        }
+        return command;
     }
 
     @Override

@@ -47,11 +47,11 @@ public final class DirectionFacingProvider {
         .build();
 
     public Optional<net.minecraft.util.Direction> get(Direction key) {
-        return Optional.ofNullable(directionMap.get(checkNotNull(key)));
+        return Optional.ofNullable(DirectionFacingProvider.directionMap.get(checkNotNull(key)));
     }
 
     public Optional<Direction> getKey(net.minecraft.util.Direction value) {
-        return Optional.ofNullable(directionMap.inverse().get(checkNotNull(value)));
+        return Optional.ofNullable(DirectionFacingProvider.directionMap.inverse().get(checkNotNull(value)));
     }
 
     DirectionFacingProvider() { }

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.util;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.EntityDamageSource;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -34,13 +35,13 @@ import javax.annotation.Nullable;
 @Mixin(EntityDamageSource.class)
 public abstract class EntityDamageSourceMixin extends DamageSourceMixin {
 
-    @Shadow @Nullable protected net.minecraft.entity.Entity damageSourceEntity;
+    @Shadow @Final @Nullable protected net.minecraft.entity.Entity damageSourceEntity;
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper("EntityDamageSource")
             .add("Name", this.damageType)
-            .add("Type", this.impl$damageType.getKey().toString())
+            .add("Type", this.impl$damageType.get().getKey().toString())
             .add("Source", this.damageSourceEntity)
             .toString();
     }

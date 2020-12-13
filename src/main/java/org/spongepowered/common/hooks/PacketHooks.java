@@ -26,6 +26,7 @@ package org.spongepowered.common.hooks;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SJoinGamePacket;
+import net.minecraft.network.play.server.SRespawnPacket;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
@@ -38,5 +39,10 @@ public interface PacketHooks {
 
         return new SJoinGamePacket(entity.getEntityId(), gameType, seed, hardcoreMode, dimensionType, maxPlayers, worldType, viewDistance,
                 reducedDebugInfo, enableRespawnScreen);
+    }
+
+    default SRespawnPacket createSRespawnPacket(final ServerPlayerEntity entity, final DimensionType dimensionType, final long seed,
+            final WorldType worldType, final GameType gameType) {
+        return new SRespawnPacket(dimensionType, seed, worldType, gameType);
     }
 }

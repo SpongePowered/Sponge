@@ -32,6 +32,8 @@ import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.ISuggestionProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Objects;
+
 public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentCommandNode<ISuggestionProvider, T> implements ForcedRedirectNode {
 
     @Nullable private CommandNode<ISuggestionProvider> forcedRedirect = null;
@@ -51,6 +53,27 @@ public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentComma
     @Override
     public CommandNode<ISuggestionProvider> getRedirect() {
         return this.forcedRedirect;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), this.forcedRedirect, this.getCustomSuggestions());
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        final ForcedRedirectArgumentSuggestionNode<?> that = (ForcedRedirectArgumentSuggestionNode<?>) o;
+        return Objects.equals(this.forcedRedirect, that.forcedRedirect)
+                && Objects.equals(this.getCustomSuggestions(), that.getCustomSuggestions());
     }
 
 }

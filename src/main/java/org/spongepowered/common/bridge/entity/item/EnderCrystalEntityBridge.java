@@ -33,6 +33,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public interface EnderCrystalEntityBridge {
 
     @Nullable
-    Explosion bridge$throwEventWithDetonation(World world, @Nullable Entity nil, double x,
+    Explosion bridge$throwExplosionEventAndExplode(World world, @Nullable Entity nil, double x,
         double y, double z, boolean smoking, @Nullable DamageSource source);
 }

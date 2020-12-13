@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.command.registrar;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -50,7 +49,7 @@ import java.util.Optional;
  */
 public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command.Raw> {
 
-    private static final TypeToken<Command.Raw> COMMAND_TYPE = TypeToken.of(Command.Raw.class);
+    private static final TypeToken<Command.Raw> COMMAND_TYPE = TypeToken.get(Command.Raw.class);
     private static final ResourceKey CATALOG_KEY = ResourceKey.sponge("raw");
     public static final SpongeRawCommandRegistrar INSTANCE = new SpongeRawCommandRegistrar();
 
@@ -86,7 +85,7 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
         if (commandToExecute.canExecute(cause)) {
             return commandToExecute.process(cause, arguments);
         }
-        throw new CommandPermissionException(TextComponent.of("You do not have permission to run /" + command));
+        throw new CommandPermissionException(Component.text("You do not have permission to run /" + command));
     }
 
     @Override

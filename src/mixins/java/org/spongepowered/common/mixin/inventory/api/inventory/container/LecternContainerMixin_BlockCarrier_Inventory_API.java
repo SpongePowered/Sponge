@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.inventory.api.inventory.container;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.LecternContainer;
+import net.minecraft.tileentity.LecternTileEntity;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
@@ -34,14 +35,26 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
 
+import java.lang.reflect.Field;
+
 @Mixin(LecternContainer.class)
 public abstract class LecternContainerMixin_BlockCarrier_Inventory_API implements DefaultSingleBlockCarrier {
 
     @Shadow @Final private IInventory lecternInventory;
+    private LecternTileEntity impl$lectern;
 
     @Override
     public ServerLocation getLocation() {
-        return ((BlockEntity) this.lecternInventory).getServerLocation();
+        if (this.impl$lectern == null) {
+            try {
+                final Field field = this.lecternInventory.getClass().getDeclaredField("this$0");
+                field.setAccessible(true);
+                this.impl$lectern = (LecternTileEntity) field.get(this.lecternInventory);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return ((BlockEntity) this.impl$lectern).getServerLocation();
     }
 
     @Override

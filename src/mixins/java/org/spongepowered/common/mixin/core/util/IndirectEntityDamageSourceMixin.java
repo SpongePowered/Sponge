@@ -44,7 +44,7 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
 
     @Shadow @Final @Mutable @Nullable private Entity indirectEntity;
 
-    @Shadow @Nullable public abstract Entity getImmediateSource();
+    @Shadow @Nullable public abstract Entity shadow$getImmediateSource();
 
     @Nullable private User impl$creator;
 
@@ -64,8 +64,8 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
     public String toString() {
         final MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper("IndirectEntityDamageSource")
             .add("Name", this.damageType)
-            .add("Type", this.impl$damageType.getKey().toString())
-            .add("Source", this.getImmediateSource())
+            .add("Type", this.impl$damageType.get().getKey().toString())
+            .add("Source", this.shadow$getImmediateSource())
             .add("IndirectSource", this.shadow$getTrueSource());
         if (this.impl$creator != null) {
             helper.add("SourceOwner", this.impl$creator);

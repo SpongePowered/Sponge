@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.PaneBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionalUtils;
+import org.spongepowered.common.util.DirectionalUtil;
 
 public final class PaneData {
 
@@ -40,8 +40,8 @@ public final class PaneData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
-                        .get(h -> DirectionalUtils.getHorizontalFrom(h, PaneBlock.EAST, PaneBlock.WEST, PaneBlock.NORTH, PaneBlock.SOUTH))
-                        .set((h, v) -> DirectionalUtils.setHorizontal(h, v, PaneBlock.EAST, PaneBlock.WEST, PaneBlock.NORTH, PaneBlock.SOUTH))
+                        .get(h -> DirectionalUtil.getHorizontalFrom(h, PaneBlock.EAST, PaneBlock.WEST, PaneBlock.NORTH, PaneBlock.SOUTH))
+                        .set((h, v) -> DirectionalUtil.setHorizontal(h, v, PaneBlock.EAST, PaneBlock.WEST, PaneBlock.NORTH, PaneBlock.SOUTH))
                         .supports(h -> h.getBlock() instanceof PaneBlock)
                     .create(Keys.IS_CONNECTED_EAST)
                         .get(h -> h.get(PaneBlock.EAST))

@@ -38,39 +38,39 @@ public final class PerWorldBorderListener implements IBorderListener {
     }
 
     @Override
-    public void onSizeChanged(WorldBorder border, double newSize) {
+    public void onSizeChanged(final WorldBorder border, final double newSize) {
         this.sendWorldBorderActionPacket(border, SWorldBorderPacket.Action.SET_SIZE);
     }
 
     @Override
-    public void onTransitionStarted(WorldBorder border, double oldSize, double newSize, long time) {
+    public void onTransitionStarted(final WorldBorder border, final double oldSize, final double newSize, final long time) {
         this.sendWorldBorderActionPacket(border, SWorldBorderPacket.Action.LERP_SIZE);
     }
 
     @Override
-    public void onCenterChanged(WorldBorder border, double x, double z) {
+    public void onCenterChanged(final WorldBorder border, final double x, final double z) {
         this.sendWorldBorderActionPacket(border, SWorldBorderPacket.Action.SET_CENTER);
     }
 
     @Override
-    public void onWarningTimeChanged(WorldBorder border, int newTime) {
+    public void onWarningTimeChanged(final WorldBorder border, final int newTime) {
         this.sendWorldBorderActionPacket(border, SWorldBorderPacket.Action.SET_WARNING_TIME);
     }
 
     @Override
-    public void onWarningDistanceChanged(WorldBorder border, int newDistance) {
+    public void onWarningDistanceChanged(final WorldBorder border, final int newDistance) {
         this.sendWorldBorderActionPacket(border, SWorldBorderPacket.Action.SET_WARNING_BLOCKS);
     }
 
     @Override
-    public void onDamageAmountChanged(WorldBorder border, double newAmount) {
+    public void onDamageAmountChanged(final WorldBorder border, final double newAmount) {
     }
 
     @Override
-    public void onDamageBufferChanged(WorldBorder border, double newSize) {
+    public void onDamageBufferChanged(final WorldBorder border, final double newSize) {
     }
 
-    private void sendWorldBorderActionPacket(WorldBorder border, SWorldBorderPacket.Action action) {
+    private void sendWorldBorderActionPacket(final WorldBorder border, final SWorldBorderPacket.Action action) {
         final SWorldBorderPacket packet = new SWorldBorderPacket(border, action);
         this.world.getPlayers().forEach(player -> player.connection.sendPacket(packet));
     }

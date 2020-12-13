@@ -25,25 +25,45 @@
 package org.spongepowered.common.world.schematic;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.common.SpongeCatalogType;
 
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class SpongePaletteType<T extends CatalogType> extends SpongeCatalogType implements PaletteType<T> {
+public class SpongePaletteType<T> extends SpongeCatalogType implements PaletteType<T> {
 
     private final Supplier<? extends Palette<T>> builder;
+    private final Function<T, String> encoder;
+    private final Function<String, Optional<T>> decoder;
 
-    public SpongePaletteType(final ResourceKey id, final Supplier<? extends Palette<T>> builder) {
+    public SpongePaletteType(
+        final ResourceKey id,
+        final Supplier<? extends Palette<T>> builder,
+        final Function<T, String> encoder,
+        final Function<String, Optional<T>> decoder
+    ) {
         super(id);
         this.builder = builder;
+        this.encoder = encoder;
+        this.decoder = decoder;
     }
 
     @Override
     public Palette<T> create() {
         return this.builder.get();
+    }
+
+    @Override
+    public Function<T, String> getEncoder() {
+        return this.encoder;
+    }
+
+    @Override
+    public Function<String, Optional<T>> getDecoder() {
+        return this.decoder;
     }
 
 }

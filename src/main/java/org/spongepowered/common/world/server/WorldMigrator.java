@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.world.server;
 
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import org.apache.commons.io.FileUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.util.file.CopyFileVisitor;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -59,18 +60,18 @@ public final class WorldMigrator {
 
         if (Files.exists(bukkitYml)) {
             try {
-                final ConfigurationNode node = YAMLConfigurationLoader.builder().setPath(bukkitYml).build().load();
-                final String containerCandidate = node.getNode("settings", "world-container").getString("");
+                final ConfigurationNode node = YamlConfigurationLoader.builder().path(bukkitYml).build().load();
+                final String containerCandidate = node.node("settings", "world-container").getString("");
                 if (!containerCandidate.isEmpty()) {
                     try {
-                        worldContainer = Paths.get(worldContainer.toString()).resolve(containerCandidate);
-                    } catch (InvalidPathException ipe) {
+                        worldContainer = worldContainer.resolve(containerCandidate);
+                    } catch (final InvalidPathException ipe) {
                         SpongeCommon.getLogger().warn("Cannot use path [{}] specified under [world-container] in bukkit"
                                 + ".yml. Will use [{}] instead.", containerCandidate, worldContainer, ipe);
                     }
                 }
-            } catch (IOException ioe) {
-                SpongeCommon.getLogger().warn("Cannot load bukkit.yml. Will use [{}] instead.", worldContainer, ioe);
+            } catch (final ConfigurateException ex) {
+                SpongeCommon.getLogger().warn("Cannot load bukkit.yml. Will use [{}] instead.", worldContainer, ex);
             }
         }
 
@@ -85,7 +86,7 @@ public final class WorldMigrator {
     public static void migrateWorldsTo(Path worldContainer) {
         SpongeCommon.getLogger().info("Checking for worlds that need to be migrated...");
 
-        final Path oldWorldContainer = getOldWorldContainer();
+        final Path oldWorldContainer = WorldMigrator.getOldWorldContainer();
         final List<Path> migrated = new ArrayList<>();
 
         if (Files.exists(oldWorldContainer)) {
@@ -94,16 +95,16 @@ public final class WorldMigrator {
                     entry -> !entry.getFileName().equals(worldContainer.getFileName()) && Files.exists(entry.resolve("level.dat")) && !Files
                             .exists(entry.resolve("level_sponge.dat")))) {
                 for (Path oldWorldPath : stream) {
-                    Path worldPath = worldContainer.resolve(getVanillaNetherOrEndName(oldWorldPath));
+                    Path worldPath = worldContainer.resolve(WorldMigrator.getVanillaNetherOrEndName(oldWorldPath));
 
                     // Only copy over the old world files if we don't have it already.
                     if (Files.notExists(worldPath)) {
                         SpongeCommon.getLogger().info("Migrating [{}] from [{}].", oldWorldPath.getFileName(), oldWorldContainer);
                         try {
-                            worldPath = renameToVanillaNetherOrEnd(worldContainer, oldWorldPath, worldPath);
+                            worldPath = WorldMigrator.renameToVanillaNetherOrEnd(worldContainer, oldWorldPath, worldPath);
                             Files.walkFileTree(oldWorldPath, new CopyFileVisitor(worldPath));
-                            fixInnerNetherOrEndRegionData(worldPath);
-                            removeInnerNameFolder(worldPath);
+                            WorldMigrator.fixInnerNetherOrEndRegionData(worldPath);
+                            WorldMigrator.removeInnerNameFolder(worldPath);
                             migrated.add(worldPath);
                         } catch (IOException ioe) {
                             SpongeCommon.getLogger().warn("Failed to migrate [{}] from [{}] to [{}]", oldWorldPath.getFileName(), oldWorldContainer,
@@ -234,13 +235,13 @@ public final class WorldMigrator {
      * @return The corrected path or the original path if un-needed
      */
     private static Path renameToVanillaNetherOrEnd(Path worldContainer, Path oldWorldPath, Path worldPath) {
-        final String newName = getVanillaNetherOrEndName(oldWorldPath);
+        final String newName = WorldMigrator.getVanillaNetherOrEndName(oldWorldPath);
         final Path newWorldPath = worldContainer.resolve(newName);
 
         // We only rename the Nether/The_End folder if the prefix matches the worldContainer directory name
         // Ex. If worldContainer directory name is "world" and folder names "world_nether" or "world_end" exist, we need to rename
         // those to the correct "DIM-1" and "DIM1" naming respectively.
-        if (isValidBukkitNetherOrEnd(worldContainer, oldWorldPath)) {
+        if (WorldMigrator.isValidBukkitNetherOrEnd(worldContainer, oldWorldPath)) {
             // If the new world container has no DIM-1/DIM1, we want to move these world files to those names
             if (Files.notExists(worldContainer.resolve(newName))) {
                 return newWorldPath;

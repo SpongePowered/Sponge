@@ -32,6 +32,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -59,6 +61,7 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
     @Shadow @Final public List<TileEntity> tickableTileEntities;
 
     @Shadow public abstract Chunk shadow$getChunk(int chunkX, int chunkZ);
+    @Shadow public abstract IChunk shadow$getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull);
     @Shadow public abstract Chunk shadow$getChunkAt(BlockPos pos);
     @Shadow public abstract void shadow$guardEntityTick(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
     @Shadow public boolean setBlockState(final BlockPos pos, final BlockState state, final int flags) { throw new IllegalStateException("Untransformed shadow!"); }
@@ -67,6 +70,7 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
     @Shadow @Nullable public abstract TileEntity shadow$getTileEntity(BlockPos pos);
     @Shadow public void shadow$setTileEntity(final BlockPos pos, @Nullable final TileEntity tileEntity) { } // Shadowed
     @Shadow public void shadow$neighborChanged(final BlockPos pos, final Block blockIn, final BlockPos fromPos) { } // Shadowed
+    @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
     // @formatter:on
 
     /**

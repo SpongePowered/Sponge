@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.HugeMushroomBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionalUtils;
+import org.spongepowered.common.util.DirectionalUtil;
 
 public final class HugeMushroomData {
 
@@ -64,9 +64,9 @@ public final class HugeMushroomData {
                         .set((h, v) -> h.with(HugeMushroomBlock.WEST, v))
                         .supports(h -> h.getBlock() instanceof HugeMushroomBlock)
                     .create(Keys.PORES)
-                        .get(h -> DirectionalUtils.getHorizontalUpDownFrom(h, HugeMushroomBlock.EAST, HugeMushroomBlock.WEST, HugeMushroomBlock.NORTH,
+                        .get(h -> DirectionalUtil.getHorizontalUpDownFrom(h, HugeMushroomBlock.EAST, HugeMushroomBlock.WEST, HugeMushroomBlock.NORTH,
                                 HugeMushroomBlock.SOUTH, HugeMushroomBlock.UP, HugeMushroomBlock.DOWN))
-                        .set((h, v) -> DirectionalUtils.setHorizontalUpDownFor(h, v, HugeMushroomBlock.EAST, HugeMushroomBlock.WEST,
+                        .set((h, v) -> DirectionalUtil.setHorizontalUpDownFor(h, v, HugeMushroomBlock.EAST, HugeMushroomBlock.WEST,
                                 HugeMushroomBlock.NORTH, HugeMushroomBlock.SOUTH, HugeMushroomBlock.UP, HugeMushroomBlock.DOWN))
                         .supports(h -> h.getBlock() instanceof HugeMushroomBlock);
     }

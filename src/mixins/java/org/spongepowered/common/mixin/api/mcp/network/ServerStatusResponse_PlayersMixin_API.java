@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.network;
 
-import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.ServerStatusResponse;
 import org.spongepowered.api.event.server.ClientPingServerEvent;
@@ -33,8 +32,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -45,7 +45,7 @@ public abstract class ServerStatusResponse_PlayersMixin_API implements ClientPin
     @Shadow @Final @Mutable private int onlinePlayerCount;
     @Shadow @Final @Mutable private int maxPlayers;
 
-    @Nullable private List<GameProfile> profiles;
+    @Nullable private List<org.spongepowered.api.profile.GameProfile> profiles;
 
     @Override
     public int getOnline() {
@@ -68,13 +68,11 @@ public abstract class ServerStatusResponse_PlayersMixin_API implements ClientPin
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<org.spongepowered.api.profile.GameProfile> getProfiles() {
         if (this.profiles == null) {
-            this.profiles = Lists.newArrayList();
+            this.profiles = new ArrayList<>();
         }
-
-        return (List<org.spongepowered.api.profile.GameProfile>) (List<?>) this.profiles;
+        return this.profiles;
     }
 
     /**
@@ -87,12 +85,14 @@ public abstract class ServerStatusResponse_PlayersMixin_API implements ClientPin
     @Overwrite
     public GameProfile[] getPlayers() {
         if (this.profiles == null) {
-            this.profiles = Lists.newArrayList();
+            return new GameProfile[0];
         }
 
         // TODO: When serializing, Minecraft calls this method frequently (it doesn't store the result).
         // Maybe we should cache this until the list is modified or patch the serialization?
-        return this.profiles.toArray(new GameProfile[this.profiles.size()]);
+        return this.profiles.stream()
+                .map(SpongeGameProfile::toMcProfile)
+                .toArray(GameProfile[]::new);
     }
 
     /**
@@ -104,10 +104,12 @@ public abstract class ServerStatusResponse_PlayersMixin_API implements ClientPin
     @Overwrite
     public void setPlayers(final GameProfile[] playersIn) {
         if (this.profiles == null) {
-            this.profiles = Lists.newArrayList(playersIn);
+            this.profiles = new ArrayList<>(playersIn.length);
         } else {
             this.profiles.clear();
-            Collections.addAll(this.profiles, playersIn);
+        }
+        for (final GameProfile profile : playersIn) {
+            this.profiles.add(SpongeGameProfile.of(profile));
         }
     }
 }

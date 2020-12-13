@@ -50,7 +50,7 @@ public abstract class FarmlandBlockMixin extends BlockMixin {
                                              final World worldIn, final BlockPos samePos, final Entity entityIn,
                                              final float fallDistance) {
         if (entityIn instanceof GrieferBridge && ((GrieferBridge) entityIn).bridge$canGrief()) {
-            turnToDirt(state, world, pos);
+            FarmlandBlockMixin.turnToDirt(state, world, pos);
         }
     }
 }

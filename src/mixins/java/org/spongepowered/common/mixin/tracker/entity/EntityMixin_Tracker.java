@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.tracker.entity;
 
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.Pose;
@@ -38,6 +38,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,18 +49,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.entity.EntityTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin_Tracker implements TrackableBridge {
+public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrackedBridge {
 
     // @formatter:off
     @Shadow @Final private EntityType<?> type;
@@ -127,7 +129,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
-        if (!((IPhaseState) context.state).doesBlockEventTracking(context)) {
+        if (!context.doesBlockEventTracking()) {
             return;
         }
         if (this.tracker$dropsTransactor == null) {
@@ -137,7 +139,6 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
 
     protected @MonotonicNonNull EffectTransactor tracker$dropsTransactor = null;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "remove()V", at = @At("RETURN"))
     private void tracker$ensureDropEffectCompleted(final CallbackInfo ci) {
         final PhaseTracker instance = PhaseTracker.SERVER;
@@ -148,7 +149,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
-        if (!((IPhaseState) context.state).doesBlockEventTracking(context)) {
+        if (!context.doesBlockEventTracking()) {
             return;
         }
         if (this.tracker$dropsTransactor != null) {
@@ -172,8 +173,8 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
                 this.tracker$destructCause,
                 originalChannel,
                 Optional.of(originalChannel),
-                TextComponent.empty(),
-                TextComponent.empty(),
+                Component.empty(),
+                Component.empty(),
                 (org.spongepowered.api.entity.Entity) this,
                 false
             ));
@@ -234,5 +235,10 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
     @Override
     public void bridge$refreshTrackerStates() {
         ((TrackableBridge) this.type).bridge$refreshTrackerStates();
+    }
+
+    @Override
+    public void populateFrameModifier(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
+
     }
 }

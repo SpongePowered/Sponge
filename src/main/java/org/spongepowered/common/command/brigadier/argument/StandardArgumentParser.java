@@ -31,7 +31,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
@@ -106,8 +106,8 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        final SuggestionsBuilder suggestionsBuilder = new SuggestionsBuilder("", 0);
+    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+        final SuggestionsBuilder suggestionsBuilder = new SuggestionsBuilder(currentInput, 0);
         this.listSuggestions((com.mojang.brigadier.context.CommandContext<?>) context, suggestionsBuilder);
         return suggestionsBuilder.build().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
     }
@@ -120,7 +120,7 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
         try {
             return Optional.of(this.parse(parameterKey, (SpongeCommandContextBuilder) context, (SpongeStringReader) reader));
         } catch (final CommandSyntaxException e) {
-            throw new ArgumentParseException(TextComponent.of(e.getMessage()), e, e.getInput(), e.getCursor());
+            throw new ArgumentParseException(Component.text(e.getMessage()), e, e.getInput(), e.getCursor());
         }
     }
 

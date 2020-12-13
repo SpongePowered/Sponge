@@ -30,7 +30,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.ILocationArgument;
@@ -69,7 +69,6 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
         this.resourceKey = selectAllWorlds ?  ResourceKey.sponge("location_all") : ResourceKey.sponge("location_online_only");
     }
 
-
     @Override
     @NonNull
     public ResourceKey getKey() {
@@ -78,16 +77,17 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        return this.complete();
+    public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
+        return this.complete(currentInput);
     }
 
-    private List<String> complete() {
+    private List<String> complete(final String currentInput) {
         return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties()
                 .stream()
                 .filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
                 .map(WorldProperties::getKey)
                 .map(ResourceKey::getFormatted)
+                .filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());
     }
 
@@ -104,7 +104,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
             worldProperties = SpongeCommon.getGame().getServer().getWorldManager()
                     .getProperties(resourceLocation).filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
                     .orElseThrow(() -> reader.createException(
-                            TextComponent.of("Could not get world with key \"" + resourceLocation.toString() + "\"")));
+                            Component.text("Could not get world with key \"" + resourceLocation.toString() + "\"")));
         } catch (final ArgumentParseException e) {
             final Optional<ServerLocation> location = context.getCause().getLocation();
             if (location.isPresent()) {
@@ -121,14 +121,14 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
 
         try {
             reader.skipWhitespace();
-            final Vec3d vec3d = VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context.getCause());
+            final Vec3d vec3d = SpongeServerLocationValueParameter.VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context.getCause());
             final ResourceKey key = worldProperties.getKey();
             return Optional.of(
                     worldProperties.getWorld()
                             .map(x -> x.getLocation(vec3d.x, vec3d.y, vec3d.z))
                             .orElseGet(() -> ServerLocation.of(key, vec3d.x, vec3d.y, vec3d.z)));
         } catch (final CommandSyntaxException e) {
-            throw reader.createException(TextComponent.of(e.getMessage()));
+            throw reader.createException(Component.text(e.getMessage()));
         }
     }
 
@@ -148,7 +148,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
                 RequiredArgumentBuilder.argument(key, Constants.Command.RESOURCE_LOCATION_TYPE);
         if (allowCustomSuggestionsOnTheFirstElement) {
             firstNode.suggests((context, builder) -> {
-                this.complete().forEach(builder::suggest);
+                this.complete("").forEach(builder::suggest);
                 return builder.buildFuture();
             });
         }

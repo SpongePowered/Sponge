@@ -40,9 +40,9 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
@@ -50,6 +50,7 @@ import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
@@ -59,13 +60,11 @@ public final class InventoryUtil {
 
     private InventoryUtil() {}
 
-    @SuppressWarnings("rawtypes")
     public static CraftingGridInventory toSpongeInventory(CraftingInventory inv) {
         CraftingGridInventoryLens lens = new CraftingGridInventoryLens(0, inv.getWidth(), inv.getHeight(), BasicSlotLens::new);
 
         return new CraftingGridInventoryAdapter((Fabric) inv, lens);
     }
-
 
     @SuppressWarnings("unchecked")
     public static <C extends IInventory> C toNativeInventory(Inventory inv) {
@@ -107,13 +106,13 @@ public final class InventoryUtil {
 
     // Utility
     public static Inventory toInventory(IInventory inventory) {
-        return toInventory(inventory, null);
+        return InventoryUtil.toInventory(inventory, null);
     }
 
     public static Inventory toInventory(Object inventory, @Nullable Object forgeItemHandler) {
         if (forgeItemHandler == null) {
             if (inventory instanceof ChestTileEntity) {
-                inventory = getDoubleChestInventory(((ChestTileEntity) inventory)).orElse(((Inventory) inventory));
+                inventory = InventoryUtil.getDoubleChestInventory(((ChestTileEntity) inventory)).orElse(((Inventory) inventory));
             }
             if (inventory instanceof Inventory) {
                 return ((Inventory) inventory);
@@ -131,7 +130,6 @@ public final class InventoryUtil {
         }
         return SpongeImplHooks.findInventoryAdapter(inventory);
     }
-
 
     public static TrackedInventoryBridge forCapture(Object toCapture) {
         if (toCapture instanceof TrackedInventoryBridge) {
@@ -167,14 +165,14 @@ public final class InventoryUtil {
             final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId).orElseGet(() -> {
                 SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
-                return SpongeCommon.getMinecraftPlugin();
+                return Launch.getInstance().getMinecraftPlugin();
             });
         } else if (base instanceof SpongeUser) {
-            container = SpongeCommon.getMinecraftPlugin();
+            container = Launch.getInstance().getMinecraftPlugin();
         } else {
             container = Sponge.getPluginManager().getPlugin(SpongeImplHooks.getModIdFromClass(base.getClass())).orElseGet(() -> {
                 SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
-                return SpongeCommon.getMinecraftPlugin();
+                return Launch.getInstance().getMinecraftPlugin();
             });
         }
         return container;

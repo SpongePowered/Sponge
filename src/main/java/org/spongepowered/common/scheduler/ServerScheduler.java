@@ -53,7 +53,7 @@ public final class ServerScheduler extends SyncScheduler {
     }
 
     @Override
-    protected void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable) {
+    protected void executeTaskRunnable(final SpongeScheduledTask task, final Runnable runnable) {
         try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
                 .source(task)) {
             context.buildAndSwitch();
@@ -62,7 +62,7 @@ public final class ServerScheduler extends SyncScheduler {
     }
 
     @Override
-    protected PhaseContext<?> createContext(SpongeScheduledTask task, PluginContainer container) {
+    protected PhaseContext<?> createContext(final SpongeScheduledTask task, final PluginContainer container) {
         return PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
                 .source(task)
                 .container(container);

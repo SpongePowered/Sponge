@@ -51,13 +51,12 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
 public class SpongeItemStackSnapshot implements ItemStackSnapshot {
@@ -220,7 +219,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public Optional<ItemStackSnapshot> with(final Value<?> value) {
-        return with((Key<Value<Object>>) value.getKey(), (Object) value.get());
+        return this.with((Key<Value<Object>>) value.getKey(), (Object) value.get());
     }
 
 

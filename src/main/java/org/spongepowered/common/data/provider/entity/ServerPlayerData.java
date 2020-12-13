@@ -29,6 +29,8 @@ import net.minecraft.stats.Stat;
 import net.minecraft.world.GameType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.chat.ChatVisibilities;
+import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.statistic.Statistic;
@@ -37,6 +39,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.stats.StatisticsManagerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.LocaleCache;
 
 import java.util.stream.Collectors;
 
@@ -62,10 +65,22 @@ public final class ServerPlayerData {
                         .get(h -> ((StatisticsManagerBridge) h.getStats()).bridge$getStatsData().entrySet().stream()
                                 .collect(Collectors.toMap(e -> (Statistic)e.getKey(), e -> e.getValue().longValue())))
                         .set((h, v) -> v.forEach((ik, iv) -> h.getStats().setValue(h, (Stat<?>) ik, iv.intValue())))
+                    .create(Keys.CHAT_VISIBILITY)
+                        .get(h -> {
+                            final ChatVisibility visibility = (ChatVisibility) (Object) h.getChatVisibility();
+                            if (visibility == null) {
+                                return ChatVisibilities.FULL.get();
+                            }
+                            return visibility;
+                        })
                 .asMutable(ServerPlayerEntityAccessor.class)
                     .create(Keys.HAS_VIEWED_CREDITS)
                         .get(ServerPlayerEntityAccessor::accessor$getSeenCredits)
                         .set(ServerPlayerEntityAccessor::accessor$setSeenCredits)
+                    .create(Keys.LOCALE)
+                        .get(h -> LocaleCache.getLocale(h.accessor$getLanguage()))
+                   .create(Keys.CHAT_COLORS_ENABLED)
+                        .get(ServerPlayerEntityAccessor::accessor$getChatColours)
                 .asMutable(ServerPlayerEntityBridge.class)
                     .create(Keys.HEALTH_SCALE)
                         .get(h -> h.bridge$isHealthScaled() ? h.bridge$getHealthScale() : null)
@@ -76,7 +91,11 @@ public final class ServerPlayerData {
                             h.bridge$setHealthScale(v);
                             return true;
                         })
-                        .resetOnDelete(Constants.Entity.Player.DEFAULT_HEALTH_SCALE);
+                        .resetOnDelete(Constants.Entity.Player.DEFAULT_HEALTH_SCALE)
+                    .create(Keys.VIEW_DISTANCE)
+                        .get(ServerPlayerEntityBridge::bridge$getViewDistance)
+                    .create(Keys.SKIN_PARTS)
+                        .get(ServerPlayerEntityBridge::bridge$getSkinParts);
     }
     // @formatter:on
 }

@@ -30,13 +30,13 @@ import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -58,7 +58,7 @@ public abstract class BoneMealItemMixin_Tracker {
      * phases's capturing.
      */
 
-    @SuppressWarnings({"unchecked", "Duplicates", "rawtypes"})
+    @SuppressWarnings({"Duplicates"})
     // Pending https://github.com/SpongePowered/Mixin/issues/312
     // @Group(name = "org.spongepowered.tracker:bonemeal", min = 1, max = 1)
     @Redirect(
@@ -73,14 +73,13 @@ public abstract class BoneMealItemMixin_Tracker {
     )
     private static void tracker$wrapGrowWithPhaseEntry(IGrowable iGrowable, ServerWorld worldIn, Random rand, BlockPos pos, BlockState state,
             ItemStack stack) {
-        if (((WorldBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_GROW) {
+        if (((WorldBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_ALL) {
             iGrowable.grow(worldIn, rand, pos, state);
             return;
         }
 
-        final PhaseContext<?> current = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState phaseState = current.state;
-        final boolean doesEvent = phaseState.doesBlockEventTracking(current);
+        final PhaseContext<@NonNull ?> current = PhaseTracker.getInstance().getPhaseContext();
+        final boolean doesEvent = current.doesBlockEventTracking();
         if (doesEvent) {
             // We can enter the new phase state.
             try (GrowablePhaseContext context = BlockPhase.State.GROWING.createPhaseContext(PhaseTracker.SERVER)

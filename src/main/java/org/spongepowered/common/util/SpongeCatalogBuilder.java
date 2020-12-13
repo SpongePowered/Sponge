@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.util;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.util.CatalogBuilder;
 import org.spongepowered.api.util.ResettableBuilder;
+
+import java.util.Objects;
 
 @SuppressWarnings("unchecked")
 @DefaultQualifier(NonNull.class)
@@ -43,17 +42,21 @@ public abstract class SpongeCatalogBuilder<C extends CatalogType, B extends Rese
     @Nullable protected ResourceKey key;
 
     @Override
-    public B key(ResourceKey key) {
-        checkNotNull(key, "key");
-        checkArgument(!key.getNamespace().isEmpty(), "The key namespace may not be empty.");
-        checkArgument(!key.getValue().isEmpty(), "The key value may not be empty.");
+    public B key(final ResourceKey key) {
+        Objects.requireNonNull(key);
+        if (key.getNamespace().isEmpty()) {
+            throw new IllegalArgumentException("The key namespace cannot be empty!");
+        }
+        if (key.getValue().isEmpty()) {
+            throw new IllegalArgumentException("The key value cannot be empty!");
+        }
         this.key = key;
         return (B) this;
     }
 
     @Override
     public C build() {
-        checkNotNull(this.key, "The key must be set.");
+        Objects.requireNonNull(this.key);
         return this.build(this.key);
     }
 

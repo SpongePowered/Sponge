@@ -1,0 +1,25 @@
+{
+    "minVersion": "0.8",
+    "package": "org.spongepowered.common.mixin.optimization",
+    "refmap": "sponge.mixins.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+        "mcp.entity.EntityMixin_Optimization_Collision",
+        "mcp.entity.item.ItemFrameEntityMixin_Optimization_Map",
+        "mcp.entity.passive.TameableEntity_Optimization_Owner",
+        "mcp.item.FilledMapItem_Optimization_Map",
+        "mcp.tileentity.ChestTileEntityMixin_Optimization_TileEntity",
+        "mcp.tileentity.EnderChestTileEntityMixin_Optimization_TileEntity",
+        "mcp.tileentity.HopperTileEntityMixin_Optimization_Hopper",
+        "mcp.tileentity.TileEntityMixin_Optimization_Hopper",
+        "mcp.world.IBlockReaderMixin_RayTraceChunkLoadOptimizations",
+        "mcp.world.WorldMixin_Optimization_Collision",
+        "mcp.world.server.ServerWorldMixin_Optimization_Collision",
+        "mcp.world.storage.MapData_MapInfoMixin_Optimization_Map"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

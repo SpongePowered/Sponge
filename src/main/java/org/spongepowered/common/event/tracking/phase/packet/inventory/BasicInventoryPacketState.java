@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CClickWindowPacket;
@@ -56,7 +57,6 @@ import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -136,7 +136,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
 
-    private static Set<Class<?>> containersFailedCapture = new HashSet<>();
+    private static Set<Class<?>> containersFailedCapture = new ReferenceOpenHashSet<>();
 
     @Override
     public void unwind(final InventoryPacketContext context) {
@@ -213,8 +213,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 if (!((TrackedContainerBridge) trackedInventory).bridge$capturePossible()) {
                     // TODO When this happens a mod probably overrides Container#detectAndSendChanges
                     // We are currently unable to detect changes in this case.
-                    if (!containersFailedCapture.contains(trackedInventory.getClass())) {
-                        containersFailedCapture.add(trackedInventory.getClass());
+                    if (BasicInventoryPacketState.containersFailedCapture.add(trackedInventory.getClass())) {
                         SpongeCommon
                             .getLogger().warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + openContainer.getClass());
                     }
@@ -254,7 +253,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
                 if (!inventoryEvent.isCancelled()) {
                     if (inventoryEvent instanceof SpawnEntityEvent) {
-                        processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
+                        PacketState.processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
                     } else if (!capturedItems.isEmpty()) {
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
                         SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);

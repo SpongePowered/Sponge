@@ -65,7 +65,7 @@ public class SpongeUserInventory implements IInventory {
      * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
      */
     @Override
-    public ItemStack decrStackSize(int index, int count) {
+    public ItemStack decrStackSize(int index, final int count) {
         this.markDirty();
         List<ItemStack> list = null;
 
@@ -111,7 +111,7 @@ public class SpongeUserInventory implements IInventory {
      * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
      */
     @Override
-    public void setInventorySlotContents(int index, ItemStack stack) {
+    public void setInventorySlotContents(int index, final ItemStack stack) {
         this.markDirty();
         NonNullList<ItemStack> nonnulllist = null;
 
@@ -133,7 +133,7 @@ public class SpongeUserInventory implements IInventory {
      * Writes the inventory out as a list of compound tags. This is where the slot indices are used (+100 for armor, +80
      * for crafting).
      */
-    public ListNBT writeToNBT(ListNBT nbtTagListIn) {
+    public ListNBT writeList(final ListNBT nbtTagListIn) {
         for (int i = 0; i < this.mainInventory.size(); ++i) {
             if (!this.mainInventory.get(i).isEmpty()) {
                 CompoundNBT nbttagcompound = new CompoundNBT();
@@ -169,7 +169,7 @@ public class SpongeUserInventory implements IInventory {
     /**
      * Reads from the given tag list and fills the slots in the inventory with the correct items.
      */
-    public void readFromNBT(ListNBT nbtTagListIn) {
+    public void readList(final ListNBT nbtTagListIn) {
         this.mainInventory.clear();
         this.armorInventory.clear();
         this.offHandInventory.clear();
@@ -255,7 +255,7 @@ public class SpongeUserInventory implements IInventory {
      * Don't rename this method to canInteractWith due to conflicts with Container
      */
     @Override
-    public boolean isUsableByPlayer(PlayerEntity player) {
+    public boolean isUsableByPlayer(final PlayerEntity player) {
         return true;
     }
 

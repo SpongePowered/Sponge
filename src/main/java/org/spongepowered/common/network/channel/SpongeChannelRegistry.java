@@ -166,7 +166,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
 
             @Override
             public <C extends Channel> C register(ResourceKey channelKey, Class<C> channelType) throws DuplicateRegistrationException {
-                return createChannel(channelKey, channelType);
+                return SpongeChannelRegistry.this.createChannel(channelKey, channelType);
             }
 
             @Override

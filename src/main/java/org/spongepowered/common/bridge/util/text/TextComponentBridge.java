@@ -25,7 +25,10 @@
 package org.spongepowered.common.bridge.util.text;
 
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface TextComponentBridge {
     Component bridge$asAdventureComponent();
+
+    @Nullable Component bridge$adventureComponentIfPresent();
 }

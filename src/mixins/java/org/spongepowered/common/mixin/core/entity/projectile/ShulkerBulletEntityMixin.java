@@ -26,11 +26,13 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.projectile.ShulkerBulletEntity;
 import net.minecraft.util.math.RayTraceResult;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
@@ -39,10 +41,11 @@ public abstract class ShulkerBulletEntityMixin extends EntityMixin {
 
     @Inject(method = "bulletHit", at = @At("HEAD"), cancellable = true)
     private void onBulletHitBlock(final RayTraceResult result, final CallbackInfo ci) {
-        if (!this.world.isRemote) {
-            if (SpongeCommonEventFactory.handleCollideImpactEvent((net.minecraft.entity.Entity) (Object) this, ((Projectile) this).shooter().get(), result)) {
-                ci.cancel();
-            }
+        if (!((WorldBridge) this.world).bridge$isFake() && result.getType() != RayTraceResult.Type.MISS
+                && SpongeCommonEventFactory.handleCollideImpactEvent(
+                (net.minecraft.entity.Entity) (Object) this, ((Projectile) this).get(Keys.SHOOTER).orElse(null), result)) {
+            this.shadow$remove();
+            ci.cancel();
         }
     }
 }

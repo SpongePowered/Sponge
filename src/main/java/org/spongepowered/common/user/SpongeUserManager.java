@@ -31,6 +31,7 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.user.UserManager;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -42,7 +43,7 @@ import java.util.stream.Stream;
 public final class SpongeUserManager implements UserManager {
 
     public static final UUID FAKEPLAYER_UUID = UUID.fromString("41C82C87-7AFB-4024-BA57-13D2C99CAE77");
-    public static final GameProfile FAKEPLAYER_PROFILE = (GameProfile) new com.mojang.authlib.GameProfile(FAKEPLAYER_UUID, null);
+    public static final GameProfile FAKEPLAYER_PROFILE = new SpongeGameProfile(SpongeUserManager.FAKEPLAYER_UUID, null);
 
     private final ServerUserProvider serverUserProvider;
 
@@ -74,7 +75,7 @@ public final class SpongeUserManager implements UserManager {
 
     @Override
     public User getOrCreate(final GameProfile profile) {
-        return this.serverUserProvider.getOrCreateUser(this.ensureNonNullUUID(profile), false);
+        return this.serverUserProvider.getOrCreateUser(this.ensureNonEmptyUUID(profile), false);
     }
 
     public User forceRecreateUser(final GameProfile profile) {
@@ -106,11 +107,11 @@ public final class SpongeUserManager implements UserManager {
         return this.serverUserProvider.matchKnownProfiles(checkNotNull(lastKnownName, "lastKnownName").toLowerCase(Locale.ROOT));
     }
 
-    private GameProfile ensureNonNullUUID(final GameProfile profile) {
-        if (profile.getUniqueId() == null) {
+    private GameProfile ensureNonEmptyUUID(final GameProfile profile) {
+        if (profile.getUniqueId().equals(SpongeGameProfile.EMPTY_UUID)) {
             final String name = profile.getName().orElse(null);
             // Use Forge's FakePlayer UUID
-            return (GameProfile) new com.mojang.authlib.GameProfile(FAKEPLAYER_UUID, name);
+            return new SpongeGameProfile(SpongeUserManager.FAKEPLAYER_UUID, name);
         }
         return profile;
     }

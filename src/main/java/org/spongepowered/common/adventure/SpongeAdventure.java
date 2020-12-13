@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.adventure;
 
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.EnumSet;
+import io.netty.util.AttributeKey;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
+import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -55,8 +55,8 @@ import net.minecraft.world.BossInfo;
 import net.minecraft.world.server.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.adventure.SpongeComponents;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
@@ -64,12 +64,18 @@ import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public final class SpongeAdventure {
+    public static final AttributeKey<Locale> CHANNEL_LOCALE = AttributeKey.newInstance("sponge:locale");
     public static final SpongeCallback CALLBACK_COMMAND = new SpongeCallback();
     public static final GsonComponentSerializer GSON = GsonComponentSerializer.builder()
         .legacyHoverEventSerializer(NbtLegacyHoverEventSerializer.INSTANCE)
@@ -91,6 +97,12 @@ public final class SpongeAdventure {
             return decoded.toString();
         }
     };
+
+    public static final ConfigurateComponentSerializer CONFIGURATE = ConfigurateComponentSerializer.builder()
+            .scalarSerializer(SpongeAdventure.GSON)
+            .build();
+
+    private static final Set<ServerBossInfo> ACTIVE_BOSS_BARS = ConcurrentHashMap.newKeySet();
 
     public static Component legacy(final char character, final String string) {
         return LegacyComponentSerializer.legacy(character).deserialize(string);
@@ -117,11 +129,11 @@ public final class SpongeAdventure {
     }
 
     public static Component json(final String string) {
-        return GSON.deserialize(string);
+        return SpongeAdventure.GSON.deserialize(string);
     }
 
     public static String json(final Component string) {
-        return GSON.serialize(string);
+        return SpongeAdventure.GSON.serialize(string);
     }
 
     public static String plain(final Component component) {
@@ -211,10 +223,8 @@ public final class SpongeAdventure {
             return NamedTextColor.LIGHT_PURPLE;
         } else if (color == TextFormatting.YELLOW) {
             return NamedTextColor.YELLOW;
-        } else if (color == TextFormatting.WHITE) {
-            return NamedTextColor.WHITE;
         }
-        throw new IllegalArgumentException();
+        return NamedTextColor.WHITE;
     }
 
     public static Boolean asVanilla(final TextDecoration.State state) {
@@ -284,7 +294,7 @@ public final class SpongeAdventure {
         } else if (action == ClickEvent.Action.CHANGE_PAGE) {
             return net.minecraft.util.text.event.ClickEvent.Action.CHANGE_PAGE;
         } else if (action == ClickEvent.Action.COPY_TO_CLIPBOARD) {
-            throw new UnsupportedOperationException("newer minecraft");
+            return net.minecraft.util.text.event.ClickEvent.Action.COPY_TO_CLIPBOARD;
         }
         throw new IllegalArgumentException(action.toString());
     }
@@ -292,9 +302,9 @@ public final class SpongeAdventure {
     // Horrible-ness
 
     public static List<Component> json(final List<String> strings) {
-        final List<Component> components = Lists.newArrayList();
+        final List<Component> components = new ArrayList<>();
         for (final String string : strings) {
-            components.add(json(string));
+            components.add(SpongeAdventure.json(string));
         }
         return components;
     }
@@ -302,7 +312,7 @@ public final class SpongeAdventure {
     public static ListNBT listTagJson(final List<Component> components) {
         final ListNBT nbt = new ListNBT();
         for (final Component component : components) {
-            nbt.add(StringNBT.valueOf(json(component)));
+            nbt.add(StringNBT.valueOf(SpongeAdventure.json(component)));
         }
         return nbt;
     }
@@ -408,7 +418,7 @@ public final class SpongeAdventure {
             return null;
         }
         try {
-            return BinaryTagHolder.encode(tag, NBT_CODEC);
+            return BinaryTagHolder.encode(tag, SpongeAdventure.NBT_CODEC);
         } catch (final IOException e) {
             return null;
         }
@@ -427,7 +437,7 @@ public final class SpongeAdventure {
         if (key == null) {
             return null;
         }
-        return asVanilla(key);
+        return SpongeAdventure.asVanilla(key);
     }
 
     // Sound
@@ -468,14 +478,32 @@ public final class SpongeAdventure {
         if (source == null) {
             return null;
         }
-        return asVanilla(source);
+        return SpongeAdventure.asVanilla(source);
     }
 
     public static class Factory implements SpongeComponents.Factory {
+
         @Override
         public @NonNull ClickEvent callbackClickEvent(final @NonNull Consumer<CommandCause> callback) {
+            Objects.requireNonNull(callback);
+
             final UUID key = SpongeAdventure.CALLBACK_COMMAND.registerCallback(callback);
             return ClickEvent.runCommand("/sponge:callback " + key.toString());
         }
+    }
+
+    // Boss bar tracking
+    // So we can update viewed bars for players when their locales change
+
+    public static void registerBossBar(final ServerBossInfo mcBar) {
+        SpongeAdventure.ACTIVE_BOSS_BARS.add(mcBar);
+    }
+
+    public static void unregisterBossBar(final ServerBossInfo mcBar) {
+        SpongeAdventure.ACTIVE_BOSS_BARS.remove(mcBar);
+    }
+
+    public static void forEachBossBar(final Consumer<ServerBossInfo> info) {
+        SpongeAdventure.ACTIVE_BOSS_BARS.forEach(info);
     }
 }

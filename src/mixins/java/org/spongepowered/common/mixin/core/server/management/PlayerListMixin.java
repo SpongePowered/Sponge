@@ -25,21 +25,25 @@
 package org.spongepowered.common.mixin.core.server.management;
 
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.server.SDisconnectPacket;
 import net.minecraft.network.play.server.SJoinGamePacket;
+import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.border.IBorderListener;
+import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SaveHandler;
@@ -48,9 +52,10 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -64,55 +69,67 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.accessor.network.play.server.SRespawnPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.server.PerWorldBorderListener;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.net.SocketAddress;
+import java.time.Instant;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 @Mixin(PlayerList.class)
-public abstract class PlayerListMixin {
+public abstract class PlayerListMixin implements PlayerListBridge {
 
+    // @formatter:off
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final private MinecraftServer server;
 
-    @Shadow public abstract ITextComponent canPlayerLogin(SocketAddress socketAddress, com.mojang.authlib.GameProfile gameProfile);
+    @Shadow public abstract ITextComponent shadow$canPlayerLogin(SocketAddress socketAddress, com.mojang.authlib.GameProfile gameProfile);
+    @Shadow public abstract MinecraftServer shadow$getServer();
+    @Shadow @Nullable public abstract CompoundNBT shadow$readPlayerDataFromFile(ServerPlayerEntity playerIn);
+    // @formatter:on
 
-    private void disconnectClient(final NetworkManager netManager, final @Nullable Component disconnectMessage, final @Nullable GameProfile profile) {
-        final ITextComponent reason;
-        if (disconnectMessage != null) {
-            reason = SpongeAdventure.asVanilla(disconnectMessage);
-        } else {
-            reason = new TranslationTextComponent("disconnect.disconnected");
-        }
+    private boolean impl$isBedSpawn = false;
+    private DimensionType impl$originalDestination = null;
 
-        try {
-            LOGGER.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" :
-                    netManager.getRemoteAddress() + ": " + reason.getUnformattedComponentText()));
-            netManager.sendPacket(new SDisconnectPacket(reason));
-            netManager.closeChannel(reason);
-        } catch (final Exception exception) {
-            LOGGER.error("Error whilst disconnecting player", exception);
-        }
+    @Override
+    public void bridge$setOriginalDestinationDimensionForRespawn(DimensionType dimensionType) {
+        this.impl$originalDestination = dimensionType;
     }
 
+    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;readPlayer"
+            + "DataFromFile(Lnet/minecraft/entity/player/ServerPlayerEntity;)Lnet/minecraft/nbt/CompoundNBT;"))
+    private CompoundNBT impl$setPlayerDataForNewPlayers(final PlayerList playerList, final ServerPlayerEntity playerIn) {
+        final CompoundNBT compound = this.shadow$readPlayerDataFromFile(playerIn);
+        if (compound == null) {
+            ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().setPlayerInfo(playerIn.getUniqueID(), Instant.now(), Instant.now());
+        }
+        return compound;
+    }
+    
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target =
             "Lnet/minecraft/server/MinecraftServer;getWorld(Lnet/minecraft/world/dimension/DimensionType;)Lnet/minecraft/world/server/ServerWorld;"))
     private net.minecraft.world.server.ServerWorld impl$onInitPlayer_getWorld(
             final MinecraftServer server, final net.minecraft.world.dimension.DimensionType type,
             final NetworkManager networkManager, final ServerPlayerEntity mcPlayer) {
-        @Nullable final ITextComponent kickReason = this.canPlayerLogin(networkManager.getRemoteAddress(), mcPlayer.getGameProfile());
+        @Nullable final ITextComponent kickReason = this.shadow$canPlayerLogin(networkManager.getRemoteAddress(), mcPlayer.getGameProfile());
         final Component disconnectMessage;
         if (kickReason != null) {
             disconnectMessage = SpongeAdventure.asAdventure(kickReason);
         } else {
-            disconnectMessage = TextComponent.of("You are not allowed to log in to this server.");
+            disconnectMessage = Component.text("You are not allowed to log in to this server.");
         }
 
         net.minecraft.world.server.ServerWorld mcWorld = server.getWorld(mcPlayer.dimension);
@@ -138,14 +155,12 @@ public abstract class PlayerListMixin {
 
         final Cause cause = Cause.of(EventContext.empty(), connection, user);
         final ServerSideConnectionEvent.Login event = SpongeEventFactory.createServerSideConnectionEventLogin(cause, disconnectMessage,
-                disconnectMessage, location, location, rotation, rotation, connection, user, false);
+                disconnectMessage, location, location, rotation, rotation, connection, user);
         if (kickReason != null) {
             event.setCancelled(true);
         }
-        SpongeCommon.postEvent(event);
-        if (event.isCancelled()) {
-            final Component message = event.isMessageCancelled() ? null : event.getMessage();
-            this.disconnectClient(networkManager, message, player.getProfile());
+        if (SpongeCommon.postEvent(event)) {
+            this.impl$disconnectClient(networkManager, event.getMessage(), player.getProfile());
             return null;
         }
 
@@ -156,9 +171,9 @@ public abstract class PlayerListMixin {
         return (net.minecraft.world.server.ServerWorld) toLocation.getWorld();
     }
 
-    @Inject(method = "initializeConnectionToPlayer", cancellable = true, at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-            target = "Lnet/minecraft/server/MinecraftServer;getWorld(Lnet/minecraft/world/dimension/DimensionType;)Lnet/minecraft/world/server/ServerWorld;"))
-    private void impl$onInitPlayer_afterGetWorld(final NetworkManager networkManager, final ServerPlayerEntity mcPlayer, final CallbackInfo ci) {
+    @Inject(method = "initializeConnectionToPlayer", cancellable = true, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player"
+            + "/ServerPlayerEntity;setWorld(Lnet/minecraft/world/World;)V", shift = At.Shift.AFTER))
+    private void impl$onInitPlayer_BeforeSetWorld(final NetworkManager networkManager, final ServerPlayerEntity mcPlayer, final CallbackInfo ci) {
         if (mcPlayer.world == null) {
             ci.cancel();
         }
@@ -217,7 +232,7 @@ public abstract class PlayerListMixin {
                 Optional.of(audience), joinComponent, joinComponent, connection, player, false);
         SpongeCommon.postEvent(event);
         if (!event.isMessageCancelled()) {
-            event.getAudience().ifPresent(audience1 -> audience1.sendMessage(event.getMessage()));
+            event.getAudience().ifPresent(audience1 -> audience1.sendMessage(Identity.nil(), event.getMessage()));
         }
 
         ((ServerPlayerEntityBridge) mcPlayer).bridge$setConnectionMessageToSend(null);
@@ -234,6 +249,16 @@ public abstract class PlayerListMixin {
         return ((ServerWorldBridge) playerIn.getServerWorld()).bridge$getBossBarManager();
     }
 
+    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendScoreboard(Lnet/minecraft/scoreboard/ServerScoreboard;Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
+    private void impl$sendScoreboard(final PlayerList playerList, final ServerScoreboard scoreboardIn, final ServerPlayerEntity playerIn) {
+        ((ServerPlayerEntityBridge)playerIn).bridge$initScoreboard();
+    }
+
+    @Inject(method = "playerLoggedOut", at = @At("HEAD"))
+    private void impl$RemovePlayerReferenceFromScoreboard(ServerPlayerEntity player, CallbackInfo ci) {
+        ((ServerScoreboardBridge) ((ServerPlayer) player).getScoreboard()).bridge$removePlayer(player, false);
+    }
+
     @Redirect(method = "func_212504_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;getSaveHandler()Lnet/minecraft/world/storage/SaveHandler;"))
     private SaveHandler impl$onlyUseOverworldForPlayerData(final ServerWorld serverWorld) {
         if (serverWorld.dimension.getType() == DimensionType.OVERWORLD) {
@@ -241,5 +266,81 @@ public abstract class PlayerListMixin {
         }
 
         return SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD).getSaveHandler();
+    }
+
+    @Redirect(method = "func_212504_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;addListener(Lnet/minecraft/world/border/IBorderListener;)V"))
+    private void impl$usePerWorldBorderListener(final WorldBorder worldBorder, final IBorderListener listener, final ServerWorld serverWorld) {
+        worldBorder.addListener(new PerWorldBorderListener(serverWorld));
+    }
+
+    @Redirect(method = "readPlayerDataFromFile", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;read(Lnet/minecraft/nbt/CompoundNBT;)V"))
+    private void impl$setSpongePlayerDataForSinglePlayer(final ServerPlayerEntity entity, final CompoundNBT compound) {
+        entity.read(compound);
+
+        ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().readPlayerData(compound, entity.getUniqueID(), null);
+    }
+
+    @Redirect(method = "recreatePlayerEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;setRespawnPosition(Lnet/minecraft/util/math/BlockPos;ZZ)V"))
+    private void impl$flagIfRespawnLocationIsBed(ServerPlayerEntity serverPlayerEntity, BlockPos p_226560_1_, boolean p_226560_2_,
+            boolean p_226560_3_) {
+        this.impl$isBedSpawn = true;
+        serverPlayerEntity.setRespawnPosition(p_226560_1_, p_226560_2_, p_226560_3_);
+    }
+
+    @Redirect(method = "recreatePlayerEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;sendPacket"
+            + "(Lnet/minecraft/network/IPacket;)V", ordinal = 1))
+    private void impl$callRespawnPlayerRecreateEvent(ServerPlayNetHandler serverPlayNetHandler, IPacket<?> packetIn, ServerPlayerEntity originalPlayer,
+            DimensionType dimension, boolean conqueredEnd) {
+        final ServerPlayerEntity recreatedPlayer = serverPlayNetHandler.player;
+
+        final Vector3d originalPosition = VecHelper.toVector3d(originalPlayer.getPosition());
+        final Vector3d destinationPosition = VecHelper.toVector3d(recreatedPlayer.getPositionVec());
+        final org.spongepowered.api.world.server.ServerWorld originalWorld = (org.spongepowered.api.world.server.ServerWorld) originalPlayer.world;
+        final org.spongepowered.api.world.server.ServerWorld originalDestinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server
+                .getWorld(this.impl$originalDestination == null ? DimensionType.OVERWORLD : this.impl$originalDestination);
+        final org.spongepowered.api.world.server.ServerWorld destinationWorld = (org.spongepowered.api.world.server.ServerWorld) recreatedPlayer.world;
+
+        final RespawnPlayerEvent.Recreate event =
+                SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().getCurrentCause(), destinationPosition,
+                        originalWorld, originalPosition, destinationWorld, originalDestinationWorld, destinationPosition, (ServerPlayer) originalPlayer,
+                        (ServerPlayer) recreatedPlayer, this.impl$isBedSpawn, !conqueredEnd);
+        SpongeCommon.postEvent(event);
+        recreatedPlayer.setPosition(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(), event.getDestinationPosition().getZ());
+        this.impl$isBedSpawn = false;
+        this.impl$originalDestination = null;
+
+        // We may respawn into a custom dimension that the player has not encountered before. Let the platform handle it
+        ((ServerPlayerEntityBridge) recreatedPlayer).bridge$sendDimensionData(serverPlayNetHandler.netManager, dimension);
+
+        ((ServerPlayerEntityBridge) recreatedPlayer).bridge$sendChangeDimension(
+                ((SRespawnPacketAccessor) packetIn).accessor$getDimensionType(),
+                ((SRespawnPacketAccessor) packetIn).accessor$getHashedSeed(), ((SRespawnPacketAccessor) packetIn).accessor$getWorldType(),
+                recreatedPlayer.interactionManager.getGameType()
+        );
+    }
+
+    @Redirect(method = "sendWorldInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(Lnet/minecraft/world/dimension/DimensionType;)Lnet/minecraft/world/server/ServerWorld;"))
+    private ServerWorld impl$usePerWorldWorldBorder(final MinecraftServer minecraftServer, final DimensionType dimension, final ServerPlayerEntity playerIn,
+            final ServerWorld worldIn) {
+        return worldIn;
+    }
+
+    @Redirect(method = "sendWorldInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;getSpawnPoint()Lnet/minecraft/util/math/BlockPos;"))
+    private BlockPos impl$resetTargetedLocationData(final ServerWorld serverWorld, ServerPlayerEntity playerIn) {
+        ((LocationTargetingBridge) playerIn).bridge$setTargetedPosition(null);
+        return serverWorld.getSpawnPoint();
+    }
+
+    private void impl$disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {
+        final ITextComponent reason = SpongeAdventure.asVanilla(disconnectMessage);
+
+        try {
+            PlayerListMixin.LOGGER.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" :
+                    netManager.getRemoteAddress() + ": " + reason.getUnformattedComponentText()));
+            netManager.sendPacket(new SDisconnectPacket(reason));
+            netManager.closeChannel(reason);
+        } catch (final Exception exception) {
+            PlayerListMixin.LOGGER.error("Error whilst disconnecting player", exception);
+        }
     }
 }

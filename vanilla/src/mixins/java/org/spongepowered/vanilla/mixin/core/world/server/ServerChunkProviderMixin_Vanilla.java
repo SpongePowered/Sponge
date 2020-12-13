@@ -47,15 +47,16 @@ import java.util.function.Supplier;
 public abstract class ServerChunkProviderMixin_Vanilla {
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/dimension/DimensionType;getDirectory(Ljava/io/File;)Ljava/io/File;"))
-    private File vanilla$useProvidedWorldDirectory(DimensionType dimensionType, File p_212679_1_) {
+    private File vanilla$useProvidedWorldDirectory(final DimensionType dimensionType, final File p_212679_1_) {
         return p_212679_1_;
     }
 
     // Vanilla's ChunkManager queries the DimensionType for the folder, we need to compensate by having it shift one directory up
     @Redirect(method = "<init>", at = @At(value = "NEW", target = "net/minecraft/world/server/ChunkManager"))
-    private ChunkManager vanilla$useParentWorldDirectory(ServerWorld worldIn, File worldDirectory, DataFixer p_i51538_3_, TemplateManager p_i51538_4_,
-        Executor p_i51538_5_, ThreadTaskExecutor<Runnable> mainThreadIn, IChunkLightProvider p_i51538_7_, ChunkGenerator<?> generatorIn,
-        IChunkStatusListener p_i51538_9_, Supplier<DimensionSavedDataManager> p_i51538_10_, int p_i51538_11_) {
+    private ChunkManager vanilla$useParentWorldDirectory(final ServerWorld worldIn, final File worldDirectory, final DataFixer p_i51538_3_,
+            final TemplateManager p_i51538_4_, final Executor p_i51538_5_, final ThreadTaskExecutor<Runnable> mainThreadIn,
+            final IChunkLightProvider p_i51538_7_, final ChunkGenerator<?> generatorIn, final IChunkStatusListener p_i51538_9_,
+            final Supplier<DimensionSavedDataManager> p_i51538_10_, final int p_i51538_11_) {
 
         final DimensionType type = worldIn.getDimension().getType();
 

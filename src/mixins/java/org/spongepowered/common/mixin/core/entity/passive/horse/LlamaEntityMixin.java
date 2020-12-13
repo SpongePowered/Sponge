@@ -43,7 +43,7 @@ public abstract class LlamaEntityMixin implements LlamaEntityBridge {
 
     @Override
     public LlamaType bridge$getLlamaType() {
-        return registry.getReverseMapping(this.shadow$getVariant());
+        return LlamaEntityMixin.registry.getReverseMapping(this.shadow$getVariant());
     }
 
     @Override

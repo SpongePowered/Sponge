@@ -25,12 +25,11 @@
 package org.spongepowered.common.bridge.world;
 
 import net.kyori.adventure.bossbar.BossBar;
+import net.minecraft.entity.player.ServerPlayerEntity;
 
 public interface BossInfoBridge {
     /**
      * Update this bar's info from its adventure equivalent.
-     *
-     * <p>The adventure bits</p>
      *
      * @param adventure adventure boss bar
      */
@@ -39,4 +38,6 @@ public interface BossInfoBridge {
     BossBar bridge$asAdventure();
 
     void bridge$setAdventure(BossBar adventure);
+
+    void bridge$replacePlayer(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer);
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 import net.minecraft.block.BlockState;
 import net.minecraft.world.chunk.ChunkSection;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class CheckBlockPostPlacementIsSameEffect implements ProcessingSideEffect {

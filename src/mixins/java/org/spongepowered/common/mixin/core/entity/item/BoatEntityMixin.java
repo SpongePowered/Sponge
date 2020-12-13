@@ -83,7 +83,7 @@ public abstract class BoatEntityMixin extends EntityMixin implements BoatBridge 
 
     @Override
     public double bridge$getMaxSpeed() {
-        return impl$maxSpeed;
+        return this.impl$maxSpeed;
     }
 
     @Override
@@ -93,7 +93,7 @@ public abstract class BoatEntityMixin extends EntityMixin implements BoatBridge 
 
     @Override
     public boolean bridge$getMoveOnLand() {
-        return impl$moveOnLand;
+        return this.impl$moveOnLand;
     }
 
     @Override
@@ -103,7 +103,7 @@ public abstract class BoatEntityMixin extends EntityMixin implements BoatBridge 
 
     @Override
     public double bridge$getOccupiedDecelerationSpeed() {
-        return impl$occupiedDecelerationSpeed;
+        return this.impl$occupiedDecelerationSpeed;
     }
 
     @Override
@@ -113,7 +113,7 @@ public abstract class BoatEntityMixin extends EntityMixin implements BoatBridge 
 
     @Override
     public double bridge$getUnoccupiedDecelerationSpeed() {
-        return impl$unoccupiedDecelerationSpeed;
+        return this.impl$unoccupiedDecelerationSpeed;
     }
 
     @Override

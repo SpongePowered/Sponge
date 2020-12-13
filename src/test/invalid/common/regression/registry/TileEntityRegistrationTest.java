@@ -45,7 +45,7 @@ public class TileEntityRegistrationTest {
 
 
     @RegressionTest(ghIssue = "https://github.com/SpongePowered/SpongeForge/issues/2761",
-        relatedCommits = "https://github.com/SpongePowered/SpongeCommon/commit/2e394dc71f03026f937ad332eab57020eb55e536"
+        relatedCommits = "https://github.com/SpongePowered/sponge/commit/2e394dc71f03026f937ad332eab57020eb55e536"
     )
     public static final String UNQUALIFIED_TILE_ID = "mod.you.are";
     public static final String CORRECTLY_QUALIFIED_ID = "sponge:myfodo";

@@ -76,8 +76,9 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer {
         lifecycle.establishServerFeatures();
         lifecycle.establishCommands();
 
-        // TODO Minecraft 1.14 - Evaluate exactly where we want to call this
         lifecycle.callStartingEngineEvent(cast());
+
+        lifecycle.establishDataPackRegistries();
         super.run();
     }
 
@@ -85,8 +86,6 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer {
     private void vanilla$callStartedEngineAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.callStartedEngineEvent(cast());
-
-        // TODO Minecraft 1.14 - For now, fire LoadedGameEvent right away but this may not be the best place..
 
         lifecycle.callLoadedGameEvent();
     }

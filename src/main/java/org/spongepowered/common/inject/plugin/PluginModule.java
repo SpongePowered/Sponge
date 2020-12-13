@@ -26,6 +26,10 @@ package org.spongepowered.common.inject.plugin;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
+import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.Matchers;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.inject.InjectionPointProvider;
 import org.spongepowered.common.inject.provider.PluginConfigurationModule;

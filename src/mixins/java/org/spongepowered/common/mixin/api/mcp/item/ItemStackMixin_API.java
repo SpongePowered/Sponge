@@ -42,13 +42,12 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.Constants;
@@ -165,7 +164,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Constants.ItemStack.TYPE, this.itemStack$getType().getKey())
+                .set(Constants.ItemStack.TYPE, this.itemStack$getType().getKey().toString())
                 .set(Constants.ItemStack.COUNT, this.itemStack$getQuantity())
                 .set(Constants.ItemStack.DAMAGE_VALUE, this.shadow$getDamage());
         if (this.shadow$hasTag()) { // no tag? no data, simple as that.

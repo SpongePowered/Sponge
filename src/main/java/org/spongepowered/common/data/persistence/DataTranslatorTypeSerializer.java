@@ -24,44 +24,49 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+
+import java.lang.reflect.Type;
+import java.util.Objects;
 
 public class DataTranslatorTypeSerializer<T> implements TypeSerializer<T> {
 
     private final DataTranslator<T> dataTranslator;
 
-    private DataTranslatorTypeSerializer(DataTranslator<T> dataTranslator) {
-        this.dataTranslator = checkNotNull(dataTranslator, "dataTranslator");
+    private DataTranslatorTypeSerializer(final DataTranslator<T> dataTranslator) {
+        this.dataTranslator = Objects.requireNonNull(dataTranslator, "dataTranslator");
     }
 
     @Override
-    public T deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
+    public T deserialize(final Type type, final ConfigurationNode value) throws SerializationException {
         try {
-            return this.dataTranslator.translate(ConfigurateTranslator.instance().translateFrom(value));
-        } catch (InvalidDataException e) {
+            return this.dataTranslator.translate(ConfigurateTranslator.instance().translate(value));
+        } catch (final InvalidDataException e) {
             // Since the value in the config node might be null, return null if an error occurs.
-            return null;
+            throw new SerializationException(e);
         }
     }
 
     @Override
-    public void serialize(TypeToken<?> type, T obj, ConfigurationNode value) throws ObjectMappingException {
+    public void serialize(final Type type, final @Nullable T obj, final ConfigurationNode value) throws SerializationException {
+        if (obj == null) {
+            value.set(null);
+        }
+
         try {
-            ConfigurateTranslator.instance().translateContainerToData(value, this.dataTranslator.translate(obj));
-        } catch (InvalidDataException e) {
-            throw new ObjectMappingException("Could not serialize. Data was invalid.", e);
+            ConfigurateTranslator.instance().translateDataToNode(value, this.dataTranslator.translate(obj));
+        } catch (final InvalidDataException e) {
+            throw new SerializationException(value, type, "Could not serialize. Data was invalid.", e);
         }
 
     }
 
-    public static <T> DataTranslatorTypeSerializer<T> from(DataTranslator<T> dataTranslator) {
+    public static <T> DataTranslatorTypeSerializer<T> from(final DataTranslator<T> dataTranslator) {
         return new DataTranslatorTypeSerializer<>(dataTranslator);
     }
 

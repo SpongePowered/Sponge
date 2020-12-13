@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.world;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.world.dimension.DimensionType;
@@ -39,6 +40,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 
 @Mixin(WorldSettings.class)
@@ -52,6 +54,11 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
     @Shadow public abstract WorldType shadow$getTerrainType();
     @Shadow public abstract boolean shadow$areCommandsAllowed();
     @Shadow private boolean bonusChestEnabled;
+
+    @Override
+    public ResourceKey getKey() {
+        return ((ResourceKeyBridge) this).bridge$getKey();
+    }
 
     @Intrinsic
     public long archetype$getSeed() {
@@ -100,7 +107,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     @Override
     public Difficulty getDifficulty() {
-        return ((WorldSettingsBridge) this).bridge$getDifficulty();
+        return (Difficulty) (Object) ((WorldSettingsBridge) this).bridge$getDifficulty();
     }
 
     @Override

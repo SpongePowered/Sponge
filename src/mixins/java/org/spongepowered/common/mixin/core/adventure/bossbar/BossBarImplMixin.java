@@ -28,11 +28,13 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.world.server.ServerBossInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.adventure.VanillaBossBarListener;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
 
 @Mixin(targets = "net.kyori.adventure.bossbar.BossBarImpl")
 public abstract class BossBarImplMixin implements BossBarBridge {
+
     private ServerBossInfo bridge$vanillaServerBar;
 
     @Override
@@ -42,6 +44,7 @@ public abstract class BossBarImplMixin implements BossBarBridge {
             this.bridge$vanillaServerBar = new ServerBossInfo(SpongeAdventure.asVanilla($this.name()), SpongeAdventure.asVanilla($this.color()), SpongeAdventure.asVanilla($this.overlay()));
             final BossInfoBridge bridge = (BossInfoBridge) this.bridge$vanillaServerBar;
             bridge.bridge$copyAndAssign($this);
+            $this.addListener(new VanillaBossBarListener(this.bridge$vanillaServerBar));
         }
         return this.bridge$vanillaServerBar;
     }

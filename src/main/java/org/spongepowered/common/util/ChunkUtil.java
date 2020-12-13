@@ -40,7 +40,6 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.chunk.Chunk;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -57,7 +56,7 @@ public final class ChunkUtil {
     public static Optional<Chunk> regenerateChunk(org.spongepowered.api.world.server.ServerWorld world, int cx, int cy, int cz, ChunkRegenerateFlag flag) {
         Chunk spongeChunk;
         try (final PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING.createPhaseContext(PhaseTracker.SERVER)
-                .world((World)(Object) world)) {
+                .world((ServerWorld) world)) {
             context.buildAndSwitch();
             spongeChunk = world.loadChunk(cx, cy, cz, false).orElse(null);
         }
@@ -84,7 +83,6 @@ public final class ChunkUtil {
             }
 
             final ServerChunkProvider chunkProviderServer = (ServerChunkProvider) chunk.getWorld().getChunkProvider();
-            ((ServerChunkProviderBridge) chunkProviderServer).bridge$unloadChunkAndSave(chunk);
 
             File saveFolder = Files.createTempDir();
             // register this just in case something goes wrong

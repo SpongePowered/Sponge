@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
-
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -35,59 +33,73 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Objects;
 import java.util.Optional;
 
-public class SpongeBlockStateBuilder extends AbstractDataBuilder<BlockState> implements BlockState.Builder {
+public class SpongeBlockStateBuilder extends AbstractDataBuilder<@NonNull BlockState> implements BlockState.Builder {
 
-    private BlockState blockState;
+    private BlockState blockState = BlockTypes.STONE.get().getDefaultState();
 
     public SpongeBlockStateBuilder() {
         super(BlockState.class, 1);
     }
 
     @Override
-    public BlockState.Builder blockType(final BlockType blockType) {
-        this.blockState = checkNotNull(blockType).getDefaultState();
+    public BlockState.@NonNull Builder blockType(@NonNull final BlockType blockType) {
+        this.blockState = Objects.requireNonNull(blockType).getDefaultState();
         return this;
     }
 
-
     @Override
-    public <V> SpongeBlockStateBuilder add(final Key<? extends Value<V>> key, final V value) {
-        checkNotNull(key, "key");
+    @NonNull
+    public <V> SpongeBlockStateBuilder add(@NonNull final Key<@NonNull ? extends Value<V>> key, @NonNull final V value) {
+        Objects.requireNonNull(key, "key");
         this.blockState = this.blockState.with(key, value).orElse(this.blockState);
         return this;
     }
 
     @Override
-    public SpongeBlockStateBuilder from(final BlockState holder) {
+    @NonNull
+    public SpongeBlockStateBuilder from(@NonNull final BlockState holder) {
         this.blockState = holder;
         return this;
     }
 
     @Override
+    @NonNull
     public SpongeBlockStateBuilder reset() {
         this.blockState = BlockTypes.STONE.get().getDefaultState();
         return this;
     }
 
     @Override
+    @NonNull
     public BlockState build() {
         return this.blockState;
     }
 
     @Override
+    @NonNull
     protected Optional<BlockState> buildContent(final DataView container) throws InvalidDataException {
         if (!container.contains(Constants.Block.BLOCK_STATE)) {
             return Optional.empty();
         }
-        checkDataExists(container, Constants.Block.BLOCK_STATE);
+        DataUtil.checkDataExists(container, Constants.Block.BLOCK_STATE);
         try {
-            return container.getCatalogType(Constants.Block.BLOCK_STATE, BlockState.class);
+            return container.getString(Constants.Block.BLOCK_STATE).flatMap(BlockStateSerializerDeserializer::deserialize);
         } catch (final Exception e) {
             throw new InvalidDataException("Could not retrieve a blockstate!", e);
         }
     }
+
+    @Override
+    public BlockState.@NonNull Builder fromString(@NonNull final String id) {
+        this.blockState = BlockStateSerializerDeserializer.deserialize(id)
+                .orElseThrow(() -> new IllegalArgumentException("The provided state is not valid."));
+        return this;
+    }
+
 }

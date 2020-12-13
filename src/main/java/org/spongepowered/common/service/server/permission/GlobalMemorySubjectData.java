@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 
@@ -47,7 +48,7 @@ public class GlobalMemorySubjectData extends MemorySubjectData {
 
     @Override
     public Map<Set<Context>, List<SubjectReference>> getAllParents() {
-        return ImmutableMap.of(GLOBAL_CONTEXT, this.getParents(GLOBAL_CONTEXT));
+        return ImmutableMap.of(SubjectData.GLOBAL_CONTEXT, this.getParents(SubjectData.GLOBAL_CONTEXT));
     }
 
     @Override

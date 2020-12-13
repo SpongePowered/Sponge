@@ -27,9 +27,11 @@ package org.spongepowered.common.event.tracking.context.transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -49,14 +51,16 @@ public final class AddTileEntity extends BlockEventBasedTransaction {
         final SpongeBlockSnapshot attachedSnapshot,
         final SpongeBlockSnapshot existing
     ) {
-        super(existing.getBlockPos(), (BlockState) existing.getState());
+        super(existing.getBlockPos(), (BlockState) existing.getState(), ((ServerWorld) added.getWorld()).getKey());
         this.added = added;
         this.addedSnapshot = attachedSnapshot;
         this.oldSnapshot = existing;
     }
 
     @Override
-    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
+    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
+        @Nullable GameTransaction<@NonNull ?> parent
+    ) {
         return Optional.empty();
     }
 

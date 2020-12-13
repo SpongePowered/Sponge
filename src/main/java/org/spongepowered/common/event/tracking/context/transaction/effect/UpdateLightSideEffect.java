@@ -28,13 +28,27 @@ import net.minecraft.block.BlockState;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class UpdateLightSideEffect implements ProcessingSideEffect {
 
+    private static final class Holder {
+        static final UpdateLightSideEffect INSTANCE = new UpdateLightSideEffect();
+    }
+
+    public static UpdateLightSideEffect getInstance() {
+        return UpdateLightSideEffect.Holder.INSTANCE;
+    }
+
+    UpdateLightSideEffect() {}
+
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag) {
+        if (!flag.updateLighting()) {
+            return EffectResult.NULL_PASS;
+        }
         final int originalOpactiy = oldState.opacity;
         final ServerWorld serverWorld = pipeline.getServerWorld();
         final BlockState currentState = pipeline.getAffectedChunk().getBlockState(oldState.pos);

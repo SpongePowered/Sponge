@@ -25,7 +25,6 @@
 package org.spongepowered.common.relocate.co.aikar.timings;
 
 import co.aikar.timings.Timing;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingIdentifier.TimingGroup;
 import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
 import org.spongepowered.common.relocate.co.aikar.util.MRUMapCache;
 
@@ -44,7 +43,7 @@ final class TimingIdentifier {
      */
     static final Map<String, TimingGroup> GROUP_MAP = MRUMapCache.of(
             LoadingMap.newIdentityHashMap(TimingGroup::new, 64));
-    static final TimingGroup DEFAULT_GROUP = getGroup("Minecraft");
+    static final TimingGroup DEFAULT_GROUP = TimingIdentifier.getGroup("Minecraft");
     final String group;
     final String name;
     final TimingHandler groupHandler;
@@ -52,7 +51,7 @@ final class TimingIdentifier {
     private final int hashCode;
 
     TimingIdentifier(String group, String name, Timing groupHandler, boolean protect) {
-        this.group = group != null ? group.intern() : DEFAULT_GROUP.name;
+        this.group = group != null ? group.intern() : TimingIdentifier.DEFAULT_GROUP.name;
         this.name = name.intern();
         this.groupHandler = groupHandler instanceof TimingHandler ? (TimingHandler) groupHandler : null;
         this.protect = protect;
@@ -61,10 +60,10 @@ final class TimingIdentifier {
 
     static TimingGroup getGroup(String groupName) {
         if (groupName == null) {
-            return DEFAULT_GROUP;
+            return TimingIdentifier.DEFAULT_GROUP;
         }
 
-        return GROUP_MAP.get(groupName.intern());
+        return TimingIdentifier.GROUP_MAP.get(groupName.intern());
     }
 
     // We are using .intern() on the strings so it is guaranteed to be an
@@ -89,7 +88,7 @@ final class TimingIdentifier {
     static class TimingGroup {
 
         private static int idPool = 1;
-        final int id = idPool++;
+        final int id = TimingGroup.idPool++;
 
         final String name;
         ArrayDeque<TimingHandler> handlers = new ArrayDeque<>(64);

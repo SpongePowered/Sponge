@@ -43,7 +43,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.item.recipe.RecipeType;
-import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
+import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -135,7 +135,7 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public <T extends SmeltingRecipe> Optional<T> findSmeltingRecipe(RecipeType<T> type, ItemStackSnapshot ingredient) {
+    public <T extends CookingRecipe> Optional<T> findCookingRecipe(RecipeType<T> type, ItemStackSnapshot ingredient) {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(ingredient);
         final net.minecraft.inventory.Inventory fakeFurnace = new net.minecraft.inventory.Inventory(1);

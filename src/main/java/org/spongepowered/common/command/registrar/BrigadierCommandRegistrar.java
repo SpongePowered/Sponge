@@ -24,15 +24,14 @@
  */
 package org.spongepowered.common.command.registrar;
 
-import com.google.common.reflect.TypeToken;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -210,7 +209,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
             final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause));
             return CommandResult.builder().setResult(result).build();
         } catch (final CommandSyntaxException e) {
-            throw new CommandException(TextComponent.of(e.getMessage()), e);
+            throw new CommandException(Component.text(e.getMessage()), e);
         }
     }
 
@@ -233,7 +232,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final CommandMapping mapping) {
         final CommandNode<CommandSource> node = this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias()));
         if (node != null) {
-            return Optional.of(TextComponent.of(this.dispatcher.getSmartUsage(node, (CommandSource) cause).toString()));
+            return Optional.of(Component.text(this.dispatcher.getSmartUsage(node, (CommandSource) cause).toString()));
         }
 
         return Optional.empty();
@@ -259,7 +258,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     @Override
     @NonNull
     public ResourceKey getKey() {
-        return RESOURCE_KEY;
+        return BrigadierCommandRegistrar.RESOURCE_KEY;
     }
 
     private String createCommandString(final String command, final String argument) {

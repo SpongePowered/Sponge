@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.data.provider;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.GenericTypeReflector;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.TypeTokenUtil;
 
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -39,7 +40,6 @@ import java.util.function.Supplier;
 public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> extends MutableDataProvider<V, E>
         implements AbstractDataProvider.KnownHolderType {
 
-    private static final TypeVariable<?> holderTypeParameter = GenericMutableDataProviderBase.class.getTypeParameters()[0];
     private final Class<H> holderType;
 
     protected GenericMutableDataProviderBase(final Supplier<? extends Key<V>> key, final Class<H> holderType) {
@@ -57,7 +57,8 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
 
     protected GenericMutableDataProviderBase(final Key<V> key) {
         super(key);
-        this.holderType = (Class<H>) TypeToken.of(this.getClass()).resolveType(holderTypeParameter).getRawType();
+        this.holderType = (Class<H>) GenericTypeReflector.erase(
+                TypeTokenUtil.typeArgumentFromSupertype(this.getClass(), GenericMutableDataProviderBase.class, 0));
     }
 
     private boolean isTypeAllowed(final DataHolder dataHolder) {
@@ -174,6 +175,11 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     @Override
     public final boolean isSupported(final DataHolder dataHolder) {
         return this.isTypeAllowed(dataHolder) && this.supports((H) dataHolder);
+    }
+
+    @Override
+    public boolean isSupported(final Type dataHolder) {
+        return this.holderType.isAssignableFrom(GenericTypeReflector.erase(dataHolder));
     }
 
     @Override

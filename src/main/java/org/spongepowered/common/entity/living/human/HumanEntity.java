@@ -28,7 +28,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.CreatureEntity;
@@ -71,9 +70,12 @@ import org.spongepowered.common.accessor.entity.player.PlayerEntityAccessor;
 import org.spongepowered.common.accessor.network.play.server.SPlayerListItemPacketAccessor;
 import org.spongepowered.common.accessor.network.play.server.SSpawnPlayerPacketAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -124,7 +126,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
         // PlayerEntity
         this.dataManager.register(PlayerEntityAccessor.accessor$getAbsorption(), 0.0F);
         this.dataManager.register(PlayerEntityAccessor.accessor$getPlayerScore(), 0);
-        this.dataManager.register(PlayerEntityAccessor.accessor$getPlayerModelFlag(), (byte) 0);
+        this.dataManager.register(PlayerEntityAccessor.accessor$getPlayerModelFlag(), Constants.Sponge.Entity.Human.PLAYER_MODEL_FLAG_ALL);
         this.dataManager.register(PlayerEntityAccessor.accessor$getMainHand(), (byte) 1);
         this.dataManager.register(PlayerEntityAccessor.accessor$getLeftShoulderEntity(), new CompoundNBT());
         this.dataManager.register(PlayerEntityAccessor.accessor$getRightShoulderEntity(), new CompoundNBT());
@@ -151,7 +153,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
 
     @Override
     public Component getTeamRepresentation() {
-        return TextComponent.of(this.fakeProfile.getName());
+        return Component.text(this.fakeProfile.getName());
     }
 
     @Override
@@ -202,6 +204,11 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     @Override
     public void setLeftHanded(final boolean leftHanded) {
         this.leftHanded = leftHanded;
+    }
+
+    @Override
+    public void setAggroed(boolean hasAggro) {
+        // NOOP, we handle the arm swing manually...
     }
 
     @Override
@@ -373,14 +380,18 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
         } else {
             Sponge.getServer().getScheduler().submit(Task.builder()
                     .execute(removeTask)
-                    .delayTicks(delay)
-                    .plugin(SpongeCommon.getPlugin())
+                    .delay(new SpongeTicks(delay))
+                    .plugin(Launch.getInstance().getCommonPlugin())
                     .build());
         }
     }
 
     public Property getSkinProperty() {
-        return this.fakeProfile.getProperties().get(ProfileProperty.TEXTURES).iterator().next();
+        final Collection<Property> properties = this.fakeProfile.getProperties().get(ProfileProperty.TEXTURES);
+        if (properties.isEmpty()) {
+            return null;
+        }
+        return properties.iterator().next();
     }
 
     public void setSkinProperty(final Property property) {
@@ -419,7 +430,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
      *
      * @param player The player that has stopped tracking this human
      */
-    public void onRemovedFrom(final ServerPlayerEntity player) {
+    public void untrackFrom(final ServerPlayerEntity player) {
         this.playerPacketMap.remove(player.getUniqueID());
         player.connection.sendPacket(this.createPlayerListPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER));
     }

@@ -43,7 +43,7 @@ public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
 
     @Override
     default Inventory getInventory(Direction from) {
-        return getInventory(from, this);
+        return DefaultSingleBlockCarrier.getInventory(from, this);
     }
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override

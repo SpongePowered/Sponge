@@ -25,11 +25,13 @@
 package org.spongepowered.common.bridge.data;
 
 import net.minecraft.nbt.CompoundNBT;
+import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.util.Constants;
 
 public interface DataCompoundHolder {
 
     CompoundNBT data$getCompound();
+
     void data$setCompound(CompoundNBT nbt);
 
     default boolean data$hasForgeData() {
@@ -49,7 +51,6 @@ public interface DataCompoundHolder {
         }
         return forgeCompound;
     }
-
 
     default boolean data$hasSpongeData() {
         return this.data$hasForgeData() && this.data$getForgeData().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
@@ -78,4 +79,12 @@ public interface DataCompoundHolder {
             }
         }
     }
+
+    /**
+     * Gets the {@link NBTDataType} which this
+     * nbt data holder contains data for.
+     *
+     * @return The nbt data type
+     */
+    NBTDataType data$getNBTDataType();
 }

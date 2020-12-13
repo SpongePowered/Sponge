@@ -42,7 +42,7 @@ public class EquipmentSlotLens extends FilteringSlotLens {
     private final Predicate<EquipmentType> equipmentTypeFilter;
 
     public EquipmentSlotLens(Lens parent, SlotLens lens, EquipmentType type) {
-        super(lens, equipmentTypeFilter(type), EquipmentSlotAdapter.class);
+        super(lens, EquipmentSlotLens.equipmentTypeFilter(type), EquipmentSlotAdapter.class);
         this.equipmentTypeFilter = e -> e == type;
         this.setParent(parent);
     }

@@ -30,7 +30,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class GeneralPhaseContext<C extends GeneralPhaseContext<C>> extends PhaseContext<C> {
 
-    GeneralPhaseContext(final IPhaseState<? extends C> state, final PhaseTracker tracker) {
+    GeneralPhaseContext(final IPhaseState<C> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 }

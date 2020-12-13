@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
@@ -139,9 +140,9 @@ public final class SpongePaginationList implements PaginationList {
         try {
             pagination.specificPage(page);
         } catch (final CommandException e) {
-            final Component text = e.getText();
+            final Component text = e.componentMessage();
             if (text != null) {
-                receiver.sendMessage(text.color(NamedTextColor.RED));
+                receiver.sendMessage(Identity.nil(), text.color(NamedTextColor.RED));
             }
         }
     }

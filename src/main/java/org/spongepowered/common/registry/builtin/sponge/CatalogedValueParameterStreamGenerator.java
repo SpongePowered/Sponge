@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.builtin.sponge;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.arguments.*;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.ResourceKey;
@@ -34,6 +35,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeBigDecimalValueParameter;
@@ -42,6 +44,7 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeColorVa
 import org.spongepowered.common.command.parameter.managed.standard.SpongeDataContainerValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeDateTimeValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeDurationValueParameter;
+import org.spongepowered.common.command.parameter.managed.standard.SpongeGameProfileValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeIPAddressValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeNoneValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongePluginContainerValueParameter;
@@ -50,11 +53,13 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeTargetB
 import org.spongepowered.common.command.parameter.managed.standard.SpongeTargetEntityValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeUserValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeWorldPropertiesValueParameter;
+import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector2d;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,17 +84,21 @@ public final class CatalogedValueParameterStreamGenerator {
                 // This is for a single entity. We'll have a separate one for multiple.
                 StandardCatalogedArgumentParser.createConverter("entity", EntityArgument.entity(),
                         (reader, cause, selector) -> (Entity) selector.selectOne(cause.getSource())),
-                StandardCatalogedArgumentParser.createConverter("game_profile", GameProfileArgument.gameProfile(),
-                        (reader, cause, converter) -> converter.getNames(cause.getSource())),
+                new SpongeGameProfileValueParameter(),
                 StandardCatalogedArgumentParser.createIdentity("integer", IntegerArgumentType.integer()),
                 new SpongeIPAddressValueParameter(),
+                StandardCatalogedArgumentParser.createConverter("item_stack_snapshot", ItemArgument.item(),
+                        (reader, cause, converter) ->
+                                new SpongeItemStackSnapshot((ItemStack) (Object) converter.createStack(1, true))),
                 new SpongeServerLocationValueParameter(true),
                 new SpongeServerLocationValueParameter(false),
                 StandardCatalogedArgumentParser.createIdentity("long", LongArgumentType.longArg()),
                 StandardCatalogedArgumentParser.createConverter("many_entities", EntityArgument.entities(),
                         (reader, cause, selector) -> selector.select(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())),
+                StandardCatalogedArgumentParser.createConverter("many_game_profiles", GameProfileArgument.gameProfile(),
+                        (reader, cause, converter) -> converter.getNames(cause.getSource())),
                 StandardCatalogedArgumentParser.createConverter("many_players", EntityArgument.players(),
-                        (reader, cause, selector) -> (Player) selector.selectPlayers(cause.getSource())),
+                        (reader, cause, selector) -> selector.selectPlayers(cause.getSource())),
                 new SpongeNoneValueParameter(),
                 StandardCatalogedArgumentParser.createConverter("player", EntityArgument.player(),
                         (reader, cause, selector) -> (Player) selector.selectOnePlayer(cause.getSource())),

@@ -36,10 +36,10 @@ public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart 
     private final int mask;
     private final Component component;
 
-    public SpongeSkinPart(ResourceKey key, int ordinal, final Component component) {
+    public SpongeSkinPart(final ResourceKey key, final int ordinal, final Component label) {
         super(key);
         this.ordinal = ordinal;
-        this.component = component;
+        this.component = label;
         this.mask = 1 << this.ordinal;
     }
 
@@ -48,7 +48,7 @@ public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart 
         return this.component;
     }
 
-    public boolean test(int flags) {
+    public boolean test(final int flags) {
         return (flags & this.mask) != 0;
     }
 
@@ -56,5 +56,9 @@ public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart 
     protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .add("ordinal", this.ordinal);
+    }
+
+    public int getMask() {
+        return this.mask;
     }
 }

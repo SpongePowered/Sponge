@@ -30,7 +30,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public final class EntityTickContext extends TickContext<EntityTickContext> {
 
-    EntityTickContext(final IPhaseState<? extends EntityTickContext> phaseState, PhaseTracker tracker) {
+    EntityTickContext(final IPhaseState<EntityTickContext> phaseState, PhaseTracker tracker) {
         super(phaseState, tracker);
     }
 

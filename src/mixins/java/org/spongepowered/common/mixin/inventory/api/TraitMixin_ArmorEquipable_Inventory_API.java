@@ -39,7 +39,9 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Optional;
@@ -47,9 +49,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 // All living implementors of ArmorEquipable
-@Mixin({PlayerEntity.class,
-        ArmorStandEntity.class,
-        MobEntity.class})
+@Mixin({ArmorStandEntity.class, MobEntity.class, PlayerEntity.class})
 public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEquipable {
 
     // TODO can we implement canEquip?
@@ -69,8 +69,16 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     @Override
     public Optional<ItemStack> getEquipped(final EquipmentType type) {
         final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
-        final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
-        return Optional.of(ItemStackUtil.fromNative(lens.getStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getSlotIndex())));
+        final Lens rootLens = inv.inventoryAdapter$getRootLens();
+        final EquipmentInventoryLens lens;
+        if (rootLens instanceof EquipmentInventoryLens) {
+            lens = (EquipmentInventoryLens) rootLens;
+        } else if (rootLens instanceof PlayerInventoryLens) {
+            lens = ((PlayerInventoryLens) rootLens).getEquipmentLens();
+        } else {
+            throw new IllegalStateException("Unexpected lens for Equipable Inventory " + rootLens.getClass().getName());
+        }
+        return Optional.of(ItemStackUtil.fromNative(lens.getStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getIndex())));
     }
 
     @Override

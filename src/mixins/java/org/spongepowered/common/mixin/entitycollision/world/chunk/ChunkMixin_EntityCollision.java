@@ -39,10 +39,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -90,7 +90,7 @@ public abstract class ChunkMixin_EntityCollision {
             return true;
         }
 
-        if (PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
+        if (PhaseTracker.getInstance().getPhaseContext().isCollision()) {
             // allow explosions
             return true;
         }

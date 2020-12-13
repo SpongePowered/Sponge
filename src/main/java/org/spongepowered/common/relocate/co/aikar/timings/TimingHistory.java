@@ -51,7 +51,7 @@ public class TimingHistory {
     public static long tileEntityTicks;
     public static long activatedEntityTicks;
     static int worldIdPool = 1;
-    static Map<String, Integer> worldMap = LoadingMap.newHashMap((input) -> worldIdPool++);
+    static Map<String, Integer> worldMap = LoadingMap.newHashMap((input) -> TimingHistory.worldIdPool++);
     final long endTime;
     final long startTime;
     final long totalTicks;
@@ -67,7 +67,7 @@ public class TimingHistory {
     TimingHistory() {
         this.endTime = System.currentTimeMillis() / 1000;
         this.startTime = TimingsManager.historyStart / 1000;
-        if (timedTicks % 1200 != 0 || TimingsManager.MINUTE_REPORTS.isEmpty()) {
+        if (TimingHistory.timedTicks % 1200 != 0 || TimingsManager.MINUTE_REPORTS.isEmpty()) {
             this.minuteReports = TimingsManager.MINUTE_REPORTS.toArray(new MinuteReport[TimingsManager.MINUTE_REPORTS.size() + 1]);
             this.minuteReports[this.minuteReports.length - 1] = new MinuteReport();
         } else {
@@ -189,13 +189,13 @@ public class TimingHistory {
     public static void resetTicks(boolean fullReset) {
         if (fullReset) {
             // Non full is simply for 1 minute reports
-            timedTicks = 0;
+            TimingHistory.timedTicks = 0;
         }
-        lastMinuteTime = System.nanoTime();
-        playerTicks = 0;
-        tileEntityTicks = 0;
-        entityTicks = 0;
-        activatedEntityTicks = 0;
+        TimingHistory.lastMinuteTime = System.nanoTime();
+        TimingHistory.playerTicks = 0;
+        TimingHistory.tileEntityTicks = 0;
+        TimingHistory.entityTicks = 0;
+        TimingHistory.activatedEntityTicks = 0;
     }
 
     JsonObject export() {
@@ -217,7 +217,7 @@ public class TimingHistory {
         final TicksRecord ticksRecord = new TicksRecord();
         final PingRecord pingRecord = new PingRecord();
         final TimingData fst = TimingsManager.FULL_SERVER_TICK.minuteData.clone();
-        final double tps = 1E9 / (System.nanoTime() - lastMinuteTime) * this.ticksRecord.timed;
+        final double tps = 1E9 / (System.nanoTime() - TimingHistory.lastMinuteTime) * this.ticksRecord.timed;
         final double usedMemory = TimingsManager.FULL_SERVER_TICK.avgUsedMemory;
         final double freeMemory = TimingsManager.FULL_SERVER_TICK.avgFreeMemory;
         final double loadAvg = ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
@@ -248,11 +248,11 @@ public class TimingHistory {
         final long activatedEntity;
 
         TicksRecord() {
-            this.timed = timedTicks - (TimingsManager.MINUTE_REPORTS.size() * 1200);
-            this.player = playerTicks;
-            this.entity = entityTicks;
-            this.tileEntity = tileEntityTicks;
-            this.activatedEntity = activatedEntityTicks;
+            this.timed = TimingHistory.timedTicks - (TimingsManager.MINUTE_REPORTS.size() * 1200);
+            this.player = TimingHistory.playerTicks;
+            this.entity = TimingHistory.entityTicks;
+            this.tileEntity = TimingHistory.tileEntityTicks;
+            this.activatedEntity = TimingHistory.activatedEntityTicks;
         }
 
     }
@@ -284,7 +284,7 @@ public class TimingHistory {
 
         @SuppressWarnings("unchecked")
         static <T> Function<T, Counter> loader() {
-            return (Function<T, Counter>) LOADER;
+            return (Function<T, Counter>) Counter.LOADER;
         }
 
         public int increment() {

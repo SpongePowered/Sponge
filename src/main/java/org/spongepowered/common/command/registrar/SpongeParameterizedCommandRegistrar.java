@@ -24,15 +24,12 @@
  */
 package org.spongepowered.common.command.registrar;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -49,6 +46,8 @@ import org.spongepowered.common.command.SpongeParameterizedCommand;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,7 +60,7 @@ import java.util.stream.Collectors;
 public final class SpongeParameterizedCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<Command.Parameterized> {
 
     private final Map<CommandMapping, Command.Parameterized> commandMap = new HashMap<>();
-    private static final TypeToken<Command.Parameterized> COMMAND_TYPE = TypeToken.of(Command.Parameterized.class);
+    private static final TypeToken<Command.Parameterized> COMMAND_TYPE = TypeToken.get(Command.Parameterized.class);
     public static final ResourceKey CATALOG_KEY = ResourceKey.sponge("managed");
     public static final SpongeParameterizedCommandRegistrar INSTANCE = new SpongeParameterizedCommandRegistrar();
 
@@ -82,16 +81,21 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
         // Get the builder and the first literal.
         final String namespacedCommand = container.getMetadata().getId() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
 
+        final ArrayList<String> aliases = new ArrayList<>();
+        aliases.add(primaryAlias);
+        aliases.addAll(Arrays.asList(secondaryAliases));
+
         // This will throw an error if there is an issue.
         final CommandMapping mapping = ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).registerAliasWithNamespacing(
                 this,
                 container,
                 namespacedCommand,
-                ImmutableList.<String>builder().add(primaryAlias).add(secondaryAliases).build(),
+                aliases,
                 null
         );
 
         this.createNode(mapping, command).forEach(BrigadierCommandRegistrar.INSTANCE::registerFromSpongeRegistrar);
+        this.commandMap.put(mapping, command);
         return mapping;
     }
 
@@ -108,7 +112,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
                             this.getDispatcher().parse(this.createCommandString(command, arguments), (CommandSource) cause))).build();
         } catch (final CommandSyntaxException e) {
             // We'll unwrap later.
-            throw new CommandException(TextComponent.of(e.getMessage()), e);
+            throw new CommandException(Component.text(e.getMessage()), e);
         }
     }
 
@@ -159,7 +163,9 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
     }
 
     private Collection<LiteralCommandNode<CommandSource>> createNode(final CommandMapping mapping, final Command.Parameterized command) {
-        Preconditions.checkArgument(command instanceof SpongeParameterizedCommand, "Command must be a SpongeParameterizedCommand!");
+        if (!(command instanceof SpongeParameterizedCommand)) {
+            throw new IllegalArgumentException("Command must be a SpongeParameterizedCommand!");
+        }
         return ((SpongeParameterizedCommand) command).buildWithAliases(mapping.getAllAliases());
     }
 

@@ -25,16 +25,16 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.util.Constants;
 
 public final class EntityDataProviders extends DataProviderRegistratorBuilder {
 
-    public EntityDataProviders(final DataProviderRegistry registry) {
-        super(registry);
+    public EntityDataProviders() {
+        super(Constants.Sponge.Entity.DataRegistration.ENTITY);
     }
 
     @Override
-    public void register() {
+    public void registerProviders() {
         AbstractArrowData.register(this.registrator);
         AbstractChestedHorseData.register(this.registrator);
         AbstractHorseData.register(this.registrator);

@@ -52,10 +52,9 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.network.channel.ChannelBufferAllocator;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
-import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.game.SpongeGameScopedServiceProvider;
 import org.spongepowered.common.sql.SpongeSqlManager;
-import org.spongepowered.common.util.SpongeMetricsConfigManager;
+import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 

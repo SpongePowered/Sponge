@@ -32,12 +32,13 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.applaunch.config.core.ConfigHandle;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -75,6 +76,7 @@ public final class PhasePrinter {
 
     public static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
         context.printCustom(printer, 4);
+
     static final BiConsumer<PrettyPrinter, PhaseContext<?>> PHASE_PRINTER = (printer, context) -> {
             printer.add("  - Phase: %s", context.state);
             printer.add("    Context:");
@@ -219,7 +221,11 @@ public final class PhasePrinter {
     }
 
     public static void printMessageWithCaughtException(final PhaseTracker tracker, final String header, final String subheader, final Throwable e) {
-        printMessageWithCaughtException(tracker.stack, header, subheader, tracker.getCurrentState(), tracker.getPhaseContext(), e);
+        PhasePrinter.printMessageWithCaughtException(tracker.stack, header, subheader, tracker.getPhaseContext().state, tracker.getPhaseContext(), e);
+    }
+
+    public static void printMessageWithCaughtException(final PhaseTracker tracker, final String header, final String subHeader, final IPhaseState<?> state, final PhaseContext<?> context, @Nullable final Throwable t) {
+        PhasePrinter.printMessageWithCaughtException(tracker.stack, header, subHeader, state, context, t);
     }
 
     public static void printMessageWithCaughtException(final PhaseStack stack, final String header, final String subHeader, final IPhaseState<?> state, final PhaseContext<?> context, @Nullable final Throwable t) {
@@ -257,8 +263,7 @@ public final class PhasePrinter {
             .add("The PhaseState having an exception: %s", context.state)
             .add("The PhaseContext:")
             ;
-        printer
-            .add(context.printCustom(printer, 4));
+        context.printCustom(printer, 4);
         PhasePrinter.printPhaseStackWithException(stack, printer, e);
 
         printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
@@ -312,8 +317,8 @@ public final class PhasePrinter {
     }
 
     static void generateVersionInfo(final PrettyPrinter printer) {
-        for (final PluginContainer pluginContainer : SpongeCommon.getInternalPlugins()) {
-            printer.add("%s : %s", pluginContainer.getMetadata().getName(), pluginContainer.getMetadata().getVersion());
+        for (final PluginContainer pluginContainer : Launch.getInstance().getLauncherPlugins()) {
+            printer.add("%s : %s", pluginContainer.getMetadata().getName().get(), pluginContainer.getMetadata().getVersion());
         }
     }
 

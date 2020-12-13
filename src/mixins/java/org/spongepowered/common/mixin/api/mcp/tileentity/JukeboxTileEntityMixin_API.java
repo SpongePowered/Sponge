@@ -51,22 +51,22 @@ public abstract class JukeboxTileEntityMixin_API extends TileEntityMixin_API imp
     @Override
     public void play() {
         if (!this.getRecord().isEmpty()) {
-            this.world.playEvent(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, Item.getIdFromItem(this.getRecord().getItem()));
+            this.world.playEvent(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.shadow$getPos(), Item.getIdFromItem(this.getRecord().getItem()));
         }
     }
 
     @Override
     public void stop() {
-        this.world.playEvent(Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, 0);
+        this.world.playEvent(Constants.WorldEvents.PLAY_RECORD_EVENT, this.shadow$getPos(), 0);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public void eject() {
-        final BlockState block = this.world.getBlockState(this.pos);
+        final BlockState block = this.world.getBlockState(this.shadow$getPos());
         if (block.getBlock() == Blocks.JUKEBOX) {
-            ((JukeboxBlockAccessor) block.getBlock()).accessor$dropRecord(this.world, this.pos);
-            this.world.setBlockState(this.pos, block.with(JukeboxBlock.HAS_RECORD, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
+            ((JukeboxBlockAccessor) block.getBlock()).accessor$dropRecord(this.world, this.shadow$getPos());
+            this.world.setBlockState(this.shadow$getPos(), block.with(JukeboxBlock.HAS_RECORD, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }
 
@@ -76,11 +76,11 @@ public abstract class JukeboxTileEntityMixin_API extends TileEntityMixin_API imp
         if (!(itemStack.getItem() instanceof MusicDiscItem)) {
             return;
         }
-        final BlockState block = this.world.getBlockState(this.pos);
+        final BlockState block = this.world.getBlockState(this.shadow$getPos());
         if (block.getBlock() == Blocks.JUKEBOX) {
             // Don't use BlockJukebox#insertRecord - it looses item data
             this.setRecord(itemStack);
-            this.world.setBlockState(this.pos, block.with(JukeboxBlock.HAS_RECORD, true), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
+            this.world.setBlockState(this.shadow$getPos(), block.with(JukeboxBlock.HAS_RECORD, true), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }
 

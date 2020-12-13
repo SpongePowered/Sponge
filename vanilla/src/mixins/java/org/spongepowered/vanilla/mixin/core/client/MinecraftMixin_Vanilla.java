@@ -65,8 +65,9 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
         lifecycle.establishRegistries();
         lifecycle.establishDataProviders();
 
-        // TODO Minecraft 1.14 - Evaluate exactly where we want to call this
         lifecycle.callStartingEngineEvent(this);
+
+        lifecycle.establishDataPackRegistries();
     }
 
     @Inject(method = "shutdownMinecraftApplet", at = @At("HEAD"))

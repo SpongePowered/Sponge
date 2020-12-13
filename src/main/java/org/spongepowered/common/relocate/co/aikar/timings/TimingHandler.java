@@ -29,14 +29,12 @@ import co.aikar.timings.Timings;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.relocate.co.aikar.util.LoadingIntMap;
 
 class TimingHandler implements Timing {
 
     private static int idPool = 1;
-    final int id = idPool++;
+    final int id = TimingHandler.idPool++;
 
     final String name;
     private final boolean verbose;
@@ -88,11 +86,13 @@ class TimingHandler implements Timing {
 
     @Override
     public void startTimingIfSync() {
-        if (!this.enabled ) {
+        if (!this.enabled) {
             return;
         }
 
-        this.startTiming();
+        if (Sponge.isServerAvailable() && SpongeCommon.getServer().isOnExecutionThread()) {
+            this.startTiming();
+        }
     }
 
     @Override
@@ -101,7 +101,9 @@ class TimingHandler implements Timing {
             return;
         }
 
-        this.stopTiming();
+        if (Sponge.isServerAvailable() && SpongeCommon.getServer().isOnExecutionThread()) {
+            this.stopTiming();
+        }
     }
 
     @Override

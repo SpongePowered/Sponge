@@ -30,7 +30,9 @@ import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -45,6 +47,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -62,7 +65,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
     @Shadow private int fireworkAge;
     @Shadow private int lifetime;
 
-    @Shadow public abstract void shadow$tick();
+    @Shadow protected abstract void func_213893_k();
 
     private ProjectileSource impl$projectileSource = UnknownProjectileSource.UNKNOWN;
     private int impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
@@ -111,12 +114,15 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
         this.impl$explosionRadius = radius == null ? Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS : radius;
     }
 
-    @SuppressWarnings("deprecation")
     @Redirect(method = "func_213893_k()V",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V")
     )
-    private void impl$onExplosionDamage(final World world, final Entity self, final byte state) {
+    private void impl$useSpongeExplosion(final World world, final Entity self, final byte state) {
+        if (this.world.isRemote) {
+            world.setEntityState(self, state);
+            return;
+        }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             // Fireworks don't typically explode like other explosives, but we'll
             // post an event regardless and if the radius is zero the explosion
@@ -131,7 +137,6 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$postPrimeEvent(final CallbackInfo ci) {
         if (this.fireworkAge == 1 && !this.world.isRemote) {
@@ -152,6 +157,19 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
             return entityLivingBase.attackEntityFrom(DamageSource.FIREWORKS, amount);
         } finally {
             ((DamageSourceBridge) source).bridge$setFireworksSource();
+        }
+    }
+
+    @Inject(method = "func_213892_a", at = @At("HEAD"), cancellable = true)
+    private void impl$onImpact(final RayTraceResult rayTraceResult, final CallbackInfo ci) {
+        if (((WorldBridge) this.world).bridge$isFake() || rayTraceResult.getType() == RayTraceResult.Type.MISS) {
+            return;
+        }
+
+        if (SpongeCommonEventFactory.handleCollideImpactEvent((Entity) (Object)this,
+                ((FireworkRocket) this).get(Keys.SHOOTER).orElse(null), rayTraceResult)) {
+            this.shadow$remove();
+            ci.cancel();
         }
     }
 }

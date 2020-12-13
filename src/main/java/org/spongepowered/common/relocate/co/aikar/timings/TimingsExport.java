@@ -33,10 +33,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
@@ -47,6 +46,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
+import org.spongepowered.configurate.ConfigurationNode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -89,27 +89,27 @@ class TimingsExport extends Thread {
      * Builds an XML report of the timings to be uploaded for parsing.
      */
     static void reportTimings() {
-        if (requestingReport.isEmpty()) {
+        if (TimingsExport.requestingReport.isEmpty()) {
             return;
         }
-        TimingsReportListener listeners = new TimingsReportListener(requestingReport);
+        TimingsReportListener listeners = new TimingsReportListener(TimingsExport.requestingReport);
 
-        requestingReport.clear();
+        TimingsExport.requestingReport.clear();
         long now = System.currentTimeMillis();
-        final long lastReportDiff = now - lastReport;
+        final long lastReportDiff = now - TimingsExport.lastReport;
         if (lastReportDiff < 60000) {
-            listeners.send(TextComponent.of("Please wait at least 1 minute in between Timings reports. (" + (int)((60000 - lastReportDiff) / 1000) + " seconds)", NamedTextColor.RED));
+            listeners.send(Component.text("Please wait at least 1 minute in between Timings reports. (" + (int)((60000 - lastReportDiff) / 1000) + " seconds)", NamedTextColor.RED));
             listeners.done();
             return;
         }
         final long lastStartDiff = now - TimingsManager.timingStart;
         if (lastStartDiff < 180000) {
-            listeners.send(TextComponent.of("Please wait at least 3 minutes before generating a Timings report. Unlike Timings v1, v2 benefits from longer timings and is not as useful with short timings. (" + (int)((180000 - lastStartDiff) / 1000) + " seconds)", NamedTextColor.RED));
+            listeners.send(Component.text("Please wait at least 3 minutes before generating a Timings report. Unlike Timings v1, v2 benefits from longer timings and is not as useful with short timings. (" + (int)((180000 - lastStartDiff) / 1000) + " seconds)", NamedTextColor.RED));
             listeners.done();
             return;
         }
-        listeners.send(TextComponent.of("Preparing Timings Report...", NamedTextColor.GREEN));
-        lastReport = now;
+        listeners.send(Component.text("Preparing Timings Report...", NamedTextColor.GREEN));
+        TimingsExport.lastReport = now;
 
         Platform platform = SpongeCommon.getGame().getPlatform();
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
@@ -120,7 +120,7 @@ class TimingsExport extends Thread {
                 .add("end", System.currentTimeMillis() / 1000)
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
         if (!TimingsManager.privacy) {
-            builder.add("server", getServerName())
+            builder.add("server", TimingsExport.getServerName())
                     .add("motd", SpongeAdventure.plain(Sponge.getServer().getMotd()))
                     .add("online-mode", Sponge.getServer().getOnlineMode())
                     .add("icon", SpongeCommon.getServer().getServerStatusResponse().getFavicon());
@@ -129,7 +129,7 @@ class TimingsExport extends Thread {
         final Runtime runtime = Runtime.getRuntime();
         RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
         builder.add("system", JSONUtil.objectBuilder()
-                .add("timingcost", getCost())
+                .add("timingcost", TimingsExport.getCost())
                 .add("name", System.getProperty("os.name"))
                 .add("version", System.getProperty("os.version"))
                 .add("jvmversion", System.getProperty("java.version"))
@@ -137,7 +137,7 @@ class TimingsExport extends Thread {
                 .add("maxmem", runtime.maxMemory())
                 .add("cpu", runtime.availableProcessors())
                 .add("runtime", ManagementFactory.getRuntimeMXBean().getUptime())
-                .add("flags", RUNTIME_FLAG_JOINER.join(runtimeBean.getInputArguments()))
+                .add("flags", TimingsExport.RUNTIME_FLAG_JOINER.join(runtimeBean.getInputArguments()))
                 .add("gc", JSONUtil.mapArrayToObject(ManagementFactory.getGarbageCollectorMXBeans(), (input) -> {
                     return JSONUtil.singleObjectPair(input.getName(), JSONUtil.arrayOf(input.getCollectionCount(), input.getCollectionTime()));
                 })));
@@ -188,14 +188,14 @@ class TimingsExport extends Thread {
                     .add("version", plugin.getMetadata().getVersion())
                     .add("description", plugin.getMetadata().getDescription().orElse(""))
                     .add("website", plugin.getMetadata().getLinks().getHomepage())
-                    .add("authors", AUTHOR_LIST_JOINER.join(plugin.getMetadata().getContributors()))
+                    .add("authors", TimingsExport.AUTHOR_LIST_JOINER.join(plugin.getMetadata().getContributors()))
             ).build();
         }));
 
         // Information on the users Config
 
         builder.add("config", JSONUtil.objectBuilder()
-                .add("sponge", serializeConfigNode(SpongeConfigs.getCommon().getNode())));
+                .add("sponge", TimingsExport.serializeConfigNode(SpongeConfigs.getCommon().getNode())));
 
         new TimingsExport(listeners, builder.build(), history).start();
     }
@@ -235,26 +235,26 @@ class TimingsExport extends Thread {
         return timingsCost;
     }
 
-    private static JsonElement serializeConfigNode(ConfigurationNode node) {
-        if (node.hasMapChildren()) {
-            JsonObject object = new JsonObject();
-            for (Entry<Object, ? extends ConfigurationNode> entry : node.getChildrenMap().entrySet()) {
-                String fullPath = CONFIG_PATH_JOINER.join(entry.getValue().getPath());
+    private static JsonElement serializeConfigNode(final ConfigurationNode node) {
+        if (node.isMap()) {
+            final JsonObject object = new JsonObject();
+            for (final Entry<Object, ? extends ConfigurationNode> entry : node.childrenMap().entrySet()) {
+                final String fullPath = TimingsExport.CONFIG_PATH_JOINER.join(entry.getValue().path());
                 if (fullPath.equals("sponge.sql") || TimingsManager.hiddenConfigs.contains(fullPath)) {
                     continue;
                 }
-                object.add(entry.getKey().toString(), serializeConfigNode(entry.getValue()));
+                object.add(entry.getKey().toString(), TimingsExport.serializeConfigNode(entry.getValue()));
             }
             return object;
         }
-        if (node.hasListChildren()) {
-            JsonArray array = new JsonArray();
-            for (ConfigurationNode child : node.getChildrenList()) {
-                array.add(serializeConfigNode(child));
+        if (node.isList()) {
+            final JsonArray array = new JsonArray();
+            for (final ConfigurationNode child : node.childrenList()) {
+                array.add(TimingsExport.serializeConfigNode(child));
             }
             return array;
         }
-        return JSONUtil.toJsonElement(node.getValue());
+        return JSONUtil.toJsonElement(node.raw());
     }
 
     @Override
@@ -267,9 +267,9 @@ class TimingsExport extends Thread {
             }
         }
         if (containsRconSource) {
-            this.listeners.send(TextComponent.of("Warning: Timings report done over RCON will cause lag spikes.", NamedTextColor.RED));
-            this.listeners.send(TextComponent.of("You should use ", NamedTextColor.RED).append(TextComponent.of("/sponge timings report",
-                    NamedTextColor.YELLOW)).append(TextComponent.of(" in game or console.", NamedTextColor.RED)));
+            this.listeners.send(Component.text("Warning: Timings report done over RCON will cause lag spikes.", NamedTextColor.RED));
+            this.listeners.send(Component.text("You should use ", NamedTextColor.RED).append(Component.text("/sponge timings report",
+                    NamedTextColor.YELLOW)).append(Component.text(" in game or console.", NamedTextColor.RED)));
             this.run();
         } else {
             super.start();
@@ -293,7 +293,7 @@ class TimingsExport extends Thread {
             }
             HttpURLConnection con = (HttpURLConnection) new URL("https://timings.aikar.co/post").openConnection();
             con.setDoOutput(true);
-            String name = TimingsManager.privacy ? "" : getServerName();
+            String name = TimingsManager.privacy ? "" : TimingsExport.getServerName();
             con.setRequestProperty("User-Agent", "Sponge/" + name + "/" + hostname);
             con.setRequestMethod("POST");
             con.setInstanceFollowRedirects(false);
@@ -311,8 +311,8 @@ class TimingsExport extends Thread {
             response = this.getResponse(con);
 
             if (con.getResponseCode() != 302) {
-                this.listeners.send(TextComponent.of("Upload Error: " + con.getResponseCode() + ": " + con.getResponseMessage(), NamedTextColor.RED));
-                this.listeners.send(TextComponent.of("Check your logs for more information", NamedTextColor.RED));
+                this.listeners.send(Component.text("Upload Error: " + con.getResponseCode() + ": " + con.getResponseMessage(), NamedTextColor.RED));
+                this.listeners.send(Component.text("Check your logs for more information", NamedTextColor.RED));
                 if (response != null) {
                     SpongeCommon.getLogger().fatal(response);
                 }
@@ -320,13 +320,13 @@ class TimingsExport extends Thread {
             }
 
             timingsURL = con.getHeaderField("Location");
-            this.listeners.send(TextComponent.builder("View Timings Report: ").color(NamedTextColor.GREEN).append(TextComponent.of(timingsURL).clickEvent(ClickEvent.openUrl(timingsURL))).build());
+            this.listeners.send(Component.text().content("View Timings Report: ").color(NamedTextColor.GREEN).append(Component.text(timingsURL).clickEvent(ClickEvent.openUrl(timingsURL))).build());
 
             if (response != null && !response.isEmpty()) {
                 SpongeCommon.getLogger().info("Timing Response: " + response);
             }
         } catch (IOException ex) {
-            this.listeners.send(TextComponent.of("Error uploading timings, check your logs for more information", NamedTextColor.RED));
+            this.listeners.send(Component.text("Error uploading timings, check your logs for more information", NamedTextColor.RED));
             if (response != null) {
                 SpongeCommon.getLogger().fatal(response);
             }
@@ -350,7 +350,7 @@ class TimingsExport extends Thread {
             return bos.toString();
 
         } catch (IOException ex) {
-            this.listeners.send(TextComponent.of("Error uploading timings, check your logs for more information", NamedTextColor.RED));
+            this.listeners.send(Component.text("Error uploading timings, check your logs for more information", NamedTextColor.RED));
             SpongeCommon.getLogger().warn(con.getResponseMessage(), ex);
             return null;
         } finally {

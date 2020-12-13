@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.fluid;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -39,7 +40,7 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmutableDataHolder<FluidStackSnapshot> {
+public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmutableDataHolder<@NonNull FluidStackSnapshot> {
 
     public static final FluidStackSnapshot DEFAULT = new SpongeFluidStackSnapshotBuilder()
         .fluid(FluidTypes.WATER).volume(1000).build();
@@ -48,19 +49,20 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     private final int volume;
     @Nullable private final DataContainer extraData;
 
-    SpongeFluidStackSnapshot(SpongeFluidStackSnapshotBuilder builder) {
+    SpongeFluidStackSnapshot(final SpongeFluidStackSnapshotBuilder builder) {
         this.fluidType = builder.fluidType;
         this.volume = builder.volume;
         this.extraData = builder.container == null ? null : builder.container.copy();
     }
 
-    private SpongeFluidStackSnapshot(FluidType fluidType, int volume, @Nullable DataContainer extraData) {
+    private SpongeFluidStackSnapshot(final FluidType fluidType, final int volume, @Nullable final DataContainer extraData) {
         this.fluidType = fluidType;
         this.volume = volume;
         this.extraData = extraData == null ? null : extraData.copy();
     }
 
     @Override
+    @NonNull
     public FluidType getFluid() {
         return this.fluidType;
     }
@@ -71,6 +73,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
+    @NonNull
     public FluidStack createStack() {
         return new SpongeFluidStackBuilder().from(this).build();
     }
@@ -81,8 +84,9 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
+    @NonNull
     public DataContainer toContainer() {
-        DataContainer container = DataContainer.createNew()
+        final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Constants.Fluids.FLUID_TYPE, this.fluidType.getKey().toString())
             .set(Constants.Fluids.FLUID_VOLUME, this.volume);
@@ -98,7 +102,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -112,17 +116,19 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
+    @NonNull
     public FluidStackSnapshot copy() {
         return new SpongeFluidStackSnapshot(this.fluidType, this.volume, this.extraData);
     }
 
     @Override
-    public boolean validateRawData(DataView container) {
+    public boolean validateRawData(final DataView container) {
         return container.contains(Queries.CONTENT_VERSION, Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME);
     }
 
     @Override
-    public FluidStackSnapshot withRawData(DataView container) throws InvalidDataException {
+    @NonNull
+    public FluidStackSnapshot withRawData(@NonNull final DataView container) throws InvalidDataException {
         final FluidStack stack = this.createStack();
         stack.setRawData(container);
         return stack.createSnapshot();

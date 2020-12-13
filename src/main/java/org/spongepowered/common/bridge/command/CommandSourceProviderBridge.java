@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge.command;
 
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 
 public interface CommandSourceProviderBridge {
 

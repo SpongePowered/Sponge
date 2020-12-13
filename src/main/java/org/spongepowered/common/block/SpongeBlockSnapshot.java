@@ -35,6 +35,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
@@ -116,7 +117,8 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Optional<ServerLocation> getLocation() {
-        return Optional.empty();
+        return this.getServerWorld()
+                .map(world -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, this.pos));
     }
 
     @Override
@@ -295,11 +297,16 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     public Set<Value.Immutable<?>> getValues() {
         throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
+  
     public Optional<ServerWorld> getServerWorld() {
-        if (this.world == null) {
-            return Optional.empty();
+        @Nullable ServerWorld world = this.world != null ? this.world.get() : null;
+        if (world == null) {
+            world = (ServerWorld) Sponge.getServer().getWorldManager().getWorld(this.worldKey).orElse(null);
+            if (world != null) {
+                this.world = new WeakReference<>(world);
+            }
         }
-        return Optional.ofNullable(this.world.get());
+        return Optional.ofNullable(world);
     }
 
     public Optional<CompoundNBT> getCompound() {
@@ -309,10 +316,14 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     public SpongeBlockSnapshotBuilder createBuilder() {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.blockState(this.blockState)
-            .position(this.pos)
-            .world(this.worldKey);
+               .position(this.pos);
+        if (this.world != null && this.world.get() != null) {
+            builder.world(this.world.get());
+        } else {
+            builder.world(this.worldKey);
+        }
         if (this.compound != null) {
-            builder.unsafeNbt(this.compound);
+            builder.addUnsafeCompound(this.compound);
         }
         return builder;
     }

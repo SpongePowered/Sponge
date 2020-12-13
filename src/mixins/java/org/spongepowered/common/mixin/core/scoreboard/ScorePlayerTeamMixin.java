@@ -54,12 +54,14 @@ import java.util.stream.Collectors;
 @Mixin(ScorePlayerTeam.class)
 public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
 
+    // @formatter:off
     @Shadow @Final @Mutable @Nullable private Scoreboard scoreboard;
     @Shadow private ITextComponent displayName;
     @Shadow private TextFormatting color;
     @Shadow private ITextComponent prefix;
     @Shadow private ITextComponent suffix;
     @Shadow public abstract Collection<String> getMembershipCollection();
+    // @formatter:on
 
     @SuppressWarnings("NullableProblems") @MonotonicNonNull private Component bridge$displayName;
     @SuppressWarnings("NullableProblems") @MonotonicNonNull private Component bridge$Prefix;
@@ -187,7 +189,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
     @SuppressWarnings("EqualsBetweenInconvertibleTypes")
     @Override
     public Audience bridge$getTeamChannel(final ServerPlayerEntity player) {
-        return Audience.of(this.getMembershipCollection().stream()
+        return Audience.audience(this.getMembershipCollection().stream()
                 .map(name -> Sponge.getGame().getServer().getPlayer(name))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -197,7 +199,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
 
     @Override
     public Audience bridge$getNonTeamChannel() {
-        return Audience.of(Sponge.getGame().getServer().getOnlinePlayers().stream()
+        return Audience.audience(Sponge.getGame().getServer().getOnlinePlayers().stream()
                 .filter(player -> ((ServerPlayerEntity) player).getTeam() != (Object) this)
                 .collect(Collectors.toSet()));
     }

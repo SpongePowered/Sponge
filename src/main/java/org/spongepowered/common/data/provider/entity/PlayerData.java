@@ -35,7 +35,7 @@ import org.spongepowered.common.accessor.util.FoodStatsAccessor;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.ExperienceHolderUtils;
+import org.spongepowered.common.util.ExperienceHolderUtil;
 
 public final class PlayerData {
 
@@ -62,7 +62,7 @@ public final class PlayerData {
                     .create(Keys.EXHAUSTION)
                         .get(h -> (double) ((FoodStatsAccessor) h.getFoodStats()).accessor$getFoodExhaustionLevel())
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > EXHAUSTION_MAX) {
+                            if (v < 0 || v > PlayerData.EXHAUSTION_MAX) {
                                 return false;
                             }
                             ((FoodStatsAccessor) h.getFoodStats()).accessor$setFoodExhaustionLevel(v.floatValue());
@@ -70,8 +70,8 @@ public final class PlayerData {
                         })
                     .create(Keys.EXPERIENCE)
                         .get(h -> h.experienceTotal)
-                        .set(ExperienceHolderUtils::setExperience)
-                        .delete(h -> ExperienceHolderUtils.setExperience(h, 0))
+                        .set(ExperienceHolderUtil::setExperience)
+                        .delete(h -> ExperienceHolderUtil.setExperience(h, 0))
                     .create(Keys.EXPERIENCE_FROM_START_OF_LEVEL)
                         .get(PlayerEntity::xpBarCap)
                     .create(Keys.EXPERIENCE_LEVEL)
@@ -80,7 +80,7 @@ public final class PlayerData {
                             if (v < 0) {
                                 return false;
                             }
-                            h.experienceTotal = ExperienceHolderUtils.xpAtLevel(v);
+                            h.experienceTotal = ExperienceHolderUtil.xpAtLevel(v);
                             h.experience = 0;
                             h.experienceLevel = v;
                             ((ServerPlayerEntityBridge) h).bridge$refreshExp();
@@ -92,10 +92,10 @@ public final class PlayerData {
                             if (v < 0) {
                                 return false;
                             }
-                            ExperienceHolderUtils.setExperienceSinceLevel(h, v);
+                            ExperienceHolderUtil.setExperienceSinceLevel(h, v);
                             return true;
                         })
-                        .delete(h -> ExperienceHolderUtils.setExperience(h, 0))
+                        .delete(h -> ExperienceHolderUtil.setExperience(h, 0))
                     .create(Keys.FLYING_SPEED)
                         .get(h -> (double) h.abilities.getFlySpeed())
                         .setAnd((h, v) -> {
@@ -109,7 +109,7 @@ public final class PlayerData {
                     .create(Keys.FOOD_LEVEL)
                         .get(h -> h.getFoodStats().getFoodLevel())
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > FOOD_LEVEL_MAX) {
+                            if (v < 0 || v > PlayerData.FOOD_LEVEL_MAX) {
                                 return false;
                             }
                             h.getFoodStats().setFoodLevel(v);
@@ -125,10 +125,16 @@ public final class PlayerData {
                         .get(PlayerEntity::isSleeping)
                     .create(Keys.IS_SLEEPING_IGNORED)
                         .get(PlayerEntity::isSleeping)
+                    .create(Keys.MAX_EXHAUSTION)
+                        .get(h -> PlayerData.EXHAUSTION_MAX)
+                    .create(Keys.MAX_FOOD_LEVEL)
+                        .get(h -> PlayerData.FOOD_LEVEL_MAX)
+                    .create(Keys.MAX_SATURATION)
+                        .get(h -> PlayerData.SATURATION_MAX)
                     .create(Keys.SATURATION)
                         .get(h -> (double) h.getFoodStats().getSaturationLevel())
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > SATURATION_MAX) {
+                            if (v < 0 || v > PlayerData.SATURATION_MAX) {
                                 return false;
                             }
                             ((FoodStatsAccessor) h.getFoodStats()).accessor$setFoodSaturationLevel(v.floatValue());

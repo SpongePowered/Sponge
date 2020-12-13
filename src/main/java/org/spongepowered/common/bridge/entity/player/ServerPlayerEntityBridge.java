@@ -74,8 +74,6 @@ public interface ServerPlayerEntityBridge {
     @Nullable
     User bridge$getUserObject();
 
-    void bridge$setVelocityOverride(@Nullable Vector3d velocity);
-
     void bridge$sendBlockChange(BlockPos pos, BlockState state);
 
     void bridge$initScoreboard();
@@ -108,24 +106,16 @@ public interface ServerPlayerEntityBridge {
 
     void bridge$setContainerDisplay(Component displayName);
 
-    void bridge$setDelegateAfterRespawn(ServerPlayerEntity delegate);
-
     Scoreboard bridge$getScoreboard();
 
     void bridge$replaceScoreboard(@Nullable Scoreboard scoreboard);
 
     Set<SkinPart> bridge$getSkinParts();
 
+    void bridge$setSkinParts(final Set<SkinPart> skinParts);
+
     @Nullable
     User bridge$getUser();
-
-    boolean bridge$hasDelegate();
-
-    @Nullable
-    ServerPlayerEntity bridge$getDelegate();
-
-    @Nullable
-    Vector3d bridge$getVelocityOverride();
 
     @Nullable ITextComponent bridge$getConnectionMessageToSend();
 
@@ -140,4 +130,6 @@ public interface ServerPlayerEntityBridge {
 
     default void bridge$sendViewerEnvironment(final SpongeDimensionType dimensionType) {
     }
+
+    boolean bridge$kick(final Component message);
 }

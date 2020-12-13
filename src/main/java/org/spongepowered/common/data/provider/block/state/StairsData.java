@@ -30,8 +30,8 @@ import net.minecraft.state.properties.StairsShape;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
-import org.spongepowered.common.data.provider.util.PortionTypeUtils;
+import org.spongepowered.common.util.DirectionUtil;
+import org.spongepowered.common.util.PortionTypeUtil;
 
 public final class StairsData {
 
@@ -43,16 +43,16 @@ public final class StairsData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(StairsBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, StairsBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.get(StairsBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, StairsBlock.FACING))
                         .supports(h -> h.getBlock() instanceof StairsBlock)
                     .create(Keys.IS_WATERLOGGED)
                         .get(h -> h.get(StairsBlock.WATERLOGGED))
                         .set((h, v) -> h.with(StairsBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof StairsBlock)
                     .create(Keys.PORTION_TYPE)
-                        .get(h -> PortionTypeUtils.getFromHalfBlock(h, StairsBlock.HALF))
-                        .set((h, v) -> PortionTypeUtils.setForHalfBlock(h, v, StairsBlock.HALF))
+                        .get(h -> PortionTypeUtil.getFromHalfBlock(h, StairsBlock.HALF))
+                        .set((h, v) -> PortionTypeUtil.setForHalfBlock(h, v, StairsBlock.HALF))
                         .supports(h -> h.getBlock() instanceof StairsBlock)
                     .create(Keys.STAIR_SHAPE)
                         .get(h -> (StairShape) (Object) h.get(StairsBlock.SHAPE))

@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.TripWireBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionalUtils;
+import org.spongepowered.common.util.DirectionalUtil;
 
 public final class TripWireData {
 
@@ -40,9 +40,9 @@ public final class TripWireData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
-                        .get(h -> DirectionalUtils.getHorizontalFrom(h, TripWireBlock.EAST, TripWireBlock.WEST, TripWireBlock.NORTH,
+                        .get(h -> DirectionalUtil.getHorizontalFrom(h, TripWireBlock.EAST, TripWireBlock.WEST, TripWireBlock.NORTH,
                                 TripWireBlock.SOUTH))
-                        .set((h, v) -> DirectionalUtils.setHorizontal(h, v, TripWireBlock.EAST, TripWireBlock.WEST, TripWireBlock.NORTH,
+                        .set((h, v) -> DirectionalUtil.setHorizontal(h, v, TripWireBlock.EAST, TripWireBlock.WEST, TripWireBlock.NORTH,
                                 TripWireBlock.SOUTH))
                         .supports(h -> h.getBlock() instanceof TripWireBlock)
                     .create(Keys.IS_ATTACHED)

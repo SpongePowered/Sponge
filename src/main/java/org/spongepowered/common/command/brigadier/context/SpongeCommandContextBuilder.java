@@ -26,7 +26,6 @@ package org.spongepowered.common.command.brigadier.context;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.RedirectModifier;
@@ -37,6 +36,8 @@ import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.context.SuggestionContext;
 import com.mojang.brigadier.tree.CommandNode;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.kyori.adventure.identity.Identified;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -91,6 +92,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         this.modifier = original.modifier;
         this.forks = original.forks;
         this.currentTargetCommand = original.currentTargetCommand;
+        this.getNodes().addAll(original.getNodes());
         this.withChild(original.getChild());
         this.withCommand(original.getCommand());
         original.getArguments().forEach(this::withArgument);
@@ -174,7 +176,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
             return this.transaction.peek().getCopyBuilder().findSuggestionContext(cursor);
         }
 
-        // This is the orignal method, with field access swapped out for method calls
+        // This is the original method, with field access swapped out for method calls
         // where appropriate. There is one change marked below.
         if (this.getRange().getStart() <= cursor) {
             if (this.getRange().getEnd() < cursor) {
@@ -224,7 +226,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         }
 
         if (addToSpongeMap) {
-            final Parameter.Key<T> objectKey = new SpongeParameterKey<>(name, TypeToken.of((Class<T>) argument.getResult().getClass()));
+            final Parameter.Key<T> objectKey = new SpongeParameterKey<>(name, argument.getResult().getClass());
             this.addToArgumentMap(objectKey, argument.getResult());
         }
         super.withArgument(name, argument); // for getArguments and any mods that use this.
@@ -357,8 +359,13 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public void sendMessage(@NonNull final Component message) {
-        this.getCause().sendMessage(message);
+    public void sendMessage(@NonNull final Identified identity, @NonNull final Component message) {
+        this.getCause().sendMessage(identity, message);
+    }
+
+    @Override
+    public void sendMessage(@NonNull final Identity identity, @NonNull final Component message) {
+        this.getCause().sendMessage(identity, message);
     }
 
     Collection<?> getFrom(final SpongeParameterKey<?> key) {
@@ -382,7 +389,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         if (this.transaction != null && !this.transaction.isEmpty()) {
             this.transaction.peek().addFlagInvocation(flag);
         } else {
-            flag.getAliases().forEach(x -> this.flagMap.addTo(x, 1));
+            flag.getUnprefixedAliases().forEach(x -> this.flagMap.addTo(x, 1));
         }
     }
 

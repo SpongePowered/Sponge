@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.config.tracker;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,21 +34,27 @@ import java.util.Map;
 @ConfigSerializable
 public class BlockTrackerModCategory {
 
-    @Setting(value = "enabled", comment = "If 'false', all tracking for this mod will be ignored.")
+    @Setting("enabled")
+    @Comment("If 'false', all tracking for this mod will be ignored.")
     private boolean isEnabled = true;
-    @Setting(value = TrackerConfig.BLOCK_BULK_CAPTURE, comment = "Set to true to perform block bulk capturing during block ticks. (Default: true)")
+
+    @Setting(TrackerConfig.BLOCK_BULK_CAPTURE)
+    @Comment("Set to true to perform block bulk capturing during block ticks. (Default: true)")
     private Map<String, Boolean> blockBulkCaptureMap = new HashMap<>();
-    @Setting(value = TrackerConfig.ENTITY_BULK_CAPTURE, comment = "Set to true to perform entity bulk capturing during block ticks. (Default: true)")
+    @Setting(TrackerConfig.ENTITY_BULK_CAPTURE)
+    @Comment("Set to true to perform entity bulk capturing during block ticks. (Default: true)")
     private Map<String, Boolean> entityBulkCaptureMap = new HashMap<>();
-    @Setting(value = TrackerConfig.BLOCK_EVENT_CREATION, comment = "Set to true to create and fire block events during block ticks. (Default: true)")
+    @Setting(TrackerConfig.BLOCK_EVENT_CREATION)
+    @Comment("Set to true to create and fire block events during block ticks. (Default: true)")
     private Map<String, Boolean> blockEventCreationMap = new HashMap<>();
-    @Setting(value = TrackerConfig.ENTITY_EVENT_CREATION, comment = "Set to true to create and fire entity events during block ticks. (Default: true)")
+    @Setting(TrackerConfig.ENTITY_EVENT_CREATION)
+    @Comment("Set to true to create and fire entity events during block ticks. (Default: true)")
     private Map<String, Boolean> entityEventCreationMap = new HashMap<>();
 
     public BlockTrackerModCategory() {
     }
 
-    public BlockTrackerModCategory(String modId) {
+    public BlockTrackerModCategory(final String modId) {
     }
 
     public boolean isEnabled() {

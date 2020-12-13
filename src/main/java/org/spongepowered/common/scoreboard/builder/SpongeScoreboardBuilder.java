@@ -35,7 +35,7 @@ import org.spongepowered.common.SpongeCommon;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpongeScoreboardBuilder implements Scoreboard.Builder {
+public final class SpongeScoreboardBuilder implements Scoreboard.Builder {
 
     private List<Objective> objectives = new ArrayList<>();
     private List<Team> teams = new ArrayList<>();

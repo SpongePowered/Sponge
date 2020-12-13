@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.HopperBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class HopperData {
 
@@ -40,8 +40,8 @@ public final class HopperData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(HopperBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, HopperBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.get(HopperBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, HopperBlock.FACING))
                         .supports(h -> h.getBlock() instanceof HopperBlock);
     }
     // @formatter:on

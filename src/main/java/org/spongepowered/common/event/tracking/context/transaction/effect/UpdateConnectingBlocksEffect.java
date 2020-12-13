@@ -28,9 +28,20 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class UpdateConnectingBlocksEffect implements ProcessingSideEffect {
+
+    private static final class Holder {
+        static final UpdateConnectingBlocksEffect INSTANCE = new UpdateConnectingBlocksEffect();
+    }
+
+    public static UpdateConnectingBlocksEffect getInstance() {
+        return UpdateConnectingBlocksEffect.Holder.INSTANCE;
+    }
+
+    UpdateConnectingBlocksEffect() {}
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,

@@ -28,23 +28,20 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.item.MerchantOffer;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.accessor.item.MerchantOfferAccessor;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.MissingImplementationException;
-
-import java.util.Optional;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> implements TradeOffer.Builder, DataBuilder<TradeOffer> {
 
@@ -202,7 +199,6 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         builder.sellingItem(buyingItem)
                 .maxUses(container.getInt(Constants.Item.TradeOffer.MAX_QUERY).get())
                 .uses(container.getInt(Constants.Item.TradeOffer.USES_QUERY).get())
-                .canGrantExperience(container.getBoolean(Constants.Item.TradeOffer.EXPERIENCE_QUERY).get())
                 .merchantExperienceGranted(container.getInt(Constants.Item.TradeOffer.EXPERIENCE_GRANTED_TO_MERCHANT_QUERY).orElse(0))
                 .priceGrowthMultiplier(container.getDouble(Constants.Item.TradeOffer.PRICE_GROWTH_MULTIPLIER_QUERY).orElse(0.0D))
                 .demandBonus(container.getInt(Constants.Item.TradeOffer.DEMAND_BONUS_QUERY).orElse(0));

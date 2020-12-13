@@ -24,17 +24,18 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import org.spongepowered.common.event.tracking.EmptyContext;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.UnwindingState;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 public final class GeneralPhase {
 
     public static final class State {
         public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
         public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
-        public static final IPhaseState<GeneralizedContext> COMPLETE = new CompletePhase();
+        public static final IPhaseState<EmptyContext> COMPLETE = new CompletePhase();
+        public static final IPhaseState<SaveHandlerCreationContext> SAVE_HANDLER_CREATION = new SaveHandlerCreationPhase();
         public static final IPhaseState<?> WORLD_UNLOAD = new WorldUnload();
 
         private State() { }

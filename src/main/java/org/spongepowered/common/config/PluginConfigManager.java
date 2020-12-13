@@ -24,16 +24,22 @@
  */
 package org.spongepowered.common.config;
 
-import com.google.inject.Injector;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Singleton;
-import ninja.leaping.configurate.objectmapping.DefaultObjectMapperFactory;
-import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
-import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.plugin.PluginContainerExtension;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.reference.WatchServiceListener;
+import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 import org.spongepowered.plugin.PluginContainer;
+
+import java.io.IOException;
+
+import javax.inject.Inject;
 
 /**
  * Implementation of service to manage configurations.
@@ -41,34 +47,53 @@ import org.spongepowered.plugin.PluginContainer;
 @Singleton
 public final class PluginConfigManager implements ConfigManager {
 
-    @Override
-    public ConfigRoot getSharedConfig(PluginContainer container) {
-        return new PluginConfigRoot(getMapperFactory(container), container.getMetadata().getId().toLowerCase(), SpongeCommon.getPluginConfigDirectory());
+    private final TypeSerializerCollection serializers;
+    private final WatchServiceListener listener;
+
+    @Inject
+    PluginConfigManager(final CatalogTypeTypeSerializer catalogSerializer, final DataSerializableTypeSerializer dataSerializableSerializer) throws IOException {
+        // TODO: Move this onto the async scheduler, rather than shared FJ pool?
+        this.listener = WatchServiceListener.builder()
+                .threadFactory(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("SpongeCommon-WatchService-%d").build())
+                .build();
+
+        this.serializers = TypeSerializerCollection.defaults().childBuilder()
+                .register(CatalogType.class, catalogSerializer)
+                // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
+                // See https://github.com/SpongePowered/SpongeCommon/issues/1348
+                .register(DataSerializableTypeSerializer::accepts, dataSerializableSerializer)
+                .registerAll(SpongeAdventure.CONFIGURATE.serializers())
+                .build();
     }
 
     @Override
-    public ConfigRoot getPluginConfig(PluginContainer container) {
-        return new PluginConfigRoot(getMapperFactory(container), container.getMetadata().getId().toLowerCase(), SpongeCommon
-            .getPluginConfigDirectory().resolve(container.getMetadata().getId().toLowerCase()));
+    public ConfigRoot getSharedConfig(final PluginContainer container) {
+        return new PluginConfigRoot(this.serializers, container.getMetadata().getId().toLowerCase(),
+                                    SpongeCommon.getPluginConfigDirectory());
     }
 
-    public static ConfigRoot getSharedRoot(PluginContainer container) {
-        final String name = container.getMetadata().getId();
-        return new PluginConfigRoot(getMapperFactory(container), name, SpongeCommon.getPluginConfigDirectory());
+    @Override
+    public ConfigRoot getPluginConfig(final PluginContainer container) {
+        return new PluginConfigRoot(this.serializers, container.getMetadata().getId().toLowerCase(),
+                                    SpongeCommon.getPluginConfigDirectory().resolve(container.getMetadata().getId().toLowerCase()));
     }
 
-    public static ConfigRoot getPrivateRoot(PluginContainer container) {
-        final String name = container.getMetadata().getId();
-        return new PluginConfigRoot(getMapperFactory(container), name, SpongeCommon.getPluginConfigDirectory().resolve(name));
+    @Override
+    public TypeSerializerCollection getSerializers() {
+        return this.serializers;
     }
 
-    private static ObjectMapperFactory getMapperFactory(PluginContainer container) {
-        if (container instanceof PluginContainerExtension) {
-            Injector injector = ((PluginContainerExtension) container).getInjector();
-            if (injector != null) {
-                return injector.getInstance(GuiceObjectMapperFactory.class);
-            }
-        }
-        return DefaultObjectMapperFactory.getInstance();
+    @Override
+    public WatchServiceListener getWatchServiceListener() {
+        return this.listener;
+    }
+
+    public static ConfigurationOptions getOptions(final TypeSerializerCollection serializers) {
+        return ConfigurationOptions.defaults()
+                .serializers(serializers);
+    }
+
+    public void close() throws IOException {
+        this.listener.close();
     }
 }

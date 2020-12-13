@@ -91,9 +91,9 @@ public abstract class HopperTileEntityMixin_Inventory {
         if (!ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
             return HopperTileEntityAccessor.accsssor$insertStack(source, destination, stack, index, direction);
         }
-        TrackedInventoryBridge captureIn = impl$forCapture(source);
+        TrackedInventoryBridge captureIn = HopperTileEntityMixin_Inventory.impl$forCapture(source);
         if (captureIn == null) {
-            captureIn = impl$forCapture(destination);
+            captureIn = HopperTileEntityMixin_Inventory.impl$forCapture(destination);
         }
         return InventoryEventFactory.captureTransaction(captureIn, InventoryUtil.toInventory(destination), index,
                 () -> HopperTileEntityAccessor.accsssor$insertStack(source, destination, stack, index, direction));
@@ -110,7 +110,7 @@ public abstract class HopperTileEntityMixin_Inventory {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack1.isEmpty()) {
             // Capture Insert in Origin
-            final TrackedInventoryBridge capture = impl$forCapture(this);
+            final TrackedInventoryBridge capture = HopperTileEntityMixin_Inventory.impl$forCapture(this);
             SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) this, i, itemStack);
             // Call event
             InventoryEventFactory.callTransferPost(capture, (Inventory) this, InventoryUtil.toInventory(iInventory), itemStack, sourceSlotTransaction);
@@ -128,7 +128,7 @@ public abstract class HopperTileEntityMixin_Inventory {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack2.isEmpty()) {
             // Capture Insert in Origin
-            final TrackedInventoryBridge capture = impl$forCapture(hopper);
+            final TrackedInventoryBridge capture = HopperTileEntityMixin_Inventory.impl$forCapture(hopper);
             SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
             // Call event
             InventoryEventFactory.callTransferPost(capture, InventoryUtil.toInventory(iInventory), InventoryUtil.toInventory(hopper), itemStack1, sourceSlotTransaction);

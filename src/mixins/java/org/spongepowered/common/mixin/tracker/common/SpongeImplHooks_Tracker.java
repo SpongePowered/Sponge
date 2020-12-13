@@ -26,12 +26,11 @@ package org.spongepowered.common.mixin.tracker.common;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 
 @Mixin(SpongeImplHooks.class)
 public class SpongeImplHooks_Tracker {
@@ -52,8 +51,8 @@ public class SpongeImplHooks_Tracker {
         }
         final MinecraftServer server = world.getServer();
         if (server == null || !server.isOnExecutionThread()) {
-            return PhaseTracker.getInstance().getCurrentState().isRestoring();
+            return PhaseTracker.getInstance().getPhaseContext().isRestoring();
         }
-        return PhaseTracker.SERVER.getCurrentState().isRestoring();
+        return PhaseTracker.SERVER.getPhaseContext().isRestoring();
     }
 }

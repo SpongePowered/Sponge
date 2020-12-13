@@ -2,37 +2,11 @@
     "plugins": [
         {
             "loader": "java_plain",
-            "id": "changeblocktest",
-            "name": "ChangeBlockTest",
-            "version": "8.0.0",
-            "main-class": "org.spongepowered.test.changeblock.ChangeBlockTest",
-            "description": "Testing ChangeBlock rollbacks",
-            "links": {
-                "homepage": "https://www.spongepowered.org",
-                "source": "https://www.spongepowered.org/source",
-                "issues": "https://www.spongepowered.org/issues"
-            },
-            "contributors": [
-                {
-                    "name": "SpongePowered",
-                    "description": "Lead Developer"
-                }
-            ],
-            "dependencies": [
-                {
-                    "id": "spongeapi",
-                    "version": "8.0.0"
-                }
-            ],
-            "extra": {}
-        },
-        {
-            "loader": "java_plain",
             "id": "test",
-            "name": "TestPlugin",
+            "name": "Test Plugin",
             "version": "8.0.0",
             "main-class": "org.spongepowered.test.TestPlugin",
-            "description": "Just testing things...",
+            "description": "Manages the test plugins",
             "links": {
                 "homepage": "https://www.spongepowered.org",
                 "source": "https://www.spongepowered.org/source",
@@ -45,21 +19,35 @@
             "dependencies": [{
                 "id": "spongeapi",
                 "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "changeblocktest",
+            "name": "Change Block Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.changeblock.ChangeBlockTest",
+            "description": "Testing ChangeBlock rollbacks",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
             }],
-            "extra": {
-                "test": 1,
-                "test2": "Banana",
-                "test3": "banana123",
-                "test4": "apple_cider_mahogany_salmon",
-                "test5": 3
-            }
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
         },
         {
             "loader": "java_plain",
             "id": "worldtest",
-            "name": "WorldTest",
+            "name": "World Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.worldtest.WorldTest",
+            "main-class": "org.spongepowered.test.world.WorldTest",
             "description": "Testing world changes",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -73,15 +61,14 @@
             "dependencies": [{
                 "id": "spongeapi",
                 "version": "8.0.0"
-            }],
-            "extra": {}
+            }]
         },
         {
             "loader": "java_plain",
             "id": "commandtest",
-            "name": "CommandTest",
+            "name": "Command Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.commandtest.CommandTestPlugin",
+            "main-class": "org.spongepowered.test.command.CommandTest",
             "description": "Testing commands",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -95,15 +82,14 @@
             "dependencies": [{
                 "id": "spongeapi",
                 "version": "8.0.0"
-            }],
-            "extra": {}
+            }]
         },
         {
             "loader": "java_plain",
             "id": "inventorytest",
-            "name": "InventoryTest",
+            "name": "Inventory Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.inventorytest.InventoryTest",
+            "main-class": "org.spongepowered.test.inventory.InventoryTest",
             "description": "Testing inventory changes",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -117,15 +103,14 @@
             "dependencies": [{
                 "id": "spongeapi",
                 "version": "8.0.0"
-            }],
-            "extra": {}
+            }]
         },
         {
             "loader": "java_plain",
             "id": "customdatatest",
-            "name": "CustomDataTest",
+            "name": "Custom Data Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.customdatatest.CustomDataTest",
+            "main-class": "org.spongepowered.test.customdata.CustomDataTest",
             "description": "Testing custom data",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -139,15 +124,35 @@
             "dependencies": [{
                 "id": "spongeapi",
                 "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "projectiletest",
+            "name": "Projectile Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.projectile.ProjectileTest",
+            "description": "Testing projectile",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
             }],
-            "extra": {}
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
         },
         {
             "loader": "java_plain",
             "id": "datatest",
-            "name": "DataTest",
+            "name": "Data Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.datatest.DataTest",
+            "main-class": "org.spongepowered.test.data.DataTest",
             "description": "Testing data",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -161,15 +166,14 @@
             "dependencies": [{
                 "id": "spongeapi",
                 "version": "8.0.0"
-            }],
-            "extra": {}
+            }]
         },
         {
             "loader": "java_plain",
             "id": "humantest",
-            "name": "HumanTest",
+            "name": "Human Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.humantest.HumanTest",
+            "main-class": "org.spongepowered.test.human.HumanTest",
             "description": "Testing human",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -183,8 +187,238 @@
             "dependencies": [{
                 "id": "spongeapi",
                 "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "interacttest",
+            "name": "Interact Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.interact.InteractTest",
+            "description": "Testing InteractEvents",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
             }],
-            "extra": {}
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "recipetest",
+            "name": "Recipe Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.recipe.RecipeTest",
+            "description": "Testing recipes",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "particletest",
+            "name": "Particle Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.particle.ParticleTest",
+            "description": "Testing particles",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "advancementtest",
+            "name": "Advancement Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.advancement.AdvancementTest",
+            "description": "Testing advancements",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "configtest",
+            "name": "Config Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.config.ConfigTest",
+            "description": "Testing configurations",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "archetypetest",
+            "name": "Archetype Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.archetype.ArchetypeTest",
+            "description": "Testing archetypes and Snapshots",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "volumestreamtest",
+            "name": "Volume Stream Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.volumestream.VolumeStreamTest",
+            "description": "Testing VolumeStreams",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "raytracetest",
+            "name": "Ray Trace Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.raytrace.RayTraceTest",
+            "description": "Testing ray traces",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "movementtest",
+            "name": "Movement Entity Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.movement.MovementTest",
+            "description": "Testing move entity events",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "chattest",
+            "name": "Chat Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.chat.ChatTest",
+            "description": "Testing Chat and Adventure functionality",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "tradetest",
+            "name": "Tradae Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.trades.TradeTest",
+            "description": "Testing Villager Trade functionality",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
         }
     ]
 }

@@ -35,7 +35,7 @@ public class BasicPluginContext extends PluginPhaseContext<BasicPluginContext> {
 
     @Nullable PluginContainer container;
 
-    public BasicPluginContext(final IPhaseState<? extends BasicPluginContext> phaseState, final PhaseTracker tracker) {
+    public BasicPluginContext(final IPhaseState<BasicPluginContext> phaseState, final PhaseTracker tracker) {
         super(phaseState, tracker);
     }
 

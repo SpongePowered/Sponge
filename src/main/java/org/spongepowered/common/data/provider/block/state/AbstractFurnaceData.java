@@ -28,7 +28,7 @@ import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class AbstractFurnaceData {
 
@@ -40,8 +40,8 @@ public final class AbstractFurnaceData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(AbstractFurnaceBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, AbstractFurnaceBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.get(AbstractFurnaceBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, AbstractFurnaceBlock.FACING))
                         .supports(h -> h.getBlock() instanceof AbstractFurnaceBlock)
                     .create(Keys.IS_LIT)
                         .get(h -> h.get(AbstractFurnaceBlock.LIT))

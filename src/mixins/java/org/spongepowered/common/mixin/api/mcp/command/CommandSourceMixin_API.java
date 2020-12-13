@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.command;
 
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.identity.Identified;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -99,14 +101,14 @@ public abstract class CommandSourceMixin_API implements CommandCause {
                 .orElseGet(() -> this.getCause().first(BlockSnapshot.class).orElse(null)));
     }
 
-    /**
-     * Sends a message to the {@link Audience} as given by
-     * {@link #getAudience()}.
-     *
-     * @param message The message to send.
-     */
-    public void sendMessage(@NonNull final Component message) {
-        this.getAudience().sendMessage(message);
+    @Override
+    public void sendMessage(@NonNull final Identified identity, @NonNull final Component message) {
+        this.getAudience().sendMessage(identity, message);
+    }
+
+    @Override
+    public void sendMessage(@NonNull final Identity identity, @NonNull final Component message) {
+        this.getAudience().sendMessage(identity, message);
     }
 
 }

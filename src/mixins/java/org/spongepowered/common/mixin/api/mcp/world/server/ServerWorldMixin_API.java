@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.server;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.block.Block;
@@ -39,7 +36,6 @@ import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.raid.Raid;
 import net.minecraft.world.raid.RaidManager;
@@ -56,11 +52,9 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
-import org.spongepowered.api.util.TemporalUnits;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -75,38 +69,35 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.raid.RaidManagerAccessor;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.mixin.api.mcp.world.WorldMixin_API;
 import org.spongepowered.common.util.ChunkUtil;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowered.api.world.server.ServerWorld> implements org.spongepowered.api.world.server.ServerWorld {
 
+    // @formatter:off
     @Shadow @Final private ServerTickList<Block> pendingBlockTicks;
     @Shadow @Final private ServerTickList<Fluid> pendingFluidTicks;
     @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
-    @Shadow private boolean insideTick;
 
     @Shadow public abstract void shadow$save(@Nullable IProgressUpdate p_217445_1_, boolean p_217445_2_, boolean p_217445_3_) throws SessionLockException;
     @Shadow public abstract boolean shadow$addEntity(Entity p_217376_1_);
@@ -119,31 +110,28 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
     @Shadow public abstract RaidManager shadow$getRaids();
     @Nullable @Shadow public abstract Raid shadow$findRaid(BlockPos p_217475_1_);
+    // @formatter:on
 
     // World
+
     @Override
     public boolean isLoaded() {
-        if (((WorldBridge) this).bridge$isFake()) {
-            return false;
-        }
-
-        final ServerWorld world = ((SpongeWorldManager) ((Server) this.shadow$getServer()).getWorldManager()).getWorld(this.shadow$getDimension().getType());
-        if (world == null) {
-            return false;
-        }
-
-        return world == (Object) this;
+        return ((ServerWorldBridge) this).bridge$isLoaded();
     }
 
     // LocationCreator
 
     @Override
     public ServerLocation getLocation(final Vector3i position) {
+        Objects.requireNonNull(position);
+
         return ServerLocation.of(this, position);
     }
 
     @Override
     public ServerLocation getLocation(final Vector3d position) {
+        Objects.requireNonNull(position);
+
         return ServerLocation.of(this, position);
     }
 
@@ -160,8 +148,10 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     }
 
     @Override
-    public Optional<org.spongepowered.api.world.chunk.Chunk> regenerateChunk(
-        final int cx, final int cy, final int cz, final ChunkRegenerateFlag flag) {
+    public Optional<org.spongepowered.api.world.chunk.Chunk> regenerateChunk(final int cx, final int cy, final int cz,
+            final ChunkRegenerateFlag flag) {
+        Objects.requireNonNull(flag);
+
         return ChunkUtil.regenerateChunk(this, cx, cy, cz, flag);
     }
 
@@ -187,7 +177,8 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Override
     public boolean save() throws IOException {
         try {
-            this.shadow$save((IProgressUpdate) null, false, false);
+            ((ServerWorldBridge) this).bridge$setManualSave(true);
+            this.shadow$save((IProgressUpdate) null, false, true);
         } catch (final SessionLockException e) {
             throw new IOException(e);
         }
@@ -196,62 +187,19 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public boolean unloadChunk(final org.spongepowered.api.world.chunk.Chunk chunk) {
+        Objects.requireNonNull(chunk);
+
         this.shadow$onChunkUnloading((Chunk) chunk);
         return true;
     }
 
-    // TODO move to bridge?
-    private boolean impl$processingExplosion;
-
     @Override
-    public void triggerExplosion(org.spongepowered.api.world.explosion.Explosion explosion) {
-        checkNotNull(explosion, "explosion");
-        // Sponge start
-        this.impl$processingExplosion = true;
-        // Set up the pre event
-        final ExplosionEvent.Pre
-                event =
-                SpongeEventFactory.createExplosionEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                        explosion, this);
-        if (SpongeCommon.postEvent(event)) {
-            this.impl$processingExplosion = false;
-            return;
-        }
-        explosion = event.getExplosion();
-        final Explosion mcExplosion;
-        try {
-            // Since we already have the API created implementation Explosion, let's use it.
-            mcExplosion = (Explosion) explosion;
-        } catch (final Exception e) {
-            new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
-                    .add("An explosion that was expected to be used for this implementation does not")
-                    .add("originate from this implementation.")
-                    .add(e)
-                    .trace();
-            return;
-        }
+    public void triggerExplosion(final org.spongepowered.api.world.explosion.Explosion explosion) {
+        Objects.requireNonNull(explosion);
 
-        try (final PhaseContext<?> ignored = GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER)
-                .explosion((Explosion) explosion)
-                .source(explosion.getSourceExplosive().isPresent() ? explosion.getSourceExplosive() : this)) {
-            ignored.buildAndSwitch();
-            final boolean damagesTerrain = explosion.shouldBreakBlocks();
-            // Sponge End
-
-            mcExplosion.doExplosionA();
-            mcExplosion.doExplosionB(false);
-
-            if (!damagesTerrain) {
-                mcExplosion.clearAffectedBlockPositions();
-            }
-
-            // Sponge Start - end processing
-            this.impl$processingExplosion = false;
-        }
-        // Sponge End
+        ((ServerWorldBridge) this).bridge$triggerExplosion(explosion);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Collection<ServerPlayer> getPlayers() {
         return ImmutableList.copyOf((Collection<ServerPlayer>) (Collection<?>) this.shadow$getPlayers());
@@ -263,7 +211,6 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<org.spongepowered.api.raid.Raid> getRaids() {
         final RaidManagerAccessor raidManager = (RaidManagerAccessor) this.shadow$getRaids();
         return (Collection<org.spongepowered.api.raid.Raid>) (Collection) raidManager.accessor$getById().values();
@@ -271,6 +218,8 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public Optional<org.spongepowered.api.raid.Raid> getRaidAt(final Vector3i blockPosition) {
+        Objects.requireNonNull(blockPosition);
+
         final org.spongepowered.api.raid.Raid raid = (org.spongepowered.api.raid.Raid) this.shadow$findRaid(VecHelper.toBlockPos(blockPosition));
         return Optional.ofNullable(raid);
     }
@@ -278,105 +227,90 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     // ReadableEntityVolume
 
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> getEntity(final UUID uuid) {
-        return Optional.ofNullable((org.spongepowered.api.entity.Entity) this.shadow$getEntityByUuid(uuid));
+    public Optional<org.spongepowered.api.entity.Entity> getEntity(final UUID uniqueId) {
+        Objects.requireNonNull(uniqueId);
+
+        return Optional.ofNullable((org.spongepowered.api.entity.Entity) this.shadow$getEntityByUuid(uniqueId));
+    }
+
+    // MutableBlockEntityVolume
+
+    @Override
+    public void removeBlockEntity(int x, int y, int z) {
+        this.removeTileEntity(new BlockPos(x, y, z));
     }
 
     // UpdateableVolume
 
     @Override
-    @SuppressWarnings("unchecked")
     public ScheduledUpdateList<BlockType> getScheduledBlockUpdates() {
         return (ScheduledUpdateList<BlockType>) this.pendingBlockTicks;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ScheduledUpdateList<FluidType> getScheduledFluidUpdates() {
         return (ScheduledUpdateList<FluidType>) this.pendingFluidTicks;
     }
 
     @Override
-    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends Value<E>> key, E value) {
-        final DataProvider<? extends Value<E>, E> dataProvider = DataProviderRegistry.get().getProvider(key, ServerLocation.class);
+    public <E> DataTransactionResult offer(final int x, final int y, final int z, final Key<? extends Value<E>> key, final E value) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(value);
+
+        final DataProvider<? extends Value<E>, E> dataProvider = SpongeDataManager.getProviderRegistry().getProvider(key, ServerLocation.class);
         return dataProvider.offer(ServerLocation.of(this, new Vector3d(x, y, z)), value);
     }
 
     @Override
-    public <E> Optional<E> get(int x, int y, int z, Key<? extends Value<E>> key) {
-        final DataProvider<? extends Value<E>, E> dataProvider = DataProviderRegistry.get().getProvider(key, ServerLocation.class);
-        return dataProvider.get(ServerLocation.of(this, new Vector3d(x, y, z)));
+    public <E> Optional<E> get(final int x, final int y, final int z, final Key<? extends Value<E>> key) {
+        Objects.requireNonNull(key);
+
+        final DataProvider<? extends Value<E>, E> dataProvider = SpongeDataManager.getProviderRegistry().getProvider(key, ServerLocation.class);
+        final Optional<E> value = dataProvider.get(ServerLocation.of(this, new Vector3d(x, y, z)));
+        if (value.isPresent()) {
+            return value;
+        }
+        return this.getBlock(x, y, z).get(key);
+    }
+
+    @Override
+    public DataTransactionResult remove(final int x, final int y, final int z, final Key<?> key) {
+        Objects.requireNonNull(key);
+
+        final DataProvider dataProvider = SpongeDataManager.getProviderRegistry().getProvider((Key) key, ServerLocation.class);
+        return dataProvider.remove(ServerLocation.of(this, new Vector3d(x, y, z)));
     }
 
     // WeatherUniverse
 
     @Override
     public Weather getWeather() {
-        if (this.shadow$isThundering()) {
-            return Weathers.THUNDER.get();
-        }
-        if (this.shadow$isRaining()) {
-            return Weathers.RAIN.get();
-        }
-        return Weathers.CLEAR.get();
+        return (Weather) (this.shadow$isThundering() ? Weathers.THUNDER : this.shadow$isRaining() ? Weathers.RAIN.get() : Weathers.CLEAR.get());
     }
 
     @Override
-    public Duration getRemainingWeatherDuration() {
-        return Duration.of(this.api$getDurationInTicks(), TemporalUnits.MINECRAFT_TICKS);
-    }
-
-    private long api$getDurationInTicks() {
-        if (this.shadow$isThundering()) {
-            return this.worldInfo.getThunderTime();
-        }
-        if (this.shadow$isRaining()) {
-            return this.worldInfo.getRainTime();
-        }
-        if (this.worldInfo.getClearWeatherTime() > 0) {
-            return this.worldInfo.getClearWeatherTime();
-        }
-        return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
+    public Ticks getRemainingWeatherDuration() {
+        return new SpongeTicks(((ServerWorldBridge) this).bridge$getDurationInTicks());
     }
 
     @Override
-    public Duration getRunningWeatherDuration() {
-        return Duration.of(this.worldInfo.getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime(), TemporalUnits.MINECRAFT_TICKS);
+    public Ticks getRunningWeatherDuration() {
+        return new SpongeTicks(this.worldInfo.getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime());
     }
 
     @Override
     public void setWeather(final Weather weather) {
-        Preconditions.checkNotNull(weather);
-        this.api$setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
+        Objects.requireNonNull(weather);
+
+        ((ServerWorldBridge) this).bridge$setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
     }
 
     @Override
-    public void setWeather(final Weather weather, final Duration duration) {
-        Preconditions.checkNotNull(weather);
-        ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
-        final int ticks = (int) (duration.toMillis() / TemporalUnits.MINECRAFT_TICKS.getDuration().toMillis());
-        this.api$setWeather(weather, ticks);
-    }
+    public void setWeather(final Weather weather, final Ticks ticks) {
+        Objects.requireNonNull(weather);
+        Objects.requireNonNull(ticks);
 
-    public void api$setWeather(final Weather weather, final int ticks) {
-        if (weather == Weathers.CLEAR.get()) {
-            this.worldInfo.setClearWeatherTime(ticks);
-            this.worldInfo.setRainTime(0);
-            this.worldInfo.setThunderTime(0);
-            this.worldInfo.setRaining(false);
-            this.worldInfo.setThundering(false);
-        } else if (weather == Weathers.RAIN.get()) {
-            this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime(ticks);
-            this.worldInfo.setThunderTime(ticks);
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(false);
-        } else if (weather == Weathers.THUNDER.get()) {
-            this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime(ticks);
-            this.worldInfo.setThunderTime(ticks);
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(true);
-        }
+        ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
+        ((ServerWorldBridge) this).bridge$setWeather(weather, ticks.getTicks());
     }
 }

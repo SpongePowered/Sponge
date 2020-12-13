@@ -43,4 +43,8 @@ public interface ExplosionAccessor {
 
     @Accessor("exploder") Entity accessor$getExploder();
 
+    @Accessor("mode") Explosion.Mode accessor$getMode();
+
+    @Accessor("size") float accessor$getSize();
+
 }

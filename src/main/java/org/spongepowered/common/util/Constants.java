@@ -33,7 +33,6 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.command.arguments.NBTCompoundTagArgument;
 import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.DoubleNBT;
@@ -41,10 +40,7 @@ import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.GameRules;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.type.ArtType;
@@ -65,28 +61,21 @@ import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.data.type.ParrotType;
 import org.spongepowered.api.data.type.ParrotTypes;
-import org.spongepowered.api.data.type.PickupRule;
-import org.spongepowered.api.data.type.PickupRules;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.StructureModes;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.living.animal.Pig;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
-import org.spongepowered.common.world.storage.SpongeChunkLayout;
-import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -111,9 +100,9 @@ public final class Constants {
     public static final String UUID_MOST = "UUIDMost";
     public static final String UUID_LEAST = "UUIDLeast";
     public static final BlockPos DUMMY_POS = new BlockPos(0, 0, 0);
-    public static final int MINECRAFT_DATA_VERSION = 1976;
-    public static final String MINECRAFT_VERSION = "1.14.4";
-    public static final int MINECRAFT_PROTOCOL_VERSION = 498;
+    public static final int MINECRAFT_DATA_VERSION = 2230;
+    public static final String MINECRAFT_VERSION = "1.15.2";
+    public static final int MINECRAFT_PROTOCOL_VERSION = 578;
     public static final String MINECRAFT_CLIENT = "net.minecraft.client.Minecraft";
     public static final String DEDICATED_SERVER = "net.minecraft.server.dedicated.DedicatedServer";
     public static final String MINECRAFT_SERVER = "net.minecraft.server.MinecraftServer";
@@ -122,39 +111,36 @@ public final class Constants {
     private Constants() {
     }
 
-    @SuppressWarnings("DeprecatedIsStillUsed")
     public static final class Sponge {
 
         public static final int SPONGE_DATA_VERSION = 1;
         public static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
-        public static final GameRules DEFAULT_GAME_RULES = new GameRules();
         public static final String DATA_VERSION = "DataVersion";
         public static final String CUSTOM_DATA_CLASS = "DataClass";
         public static final String CUSTOM_DATA = "ManipulatorData";
         public static final String FAILED_CUSTOM_DATA = "FailedData";
         // These are Sponge's NBT tag keys
         public static final String SPONGE_DATA = "SpongeData";
-        public static final DataQuery SPONGE_ROOT = of(SPONGE_DATA);
+        public static final DataQuery SPONGE_ROOT = of(Sponge.SPONGE_DATA);
         public static final String SPONGE_ENTITY_CREATOR = "Creator";
         public static final String SPONGE_ENTITY_NOTIFIER = "Notifier";
         public static final String SPONGE_BLOCK_POS_TABLE = "BlockPosTable";
         public static final String SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
         public static final String CUSTOM_MANIPULATOR_TAG_LIST = "CustomManipulators";
-        public static final DataQuery CUSTOM_MANIPULATOR_LIST = of(CUSTOM_MANIPULATOR_TAG_LIST);
+        public static final DataQuery CUSTOM_MANIPULATOR_LIST = of(Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
         public static final String MANIPULATOR_ID = "ManipulatorId";
         // General DataQueries
         public static final DataQuery UNSAFE_NBT = of("UnsafeData");
         public static final DataQuery DATA_MANIPULATORS = of("Data");
         @Deprecated public static final DataQuery DATA_CLASS = DataQuery.of(Constants.Sponge.CUSTOM_DATA_CLASS);
         public static final DataQuery DATA_ID = DataQuery.of(Constants.Sponge.MANIPULATOR_ID);
-        public static final DataQuery FAILED_SERIALIZED_DATA = of("DataUnableToDeserialize");
-        public static final DataQuery INTERNAL_DATA = DataQuery.of(Constants.Sponge.CUSTOM_DATA);
+        public static final DataQuery MANIPULATOR_DATA = DataQuery.of(Constants.Sponge.CUSTOM_DATA);
         // Snapshots
         public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
         public static final DataQuery SNAPSHOT_TILE_DATA = of("TileEntityData");
         public static final int CLASS_BASED_CUSTOM_DATA = 1;
         public static final int CUSTOM_DATA_WITH_DATA_IDS = 2;
-        public static final int CURRENT_CUSTOM_DATA = CUSTOM_DATA_WITH_DATA_IDS;
+        public static final int CURRENT_CUSTOM_DATA = Sponge.CUSTOM_DATA_WITH_DATA_IDS;
 
         /**
          * Modifies bits in an integer.
@@ -173,9 +159,9 @@ public final class Constants {
          * Serialize this BlockPos into a short value
          */
         public static short blockPosToShort(final BlockPos pos) {
-            short serialized = (short) setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
-            serialized = (short) setNibble(serialized, pos.getY() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
-            serialized = (short) setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
+            short serialized = (short) Sponge.setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+            serialized = (short) Sponge.setNibble(serialized, pos.getY() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
+            serialized = (short) Sponge.setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
             return serialized;
         }
 
@@ -183,9 +169,9 @@ public final class Constants {
          * Serialize this BlockPos into an int value
          */
         public static int blockPosToInt(final BlockPos pos) {
-            int serialized = setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
-            serialized = setNibble(serialized, pos.getY() & Constants.Chunk.Y_INT_MASK, 1, Constants.Chunk.NUM_INT_Y_BITS);
-            serialized = setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 7, Constants.Chunk.NUM_XZ_BITS);
+            int serialized = Sponge.setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+            serialized = Sponge.setNibble(serialized, pos.getY() & Constants.Chunk.Y_INT_MASK, 1, Constants.Chunk.NUM_INT_Y_BITS);
+            serialized = Sponge.setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 7, Constants.Chunk.NUM_XZ_BITS);
             return serialized;
         }
 
@@ -193,27 +179,6 @@ public final class Constants {
 
             public static final DataQuery PLAYER_DATA_JOIN = of("FirstJoin");
             public static final DataQuery PLAYER_DATA_LAST = of("LastPlayed");
-            public static final int RESPAWN_DATA_1_9_VERSION = 0;
-        }
-
-        public static final class InvisibilityData {
-
-            public static final int INVISIBILITY_DATA_PRE_1_9 = 1;
-            public static final int INVISIBILITY_DATA_WITH_VANISH = 2;
-        }
-
-        public static final class VelocityData {
-
-            public static final DataQuery VELOCITY_X = of("X");
-            public static final DataQuery VELOCITY_Y = of("Y");
-            public static final DataQuery VELOCITY_Z = of("Z");
-        }
-
-        public static final class AccelerationData {
-
-            public static final DataQuery ACCELERATION_X = of("X");
-            public static final DataQuery ACCELERATION_Y = of("Y");
-            public static final DataQuery ACCELERATION_Z = of("Z");
         }
 
         public static final class EntityArchetype {
@@ -231,8 +196,6 @@ public final class Constants {
             public static final String IS_INVISIBLE = "IsInvisible";
             public static final String VANISH_UNCOLLIDEABLE = "VanishUnCollideable";
             public static final String VANISH_UNTARGETABLE = "VanishUnTargetable";
-            public static final String MAX_AIR = "maxAir";
-            public static final int DEFAULT_MAX_AIR = 300;
             public static final String CAN_GRIEF = "CanGrief";
 
             public static final class Item {
@@ -260,6 +223,22 @@ public final class Constants {
                 public static final String HEALTH_SCALE = "HealthScale";
             }
 
+            public static final class Human {
+                public static final byte PLAYER_MODEL_FLAG_ALL = (byte) 0b01111111;
+            }
+
+            public static final class DataRegistration {
+                public static final String INVENTORY = "inventory";
+                public static final String TILEENTITY = "tileentity";
+                public static final String LOCATION = "location";
+                public static final String BLOCKSTATE = "blockstate";
+                public static final String ENTITY = "entity";
+                public static final String GENERIC = "generic";
+                public static final String ITEMSTACK = "itemstack";
+                public static final String ITEM = "item";
+                public static final String NBT = "nbt";
+            }
+
         }
 
         public static final class User {
@@ -274,17 +253,15 @@ public final class Constants {
         public static final class World {
 
             public static final String DIMENSION_TYPE = "dimensionType";
-            public static final String DIMENSION_ID = "dimensionId";
             public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
-            public static final String PORTAL_AGENT_TYPE = "portalAgentType";
-            public static final String WORLD_SERIALIZATION_BEHAVIOR = "serializationBehavior";
             public static final String IS_MOD_CREATED = "isModCreated";
             public static final DataQuery WORLD_CUSTOM_SETTINGS = DataQuery.of("customSettings");
             public static final String LEVEL_SPONGE_DAT = "level_sponge.dat";
-            public static final String LEVEL_SPONGE_DAT_OLD = "level_sponge.dat_old";
-            public static final String LEVEL_SPONGE_DAT_NEW = "level_sponge.dat_new";
+            public static final String LEVEL_SPONGE_DAT_OLD = World.LEVEL_SPONGE_DAT + "_old";
+            public static final String LEVEL_SPONGE_DAT_NEW = World.LEVEL_SPONGE_DAT + "_new";
             public static final String UNIQUE_ID = "UUID";
-            public static final String KEY = "Key";
+            public static final String DIMENSIONS_DIRECTORY = "dimensions";
+            public static final String WORLD_KEY = "WorldKey";
         }
 
         public static final class Schematic {
@@ -321,8 +298,6 @@ public final class Constants {
 
             /**
              * The NBT structure of the legacy Schematic format used by MCEdit and WorldEdit etc.
-             *
-             * It's no longer updated due to the
              */
             public static final class Legacy {
 
@@ -363,16 +338,15 @@ public final class Constants {
 
         public static final class Potion {
 
-            public static final int BROKEN_POTION_ID = 1;
             public static final int POTION_V2 = 2;
-            public static final int CURRENT_VERSION = POTION_V2;
+            public static final int CURRENT_VERSION = Potion.POTION_V2;
         }
 
         public static final class ItemStackSnapshot {
 
             public static final int DUPLICATE_MANIPULATOR_DATA_VERSION = 1;
             public static final int REMOVED_DUPLICATE_DATA = 2;
-            public static final int CURRENT_VERSION = REMOVED_DUPLICATE_DATA;
+            public static final int CURRENT_VERSION = ItemStackSnapshot.REMOVED_DUPLICATE_DATA;
         }
 
         public static final class BlockState {
@@ -385,12 +359,12 @@ public final class Constants {
 
     public static final class Permissions {
 
-        public static final String FORCE_GAMEMODE_OVERRIDE = "minecraft.force-gamemode.override";
         public static final String SELECTOR_PERMISSION = "minecraft.selector";
         public static final String COMMAND_BLOCK_PERMISSION = "minecraft.commandblock";
         public static final int COMMAND_BLOCK_LEVEL = 2;
         public static final int SELECTOR_LEVEL = 2;
         public static final String SPONGE_HELP_PERMISSION = "sponge.command.help";
+        public static final String DEBUG_HOVER_STACKTRACE = "sponge.debug.hover-stacktrace";
         public static final int SPONGE_HELP_LEVEL = 0;
     }
 
@@ -408,47 +382,23 @@ public final class Constants {
 
     public static final class World {
 
-
-        public static final int CHUNK_GC_TICK_INTERVAL = 600;
-
         public static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
         public static final Vector3i BIOME_MIN = new Vector3i(Constants.World.BLOCK_MIN.getX(), 0, Constants.World.BLOCK_MIN.getZ());
         public static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
         public static final Vector3i BLOCK_SIZE = Constants.World.BLOCK_MAX.sub(Constants.World.BLOCK_MIN).add(Vector3i.ONE);
         public static final Vector3i BIOME_MAX = new Vector3i(Constants.World.BLOCK_MAX.getX(), 256, Constants.World.BLOCK_MAX.getZ());
-        public static final Vector3i BIOME_SIZE = Constants.World.BIOME_MAX.sub(Constants.World.BIOME_MIN).add(Vector3i.ONE);
-        /**
-         * Specifically ordered for the order of notifications being sent out for
-         * when sending a request through {@code net.minecraft.world.World#notifyNeighborsOfStateChange(BlockPos, Block, boolean)}
-         * using
-         *  IBlockState#neighborChanged(net.minecraft.world.World, BlockPos, Block, BlockPos)
-         */
-        public static final net.minecraft.util.Direction[] NOTIFY_DIRECTIONS =
-            {net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN, net.minecraft.util.Direction.UP,
-                net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH};
         public static final EnumSet<net.minecraft.util.Direction> NOTIFY_DIRECTION_SET = EnumSet
             .of(net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN,
                 net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH);
         public static final ResourceKey INVALID_WORLD_KEY = ResourceKey.sponge("invalid_world");
-        public static final int DEFAULT_CHUNK_UNLOAD_DELAY = 15000;
-        public static final int MAX_CHUNK_UNLOADS = 100;
-        public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
-        public static final int CHUNK_UNLOAD_DELAY = 30000;
-        public static final int END_DIMENSION_ID = 1;
-
-        public static final class Teleporter {
-
-            public static final int DEFAULT_SEARCH_RADIUS = 128;
-
-            public static final int DEFAULT_CREATION_RADIUS = 16;
-        }
+        public static final String LEVEL_DAT = "level.dat";
+        public static final String LEVEL_DAT_OLD = World.LEVEL_DAT + "_old";
     }
 
     public static final class Chunk {
 
         public static final Direction[] CARDINAL_DIRECTIONS = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
-        public static final Vector3i BIOME_SIZE = new Vector3i(SpongeChunkLayout.CHUNK_SIZE.getX(), 1, SpongeChunkLayout.CHUNK_SIZE.getZ());
         // Neighbor Constants
 
         public static final int NUM_XZ_BITS = 4;
@@ -457,9 +407,7 @@ public final class Constants {
         public static final short XZ_MASK = 0xF;
         public static final short Y_SHORT_MASK = 0xFF;
         public static final int Y_INT_MASK = 0xFFFFFF;
-        public static final String CHUNK_DATA_LEVEL = "Level";
         public static final String CHUNK_DATA_SECTIONS = "Sections";
-        private static final int Y_SHIFT = Constants.Chunk.NUM_XZ_BITS;
     }
 
     public static final class Networking {
@@ -477,13 +425,13 @@ public final class Constants {
         public static final int MASK_DRAGDATA = 0x001F8;
         public static final int MASK_BUTTON = 0x00007;
         // Mask presets
-        public static final int MASK_ALL = MASK_OUTSIDE | MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
-        public static final int MASK_NORMAL = MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
-        public static final int MASK_DRAG = MASK_OUTSIDE | MASK_NORMAL;
+        public static final int MASK_ALL = Networking.MASK_OUTSIDE | Networking.MASK_MODE | Networking.MASK_BUTTON | Networking.MASK_DRAGDATA;
+        public static final int MASK_NORMAL = Networking.MASK_MODE | Networking.MASK_BUTTON | Networking.MASK_DRAGDATA;
+        public static final int MASK_DRAG = Networking.MASK_OUTSIDE | Networking.MASK_NORMAL;
         // Click location semaphore flags
         public static final int CLICK_INSIDE_WINDOW = 0x01 << 16; // << 0
         public static final int CLICK_OUTSIDE_WINDOW = 0x01 << 16 << 1;
-        public static final int CLICK_ANYWHERE = CLICK_INSIDE_WINDOW | CLICK_OUTSIDE_WINDOW;
+        public static final int CLICK_ANYWHERE = Networking.CLICK_INSIDE_WINDOW | Networking.CLICK_OUTSIDE_WINDOW;
         // Modes flags
         public static final int MODE_CLICK = 0x01 << 9 << ClickType.PICKUP.ordinal();
         public static final int MODE_SHIFT_CLICK = 0x01 << 9 << ClickType.QUICK_MOVE.ordinal();
@@ -496,7 +444,7 @@ public final class Constants {
         public static final int DRAG_MODE_PRIMARY_BUTTON = 0x01 << 6; // << 0
         public static final int DRAG_MODE_SECONDARY_BUTTON = 0x01 << 6 << 1;
         public static final int DRAG_MODE_MIDDLE_BUTTON = 0x01 << 6 << 2;
-        public static final int DRAG_MODE_ANY = DRAG_MODE_PRIMARY_BUTTON | DRAG_MODE_SECONDARY_BUTTON | DRAG_MODE_MIDDLE_BUTTON;
+        public static final int DRAG_MODE_ANY = Networking.DRAG_MODE_PRIMARY_BUTTON | Networking.DRAG_MODE_SECONDARY_BUTTON | Networking.DRAG_MODE_MIDDLE_BUTTON;
         // Drag status flags, bitmasked from button and only set if MODE_DRAG
         public static final int DRAG_STATUS_STARTED = 0x01 << 3; // << 0;
         public static final int DRAG_STATUS_ADD_SLOT = 0x01 << 3 << 1;
@@ -511,12 +459,7 @@ public final class Constants {
         public static final int PACKET_BUTTON_SECONDARY_ID = 0;
         public static final int PACKET_BUTTON_MIDDLE_ID = 0;
         public static final InetSocketAddress LOCALHOST = InetSocketAddress.createUnresolved("127.0.0.1", 0);
-
-        public static final class Packets {
-
-            public static final int CHANGED_SECTION_FILTER_ALL = 65535;
-
-        }
+        public static final int MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF = 21;
     }
 
     public static final class Item {
@@ -534,9 +477,7 @@ public final class Constants {
         public static final String ITEM_ENCHANTMENT_LIST = "Enchantments";
         public static final String ITEM_STORED_ENCHANTMENTS_LIST = "StoredEnchantments";
         public static final String ITEM_DISPLAY = "display";
-        public static final String ITEM_DISPLAY_NAME = "Name";
         public static final String ITEM_LORE = "Lore";
-        public static final String ITEM_COLOR = "color";
         public static final String ITEM_ENCHANTMENT_ID = "id";
         public static final String ITEM_ENCHANTMENT_LEVEL = "lvl";
         public static final String ITEM_BREAKABLE_BLOCKS = "CanDestroy";
@@ -544,19 +485,13 @@ public final class Constants {
         public static final String ITEM_PLACEABLE_BLOCKS = "CanPlaceOn";
         public static final String ITEM_HIDE_FLAGS = "HideFlags";
         public static final String ITEM_UNBREAKABLE = "Unbreakable";
+        public static final String CUSTOM_MODEL_DATA = "CustomModelData";
         public static final String CUSTOM_POTION_COLOR = "CustomPotionColor";
         public static final String CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
         public static final String LOCK = "Lock";
 
-        public static final class Armor {
-
-            public static final String ARMOR_COLOR_DISPLAY_TAG = "display";
-        }
-
         public static final class Book {
 
-            // Original (0) / Copy of original (1) / Copy of a copy (2) / Tattered (3)
-            public static final int MAXIMUM_GENERATION = 3;
             public static final String ITEM_BOOK_PAGES = "pages";
             public static final String ITEM_BOOK_TITLE = "title";
             public static final String ITEM_BOOK_AUTHOR = "author";
@@ -616,58 +551,64 @@ public final class Constants {
         }
     }
 
+    public static final class Recipe {
+        public static final String GROUP = "group";
+
+        public static final String RESULT = "result";
+        public static final String ITEM = "item";
+        public static final String COUNT = "count";
+
+        public static final String SPONGE_RESULT = "sponge:result";
+        public static final String SPONGE_RESULTFUNCTION = "sponge:result_function";
+        public static final String SPONGE_REMAINING_ITEMS = "sponge:remaining_items";
+
+        public static final String COOKING_EXP = "experience";
+        public static final String COOKING_TIME = "cookingtime";
+
+        public static final String COOKING_INGREDIENT = "ingredient";
+        public static final String STONECUTTING_INGREDIENT = "ingredient";
+        public static final String SHAPED_PATTERN = "pattern";
+        public static final String SHAPED_INGREDIENTS = "key";
+        public static final String SHAPELESS_INGREDIENTS = "ingredients";
+    }
+
     public static final class TileEntity {
 
         public static final String SIGN = "Sign";
         public static final DataQuery SIGN_LINES = of("SignLines");
         // TileEntities
         public static final DataQuery TILE_TYPE = of("TileType");
-        public static final DataQuery BREWING_TIME = of("BrewTime");
         public static final DataQuery LOCK_CODE = of("Lock");
         public static final DataQuery ITEM_CONTENTS = of("Contents");
         public static final DataQuery SLOT = of("SlotId");
         public static final DataQuery SLOT_ITEM = of("Item");
-        public static final DataQuery NOTE_ID = of("Note");
         public static final DataQuery LOCKABLE_CONTAINER_CUSTOM_NAME = of("CustomName");
         // TileEntity names
         public static final DataQuery CUSTOM_NAME = of("CustomName");
-        public static final DataQuery WORLD = of("world");
 
         public static final class Structure {
 
             // Structure block entity
             public static final String DEFAULT_STRUCTURE_AUTHOR = ""; // intentionally empty, as in vanilla
             public static final boolean DEFAULT_STRUCTURE_IGNORE_ENTITIES = true;
-            public static final float DEFAULT_STRUCTURE_INTEGRITY = 1.0F;
             public static final Supplier<StructureMode> DEFAULT_STRUCTURE_MODE = StructureModes.DATA;
             public static final Vector3i DEFAULT_STRUCTURE_POSITION = Vector3i.ONE;
             public static final boolean DEFAULT_STRUCTURE_POWERED = false;
             public static final boolean DEFAULT_STRUCTURE_SHOW_AIR = false;
-            public static final boolean DEFAULT_STRUCTURE_SHOW_BOUNDING_BOX = true;
             public static final long DEFAULT_STRUCTURE_SEED = 0L;
             public static final Vector3i DEFAULT_STRUCTURE_SIZE = Vector3i.ONE;
         }
 
         public static final class Spawner {
 
-            public static final short MINIMUM_MAXIMUM_SPAWN_DELAY = 1;
-            public static final short DEFAULT_REMAINING_DELAY = 20;
-            public static final short DEFAULT_MINIMUM_SPAWN_DELAY = 200;
-            public static final short DEFAULT_MAXIMUM_SPAWN_DELAY = 800;
             public static final short DEFAULT_SPAWN_COUNT = 4;
             public static final short DEFAULT_MAXMIMUM_NEARBY_ENTITIES = 6;
-            public static final short DEFAULT_REQUIRED_PLAYER_RANGE = 16;
-            public static final short DEFAULT_SPAWN_RANGE = 4;
-            public static final String SPAWNABLE_ENTITY_TAG = "EntityTag";
         }
 
         public static final class Furnace {
 
             public static final int MAX_BURN_TIME = 1600;
             public static final int DEFAULT_COOK_TIME = 200;
-            public static final int PASSED_BURN_FIELD = 1;
-            public static final int PASSED_COOK_FIELD = 2;
-            public static final int MAX_COOKTIME_FIELD = 3;
 
             public static final DataQuery BURN_TIME = of("BurnTime");
             public static final DataQuery BURN_TIME_TOTAL = of("BurnTimeTotal");
@@ -683,7 +624,6 @@ public final class Constants {
             public static final String BANNER_PATTERNS = "Patterns";
             // Banners
             public static final DataQuery BASE = of("Base");
-            public static final DataQuery PATTERNS = of("Patterns");
             // BannerPatterns
             public static final DataQuery SHAPE = of("BannerShapeId");
             public static final DataQuery COLOR = of("DyeColor");
@@ -720,32 +660,32 @@ public final class Constants {
 
     public static final class Catalog {
 
-        public static final Supplier<DyeColor> DEFAULT_SHEEP_COLOR = DyeColors.WHITE;
         public static final Supplier<DyeColor> DEFAULT_SHULKER_COLOR = DyeColors.PURPLE;
-        public static final Supplier<EntityType<Pig>> DEFAULT_SPAWNER_ENTITY = EntityTypes.PIG;
         public static final Supplier<ComparatorMode> DEFAULT_COMPARATOR_MODE = ComparatorModes.COMPARE;
-        public static final Supplier<DyeColor> DEFAULT_BANNER_BASE = DyeColors.BLACK;
         public static final Supplier<CatType> DEFAULT_CAT_TYPE = CatTypes.WHITE;
         public static final Supplier<GameMode> DEFAULT_GAMEMODE = GameModes.NOT_SET;
-        public static final Supplier<BlockState> DEFAULT_FALLING_BLOCK_BLOCKSTATE = () -> BlockTypes.SAND.get().getDefaultState();
-        public static final Supplier<BlockState> DEFAULT_BLOCK_STATE = () -> BlockTypes.STONE.get().getDefaultState();
         public static final Supplier<ArtType> DEFAULT_ART = ArtTypes.KEBAB;
-        public static final Supplier<PickupRule> DEFAULT_PICKUP_RULE = PickupRules.ALLOWED;
         public static final Supplier<HandPreference> DEFAULT_HAND = HandPreferences.RIGHT;
+
         private Catalog() {
         }
     }
 
+    public static final class Profile {
+
+        public static final DataQuery UUID = of("UUID");
+        public static final DataQuery NAME = of("Name");
+        public static final DataQuery PROPERTIES = DataQuery.of("Properties");
+        public static final DataQuery VALUE = DataQuery.of("Value");
+        public static final DataQuery SIGNATURE = DataQuery.of("Signature");
+    }
+
     public static final class Entity {
 
-        public static final double DEFAULT_ABSORPTION = 0.0f;
         public static final String LIGHTNING_EFFECT = "effect";
         public static final int ELYTRA_FLYING_FLAG = 7;
-        public static final int DEFAULT_FIRE_TICKS = 10;
         public static final int MINIMUM_FIRE_TICKS = 1;
-        public static final boolean DEFAULT_HAS_GRAVITY = true;
         public static final boolean DEFAULT_GLOWING = false;
-        public static final int DEFAULT_FIRE_DAMAGE_DELAY = 20;
         public static final BlockPos HANGING_OFFSET_EAST = new BlockPos(1, 1, 0);
         public static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
         public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
@@ -754,44 +694,20 @@ public final class Constants {
         public static final String ENTITY_TYPE_ID = "id";
         public static final String ENTITY_POSITION = "Pos";
         public static final String ENTITY_DIMENSION = "Dimension";
-        public static final String PASSENGERS = "Passengers";
         public static final String ENTITY_ROTATION = "Rotation";
+        public static final String ENTITY_UUID = "UUID";
         // Entities
         public static final DataQuery CLASS = of("EntityClass");
         public static final DataQuery UUID = of("EntityUniqueId");
         public static final DataQuery TYPE = of("EntityType");
         public static final DataQuery ROTATION = of("Rotation");
         public static final DataQuery SCALE = of("Scale");
-
-        public static final String ATTACK_ENTITY_FROM_MAPPING = "attackEntityFrom";
-        public static final String ATTACK_ENTITY_FROM_OBFUSCATED = "func_70097_a";
+        public static final DataQuery CUSTOM_NAME = of("CustomName");
 
         public static final class Ageable {
 
             public static final int ADULT = 6000;
             public static final int CHILD = -24000;
-        }
-
-        public static final class ArmorStand {
-
-            public static final Vector3d DEFAULT_HEAD_ROTATION = VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultHeadRotation());
-            public static final Vector3d DEFAULT_CHEST_ROTATION = VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultBodyRotation());
-            public static final Vector3d DEFAULT_LEFT_ARM_ROTATION =
-                VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultLeftarmRotation());
-            public static final Vector3d DEFAULT_RIGHT_ARM_ROTATION =
-                VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultRightarmRotation());
-            public static final Vector3d DEFAULT_LEFT_LEG_ROTATION =
-                VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultLeftlegRotation());
-            public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION =
-                VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultRightlegRotation());
-
-            static {
-                try {
-                    Class.forName(String.valueOf(ArmorStandEntity.class));
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         public static final class Boat {
@@ -821,10 +737,7 @@ public final class Constants {
 
         public static final class FallingBlock {
 
-            public static final double DEFAULT_FALL_DAMAGE_PER_BLOCK = 2D;
             public static final double DEFAULT_MAX_FALL_DAMAGE = 40;
-            public static final boolean DEFAULT_CAN_PLACE_AS_BLOCK = false;
-            public static final boolean DEFAULT_CAN_DROP_AS_ITEM = true;
             public static final int DEFAULT_FALL_TIME = 1;
             public static final boolean DEFAULT_CAN_HURT_ENTITIES = false;
 
@@ -845,19 +758,17 @@ public final class Constants {
 
             public static final Supplier<HorseStyle> DEFAULT_STYLE = HorseStyles.NONE;
             public static final Supplier<HorseColor> DERAULT_TYPE = HorseColors.WHITE;
+
             private Horse() {
             }
         }
 
         public static final class Item {
 
-            public static final int MIN_PICKUP_DELAY = Short.MIN_VALUE;
             public static final int MAX_PICKUP_DELAY = Short.MAX_VALUE;
             public static final int DEFAULT_PICKUP_DELAY = 0;
             public static final double DEFAULT_ITEM_MERGE_RADIUS = 0.5D;
             public static final int MIN_DESPAWN_DELAY = Short.MIN_VALUE;
-            public static final int MAX_DESPAWN_DELAY = Short.MAX_VALUE;
-            public static final int DEFAULT_DESPAWN_DELAY = 0;
 
             public static final int MAGIC_NO_PICKUP = Constants.Entity.Item.MAX_PICKUP_DELAY;
             public static final int MAGIC_NO_DESPAWN = Constants.Entity.Item.MIN_DESPAWN_DELAY;
@@ -871,10 +782,6 @@ public final class Constants {
         public static final class Llama {
 
             public static final Supplier<LlamaType> DEFAULT_TYPE = LlamaTypes.WHITE;
-            public static final int DEFAULT_STRENGTH = 1;
-            public static final int MINIMUM_STRENGTH = 1;
-            public static final int MAXIMUM_STRENGTH = 5;
-
         }
 
         public static final class Minecart {
@@ -894,8 +801,6 @@ public final class Constants {
         public static final class Cat {
 
             public static final Supplier<CatType> DEFAULT_TYPE = CatTypes.WHITE;
-
-
         }
 
         public static final class Panda {
@@ -908,24 +813,10 @@ public final class Constants {
             public static final Supplier<ParrotType> DEFAULT_TYPE = ParrotTypes.RED_AND_BLUE;
         }
 
-        public static final class Phantom {
-
-            public static final double CAT_SCAN_RADIUS = 16.0D;
-        }
-
-        public static final class Human {
-
-            public static final String SKIN_UUID_KEY = "skinUuid";
-        }
         public static final class Player {
 
             public static final double DEFAULT_FLYING_SPEED = 0.05D;
-            public static final double DEFAULT_EXHAUSTION = 0;
-            public static final double MINIMUM_EXHAUSTION = 0;
-            public static final double DEFAULT_SATURATION = 0;
-            public static final int DEFAULT_FOOD_LEVEL = 20;
             public static final double DEFAULT_HEALTH_SCALE = 20D;
-            public static final String ABILITIES = "abilities";
             public static final String INVENTORY = "Inventory";
             public static final String INVULNERABLE = "Invulnerable";
             public static final String SELECTED_ITEM_SLOT = "SelectedItemSlot";
@@ -941,7 +832,6 @@ public final class Constants {
 
             public static final class Abilities {
                 public static final String IS_FLYING = "flying";
-                public static final String CAN_FLY = "mayfly";
             }
         }
 
@@ -959,18 +849,11 @@ public final class Constants {
 
         public static final class Ravager {
 
-            public static final int STUNNED_TIME = 40;
             public static final int ROAR_TIME = 10;
-        }
-
-        public static final class Silverfish {
-
-            public static final int MAX_EXPIRATION_TICKS = 2400;
         }
 
         public static final class Wither {
 
-            public static final int DEFAULT_WITHER_EXPLOSION_RADIUS = 7;
             public static final int DEFAULT_FUSE_DURATION = 220;
         }
 
@@ -979,11 +862,6 @@ public final class Constants {
             public static final int DEFAULT_EXPLOSION_RADIUS = 1;
             public static final float DEFAULT_WITHER_CREATED_SKULL_DAMAGE = 8.0f;
             public static final float DEFAULT_NO_SOURCE_SKULL_DAMAGE = 5.0f;
-        }
-
-        public static final class Wolf {
-
-            public static final boolean IS_WET_DEFAULT = false;
         }
     }
 
@@ -1027,6 +905,8 @@ public final class Constants {
         public static final int NEIGHBOR_DROPS =  1 << 5; // 32
         public static final int BLOCK_MOVING =    1 << 6; // 64
         public static final int PHYSICS_MASK =    1 << 7; // Sponge Added mask, because vanilla doesn't support it yet
+        public static final int LIGHTING_UPDATES = 1 << 8; // Sponge Added mask, because vanilla doesn't allow bypassing lighting
+        public static final int PATHFINDING_UPDATES = 1 << 9; // Sponge Added mask, because vanilla doesn't allow bypassing notifications to ai pathfinders
         // All of these flags are what we "expose" to the API
         // The flags that are naturally inverted are already inverted here by being masked in
         // with the opposite OR.
@@ -1086,16 +966,16 @@ public final class Constants {
         public static final byte TAG_ANY_NUMERIC = 99;
 
         public static CompoundNBT filterSpongeCustomData(final CompoundNBT rootCompound) {
-            if (rootCompound.contains(Forge.FORGE_DATA, TAG_COMPOUND)) {
+            if (rootCompound.contains(Forge.FORGE_DATA, NBT.TAG_COMPOUND)) {
                 final CompoundNBT forgeCompound = rootCompound.getCompound(Forge.FORGE_DATA);
-                if (forgeCompound.contains(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
-                    cleanseInnerCompound(forgeCompound);
+                if (forgeCompound.contains(Sponge.SPONGE_DATA, NBT.TAG_COMPOUND)) {
+                    NBT.cleanseInnerCompound(forgeCompound);
                 }
                 if (forgeCompound.isEmpty()) {
                     rootCompound.remove(Forge.FORGE_DATA);
                 }
-            } else if (rootCompound.contains(Sponge.SPONGE_DATA, TAG_COMPOUND)) {
-                cleanseInnerCompound(rootCompound);
+            } else if (rootCompound.contains(Sponge.SPONGE_DATA, NBT.TAG_COMPOUND)) {
+                NBT.cleanseInnerCompound(rootCompound);
             }
             return rootCompound;
         }
@@ -1158,7 +1038,7 @@ public final class Constants {
 
         public static final String PERSISTED_NBT_TAG = "PlayerPersisted";
         public static final String FORGE_DATA = "ForgeData";
-        public static final DataQuery ROOT = of(FORGE_DATA);
+        public static final DataQuery ROOT = of(Forge.FORGE_DATA);
         public static final String FORGE_CAPS = "ForgeCaps";
         /**
          * Cross compatibility so that Sponge's multi-world format is in sync
@@ -1228,6 +1108,7 @@ public final class Constants {
         public static final DataQuery BLOCK_EXTENDED_STATE = of("BlockExtendedState");
         public static final DataQuery BLOCK_TYPE = of("BlockType");
         public static final DataQuery BLOCK_STATE_UNSAFE_META = of("UnsafeMeta");
+        public static final DataQuery BLOCK_STATE_MATCHER = of("BlockStateMatcher");
         public static final int PIXELS_PER_BLOCK = 16;
     }
 
@@ -1253,6 +1134,7 @@ public final class Constants {
         // Fluids
         public static final DataQuery FLUID_TYPE = of("FluidType");
         public static final DataQuery FLUID_VOLUME = of("FluidVolume");
+        public static final DataQuery FLUID_STATE = of("FluidState");
     }
 
     public static final class ItemStack {
@@ -1507,5 +1389,18 @@ public final class Constants {
         public static final DataQuery VALUE = DataQuery.of("Value");
         public static final DataQuery OPERATOR = DataQuery.of("Operator");
         public static final DataQuery KEY = DataQuery.of("Key");
+    }
+
+    public static final class TickConversions {
+
+        public static final int TICK_DURATION_MS = 50;
+        public static final Duration EFFECTIVE_MINIMUM_DURATION = Duration.ofMillis(TickConversions.TICK_DURATION_MS);
+
+        public static final int MINECRAFT_DAY_TICKS = 24000;
+        public static final int MINECRAFT_HOUR_TICKS = TickConversions.MINECRAFT_DAY_TICKS / 24;
+        public static final double MINECRAFT_MINUTE_TICKS = TickConversions.MINECRAFT_HOUR_TICKS / 60.0;
+        public static final double MINECRAFT_SECOND_TICKS = TickConversions.MINECRAFT_MINUTE_TICKS / 60.0;
+        public static final int MINECRAFT_EPOCH_OFFSET = 6000;
+
     }
 }

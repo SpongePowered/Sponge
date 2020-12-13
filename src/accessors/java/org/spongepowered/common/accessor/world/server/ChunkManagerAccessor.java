@@ -40,4 +40,6 @@ public interface ChunkManagerAccessor {
     @Accessor("generator") void accessor$setChunkGenerator(ChunkGenerator<?> chunkGenerator);
 
     @Invoker("getLoadedChunksIterable") Iterable<ChunkHolder> accessor$getLoadedChunksIterable();
+
+    @Invoker("save") void accessor$save(boolean flush);
 }

@@ -27,17 +27,17 @@ package org.spongepowered.common.util;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Predicate;
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import java.lang.reflect.Type;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class IpSet implements Predicate<InetAddress> {
+public final class IpSet implements Predicate<InetAddress> {
     private final InetAddress addr;
     private final int prefixLen;
 
@@ -71,7 +71,7 @@ public class IpSet implements Predicate<InetAddress> {
     }
 
     public static IpSet fromAddrPrefix(final InetAddress address, final int prefixLen) {
-        validatePrefixLength(checkNotNull(address, "address"), checkNotNull(prefixLen, "prefixLen"));
+        IpSet.validatePrefixLength(checkNotNull(address, "address"), checkNotNull(prefixLen, "prefixLen"));
         return new IpSet(address, prefixLen);
     }
 
@@ -99,14 +99,14 @@ public class IpSet implements Predicate<InetAddress> {
             throw new IllegalArgumentException(addrString + " does not contain a valid IP address");
         }
 
-        return fromAddrPrefix(addr, prefixLen);
+        return IpSet.fromAddrPrefix(addr, prefixLen);
     }
 
     private static void validatePrefixLength(final InetAddress address, final int prefixLen) throws IllegalArgumentException {
         if (prefixLen < 0) {
             throw new IllegalArgumentException("Minimum prefix length for an IP address is 0!");
         }
-        final int maxLen = getMaxPrefixLength(address);
+        final int maxLen = IpSet.getMaxPrefixLength(address);
         if (prefixLen > maxLen) {
             throw new IllegalArgumentException("Maximum prefix length for a " + address.getClass().getSimpleName() + " is " + maxLen);
         }
@@ -129,17 +129,17 @@ public class IpSet implements Predicate<InetAddress> {
     public static final class IpSetSerializer implements TypeSerializer<IpSet> {
 
         @Override
-        public IpSet deserialize(final TypeToken<?> type, final ConfigurationNode value) throws ObjectMappingException {
+        public IpSet deserialize(final Type type, final ConfigurationNode value) throws SerializationException {
             try {
                 return IpSet.fromCidr(value.getString());
             } catch (final IllegalArgumentException e) {
-                throw new ObjectMappingException(e);
+                throw new SerializationException(e);
             }
         }
 
         @Override
-        public void serialize(final TypeToken<?> type, final IpSet obj, final ConfigurationNode value) throws ObjectMappingException {
-            value.setValue(obj.toString());
+        public void serialize(final Type type, final IpSet obj, final ConfigurationNode value) throws SerializationException {
+            value.set(obj == null ? null : obj.toString());
         }
     }
 }

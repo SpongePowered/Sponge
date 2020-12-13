@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.data;
 
-import com.google.common.reflect.TypeToken;
+import com.google.common.collect.Multimap;
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
@@ -35,6 +37,8 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,8 +47,8 @@ public final class SpongeDataRegistration implements DataRegistration {
 
     final ResourceKey key;
     final List<Key<?>> keys;
-    final Map<TypeToken, DataStore> dataStoreMap;
-    final Map<Key, DataProvider> dataProviderMap;
+    final Map<Type, DataStore> dataStoreMap;
+    final Multimap<Key, DataProvider> dataProviderMap;
     final PluginContainer plugin;
 
     SpongeDataRegistration(ResourceKey key, PluginContainer plugin, SpongeDataRegistrationBuilder builder) {
@@ -56,20 +60,30 @@ public final class SpongeDataRegistration implements DataRegistration {
     }
 
     @Override
-    public <V extends Value<E>, E> Optional<DataProvider<V, E>> getProviderFor(Key<V> key) throws UnregisteredKeyException {
-        return Optional.ofNullable(this.dataProviderMap.get(key));
+    @SuppressWarnings("unchecked")
+    public <V extends Value<E>, E> Collection<DataProvider<V, E>> getProvidersFor(Key<V> key) throws UnregisteredKeyException {
+        return (Collection) this.dataProviderMap.get(key);
     }
 
     @Override
-    public Optional<DataStore> getDataStore(TypeToken<? extends DataHolder> token) {
-        DataStore dataStore = this.dataStoreMap.get(token);
+    public Optional<DataStore> getDataStore(final TypeToken<? extends DataHolder> token) {
+        return this.getDataStore0(token.getType());
+    }
+
+    @Override
+    public Optional<DataStore> getDataStore(final Class<? extends DataHolder> token) {
+        return this.getDataStore0(token);
+    }
+
+    private Optional<DataStore> getDataStore0(final Type type) {
+        DataStore dataStore = this.dataStoreMap.get(type);
         if (dataStore != null) {
             return Optional.of(dataStore);
         }
-        for (Map.Entry<TypeToken, DataStore> entry : this.dataStoreMap.entrySet()) {
-            if (entry.getKey().isSupertypeOf(token)) {
+        for (final Map.Entry<Type, DataStore> entry : this.dataStoreMap.entrySet()) {
+            if (GenericTypeReflector.isSuperType(entry.getKey(), type)) {
                 dataStore = entry.getValue();
-                this.dataStoreMap.put(token, dataStore);
+                this.dataStoreMap.put(type, dataStore);
                 return Optional.of(dataStore);
             }
         }
@@ -89,5 +103,13 @@ public final class SpongeDataRegistration implements DataRegistration {
     @Override
     public PluginContainer getPluginContainer() {
         return this.plugin;
+    }
+
+    public Collection<DataStore> getDataStores() {
+        return this.dataStoreMap.values();
+    }
+
+    public Collection<DataProvider> getDataProviders() {
+        return this.dataProviderMap.values();
     }
 }

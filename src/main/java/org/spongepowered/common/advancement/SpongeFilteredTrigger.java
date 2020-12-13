@@ -24,14 +24,23 @@
  */
 package org.spongepowered.common.advancement;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import net.minecraft.advancements.ICriterionInstance;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataSerializable;
+
+import java.io.IOException;
 
 @SuppressWarnings("rawtypes")
 public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigger {
+
+    private final static Gson GSON = new Gson();
 
     private final SpongeTrigger triggerType;
     private final FilteredTriggerConfiguration configuration;
@@ -54,5 +63,19 @@ public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigge
     @Override
     public FilteredTriggerConfiguration getConfiguration() {
         return this.configuration;
+    }
+
+    @Override
+    public JsonElement serialize() {
+        if (this.configuration instanceof DataSerializable) {
+            final DataContainer dataContainer = ((DataSerializable) this.configuration).toContainer();
+            try {
+                final String json = DataFormats.JSON.get().write(dataContainer);
+                return SpongeFilteredTrigger.GSON.fromJson(json, JsonElement.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return SpongeFilteredTrigger.GSON.toJsonTree(this.configuration);
     }
 }

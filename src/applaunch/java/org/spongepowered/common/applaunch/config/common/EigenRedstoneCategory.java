@@ -24,20 +24,24 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
 public class EigenRedstoneCategory {
 
-    @Setting(value = "enabled", comment = "If 'true', uses theosib's redstone implementation which improves performance. \n"
+    @Setting("enabled")
+    @Comment("If 'true', uses theosib's redstone implementation which improves performance. \n"
             + "See https://bugs.mojang.com/browse/MC-11193 and \n "
             + "    https://bugs.mojang.com/browse/MC-81098 for more information. \n"
             + "Note: We cannot guarantee compatibility with mods. Use at your discretion.")
     private boolean isEnabled = false;
-    @Setting(value = "vanilla-search", comment = "If 'true', restores the vanilla algorithm for propagating redstone wire changes.")
+    @Setting("vanilla-search")
+    @Comment("If 'true', restores the vanilla algorithm for propagating redstone wire changes.")
     private boolean vanillaSearch = false;
-    @Setting(value = "vanilla-decrement", comment = "If 'true', restores the vanilla algorithm for computing wire power levels when powering off.")
+    @Setting("vanilla-decrement")
+    @Comment("If 'true', restores the vanilla algorithm for computing wire power levels when powering off.")
     private boolean vanillaDecrement = false;
 
     public EigenRedstoneCategory() {

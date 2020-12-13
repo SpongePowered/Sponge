@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.block;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.item.Item;
@@ -42,8 +41,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Mixin(value = Block.class, priority = 999)
 public abstract class BlockMixin_API implements BlockType {
@@ -96,17 +97,27 @@ public abstract class BlockMixin_API implements BlockType {
 
     @Override
     public Component asComponent() {
-        return TranslatableComponent.of(this.shadow$getTranslationKey());
+        return Component.translatable(this.shadow$getTranslationKey());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<StateProperty<?>> getStateProperties() {
-        return (Collection<StateProperty<?>>) (Object) stateContainer.getProperties();
+        return (Collection<StateProperty<?>>) (Object) this.stateContainer.getProperties();
     }
 
     @Override
     public Optional<StateProperty<?>> getStatePropertyByName(String name) {
-        return Optional.ofNullable((StateProperty<?>) stateContainer.getProperty(name));
+        return Optional.ofNullable((StateProperty<?>) this.stateContainer.getProperty(name));
+    }
+
+    @Override
+    public boolean isAnyOf(Supplier<BlockType>... types) {
+        return Arrays.stream(types).map(Supplier::get).anyMatch(type -> type == this);
+    }
+
+    @Override
+    public boolean isAnyOf(BlockType... types) {
+        return Arrays.stream(types).anyMatch(type -> type == this);
     }
 }

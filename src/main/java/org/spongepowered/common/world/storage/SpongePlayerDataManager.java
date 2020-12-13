@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.storage;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -33,8 +32,10 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
+import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.DirectoryIteratorException;
@@ -51,14 +52,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Nullable;
-
 public final class SpongePlayerDataManager {
 
     private static final String SPONGE_DATA = "sponge";
     private final Server server;
     private final Map<UUID, SpongePlayerData> playerDataByUniqueId;
-    private Path playersDirectory;
+    @org.checkerframework.checker.nullness.qual.Nullable private Path playersDirectory = null;
 
     public SpongePlayerDataManager(final Server server) {
         this.server = server;
@@ -67,7 +66,8 @@ public final class SpongePlayerDataManager {
 
     public void load() {
         try {
-            this.playersDirectory = ((SpongeWorldManager) this.server.getWorldManager()).getSavesDirectory().resolve("data").resolve(SPONGE_DATA);
+            this.playersDirectory = ((SpongeWorldManager) this.server.getWorldManager()).getSavesDirectory().resolve("data").resolve(
+                SpongePlayerDataManager.SPONGE_DATA);
             Files.createDirectories(this.playersDirectory);
 
             final List<Path> playerFiles = new ArrayList<>();
@@ -75,7 +75,7 @@ public final class SpongePlayerDataManager {
                 for (final Path entry : stream) {
                     playerFiles.add(entry);
                 }
-            } catch (DirectoryIteratorException e) {
+            } catch (final DirectoryIteratorException e) {
                 SpongeCommon.getLogger().error("Something happened when trying to gather all player files", e);
             }
             for (final Path playerFile : playerFiles) {
@@ -93,9 +93,8 @@ public final class SpongePlayerDataManager {
                     }
 
                     final DataContainer container = NbtTranslator.getInstance().translateFrom(compound);
-                    // TODO Minecraft 1.14 - Data Registration in the lifecycle
-//                    final SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
-//                    this.playerDataByUniqueId.put(data.uuid, data);
+                    final SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
+                    this.playerDataByUniqueId.put(data.getUniqueId(), data);
                 }
             }
             playerFiles.clear();
@@ -105,17 +104,56 @@ public final class SpongePlayerDataManager {
         }
     }
 
-    public void savePlayer(final UUID id) {
-        @Nullable final SpongePlayerData data = this.playerDataByUniqueId.get(checkNotNull(id, "Player id cannot be null!"));
+    public void readPlayerData(final CompoundNBT compound, @Nullable UUID playerUniqueId, @Nullable Instant creation) {
+        if (creation == null) {
+            creation = Instant.now();
+        }
+        Instant lastPlayed = Instant.now();
+        // first try to migrate bukkit join data stuff
+        if (compound.contains(Constants.Bukkit.BUKKIT, Constants.NBT.TAG_COMPOUND)) {
+            final CompoundNBT bukkitCompound = compound.getCompound(Constants.Bukkit.BUKKIT);
+            creation = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_FIRST_PLAYED));
+            lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_LAST_PLAYED));
+        }
+        // migrate canary join data
+        if (compound.contains(Constants.Canary.ROOT, Constants.NBT.TAG_COMPOUND)) {
+            final CompoundNBT canaryCompound = compound.getCompound(Constants.Canary.ROOT);
+            creation = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.FIRST_JOINED));
+            lastPlayed = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.LAST_JOINED));
+        }
+        if (playerUniqueId == null) {
+            if (compound.hasUniqueId(Constants.UUID)) {
+                playerUniqueId = compound.getUniqueId(Constants.UUID);
+            }
+        }
+        if (playerUniqueId != null) {
+            final Optional<Instant> savedFirst = this.getFirstJoined(playerUniqueId);
+            if (savedFirst.isPresent()) {
+                creation = savedFirst.get();
+            }
+            final Optional<Instant> savedJoined = this.getLastPlayed(playerUniqueId);
+            if (savedJoined.isPresent()) {
+                lastPlayed = savedJoined.get();
+            }
+            this.setPlayerInfo(playerUniqueId, creation, lastPlayed);
+        }
+    }
+
+    public void savePlayer(final UUID uniqueId) {
+        if (uniqueId == null) {
+            throw new IllegalArgumentException("Player unique id cannot be null!");
+        }
+
+        @Nullable final SpongePlayerData data = this.playerDataByUniqueId.get(uniqueId);
         if (data != null) {
-            saveFile(id.toString(), createCompoundFor(data));
+            this.saveFile(uniqueId.toString(), this.createCompoundFor(data));
         } else {
-            SpongeCommon.getLogger().error("Couldn't find a player data for the uuid: " + id.toString());
+            SpongeCommon.getLogger().error("Couldn't find a player data for the uuid: " + uniqueId.toString());
         }
     }
 
     private CompoundNBT createCompoundFor(final SpongePlayerData data) {
-        return NbtTranslator.getInstance().translateData(data.toContainer());
+        return NbtTranslator.getInstance().translate(data.toContainer());
     }
 
     private void saveFile(final String id, final CompoundNBT compound) {
@@ -134,27 +172,34 @@ public final class SpongePlayerDataManager {
         }
     }
 
-    public void setPlayerInfo(final UUID playerId, final Instant join, final Instant last) {
-        checkNotNull(join, "Joined date cannot be null!");
-        checkNotNull(last, "Last joined date cannot be null!");
+    public void setPlayerInfo(final UUID playerUniqueId, final Instant join, final Instant last) {
+        if (playerUniqueId == null) {
+            throw new IllegalArgumentException("Player unique id cannot be null!");
+        }
+        if (join == null) {
+            throw new IllegalArgumentException("Joined date cannot be null!");
+        }
+        if (last == null) {
+            throw new IllegalArgumentException("Last joined date cannot be null!");
+        }
 
-        SpongePlayerData data = this.playerDataByUniqueId.get(checkNotNull(playerId, "Player UUID cannot be null!"));
+        SpongePlayerData data = this.playerDataByUniqueId.get(playerUniqueId);
         if (data == null) {
             data = new SpongePlayerData();
-            data.uuid = playerId;
+            data.setUniqueId(playerUniqueId);
         }
-        data.firstJoined = join.toEpochMilli();
-        data.lastJoined = last.toEpochMilli();
-        this.playerDataByUniqueId.put(playerId, data);
+        data.setFirstJoined(join.toEpochMilli());
+        data.setLastJoined(last.toEpochMilli());
+        this.playerDataByUniqueId.put(playerUniqueId, data);
     }
 
     public Optional<Instant> getFirstJoined(final UUID uniqueId) {
         final SpongePlayerData data = this.playerDataByUniqueId.get(uniqueId);
-        return Optional.ofNullable(data == null ? null : Instant.ofEpochMilli(data.firstJoined));
+        return Optional.ofNullable(data == null ? null : Instant.ofEpochMilli(data.getFirstJoined()));
     }
 
     public Optional<Instant> getLastPlayed(final UUID uniqueId) {
         final SpongePlayerData data = this.playerDataByUniqueId.get(uniqueId);
-        return Optional.ofNullable(data == null ? null : Instant.ofEpochMilli(data.lastJoined));
+        return Optional.ofNullable(data == null ? null : Instant.ofEpochMilli(data.getLastJoined()));
     }
 }

@@ -33,7 +33,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Unit;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -66,16 +65,17 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
+import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
-import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
-import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.event.lifecycle.RegisterWorldEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
@@ -83,16 +83,23 @@ import org.spongepowered.common.util.FutureUtil;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.server.WorldRegistration;
-import org.spongepowered.vanilla.accessor.world.storage.SaveFormatAccessor_Vanilla;
 import org.spongepowered.vanilla.accessor.server.MinecraftServerAccessor_Vanilla;
+import org.spongepowered.vanilla.accessor.world.storage.SaveFormatAccessor_Vanilla;
+import org.spongepowered.vanilla.bridge.util.registry.SimpleRegistryBridge;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -114,6 +121,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     private final Map<ResourceKey, WorldRegistration> pendingWorlds;
     private final Map<ResourceKey, WorldInfo> allInfos;
 
+    private static final TicketType<ResourceLocation> SPAWN_CHUNKS = TicketType.create("spawn_chunks", (i, o) -> i.compareTo(o));
+
     public VanillaWorldManager(final MinecraftServer server) {
         this.server = server;
         this.savesDirectory = ((MinecraftServerAccessor_Vanilla) server).accessor$getAnvilFile().toPath().resolve(server.getFolderName());
@@ -123,6 +132,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         this.infoByType = new IdentityHashMap<>();
         this.pendingWorlds = new LinkedHashMap<>();
         this.allInfos = new LinkedHashMap<>();
+
+        this.clearCustomWorldDimensions();
 
         this.registerPendingWorld(SpongeWorldManager.VANILLA_OVERWORLD, null);
         this.registerPendingWorld(SpongeWorldManager.VANILLA_THE_NETHER, null);
@@ -170,6 +181,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
         ((WorldInfoBridge) worldInfo).bridge$setModCreated(true);
 
+        SpongeCommon.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                archetype, (WorldProperties) worldInfo));
+
         return CompletableFuture.completedFuture((WorldProperties) worldInfo);
     }
 
@@ -177,12 +191,21 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     public CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld(final ResourceKey key) {
         Objects.requireNonNull(key);
 
-        ServerWorld world = worlds.get(key);
+        ServerWorld world = this.worlds.get(key);
         if (world != null) {
             return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
         }
 
-        final Path worldDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir().resolve(this.server.getFolderName()).resolve(key.getValue());
+        final boolean isSinglePlayer = this.server.isSinglePlayer();
+        final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
+        final Path gameDirectory = !isSinglePlayer ? savesDirectory : savesDirectory.getParent();
+        final Path levelDirectory = savesDirectory.resolve(this.server.getFolderName());
+
+        final String directoryName = this.getDirectoryName(key);
+        final boolean isVanillaSubWorld = this.isVanillaSubWorld(directoryName);
+
+        final Path worldDirectory = isVanillaSubWorld ? levelDirectory.resolve(directoryName) :
+                levelDirectory.resolve("dimensions").resolve(key.getNamespace()).resolve(key.getValue());
 
         if (Files.notExists(worldDirectory)) {
             return FutureUtil.completedWithException(new IOException(String.format("World '%s' has no directory in '%s'.", key,
@@ -194,17 +217,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     key, Constants.Sponge.World.LEVEL_SPONGE_DAT)));
         }
 
-        final SaveFormat saveFormat = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("backups"),
-                this.server.getDataFixer());
-        final SaveHandler saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(key), this.server);
+        final SaveFormat saveFormat = new SaveFormat(worldDirectory.getParent(), gameDirectory.resolve("backups"), this.server.getDataFixer());
+        final SaveHandler saveHandler = saveFormat.getSaveLoader(directoryName, this.server);
 
         final WorldInfo worldInfo = saveHandler.loadWorldInfo();
-        final Integer dimensionId = ((WorldInfoBridge) worldInfo).bridge$getDimensionId();
-
-        if (dimensionId == null) {
-            return FutureUtil.completedWithException(new IOException(String.format("World '%s' has no dimension id in the Sponge level data ('%s').",
-                    key, Constants.Sponge.World.LEVEL_SPONGE_DAT)));
-        }
 
         final ResourceKey existingKey = ((ResourceKeyBridge) worldInfo).bridge$getKey();
         if (existingKey != null && !existingKey.equals(key)) {
@@ -217,21 +233,21 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final SpongeDimensionType logicType = ((WorldInfoBridge) worldInfo).bridge$getLogicType();
 
         final DimensionType dimensionType = Registry.DIMENSION_TYPE.getValue((ResourceLocation) (Object) key).orElseGet(() -> this.
-                createDimensionType(key, logicType, worldDirectory.getFileName().toString(), dimensionId + 1));
-
-        if (dimensionType.getId() != dimensionId) {
-            return FutureUtil.completedWithException(new IOException(String.format("World '%s' specifies internal id '%s' which was already "
-                            + "registered.", key, dimensionId)));
-        }
+                createDimensionType(key, logicType, worldDirectory.getFileName().toString(), ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE)
+                        .accessor$getNextFreeId()));
 
         ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType(logicType);
 
-        MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Loading World '{}' ({}/{})", key, logicType.getKey().getFormatted(), dimensionType.getId());
+        MinecraftServerAccessor.accessor$getLogger().info("Loading World '{}' ({})", key, logicType.getKey().getFormatted());
 
-        final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getChunkStatusListenerFactory().create(11);
+        final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(logicType, key);
+        ((WorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
 
-        world = new ServerWorld(this.server, this.server.getBackgroundExecutor(), saveHandler, worldInfo,
-                dimensionType, this.server.getProfiler(), chunkStatusListener);
+        final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getChunkStatusListenerFactory()
+                .create(11);
+
+        world = new ServerWorld(this.server, this.server.getBackgroundExecutor(), saveHandler, worldInfo, dimensionType, this.server.getProfiler(),
+                chunkStatusListener);
 
         this.loadedWorldInfos.put(key, worldInfo);
         this.infoByType.put(dimensionType, worldInfo);
@@ -239,7 +255,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         this.worlds.put(key, world);
         this.worldsByType.put(dimensionType, world);
 
-        this.performPostLoadWorldLogic(world, this.createDefaultSettings(null, false, worldInfo.getSeed(), worldInfo.getGenerator(), null), worldDirectory, chunkStatusListener);
+        this.performPostLoadWorldLogic(world, this.createDefaultSettings(null, false, worldInfo.getSeed(), worldInfo
+                .getGenerator(), null), worldDirectory, chunkStatusListener);
 
         return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
     }
@@ -258,13 +275,23 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
         }
 
-        final Path worldDirectory =
-                ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir().resolve(this.server.getFolderName())
-                        .resolve(properties.getKey().getValue());
-        final boolean isOnDisk = Files.exists(worldDirectory);
+        final boolean isSinglePlayer = this.server.isSinglePlayer();
+        final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
+        final Path gameDirectory = !isSinglePlayer ? savesDirectory : savesDirectory.getParent();
+        final Path levelDirectory = savesDirectory.resolve(this.server.getFolderName());
 
-        final SaveFormat saveFormat = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("backups"),
-                this.server.getDataFixer());
+        final String directoryName = this.getDirectoryName(properties.getKey());
+        final boolean isVanillaSubWorld = this.isVanillaSubWorld(directoryName);
+
+        final Path worldDirectory = isVanillaSubWorld ? levelDirectory.resolve(directoryName) : levelDirectory.resolve(Constants.Sponge.World
+                .DIMENSIONS_DIRECTORY).resolve(properties.getKey().getNamespace()).resolve(properties.getKey().getValue());
+
+        // If there is a folder on disk but we have no properties, this is likely because creating a properties in Vanilla inherently
+        // writes the directory (such in the case of createProperties) but this properties has never been saved. It is dangerous to patch
+        // out the creation of that directory so this hackfix will work for now
+        final boolean isOnDisk = Files.exists(worldDirectory) && Files.exists(worldDirectory.resolve(Constants.World.LEVEL_DAT));
+
+        final SaveFormat saveFormat = new SaveFormat(worldDirectory.getParent(), gameDirectory.resolve("backups"), this.server.getDataFixer());
         final SaveHandler saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(properties.getKey()), this.server);
 
         if (isOnDisk) {
@@ -278,29 +305,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 return FutureUtil.completedWithException(new IOException(String.format("World '%s' was registered with a different directory on "
                         + "this server instance before. Aborting...", properties.getKey())));
             }
-
-            if (((WorldInfoBridge) properties).bridge$getDimensionId() != null && dimensionType.getId() != (((WorldInfoBridge) properties).bridge$getDimensionId())) {
-                return FutureUtil.completedWithException(new IOException(String.format("World '%s' was registered with a different internal id on "
-                                + "this server instance before. Aborting...", properties.getKey())));
-            }
         } else {
-            int dimensionId;
-            if (((WorldInfoBridge) properties).bridge$getDimensionId() != null) {
-                dimensionType = DimensionType.getById(((WorldInfoBridge) properties).bridge$getDimensionId());
-                if (dimensionType != null) {
-                    return FutureUtil.completedWithException(new IOException(String.format("World '%s' is already registered under a different id. "
-                            + "Aborting...", properties.getKey())));
-                }
-                dimensionId = ((WorldInfoBridge) properties).bridge$getDimensionId();
-            } else {
-                dimensionId = ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE).accessor$getNextFreeId();
-            }
-
             dimensionType = this.createDimensionType(properties.getKey(), (SpongeDimensionType) properties.getDimensionType(),
-                    worldDirectory.getFileName().toString(), dimensionId);
+                    worldDirectory.getFileName().toString(), ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE).accessor$getNextFreeId());
         }
-
-        ((WorldInfoBridge) properties).bridge$setDimensionId(dimensionType);
 
         final WorldInfo worldInfo = (WorldInfo) properties;
 
@@ -308,21 +316,25 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType(logicType);
 
-        MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Loading World '{}' ({}/{})", properties.getKey(), logicType.getKey().getFormatted(),
-                dimensionType.getId());
+        MinecraftServerAccessor.accessor$getLogger().info("Loading World '{}' ({})", properties.getKey(), logicType.getKey()
+                .getFormatted());
+
+        final InheritableConfigHandle<WorldConfig> adapter = SpongeGameConfigs.createWorld(logicType, properties.getKey());
+        ((WorldInfoBridge) properties).bridge$setConfigAdapter(adapter);
 
         final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getChunkStatusListenerFactory().create(11);
 
-        final ServerWorld serverWorld = new ServerWorld(this.server, this.server.getBackgroundExecutor(), saveHandler, worldInfo,
+        world = new ServerWorld(this.server, this.server.getBackgroundExecutor(), saveHandler, worldInfo,
                 dimensionType, this.server.getProfiler(), chunkStatusListener);
 
         this.loadedWorldInfos.put(properties.getKey(), worldInfo);
         this.infoByType.put(dimensionType, worldInfo);
         this.allInfos.put(properties.getKey(), worldInfo);
-        this.worlds.put(properties.getKey(), serverWorld);
-        this.worldsByType.put(dimensionType, serverWorld);
+        this.worlds.put(properties.getKey(), world);
+        this.worldsByType.put(dimensionType, world);
 
-        this.performPostLoadWorldLogic(serverWorld, this.createDefaultSettings(null, false, worldInfo.getSeed(), worldInfo.getGenerator(), null), worldDirectory, chunkStatusListener);
+        this.performPostLoadWorldLogic(world, this.createDefaultSettings(null, false, worldInfo.getSeed(), worldInfo.getGenerator(), null),
+                worldDirectory, chunkStatusListener);
 
         return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
     }
@@ -356,40 +368,20 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     + "world loaded.", world.getKey())));
         }
 
-        if (world.getPlayers().size() != 0) {
-            return FutureUtil.completedWithException(new IOException(String.format("World '%s' was told to unload but players remain.",
-                    world.getKey())));
+        try {
+            this.unloadWorld0((ServerWorld) world);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
         }
 
-        try (final ServerWorld closingWorld = (ServerWorld) world) {
-            SpongeCommon.getLogger().info("Unloading World '{}' ({}/{})", ((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey(),
-                    ((org.spongepowered.api.world.server.ServerWorld) closingWorld).getDimensionType().getKey(),
-                    closingWorld.dimension.getType().getId());
-            try {
-                closingWorld.save(null, true, true);
-            } catch (final SessionLockException e) {
-                return FutureUtil.completedWithException(new IOException(e));
-            }
-
-            this.loadedWorldInfos.remove(((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey());
-            this.infoByType.remove(closingWorld.dimension.getType());
-            this.worlds.remove(((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey());
-            this.worldsByType.remove(closingWorld.dimension.getType());
-
-            SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                    (org.spongepowered.api.world.server.ServerWorld) closingWorld));
-
-            return CompletableFuture.completedFuture(true);
-        } catch (IOException ex) {
-            return FutureUtil.completedWithException(ex);
-        }
+        return CompletableFuture.completedFuture(true);
     }
 
     @Override
     public Optional<WorldProperties> getProperties(final ResourceKey key) {
         Objects.requireNonNull(key);
 
-        return (Optional<WorldProperties>) (Object) Optional.ofNullable(this.loadedWorldInfos.get(key));
+        return (Optional<WorldProperties>) (Object) Optional.ofNullable(this.allInfos.get(key));
     }
 
     @Override
@@ -428,25 +420,256 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final SaveFormat saveFormat = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("backups"),
                 this.server.getDataFixer());
         final SaveHandler saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(properties.getKey()), this.server);
-
         saveHandler.saveWorldInfo((WorldInfo) properties);
 
         return CompletableFuture.completedFuture(true);
     }
 
     @Override
-    public CompletableFuture<WorldProperties> copyWorld(final ResourceKey key, final String copyValue) {
-        return null;
+    public CompletableFuture<WorldProperties> copyWorld(final ResourceKey key, final ResourceKey copyKey) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(copyKey, "copyKey");
+
+        if (VanillaWorldManager.VANILLA_OVERWORLD.equals(copyKey)) {
+            throw new IllegalArgumentException(String.format("The copy key '%s' cannot be the default world!", copyKey));
+        }
+
+        if (this.worlds.containsKey(copyKey)) {
+            return FutureUtil.completedWithException(new IllegalStateException(String.format("The copy key '%s' is a currently loaded world!",
+                    copyKey)));
+        }
+
+        final ServerWorld loadedWorld = this.worlds.get(key);
+        boolean disableLevelSaving = false;
+
+        if (loadedWorld != null) {
+            try {
+                disableLevelSaving = loadedWorld.disableLevelSaving;
+                loadedWorld.save(null, true, loadedWorld.disableLevelSaving);
+            } catch (final SessionLockException e) {
+                FutureUtil.completedWithException(e);
+            }
+            loadedWorld.disableLevelSaving = true;
+        }
+
+        final boolean isSinglePlayer = this.server.isSinglePlayer();
+        final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
+        final Path gameDirectory = !isSinglePlayer ? savesDirectory : savesDirectory.getParent();
+        final Path levelDirectory = savesDirectory.resolve(this.server.getFolderName());
+
+        final String directoryName = this.getDirectoryName(key);
+        final boolean isDefaultWorld = VanillaWorldManager.VANILLA_OVERWORLD.equals(key);
+        final boolean isVanillaSubWorld = this.isVanillaSubWorld(directoryName);
+
+        final Path originalDirectory = isDefaultWorld ? levelDirectory : isVanillaSubWorld ? levelDirectory.resolve(directoryName) :
+                levelDirectory.resolve(Constants.Sponge.World.DIMENSIONS_DIRECTORY).resolve(key.getNamespace()).resolve(key.getValue());
+
+        final Path copyDirectory = levelDirectory.resolve(Constants.Sponge.World.DIMENSIONS_DIRECTORY).resolve(copyKey.getNamespace()).resolve(copyKey.getValue());
+
+        try {
+            Files.walkFileTree(originalDirectory, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+                    // Silly recursion if the default world is being copied
+                    if (dir.getFileName().toString().equals(Constants.Sponge.World.DIMENSIONS_DIRECTORY)) {
+                        return FileVisitResult.SKIP_SUBTREE;
+                    }
+
+                    // Silly copying of vanilla sub worlds if the default world is being copied
+                    if (isDefaultWorld && VanillaWorldManager.this.isVanillaSubWorld(dir.getFileName().toString())) {
+                        return FileVisitResult.SKIP_SUBTREE;
+                    }
+
+                    final Path relativize = originalDirectory.relativize(dir);
+                    final Path directory = copyDirectory.resolve(relativize);
+                    Files.createDirectories(directory);
+
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+                    final String fileName = file.getFileName().toString();
+                    // Do not copy backups (not relevant anymore)
+                    if (fileName.equals(Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD)) {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    if (fileName.equals(Constants.World.LEVEL_DAT_OLD)) {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    Files.copy(file, copyDirectory.resolve(originalDirectory.relativize(file)), StandardCopyOption.COPY_ATTRIBUTES,
+                            StandardCopyOption.REPLACE_EXISTING);
+
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (final IOException e) {
+            // Bail the whole deal if we hit IO problems!
+            try {
+                Files.deleteIfExists(copyDirectory);
+            } catch (final IOException ignore) {
+            }
+
+            return FutureUtil.completedWithException(e);
+        }
+
+        if (loadedWorld != null) {
+            loadedWorld.disableLevelSaving = disableLevelSaving;
+        }
+
+        final Path configFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds").resolve(key
+                .getNamespace()).resolve(key.getValue() + ".conf");
+
+        final Path copiedConfigFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds")
+                .resolve(copyKey.getNamespace()).resolve(copyKey.getValue() + ".conf");
+
+        try {
+            Files.createDirectories(copiedConfigFile.getParent());
+            Files.copy(configFile, copiedConfigFile, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
+        // Strip UUID
+        final Path copiedSpongeLevelFile = copyDirectory.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT);
+        if (Files.exists(copiedSpongeLevelFile)) {
+            final CompoundNBT spongeLevelCompound;
+            try {
+                spongeLevelCompound = CompressedStreamTools.readCompressed(Files.newInputStream(copiedSpongeLevelFile));
+
+                if (!spongeLevelCompound.isEmpty()) {
+                    final CompoundNBT spongeDataCompound = spongeLevelCompound.getCompound(Constants.Sponge.SPONGE_DATA);
+                    spongeDataCompound.removeUniqueId(Constants.Sponge.World.UNIQUE_ID);
+                    CompressedStreamTools.writeCompressed(spongeLevelCompound, Files.newOutputStream(copiedSpongeLevelFile));
+                }
+            } catch (final IOException e) {
+                return FutureUtil.completedWithException(e);
+            }
+        }
+
+        final SaveFormat saveFormat = new SaveFormat(copyDirectory.getParent(), gameDirectory.resolve("backups"), this.server.getDataFixer());
+        final SaveHandler saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(copyKey), this.server);
+
+        return CompletableFuture.completedFuture((WorldProperties) saveHandler.loadWorldInfo());
     }
 
     @Override
     public CompletableFuture<WorldProperties> renameWorld(final ResourceKey key, final String newValue) {
-        return null;
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(newValue, "newValue");
+
+        if (VanillaWorldManager.VANILLA_OVERWORLD.equals(key)) {
+            throw new IllegalArgumentException("The default world cannot be renamed!");
+        }
+
+        final ResourceKey renamedKey = ResourceKey.of(key.getNamespace(), newValue);
+        if (this.worlds.containsKey(renamedKey)) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        ServerWorld loadedWorld = this.worlds.get(key);
+        if (loadedWorld != null) {
+            try {
+                this.unloadWorld0(loadedWorld);
+            } catch (final IOException e) {
+                return FutureUtil.completedWithException(e);
+            }
+        }
+
+        this.allInfos.remove(key);
+
+        final boolean isSinglePlayer = this.server.isSinglePlayer();
+        final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
+        final Path gameDirectory = !isSinglePlayer ? savesDirectory : savesDirectory.getParent();
+        final Path levelDirectory = savesDirectory.resolve(this.server.getFolderName());
+
+        final String directoryName = this.getDirectoryName(key);
+        final boolean isDefaultWorld = VanillaWorldManager.VANILLA_OVERWORLD.equals(key);
+        final boolean isVanillaSubWorld = this.isVanillaSubWorld(directoryName);
+
+        final Path originalDirectory = isDefaultWorld ? levelDirectory : isVanillaSubWorld ? levelDirectory.resolve(directoryName) :
+                levelDirectory.resolve(Constants.Sponge.World.DIMENSIONS_DIRECTORY).resolve(key.getNamespace()).resolve(key.getValue());
+
+        final Path renamedDirectory =
+                levelDirectory.resolve(Constants.Sponge.World.DIMENSIONS_DIRECTORY).resolve(renamedKey.getNamespace()).resolve(renamedKey.getValue());
+
+        try {
+            Files.createDirectories(renamedDirectory);
+            Files.move(originalDirectory, renamedDirectory, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
+        final Path configFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds").resolve(key
+                .getNamespace()).resolve(key.getValue() + ".conf");
+
+        final Path renamedConfigFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds")
+                .resolve(renamedKey.getNamespace()).resolve(renamedKey.getValue() + ".conf");
+
+        try {
+            Files.createDirectories(renamedConfigFile.getParent());
+            Files.move(configFile, renamedConfigFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
+        final SaveFormat saveFormat = new SaveFormat(renamedDirectory.getParent(), gameDirectory.resolve("backups"), this.server.getDataFixer());
+        final SaveHandler saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(renamedKey), this.server);
+
+        return CompletableFuture.completedFuture((WorldProperties) saveHandler.loadWorldInfo());
     }
 
     @Override
     public CompletableFuture<Boolean> deleteWorld(final ResourceKey key) {
-        return null;
+        Objects.requireNonNull(key);
+
+        if (VanillaWorldManager.VANILLA_OVERWORLD.equals(key)) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        final ServerWorld loadedWorld = this.worlds.get(key);
+        if (loadedWorld != null) {
+            boolean disableLevelSaving = loadedWorld.disableLevelSaving;
+            loadedWorld.disableLevelSaving = true;
+            try {
+                this.unloadWorld0(loadedWorld);
+            } catch (final IOException e) {
+                loadedWorld.disableLevelSaving = disableLevelSaving;
+                return FutureUtil.completedWithException(e);
+            }
+        }
+
+        this.allInfos.remove(key);
+
+        final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
+        final Path levelDirectory = savesDirectory.resolve(this.server.getFolderName());
+
+        final String directoryName = this.getDirectoryName(key);
+        final boolean isDefaultWorld = VanillaWorldManager.VANILLA_OVERWORLD.equals(key);
+        final boolean isVanillaSubWorld = this.isVanillaSubWorld(directoryName);
+
+        final Path worldDirectory = isDefaultWorld ? levelDirectory : isVanillaSubWorld ? levelDirectory.resolve(directoryName) :
+                levelDirectory.resolve(Constants.Sponge.World.DIMENSIONS_DIRECTORY).resolve(key.getNamespace()).resolve(key.getValue());
+
+        try {
+            Files.walk(worldDirectory)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
+        final Path configFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds").resolve(key
+                .getNamespace()).resolve(key.getValue() + ".conf");
+
+        try {
+            Files.deleteIfExists(configFile);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
+        return CompletableFuture.completedFuture(true);
     }
 
     @Override
@@ -457,17 +680,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return false;
         }
 
-        DimensionType registeredType;
-
-        if (archetype == null) {
-            // Only null for the initial Vanilla registrations but I could create generic settings for them. I'll ponder it
-            registeredType = VANILLA_THE_NETHER.equals(key) ? DimensionType.THE_NETHER : VANILLA_THE_END.equals(key) ? DimensionType.THE_END : DimensionType.OVERWORLD;
-        } else {
-            registeredType = this.createDimensionType(key, ((WorldSettingsBridge) (Object) archetype).bridge$getLogicType(), key.getValue(),
-                    ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE).accessor$getNextFreeId());
-        }
-
-        this.pendingWorlds.put(key, new WorldRegistration(key, registeredType, (WorldSettings) (Object) archetype));
+        this.pendingWorlds.put(key, new WorldRegistration(key, null, (WorldSettings) (Object) archetype));
         return true;
     }
 
@@ -490,6 +703,38 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
+    public void unloadWorld0(final ServerWorld world) throws IOException {
+        final ResourceLocation key = (ResourceLocation) (Object) ((ResourceKeyBridge) world.getWorldInfo()).bridge$getKey();
+
+        if (world.getPlayers().size() != 0) {
+            throw new IOException(String.format("World '%s' was told to unload but players remain.", key));
+        }
+
+        SpongeCommon.getLogger().info("Unloading World '{}' ({})", key, ((ResourceKeyBridge) world.dimension.getType()).bridge$getKey());
+
+        final BlockPos spawnPoint = world.getSpawnPoint();
+        world.getChunkProvider().releaseTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(spawnPoint), 11, key);
+
+        ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().save();
+        ((ServerWorldBridge) world).bridge$setManualSave(true);
+
+        try {
+            world.save(null, true, world.disableLevelSaving);
+            world.close();
+        } catch (final Exception ex) {
+            throw new IOException(ex);
+        }
+
+        this.loadedWorldInfos.remove(key);
+        this.infoByType.remove(world.dimension.getType());
+        this.worlds.remove(key);
+        this.worldsByType.remove(world.dimension.getType());
+
+        SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                (org.spongepowered.api.world.server.ServerWorld) world));
+    }
+
+    @Override
     @Nullable
     public ServerWorld getDefaultWorld() {
         return this.worlds.get(VanillaWorldManager.VANILLA_OVERWORLD);
@@ -497,6 +742,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public void adjustWorldForDifficulty(final ServerWorld world, final Difficulty newDifficulty, final boolean forceDifficulty) {
+        if (world.getWorldInfo().isDifficultyLocked() && !forceDifficulty) {
+            return;
+        }
+
         if (forceDifficulty) {
             // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
             if (!((WorldInfoBridge) world.getWorldInfo()).bridge$hasCustomDifficulty()) {
@@ -513,32 +762,28 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$convertMapIfNeeded(saveName);
 
-        try {
-            this.loadExistingWorldRegistrations();
-        } catch (final IOException e) {
-            SpongeCommon.getLogger().error("Exception caught registering existing Sponge worlds!", e);
-            return;
-        }
+        SpongeCommon.postEvent(new RegisterWorldEventImpl(PhaseTracker.getCauseStackManager().getCurrentCause(), SpongeCommon.getGame(), this));
 
         final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
-
-        final Path worldsDirectory = savesDirectory.resolve(saveName);
+        final Path gameDirectory = !isSinglePlayer ? savesDirectory : savesDirectory.getParent();
+        final Path levelDirectory = savesDirectory.resolve(saveName);
 
         if (!isSinglePlayer) {
             // Symlink needs special handling
             try {
-                if (Files.isSymbolicLink(worldsDirectory)) {
-                    final Path actualPathLink = Files.readSymbolicLink(worldsDirectory);
+                if (Files.isSymbolicLink(levelDirectory)) {
+                    final Path actualPathLink = Files.readSymbolicLink(levelDirectory);
                     if (Files.notExists(actualPathLink)) {
                         Files.createDirectories(actualPathLink);
                     } else if (!Files.isDirectory(actualPathLink)) {
-                        throw new IOException("Worlds directory '" + worldsDirectory + "' symlink to '" + actualPathLink + "' is not a directory!");
+                        throw new IOException(String.format("Worlds directory '%s' symlink to '%s' is not a directory!", levelDirectory,
+                                actualPathLink));
                     }
                 } else {
-                    Files.createDirectories(worldsDirectory);
+                    Files.createDirectories(levelDirectory);
                 }
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
+            } catch (final IOException ex) {
+                throw new RuntimeException(String.format("Could not process symlink for world container '%s'!", levelName), ex);
             }
 
             if (!this.server.getAllowNether()) {
@@ -547,14 +792,25 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             }
         }
 
+        final Path dimensionsDirectory = levelDirectory.resolve("dimensions");
+
+        try {
+            Files.createDirectories(dimensionsDirectory);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            this.loadExistingWorldRegistrations(dimensionsDirectory);
+        } catch (final IOException e) {
+            throw new RuntimeException("Exception caught registering existing Sponge worlds!", e);
+        }
+
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setUserMessage(new TranslationTextComponent("menu.loadingLevel"));
 
-        for (Map.Entry<ResourceKey, WorldRegistration> entry : this.pendingWorlds.entrySet()) {
+        for (final Map.Entry<ResourceKey, WorldRegistration> entry : this.pendingWorlds.entrySet()) {
             final ResourceKey key = entry.getKey();
             final WorldRegistration worldRegistration = entry.getValue();
-
-            final DimensionType dimensionType = worldRegistration.getDimensionType();
-            final SpongeDimensionType logicType = ((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType();
 
             final boolean isDefaultWorld = VanillaWorldManager.VANILLA_OVERWORLD.equals(key);
 
@@ -562,15 +818,30 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 continue;
             }
 
-            final Path worldDirectory = isDefaultWorld ? worldsDirectory : worldsDirectory.resolve(this.getDirectoryName(key));
+            final String directoryName = this.getDirectoryName(key);
+            final boolean isVanillaSubWorld = this.isVanillaSubWorld(directoryName);
 
-            MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Loading World '{}' ({}/{})", key, logicType.getKey().getFormatted(), dimensionType.getId());
+            final Path worldDirectory = isDefaultWorld ? levelDirectory : isVanillaSubWorld ? levelDirectory.resolve(directoryName) :
+                    dimensionsDirectory.resolve(key.getNamespace()).resolve(directoryName);
+
+            DimensionType dimensionType = Registry.DIMENSION_TYPE.getValue((ResourceLocation) (Object) key).orElse(null);
+            if (dimensionType == null) {
+                dimensionType = this.createDimensionType(worldRegistration.getKey(),
+                        (SpongeDimensionType) ((WorldArchetype) (Object) worldRegistration.getDefaultSettings()).getDimensionType(),
+                        worldDirectory.getFileName().toString(), ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE).accessor$getNextFreeId());
+            }
+
+            final SpongeDimensionType logicType = ((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType();
+
+            MinecraftServerAccessor.accessor$getLogger().info("Loading World '{}' ({})", key, logicType.getKey().getFormatted());
+
+            final boolean configExists = SpongeGameConfigs.doesWorldConfigExist(key);
 
             final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(logicType, key);
             if (!isDefaultWorld) {
                 if (!configAdapter.get().getWorld().isWorldEnabled()) {
-                    MinecraftServerAccessor_Vanilla.accessor$getLogger().warn("World '{}' ({}/{}) has been disabled in the configuration. "
-                            + "World will not be loaded...", key, logicType.getKey().getFormatted(), dimensionType.getId());
+                    SpongeCommon.getLogger().warn("World '{}' ({}) has been disabled in the configuration. World will not be loaded...", key,
+                            logicType.getKey().getFormatted());
                     continue;
                 }
             }
@@ -582,37 +853,46 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 saveFormat = this.server.getActiveAnvilConverter();
                 saveHandler = saveFormat.getSaveLoader(saveName, this.server);
             } else {
-                saveFormat = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("backups"),
-                        this.server.getDataFixer());
-                saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(key), this.server);
+                saveFormat = new SaveFormat(worldDirectory.getParent(), gameDirectory.resolve("backups"), this.server.getDataFixer());
+                saveHandler = saveFormat.getSaveLoader(directoryName, this.server);
             }
 
             WorldInfo worldInfo = saveHandler.loadWorldInfo();
-            if (defaultSettings == null) {
-                defaultSettings = worldRegistration.getDefaultSettings();
-            }
 
             if (worldInfo == null) {
+
+                if (worldRegistration.getDefaultSettings() != null) {
+                    defaultSettings = worldRegistration.getDefaultSettings();
+                }
+
                 // Demo code does not run on SinglePlayer
+
+                // The pass off of the config adapter here is done because creation of a WorldInfo that isn't from disk will use the
+                // WorldSettings in the constructor to set the values. Which will then trigger the creation of the config handle
+                // which will be a different handle than the above adapter. Easiest is to store the reference on the settings and set it
+                // during population of the WorldInfo from the WorldSettings
+
+                // Additionally, if we have no WorldInfo but we do have a config file, it is likely the admin decided to regenerate their
+                // world. We want to respect that file. Setting this flag will cause WorldSettings to skip populating the WorldInfo with
+                // these Sponge-specific default settings
+
                 if (isSinglePlayer) {
-                    worldInfo = new WorldInfo(defaultSettings, levelName);
+                    ((WorldSettingsBridge) (Object) defaultSettings).bridge$setInfoConfigAdapter(configAdapter);
+                    ((WorldSettingsBridge) (Object) defaultSettings).bridge$setConfigExists(configExists);
+                    worldInfo = new WorldInfo(defaultSettings, isDefaultWorld ? levelName : this.getDirectoryName(key));
                 } else {
                     if (defaultSettings == null) {
                         defaultSettings = this.createDefaultSettings(defaultSettings, isDefaultWorld, seed, type, generatorOptions);
-                        if (isDefaultWorld) {
-                            defaultSettings.setGeneratorOptions(generatorOptions);
-                            if (((MinecraftServerAccessor_Vanilla) this.server).accessor$getEnableBonusChest()) {
-                                defaultSettings.enableBonusChest();
-                            }
-                        }
                     }
 
-                    worldInfo = new WorldInfo(defaultSettings, isDefaultWorld ? saveName : this.getDirectoryName(key));
+                    ((WorldSettingsBridge) (Object) defaultSettings).bridge$setInfoConfigAdapter(configAdapter);
+                    ((WorldSettingsBridge) (Object) defaultSettings).bridge$setConfigExists(configExists);
+                    worldInfo = new WorldInfo(defaultSettings, isDefaultWorld ? levelName : this.getDirectoryName(key));
                 }
+                ((ResourceKeyBridge) worldInfo).bridge$setKey(worldRegistration.getKey());
+
                 ((WorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
 
-                ((ResourceKeyBridge) worldInfo).bridge$setKey(worldRegistration.getKey());
-                ((WorldInfoBridge) worldInfo).bridge$setDimensionId(dimensionType);
                 ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
 
                 SpongeCommon.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(
@@ -625,7 +905,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 // This may be an existing world created before Sponge was installed, handle accordingly
                 if (((ResourceKeyBridge) worldInfo).bridge$getKey() == null) {
                     ((ResourceKeyBridge) worldInfo).bridge$setKey(worldRegistration.getKey());
-                    ((WorldInfoBridge) worldInfo).bridge$setDimensionId(dimensionType);
                     ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
                 }
 
@@ -647,8 +926,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             this.allInfos.put(key, worldInfo);
 
             if (!isDefaultWorld && !((WorldProperties) worldInfo).doesLoadOnStartup()) {
-                SpongeCommon.getLogger().warn("World '{}' ({}/{}) has been set to not load on startup in the "
-                        + "configuration. Skipping...", key, logicType.getKey().getFormatted(), dimensionType.getId());
+                SpongeCommon.getLogger().warn("World '{}' ({}) has been set to not load on startup in the configuration. Skipping...", key,
+                        logicType.getKey().getFormatted());
                 continue;
             }
 
@@ -673,22 +952,32 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             this.server.setDifficultyForAllWorlds(this.server.getDifficulty(), true);
         }
 
-        // TODO May not be the best spot for this...
         ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().load();
+    }
+
+    private void clearCustomWorldDimensions() {
+        final List<DimensionType> customDimensions = new ArrayList<>();
+        for (DimensionType next : Registry.DIMENSION_TYPE) {
+            if ((next.getId() + 1) > 2) {
+                customDimensions.add(next);
+            }
+        }
+
+        ((SimpleRegistryBridge) Registry.DIMENSION_TYPE).bridge$removeAll(customDimensions);
     }
 
     private void loadSpawnChunks(final ServerWorld serverWorld, final IChunkStatusListener chunkStatusListener) {
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setUserMessage(new TranslationTextComponent("menu.generatingTerrain"));
         final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) serverWorld;
-        MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Preparing start region for world '{}' ({}/{})", apiWorld.getKey(),
-                apiWorld.getProperties().getDimensionType().getKey(), serverWorld.getDimension().getType().getId());
+        MinecraftServerAccessor.accessor$getLogger().info("Preparing start region for world '{}' ({})", apiWorld.getKey(),
+                apiWorld.getProperties().getDimensionType().getKey());
         final BlockPos spawnPoint = serverWorld.getSpawnPoint();
         final ChunkPos spawnChunkPos = new ChunkPos(spawnPoint);
         chunkStatusListener.start(spawnChunkPos);
         final ServerChunkProvider chunkProvider = serverWorld.getChunkProvider();
         chunkProvider.getLightManager().func_215598_a(500);
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setServerTime(Util.milliTime());
-        chunkProvider.registerTicket(TicketType.START, spawnChunkPos, 11, Unit.INSTANCE);
+        chunkProvider.registerTicket(VanillaWorldManager.SPAWN_CHUNKS, spawnChunkPos, 11, (ResourceLocation) (Object) apiWorld.getKey());
 
         while (chunkProvider.getLoadedChunksCount() != 441) {
             ((MinecraftServerAccessor_Vanilla) this.server).accessor$setServerTime(Util.milliTime() + 10L);
@@ -713,6 +1002,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$runScheduledTasks();
         chunkStatusListener.stop();
         chunkProvider.getLightManager().func_215598_a(5);
+
+        // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
+        if (!((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesKeepSpawnLoaded()) {
+            chunkProvider.releaseTicket(VanillaWorldManager.SPAWN_CHUNKS, spawnChunkPos, 11, (ResourceLocation) (Object) apiWorld.getKey());
+        }
     }
 
     private DimensionType createDimensionType(final ResourceKey key, final SpongeDimensionType logicType, final String worldDirectory,
@@ -725,62 +1019,43 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         return registeredType;
     }
 
-    private void loadExistingWorldRegistrations() throws IOException {
-        if (Files.notExists(this.savesDirectory)) {
-            return;
-        }
+    private void loadExistingWorldRegistrations(final Path dimensionsDirectory) throws IOException {
+        for (final Path namespacedDirectory : Files.walk(dimensionsDirectory, 1).filter(o -> !dimensionsDirectory.equals(o) && Files.isDirectory(o)).collect(Collectors.toList())) {
+            for (final Path valueDirectory : Files.walk(namespacedDirectory, 1).filter(i -> !namespacedDirectory.equals(i) && Files.exists(i.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT))).collect(Collectors.toList()))
+            {
+                final ResourceKey key = ResourceKey.of(namespacedDirectory.getFileName().toString(), valueDirectory.getFileName().toString());
 
-        for (Path path : Files.walk(this.savesDirectory, 1).filter(path -> !this.savesDirectory.equals(path) && Files.isDirectory(path) && !this.isVanillaSubLevel(path.getFileName().toString()) && Files.exists(path.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT))).collect(Collectors.toList())) {
-            final String worldDirectory = path.getFileName().toString();
-            final CompoundNBT worldCompound;
-            try {
-                worldCompound = CompressedStreamTools.readCompressed(new FileInputStream(path.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT).toFile()));
-            } catch (final IOException ex) {
-                SpongeCommon.getLogger().error("Attempt to load sponge level data for world '{}' failed!", worldDirectory, ex);
-                continue;
+                final CompoundNBT spongeCompound =
+                        CompressedStreamTools.readCompressed(Files.newInputStream(valueDirectory.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT)));
+
+                final CompoundNBT spongeDataCompound = spongeCompound.getCompound(Constants.Sponge.SPONGE_DATA);
+
+                final String rawLogicType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
+
+                SpongeDimensionType logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.spongepowered
+                        .api.world.dimension.DimensionType.class, ResourceKey.resolve(rawLogicType)).orElse(null);
+
+                if (logicType == null) {
+                    SpongeCommon.getLogger().warn("World '{}' has an unknown dimension type '{}'. Falling back to '{}'.",
+                            valueDirectory.getFileName().toString(), rawLogicType, DimensionTypes.OVERWORLD.get().getKey());
+                    logicType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
+                }
+
+                final DimensionType registeredType = this.createDimensionType(key, logicType, valueDirectory.getFileName().toString(),
+                        ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE).accessor$getNextFreeId());
+
+                final WorldRegistration existingRegistration = this.pendingWorlds.get(key);
+                if (existingRegistration != null) {
+                    existingRegistration.setDimensionType(registeredType);
+                } else {
+                    this.pendingWorlds.put(key, new WorldRegistration(key, registeredType, null));
+                }
             }
-            final CompoundNBT spongeDataCompound = worldCompound.getCompound(Constants.Sponge.SPONGE_DATA);
-            final String rawKey = spongeDataCompound.getString(Constants.Sponge.World.KEY);
-            final ResourceKey key;
-            if (rawKey.isEmpty()) {
-                key = ResourceKey.sponge(worldDirectory.toLowerCase());
-                SpongeCommon.getLogger().warn("World '{}' was created on an older Sponge version (before Minecraft 1.15) which had no concept of "
-                        + "which plugin created it. To compensate, this world will be created with the key '{}'. Please specify this key to any plugins"
-                        + " that need to know of this world.", worldDirectory, key);
-            } else {
-                key = ResourceKey.resolve(rawKey);
-            }
-            if (this.pendingWorlds.containsKey(key)) {
-                SpongeCommon.getLogger().error("Duplicate World '{}' is being loaded from '{}'. Skipping...", key, worldDirectory);
-                continue;
-            }
-
-            final int dimensionId = spongeDataCompound.getInt(Constants.Sponge.World.DIMENSION_ID);
-            DimensionType registeredType = DimensionType.getById(dimensionId + 1);
-            if (registeredType != null) {
-                SpongeCommon.getLogger().error("Duplicate id '{}' is being loaded by '{}' but was "
-                        + "previously loaded by '{}'. Skipping...", dimensionId, worldDirectory, DimensionType.getKey(registeredType).getPath());
-                continue;
-            }
-
-            final String rawLogicType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
-
-            SpongeDimensionType logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.spongepowered
-                    .api.world.dimension.DimensionType.class, ResourceKey.resolve(rawLogicType)).orElse(null);
-
-            if (logicType == null) {
-                SpongeCommon.getLogger().warn("World '{}' has an unknown dimension type '{}'. Falling back to '{}'.",
-                        worldDirectory, rawLogicType, DimensionTypes.OVERWORLD.get().getKey());
-                logicType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
-            }
-
-            registeredType = this.createDimensionType(key, logicType, worldDirectory, dimensionId + 1);
-            this.pendingWorlds.put(key, new WorldRegistration(key, registeredType, null));
         }
     }
 
-    private boolean isVanillaSubLevel(final String directoryName) {
-        return "DIM-1".equals(directoryName) || "DIM1" .equals(directoryName);
+    private boolean isVanillaSubWorld(final String directoryName) {
+        return "DIM-1".equals(directoryName) || "DIM1".equals(directoryName);
     }
 
     private WorldSettings createDefaultSettings(@Nullable WorldSettings providedSettings, final boolean isDefaultWorld, final long seed,
@@ -788,7 +1063,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         // Pure fresh Vanilla worlds situation (plugins registering worlds to load before now *must* give us an archetype)
         if (providedSettings == null) {
             if (this.server.isDemo()) {
-                return MinecraftServer.DEMO_WORLD_SETTINGS;
+                providedSettings = MinecraftServer.DEMO_WORLD_SETTINGS;
             } else {
                 providedSettings =
                         new WorldSettings(seed, this.server.getGameType(), this.server.canStructuresSpawn(), this.server.isHardcore(), worldType);
@@ -813,11 +1088,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             serverWorld.getWorldInfo().setGameType(this.server.getGameType());
         }
 
-        // Initialize scoreboard data. This will hook to the ServerScoreboard, needs to be made multi-world aware
-        ((MinecraftServerAccessor_Vanilla) this.server).accessor$func_213204_a(serverWorld.getSavedData());
-
-        // TODO Dualspiral, look this over...Per world commands?
         if (isDefaultWorld) {
+            // Initialize scoreboard data. This will hook to the ServerScoreboard, needs to be made multi-world aware
+            ((MinecraftServerAccessor_Vanilla) this.server).accessor$func_213204_a(serverWorld.getSavedData());
+
             ((MinecraftServerAccessor) this.server).accessor$setfield_229733_al(new CommandStorage(serverWorld.getSavedData()));
         }
 
@@ -828,8 +1102,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 if (serverWorld.getWorldInfo().getGenerator() == WorldType.DEBUG_ALL_BLOCK_STATES) {
                     ((MinecraftServerAccessor_Vanilla) this.server).accessor$applyDebugWorldInfo(serverWorld.getWorldInfo());
                 }
-            } catch (Throwable throwable) {
-                final CrashReport crashReport = CrashReport.makeCrashReport(throwable, "Exception initializing world '" + worldDirectory + "'");
+            } catch (final Throwable throwable) {
+                final CrashReport crashReport = CrashReport.makeCrashReport(throwable, "Exception initializing world '" + worldDirectory
+                        + "'");
                 try {
                     serverWorld.fillCrashReport(crashReport);
                 } catch (Throwable ignore) {
@@ -851,11 +1126,27 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             ((ServerWorldBridge) serverWorld).bridge$getBossBarManager().read(serverWorld.getWorldInfo().getCustomBossEvents());
         }
 
+        final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) serverWorld;
         SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                (org.spongepowered.api.world.server.ServerWorld) serverWorld));
+                apiWorld));
 
-        if (isDefaultWorld || ((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesGenerateSpawnOnLoad()) {
+        final boolean generateSpawnOnLoad = ((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesGenerateSpawnOnLoad() || isDefaultWorld;
+
+        if (generateSpawnOnLoad) {
             this.loadSpawnChunks(serverWorld, listener);
+        } else {
+            serverWorld.getChunkProvider().registerTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(apiWorld.getProperties().getSpawnPosition()
+                            .getX(), apiWorld.getProperties().getSpawnPosition().getZ()), 11, (ResourceLocation) (Object) apiWorld.getKey());
+        }
+    }
+
+    private boolean isDirectoryEmpty(final Path directory) throws IOException {
+        if (!Files.isDirectory(directory)) {
+            return false;
+        }
+
+        try (final DirectoryStream<Path> dir = Files.newDirectoryStream(directory)) {
+            return !dir.iterator().hasNext();
         }
     }
 }

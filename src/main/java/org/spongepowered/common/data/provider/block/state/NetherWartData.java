@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.NetherWartBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class NetherWartData {
 
@@ -40,9 +40,9 @@ public final class NetherWartData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, NetherWartBlock.AGE))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, NetherWartBlock.AGE))
                         .get(h -> h.get(NetherWartBlock.AGE))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, NetherWartBlock.AGE))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, NetherWartBlock.AGE))
                         .supports(h -> h.getBlock() instanceof NetherWartBlock);
     }
     // @formatter:on

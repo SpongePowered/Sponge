@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.FarmlandBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class FarmlandData {
 
@@ -40,9 +40,9 @@ public final class FarmlandData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.MOISTURE)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.MOISTURE, FarmlandBlock.MOISTURE))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.MOISTURE, FarmlandBlock.MOISTURE))
                         .get(h -> h.get(FarmlandBlock.MOISTURE))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, FarmlandBlock.MOISTURE))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, FarmlandBlock.MOISTURE))
                         .supports(h -> h.getBlock() instanceof FarmlandBlock);
     }
     // @formatter:on

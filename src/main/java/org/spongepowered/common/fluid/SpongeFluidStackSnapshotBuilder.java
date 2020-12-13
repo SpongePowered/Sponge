@@ -27,6 +27,7 @@ package org.spongepowered.common.fluid;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Key;
@@ -41,38 +42,39 @@ import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.common.util.Constants;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidStackSnapshot> implements FluidStackSnapshot.Builder {
+public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@NonNull FluidStackSnapshot> implements FluidStackSnapshot.Builder {
 
     FluidType fluidType;
     int volume;
     @Nullable DataView container;
-    @Nullable LinkedHashMap<Key<?>, Object> keyValues;
+    @Nullable LinkedHashMap<Key<@NonNull ?>, Object> keyValues;
 
     public SpongeFluidStackSnapshotBuilder() {
         super(FluidStackSnapshot.class, 1);
     }
 
     @Override
-    public FluidStackSnapshot.Builder fluid(FluidType fluidType) {
-        this.fluidType = checkNotNull(fluidType, "FluidType cannot be null!");
+    public FluidStackSnapshot.@NonNull Builder fluid(@NonNull final FluidType fluidType) {
+        this.fluidType = Objects.requireNonNull(fluidType, "FluidType cannot be null!");
         return this;
     }
 
     @Override
-    public FluidStackSnapshot.Builder volume(int volume) {
+    public FluidStackSnapshot.@NonNull Builder volume(final int volume) {
         this.volume = volume;
         return this;
     }
 
     @Override
-    public FluidStackSnapshot.Builder from(FluidStack fluidStack) {
+    public FluidStackSnapshot.@NonNull Builder from(@NonNull final FluidStack fluidStack) {
         this.fluidType = fluidStack.getFluid();
         this.volume = fluidStack.getVolume();
-        DataContainer datacontainer = fluidStack.toContainer();
+        final DataContainer datacontainer = fluidStack.toContainer();
         this.container = null;
         if (datacontainer.contains(Constants.Sponge.UNSAFE_NBT)) {
             this.container = datacontainer.getView(Constants.Sponge.UNSAFE_NBT).get();
@@ -81,18 +83,27 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
     }
 
     @Override
-    public FluidStackSnapshot.Builder from(FluidStackSnapshot holder) {
-        checkNotNull(holder, "FluidStackSnapshot cannot be null!");
-        this.fluidType = checkNotNull(holder.getFluid(), "Invalid FluidStackSnapshot! FluidType cannot be null!");
-        return null;
+    public FluidStackSnapshot.@NonNull Builder from(@NonNull final FluidStackSnapshot holder) {
+        Objects.requireNonNull(holder, "FluidStackSnapshot cannot be null!");
+        if (!(holder instanceof SpongeFluidStackSnapshot)) {
+            throw new IllegalArgumentException("Must be a SpongeFluidStackSnapshot");
+        }
+        this.fluidType = Objects.requireNonNull(holder.getFluid(), "Invalid FluidStackSnapshot! FluidType cannot be null!");
+        this.container = holder.toContainer();
+        this.keyValues = new LinkedHashMap<>(((SpongeFluidStackSnapshot) holder).getMappedValues());
+        return this;
     }
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public FluidStackSnapshot build() {
-        checkState(this.fluidType != null, "FluidType cannot be null!");
-        checkState(this.volume >= 0, "The fluid volume must be at least 0!");
-        SpongeFluidStackSnapshot snapshot = new SpongeFluidStackSnapshot(this);
+        if (this.fluidType == null) {
+            throw new IllegalStateException("FluidType cannot be null!");
+        }
+        if (this.volume < 0) {
+            throw new IllegalStateException("The fluid volume must be at least 0!");
+        }
+        final SpongeFluidStackSnapshot snapshot = new SpongeFluidStackSnapshot(this);
         if (this.keyValues != null) {
             final FluidStack stack = snapshot.createStack();
             this.keyValues.forEach((k, v) -> stack.offer((Key) k, v));
@@ -102,7 +113,8 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
     }
 
     @Override
-    protected Optional<FluidStackSnapshot> buildContent(DataView container) throws InvalidDataException {
+    @NonNull
+    protected Optional<FluidStackSnapshot> buildContent(@NonNull final DataView container) throws InvalidDataException {
         try {
             if (container.contains(Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME)) {
                 final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
@@ -112,7 +124,7 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
                 }
                 final FluidType fluidType = type.get();
                 final int volume = container.getInt(Constants.Fluids.FLUID_VOLUME).get();
-                SpongeFluidStackSnapshotBuilder builder = new SpongeFluidStackSnapshotBuilder();
+                final SpongeFluidStackSnapshotBuilder builder = new SpongeFluidStackSnapshotBuilder();
                 builder.fluid(fluidType)
                         .volume(volume);
                 if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
@@ -120,14 +132,14 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
                 }
                 return Optional.of(builder.build());
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new InvalidDataException("Something went wrong deserializing.", e);
         }
         return Optional.empty();
     }
 
     @Override
-    public FluidStackSnapshot.Builder reset() {
+    public FluidStackSnapshot.@NonNull Builder reset() {
         this.fluidType = null;
         this.volume = 0;
         this.container = null;
@@ -135,7 +147,7 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
     }
 
     @Override
-    public <V> FluidStackSnapshot.Builder add(Key<? extends Value<V>> key, V value) {
+    public <V> FluidStackSnapshot.@NonNull Builder add(@NonNull final Key<@NonNull? extends Value<V>> key, @NonNull final V value) {
         if (this.keyValues == null) {
             this.keyValues = new LinkedHashMap<>();
         }

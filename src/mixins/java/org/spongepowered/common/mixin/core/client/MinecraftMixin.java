@@ -167,4 +167,9 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     public ClientType bridge$getClientType() {
         return ClientType.SPONGE_VANILLA;
     }
+
+    @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;shutdownServerExecutor()V"))
+    private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
+        SpongeCommon.getGame().getAsyncScheduler().close();
+    }
 }

@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,8 @@ import java.util.List;
 @ConfigSerializable
 public class BrokenModCategory {
 
-    @Setting(value = "broken-network-handler-mods", comment = "A list of mod ids that have broken network handlers (they interact with the game from a Netty handler thread).\n"
+    @Setting("broken-network-handler-mods")
+    @Comment("A list of mod ids that have broken network handlers (they interact with the game from a Netty handler thread).\n"
             + "All network handlers from a forcibly scheduled to run on the main thread.\n"
             + "Note that this setting should be considered a last resort, and should only be used as a stopgap measure while waiting for a mod to properly fix the issue.")
     private List<String> brokenNetworkHandlerMods = new ArrayList<>();

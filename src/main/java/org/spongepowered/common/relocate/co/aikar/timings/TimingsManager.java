@@ -45,7 +45,7 @@ public final class TimingsManager {
     static final Map<TimingIdentifier, TimingHandler> TIMING_MAP = Collections.synchronizedMap(
             LoadingMap.newHashMap((id) -> (id.protect ? new UnsafeTimingHandler(id) : new TimingHandler(id)), 256, .5F));
     public static final FullServerTickHandler FULL_SERVER_TICK = new FullServerTickHandler();
-    public static final TimingHandler TIMINGS_TICK = SpongeTimingsFactory.ofSafe("Timings Tick", FULL_SERVER_TICK);
+    public static final TimingHandler TIMINGS_TICK = SpongeTimingsFactory.ofSafe("Timings Tick", TimingsManager.FULL_SERVER_TICK);
     public static final Timing DATA_GROUP_HANDLER = SpongeTimingsFactory.ofSafe("Data");
     public static final Timing MOD_EVENT_HANDLER = SpongeTimingsFactory.ofSafe("Mod Events");
     public static final Timing PLUGIN_SCHEDULER_HANDLER = SpongeTimingsFactory.ofSafe("Plugin Scheduler");
@@ -71,7 +71,7 @@ public final class TimingsManager {
      * Resets all timing data on the next tick
      */
     static void reset() {
-        needsFullReset = true;
+        TimingsManager.needsFullReset = true;
     }
 
     /**
@@ -79,9 +79,9 @@ public final class TimingsManager {
      */
     static void tick() {
         if (Timings.isTimingsEnabled()) {
-            boolean violated = FULL_SERVER_TICK.isViolated();
+            boolean violated = TimingsManager.FULL_SERVER_TICK.isViolated();
 
-            for (TimingHandler handler : HANDLERS) {
+            for (TimingHandler handler : TimingsManager.HANDLERS) {
                 if (handler.isSpecial()) {
                     // We manually call this
                     continue;
@@ -97,51 +97,51 @@ public final class TimingsManager {
 
     static void stopServer() {
         Timings.setTimingsEnabled(false);
-        recheckEnabled();
+        TimingsManager.recheckEnabled();
     }
 
     static void recheckEnabled() {
-        synchronized (TIMING_MAP) {
-            for (TimingHandler timings : TIMING_MAP.values()) {
+        synchronized (TimingsManager.TIMING_MAP) {
+            for (TimingHandler timings : TimingsManager.TIMING_MAP.values()) {
                 timings.checkEnabled();
             }
         }
-        needsRecheckEnabled = false;
+        TimingsManager.needsRecheckEnabled = false;
     }
 
     static void resetTimings() {
-        if (needsFullReset) {
+        if (TimingsManager.needsFullReset) {
             // Full resets need to re-check every handlers enabled state
             // Timing map can be modified from async so we must sync on it.
-            synchronized (TIMING_MAP) {
-                for (TimingHandler timings : TIMING_MAP.values()) {
+            synchronized (TimingsManager.TIMING_MAP) {
+                for (TimingHandler timings : TimingsManager.TIMING_MAP.values()) {
                     timings.reset(true);
                 }
             }
-            if (timingStart != 0) {
+            if (TimingsManager.timingStart != 0) {
                 SpongeCommon.getLogger().info("Timings reset");
             }
-            HISTORY.clear();
-            needsFullReset = false;
-            needsRecheckEnabled = false;
-            timingStart = System.currentTimeMillis();
+            TimingsManager.HISTORY.clear();
+            TimingsManager.needsFullReset = false;
+            TimingsManager.needsRecheckEnabled = false;
+            TimingsManager.timingStart = System.currentTimeMillis();
         } else {
             // Soft resets only need to act on timings that have done something
             // Handlers can only be modified on main thread.
-            for (TimingHandler timings : HANDLERS) {
+            for (TimingHandler timings : TimingsManager.HANDLERS) {
                 timings.reset(false);
             }
         }
 
-        HANDLERS.clear();
-        MINUTE_REPORTS.clear();
+        TimingsManager.HANDLERS.clear();
+        TimingsManager.MINUTE_REPORTS.clear();
 
         TimingHistory.resetTicks(true);
-        historyStart = System.currentTimeMillis();
+        TimingsManager.historyStart = System.currentTimeMillis();
     }
 
     static TimingHandler getHandler(String group, String name, Timing parent, boolean protect) {
-        return TIMING_MAP.get(new TimingIdentifier(group, name, parent, protect));
+        return TimingsManager.TIMING_MAP.get(new TimingIdentifier(group, name, parent, protect));
     }
 
     // TODO Revise this

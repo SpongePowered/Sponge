@@ -25,75 +25,82 @@
 package org.spongepowered.common.world.schematic;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.HashBiMap;
 import net.minecraft.block.Block;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
+import org.spongepowered.common.util.MemoizedSupplier;
 
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.OptionalInt;
 import java.util.function.IntFunction;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
+import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
+public class GlobalPalette<T> implements Palette.Immutable<T> {
 
-public class GlobalPalette<T extends CatalogType> implements Palette<T> {
 
-    @Nullable
-    private static Palette<BlockState> blockPalette;
-    @Nullable
-    private static GlobalPalette<BiomeType> biomePalette;
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static final Supplier<GlobalPalette<BlockState>> GLOBAL_BLOCK_STATE_PALETTE = MemoizedSupplier.memoize(
+        () -> new GlobalPalette<>(
+            PaletteTypes.GLOBAL_BLOCK_PALETTE.get(),
+            () -> (Stream<BlockState>) (Stream) Registry.BLOCK.stream()
+                .flatMap(block -> block.getStateContainer().getValidStates().stream()),
+            (type) -> Block.BLOCK_STATE_IDS.get((net.minecraft.block.BlockState) type),
+            (id) -> (BlockState) Block.BLOCK_STATE_IDS.getByValue(id),
+            BlockState.class
+        )
+    );
 
-    private final Function<T, Integer> typeToInt;
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static final Supplier<GlobalPalette<BiomeType>> GLOBAL_BIOME_PALETTE = MemoizedSupplier.memoize(() -> new GlobalPalette<>(
+        PaletteTypes.GLOBAL_BIOME_PALETTE.get(),
+        () -> (Stream<BiomeType>) (Stream) Registry.BIOME.stream(),
+        (type) -> Registry.BIOME.getId((Biome) (type instanceof VirtualBiomeType ? ((VirtualBiomeType) type).getPersistedType() : type)),
+        (id) -> (BiomeType) Registry.BIOME.getByValue(id),
+        BiomeType.class
+    ));
+
+
+    private final ToIntFunction<T> typeToInt;
     private final IntFunction<T> intToType;
     private final PaletteType<T> paletteType;
     private final Class<T> catalogType;
-    private final int length;
+    private final IntSupplier length;
+    private final Supplier<Stream<T>> catalogSupplier;
 
-    private GlobalPalette(final PaletteType<T> paletteType, final Function<T, Integer> map, final IntFunction<T> identity, final Class<T> catalogType) {
-        int highest = 0;
-        for (final T type : Sponge.getRegistry().getCatalogRegistry().getAllOf(catalogType)) {
-            final int id = map.apply(type);
-            if (id > highest) {
-                highest = id;
-            }
-        }
-        this.length = highest;
+    private GlobalPalette(
+        final PaletteType<T> paletteType,
+        final Supplier<Stream<T>> catalogSupplier,
+        final ToIntFunction<T> map,
+        final IntFunction<T> identity,
+        final Class<T> catalogType
+    ) {
+
+        this.length = () -> catalogSupplier.get().mapToInt(map).max().orElse(0);
         this.typeToInt = map;
         this.intToType = identity;
         this.paletteType = paletteType;
         this.catalogType = catalogType;
+        this.catalogSupplier = catalogSupplier;
     }
 
-    @SuppressWarnings("deprecation")
     public static Palette<BlockState> getBlockPalette() {
-        if (blockPalette == null) {
-            blockPalette = new GlobalPalette<>(PaletteTypes.GLOBAL_BLOCKS.get(),
-                (type) -> Block.BLOCK_STATE_IDS.get((net.minecraft.block.BlockState) type),
-                (id) -> (BlockState) Block.BLOCK_STATE_IDS.getByValue(id),
-                BlockState.class);
-        }
-        return blockPalette;
+        return GlobalPalette.GLOBAL_BLOCK_STATE_PALETTE.get();
     }
 
     public static GlobalPalette<BiomeType> getBiomePalette() {
-        if (biomePalette == null) {
-            biomePalette = new GlobalPalette<>(PaletteTypes.GLOBAL_BIOMES.get(),
-                (type) -> Registry.BIOME.getId((Biome) (type instanceof VirtualBiomeType ? ((VirtualBiomeType) type).getPersistedType() : type)),
-                (id) -> (BiomeType) Registry.BIOME.getByValue(id),
-                BiomeType.class
-                );
-
-        }
-        return biomePalette;
+        return GlobalPalette.GLOBAL_BIOME_PALETTE.get();
     }
 
     @Override
@@ -103,17 +110,12 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
 
     @Override
     public int getHighestId() {
-        return this.length;
+        return this.length.getAsInt();
     }
 
     @Override
-    public Optional<Integer> get(final T type) {
-        return Optional.of(this.typeToInt.apply(type));
-    }
-
-    @Override
-    public int getOrAssign(final T state) {
-        return this.typeToInt.apply(state);
+    public OptionalInt get(final T type) {
+        return OptionalInt.of(this.typeToInt.applyAsInt(type));
     }
 
     @Override
@@ -122,13 +124,17 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
     }
 
     @Override
-    public boolean remove(final T state) {
-        throw new UnsupportedOperationException("Cannot remove blockstates from the global palette");
+    public Stream<T> stream() {
+        return this.catalogSupplier.get();
     }
 
     @Override
-    public Collection<T> getEntries() {
-        return Sponge.getRegistry().getCatalogRegistry().getAllOf(this.catalogType);
+    public Mutable<T> asMutable() {
+        final HashBiMap<T, Integer> copy = HashBiMap.create(this.length.getAsInt());
+        this.catalogSupplier.get()
+            .map(it -> Tuple.of(it, this.typeToInt.applyAsInt(it)))
+            .forEach(tuple -> copy.put(tuple.getFirst(), tuple.getSecond()));
+        return new MutableBimapPalette<T>(this.paletteType, copy);
     }
 
     @Override
@@ -147,8 +153,8 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
         }
         final GlobalPalette other = (GlobalPalette) obj;
         return Objects.equals(this.paletteType, other.paletteType)
-               && Objects.equals(this.catalogType, other.catalogType)
-               && Objects.equals(this.length, other.length);
+            && Objects.equals(this.catalogType, other.catalogType)
+            && Objects.equals(this.length.getAsInt(), other.length.getAsInt());
     }
 
     @Override
@@ -156,7 +162,7 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
         return MoreObjects.toStringHelper(this)
             .add("paletteType", this.paletteType)
             .add("catalogType", this.catalogType)
-            .add("length", this.length)
+            .add("length", this.length.getAsInt())
             .toString();
     }
 }

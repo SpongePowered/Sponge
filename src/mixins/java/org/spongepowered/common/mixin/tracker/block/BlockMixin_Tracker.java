@@ -39,11 +39,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.block.TrackedBlockBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
-import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.util.ReflectionUtil;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(Block.class)
@@ -54,26 +53,10 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
         throw new IllegalStateException("untransformed shadow");
     }
     // @formatter:on
-    private boolean tracker$hasNeighborLogicOverridden = false;
+    private final boolean tracker$hasNeighborLogicOverridden = ReflectionUtil.isNeighborChangedDeclared(this.getClass());
+
     @Nullable private static EffectTransactor tracker$effectTransactorForDrops = null;
 
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void tracker$initializeTrackerOptimizations(final Block.Properties properties, final CallbackInfo ci) {
-        // neighborChanged
-        try {
-            final String mapping = Launch.getInstance().isDeveloperEnvironment() ? "neighborChanged" : "func_220069_a";
-            final Class<?>[] argTypes = {net.minecraft.block.BlockState.class, net.minecraft.world.World.class, BlockPos.class, Block.class, BlockPos.class, boolean.class};
-            final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            this.tracker$hasNeighborLogicOverridden = !clazz.equals(Block.class);
-        } catch (final Throwable e) {
-            if (e instanceof NoClassDefFoundError) {
-                // fall back to checking if class equals Block.
-                // Fixes https://github.com/SpongePowered/SpongeForge/issues/2770
-                //noinspection EqualsBetweenInconvertibleTypes
-                this.tracker$hasNeighborLogicOverridden = !this.getClass().equals(Block.class);
-            }
-        }
-    }
 
     @Override
     public boolean bridge$overridesNeighborNotificationLogic() {
@@ -100,7 +83,7 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
     )
     private static void tracker$cancelOnBlockRestoration(final CallbackInfo ci) {
         if (Thread.currentThread() == PhaseTracker.SERVER.getSidedThread()) {
-            if (PhaseTracker.SERVER.getPhaseContext().state.isRestoring()) {
+            if (PhaseTracker.SERVER.getPhaseContext().isRestoring()) {
                 ci.cancel();
             }
         }
@@ -118,7 +101,7 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if(!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+        if(!context.recordsEntitySpawns()) {
             return;
         }
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
@@ -138,7 +121,7 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if (!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+        if (!context.recordsEntitySpawns()) {
             return;
         }
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
@@ -157,7 +140,7 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if(!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+        if(!context.recordsEntitySpawns()) {
             return;
         }
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
@@ -179,7 +162,7 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if(!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+        if(!context.recordsEntitySpawns()) {
             return;
         }
         context.getTransactor().completeBlockDrops(BlockMixin_Tracker.tracker$effectTransactorForDrops);

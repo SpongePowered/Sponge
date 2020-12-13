@@ -29,12 +29,11 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
 
 public final class ChatFormatter {
 
@@ -47,7 +46,7 @@ public final class ChatFormatter {
     private static final String PATH = ".*?";
 
     private static final Pattern URL_PATTERN = Pattern.compile(
-            "(?:" + SCHEME + ")?(?:" + IP_ADDRESS + '|' + DOMAIN + ")(?::" + PORT + ")?" + PATH + "(?=[!?,;:\"']?(?:[§\\s]|$))",
+            "(?:" + ChatFormatter.SCHEME + ")?(?:" + ChatFormatter.IP_ADDRESS + '|' + ChatFormatter.DOMAIN + ")(?::" + ChatFormatter.PORT + ")?" + ChatFormatter.PATH + "(?=[!?,;:\"']?(?:[§\\s]|$))",
             Pattern.CASE_INSENSITIVE);
 
     private ChatFormatter() {
@@ -55,7 +54,7 @@ public final class ChatFormatter {
 
     public static void formatChatComponent(TranslationTextComponent component) {
         String message = (String) component.getFormatArgs()[1];
-        ITextComponent formatted = format(message);
+        ITextComponent formatted = ChatFormatter.format(message);
         if (formatted == null) {
             return;
         }
@@ -66,7 +65,7 @@ public final class ChatFormatter {
 
     @Nullable
     public static ITextComponent format(String s) {
-        Matcher matcher = URL_PATTERN.matcher(s);
+        Matcher matcher = ChatFormatter.URL_PATTERN.matcher(s);
         if (!matcher.find()) {
             return null;
         }
@@ -83,7 +82,7 @@ public final class ChatFormatter {
 
             try {
                 if (new URI(url).getScheme() == null) {
-                    url = DEFAULT_SCHEME + url;
+                    url = ChatFormatter.DEFAULT_SCHEME + url;
                 }
             } catch (URISyntaxException e) {
                 continue; // Invalid URL so just ignore it

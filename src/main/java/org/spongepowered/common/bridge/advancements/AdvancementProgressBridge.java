@@ -25,10 +25,10 @@
 package org.spongepowered.common.bridge.advancements;
 
 import net.minecraft.advancements.PlayerAdvancements;
-import org.spongepowered.api.ResourceKey;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.advancement.ImplementationBackedCriterionProgress;
+import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 
 import java.util.Map;
 
@@ -40,11 +40,11 @@ public interface AdvancementProgressBridge {
 
     void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements);
 
-    void bridge$setAdvancementKey(ResourceKey key);
+    void bridge$setAdvancementId(ResourceLocation key);
 
     void bridge$invalidateAchievedState();
 
     void bridge$updateProgressMap();
 
-    Map<AdvancementCriterion, ImplementationBackedCriterionProgress> bridge$getProgressMap();
+    Map<String, ImplementationBackedCriterionProgress> bridge$getProgressMap();
 }

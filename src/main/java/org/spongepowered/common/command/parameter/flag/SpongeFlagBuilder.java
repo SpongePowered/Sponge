@@ -49,10 +49,10 @@ public final class SpongeFlagBuilder implements Flag.Builder {
     public Flag.@NonNull Builder alias(@NonNull final String alias) {
         Objects.requireNonNull(alias, "The alias cannot be null.");
         if (alias.startsWith("-")) {
-            throw new IllegalArgumentException("Flags cannot start with a dash");
+            throw new IllegalArgumentException("Flag '" + alias + "' cannot start with a dash");
         }
         if (alias.contains(" ")) {
-            throw new IllegalArgumentException("Flags cannot contain whitespace");
+            throw new IllegalArgumentException("Flag '" + alias + "' cannot contain whitespace");
         }
         if (alias.length() == 1) {
             this.aliases.add("-" + alias.toLowerCase(Locale.ROOT));
@@ -60,6 +60,14 @@ public final class SpongeFlagBuilder implements Flag.Builder {
             this.aliases.add("--" + alias.toLowerCase(Locale.ROOT));
         }
         this.keys.add(alias.toLowerCase(Locale.ROOT));
+        return this;
+    }
+
+    @Override
+    public Flag.@NonNull Builder aliases(@NonNull final Iterable<String> aliases) {
+        for (final String alias : aliases) {
+            this.alias(alias);
+        }
         return this;
     }
 

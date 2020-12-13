@@ -28,9 +28,13 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.server.ServerWorldLightManager;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -38,6 +42,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
+import java.io.IOException;
 import java.util.Random;
 
 @Mixin(net.minecraft.world.World.class)
@@ -53,23 +58,26 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
     @Shadow public abstract Dimension shadow$getDimension();
     @Shadow public abstract WorldInfo shadow$getWorldInfo();
     @Shadow public abstract void shadow$calculateInitialSkylight();
+    @Shadow public abstract boolean shadow$isThundering();
+    @Shadow public abstract boolean shadow$isRaining();
     // @formatter on
-    private boolean impl$isDefinitelyFake = false;
-    private boolean impl$hasChecked = false;
+
+    private boolean impl$isFake = false;
+    private boolean impl$hasCheckedFakeState = false;
 
     @Override
     public boolean bridge$isFake() {
-        if (this.impl$hasChecked) {
-            return this.impl$isDefinitelyFake;
+        if (this.impl$hasCheckedFakeState) {
+            return this.impl$isFake;
         }
-        this.impl$isDefinitelyFake = this.isRemote || this.shadow$getWorldInfo() == null || this.shadow$getWorldInfo().getWorldName() == null || !(this instanceof TrackedWorldBridge);
-        this.impl$hasChecked = true;
-        return this.impl$isDefinitelyFake;
+        this.impl$isFake = this.isRemote || this.shadow$getWorldInfo() == null || this.shadow$getWorldInfo().getWorldName() == null || !(this instanceof TrackedWorldBridge);
+        this.impl$hasCheckedFakeState = true;
+        return this.impl$isFake;
     }
 
     @Override
     public void bridge$clearFakeCheck() {
-        this.impl$hasChecked = false;
+        this.impl$hasCheckedFakeState = false;
     }
 
     @Override
@@ -77,5 +85,4 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
         ((DimensionTypeBridge) this.dimension.getType()).bridge$setSpongeDimensionType(dimensionType);
         ((WorldAccessor) this).accessor$setDimension(this.dimension.getType().create((World) (Object) this));
     }
-
 }

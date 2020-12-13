@@ -29,7 +29,6 @@ import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.PrimaryPlayerInventoryAdapter;
@@ -40,18 +39,14 @@ import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLen
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("rawtypes")
 @Mixin(net.minecraft.entity.player.PlayerInventory.class)
 public abstract class PlayerInventoryMixin_Inventory_API implements PlayerInventory {
-
-    @Shadow public int currentItem;
 
     @Nullable private PrimaryPlayerInventoryAdapter api$primary;
     @Nullable private EquipmentInventoryAdapter api$equipment;
     @Nullable private EquipmentInventoryAdapter api$armor;
     @Nullable private SlotAdapter api$offhand;
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public PrimaryPlayerInventory getPrimary() {
         if (this.api$primary == null && ((InventoryAdapter) this).inventoryAdapter$getRootLens() instanceof PlayerInventoryLens) {

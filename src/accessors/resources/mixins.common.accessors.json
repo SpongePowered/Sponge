@@ -15,6 +15,7 @@
         "block.AbstractSkullBlockAccessor",
         "block.BedBlockAccessor",
         "block.BlockAccessor",
+        "block.DispenserBlockAccessor",
         "block.FireBlockAccessor",
         "block.JukeboxBlockAccessor",
         "block.PistonBlockAccessor",
@@ -163,6 +164,7 @@
         "world.GameRulesAccessor",
         "world.WorldAccessor",
         "world.WorldTypeAccessor",
+        "world.biome.BiomeContainerAccessor",
         "world.border.WorldBorderAccessor",
         "world.chunk.ChunkAccessor",
         "world.dimension.DimensionAccessor",
@@ -179,7 +181,9 @@
         "world.storage.SaveHandlerAccessor",
         "entity.item.BoatEntityAccessor",
         "entity.EntityTypeAccessor",
-        "entity.passive.fish.TropicalFishEntityAccessor"
+        "entity.passive.fish.TropicalFishEntityAccessor",
+        "network.play.server.SRespawnPacketAccessor",
+        "tileentity.TileEntityAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

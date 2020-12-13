@@ -39,10 +39,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Mixin(Entity.class)
 public interface EntityAccessor {
 
-    @Accessor("NEXT_ENTITY_ID") static AtomicInteger accessor$getNextEntityID() {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
-
     @Accessor("FLAGS") static DataParameter<Byte> accessor$getFlags() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
@@ -75,15 +71,19 @@ public interface EntityAccessor {
 
     @Accessor("inPortal") void accessor$setInPortal(boolean value);
 
+    @Accessor("lastPortalPos") void accessor$setLastPortalPos(BlockPos value);
+
+    @Accessor("timeUntilPortal") void accessor$setTimeUntilPortal(int value);
+
     @Invoker("setFlag") void accessor$setFlag(int flag, boolean set);
 
     @Invoker("getFireImmuneTicks") int accessor$getFireImmuneTicks();
 
     @Invoker("getPermissionLevel") int accessor$getPermissionLevel();
 
-    @Accessor("lastPortalPos") void accessor$setLastPortalPos(BlockPos value);
-
-    @Accessor("timeUntilPortal") void accessor$setTimeUntilPortal(int value);
-
     @Invoker("getEntityString") String accessor$getEntityString();
+
+    @Invoker("removePassenger") void accessor$removePassenger(Entity entity);
+
+    @Invoker("setRotation") void accessor$setRotation(float yaw, float pitch);
 }

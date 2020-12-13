@@ -27,11 +27,6 @@ package org.spongepowered.common.mixin.core.util.text;
 import net.kyori.adventure.text.BlockNBTComponent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
-import net.kyori.adventure.text.EntityNBTComponent;
-import net.kyori.adventure.text.KeybindComponent;
-import net.kyori.adventure.text.ScoreComponent;
-import net.kyori.adventure.text.SelectorComponent;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.NBTTextComponent;
@@ -40,6 +35,7 @@ import net.minecraft.util.text.SelectorTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.util.text.StyleBridge;
@@ -58,7 +54,7 @@ public class TextComponentMixin implements TextComponentBridge {
         if (this.bridge$adventureComponent == null) {
             ComponentBuilder<?, ?> builder = null;
             if ((Object) this instanceof StringTextComponent) {
-                builder = net.kyori.adventure.text.TextComponent.builder(((StringTextComponent) (Object) this).getText());
+                builder = Component.text().content(((StringTextComponent) (Object) this).getText());
             } else if ((Object) this instanceof TranslationTextComponent) {
                 final TranslationTextComponent $this = (TranslationTextComponent) (Object) this;
                 final List<Component> with = new ArrayList<>($this.getFormatArgs().length);
@@ -66,24 +62,24 @@ public class TextComponentMixin implements TextComponentBridge {
                     if (arg instanceof ITextComponent) {
                         with.add(SpongeAdventure.asAdventure((ITextComponent) arg));
                     } else {
-                        with.add(net.kyori.adventure.text.TextComponent.of(arg.toString()));
+                        with.add(Component.text(arg.toString()));
                     }
                 }
-                builder = TranslatableComponent.builder($this.getKey()).args(with.toArray(new Component[0]));
+                builder = Component.translatable().key($this.getKey()).args(with.toArray(new Component[0]));
             } else if ((Object) this instanceof KeybindTextComponent) {
-                builder = KeybindComponent.builder(((KeybindTextComponent) (Object) this).getKeybind());
+                builder = Component.keybind().keybind(((KeybindTextComponent) (Object) this).getKeybind());
             } else if ((Object) this instanceof ScoreTextComponent) {
                 final ScoreTextComponent $this = (ScoreTextComponent) (Object) this;
-                builder = ScoreComponent.builder($this.getName(), $this.getObjective()).value($this.getUnformattedComponentText());
+                builder = Component.score().name($this.getName()).objective($this.getObjective()).value($this.getUnformattedComponentText());
             } else if ((Object) this instanceof SelectorTextComponent) {
-                builder = SelectorComponent.builder(((SelectorTextComponent) (Object) this).getSelector());
+                builder = Component.selector().pattern(((SelectorTextComponent) (Object) this).getSelector());
             } else if ((Object) this instanceof NBTTextComponent) {
                 if ((Object) this instanceof NBTTextComponent.Block) {
                     final NBTTextComponent.Block $this = (NBTTextComponent.Block) (Object) this;
-                    builder = BlockNBTComponent.builder().pos(BlockNBTComponent.Pos.fromString($this.func_218683_k())).nbtPath($this.func_218676_i()).interpret($this.func_218677_j());
+                    builder = Component.blockNBT().pos(BlockNBTComponent.Pos.fromString($this.func_218683_k())).nbtPath($this.func_218676_i()).interpret($this.func_218677_j());
                 } else if ((Object) this instanceof NBTTextComponent.Entity) {
                     final NBTTextComponent.Entity $this = (NBTTextComponent.Entity) (Object) this;
-                    builder = EntityNBTComponent.builder().nbtPath($this.func_218676_i()).interpret($this.func_218677_j()).selector($this.func_218687_k());
+                    builder = Component.entityNBT().nbtPath($this.func_218676_i()).interpret($this.func_218677_j()).selector($this.func_218687_k());
                 }
             } else {
               throw new UnsupportedOperationException();
@@ -94,6 +90,11 @@ public class TextComponentMixin implements TextComponentBridge {
             builder.style(((StyleBridge) ((ITextComponent) this).getStyle()).bridge$asAdventure());
             this.bridge$adventureComponent = builder.build();
         }
+        return this.bridge$adventureComponent;
+    }
+
+    @Override
+    public @Nullable Component bridge$adventureComponentIfPresent() {
         return this.bridge$adventureComponent;
     }
 }

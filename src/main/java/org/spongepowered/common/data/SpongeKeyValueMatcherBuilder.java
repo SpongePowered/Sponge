@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data;
 
+import io.leangen.geantyref.GenericTypeReflector;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.KeyValueMatcher;
@@ -101,8 +102,8 @@ public final class SpongeKeyValueMatcherBuilder<V> implements KeyValueMatcher.Bu
         if (!operator.isPresent()) {
             return Optional.empty();
         }
-        final Optional<Object> value = container.getObject(
-                Constants.KeyValueMatcher.VALUE, key.get().getElementToken().getRawType());
+        final Optional<?> value = container.getObject(Constants.KeyValueMatcher.VALUE,
+                                                      GenericTypeReflector.erase(key.get().getElementType()));
         if (!value.isPresent()) {
             return Optional.empty();
         }

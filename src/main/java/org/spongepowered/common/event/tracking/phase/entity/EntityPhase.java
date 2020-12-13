@@ -30,6 +30,7 @@ public final class EntityPhase {
 
     public static final class State {
         public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
+        public static final IPhaseState<BasicEntityContext> COLLISION = new EntityCollisionState();
 
         private State() {
         }

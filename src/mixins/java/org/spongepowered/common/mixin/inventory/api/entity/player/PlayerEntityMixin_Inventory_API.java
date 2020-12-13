@@ -34,9 +34,11 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 
 @Mixin(PlayerEntity.class)
-public abstract class PlayerEntityMixin_Inventory_API implements Player {
+public abstract class PlayerEntityMixin_Inventory_API implements Player, InventoryBridge {
 
     @Shadow @Final public PlayerInventory inventory;
     @Shadow public Container openContainer;
@@ -58,4 +60,8 @@ public abstract class PlayerEntityMixin_Inventory_API implements Player {
         return (Inventory) this.shadow$getInventoryEnderChest();
     }
 
+    @Override
+    public InventoryAdapter bridge$getAdapter() {
+        return (InventoryAdapter) this.inventory;
+    }
 }

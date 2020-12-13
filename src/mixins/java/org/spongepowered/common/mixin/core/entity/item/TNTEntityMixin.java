@@ -110,7 +110,7 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
             target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
         )
     )
-    private net.minecraft.world.Explosion spongeImpl$UseSpongeExplosionInstead(final net.minecraft.world.World world,
+    private net.minecraft.world.Explosion impl$useSpongeExplosion(final net.minecraft.world.World world,
         final Entity entityIn, final double xIn, final double yIn, final double zIn, final float explosionRadius,
         final net.minecraft.world.Explosion.Mode modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()

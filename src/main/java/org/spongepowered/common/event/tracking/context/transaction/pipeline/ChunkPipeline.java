@@ -37,7 +37,6 @@ import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
-import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -50,8 +49,6 @@ import java.util.function.Supplier;
 
 public final class ChunkPipeline implements BlockPipeline {
 
-    public static final ChunkPipeline NULL_RETURN = new ChunkPipeline();
-
     private final @Nullable Supplier<Chunk> chunkSupplier;
     private final @Nullable Supplier<ServerWorld> serverWorld;
     private final @Nullable Supplier<ChunkSection> sectionSupplier;
@@ -59,10 +56,16 @@ public final class ChunkPipeline implements BlockPipeline {
     private final List<ResultingTransactionBySideEffect> chunkEffects;
     final ChangeBlock transaction;
 
-    private ChunkPipeline() {
-        this.chunkSupplier = null;
-        this.serverWorld = null;
-        this.sectionSupplier = null;
+    public static ChunkPipeline nullReturn(final Chunk chunk, final ServerWorld world) {
+        return new ChunkPipeline(chunk, world);
+    }
+
+    private ChunkPipeline(final Chunk chunk, final ServerWorld world) {
+        final WeakReference<Chunk> chunkWeakReference = new WeakReference<>(chunk);
+        this.chunkSupplier = () -> chunkWeakReference.get();
+        final WeakReference<ServerWorld> serverWorldWeakReference = new WeakReference<>(world);
+        this.serverWorld = () -> serverWorldWeakReference.get();
+        this.sectionSupplier = () -> Chunk.EMPTY_SECTION;
         this.wasEmpty = true;
         this.chunkEffects = Collections.emptyList();
         this.transaction = null;
@@ -110,7 +113,7 @@ public final class ChunkPipeline implements BlockPipeline {
         final int oldOpacity = currentState.getOpacity(serverWorld, pos);
         final SpongeBlockChangeFlag flag = this.transaction.getBlockChangeFlag();
         final @Nullable TileEntity existing = this.chunkSupplier.get().getTileEntity(pos, Chunk.CreateEntityType.CHECK);
-        final PipelineCursor formerState = new PipelineCursor(currentState, oldOpacity, pos, existing);
+        PipelineCursor formerState = new PipelineCursor(currentState, oldOpacity, pos, existing);
 
         for (final ResultingTransactionBySideEffect effect : this.chunkEffects) {
             try (final EffectTransactor ignored = context.getTransactor().pushEffect(effect)) {
@@ -122,6 +125,9 @@ public final class ChunkPipeline implements BlockPipeline {
                 );
                 if (result.hasResult) {
                     return result.resultingState;
+                }
+                if (formerState.drops.isEmpty() && !result.drops.isEmpty()) {
+                    formerState = new PipelineCursor(currentState, oldOpacity, pos, existing, result.drops);
                 }
             }
         }

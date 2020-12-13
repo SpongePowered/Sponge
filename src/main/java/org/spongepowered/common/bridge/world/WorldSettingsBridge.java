@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.bridge.world;
 
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public interface WorldSettingsBridge {
@@ -78,4 +80,8 @@ public interface WorldSettingsBridge {
     void bridge$setRandomSeed(boolean state);
 
     void bridge$populateInfo(WorldInfo info);
+
+    void bridge$setInfoConfigAdapter(InheritableConfigHandle<WorldConfig> configAdapter);
+
+    void bridge$setConfigExists(boolean worldConfigExists);
 }

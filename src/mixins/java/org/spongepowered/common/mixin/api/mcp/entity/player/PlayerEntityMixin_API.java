@@ -27,18 +27,17 @@ package org.spongepowered.common.mixin.api.mcp.entity.player;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.EnderChestInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.mixin.api.mcp.entity.LivingEntityMixin_API;
 
 @Mixin(PlayerEntity.class)
@@ -47,11 +46,11 @@ public abstract class PlayerEntityMixin_API extends LivingEntityMixin_API {
 
     @Shadow public Container openContainer;
     @Shadow public float experience;
-    @Shadow public PlayerAbilities abilities;
-    @Shadow public PlayerInventory inventory;
-    @Shadow protected EnderChestInventory enterChestInventory;
-    @Shadow public abstract ITextComponent shadow$getName();
+    @Shadow @Final public PlayerAbilities abilities;
+    @Shadow @Final public PlayerInventory inventory;
     @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
+    @Shadow public abstract ITextComponent shadow$getDisplayName();
+    @Shadow public abstract ITextComponent shadow$getName();
 
     final boolean impl$isFake = SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this);
 

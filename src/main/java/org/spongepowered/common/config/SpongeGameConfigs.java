@@ -24,68 +24,71 @@
  */
 package org.spongepowered.common.config;
 
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
-import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.customdata.CustomDataConfig;
-import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
+import org.spongepowered.common.config.inheritable.GlobalConfig;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.common.world.server.SpongeWorldManager;
+import org.spongepowered.configurate.ConfigurateException;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * SpongeCommon configurations that need to interact with game state
  */
-public class SpongeGameConfigs {
+public final class SpongeGameConfigs {
 
     static final Logger LOGGER = LogManager.getLogger();
 
-    static ConfigHandle<TrackerConfig> trackerConfigAdapter;
-    static ConfigHandle<CustomDataConfig> customDataConfigAdapter;
+    private static final Lock initLock = new ReentrantLock();
+    private static ConfigHandle<TrackerConfig> trackerConfigAdapter;
+    private static ConfigHandle<CustomDataConfig> customDataConfigAdapter;
+    private static volatile InheritableConfigHandle<GlobalConfig> global;
 
-    public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(final Map<String, Tristate> entries) {
-        return SpongeConfigs.getCommon().updateSetting("metrics.plugin-states", entries,
-                        new TypeToken<Map<String, Tristate>>() { private static final long serialVersionUID = -1L;});
+    private SpongeGameConfigs() {
     }
 
     public static ConfigHandle<CustomDataConfig> getCustomData() {
-        if (customDataConfigAdapter == null) {
-            customDataConfigAdapter = SpongeConfigs.create(new CustomDataConfig(), CustomDataConfig.FILE_NAME);
+        if (SpongeGameConfigs.customDataConfigAdapter == null) {
+            SpongeGameConfigs.customDataConfigAdapter = SpongeConfigs.create(new CustomDataConfig(), CustomDataConfig.FILE_NAME);
         }
-        return customDataConfigAdapter;
+        return SpongeGameConfigs.customDataConfigAdapter;
     }
 
     public static ConfigHandle<TrackerConfig> getTracker() {
-        if (trackerConfigAdapter == null) {
-            trackerConfigAdapter = SpongeConfigs.create(new TrackerConfig(), TrackerConfig.FILE_NAME);
+        if (SpongeGameConfigs.trackerConfigAdapter == null) {
+            SpongeGameConfigs.trackerConfigAdapter = SpongeConfigs.create(new TrackerConfig(), TrackerConfig.FILE_NAME);
         }
-        return trackerConfigAdapter;
+        return SpongeGameConfigs.trackerConfigAdapter;
     }
 
     public static InheritableConfigHandle<WorldConfig> getForWorld(final org.spongepowered.api.world.World<?> spongeWorld) {
-        return getForWorld((net.minecraft.world.World) spongeWorld);
+        return SpongeGameConfigs.getForWorld((net.minecraft.world.World) spongeWorld);
     }
 
     public static InheritableConfigHandle<WorldConfig> getForWorld(final net.minecraft.world.World mcWorld) {
         return ((WorldInfoBridge) mcWorld.getWorldInfo()).bridge$getConfigAdapter();
+    }
+
+    public static boolean doesWorldConfigExist(final ResourceKey world) {
+        final Path configPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", world.getNamespace(), world.getValue() + ".conf"));
+        return Files.exists(configPath);
     }
 
     public static InheritableConfigHandle<WorldConfig> createWorld(final @Nullable DimensionType legacyType, final ResourceKey world) {
@@ -93,36 +96,35 @@ public class SpongeGameConfigs {
         final Path configPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", world.getNamespace(), world.getValue() + ".conf"));
         if (legacyType != null) {
             // Legacy config path: config/sponge/worlds/<dim-namespace>/<dim-value>/<world-name>/world.conf
-            final String legacyName = getLegacyWorldName(world);
+            final String legacyName = SpongeGameConfigs.getLegacyWorldName(world);
             if (legacyName != null) {
                 final Path legacyPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", legacyType.getKey().getNamespace(),
-                        getLegacyValue(legacyType.getKey()), legacyName, "world.conf"));
+                        SpongeGameConfigs.getLegacyValue(legacyType.getKey()), legacyName, "world.conf"));
                 if (legacyPath.toFile().isFile() && !configPath.toFile().isFile()) {
                     try {
                         Files.createDirectories(configPath.getParent());
                         Files.move(legacyPath, configPath);
                         final Path legacyParent = legacyPath.getParent();
-                        try (DirectoryStream<Path> str = Files.newDirectoryStream(legacyParent)) {
+                        try (final DirectoryStream<Path> str = Files.newDirectoryStream(legacyParent)) {
                             if (!str.iterator().hasNext()) {
                                 Files.delete(legacyParent);
                             }
                         }
                     } catch (final IOException ex) {
-                        LOGGER.error("Unable to migrate config for world {} from legacy location {}", world, legacyPath, ex);
+                        SpongeGameConfigs.LOGGER.error("Unable to migrate config for world {} from legacy location {}", world, legacyPath, ex);
                     }
                 }
             }
         }
         try {
-            @SuppressWarnings("deprecation") // deprecated to discourage usage outside of this method
             final InheritableConfigHandle<WorldConfig> config = new InheritableConfigHandle<>(new WorldConfig(), SpongeConfigs.createLoader(configPath),
-                    SpongeConfigs.getGlobalInheritable());
+                    SpongeGameConfigs.getGlobalInheritable());
             config.load();
             return config;
-        } catch (final IOException | ObjectMappingException ex) {
-            LOGGER.error("Unable to load configuration for world {}. Sponge will use a "
+        } catch (final IOException ex) {
+            SpongeGameConfigs.LOGGER.error("Unable to load configuration for world {}. Sponge will use a "
                     + "fallback configuration with default values that will not save.", world, ex);
-            return SpongeConfigs.createDetached();
+            return SpongeGameConfigs.createDetached();
         }
     }
 
@@ -143,5 +145,31 @@ public class SpongeGameConfigs {
             return "DIM-1";
         }
         return null;
+    }
+
+    private static InheritableConfigHandle<GlobalConfig> getGlobalInheritable() {
+        if (SpongeGameConfigs.global == null) {
+            SpongeGameConfigs.initLock.lock();
+            try {
+                if (SpongeGameConfigs.global == null) {
+                    try {
+                        SpongeGameConfigs.global = new InheritableConfigHandle<>(new GlobalConfig(),
+                                SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(GlobalConfig.FILE_NAME)), null);
+                        SpongeGameConfigs.global.load();
+                    } catch (final IOException e) {
+                        SpongeGameConfigs.LOGGER.error("Unable to load global world configuration in {}. Sponge will run with default settings",
+                                            GlobalConfig.FILE_NAME, e);
+                        SpongeGameConfigs.global = new InheritableConfigHandle<>(new GlobalConfig(), null);
+                    }
+                }
+            } finally {
+                SpongeGameConfigs.initLock.unlock();
+            }
+        }
+        return SpongeGameConfigs.global;
+    }
+
+    public static InheritableConfigHandle<WorldConfig> createDetached() {
+        return new InheritableConfigHandle<>(new WorldConfig(), SpongeGameConfigs.getGlobalInheritable());
     }
 }

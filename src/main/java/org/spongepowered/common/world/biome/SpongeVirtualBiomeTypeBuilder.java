@@ -76,7 +76,7 @@ public class SpongeVirtualBiomeTypeBuilder extends SpongeCatalogBuilder<VirtualB
         super.reset();
         this.temperature = 0;
         this.humidity = 0;
-        this.persisted = BiomeTypes.VOID.get();
+        this.persisted = BiomeTypes.THE_VOID.get();
         return this;
     }
 

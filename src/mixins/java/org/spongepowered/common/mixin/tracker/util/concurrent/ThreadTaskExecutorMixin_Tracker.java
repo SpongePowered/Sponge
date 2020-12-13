@@ -26,22 +26,25 @@ package org.spongepowered.common.mixin.tracker.util.concurrent;
 
 import net.minecraft.util.concurrent.ThreadTaskExecutor;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 
 @Mixin(ThreadTaskExecutor.class)
 public abstract class ThreadTaskExecutorMixin_Tracker<R extends Runnable> {
+
+    @Shadow protected void shadow$run(final R taskIn) {} // Shadow
 
     @Redirect(method = "execute",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/lang/Runnable;run()V",
                     remap = false))
-    private void tracker$callOnMainThreadWithPhaseState(Runnable runnable) {
+    private void tracker$callOnMainThreadWithPhaseState(final Runnable runnable) {
         // This method can be called async while server is stopping
         if (this.tracker$isServerAndIsServerStopped() && !SpongeImplHooks.onServerThread()) {
             runnable.run();

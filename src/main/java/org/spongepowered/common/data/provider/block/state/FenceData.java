@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.FenceBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionalUtils;
+import org.spongepowered.common.util.DirectionalUtil;
 
 public final class FenceData {
 
@@ -40,8 +40,8 @@ public final class FenceData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
-                        .get(h -> DirectionalUtils.getHorizontalFrom(h, FenceBlock.EAST, FenceBlock.WEST, FenceBlock.NORTH, FenceBlock.SOUTH))
-                        .set((h, v) -> DirectionalUtils.setHorizontal(h, v, FenceBlock.EAST, FenceBlock.WEST, FenceBlock.NORTH, FenceBlock.SOUTH))
+                        .get(h -> DirectionalUtil.getHorizontalFrom(h, FenceBlock.EAST, FenceBlock.WEST, FenceBlock.NORTH, FenceBlock.SOUTH))
+                        .set((h, v) -> DirectionalUtil.setHorizontal(h, v, FenceBlock.EAST, FenceBlock.WEST, FenceBlock.NORTH, FenceBlock.SOUTH))
                         .supports(h -> h.getBlock() instanceof FenceBlock)
                     .create(Keys.IS_CONNECTED_EAST)
                         .get(h -> h.get(FenceBlock.EAST))

@@ -28,7 +28,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import org.apache.logging.log4j.LogManager;
 import org.cadixdev.atlas.Atlas;
-import org.cadixdev.bombe.jar.asm.JarEntryRemappingTransformer;
+import org.cadixdev.bombe.asm.jar.JarEntryRemappingTransformer;
 import org.cadixdev.lorenz.MappingSet;
 import org.cadixdev.lorenz.asm.LorenzRemapper;
 import org.cadixdev.lorenz.io.MappingFormats;
@@ -43,6 +43,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,11 +80,17 @@ public final class InstallerMain {
 
         final String javaBin = this.installer.getLauncherConfig().jvmDirectory.replace("${JAVA_HOME}", System.getProperty("java.home")) +
             File.separator + "bin" + File.separator + "java";
-        final List<String> jvmArgs = Arrays.asList(this.installer.getLauncherConfig().jvmArgs.split(" "));
+        final List<String> jvmArgs;
+        if (!this.installer.getLauncherConfig().jvmArgs.isEmpty()) {
+            jvmArgs = Arrays.asList(this.installer.getLauncherConfig().jvmArgs.split(" "));
+        } else {
+            jvmArgs = null;
+        }
         final String depsClasspath = this.installer.getLibraryManager().getAll().values().stream().map(LibraryManager.Library::getFile).
-            map(Path::toAbsolutePath).map(Path::toString).collect(Collectors.joining(File.pathSeparator));
-        final String classpath = System.getProperty("java.class.path") + File.pathSeparator + depsClasspath + File.pathSeparator +
-            minecraftJar.toAbsolutePath().toString();
+            map(Path::toAbsolutePath).map(Path::normalize).map(Path::toString).collect(Collectors.joining(File.pathSeparator));
+        final String classpath = Paths.get(System.getProperty("java.class.path")).toAbsolutePath() + File.pathSeparator +
+                depsClasspath + File.pathSeparator +
+            minecraftJar.toAbsolutePath().normalize().toString();
         final List<String> gameArgs = Arrays.asList(this.installer.getLauncherConfig().args.split(" "));
 
         this.installer.getLogger().debug("Setting classpath to: " + classpath);
@@ -91,7 +98,9 @@ public final class InstallerMain {
         final String className = "org.spongepowered.vanilla.applaunch.Main";
         final List<String> command = new ArrayList<>();
         command.add(javaBin);
-        command.addAll(jvmArgs);
+        if (jvmArgs != null) {
+            command.addAll(jvmArgs);
+        }
         command.add("-cp");
         command.add(classpath);
         command.add(className);
@@ -207,7 +216,7 @@ public final class InstallerMain {
         this.installer.getLogger().info("Remapping Minecraft to SRG. This may take a while...");
         try (final FileSystem fileSystem = FileSystems.newFileSystem(srgZip, null)) {
             final Path srgFile = fileSystem.getPath(Constants.Libraries.MCP_JOINED_PATH);
-            final MappingSet mappings = new MappingSet();
+            final MappingSet mappings = MappingSet.create();
             MappingFormats.TSRG.read(mappings, srgFile);
             final Atlas atlas = new Atlas();
             atlas.install(ctx -> new JarEntryRemappingTransformer(

@@ -25,7 +25,6 @@
 package org.spongepowered.vanilla.client.gui.widget;
 
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -38,6 +37,7 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.client.gui.screen.PluginScreen;
 import org.spongepowered.vanilla.util.Bounds;
 
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -45,12 +45,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public final class MetadataPanel extends ScrollPanel {
 
@@ -59,12 +56,13 @@ public final class MetadataPanel extends ScrollPanel {
         //   |-----------------|        |-------------------------|  |-------------------------|    |---------| |--|   |---------------|
         "((?:[a-z0-9]{2,}://)?(?:(?:[0-9]{1,3}\\.){3}[0-9]{1,3}|(?:[-\\w_]+\\.[a-z]{2,}?))(?::[0-9]{1,5})?.*?(?=[!\"\u00A7 \n]|$))",
         Pattern.CASE_INSENSITIVE);
+    static final int INDENT_SIZE = 12;
     private final Minecraft minecraft;
     private final PluginScreen screen;
     private final int lineHeight;
     private final List<Category> categories = new ObjectArrayList<>();
     private final List<Category> resizedCategories = new ObjectArrayList<>();
-    private final Map<Integer, Integer> nodeToMaxKeyWidthMap = new Int2IntOpenHashMap();
+    private int maxKeyWidth;
 
     public MetadataPanel(final Minecraft minecraft, final PluginScreen screen, final int width, final int height, final int top, final int left) {
         super(minecraft, width, height, top, left);
@@ -75,7 +73,7 @@ public final class MetadataPanel extends ScrollPanel {
 
     public void setMetadata(@Nullable final PluginMetadata metadata) {
         this.categories.clear();
-        this.nodeToMaxKeyWidthMap.clear();
+        this.maxKeyWidth = 0;
 
         if (metadata == null) {
             this.resizedCategories.clear();
@@ -115,7 +113,7 @@ public final class MetadataPanel extends ScrollPanel {
 
         this.categories.stream().flatMap(c -> c.getEntries().stream()).forEach(e -> {
             final int width = e.key == null ? 0 : this.minecraft.fontRenderer.getStringWidth(e.key.getFormattedText());
-            this.nodeToMaxKeyWidthMap.put(e.level, Math.max(this.nodeToMaxKeyWidthMap.getOrDefault(e.level, 0), width));
+            this.maxKeyWidth = Math.max(this.maxKeyWidth, width + (e.level * MetadataPanel.INDENT_SIZE));
         });
 
         this.resizeContent();
@@ -132,13 +130,14 @@ public final class MetadataPanel extends ScrollPanel {
                     continue;
                 }
 
+                final int levelOffset = entry.level * MetadataPanel.INDENT_SIZE;
                 final int baseX = 4;
-                final int keyX = baseX + 12 + (entry.level * 12);
-                final int separatorX = keyX + this.nodeToMaxKeyWidthMap.getOrDefault(entry.level, 0) + 4;
+                final int keyX = baseX + MetadataPanel.INDENT_SIZE + levelOffset;
+                final int separatorX = keyX + this.maxKeyWidth + 4 - levelOffset;
                 final int valueX = separatorX + this.minecraft.fontRenderer.getStringWidth(":") + 4;
                 final int maxWidth = this.width - valueX - 8;
                 if (maxWidth >= 0) {
-                    final List<String> lines = Arrays.asList(efficientWrapper(entry.rawValue, maxWidth).split("\n"));
+                    final List<String> lines = Arrays.asList(this.efficientWrapper(entry.rawValue, maxWidth).split("\n"));
                     newEntries.add(new Entry(entry.rawKey, lines.get(0), entry.level, entry.rawValue));
                     newEntries.addAll(lines.stream().skip(1).map(l -> new Entry(null, l, entry.level, entry.rawValue)).collect(Collectors.toList()));
                 }
@@ -212,7 +211,8 @@ public final class MetadataPanel extends ScrollPanel {
             final String noResults = "No data...";
             final int noResultsWidth = font.getStringWidth(noResults);
 
-            font.drawString(noResults, (this.width / 2) + this.left - (noResultsWidth / 2), this.top + 10, TextFormatting.GRAY.getColor());
+            font.drawString(noResults, ((float) this.width / 2) + this.left - ((float) noResultsWidth / 2), this.top + 10,
+                    TextFormatting.GRAY.getColor());
 
             return;
         }
@@ -228,14 +228,15 @@ public final class MetadataPanel extends ScrollPanel {
             this.minecraft.fontRenderer.drawString(category.name.getFormattedText(), baseX, relativeY, 0xFFFFFF);
             relativeY += this.lineHeight;
 
-            // Iterate and raw entries
+            // Iterate and draw entries
             for (final Entry entry : category.getEntries()) {
                 if (entry.value == null) {
                     continue;
                 }
 
-                final int keyX = baseX + 12 + (entry.level * 12);
-                final int separatorX = keyX + this.nodeToMaxKeyWidthMap.getOrDefault(entry.level, 0) + 4;
+                final int levelOffset = entry.level * MetadataPanel.INDENT_SIZE;
+                final int keyX = baseX + MetadataPanel.INDENT_SIZE + levelOffset;
+                final int separatorX = keyX + this.maxKeyWidth + 4 - levelOffset;
                 final int valueX = separatorX + this.minecraft.fontRenderer.getStringWidth(":") + 4;
 
                 // Only draw key and separator if there is any key present
@@ -294,7 +295,7 @@ public final class MetadataPanel extends ScrollPanel {
         // Matches an ip (xx.xxx.xx.xxx) or a domain (something.com) with or
         // without a protocol or path.
         ITextComponent ichat = null;
-        final Matcher matcher = URL_PATTERN.matcher(string);
+        final Matcher matcher = MetadataPanel.URL_PATTERN.matcher(string);
         int lastEnd = 0;
 
         // Find all urls
@@ -423,7 +424,7 @@ public final class MetadataPanel extends ScrollPanel {
 
                 // Account for text components that were split to new lines
                 if (originalValue != null) {
-                    final ITextComponent linkComponent = newChatWithLinks(originalValue, false);
+                    final ITextComponent linkComponent = MetadataPanel.newChatWithLinks(originalValue, false);
                     if (linkComponent.getStyle().getClickEvent() != null) {
                         this.value.setStyle(linkComponent.getStyle());
                     }

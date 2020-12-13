@@ -1,14 +1,24 @@
-SpongeCommon [![Build Status](https://travis-ci.org/SpongePowered/SpongeCommon.svg?branch=master)](https://travis-ci.org/SpongePowered/SpongeCommon)
+Sponge ![Java CI with Gradle](https://github.com/SpongePowered/Sponge/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=api-8&event=push)
 =============
 
-Common code for official SpongeAPI implementations. It is licensed under the [MIT License]. 
+The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms. It is licensed under the [MIT License].
 
 * [Homepage]
 * [Source]
 * [Issues]
 * [Documentation]
-* [Community Chat]: [#sponge on irc.esper.net]
-* [Development Chat]: [#spongedev on irc.esper.net]
+* [Discord]: [#sponge ]
+
+## Latest Builds
+
+### Sponge
+
+**1.15.2**: ![Snapshots](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=Sponge&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
+
+### SpongeVanilla
+
+**1.15.2**: ![Snapshots](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=SpongeVanilla&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
+
 
 ## Prerequisites
 * [Java] 8
@@ -16,37 +26,37 @@ Common code for official SpongeAPI implementations. It is licensed under the [MI
 ## Clone
 The following steps will ensure your project is cloned properly.
 
-1. `git clone --recursive https://github.com/SpongePowered/SpongeCommon.git`
-2. `cd SpongeCommon`
+1. `git clone --recursive https://github.com/SpongePowered/Sponge.git`
+2. `cd Sponge`
 3. `cp scripts/pre-commit .git/hooks`
 
 ## Setup
-**Note**: SpongeCommon uses [Gradle] as its build system. The repo includes the Gradle wrapper that will automatically download the correct Gradle 
+**Note**: Sponge uses [Gradle] as its build system. The repo includes the Gradle wrapper that will automatically download the correct Gradle 
 version. Local installations of Gradle may work but are untested. To execute the Gradle wrapper, run the `./gradlew` script on Unix systems or only
 `gradlew` on Windows systems.
 
-Before you are able to build SpongeCommon, you must first prepare the environment (some IDEs may do this for you).
+Before you are able to build Sponge, you must first prepare the environment (some IDEs may do this for you).
 
   - Run `./gradlew build --refresh-dependencies`
 
-Even if this fails to compile SpongeCommon, it will download all the dependencies so you can get started.  
+Even if this fails to compile Sponge, it will download all the dependencies so you can get started.  
 
 ### IDE Setup
 __For [Eclipse]__
   1. Run `./gradlew eclipse`
-  2. Import SpongeCommon as an existing project (File > Import > General)
-  3. Select the root folder for SpongeCommon and make sure `Search for nested projects` is enabled
-  4. Check SpongeCommon when it finishes building and click **Finish**
+  2. Import Sponge as an existing project (File > Import > General)
+  3. Select the root folder for Sponge and make sure `Search for nested projects` is enabled
+  4. Check Sponge when it finishes building and click **Finish**
 
 __For [IntelliJ]__
   1. Make sure you have the Gradle plugin enabled (File > Settings > Plugins).  
-  2. Click File > New > Project from Existing Sources > Gradle and select the root folder for SpongeCommon.
+  2. Click File > New > Project from Existing Sources > Gradle and select the root folder for Sponge.
   3. Make sure _Use default gradle wrapper_ is selected. Older/newer Gradle versions may work but we only test using the wrapper.
 
 ## Building
-__Note:__ You must [Setup the environment](#setup) before you can build SpongeCommon.
+__Note:__ You must [Setup the environment](#setup) before you can build Sponge.
 
-In order to build SpongeCommon you simply need to run the `gradlew` command. On Windows systems you should run `gradlew` instead of `./gradlew` to
+In order to build Sponge you simply need to run the `gradlew` command. On Windows systems you should run `gradlew` instead of `./gradlew` to
 invoke the Gradle wrapper. You can find the compiled JAR files in `./build/libs`.
 
 ## Updating your Clone
@@ -65,11 +75,10 @@ Are you a talented programmer looking to contribute some code? We'd love the hel
 [Gradle]: https://gradle.org/
 [Homepage]: https://spongepowered.org/
 [IntelliJ]: http://www.jetbrains.com/idea/
-[Issues]: https://github.com/SpongePowered/SpongeCommon/issues
+[Issues]: https://github.com/SpongePowered/Sponge/issues
 [Documentation]: https://docs.spongepowered.org/
 [Java]: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-[Source]: https://github.com/SpongePowered/SpongeCommon/
+[Source]: https://github.com/SpongePowered/Sponge/
 [MIT License]: http://www.tldrlegal.com/license/mit-license
-[Community Chat]: https://webchat.esper.net/?channels=sponge
-[Development Chat]: https://webchat.esper.net/?channels=spongedev
+[Discord]: https://discord.gg/sponge
 [Jenkins]: https://jenkins-ci.org/

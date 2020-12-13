@@ -34,6 +34,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
+import java.util.Queue;
+
 @Mixin(ServerWorld.class)
 public interface ServerWorldAccessor {
 
@@ -44,6 +46,12 @@ public interface ServerWorldAccessor {
     @Invoker("hasDuplicateEntity") boolean accessor$hasDuplicateEntity(Entity entity);
 
     @Accessor("entitiesById") Int2ObjectMap<Entity> accessor$getEntitiesById();
+
+    @Accessor("tickingEntities") boolean accessor$isTickingEntities();
+
+    @Accessor("entitiesToAdd") Queue<Entity> accessor$getEntitiesToAdd();
+
+    @Invoker("removeFromChunk") void accessor$removeFromChunk(Entity entityIn);
 
     @Accessor("blockEventQueue") ObjectLinkedOpenHashSet<BlockEventData> accessor$getBlockEventQueue();
 

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -51,8 +51,9 @@ public final class SpongePluginContainerValueParameter extends CatalogedArgument
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        return Launch.getInstance().getPluginManager().getPlugins().stream().map(x -> x.getMetadata().getId()).collect(Collectors.toList());
+    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+        return Launch.getInstance().getPluginManager().getPlugins().stream().map(x -> x.getMetadata().getId()).filter(x -> x.startsWith(currentInput))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -68,7 +69,7 @@ public final class SpongePluginContainerValueParameter extends CatalogedArgument
             return container;
         }
 
-        throw reader.createException(TextComponent.of("Could not find plugin with ID \"" + id + "\""));
+        throw reader.createException(Component.text("Could not find plugin with ID \"" + id + "\""));
     }
 
 }

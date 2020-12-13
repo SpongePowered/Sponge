@@ -24,19 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.world.dragon;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-
-/* TODO - Expand dragon phases so that various things can be configurable
-  including but not withstanding, being able to set up multiple dragons
-  or configuring how the respawn events happen.
-*/
 public final class DragonPhase {
 
     public static final class State {
 
-        public static final IPhaseState<GeneralizedContext> RESPAWN_DRAGON = new GeneralDragonPhaseState();
-
+        public static final DragonPhaseState<SpawnDragonContext> SPAWN_DRAGON = new SpawnDragonPhaseState();
 
         private State() {
             throw new IllegalStateException("Cannot construct State!");

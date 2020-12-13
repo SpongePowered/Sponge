@@ -37,25 +37,13 @@ import javax.annotation.Nullable;
 
 public interface AdvancementBridge {
 
-    ResourceKey bridge$getKey();
-
     Optional<Advancement> bridge$getParent();
 
     void bridge$setParent(@Nullable Advancement advancement);
 
-    Optional<AdvancementTree> bridge$getTree();
-
-    void bridge$setTree(AdvancementTree tree);
-
     AdvancementCriterion bridge$getCriterion();
 
     void bridge$setCriterion(AdvancementCriterion criterion);
-
-    boolean bridge$isRegistered();
-
-    void bridge$setRegistered();
-
-    Component bridge$getText();
 
     List<Component> bridge$getToastText();
 }

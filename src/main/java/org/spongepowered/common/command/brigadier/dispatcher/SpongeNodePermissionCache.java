@@ -93,7 +93,7 @@ public final class SpongeNodePermissionCache {
                         return "unknown";
                     });
             final String permString = path.stream().map(x -> {
-                final String replaced = ILLEGAL_CHARS.matcher(x).replaceAll("").toLowerCase(Locale.ROOT);
+                final String replaced = SpongeNodePermissionCache.ILLEGAL_CHARS.matcher(x).replaceAll("").toLowerCase(Locale.ROOT);
                 if (replaced.startsWith(pluginId)) {
                     return replaced.replaceFirst(pluginId, "");
                 }

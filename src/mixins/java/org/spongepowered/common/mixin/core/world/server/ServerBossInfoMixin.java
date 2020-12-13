@@ -26,15 +26,19 @@ package org.spongepowered.common.mixin.core.world.server;
 
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SUpdateBossInfoPacket;
 import net.minecraft.world.BossInfo;
 import net.minecraft.world.server.ServerBossInfo;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.mixin.core.world.BossInfoMixin;
 
 import java.util.Set;
@@ -44,9 +48,11 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
 
     private static final float EPSILON = 1e-2f;
 
-    private float impl$lastSentPercent = 0f;
+    private float impl$lastSentProgress = 0f;
 
     @Shadow protected abstract void sendUpdate(final SUpdateBossInfoPacket.Operation operation);
+    @Shadow @Final private Set<ServerPlayerEntity> players;
+    @Shadow private boolean visible;
 
     @Override
     public void bridge$setAdventure(final BossBar adventure) {
@@ -67,8 +73,16 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
         }
     }
 
+    @Override
+    public void bridge$replacePlayer(final ServerPlayerEntity oldPlayer, final ServerPlayerEntity newPlayer) {
+        super.bridge$replacePlayer(oldPlayer, newPlayer);
+        if(this.players.remove(oldPlayer)) {
+            this.players.add(newPlayer);
+        }
+    }
+
     @Inject(method = "setDarkenSky", at = @At("HEAD"))
-    private void forceDarkenSkyUpdate(final boolean darkenSky, final CallbackInfoReturnable<BossInfo> ci) {
+    private void impl$forceDarkenSkyUpdate(final boolean darkenSky, final CallbackInfoReturnable<BossInfo> ci) {
         this.darkenSky = !darkenSky;
     }
 
@@ -96,9 +110,9 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
     }
 
     @Override
-    public void bossBarPercentChanged(final BossBar bar, final float oldPercent, final float newPercent) {
-        if (Math.abs(newPercent - this.impl$lastSentPercent) > EPSILON) {
-            this.impl$lastSentPercent = newPercent;
+    public void bossBarProgressChanged(final BossBar bar, final float oldProgress, final float newProgress) {
+        if (Math.abs(newProgress - this.impl$lastSentProgress) > ServerBossInfoMixin.EPSILON) {
+            this.impl$lastSentProgress = newProgress;
             this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_PCT);
         }
     }
@@ -116,5 +130,37 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
     @Override
     public void bossBarFlagsChanged(final BossBar bar, final Set<BossBar.Flag> flagsAdded, final Set<BossBar.Flag> flagsRemoved) {
         this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_PROPERTIES);
+    }
+
+    // Tracking for registration (designed for localization handling)
+
+    @Inject(method = "addPlayer", at = @At("TAIL"))
+    private void impl$addPlayer(final ServerPlayerEntity player, final CallbackInfo ci) {
+        if (!this.players.isEmpty() && this.visible) {
+            SpongeAdventure.registerBossBar((ServerBossInfo) (Object) this);
+        }
+    }
+
+    @Inject(method = "removePlayer", at = @At("TAIL"))
+    private void impl$removePlayer(final ServerPlayerEntity player, final CallbackInfo ci) {
+        if (this.players.isEmpty()) {
+            SpongeAdventure.unregisterBossBar((ServerBossInfo) (Object) this);
+        }
+    }
+
+    @Inject(method = "removeAllPlayers", at = @At("HEAD"))
+    private void impl$removeAllPlayers(final CallbackInfo ci) {
+        SpongeAdventure.unregisterBossBar((ServerBossInfo) (Object) this);
+    }
+
+    @Inject(method = "setVisible", at = @At("HEAD"))
+    private void impl$setVisible(final boolean visible, final CallbackInfo ci) {
+        if (!this.players.isEmpty()) {
+            if (visible) {
+                SpongeAdventure.registerBossBar((ServerBossInfo) (Object) this);
+            } else {
+                SpongeAdventure.unregisterBossBar((ServerBossInfo) (Object) this);
+            }
+        }
     }
 }

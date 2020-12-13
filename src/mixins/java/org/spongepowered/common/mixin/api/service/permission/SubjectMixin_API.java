@@ -29,13 +29,12 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.tileentity.CommandBlockTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.service.server.permission.SpongeBridgeSubject;
+import org.spongepowered.common.service.server.permission.BridgeSubject;
 
 /**
  * Mixin to provide a common implementation of subject that refers to the
  * installed permissions service for a subject.
  */
-@Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, RConConsoleSource.class},
-        targets = {"net/minecraft/tileentity/SignTileEntity$1", "net/minecraft/tileentity/SignTileEntity$2"})
-public abstract class SubjectMixin_API implements SpongeBridgeSubject {
+@Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, RConConsoleSource.class})
+public abstract class SubjectMixin_API implements BridgeSubject {
 }

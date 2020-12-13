@@ -28,6 +28,7 @@ import net.minecraft.entity.monster.EndermiteEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.entity.monster.EndermiteEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class EndermiteData {
 
@@ -45,16 +46,17 @@ public final class EndermiteData {
                             if (h.isNoDespawnRequired()) {
                                 return null;
                             }
-                            return ((EndermiteEntityAccessor) h).accessor$getLifetime();
+                            return new SpongeTicks(((EndermiteEntityAccessor) h).accessor$getLifetime());
                         })
                         .setAnd((h, v) -> {
                             if (h.isNoDespawnRequired()) {
                                 return false;
                             }
-                            if (v < 0 || v > DESPAWN_DELAY_MAX) {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0 || ticks > EndermiteData.DESPAWN_DELAY_MAX) {
                                 return false;
                             }
-                            ((EndermiteEntityAccessor) h).accessor$setLifetime(v);
+                            ((EndermiteEntityAccessor) h).accessor$setLifetime(ticks);
                             return true;
                         });
     }

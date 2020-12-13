@@ -30,6 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.NameableBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.ServerLocation;
@@ -87,6 +88,12 @@ public final class ServerLocationData {
                         })
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(((INameable)h.getBlockEntity().get()).getDisplayName()))
+                        .supports(h -> h.getBlockEntity().isPresent() && h.getBlockEntity().get() instanceof NameableBlockEntity)
+                    .create(Keys.CUSTOM_NAME)
+                        .get(h -> {
+                            final BlockEntity blockEntity = h.getBlockEntity().get();
+                            return ((INameable) blockEntity).hasCustomName() ? SpongeAdventure.asAdventure(((INameable)blockEntity).getCustomName()) : null;
+                        })
                         .set((h, v) -> (((CustomNameableBridge)h.getBlockEntity().get())).bridge$setCustomDisplayName(SpongeAdventure.asVanilla(v)))
                         .delete(h -> (((CustomNameableBridge)h.getBlockEntity().get())).bridge$setCustomDisplayName(null))
                         .supports(h -> h.getBlockEntity().isPresent() && h.getBlockEntity().get() instanceof NameableBlockEntity);

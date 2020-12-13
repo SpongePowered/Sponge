@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
@@ -52,10 +53,8 @@ abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState
     }
 
     @Override
-    public void appendNotifierPreBlockTick(final ServerWorld world, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
-        if (this == TickPhase.Tick.BLOCK || this == TickPhase.Tick.RANDOM_BLOCK) {
+    public void appendNotifierPreBlockTick(final ServerWorld world, final BlockPos pos, final C context, final LocationBasedTickContext<@NonNull ?> phaseContext) {
 
-        }
     }
 
     @Override

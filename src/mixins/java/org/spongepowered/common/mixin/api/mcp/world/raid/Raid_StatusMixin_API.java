@@ -42,7 +42,7 @@ public abstract class Raid_StatusMixin_API implements RaidStatus {
     private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void api$setKey(CallbackInfo ci) {
+    private void api$setKey(final CallbackInfo ci) {
         this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), this.shadow$getName().toLowerCase());
     }
 

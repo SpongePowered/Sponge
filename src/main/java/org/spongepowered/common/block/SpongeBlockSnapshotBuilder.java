@@ -28,6 +28,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -43,8 +44,8 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -57,7 +58,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapshot> implements BlockSnapshot.Builder {
+public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull BlockSnapshot> implements BlockSnapshot.Builder {
 
     private static final Deque<SpongeBlockSnapshotBuilder> pool = new ConcurrentLinkedDeque<>();
 
@@ -66,7 +67,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     public static SpongeBlockSnapshotBuilder pooled() {
-        final SpongeBlockSnapshotBuilder builder = pool.pollFirst();
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pool.pollFirst();
         if (builder != null) {
             return builder.reset();
         }
@@ -91,7 +92,8 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public SpongeBlockSnapshotBuilder world(final WorldProperties worldProperties) {
+    @NonNull
+    public SpongeBlockSnapshotBuilder world(@NonNull final WorldProperties worldProperties) {
         this.worldKey = Objects.requireNonNull(worldProperties).getKey();
         return this;
     }
@@ -103,12 +105,13 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     
     public SpongeBlockSnapshotBuilder world(final ServerWorld world) {
         this.worldKey = ((org.spongepowered.api.world.server.ServerWorld) Objects.requireNonNull(world)).getKey();
-        this.worldRef = new WeakReference<ServerWorld>(world);
+        this.worldRef = new WeakReference<>(world);
         return this;
     }
 
     @Override
-    public SpongeBlockSnapshotBuilder blockState(final BlockState blockState) {
+    @NonNull
+    public SpongeBlockSnapshotBuilder blockState(@NonNull final BlockState blockState) {
         this.blockState = Objects.requireNonNull(blockState);
         return this;
     }
@@ -120,7 +123,8 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
 
     @Override
-    public SpongeBlockSnapshotBuilder position(final Vector3i position) {
+    @NonNull
+    public SpongeBlockSnapshotBuilder position(@NonNull final Vector3i position) {
         this.coordinates = Objects.requireNonNull(position);
         if (this.compound != null) {
             this.compound.putInt(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X, position.getX());
@@ -131,22 +135,26 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public BlockSnapshot.Builder from(final ServerLocation location) {
-        throw new UnsupportedOperationException("Not implemented correctly.");
+    public BlockSnapshot.@NonNull Builder from(@NonNull final ServerLocation location) {
+        return this.from(location.createSnapshot());
     }
 
     @Override
+    @NonNull
     public SpongeBlockSnapshotBuilder creator(final UUID uuid) {
-        throw new UnsupportedOperationException("Not implemented correctly.");
-    }
-
-    @Override
-    public SpongeBlockSnapshotBuilder notifier(final UUID uuid) {
-        this.notifierUniqueId = uuid;
+        this.creatorUniqueId = Objects.requireNonNull(uuid);
         return this;
     }
 
     @Override
+    @NonNull
+    public SpongeBlockSnapshotBuilder notifier(final UUID uuid) {
+        this.notifierUniqueId = Objects.requireNonNull(uuid);
+        return this;
+    }
+
+    @Override
+    @NonNull
     public BlockSnapshot empty() {
         return SpongeBlockSnapshotBuilder.pooled()
                 .world(Constants.World.INVALID_WORLD_KEY)
@@ -155,24 +163,23 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
                 .build();
     }
 
-    public SpongeBlockSnapshotBuilder unsafeNbt(final CompoundNBT compound) {
-        this.compound = compound.copy();
-        return this;
-    }
+    @Override
+    public <V> BlockSnapshot.@NonNull Builder add(@NonNull final Key<@NonNull ? extends Value<V>> key, @NonNull final V value) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(value);
 
-
-    public SpongeBlockSnapshotBuilder flag(final BlockChangeFlag flag) {
-        this.flag = (SpongeBlockChangeFlag) flag;
+        this.blockState = this.blockState.with(key, value)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("Key %s is not supported for block state %s",
+                        key.getKey().asString(),
+                        this.blockState.toString())));
         return this;
     }
 
     @Override
-    public <V> BlockSnapshot.Builder add(final Key<? extends Value<V>> key, final V value) {
-        return null;
-    }
-
-    @Override
+    @NonNull
     public SpongeBlockSnapshotBuilder from(final BlockSnapshot holder) {
+        Objects.requireNonNull(holder);
+
         this.blockState = holder.getState();
         this.worldKey = holder.getWorld();
         if (holder.getCreator().isPresent()) {
@@ -186,6 +193,8 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     public SpongeBlockSnapshotBuilder from(final SpongeBlockSnapshot snapshot) {
+        Objects.requireNonNull(snapshot);
+
         this.blockState = snapshot.getState();
         this.worldKey = snapshot.getWorld();
         this.worldRef = snapshot.world;
@@ -195,15 +204,8 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         return this;
     }
 
-    public SpongeBlockSnapshotBuilder tileEntity(final TileEntity added) {
-        this.compound = null;
-        final CompoundNBT tag = new CompoundNBT();
-        added.write(tag);
-        this.compound = tag;
-        return this;
-    }
-
     @Override
+    @NonNull
     public SpongeBlockSnapshotBuilder reset() {
         this.blockState = (BlockState) Blocks.AIR.getDefaultState();
         this.worldKey = Constants.World.INVALID_WORLD_KEY;
@@ -217,17 +219,19 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
+    @NonNull
     public SpongeBlockSnapshot build() {
         Objects.requireNonNull(this.blockState, "BlockState cannot be null!");
         final SpongeBlockSnapshot spongeBlockSnapshot = new SpongeBlockSnapshot(this);
         this.reset();
         if (this.pooled) {
-            pool.push(this);
+            SpongeBlockSnapshotBuilder.pool.push(this);
         }
         return spongeBlockSnapshot;
     }
 
     @Override
+    @NonNull
     protected Optional<BlockSnapshot> buildContent(final DataView container) throws InvalidDataException {
         if (!container.contains(Constants.Block.BLOCK_STATE, Queries.WORLD_KEY, Constants.Sponge.SNAPSHOT_WORLD_POSITION)) {
             return Optional.empty();
@@ -252,8 +256,8 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         creatorUuid.ifPresent(s -> builder.creator(UUID.fromString(s)));
         notifierUuid.ifPresent(s -> builder.notifier(UUID.fromString(s)));
         container.getView(Constants.Sponge.UNSAFE_NBT)
-                .map(dataView -> NbtTranslator.getInstance().translateData(dataView))
-                .ifPresent(builder::unsafeNbt);
+                .map(dataView -> NbtTranslator.getInstance().translate(dataView))
+                .ifPresent(builder::addUnsafeCompound);
         if (container.contains(Constants.Sponge.SNAPSHOT_TILE_DATA)) {
             final List<DataView> dataViews = container.getViewList(Constants.Sponge.SNAPSHOT_TILE_DATA).get();
 //            DataUtil.deserializeImmutableManipulatorList(dataViews).forEach(builder::add);
@@ -261,4 +265,23 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         return Optional.of(builder.build());
     }
 
+    public SpongeBlockSnapshotBuilder addUnsafeCompound(final CompoundNBT compound) {
+        Objects.requireNonNull(compound);
+
+        this.compound = compound.copy();
+        return this;
+    }
+
+    public SpongeBlockSnapshotBuilder flag(final BlockChangeFlag flag) {
+        this.flag = (SpongeBlockChangeFlag) flag;
+        return this;
+    }
+
+    public SpongeBlockSnapshotBuilder tileEntity(final TileEntity added) {
+        this.compound = null;
+        final CompoundNBT tag = new CompoundNBT();
+        added.write(tag);
+        this.compound = tag;
+        return this;
+    }
 }

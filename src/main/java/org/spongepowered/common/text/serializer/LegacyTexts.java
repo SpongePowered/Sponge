@@ -49,36 +49,36 @@ public final class LegacyTexts {
     }
 
     static {
-        final char[] lookup = new char[formatting.length];
+        final char[] lookup = new char[LegacyTexts.formatting.length];
 
-        for (int i = 0; i < formatting.length; i++) {
-            lookup[i] = ((TextFormattingAccessor) (Object) formatting[i]).accessor$getFormattingCode();
+        for (int i = 0; i < LegacyTexts.formatting.length; i++) {
+            lookup[i] = ((TextFormattingAccessor) (Object) LegacyTexts.formatting[i]).accessor$getFormattingCode();
         }
 
         LOOKUP = new String(lookup);
     }
 
     public static int getFormattingCount() {
-        return formatting.length;
+        return LegacyTexts.formatting.length;
     }
 
     public static int findFormat(final char format) {
-        int pos = LOOKUP.indexOf(format);
+        int pos = LegacyTexts.LOOKUP.indexOf(format);
         if (pos == -1) {
-            pos = LOOKUP.indexOf(Character.toLowerCase(format));
+            pos = LegacyTexts.LOOKUP.indexOf(Character.toLowerCase(format));
         }
 
         return pos;
     }
 
     public static boolean isFormat(final char format) {
-        return findFormat(format) != -1;
+        return LegacyTexts.findFormat(format) != -1;
     }
 
     @Nullable
     public static TextFormatting parseFormat(final char format) {
-        final int pos = findFormat(format);
-        return pos != -1 ? formatting[pos] : null;
+        final int pos = LegacyTexts.findFormat(format);
+        return pos != -1 ? LegacyTexts.formatting[pos] : null;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -95,14 +95,14 @@ public final class LegacyTexts {
 
             int pos = text.length();
             do {
-                final TextFormatting format = parseFormat(text.charAt(next + 1));
+                final TextFormatting format = LegacyTexts.parseFormat(text.charAt(next + 1));
                 if (format != null) {
                     final int from = next + 2;
                     if (from != pos) {
                         if (current != null) {
                             if (reset) {
                                 parsed.add(current);
-                                setParentIfNotSame(current.getStyle(), component.getStyle());
+                                LegacyTexts.setParentIfNotSame(current.getStyle(), component.getStyle());
                                 reset = false;
                                 current = new StringTextComponent("");
                             } else {
@@ -119,7 +119,7 @@ public final class LegacyTexts {
                         current = new StringTextComponent("");
                     }
 
-                    reset |= applyStyle(current.getStyle(), format);
+                    reset |= LegacyTexts.applyStyle(current.getStyle(), format);
                     pos = next;
                 }
 
@@ -128,7 +128,7 @@ public final class LegacyTexts {
 
             if (current != null) {
                 parsed.add(current);
-                setParentIfNotSame(current.getStyle(), component.getStyle());
+                LegacyTexts.setParentIfNotSame(current.getStyle(), component.getStyle());
             }
 
             Collections.reverse(parsed);
@@ -151,7 +151,7 @@ public final class LegacyTexts {
         newComponent.setStyle(component.getStyle());
         for (ITextComponent child : component.getSiblings()) {
             if (child instanceof StringTextComponent) {
-                child = parseComponent((StringTextComponent) child, code);
+                child = LegacyTexts.parseComponent((StringTextComponent) child, code);
             } else {
                 child = child.shallowCopy();
             }
@@ -203,7 +203,7 @@ public final class LegacyTexts {
 
         final char[] result = text.toCharArray();
         for (; pos < last; pos++) {
-            if (result[pos] == from && isFormat(result[pos + 1])) {
+            if (result[pos] == from && LegacyTexts.isFormat(result[pos + 1])) {
                 result[pos] = to;
             }
         }

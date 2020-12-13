@@ -35,8 +35,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
@@ -49,16 +49,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.accessor.command.CommandSourceAccessor;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.command.ICommandSourceBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.service.server.permission.SpongePermissions;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.function.Supplier;
-
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 @Mixin(CommandSource.class)
 public abstract class CommandSourceMixin implements CommandSourceBridge {
@@ -67,7 +69,7 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
             + "Lnet/minecraft/util/math/Vec2f;Lnet/minecraft/world/server/ServerWorld;ILjava/lang/String;Lnet/minecraft/util/text/ITextComponent;"
             + "Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/entity/Entity;ZLcom/mojang/brigadier/ResultConsumer;"
             + "Lnet/minecraft/command/arguments/EntityAnchorArgument$Type;)";
-    private static final String PROTECTED_CTOR_METHOD = "<init>" + PROTECTED_CTOR + "V";
+    private static final String PROTECTED_CTOR_METHOD = "<init>" + CommandSourceMixin.PROTECTED_CTOR + "V";
 
     @Shadow @Final private ICommandSource source;
     @Shadow @Final @Mutable private Vec3d pos;
@@ -75,10 +77,18 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
     @Shadow @Final @Mutable private ServerWorld world;
     @Shadow @Final @Mutable private int permissionLevel;
 
+    @Shadow @Final private ITextComponent displayName;
+    @Shadow @Final private String name;
+    @Shadow @Final @Nullable private Entity entity;
+
+    @Shadow @Final private MinecraftServer server;
+    @Shadow @Final private boolean feedbackDisabled;
+    @Shadow @Final private ResultConsumer<CommandSource> resultConsumer;
+    @Shadow @Final private EntityAnchorArgument.Type entityAnchorType;
     private Cause impl$cause;
     @Nullable private Supplier<String> impl$potentialPermissionNode = null;
 
-    @Inject(method = PROTECTED_CTOR_METHOD, at = @At("RETURN"))
+    @Inject(method = CommandSourceMixin.PROTECTED_CTOR_METHOD, at = @At("RETURN"))
     private void impl$setCauseOnConstruction(
             final ICommandSource p_i49553_1_,
             final Vec3d p_i49553_2_,
@@ -94,25 +104,22 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
             final EntityAnchorArgument.Type p_i49553_12_,
             final CallbackInfo ci
     ) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(p_i49553_1_);
-            this.impl$cause = frame.getCurrentCause();
-            final EventContext context = this.impl$cause.getContext();
+        this.impl$cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+        final EventContext context = this.impl$cause.getContext();
 
-            context.get(EventContextKeys.LOCATION).ifPresent(x ->{
-                this.pos = VecHelper.toVec3d(x.getPosition());
-                this.world = (ServerWorld) x.getWorld();
-            });
+        context.get(EventContextKeys.LOCATION).ifPresent(x ->{
+            this.pos = VecHelper.toVec3d(x.getPosition());
+            this.world = (ServerWorld) x.getWorld();
+        });
 
-            context.get(EventContextKeys.ROTATION).ifPresent(x -> this.rotation = new Vec2f((float) x.getX(), (float) x.getY()));
-            context.get(EventContextKeys.SUBJECT).ifPresent(x -> {
-                if (x instanceof EntityAccessor) {
-                    this.permissionLevel = ((EntityAccessor) x).accessor$getPermissionLevel();
-                } else if (x instanceof MinecraftServer && !((MinecraftServer) x).isSinglePlayer()) {
-                    this.permissionLevel = 4;
-                }
-            });
-        }
+        context.get(EventContextKeys.ROTATION).ifPresent(x -> this.rotation = new Vec2f((float) x.getX(), (float) x.getY()));
+        context.get(EventContextKeys.SUBJECT).ifPresent(x -> {
+            if (x instanceof EntityAccessor) {
+                this.permissionLevel = ((EntityAccessor) x).accessor$getPermissionLevel();
+            } else if (x instanceof MinecraftServer && !((MinecraftServer) x).isSinglePlayer()) {
+                this.permissionLevel = 4;
+            }
+        });
     }
 
     /*
@@ -137,6 +144,13 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
             commandSourceBridge.bridge$setPotentialPermissionNode(this.impl$potentialPermissionNode);
             commandSourceBridge.bridge$setCause(this.impl$cause);
         }
+    }
+
+    @Override
+    public CommandCause bridge$withCurrentCause() {
+        // Cause is set in ctor.
+        return (CommandCause) CommandSourceAccessor.accessor$createInstance(this.source, this.pos, this.rotation, this.world, this.permissionLevel,
+                this.name, this.displayName, this.server, this.entity, this.feedbackDisabled, this.resultConsumer, this.entityAnchorType);
     }
 
     /*
@@ -208,6 +222,11 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
     @Override
     public ICommandSource bridge$getICommandSource() {
         return this.source;
+    }
+
+    @Override
+    public void bridge$updateFrameFromICommandSource(final CauseStackManager.StackFrame frame) {
+        ((ICommandSourceBridge) this.source).bridge$addToCauseStack(frame);
     }
 
     @Override

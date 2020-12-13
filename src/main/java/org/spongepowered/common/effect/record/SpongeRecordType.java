@@ -36,6 +36,7 @@ import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.accessor.item.MusicDiscItemAccessor;
 import org.spongepowered.math.vector.Vector3i;
+
 import javax.annotation.Nullable;
 
 public final class SpongeRecordType extends SpongeCatalogType implements MusicDisc {
@@ -67,7 +68,7 @@ public final class SpongeRecordType extends SpongeCatalogType implements MusicDi
     public static SPlaySoundEventPacket createPacket(Vector3i position, @Nullable MusicDisc recordType) {
         checkNotNull(position, "position");
         final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
-        return new SPlaySoundEventPacket(EFFECT_ID, pos, recordType == null ? 0 :
+        return new SPlaySoundEventPacket(SpongeRecordType.EFFECT_ID, pos, recordType == null ? 0 :
                 ((SpongeRecordType) recordType).getId(), false);
     }
 }

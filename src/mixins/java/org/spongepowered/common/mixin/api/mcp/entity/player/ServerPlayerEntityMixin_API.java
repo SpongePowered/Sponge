@@ -27,11 +27,11 @@ package org.spongepowered.common.mixin.api.mcp.entity.player;
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.title.Title;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -50,7 +50,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Server;
@@ -69,8 +68,8 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.network.ServerPlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -89,9 +88,7 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.accessor.world.border.WorldBorderAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPacketBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
@@ -106,6 +103,7 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -117,18 +115,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 @Mixin(ServerPlayerEntity.class)
 @Implements(@Interface(iface = Player.class, prefix = "player$"))
 public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API implements ServerPlayer {
 
     @Shadow @Final public MinecraftServer server;
     @Shadow @Final private PlayerAdvancements advancements;
-    @Shadow private net.minecraft.entity.player.ChatVisibility chatVisibility;
-    @Shadow private String language;
     @Shadow public ServerPlayNetHandler connection;
-    @Shadow private boolean chatColours;
 
     private PlayerChatRouter api$chatRouter;
     private final TabList api$tabList = new SpongeTabList((ServerPlayerEntity) (Object) this);
@@ -161,33 +154,13 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
+    public boolean isOnline() {
+        return this.server.getPlayerList().getPlayerByUUID(this.entityUniqueID) == (ServerPlayerEntity) (Object) this;
+    }
+
+    @Override
     public GameProfile getProfile() {
         return ((ServerPlayerEntityBridge) this).bridge$getUser().getProfile();
-    }
-
-    @Override
-    public Locale getLocale() {
-        return LocaleCache.getLocale(this.language);
-    }
-
-    @Override
-    public int getViewDistance() {
-        return ((ServerPlayerEntityBridge) this).bridge$getViewDistance();
-    }
-
-    @Override
-    public ChatVisibility getChatVisibility() {
-        return (ChatVisibility) (Object) this.chatVisibility;
-    }
-
-    @Override
-    public boolean isChatColorsEnabled() {
-        return this.chatColours;
-    }
-
-    @Override
-    public Set<SkinPart> getDisplayedSkinParts() {
-        return ((ServerPlayerEntityBridge) this).bridge$getSkinParts();
     }
 
     @Override
@@ -203,7 +176,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         }
         this.spawnParticles(particleEffect, position, Integer.MAX_VALUE);
     }
-
 
     @Override
     public ServerPlayerConnection getConnection() {
@@ -227,9 +199,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void setScoreboard(final Scoreboard scoreboard) {
-        if (((ServerPlayerEntityBridge) this).bridge$hasDelegate()) {
-            ((ServerPlayer) ((ServerPlayerEntityBridge) this).bridge$getDelegate()).setScoreboard(scoreboard);
-        }
         ((ServerScoreboardBridge) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).bridge$removePlayer((ServerPlayerEntity) (Object) this, true);
         ((ServerPlayerEntityBridge) this).bridge$replaceScoreboard(scoreboard);
         ((ServerScoreboardBridge) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, true);
@@ -246,14 +215,13 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public void kick() {
-        this.kick(TranslatableComponent.of("disconnect.disconnected"));
+    public boolean kick() {
+        return this.kick(Component.translatable("disconnect.disconnected"));
     }
 
     @Override
-    public void kick(final Component message) {
-        final ITextComponent component = SpongeAdventure.asVanilla(message);
-        this.connection.disconnect(component);
+    public boolean kick(final Component message) {
+        return ((ServerPlayerEntityBridge) this).bridge$kick(message);
     }
 
     @Override
@@ -312,7 +280,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public boolean respawnPlayer() {
+    public boolean respawn() {
         if (this.shadow$getHealth() > 0.0F) {
             return false;
         }
@@ -323,8 +291,8 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public PlayerChatRouter getChatRouter() {
         if (this.api$chatRouter == null) {
-            this.api$chatRouter = (player, message) -> ((Server) this.server).sendMessage(
-                    TranslatableComponent.of("chat.type.text", ((EntityBridge) player).bridge$getDisplayNameText(), message));
+            this.api$chatRouter = (player, message) -> ((Server) this.server).sendMessage(player,
+                    Component.translatable("chat.type.text", SpongeAdventure.asAdventure(this.shadow$getDisplayName()), message));
         }
         return this.api$chatRouter;
     }
@@ -361,7 +329,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public AdvancementProgress getProgress(final Advancement advancement) {
         Preconditions.checkNotNull(advancement, "advancement");
-        Preconditions.checkState(((AdvancementBridge) advancement).bridge$isRegistered(), "The advancement must be registered");
         return (AdvancementProgress) this.advancements.getProgress((net.minecraft.advancements.Advancement) advancement);
     }
 
@@ -420,13 +387,13 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     // Audience
 
     @Override
-    public void sendMessage(final Component message, final MessageType type) {
+    public void sendMessage(final Identity identity, final Component message, final MessageType type) {
         if (this.impl$isFake) {
             return;
         }
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(type, "type");
-        this.connection.sendPacket(new SChatPacket(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type)));
+        this.connection.sendPacket(new SChatPacket(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type))); // TODO(1.16) use identity
     }
 
     @Override
@@ -439,6 +406,21 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
+    public void sendPlayerListHeader(final Component header) {
+        this.api$tabList.setHeader(header);
+    }
+
+    @Override
+    public void sendPlayerListFooter(final Component footer) {
+        this.api$tabList.setFooter(footer);
+    }
+
+    @Override
+    public void sendPlayerListHeaderAndFooter(final Component header, final Component footer) {
+        this.api$tabList.setHeaderAndFooter(header, footer);
+    }
+
+    @Override
     public void showTitle(final Title title) {
         if (this.impl$isFake) {
             return;
@@ -446,7 +428,9 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         Objects.requireNonNull(title, "title");
         final Title.Times times = title.times();
         if (times != null) {
-            this.connection.sendPacket(new STitlePacket(ticks(times.fadeIn()), ticks(times.stay()), ticks(times.fadeOut())));
+            this.connection.sendPacket(new STitlePacket(
+                ServerPlayerEntityMixin_API.ticks(times.fadeIn()),
+                ServerPlayerEntityMixin_API.ticks(times.stay()), ServerPlayerEntityMixin_API.ticks(times.fadeOut())));
         }
         this.connection.sendPacket(new STitlePacket(STitlePacket.Type.SUBTITLE, SpongeAdventure.asVanilla(title.subtitle())));
         this.connection.sendPacket(new STitlePacket(STitlePacket.Type.TITLE, SpongeAdventure.asVanilla(title.title())));

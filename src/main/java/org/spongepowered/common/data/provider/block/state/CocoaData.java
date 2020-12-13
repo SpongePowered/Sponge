@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.CocoaBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class CocoaData {
 
@@ -40,9 +40,9 @@ public final class CocoaData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, CocoaBlock.AGE))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, CocoaBlock.AGE))
                         .get(h -> h.get(CocoaBlock.AGE))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, CocoaBlock.AGE))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, CocoaBlock.AGE))
                         .supports(h -> h.getBlock() instanceof CocoaBlock);
     }
     // @formatter:on

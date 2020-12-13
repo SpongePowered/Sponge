@@ -28,6 +28,7 @@ import net.minecraft.command.ICommandSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 
 import java.util.function.Supplier;
 
@@ -37,7 +38,11 @@ public interface CommandSourceBridge {
 
     ICommandSource bridge$getICommandSource();
 
+    void bridge$updateFrameFromICommandSource(CauseStackManager.StackFrame frame);
+
     CommandCause bridge$asCommandCause();
+
+    CommandCause bridge$withCurrentCause();
 
     void bridge$setCause(Cause build);
 

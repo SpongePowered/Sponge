@@ -52,6 +52,19 @@ public final class VillagerData {
                     .create(Keys.PROFESSION_TYPE)
                         .get(h -> (ProfessionType) h.getVillagerData().getProfession())
                         .set((h, v) -> h.setVillagerData(h.getVillagerData().withProfession((VillagerProfession) v)))
+                    .create(Keys.EXPERIENCE)
+                        .get(VillagerEntity::getXp)
+                        .set(VillagerEntity::setXp)
+                    .delete(h -> h.setXp(0))
+                    .create(Keys.EXPERIENCE_LEVEL)
+                        .get(h -> h.getVillagerData().getLevel())
+                        .setAnd((h, v) -> {
+                            if (v < 1) {
+                                return false;
+                            }
+                            h.setVillagerData(h.getVillagerData().withLevel(v));
+                            return true;
+                        })
                     .create(Keys.TRADE_OFFERS)
                         .get(h -> h.getOffers().stream().map(TradeOffer.class::cast).collect(Collectors.toList()))
                         .set((h, v) -> h.setOffers(v.stream().map(MerchantOffer.class::cast).collect(Collectors.toCollection(MerchantOffers::new))))

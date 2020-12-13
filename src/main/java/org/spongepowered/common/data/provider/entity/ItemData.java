@@ -29,6 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class ItemData {
 
@@ -44,12 +45,13 @@ public final class ItemData {
                         .set((h, v) -> h.setItem(ItemStackUtil.fromSnapshotToNative(v)))
                 .asMutable(ItemEntityBridge.class)
                     .create(Keys.DESPAWN_DELAY)
-                        .get(ItemEntityBridge::bridge$getDespawnDelay)
+                        .get(h -> new SpongeTicks(h.bridge$getDespawnDelay()))
                         .setAnd((h, v) -> {
-                            if (v < 0) {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0) {
                                 return false;
                             }
-                            h.bridge$setDespawnDelay(v, false);
+                            h.bridge$setDespawnDelay(ticks, false);
                             return true;
                         })
                     .create(Keys.INFINITE_DESPAWN_DELAY)
@@ -59,8 +61,8 @@ public final class ItemData {
                         .get(ItemEntityBridge::bridge$infinitePickupDelay)
                         .set((h, v) -> h.bridge$setPickupDelay(h.bridge$getPickupDelay(), v))
                     .create(Keys.PICKUP_DELAY)
-                        .get(ItemEntityBridge::bridge$getPickupDelay)
-                        .set((h, v) -> h.bridge$setPickupDelay(v, false));
+                        .get(h -> new SpongeTicks(h.bridge$getPickupDelay()))
+                        .set((h, v) -> h.bridge$setPickupDelay((int) v.getTicks(), false));
     }
     // @formatter:on
 }

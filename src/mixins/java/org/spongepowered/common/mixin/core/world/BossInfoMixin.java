@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.kyori.adventure.bossbar.BossBar;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.BossInfo;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,15 +36,16 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
 
 @Mixin(BossInfo.class)
-public class BossInfoMixin implements BossInfoBridge {
-    @Shadow protected ITextComponent name;
+public abstract class BossInfoMixin implements BossInfoBridge {
 
+    @Shadow protected ITextComponent name;
     @Shadow protected float percent;
     @Shadow protected BossInfo.Color color;
     @Shadow protected BossInfo.Overlay overlay;
     @Shadow protected boolean createFog;
     @Shadow protected boolean darkenSky;
     @Shadow protected boolean playEndBossMusic;
+
     protected BossBar impl$adventure;
 
     @Override
@@ -58,7 +60,7 @@ public class BossInfoMixin implements BossInfoBridge {
     @Override
     public BossBar bridge$asAdventure() {
         if (this.impl$adventure == null) {
-            this.bridge$setAdventure(BossBar.of(
+            this.bridge$setAdventure(BossBar.bossBar(
                 SpongeAdventure.asAdventure(this.name),
                 this.percent,
                 SpongeAdventure.asAdventure(this.color),
@@ -72,6 +74,11 @@ public class BossInfoMixin implements BossInfoBridge {
     @Override
     public void bridge$setAdventure(final BossBar adventure) {
         this.impl$adventure = adventure;
+    }
+
+    @Override
+    public void bridge$replacePlayer(final ServerPlayerEntity oldPlayer, final ServerPlayerEntity newPlayer) {
+        // no-op
     }
 
     // Redirect setters

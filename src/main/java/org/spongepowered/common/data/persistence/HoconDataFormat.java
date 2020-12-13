@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
@@ -34,6 +31,10 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.InvalidDataFormatException;
 import org.spongepowered.api.data.persistence.StringDataFormat;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -51,59 +52,68 @@ import java.util.concurrent.Callable;
 
 public class HoconDataFormat extends SpongeCatalogType implements StringDataFormat {
 
-    public HoconDataFormat(ResourceKey key) {
+    public HoconDataFormat(final ResourceKey key) {
         super(key);
     }
 
     @Override
-    public DataContainer read(String input) throws InvalidDataException, IOException {
-        return readFrom(() -> new BufferedReader(new StringReader(input)));
+    public DataContainer read(final String input) throws InvalidDataException, IOException {
+        return HoconDataFormat.readFrom(() -> new BufferedReader(new StringReader(input)));
     }
 
     @Override
-    public DataContainer readFrom(Reader input) throws InvalidDataException, IOException {
-        return readFrom(() -> createBufferedReader(input));
+    public DataContainer readFrom(final Reader input) throws InvalidDataException, IOException {
+        return HoconDataFormat.readFrom(() -> HoconDataFormat.createBufferedReader(input));
     }
 
     @Override
-    public DataContainer readFrom(InputStream input) throws InvalidDataFormatException, IOException {
-        return readFrom(() -> new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8)));
+    public DataContainer readFrom(final InputStream input) throws InvalidDataFormatException, IOException {
+        return HoconDataFormat.readFrom(() -> new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8)));
     }
 
-    private static DataContainer readFrom(Callable<BufferedReader> source) throws IOException {
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
-                .setSource(source)
+    private static DataContainer readFrom(final Callable<BufferedReader> source) throws InvalidDataFormatException {
+        final HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
+                .source(source)
                 .build();
-        CommentedConfigurationNode node = loader.load();
-        return ConfigurateTranslator.instance().translateFrom(node);
+        try {
+            final CommentedConfigurationNode node = loader.load();
+            return ConfigurateTranslator.instance().translate(node);
+        } catch (final ConfigurateException ex) {
+            throw new InvalidDataFormatException(ex);
+        }
     }
 
     @Override
-    public String write(DataView data) throws IOException {
-        StringWriter writer = new StringWriter();
-        writeTo(() -> new BufferedWriter(writer), data);
+    public String write(final DataView data) throws IOException {
+        final StringWriter writer = new StringWriter();
+        HoconDataFormat.writeTo(() -> new BufferedWriter(writer), data);
         return writer.toString();
     }
 
     @Override
-    public void writeTo(Writer output, DataView data) throws IOException {
-        writeTo(() -> createBufferedWriter(output), data);
+    public void writeTo(final Writer output, final DataView data) throws IOException {
+        HoconDataFormat.writeTo(() -> HoconDataFormat.createBufferedWriter(output), data);
     }
 
     @Override
-    public void writeTo(OutputStream output, DataView data) throws IOException {
-        writeTo(() -> new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8)), data);
+    public void writeTo(final OutputStream output, final DataView data) throws IOException {
+        HoconDataFormat.writeTo(() -> new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8)), data);
     }
 
-    private static void writeTo(Callable<BufferedWriter> sink, DataView data) throws IOException {
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
-                .setSink(sink)
+    private static void writeTo(final Callable<BufferedWriter> sink, final DataView data) throws IOException {
+        final HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
+                .sink(sink)
                 .build();
-        ConfigurationNode node = ConfigurateTranslator.instance().translateData(data);
-        loader.save(node);
+        final ConfigurationNode node = loader.createNode();
+        ConfigurateTranslator.instance().translateDataToNode(node, data);
+        try {
+            loader.save(node);
+        } catch (final ConfigurateException ex) {
+            throw new IOException(ex);
+        }
     }
 
-    private static BufferedReader createBufferedReader(Reader reader) {
+    private static BufferedReader createBufferedReader(final Reader reader) {
         if (reader instanceof BufferedReader) {
             return (BufferedReader) reader;
         }
@@ -111,7 +121,7 @@ public class HoconDataFormat extends SpongeCatalogType implements StringDataForm
         return new BufferedReader(reader);
     }
 
-    private static BufferedWriter createBufferedWriter(Writer writer) {
+    private static BufferedWriter createBufferedWriter(final Writer writer) {
         if (writer instanceof BufferedWriter) {
             return (BufferedWriter) writer;
         }

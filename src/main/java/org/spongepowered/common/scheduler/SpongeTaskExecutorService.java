@@ -32,6 +32,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scheduler.TaskExecutorService;
 import org.spongepowered.api.scheduler.TaskFuture;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.temporal.TemporalUnit;
 import java.util.List;
@@ -43,8 +44,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 class SpongeTaskExecutorService extends AbstractExecutorService implements TaskExecutorService {
 
@@ -103,7 +102,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final FutureTask<T> runnable = new FutureTask<>(command, result);
         final Task task = this.createTask(runnable)
                 .build();
-        return new LanternScheduledFuture<>(runnable, submitTask(task), this.scheduler);
+        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
@@ -111,7 +110,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final FutureTask<T> runnable = new FutureTask<>(command);
         final Task task = this.createTask(runnable)
                 .build();
-        return new LanternScheduledFuture<>(runnable, submitTask(task), this.scheduler);
+        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
@@ -120,7 +119,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new LanternScheduledFuture<>(runnable, submitTask(task), this.scheduler);
+        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
@@ -129,7 +128,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new LanternScheduledFuture<>(runnable, submitTask(task), this.scheduler);
+        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
@@ -138,7 +137,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new LanternScheduledFuture<>(runnable, submitTask(task), this.scheduler);
+        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
@@ -147,7 +146,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new LanternScheduledFuture<>(runnable, submitTask(task), this.scheduler);
+        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
@@ -179,13 +178,13 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
     @Override
     public ScheduledTaskFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TemporalUnit unit) {
         // Since we don't have full control over the execution, the contract needs to be a little broken
-        return scheduleAtFixedRate(command, initialDelay, delay, unit);
+        return this.scheduleAtFixedRate(command, initialDelay, delay, unit);
     }
 
     @Override
     public ScheduledTaskFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
         // Since we don't have full control over the execution, the contract needs to be a little broken
-        return scheduleAtFixedRate(command, initialDelay, delay, unit);
+        return this.scheduleAtFixedRate(command, initialDelay, delay, unit);
     }
 
     private Task.Builder createTask(Runnable command) {
@@ -246,7 +245,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
                         .result();
             }
 
-            return Long.compare(getDelay(TimeUnit.NANOSECONDS), other.getDelay(TimeUnit.NANOSECONDS));
+            return Long.compare(this.getDelay(TimeUnit.NANOSECONDS), other.getDelay(TimeUnit.NANOSECONDS));
         }
 
         @Override

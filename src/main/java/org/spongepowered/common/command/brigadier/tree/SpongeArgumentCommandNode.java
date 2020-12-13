@@ -34,6 +34,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
+import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -45,6 +46,7 @@ import net.minecraft.command.ISuggestionProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
+import org.spongepowered.api.command.parameter.managed.ValueUsage;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
@@ -54,7 +56,6 @@ import org.spongepowered.common.util.Constants;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -71,19 +72,18 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         }
 
         return (context, builder) -> {
-            final String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
-            final List<String> suggestions = completer.complete((org.spongepowered.api.command.parameter.CommandContext) context);
+            final List<String> suggestions = completer.complete((org.spongepowered.api.command.parameter.CommandContext) context, builder.getRemaining());
             for (final String suggestion : suggestions) {
-                if (suggestion.toLowerCase(Locale.ROOT).contains(remaining)) {
-                    builder.suggest(suggestion);
-                }
+                builder.suggest(suggestion);
             }
             return builder.buildFuture();
         };
     }
 
+
     private final Parameter.Key<? super T> key;
     private final ArgumentParser<T> parser;
+    private final ValueUsage usage;
     private final boolean isComplexSuggestions;
 
     // used so we can have insertion order.
@@ -92,6 +92,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     @SuppressWarnings({"unchecked"})
     public SpongeArgumentCommandNode(
             final Parameter.Key<? super T> key,
+            final ValueUsage usage,
             final ArgumentParser<T> parser,
             @Nullable final ValueCompleter valueCompleter,
             @Nullable final Command command,
@@ -111,6 +112,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         this.parser = parser;
         this.isComplexSuggestions = this.parser instanceof ComplexSuggestionNodeProvider;
         this.key = key;
+        this.usage = usage;
     }
 
     public final boolean isComplex() {
@@ -178,7 +180,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                 type = this.parser.getClientCompletionArgumentType().get(0);
             }
 
-            final RequiredArgumentBuilder<ISuggestionProvider, ?> toReturn = RequiredArgumentBuilder.argument(this.getName(), type);
+            final RequiredArgumentBuilder<ISuggestionProvider, ?> toReturn = RequiredArgumentBuilder.argument(this.getUsageTextForClient(), type);
             if (this.getCommand() != null) {
                 toReturn.executes(x -> 0);
             }
@@ -191,11 +193,34 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             return toReturn;
         }
 
-        return (ArgumentBuilder) this.createBuilder();
+        // ensure we send what we want to send to the client in terms of the usage string.
+        final RequiredArgumentBuilder<CommandSource, ?> builder = RequiredArgumentBuilder.argument(this.getUsageTextForClient(), type);
+        builder.requires(this.getRequirement());
+        builder.forward(this.getRedirect(), this.getRedirectModifier(), this.isFork());
+        builder.suggests(this.getCustomSuggestions());
+        if (this.getCommand() != null) {
+            builder.executes(this.getCommand());
+        }
+        return (ArgumentBuilder) builder;
     }
 
     public final ArgumentParser<T> getParser() {
         return this.parser;
+    }
+
+    @Override
+    public String getUsageText() {
+        if (this.usage != null) {
+            return this.usage.getUsage(this.key.key());
+        }
+        return super.getUsageText();
+    }
+
+    private String getUsageTextForClient() {
+        if (this.usage != null) {
+            return this.usage.getUsage(this.key.key());
+        }
+        return this.getName();
     }
 
     @Override
@@ -208,6 +233,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             final ParsedArgument<CommandSource, T> parsed = new ParsedArgument<>(start, reader.getCursor(), result);
             builder.withArgumentInternal(this.getName(), parsed, false);
             builder.withNode(this, parsed.getRange());
+        } else if (this.parser.doesNotRead()) {
+            // Assume this is a null "optional" parser and add the node as read so that we dont end up with an empty context
+            builder.withNode(this, StringRange.at(start));
         }
     }
 
@@ -232,4 +260,28 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         this.nodeHolder.add(node);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), this.key, this.parser, this.usage, this.isComplexSuggestions, this.getCustomSuggestions());
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        final SpongeArgumentCommandNode<?> that = (SpongeArgumentCommandNode<?>) o;
+        return this.isComplexSuggestions == that.isComplexSuggestions &&
+                this.getRedirect() == that.getRedirect() && // See SuggestionArgumentNode for an explanation
+                this.key.equals(that.key) &&
+                this.parser.equals(that.parser) &&
+                Objects.equals(this.usage, that.usage) &&
+                Objects.equals(this.getCustomSuggestions(), that.getCustomSuggestions());
+    }
 }

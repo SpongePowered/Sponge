@@ -26,19 +26,18 @@ package org.spongepowered.common.event.tracking.phase.generation;
 
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.gen.ChunkGenerator;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
 
 public final class GenerationCompatibileContext extends GenerationContext<GenerationCompatibileContext> {
 
     @Nullable AbstractChunkProvider provider;
-    @Nullable ChunkGenerator modGen;
+    @Nullable ChunkGenerator<?> generator;
 
-    GenerationCompatibileContext(
-            final IPhaseState<? extends GenerationCompatibileContext> state, PhaseTracker tracker) {
+    GenerationCompatibileContext(final IPhaseState<GenerationCompatibileContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 
@@ -46,7 +45,7 @@ public final class GenerationCompatibileContext extends GenerationContext<Genera
     protected void reset() {
         super.reset();
         this.provider = null;
-        this.modGen = null;
+        this.generator = null;
     }
 
     @Override
@@ -54,7 +53,7 @@ public final class GenerationCompatibileContext extends GenerationContext<Genera
         final String s = String.format("%1$" + indent + "s", "");
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "ChunkProvider", this.provider)
-            .add(s + "- %s: %s", "Mod Provided Chunk Generator", this.modGen);
+            .add(s + "- %s: %s", "Mod Provided Chunk Generator", this.generator);
 
     }
 }

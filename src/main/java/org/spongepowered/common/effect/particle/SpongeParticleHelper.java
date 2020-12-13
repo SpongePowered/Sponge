@@ -24,18 +24,39 @@
  */
 package org.spongepowered.common.effect.particle;
 
+import net.minecraft.block.Block;
 import net.minecraft.network.IPacket;
+import net.minecraft.network.play.server.SPlaySoundEventPacket;
+import net.minecraft.network.play.server.SSpawnParticlePacket;
+import net.minecraft.particles.BasicParticleType;
+import net.minecraft.particles.BlockParticleData;
+import net.minecraft.particles.IParticleData;
+import net.minecraft.particles.ItemParticleData;
+import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.dimension.DimensionType;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.particle.ParticleOptions;
+import org.spongepowered.api.effect.particle.ParticleType;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.util.Color;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3f;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 
 public class SpongeParticleHelper {
 
     public static void sendPackets(ParticleEffect particleEffect, Vector3d position, int radius, DimensionType type, PlayerList playerList) {
-        final List<IPacket<?>> packets = toPackets(particleEffect, position);
+        final List<IPacket<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
+
         if (!packets.isEmpty()) {
             final double x = position.getX();
             final double y = position.getY();
@@ -48,7 +69,212 @@ public class SpongeParticleHelper {
     }
 
     public static List<IPacket<?>> toPackets(final ParticleEffect effect, final Vector3d position) {
-        throw new UnsupportedOperationException("implement me - see invalid");
+        SpongeParticleEffect spongeEffect = (SpongeParticleEffect) effect;
+
+        CachedParticlePacket cachedPacket = spongeEffect.cachedPacket;
+        if (cachedPacket == null) {
+            // Also save the generated packet cache for repeated uses.
+            cachedPacket = spongeEffect.cachedPacket = SpongeParticleHelper.getCachedPacket(spongeEffect);
+        }
+
+        final List<IPacket<?>> packets = new ArrayList<>();
+        cachedPacket.process(position, packets);
+        return packets;
     }
 
+    public static CachedParticlePacket getCachedPacket(final SpongeParticleEffect effect) {
+        final ParticleType type = effect.getType();
+
+        if (type instanceof NumericalParticleType) {
+            // Special cased particle types with numerical IDs.
+            return SpongeParticleHelper.getNumericalPacket(effect, (NumericalParticleType) type);
+        } else {
+            // Normal named particle type.
+            return SpongeParticleHelper.getNamedPacket(effect, (net.minecraft.particles.ParticleType<?>) type);
+        }
+    }
+
+    private static CachedParticlePacket getNumericalPacket(final ParticleEffect effect, final NumericalParticleType type) {
+        int effectId = type.getId();
+
+        return new NumericalCachedPacket(effectId, type.getData(effect), false);
+    }
+
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    private static CachedParticlePacket getNamedPacket(final ParticleEffect effect, final net.minecraft.particles.ParticleType<?> internalType) {
+        // Named particles always support OFFSET and QUANTITY.
+        final Vector3f offset = effect.getOptionOrDefault(ParticleOptions.OFFSET).get().toFloat();
+        final int quantity = effect.getOptionOrDefault(ParticleOptions.QUANTITY).get();
+        final Vector3f velocity = effect.getOptionOrDefault(ParticleOptions.VELOCITY).orElse(Vector3d.ZERO).toFloat();
+
+        if (internalType instanceof BasicParticleType) {
+            // Simple named particle without any additional supported options.
+            return new NamedCachedPacket((IParticleData) internalType, offset, quantity, velocity);
+        }
+
+        // The only way we can see what options are supported for a particular named particle
+        // is to compare the internal type's deserializer to some static deserializer fields.
+        // If only mojang had some type akin to our ParticleEffect...
+        if (internalType.getDeserializer() == BlockParticleData.DESERIALIZER) {
+            // This particle type supports a block state option.
+            final BlockState state = effect.getOptionOrDefault(ParticleOptions.BLOCK_STATE).get();
+            final BlockParticleData particleData = new BlockParticleData(
+                    (net.minecraft.particles.ParticleType<BlockParticleData>) internalType,
+                    (net.minecraft.block.BlockState) state);
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
+        } else if (internalType.getDeserializer() == ItemParticleData.DESERIALIZER) {
+            // This particle type supports an item option.
+            final ItemStackSnapshot snapshot = effect.getOptionOrDefault(ParticleOptions.ITEM_STACK_SNAPSHOT).get();
+            final ItemParticleData particleData = new ItemParticleData(
+                    (net.minecraft.particles.ParticleType<ItemParticleData>) internalType,
+                    (net.minecraft.item.ItemStack) (Object) snapshot.createStack());
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
+        } else if (internalType.getDeserializer() == RedstoneParticleData.DESERIALIZER) {
+            // This particle type supports a color option.
+            final Color color = effect.getOptionOrDefault(ParticleOptions.COLOR).get();
+            final RedstoneParticleData particleData = new RedstoneParticleData(
+                    (float) color.getRed() / 255,
+                    (float) color.getGreen() / 255,
+                    (float) color.getBlue() / 255,
+                    1.0f);
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
+        }
+
+        // Otherwise, we don't really know how to get a valid IParticleData. Sorry mods!
+        return EmptyCachedPacket.INSTANCE;
+    }
+
+    public static int getDirectionId(Direction direction) {
+        if (direction.isSecondaryOrdinal()) {
+            direction = Direction.getClosest(direction.asOffset(), Direction.Division.ORDINAL);
+        }
+        switch (direction) {
+            case SOUTHEAST:
+                return 0;
+            case SOUTH:
+                return 1;
+            case SOUTHWEST:
+                return 2;
+            case EAST:
+                return 3;
+            case WEST:
+                return 5;
+            case NORTHEAST:
+                return 6;
+            case NORTH:
+                return 7;
+            case NORTHWEST:
+                return 8;
+            default:
+                return 4;
+        }
+    }
+
+    public static int getBlockStateId(final ParticleEffect effect, final Optional<BlockState> defaultBlockState) {
+        final Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
+        if (blockState.isPresent()) {
+            // Use the provided block state option.
+            return Block.getStateId((net.minecraft.block.BlockState) blockState.get());
+        }
+
+        final Optional<ItemStackSnapshot> itemSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
+        if (itemSnapshot.isPresent()) {
+            // Try to convert the item into a usable block state.
+            final Optional<BlockType> blockType = itemSnapshot.get().getType().getBlock();
+            // TODO: correct behavior?
+            return blockType.map(type -> Block.getStateId((net.minecraft.block.BlockState) type.getDefaultState()))
+                    .orElse(0);
+        }
+
+        // Otherwise, use the default block state option if available.
+        return defaultBlockState.map(state -> Block.getStateId((net.minecraft.block.BlockState) state))
+                .orElse(0);
+    }
+
+    private static final class EmptyCachedPacket implements CachedParticlePacket {
+
+        public static final EmptyCachedPacket INSTANCE = new EmptyCachedPacket();
+
+        @Override
+        public void process(final Vector3d position, final List<IPacket<?>> output) {
+        }
+    }
+
+    private static final class NamedCachedPacket implements CachedParticlePacket {
+
+        private final IParticleData particleData;
+        private final Vector3f offset;
+        private final int quantity;
+        private final Vector3f velocity;
+
+        public NamedCachedPacket(final IParticleData particleData, final Vector3f offset, final int quantity, Vector3f velocity) {
+            this.particleData = particleData;
+            this.offset = offset;
+            this.quantity = quantity;
+            this.velocity = velocity;
+        }
+
+        @Override
+        public void process(final Vector3d position, final List<IPacket<?>> output) {
+            final float posX = (float) position.getX();
+            final float posY = (float) position.getY();
+            final float posZ = (float) position.getZ();
+
+            final float offX = this.offset.getX();
+            final float offY = this.offset.getY();
+            final float offZ = this.offset.getZ();
+
+            if (this.velocity.equals(Vector3f.ZERO)) {
+                final SSpawnParticlePacket packet = new SSpawnParticlePacket(
+                        this.particleData,
+                        true,
+                        posX, posY, posZ,
+                        offX, offY, offZ,
+                        0.0F,
+                        this.quantity
+                );
+
+                output.add(packet);
+            } else {
+                final float velocityX = this.velocity.getX();
+                final float velocityY = this.velocity.getY();
+                final float velocityZ = this.velocity.getZ();
+                final Random random = new Random();
+                for (int i = 0; i < this.quantity; i++) {
+                    final float px0 = posX + (random.nextFloat() * 2f - 1f) * offX;
+                    final float py0 = posY + (random.nextFloat() * 2f - 1f) * offY;
+                    final float pz0 = posZ + (random.nextFloat() * 2f - 1f) * offZ;
+
+                    final SSpawnParticlePacket message = new SSpawnParticlePacket(
+                            this.particleData,
+                            true,
+                            px0, py0, pz0,
+                            velocityX, velocityY, velocityZ,
+                            1f,
+                            0);
+                    output.add(message);
+                }
+            }
+        }
+    }
+
+    private static final class NumericalCachedPacket implements CachedParticlePacket {
+
+        private final int type;
+        private final int data;
+        private final boolean broadcast;
+
+        public NumericalCachedPacket(final int type, final int data, final boolean broadcast) {
+            this.type = type;
+            this.data = data;
+            this.broadcast = broadcast;
+        }
+
+        @Override
+        public void process(final Vector3d position, final List<IPacket<?>> output) {
+            final BlockPos blockPos = new BlockPos(position.getFloorX(), position.getFloorY(), position.getFloorZ());
+            final SPlaySoundEventPacket packet = new SPlaySoundEventPacket(this.type, blockPos, this.data, this.broadcast);
+            output.add(packet);
+        }
+    }
 }

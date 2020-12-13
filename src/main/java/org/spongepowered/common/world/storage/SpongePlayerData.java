@@ -24,54 +24,45 @@
  */
 package org.spongepowered.common.world.storage;
 
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataSerializable;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
-public class SpongePlayerData implements DataSerializable {
+public final class SpongePlayerData implements DataSerializable {
 
-    UUID uuid;
-    long firstJoined;
-    long lastJoined;
+    private UUID uniqueId;
+    private long firstJoined;
+    private long lastJoined;
 
     SpongePlayerData() {
     }
 
-    @Override
-    public String toString() {
-        return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("uuid", this.uuid)
-                .add("firstJoined", this.firstJoined)
-                .add("lastJoined", this.lastJoined)
-                .toString();
+    public UUID getUniqueId() {
+        return this.uniqueId;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.uuid, this.firstJoined, this.lastJoined);
+    public void setUniqueId(final UUID uniqueId) {
+        this.uniqueId = uniqueId;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || this.getClass() != obj.getClass()) {
-            return false;
-        }
-        final SpongePlayerData other = (SpongePlayerData) obj;
-        return Objects.equals(this.uuid, other.uuid)
-               && Objects.equals(this.firstJoined, other.firstJoined)
-               && Objects.equals(this.lastJoined, other.lastJoined);
+    public long getFirstJoined() {
+        return this.firstJoined;
+    }
+
+    public void setFirstJoined(final long firstJoined) {
+        this.firstJoined = firstJoined;
+    }
+
+    public long getLastJoined() {
+        return this.lastJoined;
+    }
+
+    public void setLastJoined(final long lastJoined) {
+        this.lastJoined = lastJoined;
     }
 
     @Override
@@ -83,31 +74,36 @@ public class SpongePlayerData implements DataSerializable {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Constants.Entity.Player.UUID, this.uuid.toString())
+                .set(Constants.Entity.Player.UUID, this.uniqueId.toString())
                 .set(Constants.Sponge.PlayerData.PLAYER_DATA_JOIN, this.firstJoined)
                 .set(Constants.Sponge.PlayerData.PLAYER_DATA_LAST, this.lastJoined);
     }
 
-    public static final class Builder extends AbstractDataBuilder<SpongePlayerData> implements DataBuilder<SpongePlayerData> {
+    @Override
+    public String toString() {
+        return com.google.common.base.MoreObjects.toStringHelper(this)
+                .add("uniqueId", this.uniqueId)
+                .add("firstJoined", this.firstJoined)
+                .add("lastJoined", this.lastJoined)
+                .toString();
+    }
 
-        public Builder() {
-            super(SpongePlayerData.class, 1);
-        }
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.uniqueId, this.firstJoined, this.lastJoined);
+    }
 
-        @Override
-        protected Optional<SpongePlayerData> buildContent(DataView container) throws InvalidDataException {
-            if (container.contains(Constants.Entity.Player.UUID, Constants.Sponge.PlayerData.PLAYER_DATA_JOIN, Constants.Sponge.PlayerData.PLAYER_DATA_LAST)) {
-                final String idString = container.getString(Constants.Entity.Player.UUID).get();
-                final UUID uuid = UUID.fromString(idString);
-                final long firstJoin = container.getLong(Constants.Sponge.PlayerData.PLAYER_DATA_JOIN).get();
-                final long lastJoin = container.getLong(Constants.Sponge.PlayerData.PLAYER_DATA_LAST).get();
-                final SpongePlayerData data = new SpongePlayerData();
-                data.uuid = uuid;
-                data.firstJoined = firstJoin;
-                data.lastJoined = lastJoin;
-                return Optional.of(data);
-            }
-            return Optional.empty();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongePlayerData other = (SpongePlayerData) obj;
+        return Objects.equals(this.uniqueId, other.uniqueId)
+                && Objects.equals(this.firstJoined, other.firstJoined)
+                && Objects.equals(this.lastJoined, other.lastJoined);
     }
 }

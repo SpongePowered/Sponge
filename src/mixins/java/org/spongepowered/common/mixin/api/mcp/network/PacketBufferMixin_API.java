@@ -613,7 +613,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     public ChannelBuf cbuf$writeDataView(final DataView data) {
-        final CompoundNBT compound = NbtTranslator.getInstance().translateData(checkNotNull(data, "data"));
+        final CompoundNBT compound = NbtTranslator.getInstance().translate(checkNotNull(data, "data"));
         this.shadow$writeCompoundTag(compound);
         return (ChannelBuf) this;
     }

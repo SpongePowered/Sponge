@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.data.provider;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.GenericTypeReflector;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.util.TypeTokenUtil;
 
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 @SuppressWarnings("unchecked")
 public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E> extends ImmutableDataProvider<V, E> implements
         AbstractDataProvider.KnownHolderType {
 
-    private static final TypeVariable<?> holderTypeParameter = GenericImmutableDataProviderBase.class.getTypeParameters()[0];
     private final Class<H> holderType;
 
     GenericImmutableDataProviderBase(final Key<V> key, final Class<H> holderType) {
@@ -46,7 +46,8 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
 
     GenericImmutableDataProviderBase(final Key<V> key) {
         super(key);
-        this.holderType = (Class<H>) TypeToken.of(this.getClass()).resolveType(holderTypeParameter).getRawType();
+        this.holderType = (Class<H>) GenericTypeReflector.erase(
+                TypeTokenUtil.typeArgumentFromSupertype(this.getClass(), GenericImmutableDataProviderBase.class, 0));
     }
 
     private boolean isTypeAllowed(final DataHolder dataHolder) {
@@ -122,6 +123,11 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
     @Override
     public boolean isSupported(final DataHolder dataHolder) {
         return this.isTypeAllowed(dataHolder) && this.supports((H) dataHolder);
+    }
+
+    @Override
+    public boolean isSupported(final Type dataHolder) {
+        return this.holderType.isAssignableFrom(GenericTypeReflector.erase(dataHolder));
     }
 
     @Override

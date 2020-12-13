@@ -27,14 +27,12 @@ package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.merchant.villager.VillagerTrades;
 import net.minecraft.item.MerchantOffer;
-import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
-
 import java.util.Random;
 
 @Mixin(VillagerTrades.ITrade.class)
@@ -43,7 +41,7 @@ public interface VillagerTrades_ITradeMixin_API extends TradeOfferGenerator {
     @Shadow @Nullable MerchantOffer shadow$getOffer(Entity entity, Random random);
 
     @Override
-    default TradeOffer apply(final Random random, final Merchant merchant) {
+    default TradeOffer apply(final org.spongepowered.api.entity.Entity merchant, final Random random) {
         return (TradeOffer) this.shadow$getOffer((Entity) merchant, random);
     }
 

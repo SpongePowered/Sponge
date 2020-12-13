@@ -33,17 +33,29 @@ public interface CPlayerPacketAccessor {
 
     @Accessor("x") double accessor$getX();
 
+    @Accessor("x") void accessor$setX(double newX);
+
     @Accessor("y") double accessor$getY();
+
+    @Accessor("y") void accessor$setY(double newY);
 
     @Accessor("z") double accessor$getZ();
 
+    @Accessor("z") void accessor$setZ(double newZ);
+
     @Accessor("yaw") float accessor$getYaw();
 
+    @Accessor("yaw") void accessor$setYaw(float newYaw);
+
     @Accessor("pitch") float accessor$getPitch();
+
+    @Accessor("pitch") void accessor$setPitch(float newPitch);
 
     @Accessor("onGround") boolean accessor$getOnGround();
 
     @Accessor("moving") boolean accessor$getMoving();
+
+    @Accessor("moving") void accessor$setMoving(boolean moving);
 
     @Accessor("rotating") boolean accessor$getRotating();
 }

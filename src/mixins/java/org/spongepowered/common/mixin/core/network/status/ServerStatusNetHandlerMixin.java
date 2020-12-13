@@ -54,7 +54,7 @@ public abstract class ServerStatusNetHandlerMixin {
     @Overwrite
     public void processServerQuery(final CServerQueryPacket packetIn) {
         if (this.handled) {
-            this.networkManager.closeChannel(EXIT_MESSAGE);
+            this.networkManager.closeChannel(ServerStatusNetHandlerMixin.EXIT_MESSAGE);
         } else {
             this.handled = true;
 

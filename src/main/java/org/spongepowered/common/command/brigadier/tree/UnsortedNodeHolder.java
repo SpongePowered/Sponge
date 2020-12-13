@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public final class UnsortedNodeHolder {
     private final List<CommandNode<CommandSource>> standardChildren = new LinkedList<>();
     private final List<CommandNode<CommandSource>> redirectingChildren = new LinkedList<>();
 
-    @Nullable private ImmutableList<CommandNode<CommandSource>> cachedResult;
+    @Nullable private List<CommandNode<CommandSource>> cachedResult;
 
     public void add(final CommandNode<CommandSource> node) {
         this.cachedResult = null;
@@ -52,10 +53,10 @@ public final class UnsortedNodeHolder {
 
     public Collection<CommandNode<CommandSource>> getChildren() {
         if (this.cachedResult == null) {
-            this.cachedResult = ImmutableList.<CommandNode<CommandSource>>builder()
-                    .addAll(this.standardChildren)
-                    .addAll(this.redirectingChildren)
-                    .build();
+            final LinkedList<CommandNode<CommandSource>> result = new LinkedList<>();
+            result.addAll(this.standardChildren);
+            result.addAll(this.redirectingChildren);
+            this.cachedResult = Collections.unmodifiableList(result);
         }
 
         return this.cachedResult;
@@ -63,7 +64,7 @@ public final class UnsortedNodeHolder {
 
     // Handles hidden nodes
     public Collection<CommandNode<CommandSource>> getChildrenForSuggestions() {
-        final ImmutableList.Builder<CommandNode<CommandSource>> nodes = ImmutableList.builder();
+        final ArrayList<CommandNode<CommandSource>> nodes = new ArrayList<>();
         for (final CommandNode<CommandSource> childNode : this.getChildren()) {
             if (childNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<CommandSource>) childNode).getParser().doesNotRead()) {
                 final CommandNode<CommandSource> redirected = childNode.getRedirect();
@@ -81,7 +82,24 @@ public final class UnsortedNodeHolder {
                 nodes.add(childNode);
             }
         }
-        return nodes.build();
+        nodes.sort((first, second) -> {
+            if (first.getRedirect() == null) {
+                return second.getRedirect() == null ? 0 : -1;
+            } else if (second.getRedirect() == null) {
+                return 1;
+            }
+
+            // if both are redirects...
+            if (first.getRedirect() == second) {
+                // second goes first.
+                return 1;
+            } else if (second.getRedirect() == first) {
+                // first goes first
+                return -1;
+            }
+            return 0; // don't care.
+        });
+        return nodes;
     }
 
 }

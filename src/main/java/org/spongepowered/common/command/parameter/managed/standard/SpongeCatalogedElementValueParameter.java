@@ -26,7 +26,7 @@ package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogType;
@@ -39,8 +39,10 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -48,9 +50,6 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
 
     private final List<String> prefixes;
     private final Class<T> catalogType;
-
-    // As CatalogTypes are baked in at startup, we can calculate and cache them.
-    @Nullable private List<String> completions = null;
 
     public SpongeCatalogedElementValueParameter(final List<String> prefixes, final Class<T> catalogType) {
         this.prefixes = prefixes;
@@ -66,7 +65,7 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
             final ResourceKey resourceKey = reader.parseResourceKey();
             final Optional<T> result = SpongeCommon.getRegistry().getCatalogRegistry().get(this.catalogType, resourceKey);
             if (!result.isPresent()) {
-                throw reader.createException(TextComponent.of("No " + this.catalogType.getSimpleName() + " with ID " + resourceKey.asString() + "exists"));
+                throw reader.createException(Component.text("No " + this.catalogType.getSimpleName() + " with ID " + resourceKey.asString() + "exists"));
             }
             return result;
         } catch (final ArgumentParseException ex) {
@@ -84,22 +83,28 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
 
             final String ids = this.prefixes.stream().map(x -> x + ":" + check).collect(Collectors.joining(", "));
             throw reader.createException(
-                    TextComponent.of("No " + this.catalogType.getSimpleName() + " with any of the following IDs exist: " + ids));
+                    Component.text("No " + this.catalogType.getSimpleName() + " with any of the following IDs exist: " + ids));
         }
     }
 
     @NonNull
     @Override
-    public List<String> complete(@NonNull final CommandContext context) {
-        if (this.completions == null) {
-            this.completions = SpongeCommon.getRegistry().getCatalogRegistry().getAllOf(this.catalogType).stream().map(x -> x.getKey().toString())
-                    .collect(Collectors.toList());
-        }
-        return this.completions;
+    public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
+        final String lowerCase = currentInput.toLowerCase();
+        return SpongeCommon.getRegistry().getCatalogRegistry().streamAllOf(this.catalogType)
+                .map(CatalogType::getKey)
+                .map(x -> {
+                    if (x.asString().startsWith(lowerCase)) {
+                        return x.asString();
+                    } else if (this.prefixes.contains(x.getNamespace()) && x.getValue().startsWith(lowerCase)) {
+                        return x.getValue();
+                    }
+                    return null;
+                }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Override
     public List<ArgumentType<?>> getClientCompletionArgumentType() {
-        return ImmutableList.of(Constants.Command.RESOURCE_LOCATION_TYPE);
+        return Collections.singletonList(Constants.Command.RESOURCE_LOCATION_TYPE);
     }
 }

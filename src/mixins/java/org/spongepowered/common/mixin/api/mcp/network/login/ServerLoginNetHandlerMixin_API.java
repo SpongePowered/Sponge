@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.net.InetSocketAddress;
 
@@ -50,7 +51,7 @@ public abstract class ServerLoginNetHandlerMixin_API implements ServerSideConnec
 
     @Override
     public GameProfile getProfile() {
-        return (GameProfile) this.loginGameProfile;
+        return SpongeGameProfile.of(this.loginGameProfile);
     }
 
     @Override

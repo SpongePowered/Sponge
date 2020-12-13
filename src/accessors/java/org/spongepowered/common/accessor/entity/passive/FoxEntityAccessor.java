@@ -47,5 +47,7 @@ public interface FoxEntityAccessor {
     @Invoker("setVariantType") void accessor$setVariantType(FoxEntity.Type typeIn);
     @Invoker("setStuck") void accessor$setStuck(boolean isStuck);
     @Invoker("setSleeping") void accessor$setSleeping(boolean isSleeping);
+    @Invoker("isFoxAggroed") boolean accessor$isFoxAggroed();
+    @Invoker("setFoxAggroed") void accessor$setFoxAggroed(boolean aggroed);
 
 }

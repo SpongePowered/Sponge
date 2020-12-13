@@ -31,12 +31,13 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Engine;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
@@ -57,26 +58,30 @@ import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseCo
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.util.EngineUtil;
-import org.spongepowered.common.util.TypeTokenHelper;
+import org.spongepowered.common.util.TypeTokenUtil;
+import org.spongepowered.configurate.util.Types;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public final class SpongeEventManager implements EventManager {
@@ -104,8 +109,8 @@ public final class SpongeEventManager implements EventManager {
         this.logger = logger;
         this.lock = new Object();
         this.handlersByEvent = HashMultimap.create();
-        this.classLoaders = new HashMap<>();
-        this.registeredListeners = new HashSet<>();
+        this.classLoaders = new IdentityHashMap<>();
+        this.registeredListeners = new ReferenceOpenHashSet<>();
         this.checker = new ListenerChecker(ShouldFire.class);
 
         // Caffeine offers no control over the concurrency level of the
@@ -133,29 +138,28 @@ public final class SpongeEventManager implements EventManager {
         }
     }
 
-    <T extends Event> RegisteredListener.Cache bakeHandlers(EventType<T> eventType) {
+    <T extends Event> RegisteredListener.Cache bakeHandlers(final EventType<T> eventType) {
         final List<RegisteredListener<?>> handlers = new ArrayList<>();
-        final Set<Class<? super T>> types = TypeToken.of(eventType.getType()).getTypes().rawTypes();
+        final Stream<? extends Class<?>> types = Types.allSuperTypesAndInterfaces(eventType.getType())
+                .map(GenericTypeReflector::erase)
+                .filter(Event.class::isAssignableFrom);
 
         // TODO: Move @Includes and @Excludes from filters to the baking process, this simplifies the generated
         //       filter code and makes the filter baking target more specific handlers.
         synchronized (this.lock) {
-            for (final Class<? super T> type : types) {
-                if (Event.class.isAssignableFrom(type)) {
-                    final Collection<RegisteredListener<?>> listeners = this.handlersByEvent.get(type);
-                    if (GenericEvent.class.isAssignableFrom(type)) {
-                        final TypeToken<?> genericType = eventType.getGenericType();
-                        checkNotNull(genericType);
-                        for (final RegisteredListener<?> listener : listeners) {
-                            final TypeToken<?> genericType1 = listener.getEventType().getGenericType();
-                            checkNotNull(genericType1);
-                            if (TypeTokenHelper.isAssignable(genericType, genericType1)) {
-                                handlers.add(listener);
-                            }
+            for (final Iterator<? extends Class<?>> it = types.iterator(); it.hasNext();) {
+                final Class<?> type = it.next();
+                final Collection<RegisteredListener<?>> listeners = this.handlersByEvent.get(type);
+                if (GenericEvent.class.isAssignableFrom(type)) {
+                    final Type genericType = Objects.requireNonNull(eventType.getGenericType());
+                    for (final RegisteredListener<?> listener : listeners) {
+                        final Type genericType1 = Objects.requireNonNull(listener.getEventType().getGenericType());
+                        if (TypeTokenUtil.isAssignable(genericType, genericType1)) {
+                            handlers.add(listener);
                         }
-                    } else {
-                        handlers.addAll(listeners);
                     }
+                } else {
+                    handlers.addAll(listeners);
                 }
             }
         }
@@ -215,7 +219,6 @@ public final class SpongeEventManager implements EventManager {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void registerListener(PluginContainer plugin, Object listenerObject) {
         checkNotNull(plugin, "plugin");
         checkNotNull(listenerObject, "listener");
@@ -244,19 +247,18 @@ public final class SpongeEventManager implements EventManager {
         for (final Method method : handle.getMethods()) {
             final Listener listener = method.getAnnotation(Listener.class);
             if (listener != null) {
-                final String error = getHandlerErrorOrNull(method);
+                final String error = SpongeEventManager.getHandlerErrorOrNull(method);
                 if (error == null) {
-                    @SuppressWarnings("rawtypes")
-                    final TypeToken eventType = TypeToken.of(method.getGenericParameterTypes()[0]);
+                    final Type eventType = method.getGenericParameterTypes()[0];
                     final AnnotatedEventListener handler;
                     try {
                         handler = handlerFactory.create(listenerObject, method);
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         this.logger.error("Failed to create handler for {} on {}", method, handle, e);
                         continue;
                     }
 
-                    handlers.add(createRegistration(plugin, eventType, listener, handler));
+                    handlers.add(SpongeEventManager.createRegistration(plugin, eventType, listener, handler));
                 } else {
                     methodErrors.put(method, error);
                 }
@@ -268,7 +270,7 @@ public final class SpongeEventManager implements EventManager {
         for (Class<?> handleParent = handle; handleParent != Object.class; handleParent = handleParent.getSuperclass()) {
             for (final Method method : handleParent.getDeclaredMethods()) {
                 if (method.getAnnotation(Listener.class) != null && !methodErrors.containsKey(method)) {
-                    final String error = getHandlerErrorOrNull(method);
+                    final String error = SpongeEventManager.getHandlerErrorOrNull(method);
                     if (error != null) {
                         methodErrors.put(method, error);
                     }
@@ -285,19 +287,20 @@ public final class SpongeEventManager implements EventManager {
         this.register(handlers);
     }
 
-    private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final TypeToken<T> eventClass,
+    private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final Type eventClass,
             final Listener listener, final EventListener<? super T> handler) {
-        return createRegistration(plugin, eventClass, listener.order(), listener.beforeModifications(), handler);
+        return SpongeEventManager.createRegistration(plugin, eventClass, listener.order(), listener.beforeModifications(), handler);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final TypeToken<T> eventType,
+    private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final Type eventType,
             final Order order, final boolean beforeModifications, final EventListener<? super T> handler) {
-        TypeToken<?> genericType = null;
-        if (GenericEvent.class.isAssignableFrom(eventType.getRawType())) {
-            genericType = eventType.resolveType(GENERIC_EVENT_TYPE);
+        Type genericType = null;
+        final Class<?> erased = GenericTypeReflector.erase(eventType);
+        if (GenericEvent.class.isAssignableFrom(erased)) {
+            genericType = TypeTokenUtil.typeArgumentFromSupertype(eventType, GenericEvent.class, 0);
         }
-        return new RegisteredListener(plugin, new EventType(eventType.getRawType(), genericType), order, handler, beforeModifications);
+        return new RegisteredListener(plugin, new EventType(erased, genericType), order, handler, beforeModifications);
     }
 
     @Override
@@ -331,13 +334,13 @@ public final class SpongeEventManager implements EventManager {
     @Override
     public <T extends Event> void registerListener(final PluginContainer plugin, final Class<T> eventClass, final Order order,
             final boolean beforeModifications, final EventListener<? super T> listener) {
-        this.registerListener(plugin, TypeToken.of(eventClass), Order.DEFAULT, false, listener);
+        this.registerListener(plugin, eventClass, Order.DEFAULT, false, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(final PluginContainer plugin, final TypeToken<T> eventType, final Order order,
             final boolean beforeModifications, final EventListener<? super T> listener) {
-        this.register(createRegistration(plugin, eventType, order, beforeModifications, listener));
+        this.register(SpongeEventManager.createRegistration(plugin, eventType.getType(), order, beforeModifications, listener));
     }
 
     private void unregister(final Predicate<RegisteredListener<?>> unregister) {
@@ -380,7 +383,7 @@ public final class SpongeEventManager implements EventManager {
         final Class<? extends Event> eventClass = event.getClass();
         final EventType<? extends Event> eventType;
         if (event instanceof GenericEvent) {
-            eventType = new EventType(eventClass, checkNotNull(((GenericEvent) event).getGenericType()));
+            eventType = new EventType(eventClass, checkNotNull(((GenericEvent) event).getGenericType().getType()));
         } else {
             eventType = new EventType(eventClass, null);
         }
@@ -428,7 +431,7 @@ public final class SpongeEventManager implements EventManager {
                 SpongeCommon.setActivePlugin(handler.getPlugin());
                 handler.handle(event);
             } catch (Throwable e) {
-                this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+                this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin().getMetadata().getId(), e);
             } finally {
                 SpongeCommon.setActivePlugin(null);
             }
@@ -441,7 +444,7 @@ public final class SpongeEventManager implements EventManager {
 
     @Nullable
     private EventListenerPhaseContext createPluginContext(final RegisteredListener<?> handler) {
-        if (PhaseTracker.getInstance().getCurrentState().allowsEventListener()) {
+        if (PhaseTracker.getInstance().getPhaseContext().allowsEventListener()) {
             return PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext(PhaseTracker.getInstance())
                 .source(handler.getPlugin());
         }

@@ -35,7 +35,7 @@ public class InteractionPacketContext extends PacketContext<InteractionPacketCon
     private BlockSnapshot targetBlock = BlockSnapshot.empty();
     private ItemStack activeItem = ItemStack.empty();
 
-    InteractionPacketContext(PacketState<? extends InteractionPacketContext> state, PhaseTracker tracker) {
+    InteractionPacketContext(PacketState<InteractionPacketContext> state, PhaseTracker tracker) {
         super(state, tracker);
         this.addCaptures();
         this.addEntityDropCaptures();

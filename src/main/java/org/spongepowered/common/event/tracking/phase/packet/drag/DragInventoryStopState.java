@@ -55,7 +55,7 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
 
     @Override
     public void unwind(InventoryPacketContext context) {
-        unwindCraftPreview(context);
+        DragInventoryStopState.unwindCraftPreview(context);
         super.unwind(context);
     }
 

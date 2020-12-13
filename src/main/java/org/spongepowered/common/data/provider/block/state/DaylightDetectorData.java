@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.DaylightDetectorBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class DaylightDetectorData {
 
@@ -44,9 +44,9 @@ public final class DaylightDetectorData {
                         .set((h, v) -> h.with(DaylightDetectorBlock.INVERTED, v))
                         .supports(h -> h.getBlock() instanceof DaylightDetectorBlock)
                     .create(Keys.POWER)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.POWER, DaylightDetectorBlock.POWER))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.POWER, DaylightDetectorBlock.POWER))
                         .get(h -> h.get(DaylightDetectorBlock.POWER))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, DaylightDetectorBlock.POWER))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, DaylightDetectorBlock.POWER))
                         .supports(h -> h.getBlock() instanceof DaylightDetectorBlock);
     }
     // @formatter:on

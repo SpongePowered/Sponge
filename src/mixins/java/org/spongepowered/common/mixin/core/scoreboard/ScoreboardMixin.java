@@ -32,20 +32,19 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.scoreboard.ScoreboardBridge;
 
+@SuppressWarnings("ConstantConditions")
 @Mixin(Scoreboard.class)
 public abstract class ScoreboardMixin implements ScoreboardBridge {
 
     private boolean impl$isClient;
-
-    @SuppressWarnings("ConstantConditions")
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setIsClient(final CallbackInfo ci) {
-        this.impl$isClient = !((Scoreboard) (Object) this instanceof ServerScoreboard);
-    }
 
     @Override
     public boolean bridge$isClient() {
         return this.impl$isClient;
     }
 
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$setIsClient(final CallbackInfo ci) {
+        this.impl$isClient = !((Scoreboard) (Object) this instanceof ServerScoreboard);
+    }
 }

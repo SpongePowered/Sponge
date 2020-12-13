@@ -6,7 +6,6 @@ plugins {
 repositories {
     gradlePluginPortal()
     maven("https://repo-new.spongepowered.org/repository/maven-public/")
-    mavenLocal()
 }
 
 

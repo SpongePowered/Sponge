@@ -24,33 +24,31 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEventData;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.IGrowable;
+import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.block.transaction.Operation;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.List;
 import java.util.function.BiConsumer;
 
-class FluidTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> {
-    private final BiConsumer<CauseStackManager.StackFrame, BlockTickContext> LOCATION_MODIFIER =
+class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> {
+    private final BiConsumer<CauseStackManager.StackFrame, FluidTickContext> LOCATION_MODIFIER =
         super.getFrameModifier().andThen((frame, context) ->
             {
                 frame.pushCause(this.getLocatableBlockSourceFromContext(context));
-                context.tickingBlock.bridge$getTickFrameModifier().accept(frame, (ServerWorldBridge) context.world);
             }
         );
     private final String desc;
@@ -60,37 +58,24 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public BiConsumer<CauseStackManager.StackFrame, BlockTickContext> getFrameModifier() {
+    public BiConsumer<CauseStackManager.StackFrame, FluidTickContext> getFrameModifier() {
         return this.LOCATION_MODIFIER;
     }
 
     @Override
-    public BlockTickContext createNewContext(final PhaseTracker tracker) {
-        return new BlockTickContext(this, tracker)
+    public FluidTickContext createNewContext(final PhaseTracker tracker) {
+        return new FluidTickContext(this, tracker)
                 .addCaptures();
     }
 
 
     @Override
-    public boolean shouldProvideModifiers(final BlockTickContext phaseContext) {
+    public boolean shouldProvideModifiers(final FluidTickContext phaseContext) {
         return phaseContext.providesModifier;
     }
 
     @Override
-    public boolean getShouldCancelAllTransactions(final BlockTickContext context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
-                                                  final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
-        if (!postEvent.getTransactions().isEmpty()) {
-            return postEvent.getTransactions().stream().anyMatch(transaction -> {
-                final BlockPos pos = VecHelper.toBlockPos(context.getSource(LocatableBlock.class).get().getBlockPosition());
-                final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
-                return pos.equals(blockPos) && !transaction.isValid();
-            });
-        }
-        return false;
-    }
-
-    @Override
-    public boolean doesCaptureNeighborNotifications(final BlockTickContext context) {
+    public boolean doesCaptureNeighborNotifications(final FluidTickContext context) {
         return context.allowsBulkBlockCaptures();
     }
 
@@ -101,16 +86,24 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public void unwind(final BlockTickContext context) {
+    public void unwind(final FluidTickContext context) {
         TrackingUtil.processBlockCaptures(context);
     }
 
     @Override
-    public void appendContextPreExplosion(final ExplosionContext explosionContext, final BlockTickContext context) {
+    public void appendContextPreExplosion(final ExplosionContext explosionContext, final FluidTickContext context) {
         context.applyOwnerIfAvailable(explosionContext::creator);
         context.applyNotifierIfAvailable(explosionContext::notifier);
         final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
         explosionContext.source(locatableBlock);
+    }
+
+    @Override
+    public void appendNotifierToBlockEvent(final FluidTickContext context, final TrackedWorldBridge mixinWorldServer, final BlockPos pos,
+        final TrackerBlockEventDataBridge blockEvent
+    ) {
+        final LocatableBlock source = this.getLocatableBlockSourceFromContext(context);
+        blockEvent.bridge$setTickingLocatable(source);
     }
 
     /**
@@ -119,22 +112,55 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
      * @return True if block events are to be tracked by the specific type of entity (default is true)
      */
     @Override
-    public boolean doesBlockEventTracking(final BlockTickContext context) {
+    public boolean doesBlockEventTracking(final FluidTickContext context) {
         return context.allowsBlockEvents();
     }
 
     @Override
-    public BlockChange associateBlockChangeWithSnapshot(final BlockTickContext phaseContext, final net.minecraft.block.BlockState newState, final Block newBlock,
-                                                        final net.minecraft.block.BlockState currentState, final SpongeBlockSnapshot snapshot, final Block originalBlock) {
-        if (phaseContext.tickingBlock instanceof IGrowable) {
+    public BlockChange associateBlockChangeWithSnapshot(
+        final FluidTickContext phaseContext,
+        final net.minecraft.block.BlockState newState,
+        final Block newBlock,
+        final net.minecraft.block.BlockState currentState,
+        final SpongeBlockSnapshot snapshot,
+        final Block originalBlock
+    ) {
+        if (phaseContext.tickingBlock instanceof FlowingFluidBlock) {
             if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;
             }
-            if (newBlock instanceof IGrowable || newState.getMaterial().isFlammable()) {
-                return BlockChange.GROW;
+            if (currentState.getBlock() instanceof FlowingFluidBlock) {
+                if (newState.getBlock() instanceof FlowingFluidBlock) {
+                    return BlockChange.MODIFY;
+                } else if (newState.isAir()) {
+                    return BlockChange.DECAY;
+                } else {
+                    return BlockChange.PLACE;
+                }
+            }
+
+            if (currentState.isAir()
+                && newState.getBlock() instanceof FlowingFluidBlock) {
+                return BlockChange.PLACE;
             }
         }
         return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, snapshot, originalBlock);
+    }
+
+    @Override
+    public Operation getBlockOperation(final SpongeBlockSnapshot original, final BlockChange blockChange
+    ) {
+        final FluidState fluidState = original.getState().getFluidState();
+        if (!fluidState.isEmpty() && blockChange == BlockChange.DECAY) {
+            return Operations.LIQUID_DECAY.get();
+        }
+        if (fluidState.isEmpty() && blockChange == BlockChange.PLACE) {
+            return Operations.LIQUID_SPREAD.get();
+        }
+        if (!fluidState.isEmpty() && blockChange == BlockChange.MODIFY) {
+            return Operations.LIQUID_SPREAD.get();
+        }
+        return super.getBlockOperation(original, blockChange);
     }
 
     @Override
