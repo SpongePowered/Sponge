@@ -171,7 +171,9 @@
     "block.CommandBlockMixin",
     "block.CactusBlockMixin",
     "block.LeavesBlockMixin",
-    "enchantment.EnchantmentMixin"
+    "enchantment.EnchantmentMixin",
+    "entity.item.minecart.FurnaceMinecartEntityMixin",
+    "entity.item.minecart.ContainerMinecartEntityMixin"
   ],
   "client": [
     "client.MinecraftMixin",

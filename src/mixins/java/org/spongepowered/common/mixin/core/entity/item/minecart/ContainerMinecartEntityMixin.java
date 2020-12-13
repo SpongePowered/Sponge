@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.entity.item.minecart;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
 @Mixin(ContainerMinecartEntity.class)
 public abstract class ContainerMinecartEntityMixin extends AbstractMinecartEntityMixin {
 
-    @Shadow private boolean dropContentsWhenDead;
+    @Shadow private boolean dropEquipment;
 
     /**
      * @author Zidane - June 2019 - 1.12.2
@@ -44,12 +44,12 @@ public abstract class ContainerMinecartEntityMixin extends AbstractMinecartEntit
      */
     @Override
     @Nullable
-    public Entity changeDimension(DimensionType dimensionIn) {
-        final Entity entity = super.changeDimension(dimensionIn);
+    public Entity changeDimension(ServerWorld world) {
+        final Entity entity = super.changeDimension(world);
 
         if (entity instanceof ContainerMinecartEntity) {
             // We actually teleported so...
-            this.dropContentsWhenDead = false;
+            this.dropEquipment = false;
         }
 
         return entity;

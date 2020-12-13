@@ -61,13 +61,13 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
 
     @Redirect(method = "spawnFire",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlock(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
+            target = "Lnet/minecraft/world/World;setBlockAndUpdate(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
     private boolean impl$throwEventForChangingBlocks(final net.minecraft.world.World world, final BlockPos pos, final BlockState blockState) {
         return this.impl$strikeBlockAndAddSnapshot(world, pos, blockState);
     }
 
     @Redirect(method = "spawnFire(I)V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlock(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
+            target = "Lnet/minecraft/world/World;setBlockAndUpdate(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
     private boolean impl$throwEventForChangingBlockDuringUpdate(final net.minecraft.world.World world, final BlockPos pos, final BlockState blockState) {
         return this.impl$strikeBlockAndAddSnapshot(world, pos, blockState);
     }
@@ -92,8 +92,8 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
     }
 
     @Redirect(method = "tick()V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;onStruckByLightning(Lnet/minecraft/entity/effect/LightningBoltEntity;)V"))
-    private void impl$AddEntityToListForEvent(final net.minecraft.entity.Entity mcEntity, final LightningBoltEntity lightningBolt) {
+            target = "Lnet/minecraft/entity/Entity;thunderHit(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/entity/effect/LightningBoltEntity;)V"))
+    private void impl$AddEntityToListForEvent(final net.minecraft.entity.Entity mcEntity, final ServerWorld level, final LightningBoltEntity lightningBolt) {
         if (!this.impl$effect) {
             final Entity entity = (Entity) mcEntity;
             if (!this.impl$struckEntities.contains(entity)) {
@@ -113,7 +113,7 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
 
             if (!strike.isCancelled()) {
                 for (final Entity e : strike.getEntities()) {
-                    ((net.minecraft.entity.Entity) e).func_241841_a((ServerWorld) this.world, (LightningBoltEntity) (Object) this);
+                    ((net.minecraft.entity.Entity) e).thunderHit((ServerWorld) this.world, (LightningBoltEntity) (Object) this);
                 }
                 SpongeCommon.postEvent(SpongeEventFactory.createLightningEventPost(frame.getCurrentCause()));
             }

@@ -34,11 +34,13 @@ import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 @Mixin(CommandBlockMinecartEntity.MinecartCommandLogic.class)
 public abstract class CommandBlockMinecartEntity_MinecartCommandLogicMixin implements CommandSourceProviderBridge {
 
-    @Shadow public abstract CommandSource shadow$getCommandSource();
+    // @formatter:off
+    @Shadow public abstract CommandSource shadow$createCommandSourceStack();
+    // @formatter:on
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.shadow$getCommandSource();
+        return this.shadow$createCommandSourceStack();
     }
 
 }

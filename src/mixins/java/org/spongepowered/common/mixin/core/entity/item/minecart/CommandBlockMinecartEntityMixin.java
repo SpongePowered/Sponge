@@ -39,7 +39,9 @@ import org.spongepowered.common.bridge.permissions.SubjectBridge;
 @Mixin(CommandBlockMinecartEntity.class)
 public abstract class CommandBlockMinecartEntityMixin extends AbstractMinecartEntityMixin implements SubjectBridge, CommandSourceProviderBridge {
 
-    @Shadow @Final private CommandBlockLogic commandBlockLogic;
+    // @formatter:off
+    @Shadow @Final private CommandBlockLogic commandBlock;
+    // @formatter:on
 
     @Override
     public String bridge$getSubjectCollectionIdentifier() {
@@ -53,6 +55,6 @@ public abstract class CommandBlockMinecartEntityMixin extends AbstractMinecartEn
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.commandBlockLogic.getCommandSource();
+        return this.commandBlock.createCommandSourceStack();
     }
 }

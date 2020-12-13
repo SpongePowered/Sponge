@@ -47,9 +47,9 @@ public abstract class FurnaceMinecartEntityMixin extends AbstractMinecartEntityM
      */
     @Override
     @Overwrite
-    protected double getMaximumSpeed() {
+    protected double getMaxSpeed() {
         // Return our custom value from EntityMinecart
-        return super.getMaximumSpeed();
+        return super.getMaxSpeed();
     }
 
 }

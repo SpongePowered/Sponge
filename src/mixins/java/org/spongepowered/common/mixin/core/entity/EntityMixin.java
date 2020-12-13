@@ -135,7 +135,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract void shadow$setCustomName(@Nullable ITextComponent name);
     @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract int shadow$getEntityId();
-    @Shadow public abstract boolean shadow$isBeingRidden();
+    @Shadow public abstract boolean shadow$isVehicle();
     @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow protected abstract void shadow$removePassenger(Entity passenger);
     @Shadow public abstract boolean shadow$isInvisible();

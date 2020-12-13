@@ -66,11 +66,11 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
      * @reason Use our custom maximum speed for the Minecart.
      */
     @Overwrite
-    protected double getMaximumSpeed() {
+    protected double getMaxSpeed() {
         return this.impl$maxSpeed;
     }
 
-    @Redirect(method = "moveDerailedMinecart",
+    @Redirect(method = "comeOffTrack",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/util/math/vector/Vector3d;scale(D)Lnet/minecraft/util/math/vector/Vector3d;"
         ),
@@ -82,10 +82,10 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
         require = 1
     )
     private Vector3d impl$applyDerailedModifierOnGround(final Vector3d vec3d, final double factor) {
-        return vec3d.mul(this.impl$derailedMod.getX(), this.impl$derailedMod.getY(), this.impl$derailedMod.getZ());
+        return vec3d.multiply(this.impl$derailedMod.getX(), this.impl$derailedMod.getY(), this.impl$derailedMod.getZ());
     }
 
-    @Redirect(method = "moveDerailedMinecart",
+    @Redirect(method = "comeOffTrack",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/util/math/vector/Vector3d;scale(D)Lnet/minecraft/util/math/vector/Vector3d;"
         ),
@@ -97,21 +97,21 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
         require = 1
     )
     private Vector3d impl$applyDerailedModifierInAir(final Vector3d vec3d, final double factor) {
-        return vec3d.mul(this.impl$airborneMod.getX(), this.impl$airborneMod.getY(), this.impl$airborneMod.getZ());
+        return vec3d.multiply(this.impl$airborneMod.getX(), this.impl$airborneMod.getY(), this.impl$airborneMod.getZ());
     }
 
-    @Redirect(method = "applyDrag",
+    @Redirect(method = "applyNaturalSlowdown",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/item/minecart/AbstractMinecartEntity;isBeingRidden()Z"
+            target = "Lnet/minecraft/entity/item/minecart/AbstractMinecartEntity;isVehicle()Z"
         )
     )
     private boolean impl$applyDragIfEmpty(final AbstractMinecartEntity self) {
-        return !this.impl$slowWhenEmpty || this.shadow$isBeingRidden();
+        return !this.impl$slowWhenEmpty || this.shadow$isVehicle();
     }
 
-    @Inject(method = "attackEntityFrom",
+    @Inject(method = "hurt",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/item/minecart/AbstractMinecartEntity;removePassengers()V"
+            target = "Lnet/minecraft/entity/item/minecart/AbstractMinecartEntity;ejectPassengers()V"
         ),
         cancellable = true)
     private void impl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
