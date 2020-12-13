@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.client.world;
 
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.world.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
@@ -33,7 +34,7 @@ import org.spongepowered.common.mixin.core.world.WorldMixin;
 public abstract class ClientWorldMixin extends WorldMixin implements WorldBridge {
 
     @Override
-    public void bridge$adjustDimensionLogic(final SpongeDimensionType dimensionType) {
+    public void bridge$adjustDimensionLogic(final DimensionType dimensionType) {
         super.bridge$adjustDimensionLogic(dimensionType);
 
         this.shadow$calculateInitialSkylight();

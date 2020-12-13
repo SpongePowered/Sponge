@@ -178,7 +178,6 @@
     "client.network.handshake.ClientHandshakeNetHandlerMixin",
     "client.network.login.ClientLoginNetHandlerMixin",
     "client.network.play.ClientPlayNetHandlerMixin",
-    "client.renderer.WorldRendererMixin",
     "client.util.text.TranslationTextComponentMixin",
     "client.world.ClientWorldMixin"
   ],

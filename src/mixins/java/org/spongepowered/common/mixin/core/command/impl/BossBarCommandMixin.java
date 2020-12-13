@@ -42,7 +42,9 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 @Mixin(BossBarCommand.class)
 public abstract class BossBarCommandMixin {
 
+    // @formatter:off
     @Shadow @Mutable @Final public static SuggestionProvider<CommandSource> SUGGEST_BOSS_BAR = ((context, builder) -> ISuggestionProvider.suggestResource(((ServerWorldBridge) context.getSource().getLevel()).bridge$getBossBarManager().getIds(), builder));
+    // @formatter:on
 
     @Redirect(method = "listBars", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()"
             + "Lnet/minecraft/server/CustomServerBossInfoManager;"))
