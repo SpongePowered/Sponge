@@ -24,25 +24,27 @@
  */
 package org.spongepowered.common.command.parameter.managed.builder;
 
-import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.CatalogType;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
+import org.spongepowered.api.registry.Registry;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeCatalogedElementValueParameter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
-public final class SpongeCatalogedElementParameterBuilder<T extends CatalogType>
+public final class SpongeCatalogedElementParameterBuilder<T>
         implements VariableValueParameters.CatalogedTypeBuilder<T> {
 
-    private final Class<T> catalogType;
+    private final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction;
     private final List<String> prefixes = new ArrayList<>();
 
-    public SpongeCatalogedElementParameterBuilder(final Class<T> catalogType) {
-        this.catalogType = catalogType;
+    public SpongeCatalogedElementParameterBuilder(final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction) {
+        this.registryFunction = registryFunction;
     }
 
     @Override
@@ -54,7 +56,7 @@ public final class SpongeCatalogedElementParameterBuilder<T extends CatalogType>
     @NonNull
     @Override
     public ValueParameter<T> build() {
-        return new SpongeCatalogedElementValueParameter<T>(ImmutableList.copyOf(this.prefixes), this.catalogType);
+        return new SpongeCatalogedElementValueParameter<>(new ArrayList<>(this.prefixes), this.registryFunction);
     }
 
     @Override

@@ -25,6 +25,7 @@
 package org.spongepowered.test.world;
 
 import com.google.inject.Inject;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -39,6 +40,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.registry.Registries;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.WorldArchetype;
@@ -72,12 +74,28 @@ public final class WorldTest {
         final Parameter.Value<WorldProperties> optWorldParameter = Parameter.worldProperties().optional().setKey("world").build();
         final Parameter.Value<ServerLocation> locationParameter = Parameter.location().setKey("location").build();
         final Parameter.Value<Vector3d> optVector3Parameter = Parameter.vector3d().optional().setKey("position").build();
-        final Parameter.Value<PortalType> portalTypeParameter = Parameter.catalogedElementWithMinecraftAndSpongeDefaults(PortalType.class).setKey("portal_type").build();
-        final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.catalogedElementWithMinecraftAndSpongeDefaults(DimensionType.class).setKey("dimension_type").build();
+        final Parameter.Value<PortalType> portalTypeParameter =
+                Parameter.registryElement(
+                        TypeToken.get(PortalType.class),
+                        Registries.PORTAL_TYPE.asDefaultedReference(Sponge.getGame()::registries),
+                        "minecraft",
+                        "sponge")
+                    .setKey("portal_type").build();
+        final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.registryElement(
+                TypeToken.get(DimensionType.class),
+                Registries.DIMENSION_TYPE.asDefaultedReference(Sponge.getGame()::registries),
+                "minecraft",
+                "sponge").setKey("dimension_type").build();
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
         final Parameter.Value<ResourceKey> copyWorldKeyParameter = Parameter.resourceKey().setKey("copy_world").build();
         final Parameter.Value<String> renameWorldKeyParameter = Parameter.string().setKey("new_world_name").build();
-        final Parameter.Value<BiomeType> biomeListTypeParameter = Parameter.catalogedElementWithMinecraftAndSpongeDefaults(BiomeType.class).setKey("biome_types").consumeAllRemaining().optional().build();
+        final Parameter.Value<BiomeType> biomeListTypeParameter =
+                Parameter.registryElement(
+                        TypeToken.get(BiomeType.class),
+                        Registries.BIOME_TYPE.asDefaultedReference(Sponge.getGame()::registries),
+                        "minecraft",
+                        "sponge"
+                ).setKey("biome_types").consumeAllRemaining().optional().build();
 
         final Parameter.Value<ResourceKey> unloadedWorldKeyParameter = Parameter.resourceKey()
                 .setSuggestions((context, currentInput) -> Sponge.getServer().getWorldManager()
@@ -196,7 +214,12 @@ public final class WorldTest {
                                     settings.set(DataQuery.of("biome_source", "type"), "minecraft:checkerboard");
                                 }
                                 settings.set(DataQuery.of("biome_source", "options", "biomes"), biomes.stream().map(BiomeType::getKey).map(ResourceKey::asString).collect(Collectors.toList()));
-                                modifierType = Sponge.getRegistry().getCatalogRegistry().get(GeneratorModifierType.class, ResourceKey.resolve("buffet")).get();
+                                modifierType = Registries.GENERATOR_MODIFIER_TYPE
+                                        .asReference()
+                                        .get(Sponge.getGame().registries())
+                                        .findEntry(ResourceKey.resolve("buffet"))
+                                        .get()
+                                        .value();
                             }
                             final WorldArchetype archetype = WorldArchetype.builder()
                                     .key(ResourceKey.of(this.plugin, "nether_style"))

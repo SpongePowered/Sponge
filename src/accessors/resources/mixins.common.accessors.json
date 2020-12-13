@@ -187,7 +187,8 @@
         "entity.passive.horse.HorseEntityAccessor",
         "entity.item.ItemFrameEntityAccessor",
         "entity.monster.AbstractRaiderEntityAccessor",
-        "world.LockCodeAccessor"
+        "world.LockCodeAccessor",
+        "util.RegistryKeyAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.accessor.util;
 
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
@@ -33,7 +33,7 @@ import org.spongepowered.common.UntransformedInvokerError;
 @Mixin(RegistryKey.class)
 public interface RegistryKeyAccessor<T> {
 
-    @Invoker("create") static <T> net.minecraft.util.RegistryKey<T> invoker$create(ResourceLocation p_240905_0_, ResourceLocation p_240905_1_) {
+    @Invoker("create") static <T> RegistryKey<T> invoker$create(final ResourceLocation p_240905_0_, final ResourceLocation p_240905_1_) {
         throw new UntransformedInvokerError();
     }
 }
