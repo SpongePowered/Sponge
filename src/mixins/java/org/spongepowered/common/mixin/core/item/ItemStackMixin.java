@@ -122,7 +122,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
         }
     }
 
-    @Redirect(method = "removeChildTag",
+    @Redirect(method = "removeTagKey",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundNBT;remove(Ljava/lang/String;)V"))
     private void impl$nullStackCompoundIfEmptyAfterRemoval(final CompoundNBT compound, final String key) {
         compound.remove(key);
@@ -140,7 +140,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
     }
 
 
-    @Inject(method = "onBlockDestroyed", at = @At("HEAD"))
+    @Inject(method = "mineBlock", at = @At("HEAD"))
     private void impl$capturePlayerUsingItemstack(final World worldIn, final BlockState blockIn, final BlockPos pos, final PlayerEntity playerIn,
         final CallbackInfo ci) {
         if (!((WorldBridge) worldIn).bridge$isFake()) {
@@ -149,7 +149,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
         }
     }
 
-    @Inject(method = "onBlockDestroyed", at = @At("RETURN"))
+    @Inject(method = "mineBlock", at = @At("RETURN"))
     private void impl$nullOutCapturedPlayer(final World worldIn, final BlockState blockIn, final BlockPos pos, final PlayerEntity playerIn,
         final CallbackInfo ci) {
         if (!((WorldBridge) worldIn).bridge$isFake()) {

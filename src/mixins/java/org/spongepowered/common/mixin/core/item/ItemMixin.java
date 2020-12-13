@@ -34,12 +34,12 @@ import java.util.StringJoiner;
 @Mixin(Item.class)
 public abstract class ItemMixin implements ItemBridge {
 
-    @Shadow private String translationKey;
+    @Shadow private String descriptionId;
 
     @Override
     public String toString() {
         return new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]")
-                .add("name=" + this.translationKey)
+                .add("name=" + this.descriptionId)
                 .toString();
     }
 }

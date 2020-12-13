@@ -41,7 +41,7 @@ public abstract class ChorusFruitItemMixin {
     private boolean impl$createCauseFrameForTeleport(final LivingEntity entity, final double x, final double y, final double z,
                                                      final boolean p_213373_7_) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.CHORUS_FRUIT);
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE.get(), MovementTypes.CHORUS_FRUIT.get());
 
             return entity.randomTeleport(x, y, z, p_213373_7_);
         }

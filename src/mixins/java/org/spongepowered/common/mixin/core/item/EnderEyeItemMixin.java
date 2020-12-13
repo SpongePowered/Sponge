@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import net.minecraft.entity.item.EyeOfEnderEntity;
+import net.minecraft.entity.projectile.EyeOfEnderEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnderEyeItem;
 import net.minecraft.item.ItemStack;
@@ -84,10 +84,10 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
      */
     @SuppressWarnings("Duplicates")
     @Inject(
-        method = "onItemRightClick",
+        method = "use",
         at = @At(
             value = "NEW",
-            target = "net/minecraft/entity/item/EyeOfEnderEntity"
+            target = "net/minecraft/entity/projectile/EyeOfEnderEntity"
         ),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         require = 1,
@@ -98,8 +98,8 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
                     SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                            ServerLocation.of((ServerWorld) worldIn, playerIn.getPosX(), playerIn.getPosY() + (double) (playerIn.getSize(playerIn
-                                    .getPose()).height / 2.0F), playerIn.getPosZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
+                            ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
+                                    .getPose()).height / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.postEvent(event)) {
                 cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, used));
             }
@@ -116,8 +116,8 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
                     SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                            ServerLocation.of((ServerWorld) worldIn, playerIn.getPosX(), playerIn.getPosY() + (double) (playerIn.getSize(playerIn
-                                    .getPose()).height / 2.0F), playerIn.getPosZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
+                            ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
+                                    .getPose()).height / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.postEvent(event)) {
                 cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, used));
             }
@@ -142,21 +142,10 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
      * @param targetPos The target position of the dungeon
      * @param enderEye The ender eye being spawned
      */
-    @Inject(method = "onItemRightClick(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;",
+    @Inject(method = "use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"
-        ),
-        slice = @Slice(
-            from = @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/entity/item/EyeOfEnderEntity;moveTowards(Lnet/minecraft/util/math/BlockPos;)V"
-            ),
-            to = @At(
-                value = "FIELD",
-                target = "Lnet/minecraft/advancements/CriteriaTriggers;USED_ENDER_EYE:Lnet/minecraft/advancements/criterion/UsedEnderEyeTrigger;",
-                opcode = Opcodes.GETSTATIC
-            )
+            target = "Lnet/minecraft/world/World;addFreshEntity(Lnet/minecraft/entity/Entity;)Z"
         ),
         locals = LocalCapture.CAPTURE_FAILSOFT
     )
@@ -166,13 +155,13 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }
-        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER, (ProjectileSource) playerIn);
+        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER.get(), (ProjectileSource) playerIn);
     }
 
     /**
      * The RayTraceResult is lost, and somehow, production JVM will shove the CallbackInfoReturnable
      * into the LVT.... So.... Don't care which one is actually on the stack, it might be the one from
-     * {@link #implThrowForPreEvent(World, EntityPlayer, EnumHand, CallbackInfoReturnable, ItemStack, BlockPos)}
+     * {@link #impl$ThrowForPreEvent(World, PlayerEntity, Hand, CallbackInfoReturnable, ItemStack, BlockPos)}
      * or some other injection. Either way, this one works in production.
      */
     @Surrogate
@@ -182,7 +171,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }
-        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER, (ProjectileSource) playerIn);
+        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER.get(), (ProjectileSource) playerIn);
     }
 
 }

@@ -50,16 +50,16 @@ public abstract class FishingRodItemMixin {
 
     @Nullable private FishingBobberEntity impl$fishHook;
 
-    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-            target = "Lnet/minecraft/entity/projectile/FishingBobberEntity;handleHookRetraction(Lnet/minecraft/item/ItemStack;)I"), cancellable = true)
+    @Inject(method = "use", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
+            target = "Lnet/minecraft/entity/projectile/FishingBobberEntity;retrieve(Lnet/minecraft/item/ItemStack;)I"), cancellable = true)
     private void cancelHookRetraction(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
-        if (player.fishingBobber != null) {
+        if (player.fishing != null) {
             // Event was cancelled
-            cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand)));
+            cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, player.getItemInHand(hand)));
         }
     }
 
-    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE",
+    @Inject(method = "use", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", ordinal = 1),
             cancellable = true)
     private void onThrowEvent(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
@@ -67,21 +67,21 @@ public abstract class FishingRodItemMixin {
             // Only fire event on server-side to avoid crash on client
             return;
         }
-        ItemStack itemstack = player.getHeldItem(hand);
+        ItemStack itemstack = player.getItemInHand(hand);
         int k = EnchantmentHelper.getFishingSpeedBonus(itemstack);
         int j = EnchantmentHelper.getFishingLuckBonus(itemstack);
         FishingBobberEntity fishHook = new FishingBobberEntity(player, world, j, k);
         PhaseTracker.getCauseStackManager().pushCause(player);
         if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStart(PhaseTracker.getCauseStackManager().getCurrentCause(), (FishingBobber) fishHook))) {
             fishHook.remove(); // Bye
-            cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand)));
+            cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, player.getItemInHand(hand)));
         } else {
             this.impl$fishHook = fishHook;
         }
         PhaseTracker.getCauseStackManager().popCause();
     }
 
-    @Redirect(method = "onItemRightClick", at = @At(value = "NEW", target = "net/minecraft/entity/projectile/FishingBobberEntity"))
+    @Redirect(method = "use", at = @At(value = "NEW", target = "net/minecraft/entity/projectile/FishingBobberEntity"))
     private FishingBobberEntity onNewEntityFishHook(World world, PlayerEntity player) {
         // Use the fish hook we created for the event
         FishingBobberEntity fishHook = this.impl$fishHook;
