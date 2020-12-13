@@ -52,6 +52,7 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = ChannelBuf.class, prefix = "cbuf$"))
 public abstract class PacketBufferMixin_API extends ByteBuf {
 
+    // @formatter:off
     // mojang methods, fluent in target
     @Shadow public abstract PacketBuffer shadow$writeByteArray(byte[] array);
     @Shadow public abstract PacketBuffer shadow$writeVarInt(int input);
@@ -68,6 +69,8 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     @Shadow public abstract String shadow$readUtf(int maxLength);
     @Shadow public abstract CompoundNBT shadow$readNbt() throws IOException;
     @Shadow public abstract UUID shadow$readUUID();
+
+    // @formatter:on
 
     @Intrinsic
     public int cbuf$capacity() {

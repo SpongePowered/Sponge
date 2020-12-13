@@ -40,10 +40,11 @@ import javax.annotation.Nullable;
 @Mixin(BeaconTileEntity.class)
 public abstract class BeaconTileEntityMixin_API extends TileEntityMixin_API implements Beacon {
 
+    // @formatter:off
     @Shadow private int levels;
-
-    @Shadow @Nullable private Effect primaryEffect;
-    @Shadow @Nullable private Effect secondaryEffect;
+    @Shadow @Nullable private Effect primaryPower;
+    @Shadow @Nullable private Effect secondaryPower;
+    // @formatter:on
 
     @Override
     public int getCompletedLevels() {
@@ -53,8 +54,8 @@ public abstract class BeaconTileEntityMixin_API extends TileEntityMixin_API impl
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(Constants.TileEntity.Beacon.PRIMARY, Effect.getId(this.primaryEffect));
-        container.set(Constants.TileEntity.Beacon.SECONDARY, Effect.getId(this.secondaryEffect));
+        container.set(Constants.TileEntity.Beacon.PRIMARY, Effect.getId(this.primaryPower));
+        container.set(Constants.TileEntity.Beacon.SECONDARY, Effect.getId(this.secondaryPower));
         return container;
     }
 

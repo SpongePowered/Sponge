@@ -40,8 +40,10 @@ import java.util.Optional;
 @Implements(@Interface(iface = Server.class, prefix = "server$"))
 public abstract class DedicatedServerMixin_API extends MinecraftServerMixin_API implements Server {
 
+    // @formatter:off
     @Shadow public abstract String shadow$getServerIp();
     @Shadow public abstract int shadow$getServerPort();
+    // @formatter:on
 
     public DedicatedServerMixin_API(final String name) {
         super(name);

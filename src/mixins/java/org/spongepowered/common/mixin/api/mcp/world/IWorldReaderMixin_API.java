@@ -31,8 +31,8 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.ICollisionReader;
-import net.minecraft.world.ILightReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -88,13 +88,13 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
 
     // @formatter:off
     @Nullable @Shadow IChunk shadow$getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus p_217353_3_, boolean p_217353_4_);
-    @Deprecated @Shadow boolean shadow$chunkExists(int p_217354_1_, int p_217354_2_);
+    @Deprecated @Shadow boolean shadow$hasChunk(int p_217354_1_, int p_217354_2_);
     @Shadow int shadow$getHeight(Heightmap.Type p_201676_1_, int p_201676_2_, int p_201676_3_);
-    @Shadow int shadow$getSkylightSubtracted();
+    @Shadow int shadow$getSkyDarken();
     @Shadow int shadow$getSeaLevel();
-    @Shadow boolean shadow$hasWater(BlockPos p_201671_1_);
-    @Deprecated @Shadow boolean shadow$isAreaLoaded(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
-    @Shadow net.minecraft.world.dimension.Dimension shadow$getDimension();
+    @Shadow boolean shadow$isWaterAt(BlockPos p_201671_1_);
+    @Deprecated @Shadow boolean shadow$hasChunksAt(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
+    @Shadow net.minecraft.world.DimensionType shadow$dimensionType();
     @Shadow boolean shadow$containsAnyLiquid(AxisAlignedBB bb);
     @Shadow Biome shadow$getBiome(BlockPos p_226691_1_);
     // @formatter:on
@@ -103,7 +103,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
 
     @Override
     default DimensionType getDimensionType() {
-        return ((DimensionTypeBridge) this.shadow$getDimension().getType()).bridge$getSpongeDimensionType();
+        return (DimensionType) this.shadow$dimensionType();
     }
 
     @Override
@@ -113,17 +113,17 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
 
     @Override
     default boolean isInBorder(final Entity entity) {
-        return ((ICollisionReader) this).getWorldBorder().contains(((net.minecraft.entity.Entity) entity).getBoundingBox());
+        return ((ICollisionReader) this).getWorldBorder().isWithinBounds(((net.minecraft.entity.Entity) entity).getBoundingBox());
     }
 
     @Override
     default boolean canSeeSky(final int x, final int y, final int z) {
-        return ((ILightReader) this).canSeeSky(new BlockPos(x, y, z));
+        return ((IBlockDisplayReader) this).canSeeSky(new BlockPos(x, y, z));
     }
 
     @Override
     default boolean hasLiquid(final int x, final int y, final int z) {
-        return this.shadow$hasWater(new BlockPos(x, y, z));
+        return this.shadow$isWaterAt(new BlockPos(x, y, z));
     }
 
     @Override
@@ -135,7 +135,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
 
     @Override
     default int getSkylightSubtracted() {
-        return this.shadow$getSkylightSubtracted();
+        return this.shadow$getSkyDarken();
     }
 
     @Intrinsic
@@ -146,7 +146,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
     @Override
     default boolean isAreaLoaded(final int xStart, final int yStart, final int zStart, final int xEnd, final int yEnd,
         final int zEnd, final boolean allowEmpty) {
-        return this.shadow$isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd);
+        return this.shadow$hasChunksAt(xStart, yStart, zStart, xEnd, yEnd, zEnd);
     }
 
     // RandomProvider
@@ -191,17 +191,17 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
 
     @Override
     default boolean isChunkLoaded(final int x, final int y, final int z, final boolean allowEmpty) {
-        return this.shadow$chunkExists(x >> 4, z >> 4);
+        return this.shadow$hasChunk(x >> 4, z >> 4);
     }
 
     @Override
     default boolean hasChunk(final int x, final int y, final int z) {
-        return this.shadow$chunkExists(x >> 4, z >> 4);
+        return this.shadow$hasChunk(x >> 4, z >> 4);
     }
 
     @Override
     default boolean hasChunk(final Vector3i position) {
-        return this.shadow$chunkExists(position.getX() >> 4, position.getZ() >> 4);
+        return this.shadow$hasChunk(position.getX() >> 4, position.getZ() >> 4);
     }
 
     // HeightAwareVolume
@@ -213,7 +213,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
 
     @Override
     default BiomeType getBiome(final int x, final int y, final int z) {
-        return (BiomeType) this.shadow$getBiome(new BlockPos(x, y, z));
+        return (BiomeType) (Object) this.shadow$getBiome(new BlockPos(x, y, z));
     }
 
     @Override
@@ -318,12 +318,12 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
             (R) this,
             // IdentityFunction
             shouldCarbonCopy ? (pos, tile) -> {
-                final CompoundNBT nbt = tile.write(new CompoundNBT());
+                final CompoundNBT nbt = tile.save(new CompoundNBT());
                 final @Nullable TileEntity cloned = tile.getType().create();
                 Objects.requireNonNull(
                     cloned,
-                    () -> String.format("TileEntityType[%s] creates a null TileEntity!", TileEntityType.getId(tile.getType()))
-                ).read(nbt);
+                    () -> String.format("TileEntityType[%s] creates a null TileEntity!", TileEntityType.getKey(tile.getType()))
+                ).load(state, nbt);
                 if (this instanceof World) {
                     ((TileEntityAccessor) cloned).accessor$level((World) this);
                 }
@@ -334,12 +334,12 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
             // TileEntity by block pos
             (key, tileEntity) -> key,
             // TileEntity Accessor
-            (chunk) -> chunk instanceof Chunk ? ((Chunk) chunk).getTileEntityMap().entrySet().stream() : Stream.empty(),
+            (chunk) -> chunk instanceof Chunk ? ((Chunk) chunk).getBlockEntities().entrySet().stream() : Stream.empty(),
             // Filtered Position TileEntity Accessor
             (blockPos, world) -> {
                 final @Nullable TileEntity tileEntity = shouldCarbonCopy
                     ? backingVolume.getTileEntity(blockPos)
-                    : ((IWorldReader) world).getTileEntity(blockPos);
+                    : ((IWorldReader) world).getBlockEntity(blockPos);
                 return new Tuple<>(blockPos, tileEntity);
             }
         );
@@ -366,29 +366,29 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
             // IdentityFunction
             shouldCarbonCopy ? (pos, entity) -> {
                 final CompoundNBT nbt = new CompoundNBT();
-                entity.writeUnlessPassenger(nbt);
+                entity.save(nbt);
                 final net.minecraft.entity.Entity cloned = entity.getType().create((World) (IWorldReader) (Object) this);
                 Objects.requireNonNull(
                     cloned,
                     () -> String.format("EntityType[%s] creates a null Entity!", EntityType.getKey(entity.getType()))
-                ).read(nbt);
+                ).load(nbt);
                 backingVolume.spawnEntity((Entity) cloned);
             } : (pos, tile) -> {},
             // ChunkAccessor
             VolumeStreamUtils.getChunkAccessorByStatus((IWorldReader) (Object) this, options.loadingStyle().generateArea()),
             // Entity -> UniqueID
-            (key, entity) -> entity.getUniqueID(),
+            (key, entity) -> entity.getUUID(),
             // Entity Accessor
-            (chunk) -> chunk instanceof Chunk ? Stream.empty() : Arrays.stream(((Chunk) chunk).getEntityLists())
+            (chunk) -> chunk instanceof Chunk ? Stream.empty() : Arrays.stream(((Chunk) chunk).getEntitySections())
                     .flatMap(Collection::stream)
-                    .map(entity -> new AbstractMap.SimpleEntry<>(entity.getPosition(), entity))
+                    .map(entity -> new AbstractMap.SimpleEntry<>(entity.blockPosition(), entity))
             ,
             // Filtered Position Entity Accessor
             (entityUuid, world) -> {
                 final net.minecraft.entity.Entity tileEntity = shouldCarbonCopy
                     ? (net.minecraft.entity.Entity) backingVolume.getEntity(entityUuid).orElse(null)
                     : (net.minecraft.entity.Entity) ((ProtoWorld) world).getEntity(entityUuid).orElse(null);
-                return new Tuple<>(tileEntity.getPosition(), tileEntity);
+                return new Tuple<>(tileEntity.blockPosition(), tileEntity);
             }
         );
     }

@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.state;
 
-import net.minecraft.state.IProperty;
+import com.google.common.collect.ImmutableMap;
+import net.minecraft.state.Property;
 import net.minecraft.state.StateHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
@@ -36,24 +37,27 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 @Mixin(StateHolder.class)
 public abstract class StateHolderMixin_API<S extends State<S>, C> implements State<S>, SpongeImmutableDataHolder<S> {
 
-    @Shadow public abstract <V extends Comparable<V>> boolean shadow$has(IProperty<V> property);
-    @Shadow public abstract <T extends Comparable<T>> T shadow$get(IProperty<T> property);
-    @Shadow public abstract <T extends Comparable<T>, V extends T> C shadow$with(IProperty<T> property, V value);
-    @Shadow public abstract <T extends Comparable<T>> C shadow$cycle(IProperty<T> property);
-    @Shadow public abstract Collection<IProperty<?>> shadow$getProperties();
+    // @formatter:off
+    @Shadow public abstract <V extends Comparable<V>> boolean shadow$hasProperty(Property<V> property);
+    @Shadow public abstract <T extends Comparable<T>> T shadow$getValue(Property<T> property);
+    @Shadow public abstract <T extends Comparable<T>, V extends T> C shadow$setValue(Property<T> property, V value);
+    @Shadow public abstract <T extends Comparable<T>> C shadow$cycle(Property<T> property);
+    @Shadow public abstract ImmutableMap<Property<?>, Comparable<?>> shadow$getValues();
+    // @formatter:on
 
     @Override
     public <T extends Comparable<T>> Optional<T> getStateProperty(StateProperty<T> stateProperty) {
-        if (!this.shadow$has((IProperty) stateProperty)) {
+        if (!this.shadow$hasProperty((Property) stateProperty)) {
             return Optional.empty();
         }
 
-        return Optional.of((T) this.shadow$get((IProperty<?>) stateProperty));
+        return Optional.of((T) this.shadow$getValue((Property<?>) stateProperty));
     }
 
     @Override
@@ -63,20 +67,20 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
 
     @Override
     public <T extends Comparable<T>, V extends T> Optional<S> withStateProperty(StateProperty<T> stateProperty, V value) {
-        if (!this.shadow$has((IProperty) stateProperty)) {
+        if (!this.shadow$hasProperty((Property) stateProperty)) {
             return Optional.empty();
         }
 
-        return Optional.of((S) this.shadow$with((IProperty) stateProperty, value));
+        return Optional.of((S) this.shadow$setValue((Property) stateProperty, value));
     }
 
     @Override
     public <T extends Comparable<T>> Optional<S> cycleStateProperty(StateProperty<T> stateProperty) {
-        if (!this.shadow$has((IProperty) stateProperty)) {
+        if (!this.shadow$hasProperty((Property) stateProperty)) {
             return Optional.empty();
         }
 
-        return Optional.of((S) this.shadow$cycle((IProperty) stateProperty));
+        return Optional.of((S) this.shadow$cycle((Property) stateProperty));
     }
 
     @Override
@@ -89,5 +93,20 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Collection<StateProperty<?>> getStateProperties() {
+        return (Collection) this.shadow$getValues().keySet();
+    }
+
+    @Override
+    public Collection<?> getStatePropertyValues() {
+        return this.shadow$getValues().values();
+    }
+
+    @Override
+    public Map<StateProperty<?>, ?> getStatePropertyMap() {
+        return (Map) this.shadow$getValues();
     }
 }

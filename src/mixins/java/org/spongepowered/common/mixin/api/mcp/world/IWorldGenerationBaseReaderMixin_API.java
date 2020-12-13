@@ -38,16 +38,18 @@ import java.util.function.Predicate;
 @Mixin(IWorldGenerationBaseReader.class)
 public interface IWorldGenerationBaseReaderMixin_API extends ReadableGenerationVolume {
 
-    @Shadow boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<net.minecraft.block.BlockState> p_217375_2_);
-    @Shadow BlockPos shadow$getHeight(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
+    //@formatter:off
+    @Shadow boolean shadow$isStateAtPosition(BlockPos p_217375_1_, Predicate<net.minecraft.block.BlockState> p_217375_2_);
+    @Shadow BlockPos shadow$getHeightmapPos(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
+    //@formatter:on
 
     @Override
     default boolean hasBlockState(final int x, final int y, final int z, final Predicate<? super BlockState> predicate) {
-        return this.shadow$hasBlockState(new BlockPos(x, y, z), state -> predicate.test((BlockState) state));
+        return this.shadow$isStateAtPosition(new BlockPos(x, y, z), state -> predicate.test((BlockState) state));
     }
 
     @Override
     default int getHeight(final HeightType type, final int x, final int z) {
-        return this.shadow$getHeight((Heightmap.Type) (Object) type, new BlockPos(x, 0, z)).getY();
+        return this.shadow$getHeightmapPos((Heightmap.Type) (Object) type, new BlockPos(x, 0, z)).getY();
     }
 }

@@ -55,11 +55,13 @@ import javax.annotation.Nullable;
 @Mixin(PlayerProfileCache.class)
 public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
+    // @formatter:off
     @Shadow @Final @Mutable private final Map<String, PlayerProfileCache_ProfileEntryAccessor> profilesByName = new ConcurrentHashMap<>();
     @Shadow @Final @Mutable private final Map<UUID, PlayerProfileCache_ProfileEntryAccessor> profilesByUUID = new ConcurrentHashMap<>();
 
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile shadow$get(UUID uniqueId);
     @Shadow protected abstract long shadow$getNextOperation();
+    // @formatter:on
 
     @Override
     public boolean remove(final GameProfile profile) {

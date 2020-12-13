@@ -40,7 +40,9 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 @Mixin(Team.CollisionRule.class)
 public abstract class Team_CollisionRuleMixin_API implements CollisionRule {
 
+    // @formatter:off
     @Shadow public abstract ITextComponent shadow$getDisplayName();
+    // @formatter:on
 
     private ResourceKey api$key;
 

@@ -38,7 +38,9 @@ import org.spongepowered.common.SpongeCommon;
 @Mixin(GameType.class)
 public abstract class GameTypeMixin_API implements GameMode {
 
+    //@formatter:off
     @Shadow public abstract ITextComponent shadow$getDisplayName();
+    //@formatter:on
 
     private ResourceKey api$key;
 

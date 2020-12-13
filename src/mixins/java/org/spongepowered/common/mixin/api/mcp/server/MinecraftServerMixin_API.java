@@ -103,6 +103,7 @@ import java.util.UUID;
 @Implements(value = @Interface(iface = Server.class, prefix = "server$"))
 public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer {
 
+    // @formatter:off
     @Shadow @Final public long[] tickTimes;
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract boolean shadow$usesAuthentication();
@@ -111,6 +112,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract void shadow$halt(boolean p_71263_1_);
     @Shadow public abstract int shadow$getPlayerIdleTimeout();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
+    // @formatter:on
 
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;

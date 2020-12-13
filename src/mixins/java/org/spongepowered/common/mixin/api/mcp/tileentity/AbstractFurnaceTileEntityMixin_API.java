@@ -37,10 +37,12 @@ import java.util.Set;
 @Mixin(AbstractFurnaceTileEntity.class)
 public abstract class AbstractFurnaceTileEntityMixin_API extends LockableTileEntityMixin_API implements FurnaceBlockEntity {
 
-    @Shadow private int burnTime;
-    @Shadow private int recipesUsed;
-    @Shadow private int cookTime;
-    @Shadow private int cookTimeTotal;
+    // @formatter:off
+    @Shadow private int litTime;
+    @Shadow private int litDuration;
+    @Shadow private int cookingProgress;
+    @Shadow private int cookingTotalTime;
+    // @formatter:on
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
@@ -57,10 +59,10 @@ public abstract class AbstractFurnaceTileEntityMixin_API extends LockableTileEnt
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Constants.TileEntity.Furnace.BURN_TIME, this.burnTime)
-            .set(Constants.TileEntity.Furnace.BURN_TIME_TOTAL, this.recipesUsed)
-            .set(Constants.TileEntity.Furnace.COOK_TIME, this.cookTime)
-            .set(Constants.TileEntity.Furnace.COOK_TIME_TOTAL, this.cookTimeTotal);
+            .set(Constants.TileEntity.Furnace.BURN_TIME, this.litTime)
+            .set(Constants.TileEntity.Furnace.BURN_TIME_TOTAL, this.litDuration)
+            .set(Constants.TileEntity.Furnace.COOK_TIME, this.cookingProgress)
+            .set(Constants.TileEntity.Furnace.COOK_TIME_TOTAL, this.cookingTotalTime);
     }
 
 }

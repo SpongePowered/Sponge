@@ -41,11 +41,13 @@ import org.spongepowered.common.util.Constants;
 @Implements(@Interface(iface = PotionEffect.class, prefix = "potionEffect$"))
 public abstract class EffectInstanceMixin_API implements PotionEffect {
 
+    // @formatter:off
     @Shadow @Final private Effect effect;
     @Shadow private int duration;
     @Shadow private int amplifier;
     @Shadow private boolean ambient;
     @Shadow private boolean visible;
+    // @formatter:on
 
     @Override
     public PotionEffectType getType() {

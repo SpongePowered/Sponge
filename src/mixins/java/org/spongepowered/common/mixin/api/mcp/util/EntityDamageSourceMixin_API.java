@@ -35,11 +35,13 @@ import javax.annotation.Nullable;
 @Mixin(value = net.minecraft.util.EntityDamageSource.class)
 public abstract class EntityDamageSourceMixin_API extends DamageSourceMixin_API implements EntityDamageSource {
 
-    @Shadow @Final @Nullable protected net.minecraft.entity.Entity damageSourceEntity;
+    // @formatter:off
+    @Shadow @Final @Nullable protected net.minecraft.entity.Entity entity;
+    // @formatter:on
 
     @Override
     public Entity getSource() {
-        return ((Entity) this.damageSourceEntity);
+        return ((Entity) this.entity);
     }
 
 }

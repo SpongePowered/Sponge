@@ -39,7 +39,9 @@ import java.util.Optional;
 @Mixin(Stat.class)
 public abstract class StatMixin_API implements Statistic {
 
+    // @formatter:off
     @Shadow @Final private IStatFormatter formatter;
+    // @formatter:on
 
     @Override
     public Optional<Criterion> getCriterion() {

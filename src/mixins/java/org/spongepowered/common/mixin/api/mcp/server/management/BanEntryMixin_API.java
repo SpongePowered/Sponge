@@ -39,8 +39,10 @@ import java.util.Optional;
 @Mixin(BanEntry.class)
 public abstract class BanEntryMixin_API<T> extends UserListEntryMixin_API<T> implements Ban {
 
+    // @formatter:off
     @Shadow @Final protected Date created;
     @Shadow @Final protected Date expires;
+    // @formatter:on
 
     @Override
     public Optional<Component> getReason() {

@@ -54,6 +54,7 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = Team.class, prefix = "team$"))
 public abstract class ScorePlayerTeamMixin_API implements Team {
 
+    // @formatter:off
     @Nullable @Shadow @Final @Mutable private Scoreboard scoreboard;
     @Shadow @Final private String name;
     @Shadow @Final private Set<String> players;
@@ -70,6 +71,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
     @Shadow public abstract net.minecraft.scoreboard.Team.Visible shadow$getDeathMessageVisibility();
     @Shadow public abstract net.minecraft.scoreboard.Team.CollisionRule shadow$getCollisionRule();
     @Shadow public abstract Collection<String> shadow$getPlayers();
+    // @formatter:on
 
     @Intrinsic
     public String team$getName() {

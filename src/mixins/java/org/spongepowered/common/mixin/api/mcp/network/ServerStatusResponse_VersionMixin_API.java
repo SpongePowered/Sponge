@@ -37,8 +37,10 @@ import java.util.OptionalInt;
 @Mixin(ServerStatusResponse.Version.class)
 public abstract class ServerStatusResponse_VersionMixin_API implements MinecraftVersion, ProtocolMinecraftVersion {
 
+    // @formatter:off
     @Shadow @Final private String name;
     @Shadow @Final private int protocol;
+    // @formatter:on
 
     @Override
     public String getName() {

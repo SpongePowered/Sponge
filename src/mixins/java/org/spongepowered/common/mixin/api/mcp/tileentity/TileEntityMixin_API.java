@@ -56,42 +56,41 @@ public abstract class TileEntityMixin_API implements BlockEntity {
 
     //@formatter:off
     @Shadow @Final private TileEntityType<?> type;
-    @Shadow protected net.minecraft.world.World world;
+    @Shadow protected net.minecraft.world.World level;
+    @Shadow protected boolean remove;
 
-    @Shadow public abstract BlockPos shadow$getPos();
-    @Shadow public abstract void shadow$markDirty();
-    @Shadow public abstract CompoundNBT shadow$write(CompoundNBT compound);
-    @Shadow protected boolean removed;
+    @Shadow public abstract BlockPos shadow$getBlockPos();
+    @Shadow public abstract CompoundNBT shadow$save(CompoundNBT compound);
     //@formatter:on
 
     @Nullable private LocatableBlock api$LocatableBlock;
 
     @Override
     public ServerLocation getLocation() {
-        return ServerLocation.of((ServerWorld) this.world, VecHelper.toVector3i(this.shadow$getPos()));
+        return ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3i(this.shadow$getBlockPos()));
     }
 
     @Override
     public ServerLocation getServerLocation() {
-        if (this.world == null) {
+        if (this.level == null) {
             throw new RuntimeException("The TileEntity has not been spawned in a world yet!");
         }
 
-        if (this.world.isClientSide) {
+        if (this.level.isClientSide) {
             throw new RuntimeException("You should not attempt to make a server-side location on the client!");
         }
 
-        return ServerLocation.of((ServerWorld) this.world, VecHelper.toVector3d(this.shadow$getPos()));
+        return ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3d(this.shadow$getBlockPos()));
     }
 
     @Override
     public World<?> getWorld() {
-        return (World<?>) this.world;
+        return (World<?>) this.level;
     }
 
     @Override
     public Vector3i getBlockPosition() {
-        return VecHelper.toVector3i(this.shadow$getPos());
+        return VecHelper.toVector3i(this.shadow$getBlockPos());
     }
 
     @Override
@@ -103,13 +102,13 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Queries.WORLD_KEY, ((ServerWorld) this.world).getKey())
-            .set(Queries.POSITION_X, this.shadow$getPos().getX())
-            .set(Queries.POSITION_Y, this.shadow$getPos().getY())
-            .set(Queries.POSITION_Z, this.shadow$getPos().getZ())
+            .set(Queries.WORLD_KEY, ((ServerWorld) this.level).getKey())
+            .set(Queries.POSITION_X, this.shadow$getBlockPos().getX())
+            .set(Queries.POSITION_Y, this.shadow$getBlockPos().getY())
+            .set(Queries.POSITION_Z, this.shadow$getBlockPos().getZ())
             .set(Constants.TileEntity.TILE_TYPE, ((BlockEntityType) this.type).getKey());
         final CompoundNBT compound = new CompoundNBT();
-        this.shadow$write(compound);
+        this.shadow$save(compound);
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.getInstance().translateFrom(compound));
 //        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
@@ -131,12 +130,12 @@ public abstract class TileEntityMixin_API implements BlockEntity {
 
     @Override
     public boolean isValid() {
-        return !this.removed;
+        return !this.remove;
     }
 
     @Override
     public void setValid(final boolean valid) {
-        this.removed = valid;
+        this.remove = valid;
     }
 
     @Override
@@ -146,7 +145,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
 
     @Override
     public BlockState getBlock() {
-        return (BlockState) this.world.getBlockState(this.shadow$getPos());
+        return (BlockState) this.level.getBlockState(this.shadow$getBlockPos());
     }
 
     @Override
@@ -154,8 +153,8 @@ public abstract class TileEntityMixin_API implements BlockEntity {
         if (this.api$LocatableBlock == null) {
             final BlockState blockState = this.getBlock();
             this.api$LocatableBlock = new SpongeLocatableBlockBuilder()
-                .world((ServerWorld) this.world)
-                .position(this.shadow$getPos().getX(), this.shadow$getPos().getY(), this.shadow$getPos().getZ())
+                .world((ServerWorld) this.level)
+                .position(this.shadow$getBlockPos().getX(), this.shadow$getBlockPos().getY(), this.shadow$getBlockPos().getZ())
                 .state(blockState)
                 .build();
         }

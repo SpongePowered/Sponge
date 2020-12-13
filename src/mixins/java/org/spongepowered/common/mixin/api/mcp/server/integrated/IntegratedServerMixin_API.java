@@ -35,7 +35,9 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(IntegratedServer.class)
 public abstract class IntegratedServerMixin_API implements LocalServer {
 
+    // @formatter:off
     @Shadow @Final private Minecraft minecraft;
+    // @formatter:on
 
     @Override
     public Client getClient() {

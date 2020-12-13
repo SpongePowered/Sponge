@@ -35,11 +35,13 @@ import javax.annotation.Nullable;
 @Mixin(value = net.minecraft.util.IndirectEntityDamageSource.class)
 public abstract class IndirectEntityDamageSourceMixin_API extends EntityDamageSourceMixin_API implements IndirectEntityDamageSource {
 
-    @Shadow @Final @Nullable private Entity indirectEntity;
+    // @formatter:off
+    @Shadow @Final @Nullable private Entity owner;
+    // @formatter:on
 
     @Override
     public org.spongepowered.api.entity.Entity getIndirectSource() {
-        return (org.spongepowered.api.entity.Entity) this.indirectEntity;
+        return (org.spongepowered.api.entity.Entity) this.owner;
     }
 
 }

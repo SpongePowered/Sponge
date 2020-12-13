@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -52,6 +54,7 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
     @Shadow public abstract void shadow$calculateInitialSkylight();
     @Shadow public abstract boolean shadow$isThundering();
     @Shadow public abstract boolean shadow$isRaining();
+
     // @formatter on
 
     private boolean impl$isFake = false;

@@ -39,7 +39,9 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 @Mixin(net.minecraft.world.Difficulty.class)
 public abstract class DifficultyMixin_API implements Difficulty {
 
+    //@formatter:off
     @Shadow public abstract ITextComponent shadow$getDisplayName();
+    //@formatter:on
 
     private ResourceKey api$key;
 

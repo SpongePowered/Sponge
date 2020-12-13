@@ -38,19 +38,21 @@ import org.spongepowered.math.vector.Vector3i;
 @Mixin(IWorldWriter.class)
 public interface IWorldWriterMixin_API extends MutableGameVolume {
 
-    @Shadow boolean shadow$setBlockState(BlockPos p_180501_1_, BlockState p_180501_2_, int p_180501_3_);
+    // @formatter:off
+    @Shadow boolean shadow$setBlock(BlockPos p_180501_1_, BlockState p_180501_2_, int p_180501_3_);
     @Shadow boolean shadow$removeBlock(BlockPos p_217377_1_, boolean p_217377_2_);
     @Shadow boolean shadow$destroyBlock(BlockPos p_175655_1_, boolean p_175655_2_);
-    @Shadow boolean shadow$addEntity(Entity p_217376_1_);
+    @Shadow boolean shadow$addFreshEntity(Entity p_217376_1_);
+    // @formatter:on
 
     @Override
     default boolean setBlock(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState state, final BlockChangeFlag flag) {
-        return this.shadow$setBlockState(new BlockPos(x, y, z), (BlockState) state, ((SpongeBlockChangeFlag) flag).getRawFlag());
+        return this.shadow$setBlock(new BlockPos(x, y, z), (BlockState) state, ((SpongeBlockChangeFlag) flag).getRawFlag());
     }
 
     @Override
     default boolean spawnEntity(final org.spongepowered.api.entity.Entity entity) {
-        return this.shadow$addEntity((Entity) entity);
+        return this.shadow$addFreshEntity((Entity) entity);
     }
 
     @Override

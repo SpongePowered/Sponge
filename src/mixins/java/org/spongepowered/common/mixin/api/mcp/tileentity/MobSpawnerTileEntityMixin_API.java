@@ -37,18 +37,20 @@ import java.util.Set;
 @Mixin(MobSpawnerTileEntity.class)
 public abstract class MobSpawnerTileEntityMixin_API extends TileEntityMixin_API implements MobSpawner {
 
-    @Shadow public abstract AbstractSpawner getSpawnerBaseLogic();
+    // @formatter:off
+    @Shadow public abstract AbstractSpawner shadow$getSpawner();
+    // @formatter:on
 
     @Override
     public void spawnEntityBatchImmediately(final boolean force) {
-        final AbstractSpawnerBridge bridge = ((AbstractSpawnerBridge) this.getSpawnerBaseLogic());
+        final AbstractSpawnerBridge bridge = ((AbstractSpawnerBridge) this.shadow$getSpawner());
 
         if (force) {
             final short oldMaxNearby = (short) bridge.bridge$getMaxNearbyEntities();
             bridge.bridge$setMaxNearbyEntities(Short.MAX_VALUE);
 
             bridge.bridge$setSpawnDelay(0);
-            this.getSpawnerBaseLogic().tick();
+            this.shadow$getSpawner().tick();
 
             bridge.bridge$setMaxNearbyEntities(oldMaxNearby);
         } else {

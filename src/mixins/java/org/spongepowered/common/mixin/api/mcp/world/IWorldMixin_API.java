@@ -24,20 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.effect.LightningBoltEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.item.EnderPearlEntity;
-import net.minecraft.entity.item.FallingBlockEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.item.PaintingEntity;
-import net.minecraft.entity.item.PaintingType;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DifficultyInstance;
@@ -49,11 +37,7 @@ import net.minecraft.world.chunk.IChunk;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -63,15 +47,12 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.entity.MobEntityAccessor;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
@@ -84,12 +65,11 @@ import java.util.UUID;
 @Mixin(IWorld.class)
 public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> {
 
-    @Shadow long shadow$getSeed();
-    @Shadow net.minecraft.world.World shadow$getWorld();
-    @Shadow DifficultyInstance shadow$getDifficultyForLocation(BlockPos p_175649_1_);
-    @Shadow AbstractChunkProvider shadow$getChunkProvider();
-    @Shadow boolean shadow$chunkExists(int p_217354_1_, int p_217354_2_);
+    //@formatter:off
+    @Shadow boolean shadow$hasChunk(int p_217354_1_, int p_217354_2_);
     @Shadow Random shadow$getRandom();
+    @Shadow AbstractChunkProvider shadow$getChunkSource();
+    //@formatter:on
 
     // MutableBiomeVolume
 
@@ -121,12 +101,12 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
 
     @Override
     default boolean containsBlock(final int x, final int y, final int z) {
-        return this.shadow$chunkExists(x >> 4, z >> 4);
+        return this.shadow$hasChunk(x >> 4, z >> 4);
     }
 
     @Override
     default boolean isAreaAvailable(final int x, final int y, final int z) {
-        return this.shadow$chunkExists(x >> 4, z >> 4);
+        return this.shadow$hasChunk(x >> 4, z >> 4);
     }
 
     // ReadableEntityVolume
@@ -144,107 +124,6 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
     }
 
     // ProtoWorld
-
-    @Override
-    default long getSeed() {
-        return this.shadow$getSeed();
-    }
-
-    // MutableEntityVolume
-
-    @Override
-    default <E extends Entity> E createEntity(final EntityType<E> type, final Vector3d position) throws IllegalArgumentException,
-            IllegalStateException {
-        return this.impl$createEntity(type, position, false);
-    }
-
-    @Override
-    default <E extends Entity> E createEntityNaturally(final EntityType<E> type, final Vector3d position) throws IllegalArgumentException,
-            IllegalStateException {
-        return this.impl$createEntity(type, position, true);
-    }
-
-    @Override
-    default Optional<Entity> createEntity(final DataContainer entityContainer) {
-        throw new UnsupportedOperationException("Implement me"); // TODO implement me
-    }
-
-    @Override
-    default Optional<Entity> createEntity(final DataContainer entityContainer, final Vector3d position) {
-        throw new UnsupportedOperationException("Implement me"); // TODO implement me
-    }
-
-    default <E extends Entity> E impl$createEntity(final EntityType<E> type, final Vector3d position, final boolean naturally) throws IllegalArgumentException,
-            IllegalStateException {
-        checkNotNull(type, "The entity type cannot be null!");
-        checkNotNull(position, "The position cannot be null!");
-
-        if (type == net.minecraft.entity.EntityType.PLAYER) {
-            // Unable to construct these
-            throw new IllegalArgumentException("Cannot construct " + type.getKey() + " please look to using entity types correctly!");
-        }
-
-        net.minecraft.entity.Entity entity = null;
-        final double x = position.getX();
-        final double y = position.getY();
-        final double z = position.getZ();
-        final World thisWorld = this.shadow$getWorld();
-        // Not all entities have a single World parameter as their constructor
-        if (type == net.minecraft.entity.EntityType.LIGHTNING_BOLT) {
-            entity = new LightningBoltEntity(thisWorld, x, y, z, false);
-        }
-        // TODO - archetypes should solve the problem of calling the correct constructor
-        if (type == net.minecraft.entity.EntityType.ENDER_PEARL) {
-            final ArmorStandEntity tempEntity = new ArmorStandEntity(thisWorld, x, y, z);
-            tempEntity.setPosition(tempEntity.getPosX(), tempEntity.getPosY() - tempEntity.getEyeHeight(), tempEntity.getPosZ());
-            entity = new EnderPearlEntity(thisWorld, tempEntity);
-            ((EnderPearl) entity).offer(Keys.SHOOTER, UnknownProjectileSource.UNKNOWN);
-        }
-        // Some entities need to have non-null fields (and the easiest way to
-        // set them is to use the more specialised constructor).
-        if (type == net.minecraft.entity.EntityType.FALLING_BLOCK) {
-            entity = new FallingBlockEntity(thisWorld, x, y, z, Blocks.SAND.getDefaultState());
-        }
-        if (type == net.minecraft.entity.EntityType.ITEM) {
-            entity = new ItemEntity(thisWorld, x, y, z, new ItemStack(Blocks.STONE));
-        }
-
-        if (entity == null) {
-            try {
-                entity = ((net.minecraft.entity.EntityType) type).create(thisWorld);
-                entity.setPosition(x, y, z);
-            } catch (final Exception e) {
-                throw new RuntimeException("There was an issue attempting to construct " + type.getKey(), e);
-            }
-        }
-
-        // TODO - replace this with an actual check
-        /*
-        if (entity instanceof EntityHanging) {
-            if (((EntityHanging) entity).facingDirection == null) {
-                // TODO Some sort of detection of a valid direction?
-                // i.e scan immediate blocks for something to attach onto.
-                ((EntityHanging) entity).facingDirection = EnumFacing.NORTH;
-            }
-            if (!((EntityHanging) entity).onValidSurface()) {
-                return Optional.empty();
-            }
-        }*/
-
-        if (naturally && entity instanceof MobEntity) {
-            // Adding the default equipment
-            final DifficultyInstance difficulty = this.shadow$getDifficultyForLocation(new BlockPos(x, y, z));
-            ((MobEntityAccessor)entity).invoker$populateDefaultEquipmentSlots(difficulty);
-        }
-
-        if (entity instanceof PaintingEntity) {
-            // This is default when art is null when reading from NBT, could
-            // choose a random art instead?
-            ((PaintingEntity) entity).art = PaintingType.KEBAB;
-        }
-
-        return (E) entity;
-    }
 
     @Override
     default Collection<Entity> spawnEntities(final Iterable<? extends Entity> entities) {
@@ -270,7 +149,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
     default boolean spawnEntity(final Entity entity) {
         Objects.requireNonNull(entity);
 
-        return ((IWorld) this).addEntity((net.minecraft.entity.Entity) entity);
+        return ((IWorld) this).addFreshEntity((net.minecraft.entity.Entity) entity);
     }
 
     // MutableBlockVolume
@@ -279,14 +158,14 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
     default boolean setBlock(
         final int x, final int y, final int z, final org.spongepowered.api.block.BlockState blockState, final BlockChangeFlag flag) {
 
-        if (!World.isValid(new BlockPos(x, y, z))) {
+        if (!World.isInWorldBounds(new BlockPos(x, y, z))) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
         }
         try (final @Nullable PhaseContext<@NonNull ?> context = PluginPhase.State.BLOCK_WORKER.switchIfNecessary(PhaseTracker.SERVER)) {
             if (context != null) {
                 context.buildAndSwitch();
             }
-            return ((IWorld) this).setBlockState(new BlockPos(x, y, z), (BlockState) blockState, ((SpongeBlockChangeFlag) flag).getRawFlag());
+            return ((IWorld) this).setBlock(new BlockPos(x, y, z), (BlockState) blockState, ((SpongeBlockChangeFlag) flag).getRawFlag());
         }
     }
 

@@ -35,11 +35,13 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(SoundEvent.class)
 public abstract class SoundEventMixin_API implements SoundType {
 
-    @Shadow @Final private ResourceLocation name;
+    //@formatter:off
+    @Shadow @Final private ResourceLocation location;
+    //@formatter:on
 
     @Override
     public ResourceKey getKey() {
-        return (ResourceKey) (Object) this.name;
+        return (ResourceKey) (Object) this.location;
     }
 
 }

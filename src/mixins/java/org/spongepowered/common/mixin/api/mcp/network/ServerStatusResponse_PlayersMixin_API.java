@@ -42,8 +42,10 @@ import javax.annotation.Nullable;
 @Mixin(ServerStatusResponse.Players.class)
 public abstract class ServerStatusResponse_PlayersMixin_API implements ClientPingServerEvent.Response.Players {
 
+    // @formatter:off
     @Shadow @Final @Mutable private int numPlayers;
     @Shadow @Final @Mutable private int maxPlayers;
+    // @formatter:on
 
     @Nullable private List<org.spongepowered.api.profile.GameProfile> profiles;
 

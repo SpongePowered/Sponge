@@ -36,12 +36,14 @@ import org.spongepowered.common.accessor.world.biome.BiomeContainerAccessor;
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public abstract class ChunkMixin_API implements Chunk {
 
-    @Shadow private BiomeContainer blockBiomeArray;
+    //@formatter:off
+    @Shadow private BiomeContainer biomes;
     @Shadow private long inhabitedTime;
+    //@formatter:on
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final BiomeType biome) {
-        final Biome[] biomes = ((BiomeContainerAccessor) this.blockBiomeArray).accessor$biomes();
+        final Biome[] biomes = ((BiomeContainerAccessor) this.biomes).accessor$biomes();
 
         int maskedX = x & BiomeContainer.HORIZONTAL_MASK;
         int maskedY = MathHelper.clamp(y, 0, BiomeContainer.VERTICAL_MASK);
@@ -49,7 +51,7 @@ public abstract class ChunkMixin_API implements Chunk {
 
         final int WIDTH_BITS = BiomeContainerAccessor.accessor$WIDTH_BITS();
         final int posKey = maskedY << WIDTH_BITS + WIDTH_BITS | maskedZ << WIDTH_BITS | maskedX;
-        biomes[posKey] = (Biome) biome;
+        biomes[posKey] = (Biome) (Object) biome;
 
         return true;
     }

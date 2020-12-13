@@ -27,14 +27,12 @@ package org.spongepowered.common.mixin.api.mcp.world;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.ExplosionBridge;
-import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -42,29 +40,31 @@ import java.util.Optional;
 @Mixin(net.minecraft.world.Explosion.class)
 public abstract class ExplosionMixin_API implements Explosion {
 
-    @Shadow @Final private boolean causesFire;
-    @Shadow @Final private net.minecraft.world.World world;
+    //@formatter:off
+    @Shadow @Final private boolean fire;
+    @Shadow @Final private net.minecraft.world.World level;
     @Shadow @Final private double x;
     @Shadow @Final private double y;
     @Shadow @Final private double z;
-    @Shadow @Final private Entity exploder;
-    @Shadow @Final private float size;
+    @Shadow @Final private Entity source;
+    @Shadow @Final private float radius;
+    @Shadow @Final private net.minecraft.world.Explosion.Mode blockInteraction;
+    //@formatter:on
 
-    @Shadow @Final private net.minecraft.world.Explosion.Mode mode;
     @Nullable private ServerLocation api$location;
 
     @Override
     public ServerLocation getLocation() {
         if (this.api$location == null) {
-            this.api$location = ServerLocation.of((ServerWorld) this.world, this.x, this.y, this.z);
+            this.api$location = ServerLocation.of((ServerWorld) this.level, this.x, this.y, this.z);
         }
         return this.api$location;
     }
 
     @Override
     public Optional<Explosive> getSourceExplosive() {
-        if (this.exploder instanceof Explosive) {
-            return Optional.of((Explosive) this.exploder);
+        if (this.source instanceof Explosive) {
+            return Optional.of((Explosive) this.source);
         }
 
         return Optional.empty();
@@ -72,17 +72,17 @@ public abstract class ExplosionMixin_API implements Explosion {
 
     @Override
     public float getRadius() {
-        return this.size;
+        return this.radius;
     }
 
     @Override
     public boolean canCauseFire() {
-        return this.causesFire;
+        return this.fire;
     }
 
     @Override
     public boolean shouldPlaySmoke() {
-        return this.mode != net.minecraft.world.Explosion.Mode.NONE;
+        return this.blockInteraction != net.minecraft.world.Explosion.Mode.NONE;
     }
 
     @Override

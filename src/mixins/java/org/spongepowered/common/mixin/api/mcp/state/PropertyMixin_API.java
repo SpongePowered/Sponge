@@ -24,14 +24,20 @@
  */
 package org.spongepowered.common.mixin.api.mcp.state;
 
-import net.minecraft.state.IProperty;
 import net.minecraft.state.Property;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.state.StateProperty;
+import org.spongepowered.api.util.Functional;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -42,24 +48,51 @@ import javax.annotation.Nullable;
  * @param <T> The type of comparable
  */
 @Mixin(value = Property.class)
+@Implements(@Interface(iface = StateProperty.class, prefix = "state$"))
 public abstract class PropertyMixin_API<T extends Comparable<T>> implements StateProperty<T> {
+
+    // @formatter:off
+    @Shadow public abstract Class<T> shadow$getValueClass();
+    @Shadow public abstract Collection<T> shadow$getPossibleValues();
+    @Shadow public abstract String shadow$getName();
+    // @formatter:on
 
     @Nullable private ResourceKey api$resourceKey = null;
 
-    @SuppressWarnings("rawtypes")
     @Override
     public ResourceKey getKey() {
         if (this.api$resourceKey == null) {
-            final String id = BlockPropertyIdProvider.getIdFor((IProperty<T>) this);
+            final String id = BlockPropertyIdProvider.getIdFor((Property<T>) (Object) this);
+            final String id = this.shadow$getName();
             this.api$resourceKey = (ResourceKey) (Object) new ResourceLocation(id);
         }
         return this.api$resourceKey;
     }
 
+    @Intrinsic
+    public String state$getName() {
+        return this.shadow$getName();
+    }
+
+    @Intrinsic
+    public Collection<T> state$getPossibleValues() {
+        return this.shadow$getPossibleValues();
+    }
+
+    @Intrinsic
+    public Class<T> state$getValueClass() {
+        return this.shadow$getValueClass();
+    }
+
+    @Override
+    public Predicate<T> getPredicate() {
+        return Functional.predicateIn(this.getPossibleValues());
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Optional<T> parseValue(String value) {
-        return ((IProperty<T>) this).parseValue(value);
+        return ((Property<T>) (Object) this).getValue(value);
     }
 
 }

@@ -34,7 +34,7 @@ import java.net.InetAddress;
 import net.minecraft.server.management.IPBanEntry;
 
 @Mixin(IPBanEntry.class)
-public abstract class IPBanEntryMixin_API extends BanEntryMixin_API<String> implements Ban.Ip {
+public abstract class IPBanEntryMixin_API extends BanEntryMixin_API<String> implements Ban.IP {
 
     @Override
     public BanType getType() {

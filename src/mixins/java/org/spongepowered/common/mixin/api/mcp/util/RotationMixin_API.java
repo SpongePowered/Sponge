@@ -36,7 +36,7 @@ import java.util.Locale;
 public abstract class RotationMixin_API implements org.spongepowered.api.util.rotation.Rotation {
 
     //@formatter:off
-    @Shadow public abstract Rotation shadow$add(Rotation rotation);
+    @Shadow public abstract Rotation shadow$getRotated(Rotation rotation);
     //@formatter:on
 
     private final ResourceKey api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), ((Rotation) (Object) this).name().toLowerCase(Locale.ENGLISH));
@@ -44,7 +44,7 @@ public abstract class RotationMixin_API implements org.spongepowered.api.util.ro
     @SuppressWarnings("ConstantConditions")
     @Override
     public org.spongepowered.api.util.rotation.Rotation and(final org.spongepowered.api.util.rotation.Rotation rotation) {
-        return (org.spongepowered.api.util.rotation.Rotation) (Object) this.shadow$add((Rotation) (Object) rotation);
+        return (org.spongepowered.api.util.rotation.Rotation) (Object) this.shadow$getRotated((Rotation) (Object) rotation);
     }
 
     @Override

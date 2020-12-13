@@ -41,13 +41,15 @@ import java.util.Set;
 @Mixin(SignTileEntity.class)
 public abstract class SignTileEntityMixin_API extends TileEntityMixin_API implements Sign {
 
-    @Shadow @Final public ITextComponent[] signText;
+    // @formatter:off
+    @Shadow @Final public ITextComponent[] messages;
+    // @formatter:on
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         List<String> lines = Lists.newArrayList();
-        for (ITextComponent line : this.signText) {
+        for (ITextComponent line : this.messages) {
             lines.add(ITextComponent.Serializer.toJson(line));
         }
 

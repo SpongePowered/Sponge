@@ -93,22 +93,29 @@ import javax.annotation.Nullable;
 public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowered.api.world.server.ServerWorld> implements org.spongepowered.api.world.server.ServerWorld {
 
     // @formatter:off
-    @Shadow @Final private ServerTickList<Block> pendingBlockTicks;
-    @Shadow @Final private ServerTickList<Fluid> pendingFluidTicks;
+    @Shadow @Final private ServerTickList<Block> blockTicks;
+    @Shadow @Final private ServerTickList<Fluid> liquidTicks;
     @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
 
-    @Shadow public abstract void shadow$save(@Nullable IProgressUpdate p_217445_1_, boolean p_217445_2_, boolean p_217445_3_) throws SessionLockException;
-    @Shadow public abstract boolean shadow$addEntity(Entity p_217376_1_);
-    @Shadow public abstract void shadow$onChunkUnloading(Chunk p_217466_1_);
+    @Shadow public abstract void shadow$save(@Nullable IProgressUpdate p_217445_1_, boolean p_217445_2_, boolean p_217445_3_);
+    @Shadow protected abstract boolean shadow$addEntity(Entity p_217376_1_);
+    @Shadow public abstract void shadow$unload(Chunk p_217466_1_);
     @Shadow public abstract void shadow$playSound(@Nullable PlayerEntity p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
-    @Shadow public abstract ServerChunkProvider shadow$getChunkProvider();
+    @Shadow public abstract ServerChunkProvider shadow$getChunkSource();
     @Nonnull @Shadow public abstract MinecraftServer shadow$getServer();
-    @Nullable @Shadow public abstract Entity shadow$getEntityByUuid(UUID p_217461_1_);
+    @Nullable @Shadow public abstract Entity shadow$getEntity(UUID p_217461_1_);
     @Shadow public abstract SaveHandler shadow$getSaveHandler();
-    @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
+    @Shadow public abstract List<ServerPlayerEntity> shadow$players();
     @Shadow public abstract RaidManager shadow$getRaids();
-    @Nullable @Shadow public abstract Raid shadow$findRaid(BlockPos p_217475_1_);
+    @Nullable @Shadow public abstract Raid shadow$getRaidAt(BlockPos p_217475_1_);
+    @Shadow public abstract long shadow$getSeed();
+
     // @formatter:on
+
+    @Override
+    public long getSeed() {
+        return this.shadow$getSeed();
+    }
 
     // World
 
@@ -169,7 +176,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public WorldStorage getWorldStorage() {
-        return (WorldStorage) this.shadow$getChunkProvider();
+        return (WorldStorage) this.shadow$getChunkSource();
     }
 
     @Override
@@ -187,7 +194,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     public boolean unloadChunk(final org.spongepowered.api.world.chunk.Chunk chunk) {
         Objects.requireNonNull(chunk);
 
-        this.shadow$onChunkUnloading((Chunk) chunk);
+        this.shadow$unload((Chunk) chunk);
         return true;
     }
 
@@ -200,7 +207,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public Collection<ServerPlayer> getPlayers() {
-        return ImmutableList.copyOf((Collection<ServerPlayer>) (Collection<?>) this.shadow$getPlayers());
+        return ImmutableList.copyOf((Collection<ServerPlayer>) (Collection<?>) this.shadow$players());
     }
 
     @Override
@@ -218,7 +225,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     public Optional<org.spongepowered.api.raid.Raid> getRaidAt(final Vector3i blockPosition) {
         Objects.requireNonNull(blockPosition);
 
-        final org.spongepowered.api.raid.Raid raid = (org.spongepowered.api.raid.Raid) this.shadow$findRaid(VecHelper.toBlockPos(blockPosition));
+        final org.spongepowered.api.raid.Raid raid = (org.spongepowered.api.raid.Raid) this.shadow$getRaidAt(VecHelper.toBlockPos(blockPosition));
         return Optional.ofNullable(raid);
     }
 
@@ -228,26 +235,26 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     public Optional<org.spongepowered.api.entity.Entity> getEntity(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId);
 
-        return Optional.ofNullable((org.spongepowered.api.entity.Entity) this.shadow$getEntityByUuid(uniqueId));
+        return Optional.ofNullable((org.spongepowered.api.entity.Entity) this.shadow$getEntity(uniqueId));
     }
 
     // MutableBlockEntityVolume
 
     @Override
     public void removeBlockEntity(int x, int y, int z) {
-        this.removeTileEntity(new BlockPos(x, y, z));
+        this.shadow$removeBlockEntity(new BlockPos(x, y, z));
     }
 
     // UpdateableVolume
 
     @Override
     public ScheduledUpdateList<BlockType> getScheduledBlockUpdates() {
-        return (ScheduledUpdateList<BlockType>) this.pendingBlockTicks;
+        return (ScheduledUpdateList<BlockType>) this.blockTicks;
     }
 
     @Override
     public ScheduledUpdateList<FluidType> getScheduledFluidUpdates() {
-        return (ScheduledUpdateList<FluidType>) this.pendingFluidTicks;
+        return (ScheduledUpdateList<FluidType>) this.liquidTicks;
     }
 
     @Override
@@ -300,7 +307,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     public void setWeather(final Weather weather) {
         Objects.requireNonNull(weather);
 
-        ((ServerWorldBridge) this).bridge$setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
+        ((ServerWorldBridge) this).bridge$setWeather(weather, (300 + this.random.nextInt(600)) * 20);
     }
 
     @Override

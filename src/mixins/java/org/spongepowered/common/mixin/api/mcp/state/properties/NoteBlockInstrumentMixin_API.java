@@ -39,7 +39,9 @@ import org.spongepowered.common.SpongeCommon;
 @Mixin(NoteBlockInstrument.class)
 public abstract class NoteBlockInstrumentMixin_API implements InstrumentType {
 
-    @Shadow public abstract SoundEvent shadow$getSound();
+    // @formatter:off
+    @Shadow public abstract SoundEvent shadow$getSoundEvent();
+    // @formatter:on
     
     private ResourceKey api$key;
 
@@ -55,6 +57,6 @@ public abstract class NoteBlockInstrumentMixin_API implements InstrumentType {
 
     @Override
     public SoundType getSound() {
-        return (SoundType) this.shadow$getSound();
+        return (SoundType) this.shadow$getSoundEvent();
     }
 }

@@ -34,8 +34,10 @@ import org.spongepowered.common.bridge.world.biome.BiomeBridge;
 @Mixin(Biome.class)
 public abstract class BiomeMixin_API implements BiomeType {
 
-    @Shadow public abstract float shadow$getDefaultTemperature();
+    //@formatter:off
+    @Shadow public abstract float shadow$getBaseTemperature();
     @Shadow public abstract float shadow$getDownfall();
+    //@formatter:on
 
     @Override
     public ResourceKey getKey() {
@@ -44,7 +46,7 @@ public abstract class BiomeMixin_API implements BiomeType {
 
     @Override
     public double getTemperature() {
-        return this.shadow$getDefaultTemperature();
+        return this.shadow$getBaseTemperature();
     }
 
     @Override
