@@ -44,7 +44,9 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(RunAroundLikeCrazyGoal.class)
 public abstract class RunAroundLikeCrazyGoalMixin extends GoalMixin {
 
-    @Shadow @Final @Mutable private AbstractHorseEntity horseHost;
+    // @formatter:off
+    @Shadow @Final @Mutable private AbstractHorseEntity horse;
+    // @formatter:on
 
     /**
      * @author rexbut - December 16th, 2016
@@ -54,39 +56,39 @@ public abstract class RunAroundLikeCrazyGoalMixin extends GoalMixin {
      */
     @Overwrite
     public void tick() {
-        if (!this.horseHost.isTame() && this.horseHost.getRNG().nextInt(50) == 0) {
-            Entity entity = this.horseHost.getPassengers().get(0);
+        if (!this.horse.isTamed() && this.horse.getRandom().nextInt(50) == 0) {
+            Entity entity = this.horse.getPassengers().get(0);
 
             if (entity == null) {
                 return;
             }
 
             if (entity instanceof PlayerEntity) {
-                int i = this.horseHost.getTemper();
-                int j = this.horseHost.getMaxTemper();
+                int i = this.horse.getTemper();
+                int j = this.horse.getMaxTemper();
 
-                if (j > 0 && this.horseHost.getRNG().nextInt(j) < i) {
+                if (j > 0 && this.horse.getRandom().nextInt(j) < i) {
                     // Sponge start - Fire Tame Entity event
                     try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                         frame.pushCause(entity);
-                        if (SpongeCommon.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (HorseLike) this.horseHost))) {
+                        if (SpongeCommon.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (HorseLike) this.horse))) {
                             return;
                         }
                     }
                     // Sponge end
-                    this.horseHost.setTamedBy((PlayerEntity)entity);
+                    this.horse.tameWithName((PlayerEntity)entity);
                     return;
                 }
 
-                this.horseHost.increaseTemper(5);
+                this.horse.modifyTemper(5);
             }
 
             // Sponge start - Throw an event before calling entity states
-            // this.horseHost.removePassengers(); // Vanilla
-            if (((EntityBridge) this.horseHost).bridge$removePassengers(DismountTypes.DERAIL.get())) {
+            // this.horseHost.ejectPassengers(); // Vanilla
+            if (((EntityBridge) this.horse).bridge$removePassengers(DismountTypes.DERAIL.get())) {
                 // Sponge end
-                this.horseHost.makeMad();
-                this.horseHost.world.setEntityState(this.horseHost, (byte)6);
+                this.horse.makeMad();
+                this.horse.level.broadcastEntityEvent(this.horse, (byte)6);
             }
         }
     }

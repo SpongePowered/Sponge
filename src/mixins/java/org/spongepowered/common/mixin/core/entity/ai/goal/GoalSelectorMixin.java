@@ -29,7 +29,6 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.GoalSelector;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.living.Agent;
@@ -55,7 +54,10 @@ import javax.annotation.Nullable;
 @Mixin(GoalSelector.class)
 public abstract class GoalSelectorMixin implements GoalSelectorBridge {
 
-    @Shadow @Final private Set<PrioritizedGoal> goals;
+    // @formatter:off
+    @Shadow @Final private Set<PrioritizedGoal> availableGoals;
+    // @formatter:on
+
     @Nullable private MobEntity owner;
     @Nullable private GoalExecutorType type;
     private boolean initialized;
@@ -114,7 +116,7 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
     @SuppressWarnings({"rawtypes"})
     @Overwrite
     public void removeGoal(final Goal task) {
-        this.goals.removeIf(prioritizedGoal -> {
+        this.availableGoals.removeIf(prioritizedGoal -> {
             if (prioritizedGoal.getGoal() == task) {
                 if (ShouldFire.GOAL_EVENT_REMOVE && this.owner != null && !((EntityBridge) this.owner).bridge$isConstructing()) {
                     GoalEvent.Remove event = SpongeEventFactory.createGoalEventRemove(PhaseTracker.getCauseStackManager().getCurrentCause(),
@@ -125,7 +127,7 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
                     }
                 }
                 if (prioritizedGoal.isRunning()) {
-                    prioritizedGoal.resetTask();
+                    prioritizedGoal.stop();
                 }
                 return true;
             }

@@ -45,7 +45,9 @@ import java.util.function.Predicate;
 @Mixin(EatGrassGoal.class)
 public abstract class EatGrassGoalMixin extends Goal {
 
-    @Shadow @Final private MobEntity grassEaterEntity;
+    // @formatter:off
+    @Shadow @Final private MobEntity mob;
+    // @formatter:on
 
     /**
      * @author gabizou - April 13th, 2018
@@ -61,9 +63,9 @@ public abstract class EatGrassGoalMixin extends Goal {
             remap = false
         )
     )
-    @SuppressWarnings({"unchecked", "rawtypes", "Guava"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private boolean impl$onTallGrassApplyForGriefing(final Predicate predicate, final Object object) {
-        return ((GrieferBridge) this.grassEaterEntity).bridge$canGrief() && predicate.test(object);
+        return ((GrieferBridge) this.mob).bridge$canGrief() && predicate.test(object);
     }
 
     /**
@@ -77,7 +79,7 @@ public abstract class EatGrassGoalMixin extends Goal {
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/util/math/BlockPos;down()Lnet/minecraft/util/math/BlockPos;"
+                target = "Lnet/minecraft/util/math/BlockPos;below()Lnet/minecraft/util/math/BlockPos;"
             ),
             to = @At(
                 value = "FIELD",
@@ -91,6 +93,6 @@ public abstract class EatGrassGoalMixin extends Goal {
         )
     )
     private BlockState impl$onSpongeGetBlockForGriefing(World world, BlockPos pos) {
-        return ((GrieferBridge) this.grassEaterEntity).bridge$canGrief() ? world.getBlockState(pos) : Blocks.AIR.getDefaultState();
+        return ((GrieferBridge) this.mob).bridge$canGrief() ? world.getBlockState(pos) : Blocks.AIR.defaultBlockState();
     }
 }

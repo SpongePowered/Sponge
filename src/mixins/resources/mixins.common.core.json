@@ -170,7 +170,8 @@
     "world.storage.WorldInfoMixin",
     "block.CommandBlockMixin",
     "block.CactusBlockMixin",
-    "block.LeavesBlockMixin"
+    "block.LeavesBlockMixin",
+    "enchantment.EnchantmentMixin"
   ],
   "client": [
     "client.MinecraftMixin",
