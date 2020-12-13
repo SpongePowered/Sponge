@@ -101,14 +101,22 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
-    public Command.@NonNull Builder setExtendedDescription(@NonNull final Function<CommandCause, Optional<Component>> extendedDescriptionFunction) {
-        this.extendedDescription = extendedDescriptionFunction;
+    public Command.@NonNull Builder setExtendedDescription(@Nullable final Function<CommandCause, Optional<Component>> extendedDescriptionFunction) {
+        if (extendedDescriptionFunction == null) {
+            this.extendedDescription = cause -> Optional.empty();
+        } else {
+            this.extendedDescription = extendedDescriptionFunction;
+        }
         return this;
     }
 
     @Override
-    public Command.@NonNull Builder setShortDescription(@NonNull final Function<CommandCause, Optional<Component>> descriptionFunction) {
-        this.shortDescription = descriptionFunction;
+    public Command.@NonNull Builder setShortDescription(@Nullable final Function<CommandCause, Optional<Component>> descriptionFunction) {
+        if (descriptionFunction == null) {
+            this.shortDescription = cause -> Optional.empty();
+        } else {
+            this.shortDescription = descriptionFunction;
+        }
         return this;
     }
 
