@@ -25,26 +25,20 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.HangingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
@@ -53,8 +47,9 @@ import java.util.ArrayList;
 @Mixin(HangingEntity.class)
 public abstract class HangingEntityMixin extends EntityMixin {
 
-    @Shadow private Direction facingDirection;
-    @Shadow public abstract boolean shadow$onValidSurface();
+    // @formatter:off
+    @Shadow public abstract boolean shadow$survives();
+    // @formatter:on
 
     private boolean impl$ignorePhysics = false;
 
@@ -63,9 +58,9 @@ public abstract class HangingEntityMixin extends EntityMixin {
      */
     @Redirect(method = "tick()V",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/item/HangingEntity;onValidSurface()Z"))
+            target = "Lnet/minecraft/entity/item/HangingEntity;survives()Z"))
     private boolean impl$checkIfOnValidSurfaceAndIgnoresPhysics(final HangingEntity entityHanging) {
-        return this.shadow$onValidSurface() && !this.impl$ignorePhysics;
+        return this.shadow$survives() && !this.impl$ignorePhysics;
     }
 
     @Override
@@ -82,7 +77,7 @@ public abstract class HangingEntityMixin extends EntityMixin {
         }
     }
 
-    @Inject(method = "attackEntityFrom",
+    @Inject(method = "hurt",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/item/HangingEntity;remove()V"
         ),

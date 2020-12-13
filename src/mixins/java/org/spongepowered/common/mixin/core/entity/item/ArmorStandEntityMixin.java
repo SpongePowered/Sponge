@@ -49,7 +49,9 @@ import java.util.ArrayList;
 @Mixin(ArmorStandEntity.class)
 public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
 
-    @Shadow protected abstract void shadow$func_213817_e(DamageSource damageSource, float damage); // damageArmorStand
+    // @formatter:off
+    @Shadow protected abstract void shadow$causeDamage(DamageSource damageSource, float damage); // damageArmorStand
+    // @formatter:on
 
     /**
      * The return value is set to false if the entity should not be completely
@@ -64,13 +66,13 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
                 cir.setReturnValue(false);
             }
             if (event.getFinalDamage() < this.shadow$getHealth()) {
-                this.shadow$func_213817_e(source, (float) event.getFinalDamage());
+                this.shadow$causeDamage(source, (float) event.getFinalDamage());
                 cir.setReturnValue(false);
             }
         }
     }
 
-    @Inject(method = "attackEntityFrom",
+    @Inject(method = "hurt",
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/util/DamageSource;OUT_OF_WORLD:Lnet/minecraft/util/DamageSource;")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ArmorStandEntity;remove()V", ordinal = 0),
             cancellable = true)
@@ -78,39 +80,39 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
         this.fireDestroyDamageEvent(source, cir);
     }
 
-    @Inject(method = "attackEntityFrom",
+    @Inject(method = "hurt",
             slice = @Slice(from = @At(value = "INVOKE",
                 target = "Lnet/minecraft/util/DamageSource;isExplosion()Z")
             ),
             at = @At(value = "INVOKE",
-                target = "Lnet/minecraft/entity/item/ArmorStandEntity;func_213816_g(Lnet/minecraft/util/DamageSource;)V"),
+                target = "Lnet/minecraft/entity/item/ArmorStandEntity;causeDamage(Lnet/minecraft/util/DamageSource;F)V"),
             cancellable = true)
     private void impl$fireDamageEventExplosion(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         this.fireDestroyDamageEvent(source, cir);
     }
 
-    @Redirect(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ArmorStandEntity;func_213817_e(Lnet/minecraft/util/DamageSource;F)V"))
+    @Redirect(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ArmorStandEntity;causeDamage(Lnet/minecraft/util/DamageSource;F)V"))
     private void impl$fireDamageEventDamage(final ArmorStandEntity self, final DamageSource source, final float amount) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(),
                 (Entity) this, new ArrayList<>(), amount);
             if (!SpongeCommon.postEvent(event)) {
-                this.shadow$func_213817_e(source, (float) event.getFinalDamage());
+                this.shadow$causeDamage(source, (float) event.getFinalDamage());
             }
         }
     }
 
-    @Inject(method = "attackEntityFrom", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/util/DamageSource;isCreativePlayer()Z")),
+    @Inject(method = "hurt", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/util/DamageSource;isCreativePlayer()Z")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ArmorStandEntity;playBrokenSound()V"), cancellable = true)
     private void fireDamageEventCreativePunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         this.fireDestroyDamageEvent(source, cir);
     }
 
-    @Inject(method = "attackEntityFrom",
+    @Inject(method = "hurt",
             slice = @Slice(
-                    from = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/ArmorStandEntity;punchCooldown:J", opcode = Opcodes.GETFIELD)),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V"),
+                    from = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/ArmorStandEntity;lastHit:J", opcode = Opcodes.GETFIELD)),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;broadcastEntityEvent(Lnet/minecraft/entity/Entity;B)V"),
             cancellable = true)
     private void fireDamageEventFirstPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         // While this doesn't technically "damage" the armor stand, it feels
@@ -125,9 +127,9 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
         }
     }
 
-    @Inject(method = "attackEntityFrom",
+    @Inject(method = "hurt",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/item/ArmorStandEntity;func_213815_f(Lnet/minecraft/util/DamageSource;)V"
+            target = "Lnet/minecraft/entity/item/ArmorStandEntity;brokenByPlayer(Lnet/minecraft/util/DamageSource;)V"
         ),
         cancellable = true)
     private void fireDamageEventSecondPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
@@ -138,10 +140,10 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
      * @author JBYoshi
      * @reason EntityArmorStand "simplifies" this method to simply call {@link
      * #shadow$remove()}. However, this ignores our custom event. Instead, delegate
-     * to the superclass and use {@link ArmorStandEntity#attackEntityFrom(DamageSource, float)}.
+     * to the superclass and use {@link ArmorStandEntity#hurt(DamageSource, float)}.
      */
     @Overwrite
-    public void onKillCommand() {
+    public void kill() {
         super.shadow$kill();
     }
 }

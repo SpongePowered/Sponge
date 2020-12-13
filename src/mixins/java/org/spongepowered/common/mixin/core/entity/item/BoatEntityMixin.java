@@ -45,7 +45,7 @@ public abstract class BoatEntityMixin extends EntityMixin implements BoatBridge 
     private double impl$occupiedDecelerationSpeed = Constants.Entity.Boat.OCCUPIED_DECELERATION_SPEED;
     private double impl$unoccupiedDecelerationSpeed = Constants.Entity.Boat.UNOCCUPIED_DECELERATION_SPEED;
 
-    @ModifyConstant(method = "updateMotion", constant = @Constant(floatValue = Constants.Entity.Boat.DEFAULT_MAX_SPEED))
+    @ModifyConstant(method = "floatBoat", constant = @Constant(floatValue = Constants.Entity.Boat.DEFAULT_MAX_SPEED))
     private float impl$getMaximumWaterMotion(final float originalSpeed) {
         return this.impl$maxSpeed;
     }
@@ -67,9 +67,9 @@ public abstract class BoatEntityMixin extends EntityMixin implements BoatBridge 
         }
     }
 
-    @Redirect(method = "getBoatGlide", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;getSlipperiness()F"))
+    @Redirect(method = "getGroundFriction", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;getFriction()F"))
     private float impl$getBlockSlipperinessIfBoatIsNotOverridingMovingOnLand(final Block block) {
-        return this.impl$moveOnLand ? Blocks.ICE.getSlipperiness() : block.getSlipperiness();
+        return this.impl$moveOnLand ? Blocks.ICE.getFriction() : block.getFriction();
     }
 
     @Override

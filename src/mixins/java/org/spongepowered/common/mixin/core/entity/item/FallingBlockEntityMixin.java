@@ -40,32 +40,34 @@ import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 @Mixin(FallingBlockEntity.class)
 public abstract class FallingBlockEntityMixin extends EntityMixin {
 
-    @Shadow private BlockState fallTile;
+    // @formatter:off
+    @Shadow private BlockState blockState;
+    // @formatter:on
 
     @SuppressWarnings("ConstantConditions")
-    @Redirect(method = "onLivingFall(FF)Z",
+    @Redirect(method = "causeFallDamage",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
+            target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"
         )
     )
     private boolean spongeAttackFallingOrAnvil(final Entity entity, final DamageSource source, final float damage) {
-        if (entity.world.isClientSide) {
-            return entity.attackEntityFrom(source, damage);
+        if (entity.level.isClientSide) {
+            return entity.hurt(source, damage);
         }
-        final boolean isAnvil = this.fallTile.getBlock().isIn(BlockTags.ANVIL);
+        final boolean isAnvil = this.blockState.getBlock().is(BlockTags.ANVIL);
         try {
             if (isAnvil) {
                 final MinecraftFallingBlockDamageSource anvil = new MinecraftFallingBlockDamageSource("anvil", (FallingBlockEntity) (Object) this);
                 ((DamageSourceBridge) (Object) anvil).bridge$setAnvilSource();
 
-                return entity.attackEntityFrom(DamageSource.ANVIL, damage);
+                return entity.hurt(DamageSource.ANVIL, damage);
             } else {
                 final MinecraftFallingBlockDamageSource
                     fallingblock =
                     new MinecraftFallingBlockDamageSource("fallingblock", (FallingBlockEntity) (Object) this);
                 ((DamageSourceBridge) (Object) fallingblock).bridge$setFallingBlockSource();
-                return entity.attackEntityFrom(DamageSource.FALLING_BLOCK, damage);
+                return entity.hurt(DamageSource.FALLING_BLOCK, damage);
             }
         } finally {
             if (isAnvil) {

@@ -173,7 +173,11 @@
     "block.LeavesBlockMixin",
     "enchantment.EnchantmentMixin",
     "entity.item.minecart.FurnaceMinecartEntityMixin",
-    "entity.item.minecart.ContainerMinecartEntityMixin"
+    "entity.item.minecart.ContainerMinecartEntityMixin",
+    "entity.item.ArmorStandEntityMixin",
+    "entity.item.HangingEntityMixin",
+    "entity.item.ItemFrameEntityMixin",
+    "entity.item.PaintingTypeMixin"
   ],
   "client": [
     "client.MinecraftMixin",

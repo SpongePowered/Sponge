@@ -61,10 +61,10 @@ public abstract class EnderCrystalEntityMixin extends EntityMixin implements Exp
         this.impl$explosionStrength = radius == null ? Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH : radius;
     }
 
-    @Redirect(method = "attackEntityFrom",
+    @Redirect(method = "hurt",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
+            target = "Lnet/minecraft/world/World;explode(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
         )
     )
     @Nullable

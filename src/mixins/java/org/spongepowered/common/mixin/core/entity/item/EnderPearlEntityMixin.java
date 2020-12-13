@@ -31,13 +31,13 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.EndGatewayTileEntity;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -56,13 +56,11 @@ import javax.annotation.Nullable;
 @Mixin(EnderPearlEntity.class)
 public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
 
-    @Shadow private LivingEntity perlThrower;
-
     private double impl$damageAmount;
 
-    @ModifyArg(method = "onImpact",
+    @ModifyArg(method = "onHit",
             at = @At(value = "INVOKE",
-                target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+                target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"))
     private float impl$onAttackEntityFromWithDamage(final float damage) {
         return (float) this.impl$damageAmount;
     }
@@ -81,7 +79,7 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
         compound.putDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damageAmount);
     }
 
-    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/EndGatewayTileEntity;teleportEntity(Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "onHit", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/EndGatewayTileEntity;teleportEntity(Lnet/minecraft/entity/Entity;)V"))
     private void impl$createCauseFrameForGatewayTeleport(EndGatewayTileEntity endGatewayTileEntity, Entity entityIn) {
         if (this.shadow$getEntityWorld().isClientSide) {
             return;
@@ -95,7 +93,7 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
     }
 
     @Inject(
-            method = "onImpact",
+            method = "onHit",
             at = @At(value = "RETURN", ordinal = 2, shift = At.Shift.BY, by = 2),
             locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true
@@ -106,13 +104,13 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
         }
         
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(this.perlThrower);
+            frame.pushCause(this.shadow$getOwner());
             frame.pushCause(this);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENDER_PEARL);
 
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
-                    (org.spongepowered.api.entity.Entity) entity, VecHelper.toVector3d(entity.getPositionVector()),
-                    VecHelper.toVector3d(this.shadow$getPositionVector()), VecHelper.toVector3d(this.shadow$getPositionVector()));
+                    (org.spongepowered.api.entity.Entity) entity, VecHelper.toVector3d(entity.position()),
+                    VecHelper.toVector3d(this.shadow$position()), VecHelper.toVector3d(this.shadow$position()));
             if (SpongeCommon.postEvent(event)) {
                 // Eventhough the event is made, the pearl was still created so remove it anyways
                 this.shadow$remove();
@@ -127,13 +125,12 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
 
     @Override
     @Nullable
-    public Entity changeDimension(final DimensionType dimensionIn) {
+    public Entity changeDimension(final ServerWorld dimensionIn) {
         final Entity entity = super.changeDimension(dimensionIn);
 
         if (entity instanceof EnderPearlEntity) {
             // We actually teleported so...
-            this.perlThrower = null;
-            this.owner = null;
+            this.shadow$setOwner(null);
         }
 
         return entity;

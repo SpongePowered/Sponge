@@ -53,7 +53,9 @@ import java.util.Optional;
 @Mixin(TNTEntity.class)
 public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPrimedBridge, FusedExplosiveBridge, ExplosiveBridge {
 
-    @Shadow private int fuse;
+    // @formatter:off
+    @Shadow private int life;
+    // @formatter:on
 
     @Nullable private LivingEntity impl$detonator;
     private int bridge$explosionRadius = Constants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS;
@@ -66,7 +68,7 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
 
     @Override
     public boolean bridge$isExploding() {
-        return this.removed && this.fuse <= 0;
+        return this.removed && this.life <= 0;
     }
 
     @Override
@@ -91,12 +93,12 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
 
     @Override
     public int bridge$getFuseTicksRemaining() {
-        return this.fuse;
+        return this.life;
     }
 
     @Override
     public void bridge$setFuseTicksRemaining(final int fuseTicks) {
-        this.fuse = fuseTicks;
+        this.life = fuseTicks;
     }
 
     @Nullable
@@ -104,7 +106,7 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
         method = "explode",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
+            target = "Lnet/minecraft/world/World;explode(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
         )
     )
     private net.minecraft.world.Explosion impl$useSpongeExplosion(final net.minecraft.world.World world,
@@ -125,7 +127,7 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$updateTNTPushPrime(final CallbackInfo ci) {
-        if (this.fuse == this.bridge$fuseDuration - 1 && !this.world.isClientSide) {
+        if (this.life == this.bridge$fuseDuration - 1 && !this.world.isClientSide) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 if (this.impl$detonator != null) {
                     frame.pushCause(this.impl$detonator);

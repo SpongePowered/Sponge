@@ -41,9 +41,8 @@ import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import javax.annotation.Nullable;
 
 @Mixin(ThrowableEntity.class)
-public abstract class ThrowableEntityMixin extends EntityMixin {
+public abstract class ThrowableEntityMixin extends ProjectileEntityMixin {
 
-    @Shadow protected LivingEntity owner;
 
     @Shadow @Nullable public abstract LivingEntity shadow$getThrower();
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);

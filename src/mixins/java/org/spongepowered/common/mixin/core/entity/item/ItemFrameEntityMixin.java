@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.util.DamageSource;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -47,12 +46,10 @@ import javax.annotation.Nullable;
 @Mixin(ItemFrameEntity.class)
 public abstract class ItemFrameEntityMixin extends HangingEntityMixin {
 
-    @Shadow public abstract void shadow$setDisplayedItem(@Nullable net.minecraft.item.ItemStack p_82334_1_);
-
-    @Inject(method = "attackEntityFrom",
+    @Inject(method = "hurt",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/item/ItemFrameEntity;dropItemOrSelf(Lnet/minecraft/entity/Entity;Z)V"
+            target = "Lnet/minecraft/entity/item/ItemFrameEntity;dropItem(Lnet/minecraft/entity/Entity;Z)V"
         ),
         cancellable = true)
     private void onAttackEntityFrom(final DamageSource source, final float amount,
@@ -65,27 +62,6 @@ public abstract class ItemFrameEntityMixin extends HangingEntityMixin {
                 cir.setReturnValue(true);
             }
         }
-    }
-
-    /**
-     * Fixes MC-124833
-     *
-     * @author Meronat - April 4th, 2018
-     * @reason Fixes a vanilla dupe in 1.12.2 - MC-124833 - Which resulted due
-     *     to the displayed item not being properly unset.
-     *
-     * @param ci The callback info
-     */
-    @Inject(
-        method = "removeItem",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/item/ItemStack;setItemFrame(Lnet/minecraft/entity/item/ItemFrameEntity;)V",
-            shift = At.Shift.AFTER
-        )
-    )
-    private void impl$postOnSetItemFrame(final CallbackInfo ci) {
-        this.shadow$setDisplayedItem(net.minecraft.item.ItemStack.EMPTY);
     }
 
 }

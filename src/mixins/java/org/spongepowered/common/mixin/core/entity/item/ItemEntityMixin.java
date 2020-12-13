@@ -51,9 +51,13 @@ import org.spongepowered.common.util.Constants;
 public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityBridge {
 
     private static final int MAGIC_PREVIOUS = -1;
+
+    // @formatter:off
     @Shadow private int pickupDelay;
     @Shadow private int age;
     @Shadow public abstract ItemStack shadow$getItem();
+    // @formatter:on
+
     /**
      * A simple cached value of the merge radius for this item.
      * Since the value is configurable, the first time searching for
@@ -71,7 +75,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
         return this.impl$infinitePickupDelay;
     }
 
-    @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = Constants.Entity.Item.DEFAULT_ITEM_MERGE_RADIUS))
+    @ModifyConstant(method = "mergeWithNeighbours", constant = @Constant(doubleValue = Constants.Entity.Item.DEFAULT_ITEM_MERGE_RADIUS))
     private double impl$changeSearchRadiusFromConfig(final double originalRadius) {
         if (this.world.isClientSide || ((WorldBridge) this.world).bridge$isFake()) {
             return originalRadius;
@@ -178,7 +182,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
         method = "tick()V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ItemEntity;remove()V"),
         slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ItemEntity;handleWaterMovement()Z"),
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ItemEntity;updateInWaterStateAndDoFluidPushing()Z"),
             to = @At("TAIL")
         )
     )
