@@ -100,7 +100,7 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.service.ban.Ban;
-import org.spongepowered.api.util.Builder;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
@@ -204,7 +204,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
     }
 
     @Override
-    public <T extends Builder<?, ? super T>> T provide(final Class<T> builderClass) {
+    public <T extends ResettableBuilder<?, ? super T>> T provide(final Class<T> builderClass) {
         final Supplier<?> supplier = this.builders.get(builderClass);
         if (supplier == null) {
             throw new TypeNotFoundException(String.format("Type '%s' has no builder registered!", builderClass));
