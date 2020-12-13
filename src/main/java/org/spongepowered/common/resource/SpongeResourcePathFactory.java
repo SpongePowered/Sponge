@@ -22,33 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.resource;
+package org.spongepowered.common.resource;
 
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.resource.ISpongeResourcePath;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.resource.ResourcePath;
 
-@Mixin(ResourceLocation.class)
-@Implements(@Interface(iface = ISpongeResourcePath.class, prefix = "resource$"))
-public abstract class MixinResourceLocation_API implements ISpongeResourcePath {
-
-    // @formatter:off
-    @Shadow public abstract String shadow$getNamespace();
-    @Shadow public abstract String shadow$getPath();
-    // @formatter:on
-
-    @Intrinsic
-    public String resource$getNamespace() {
-        return shadow$getNamespace();
+public class SpongeResourcePathFactory implements ResourcePath.Factory {
+    @Override
+    public ResourcePath of(ResourceKey key) {
+        return new SpongeResourcePath(key);
     }
-
-    @Intrinsic
-    public String resource$getPath() {
-        return shadow$getPath();
-    }
-
 }

@@ -29,10 +29,10 @@ import net.minecraft.resources.ResourcePackType;
 import net.minecraft.resources.data.IMetadataSectionSerializer;
 import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.resource.meta.MetaSection;
 import org.spongepowered.api.resource.pack.Pack;
 import org.spongepowered.api.resource.pack.PackType;
+import org.spongepowered.common.resource.SpongeResourcePath;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,20 +71,20 @@ public class SpongePacks {
 
         @Override
         public InputStream getResourceStream(ResourcePackType type, ResourceLocation location) throws IOException {
-            return pack.openStream((PackType) (Object) type, (ResourcePath) (Object) location);
+            return pack.openStream((PackType) (Object) type, SpongeResourcePath.fromVanilla(location));
         }
 
         @Override
         public Collection<ResourceLocation> getAllResourceLocations(ResourcePackType type, String namespaceIn, String pathIn, int maxDepth, Predicate<String> filter) {
             return pack.find((PackType) (Object) type, namespaceIn, pathIn, maxDepth, filter)
                     .stream()
-                    .map(ResourceLocation.class::cast)
+                    .map(SpongeResourcePath::toVanilla)
                     .collect(Collectors.toList());
         }
 
         @Override
         public boolean resourceExists(ResourcePackType type, ResourceLocation location) {
-            return pack.exists((PackType) (Object) type, (ResourcePath) (Object) location);
+            return pack.exists((PackType) (Object) type, SpongeResourcePath.fromVanilla(location));
         }
 
         @Override

@@ -37,12 +37,14 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.resource.SpongeResourcePath;
 import org.spongepowered.common.util.CloseableListImpl;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Mixin(IResourceManager.class)
 @Implements(@Interface(iface = ResourceManager.class, prefix = "resource$"))
@@ -56,16 +58,18 @@ public interface MixinIResourceManager_API extends ResourceManager {
 
     @Override
     default Resource load(ResourcePath path) throws IOException {
-        return (Resource) this.getResource((ResourceLocation) (Object) path);
+        return (Resource) this.getResource(SpongeResourcePath.toVanilla(path));
     }
 
     @Override
     default CloseableList<@NonNull Resource> loadAll(ResourcePath path) throws IOException {
-        return CloseableListImpl.create((List) this.getAllResources((ResourceLocation) (Object) path));
+        return CloseableListImpl.create((List) this.getAllResources(SpongeResourcePath.toVanilla(path)));
     }
 
     @Intrinsic
     default Collection<ResourcePath> resource$find(String pathPrefix, Predicate<String> pathFilter) {
-        return (Collection) this.getAllResourceLocations(pathPrefix, pathFilter);
+        return this.getAllResourceLocations(pathPrefix, pathFilter).stream()
+                .map(SpongeResourcePath::fromVanilla)
+                .collect(Collectors.toList());
     }
 }

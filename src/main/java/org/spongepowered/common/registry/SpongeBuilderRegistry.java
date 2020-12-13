@@ -101,7 +101,6 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.service.ban.Ban;
-import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
@@ -190,7 +189,6 @@ import org.spongepowered.common.world.biome.SpongeVirtualBiomeTypeBuilder;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.volume.stream.SpongeStreamOptionsBuilder;
-import org.spongepowered.common.resource.SpongeResourcePathBuilder;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -315,7 +313,6 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(PaletteType.Builder.class, SpongePaletteTypeBuilder::new)
             .register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new)
             .register(FluidState.Builder.class, SpongeFluidStateBuilder::new)
-            .register(ResourcePath.Builder.class, SpongeResourcePathBuilder::new)
         ;
     }
 }

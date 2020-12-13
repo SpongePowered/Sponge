@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.resource.SpongeResourcePath;
 import org.spongepowered.common.resource.meta.SpongeMetadataSectionSerializer;
 
 import javax.annotation.Nullable;
@@ -66,7 +67,7 @@ public interface MixinIResourcePack_API extends Pack {
     @Override
     @SuppressWarnings("ConstantConditions")
     default InputStream openStream(PackType type, ResourcePath path) throws IOException {
-        return this.getResourceStream((ResourcePackType) (Object) type, (ResourceLocation) (Object) path);
+        return this.getResourceStream((ResourcePackType) (Object) type, SpongeResourcePath.toVanilla(path));
     }
 
     @Override
@@ -74,14 +75,14 @@ public interface MixinIResourcePack_API extends Pack {
     default Collection<ResourcePath> find(PackType type, String namespace, String prefix, int depth, Predicate<String> filter) {
         return this.getAllResourceLocations((ResourcePackType) (Object) type, namespace, prefix, depth, filter)
                 .stream()
-                .map(ResourcePath.class::cast)
+                .map(SpongeResourcePath::fromVanilla)
                 .collect(Collectors.toList());
     }
 
     @Override
     @SuppressWarnings("ConstantConditions")
     default boolean exists(PackType type, ResourcePath path) {
-        return this.resourceExists((ResourcePackType) (Object) type, (ResourceLocation) (Object) path);
+        return this.resourceExists((ResourcePackType) (Object) type, SpongeResourcePath.toVanilla(path));
     }
 
     @Override

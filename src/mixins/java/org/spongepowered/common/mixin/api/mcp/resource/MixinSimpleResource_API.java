@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.resource.ISpongeResource;
+import org.spongepowered.common.resource.SpongeResourcePath;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -64,7 +65,7 @@ public abstract class MixinSimpleResource_API implements ISpongeResource {
 
     @Intrinsic
     public ResourcePath resource$getPath() {
-        return (ResourcePath) (Object) location;
+        return SpongeResourcePath.fromVanilla(location);
     }
 
     @Intrinsic

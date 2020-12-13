@@ -236,7 +236,6 @@
         "mcp.resource.MixinIFutureReloadListener",
         "mcp.resource.MixinIFutureReloadListener_IStage_API",
         "mcp.resource.MixinIResourceManager_API",
-        "mcp.resource.MixinResourceLocation_API",
         "mcp.resource.MixinSimpleResource_API",
         "mcp.resource.meta.MixinIMetaDataSectionSerializer",
         "mcp.resource.meta.MixinPackMetadataSection_API",

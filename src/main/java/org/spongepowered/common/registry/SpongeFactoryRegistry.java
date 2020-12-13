@@ -47,6 +47,7 @@ import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.UnknownTypeException;
+import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.resource.ResourceReloadListener;
 import org.spongepowered.api.resource.pack.Pack;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -78,6 +79,7 @@ import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
 import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
+import org.spongepowered.common.resource.SpongeResourcePathFactory;
 import org.spongepowered.common.resource.SpongeResourceReloadListenerFactory;
 import org.spongepowered.common.resource.pack.SpongePackFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
@@ -137,6 +139,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY)
             .registerFactory(Parameter.Value.Factory.class, new SpongeParameterFactory())
             .registerFactory(ResourcePack.Factory.class, new SpongeResourcePack.Factory())
+            .registerFactory(ResourcePath.Factory.class, new SpongeResourcePathFactory())
             .registerFactory(ServerLocation.Factory.class, new SpongeServerLocation.Factory())
             .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory())
             .registerFactory(TimingsFactory.class, new SpongeTimingsFactory())
