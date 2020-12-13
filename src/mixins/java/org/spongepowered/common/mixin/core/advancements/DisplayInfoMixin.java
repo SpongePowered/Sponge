@@ -39,7 +39,9 @@ import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 @Mixin(DisplayInfo.class)
 public abstract class DisplayInfoMixin implements DisplayInfoBridge {
 
+    // @formatter:off
     @Shadow @Final @Mutable @Nullable private ResourceLocation background;
+    // @formatter:on
 
     @Nullable private Advancement impl$advancement;
 

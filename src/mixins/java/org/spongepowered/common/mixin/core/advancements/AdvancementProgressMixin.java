@@ -74,7 +74,9 @@ import javax.annotation.Nullable;
 @Mixin(AdvancementProgress.class)
 public abstract class AdvancementProgressMixin implements AdvancementProgressBridge {
 
+    // @formatter:off
     @Shadow @Final private Map<String, net.minecraft.advancements.CriterionProgress> criteria;
+    // @formatter:on
 
     @Nullable private Map<String, ImplementationBackedCriterionProgress> impl$progressMap;
     @Nullable private ResourceLocation impl$advancementKey;
@@ -85,7 +87,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
         checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
 
-        final net.minecraft.advancements.Advancement advancement = SpongeCommon.getServer().getAdvancementManager().getAdvancement(this.impl$advancementKey);
+        final net.minecraft.advancements.Advancement advancement = SpongeCommon.getServer().getAdvancements().getAdvancement(this.impl$advancementKey);
         if (advancement == null) {
             throw new IllegalStateException("The advancement of this advancement progress is unloaded: " + this.impl$advancementKey);
         }
@@ -213,7 +215,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      * @reason Rewrite the method to add support for triggering
      *         score criteria and calling grant events.
      */
-    @Inject(method = "grantCriterion(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "grantProgress", at = @At("HEAD"), cancellable = true)
     private void impl$grantScoreCriteriaAndCallEvents(String criterion, CallbackInfoReturnable<Boolean> ci) {
         if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) { // Use vanilla behavior on the client
             return;
@@ -223,11 +225,11 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
     private boolean impl$grantCriterion(String rawCriterion) {
         final net.minecraft.advancements.CriterionProgress criterionProgress = this.criteria.get(rawCriterion);
-        if (criterionProgress == null || criterionProgress.isObtained()) {
+        if (criterionProgress == null || criterionProgress.isDone()) {
             return false;
         }
         if (SpongeScoreCriterion.BYPASS_EVENT) {
-            criterionProgress.obtain();
+            criterionProgress.grant();
             return true;
         }
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
@@ -259,7 +261,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
         if (SpongeCommon.postEvent(event)) {
             return false;
         }
-        criterionProgress.obtain();
+        criterionProgress.grant();
         return true;
     }
 
@@ -268,7 +270,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      * @reason Rewrite the method to add support for triggering
      *         score criteria and calling revoke events.
      */
-    @Inject(method = "revokeCriterion(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "revokeProgress", at = @At("HEAD"), cancellable = true)
     private void impl$removeScoreCriteriaAndCallEvents(String rawCriterion, CallbackInfoReturnable<Boolean> ci) {
         if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) { // Use vanilla behavior on the client
             return;
@@ -278,11 +280,11 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
     private boolean impl$revokeCriterion(String rawCriterion) {
         final net.minecraft.advancements.CriterionProgress criterionProgress = this.criteria.get(rawCriterion);
-        if (criterionProgress == null || !criterionProgress.isObtained()) {
+        if (criterionProgress == null || !criterionProgress.isDone()) {
             return false;
         }
         if (SpongeScoreCriterion.BYPASS_EVENT) {
-            criterionProgress.reset();
+            criterionProgress.revoke();
             return true;
         }
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
@@ -318,7 +320,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
         if (SpongeCommon.postEvent(event)) {
             return false;
         }
-        criterionProgress.reset();
+        criterionProgress.revoke();
         return true;
     }
 
@@ -331,7 +333,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
     private Optional<Advancement> getOptionalAdvancement() {
         checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
         checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
-        final net.minecraft.advancements.Advancement advancement = SpongeCommon.getServer().getAdvancementManager().getAdvancement(this.impl$advancementKey);
+        final net.minecraft.advancements.Advancement advancement = SpongeCommon.getServer().getAdvancements().getAdvancement(this.impl$advancementKey);
         return Optional.ofNullable((Advancement)advancement);
     }
 }

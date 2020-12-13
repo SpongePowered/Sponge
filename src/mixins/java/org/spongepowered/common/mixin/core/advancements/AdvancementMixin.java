@@ -67,14 +67,17 @@ import java.util.Set;
 @Mixin(Advancement.class)
 public abstract class AdvancementMixin implements AdvancementBridge {
 
+    // @formatter:off
     @Shadow @Final @Mutable @Nullable private Advancement parent;
     @Shadow @Final @Mutable private String[][] requirements;
     @Shadow @Final @Mutable private Map<String, Criterion> criteria;
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private ResourceLocation id;
 
-    @Shadow @Final private ITextComponent displayText;
+    @Shadow @Final private ITextComponent chatComponent;
     @Shadow @Final private AdvancementRewards rewards;
+    // @formatter:on
+
     private AdvancementCriterion impl$criterion;
     private List<Component> impl$toastText;
 
@@ -128,7 +131,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
         final ImmutableList.Builder<Component> toastText = ImmutableList.builder();
         if (this.display != null) {
             final FrameType frameType = this.display.getFrame();
-            toastText.add(Component.translatable("advancements.toast." + frameType.getName(), SpongeAdventure.asAdventureNamed(frameType.getFormat())));
+            toastText.add(Component.translatable("advancements.toast." + frameType.getName(), SpongeAdventure.asAdventureNamed(frameType.getChatColor())));
             toastText.add(SpongeAdventure.asAdventure(this.display.getTitle()));
         } else {
 

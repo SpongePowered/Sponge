@@ -48,7 +48,7 @@ import javax.annotation.Nullable;
  * @param <T> The type of comparable
  */
 @Mixin(value = Property.class)
-@Implements(@Interface(iface = StateProperty.class, prefix = "state$"))
+@Implements(@Interface(iface = StateProperty.class, prefix = "stateProperty$"))
 public abstract class PropertyMixin_API<T extends Comparable<T>> implements StateProperty<T> {
 
     // @formatter:off
@@ -70,17 +70,17 @@ public abstract class PropertyMixin_API<T extends Comparable<T>> implements Stat
     }
 
     @Intrinsic
-    public String state$getName() {
+    public String stateProperty$getName() {
         return this.shadow$getName();
     }
 
     @Intrinsic
-    public Collection<T> state$getPossibleValues() {
+    public Collection<T> stateProperty$getPossibleValues() {
         return this.shadow$getPossibleValues();
     }
 
     @Intrinsic
-    public Class<T> state$getValueClass() {
+    public Class<T> stateProperty$getValueClass() {
         return this.shadow$getValueClass();
     }
 
