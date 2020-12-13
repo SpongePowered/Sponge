@@ -42,10 +42,10 @@ import org.spongepowered.common.util.MinecraftBlockDamageSource;
 public abstract class MagmaBlockMixin extends BlockMixin {
 
     @Redirect(
-        method = "onEntityWalk",
+        method = "stepOn",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
+            target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"
         )
     )
     private boolean impl$swapDamageSourceForMagma(Entity entity, DamageSource source, float damage, World world, BlockPos pos, Entity original) {
@@ -55,11 +55,11 @@ public abstract class MagmaBlockMixin extends BlockMixin {
                 final MinecraftBlockDamageSource hotFloor = new MinecraftBlockDamageSource("hotFloor", location);
                 ((DamageSourceAccessor) (Object) hotFloor).invoker$setIsFire();
                 ((DamageSourceBridge) (Object) hotFloor).bridge$setHotFloorSource();
-                return entity.attackEntityFrom(DamageSource.HOT_FLOOR, damage);
+                return entity.hurt(DamageSource.HOT_FLOOR, damage);
             } finally {
                 ((DamageSourceBridge) source).bridge$setHotFloorSource();
             }
         }
-        return entity.attackEntityFrom(source, damage);
+        return entity.hurt(source, damage);
     }
 }

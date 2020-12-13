@@ -22,7 +22,7 @@
     "adventure.text.AbstractComponentMixin",
     "adventure.text.format.StyleImplMixin",
     "authlib.properties.PropertyMixin",
-    "block.Block_PropertiesMixin",
+      "block.AbstractBlock_PropertiesMixin",
     "block.BlockMixin",
     "block.BlockStateMixin",
     "block.CarvedPumpkinBlockMixin",
@@ -167,7 +167,10 @@
     "world.server.ServerWorldMixin",
     "world.spawner.AbstractSpawnerMixin",
     "world.storage.SaveHandlerMixin",
-    "world.storage.WorldInfoMixin"
+    "world.storage.WorldInfoMixin",
+    "block.CommandBlockMixin",
+    "block.CactusBlockMixin",
+    "block.LeavesBlockMixin"
   ],
   "client": [
     "client.MinecraftMixin",

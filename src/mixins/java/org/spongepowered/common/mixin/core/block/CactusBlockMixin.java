@@ -39,18 +39,18 @@ import org.spongepowered.common.util.MinecraftBlockDamageSource;
 @Mixin(CactusBlock.class)
 public abstract class CactusBlockMixin extends BlockMixin {
 
-    @Redirect(method = "onEntityCollision",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+    @Redirect(method = "entityInside",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"))
     private boolean impl$reAssignForBlockDamageSource(Entity this$, DamageSource source, float damage,
         net.minecraft.world.World world, BlockPos pos, net.minecraft.block.BlockState state, Entity entity) {
         if (world.isClientSide()) {
-            return entity.attackEntityFrom(source, damage);
+            return entity.hurt(source, damage);
         }
         try {
             final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
             final MinecraftBlockDamageSource cactus = new MinecraftBlockDamageSource("cactus", location);
             ((DamageSourceBridge) (Object) cactus).bridge$setCactusSource();
-            return entity.attackEntityFrom(DamageSource.CACTUS, damage);
+            return entity.hurt(DamageSource.CACTUS, damage);
         } finally {
             ((DamageSourceBridge) source).bridge$setCactusSource();
         }

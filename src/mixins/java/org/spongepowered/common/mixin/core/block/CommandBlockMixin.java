@@ -43,7 +43,7 @@ import org.spongepowered.common.service.server.permission.SpongePermissionServic
 @Mixin(CommandBlockBlock.class)
 public abstract class CommandBlockMixin {
 
-    @Inject(method = "onBlockActivated", at = @At(value = "RETURN", ordinal = 1))
+    @Inject(method = "use", at = @At(value = "RETURN", ordinal = 1))
     private void impl$checkCommandBlockPermission(final BlockState state, final World world, final BlockPos pos, final PlayerEntity player, final Hand hand,
             final BlockRayTraceResult hit, final CallbackInfoReturnable<Boolean> cir) {
         // In Vanilla, the command block will never even open, since the client will do the permission check.
@@ -52,7 +52,7 @@ public abstract class CommandBlockMixin {
         // If the server-side permission check fails, we need to forcibly close it, since it will already have opened on the client.
         if (!world.isClientSide() && !(Sponge.getServer().getServiceProvider().permissionService() instanceof SpongePermissionService)) {
             // CommandBlock GUI opens solely on the client, we need to force it close on cancellation
-            ((ServerPlayerEntity) player).connection.sendPacket(new SCloseWindowPacket(0));
+            ((ServerPlayerEntity) player).connection.send(new SCloseWindowPacket(0));
         }
     }
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.DyeColor;
@@ -33,10 +34,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 
-@Mixin(Block.Properties.class)
-public abstract class Block_PropertiesMixin {
+@Mixin(AbstractBlock.Properties.class)
+public abstract class AbstractBlock_PropertiesMixin {
 
-    @Inject(method = "create(Lnet/minecraft/block/material/Material;Lnet/minecraft/item/DyeColor;)Lnet/minecraft/block/Block$Properties;",
+    @Inject(method = "of(Lnet/minecraft/block/material/Material;Lnet/minecraft/item/DyeColor;)Lnet/minecraft/block/AbstractBlock$Properties;",
             at = @At("RETURN"))
     private static void impl$onCreate(final Material material, final DyeColor color, final CallbackInfoReturnable<Block.Properties> cir) {
         final Block.Properties returnValue = cir.getReturnValue();

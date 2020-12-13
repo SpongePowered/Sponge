@@ -62,10 +62,10 @@ public abstract class FireBlockMixin extends BlockMixin {
             }
 
         }
-        return world.setBlockState(pos, newState, flags);
+        return world.setBlock(pos, newState, flags);
     }
 
-    @Inject(method = "catchOnFire",
+    @Inject(method = "checkBurnOut",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlock(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"),
@@ -81,7 +81,7 @@ public abstract class FireBlockMixin extends BlockMixin {
         }
     }
 
-    @Inject(method = "catchOnFire",
+    @Inject(method = "checkBurnOut",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"),

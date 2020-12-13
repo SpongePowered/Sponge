@@ -55,10 +55,6 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     private boolean impl$allowsBlockEventCreation = true;
     private boolean impl$allowsEntityEventCreation = true;
 
-    @Shadow public abstract String getTranslationKey();
-    @Shadow public abstract Material getMaterial(net.minecraft.block.BlockState state);
-    @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
-
     /**
      * We captured the dye color when creating the Block.Properties.
      * As the Properties objects are discarded we transfer it over to the Block itself now.

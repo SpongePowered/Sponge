@@ -35,8 +35,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 @Mixin(LeavesBlock.class)
 public abstract class LeavesBlockMixin extends BlockMixin {
 
-    // TODO(
-    @Inject(method = "ticksRandomly", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "isRandomlyTicking", at = @At("HEAD"), cancellable = true)
     private void impl$checkConfigForLeafTicking(BlockState state, CallbackInfoReturnable<Boolean> cir) {
         if (!SpongeConfigs.getCommon().get().getWorld().getLeafDecay()) {
             cir.setReturnValue(false);
