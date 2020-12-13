@@ -55,8 +55,8 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     private final List<Flag> flags = new ArrayList<>();
     private final Set<String> flagAliases = new HashSet<>();
     @Nullable private CommandExecutor commandExecutor;
-    @Nullable private Function<CommandCause, Optional<Component>> extendedDescription;
-    @Nullable private Function<CommandCause, Optional<Component>> shortDescription;
+    private Function<CommandCause, Optional<Component>> extendedDescription = cause -> Optional.empty();
+    private Function<CommandCause, Optional<Component>> shortDescription = cause -> Optional.empty();
     @Nullable private Predicate<CommandCause> executionRequirements;
     private boolean isTerminal = false;
 
