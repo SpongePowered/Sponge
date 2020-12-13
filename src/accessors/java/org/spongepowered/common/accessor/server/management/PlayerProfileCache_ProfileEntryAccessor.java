@@ -33,7 +33,10 @@ import java.util.Date;
 @Mixin(targets = "net.minecraft.server.management.PlayerProfileCache$ProfileEntry")
 public interface PlayerProfileCache_ProfileEntryAccessor {
 
-    @Invoker("getGameProfile") GameProfile accessor$getGameProfile();
+    @Invoker("getProfile") GameProfile invoker$getProfile();
 
-    @Invoker("getExpirationDate") Date accessor$getExpirationDate();
+    @Invoker("getExpirationDate") Date invoker$getExpirationDate();
+
+    @Invoker("setLastAccess") void invoker$setLastAccess(final long lastAccessMs);
+
 }

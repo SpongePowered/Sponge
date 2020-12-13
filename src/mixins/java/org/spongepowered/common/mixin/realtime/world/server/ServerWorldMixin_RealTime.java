@@ -26,7 +26,10 @@ package org.spongepowered.common.mixin.realtime.world.server;
 
 import net.minecraft.world.GameRules;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.IServerWorldInfo;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -37,17 +40,19 @@ import org.spongepowered.common.mixin.realtime.world.WorldMixin_RealTime;
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin_RealTime extends WorldMixin_RealTime implements RealTimeTrackingBridge {
 
+    @Shadow @Final private IServerWorldInfo serverLevelData;
+
     @Inject(method = "tick", at = @At("HEAD"))
-    private void realTimeImpl$fixTimeOfDayForRealTime(CallbackInfo ci) {
+    private void realTimeImpl$fixTimeOfDayForRealTime(final CallbackInfo ci) {
         if (((WorldBridge) this).bridge$isFake()) {
             return;
         }
-        if (this.worldInfo.getGameRulesInstance().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)) {
+        if (this.serverLevelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
             // Subtract the one the original tick method is going to add
-            long diff = this.realTimeBridge$getRealTimeTicks() - 1;
+            final long diff = this.realTimeBridge$getRealTimeTicks() - 1;
             // Don't set if we're not changing it as other mods might be listening for changes
             if (diff > 0) {
-                this.worldInfo.setDayTime(this.worldInfo.getDayTime() + diff);
+                this.serverLevelData.setDayTime(this.serverLevelData.getDayTime() + diff);
             }
         }
     }

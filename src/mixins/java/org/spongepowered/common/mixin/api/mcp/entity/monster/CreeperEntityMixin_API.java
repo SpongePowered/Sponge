@@ -35,11 +35,13 @@ import java.util.Set;
 @Mixin(CreeperEntity.class)
 public abstract class CreeperEntityMixin_API extends MonsterEntityMixin_API implements Creeper {
 
-    @Shadow private void shadow$explode() { } // explode
+    // @formatter:off
+    @Shadow public void shadow$ignite() { } // explode
+    // @formatter:on
 
     @Override
     public void detonate() {
-        this.shadow$explode();
+        this.shadow$ignite();
     }
 
     @Override

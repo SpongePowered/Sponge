@@ -42,8 +42,8 @@ import java.util.Optional;
 /**
  * The de-facto builder for a {@link BannerPatternLayer}.
  */
-public class SpongePatternLayerBuilder extends AbstractDataBuilder<BannerPatternLayer> implements BannerPatternLayer.Builder, DataBuilder<BannerPatternLayer> {
-
+public final class SpongePatternLayerBuilder extends AbstractDataBuilder<BannerPatternLayer> implements BannerPatternLayer.Builder,
+        DataBuilder<BannerPatternLayer> {
 
     private DyeColor color;
     private BannerPatternShape shape;

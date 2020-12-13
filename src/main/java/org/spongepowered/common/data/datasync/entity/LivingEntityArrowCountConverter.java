@@ -35,10 +35,10 @@ import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import java.util.List;
 import java.util.Optional;
 
-public class LivingEntityArrowCountConverter extends DataParameterConverter<Integer> {
+public final class LivingEntityArrowCountConverter extends DataParameterConverter<Integer> {
 
     public LivingEntityArrowCountConverter() {
-        super(LivingEntityAccessor.accessor$getArrowCountInEntity());
+        super(LivingEntityAccessor.accessor$DATA_ARROW_COUNT_ID());
     }
 
     @Override

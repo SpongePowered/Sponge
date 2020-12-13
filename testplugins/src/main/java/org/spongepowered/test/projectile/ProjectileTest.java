@@ -27,6 +27,7 @@ package org.spongepowered.test.projectile;
 import com.google.inject.Inject;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
@@ -48,6 +49,8 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.api.registry.Registries;
+import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3d;
@@ -67,17 +70,21 @@ public class ProjectileTest implements LoadableModule {
     private ProjectileTestListener listeners;
 
     @Override
-    public void enable(CommandContext ctx) {
+    public void enable(final CommandContext ctx) {
         this.listeners = new ProjectileTestListener();
         Sponge.getEventManager().registerListeners(this.plugin, this.listeners);
     }
 
     @Listener
     public void registerCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        @SuppressWarnings("rawtypes") final Parameter.Value<EntityType> entityTypeParameter =
-                Parameter.catalogedElementWithMinecraftAndSpongeDefaults(EntityType.class)
-                        .setKey("type")
-                        .build();
+        final Parameter.Value<EntityType<@NonNull ?>> entityTypeParameter =
+                Parameter.registryElement(
+                        TypeTokens.ENTITY_TYPE_TOKEN,
+                        Registries.ENTITY_TYPE.asDefaultedReference(Sponge.getGame()::registries),
+                        "minecraft",
+                        "sponge")
+                    .setKey("type")
+                    .build();
         final Parameter.Value<Boolean> targetParameter = Parameter.bool().setKey("target").orDefault(false).build();
         final Command.Parameterized launchCommand = Command.builder()
                 .parameters(entityTypeParameter, targetParameter)
@@ -157,7 +164,7 @@ public class ProjectileTest implements LoadableModule {
                     final EntityType<?> entityType = context.requireOne(entityTypeParameter);
                     final Optional<? extends Projectile> launched = ((Dispenser) dispenser).launchProjectile((EntityType<Projectile>) entityType);
                     if (launched.isPresent()) {
-                        launched.get().offer(Keys.SHOOTER, player);
+                        launched.get().offer(Keys.SHOOTER.get(), player);
                         player.sendMessage(Identity.nil(), Component.text()
                                 .append(Component.text("The dispenser launched a ")).append(Component.text(launched.get().getType().key().asString()))
                                 .build()
@@ -198,7 +205,7 @@ public class ProjectileTest implements LoadableModule {
         }
 
         @Listener
-        public void onClickBlock(InteractBlockEvent.Secondary event, @First ServerPlayer player) {
+        public void onClickBlock(final InteractBlockEvent.Secondary event, @First final ServerPlayer player) {
             if (event.getInteractionPoint().isPresent()) {
                 final Vector3d interactionPoint = event.getInteractionPoint().get();
                 final ServerWorld world = player.getWorld();

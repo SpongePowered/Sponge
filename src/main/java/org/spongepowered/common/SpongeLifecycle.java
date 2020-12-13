@@ -29,6 +29,7 @@ import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
@@ -42,16 +43,17 @@ import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeEventManager;
+import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryEvent;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
-import org.spongepowered.common.event.lifecycle.RegisterCatalogRegistryEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.recipe.SpongeRecipeProvider;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
-import org.spongepowered.common.registry.SpongeBuilderRegistry;
+import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
-import org.spongepowered.common.registry.SpongeFactoryRegistry;
+import org.spongepowered.common.registry.SpongeFactoryProvider;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.plugin.PluginContainer;
@@ -72,11 +74,11 @@ public final class SpongeLifecycle {
     }
 
     public void establishFactories() {
-        ((SpongeFactoryRegistry) this.game.getRegistry().getFactoryRegistry()).registerDefaultFactories();
+        ((SpongeFactoryProvider) this.game.getFactoryProvider()).registerDefaultFactories();
     }
 
     public void establishBuilders() {
-        ((SpongeBuilderRegistry) this.game.getRegistry().getBuilderRegistry()).registerDefaultBuilders();
+        ((SpongeBuilderProvider) this.game.getBuilderProvider()).registerDefaultBuilders();
         ((SpongeDataManager) this.game.getDataManager()).registerDefaultBuilders();
     }
 
@@ -89,13 +91,15 @@ public final class SpongeLifecycle {
     }
 
     public void establishRegistries() {
+        // Need to do this here to prevent classloading Registry too early...
+        ((SpongeRegistryHolder) this.game.registries()).setRootMinecraftRegistry((Registry<Registry<?>>) Registry.REGISTRY);
+
         final SpongeCatalogRegistry spongeCatalogRegistry = (SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry();
 
         spongeCatalogRegistry.registerDefaultRegistries();
         spongeCatalogRegistry.registerDefaultSuppliers();
 
-        this.game.getEventManager().post(new RegisterCatalogRegistryEventImpl(Cause.of(EventContext.empty(), this.game), this.game));
-
+        this.game.getEventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
         spongeCatalogRegistry.callRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
     }
 
@@ -113,7 +117,7 @@ public final class SpongeLifecycle {
     }
 
     public void initTimings() {
-        ((SpongeTimingsFactory) Sponge.getRegistry().getFactoryRegistry().provideFactory(TimingsFactory.class)).init();
+        ((SpongeTimingsFactory) Sponge.getGame().getFactoryProvider().provide(TimingsFactory.class)).init();
     }
 
     public void establishGameServices() {

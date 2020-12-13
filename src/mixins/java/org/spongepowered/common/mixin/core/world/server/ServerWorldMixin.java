@@ -35,6 +35,7 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.SessionLockException;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
@@ -44,6 +45,7 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,13 +63,11 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +77,7 @@ import java.util.StringJoiner;
 public abstract class ServerWorldMixin extends WorldMixin implements ServerWorldBridge, PlatformServerWorldBridge, ResourceKeyBridge {
 
     // @formatter:off
+    @Shadow private @Final IServerWorldInfo field_241103_E_;
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
     @Shadow protected abstract void shadow$saveLevel() throws SessionLockException;
@@ -108,8 +109,8 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         super.bridge$adjustDimensionLogic(dimensionType);
 
         final ChunkGenerator<?> chunkGenerator = this.dimension.createChunkGenerator();
-        ((ServerChunkProviderAccessor) this.chunkProvider).accessor$setChunkGenerator(chunkGenerator);
-        ((ChunkManagerAccessor) ((ServerChunkProvider) this.chunkProvider).chunkManager).accessor$setChunkGenerator(chunkGenerator);
+        ((ServerChunkProviderAccessor) this.chunkProvider).accessor$generator(chunkGenerator);
+        ((ChunkManagerAccessor) ((ServerChunkProvider) this.chunkProvider).chunkManager).accessor$generator(chunkGenerator);
 
         for (final ServerPlayerEntity player : this.shadow$getPlayers()) {
             ((ServerPlayerEntityBridge) player).bridge$sendViewerEnvironment(dimensionType);
@@ -150,38 +151,38 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Override
     public void bridge$setWeather(Weather weather, long ticks) {
         if (weather == Weathers.CLEAR.get()) {
-            this.worldInfo.setClearWeatherTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.worldInfo.setRainTime(0);
-            this.worldInfo.setThunderTime(0);
-            this.worldInfo.setRaining(false);
-            this.worldInfo.setThundering(false);
+            this.field_241103_E_.setClearWeatherTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.field_241103_E_.setRainTime(0);
+            this.field_241103_E_.setThunderTime(0);
+            this.field_241103_E_.setRaining(false);
+            this.field_241103_E_.setThundering(false);
         } else if (weather == Weathers.RAIN.get()) {
-            this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.worldInfo.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(false);
+            this.field_241103_E_.setClearWeatherTime(0);
+            this.field_241103_E_.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.field_241103_E_.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.field_241103_E_.setRaining(true);
+            this.field_241103_E_.setThundering(false);
         } else if (weather == Weathers.THUNDER.get()) {
-            this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.worldInfo.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(true);
+            this.field_241103_E_.setClearWeatherTime(0);
+            this.field_241103_E_.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.field_241103_E_.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.field_241103_E_.setRaining(true);
+            this.field_241103_E_.setThundering(true);
         }
     }
 
     @Override
     public long bridge$getDurationInTicks() {
         if (this.shadow$isThundering()) {
-            return this.worldInfo.getThunderTime();
+            return this.field_241103_E_.getThunderTime();
         }
         if (this.shadow$isRaining()) {
-            return this.worldInfo.getRainTime();
+            return this.field_241103_E_.getRainTime();
         }
-        if (this.worldInfo.getClearWeatherTime() > 0) {
-            return this.worldInfo.getClearWeatherTime();
+        if (this.field_241103_E_.getClearWeatherTime() > 0) {
+            return this.field_241103_E_.getClearWeatherTime();
         }
-        return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
+        return Math.min(this.field_241103_E_.getThunderTime(), this.field_241103_E_.getRainTime());
     }
 
     @Override
@@ -216,11 +217,11 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             final boolean shouldBreakBlocks = explosion.shouldBreakBlocks();
             // Sponge End
 
-            mcExplosion.doExplosionA();
-            mcExplosion.doExplosionB(true);
+            mcExplosion.explode();
+            mcExplosion.finalizeExplosion(true);
 
             if (!shouldBreakBlocks) {
-                mcExplosion.clearAffectedBlockPositions();
+                mcExplosion.clearToBlow();
             }
 
             // Sponge Start - end processing

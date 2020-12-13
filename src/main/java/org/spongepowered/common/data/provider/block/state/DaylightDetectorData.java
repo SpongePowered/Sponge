@@ -40,12 +40,12 @@ public final class DaylightDetectorData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.INVERTED)
-                        .get(h -> h.get(DaylightDetectorBlock.INVERTED))
-                        .set((h, v) -> h.with(DaylightDetectorBlock.INVERTED, v))
+                        .get(h -> h.getValue(DaylightDetectorBlock.INVERTED))
+                        .set((h, v) -> h.setValue(DaylightDetectorBlock.INVERTED, v))
                         .supports(h -> h.getBlock() instanceof DaylightDetectorBlock)
                     .create(Keys.POWER)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.POWER, DaylightDetectorBlock.POWER))
-                        .get(h -> h.get(DaylightDetectorBlock.POWER))
+                        .get(h -> h.getValue(DaylightDetectorBlock.POWER))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, DaylightDetectorBlock.POWER))
                         .supports(h -> h.getBlock() instanceof DaylightDetectorBlock);
     }

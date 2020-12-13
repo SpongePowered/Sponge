@@ -39,8 +39,8 @@ public final class RedstoneDiodeData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(RedstoneDiodeBlock.POWERED))
-                        .set((h, v) -> h.with(RedstoneDiodeBlock.POWERED, v))
+                        .get(h -> h.getValue(RedstoneDiodeBlock.POWERED))
+                        .set((h, v) -> h.setValue(RedstoneDiodeBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof RedstoneDiodeBlock);
     }
     // @formatter:on

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.tags.BlockTags;
@@ -35,8 +34,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
+import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 
 @Mixin(FallingBlockEntity.class)
 public abstract class FallingBlockEntityMixin extends EntityMixin {
@@ -51,7 +50,7 @@ public abstract class FallingBlockEntityMixin extends EntityMixin {
         )
     )
     private boolean spongeAttackFallingOrAnvil(final Entity entity, final DamageSource source, final float damage) {
-        if (entity.world.isRemote) {
+        if (entity.world.isClientSide) {
             return entity.attackEntityFrom(source, damage);
         }
         final boolean isAnvil = this.fallTile.getBlock().isIn(BlockTags.ANVIL);

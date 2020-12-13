@@ -44,10 +44,10 @@ public final class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> 
         if (projectileType == EntityTypes.SHULKER_BULLET.get() && args.length == 1 && args[0] instanceof Entity) {
             final ShulkerEntity shulker = (ShulkerEntity) source;
             final ShulkerBulletEntity bullet =
-                    new ShulkerBulletEntity(shulker.world, shulker, (Entity) args[0], shulker.getAttachmentFacing().getAxis());
-            shulker.world.addEntity(bullet);
-            shulker.playSound(SoundEvents.ENTITY_SHULKER_SHOOT,
-                    2.0F, (shulker.world.rand.nextFloat() - shulker.world.rand.nextFloat()) * 0.2F + 1.0F);
+                    new ShulkerBulletEntity(shulker.level, shulker, (Entity) args[0], shulker.getAttachFace().getAxis());
+            shulker.level.addFreshEntity(bullet);
+            shulker.playSound(SoundEvents.SHULKER_SHOOT,
+                    2.0F, (shulker.level.random.nextFloat() - shulker.level.random.nextFloat()) * 0.2F + 1.0F);
 
             return Optional.of((P) bullet);
         }

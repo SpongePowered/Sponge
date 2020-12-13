@@ -54,7 +54,7 @@ public abstract class DoorHingeSideMixin_API implements DoorHinge {
     public DoorHinge cycleNext() {
         final SimpleRegistry<DoorHinge> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(DoorHinge.class);
         final int index = registry.getId(this);
-        DoorHinge next = registry.getByValue(index + 1);
+        DoorHinge next = registry.byId(index + 1);
         if (next == null) {
             next = DoorHinges.LEFT.get();
         }

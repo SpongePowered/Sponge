@@ -71,7 +71,6 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
     @Nullable private ResourceKey key;
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T, V extends Value<T>> SpongeDataStoreBuilder key(final Key<V> key, final DataQuery dataQuery) {
         final BiFunction<DataView, DataQuery, Optional<T>> deserializer = this.getDeserializer(key.getElementType());
         return this.key(key, (view, value) -> view.set(dataQuery, value), v -> deserializer.apply(v, dataQuery));

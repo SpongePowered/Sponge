@@ -40,7 +40,7 @@ public final class StandingSignData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> RotationUtils.getFor(h.get(StandingSignBlock.ROTATION)))
+                        .get(h -> RotationUtils.getFor(h.getValue(StandingSignBlock.ROTATION)))
                         .set((h, v) -> RotationUtils.set(h, v, StandingSignBlock.ROTATION))
                         .supports(h -> h.getBlock() instanceof StandingSignBlock);
     }

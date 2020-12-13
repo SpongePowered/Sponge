@@ -40,15 +40,19 @@ import java.util.Set;
 @Mixin(AbstractVillagerEntity.class)
 public abstract class AbstractVillagerEntityMixin_API extends AgeableEntityMixin_API implements Trader {
 
-    @Shadow public abstract void shadow$setCustomer(PlayerEntity player);
-    @Shadow public abstract PlayerEntity shadow$getCustomer();
+    // @formatter:off
+    @Shadow public abstract void shadow$setTradingPlayer(PlayerEntity player);
+    @Shadow public abstract PlayerEntity shadow$getTradingPlayer();
+    // @formatter:on
 
+    @Override
     public Optional<Humanoid> getCustomer() {
-        return Optional.ofNullable((Humanoid) this.shadow$getCustomer());
+        return Optional.ofNullable((Humanoid) this.shadow$getTradingPlayer());
     }
 
+    @Override
     public void setCustomer(@Nullable Humanoid humanoid) {
-        this.shadow$setCustomer((PlayerEntity) humanoid);
+        this.shadow$setTradingPlayer((PlayerEntity) humanoid);
     }
 
     @Override

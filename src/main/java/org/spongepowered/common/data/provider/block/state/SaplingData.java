@@ -41,7 +41,7 @@ public final class SaplingData {
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, SaplingBlock.STAGE))
-                        .get(h -> h.get(SaplingBlock.STAGE))
+                        .get(h -> h.getValue(SaplingBlock.STAGE))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, SaplingBlock.STAGE))
                         .supports(h -> h.getBlock() instanceof SaplingBlock);
     }

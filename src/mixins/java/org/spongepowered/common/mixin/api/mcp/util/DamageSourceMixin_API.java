@@ -33,14 +33,16 @@ import org.spongepowered.common.bridge.util.DamageSourceBridge;
 @Mixin(value = net.minecraft.util.DamageSource.class)
 public abstract class DamageSourceMixin_API implements DamageSource {
 
+    // @formatter:off
     @Shadow public abstract boolean shadow$isUnblockable();
     @Shadow public abstract boolean shadow$canHarmInCreative();
     @Shadow public abstract boolean shadow$isDamageAbsolute();
     @Shadow public abstract boolean shadow$isMagicDamage();
-    @Shadow public abstract float shadow$getHungerDamage();
-    @Shadow public abstract boolean shadow$isDifficultyScaled();
+    @Shadow public abstract float shadow$getFoodExhaustion();
+    @Shadow public abstract boolean shadow$scalesWithDifficulty();
     @Shadow public abstract boolean shadow$isExplosion();
-    @Shadow public abstract String shadow$getDamageType();
+    @Shadow public abstract String shadow$getMsgId();
+    // @formatter:on
 
     @Override
     public boolean isExplosive() {
@@ -69,12 +71,12 @@ public abstract class DamageSourceMixin_API implements DamageSource {
 
     @Override
     public boolean isScaledByDifficulty() {
-        return this.shadow$isDifficultyScaled();
+        return this.shadow$scalesWithDifficulty();
     }
 
     @Override
     public double getExhaustion() {
-        return this.shadow$getHungerDamage();
+        return this.shadow$getFoodExhaustion();
     }
 
     @Override

@@ -43,7 +43,6 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.hooks.PlatformHooks;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.Objects;
 import java.util.Random;

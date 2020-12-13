@@ -47,13 +47,14 @@ import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 @Implements(value = @Interface(iface = WorldArchetype.class, prefix = "archetype$"))
 public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
-    @Shadow public abstract long shadow$getSeed();
-    @Shadow public abstract GameType shadow$getGameType();
+    //@formatter:off
+    @Shadow public abstract GameType shadow$gameType();
     @Shadow public abstract boolean shadow$getHardcoreEnabled();
     @Shadow public abstract boolean shadow$isMapFeaturesEnabled();
     @Shadow public abstract WorldType shadow$getTerrainType();
-    @Shadow public abstract boolean shadow$areCommandsAllowed();
+    @Shadow public abstract boolean shadow$allowCommands();
     @Shadow private boolean bonusChestEnabled;
+    //@formatter:on
 
     @Override
     public ResourceKey getKey() {
@@ -72,7 +73,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     @Override
     public GameMode getGameMode() {
-        return (GameMode) (Object) this.shadow$getGameType();
+        return (GameMode) (Object) this.shadow$gameType();
     }
 
     @Override
@@ -92,7 +93,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     @Override
     public boolean areCommandsEnabled() {
-        return this.shadow$areCommandsAllowed();
+        return this.shadow$allowCommands();
     }
 
     @Override

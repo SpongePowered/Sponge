@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.entity.player;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface PlayerEntityBridge {

@@ -40,14 +40,14 @@ public final class PhantomData {
         registrator
                 .asMutable(PhantomEntity.class)
                     .create(Keys.SCALE)
-                        .get(h -> (double) (h.getWidth() + (0.2F * (float) h.getPhantomSize())) / h.getWidth())
+                        .get(h -> (double) (h.getBbWidth() + (0.2F * (float) h.getPhantomSize())) / h.getBbWidth())
                     .create(Keys.SIZE)
                         .get(PhantomEntity::getPhantomSize)
                         .set(PhantomEntity::setPhantomSize)
                 .asMutable(PhantomEntityAccessor.class)
                     .create(Keys.PHANTOM_PHASE)
-                        .get(h -> (PhantomPhase) (Object) h.accessor$getAttackPhase())
-                        .set((h, v) -> h.accessor$setAttackPhase((PhantomEntity.AttackPhase) (Object) v));
+                        .get(h -> (PhantomPhase) (Object) h.accessor$attackPhase())
+                        .set((h, v) -> h.accessor$attackPhase((PhantomEntity.AttackPhase) (Object) v));
     }
     // @formatter:on
 }

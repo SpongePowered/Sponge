@@ -35,10 +35,10 @@ import org.spongepowered.common.accessor.entity.EntityAccessor;
 import java.util.List;
 import java.util.Optional;
 
-public class EntityCustomNameVisibleConverter extends DataParameterConverter<Boolean> {
+public final class EntityCustomNameVisibleConverter extends DataParameterConverter<Boolean> {
 
     public EntityCustomNameVisibleConverter() {
-        super(EntityAccessor.accessor$getCustomNameVisible());
+        super(EntityAccessor.accessor$DATA_CUSTOM_NAME_VISIBLE());
     }
 
     @Override

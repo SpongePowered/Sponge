@@ -39,8 +39,8 @@ public final class RedstoneTorchData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_LIT)
-                        .get(h -> h.get(RedstoneTorchBlock.LIT))
-                        .set((h, v) -> h.with(RedstoneTorchBlock.LIT, v))
+                        .get(h -> h.getValue(RedstoneTorchBlock.LIT))
+                        .set((h, v) -> h.setValue(RedstoneTorchBlock.LIT, v))
                         .supports(h -> h.getBlock() instanceof RedstoneTorchBlock);
     }
     // @formatter:on

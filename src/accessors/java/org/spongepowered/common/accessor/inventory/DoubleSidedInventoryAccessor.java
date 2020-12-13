@@ -32,7 +32,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(DoubleSidedInventory.class)
 public interface DoubleSidedInventoryAccessor {
 
-    @Accessor("upperChest") IInventory accessor$getUpperChest();
+    @Accessor("container1") IInventory accessor$container1();
 
-    @Accessor("lowerChest") IInventory accessor$getLowerChest();
+    @Accessor("container2") IInventory accessor$container2();
+
 }

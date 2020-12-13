@@ -25,20 +25,19 @@
 package org.spongepowered.common.accessor.network.play.server;
 
 import net.minecraft.network.play.server.SRespawnPacket;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.world.GameType;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(SRespawnPacket.class)
 public interface SRespawnPacketAccessor {
 
-    @Accessor("dimensionID") DimensionType accessor$getDimensionType();
+    @Accessor("dimension") RegistryKey<World> accessor$dimension();
 
-    @Accessor("hashedSeed") long accessor$getHashedSeed();
+    @Accessor("seed") long accessor$seed();
 
-    @Accessor("gameType") GameType accessor$getGameType();
+    @Accessor("playerGameType") GameType accessor$playerGameType();
 
-    @Accessor("worldType") WorldType accessor$getWorldType();
 }

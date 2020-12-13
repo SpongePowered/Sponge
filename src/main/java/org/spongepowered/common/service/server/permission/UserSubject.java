@@ -68,9 +68,9 @@ public class UserSubject extends SpongeSubject {
                 }
                 if (opLevel > 0) {
                     // TODO: Should bypassesPlayerLimit be true or false?
-                    SpongePermissionService.getOps().addEntry(new OpEntry(player, opLevel, false));
+                    SpongePermissionService.getOps().add(new OpEntry(player, opLevel, false));
                 } else {
-                    SpongePermissionService.getOps().removeEntry(player);
+                    SpongePermissionService.getOps().remove(player);
                 }
             }
         };
@@ -91,12 +91,12 @@ public class UserSubject extends SpongeSubject {
         Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
 
         // Query op level from server ops list based on player's game profile
-        final OpEntry entry = SpongePermissionService.getOps().getEntry(this.player);
+        final OpEntry entry = SpongePermissionService.getOps().get(this.player);
         if (entry == null) {
             // Take care of singleplayer commands -- unless an op level is specified, this player follows global rules
-            return SpongeCommon.getServer().getPlayerList().canSendCommands(this.player) ? SpongeCommon.getServer().getOpPermissionLevel() : 0;
+            return SpongeCommon.getServer().getPlayerList().isOp(this.player) ? SpongeCommon.getServer().getOperatorUserPermissionLevel() : 0;
         } else {
-            return entry.getPermissionLevel();
+            return entry.getLevel();
         }
     }
 

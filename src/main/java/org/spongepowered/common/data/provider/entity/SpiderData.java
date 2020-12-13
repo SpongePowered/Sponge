@@ -38,8 +38,8 @@ public final class SpiderData {
         registrator
                 .asMutable(SpiderEntity.class)
                     .create(Keys.IS_CLIMBING)
-                        .get(SpiderEntity::isBesideClimbableBlock)
-                        .set(SpiderEntity::setBesideClimbableBlock);
+                        .get(SpiderEntity::isClimbing)
+                        .set(SpiderEntity::setClimbing);
     }
     // @formatter:on
 }

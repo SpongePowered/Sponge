@@ -50,7 +50,7 @@ public abstract class FireBlockMixin extends BlockMixin {
     @Redirect(method = "tick",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/server/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z",
+            target = "Lnet/minecraft/world/server/ServerWorld;setBlock(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z",
             ordinal = 1))
     private boolean impl$onFireSpread(final net.minecraft.world.server.ServerWorld world, final BlockPos pos, final BlockState newState, final int flags) {
         if (!((WorldBridge) world).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
@@ -62,26 +62,26 @@ public abstract class FireBlockMixin extends BlockMixin {
             }
 
         }
-        return world.setBlockState(pos, newState, flags);
+        return world.setBlock(pos, newState, flags);
     }
 
-    @Inject(method = "catchOnFire",
+    @Inject(method = "checkBurnOut",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"),
+            target = "Lnet/minecraft/world/World;setBlock(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"),
         require = 0,
         expect = 0,
         cancellable = true)
     private void impl$onCatchFirePreCheck(
         final World world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
-        if (!world.isRemote) {
+        if (!world.isClientSide) {
             if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }
         }
     }
 
-    @Inject(method = "catchOnFire",
+    @Inject(method = "checkBurnOut",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"),
@@ -90,7 +90,7 @@ public abstract class FireBlockMixin extends BlockMixin {
         cancellable = true)
     private void impl$onCatchFirePreCheckOther(
         final World world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
-        if (!world.isRemote) {
+        if (!world.isClientSide) {
             if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }

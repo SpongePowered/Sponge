@@ -33,7 +33,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -61,23 +60,23 @@ public abstract class EffectMixin_API implements PotionEffectType {
             .put("effect.weakness", "effect.weakness")
             .build();
 
-
-    @Shadow public abstract boolean shadow$isInstant();
+    // @formatter:off
+    @Shadow public abstract boolean shadow$isInstantenous();
     @Shadow public abstract ITextComponent shadow$getDisplayName();
+    // @formatter:on
 
     private ResourceKey api$key;
 
     @Override
     public ResourceKey getKey() {
         if (this.api$key == null) {
-            this.api$key = (ResourceKey) (Object) Registry.EFFECTS.getKey((Effect) (Object) this);
+            this.api$key = (ResourceKey) (Object) Registry.MOB_EFFECT.getKey((Effect) (Object) this);
         }
         return this.api$key;
     }
 
-    @Intrinsic
     public boolean potionEffectType$isInstant() {
-        return this.shadow$isInstant();
+        return this.shadow$isInstantenous();
     }
 
     @Override

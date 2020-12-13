@@ -44,8 +44,8 @@ public final class AbstractSignData {
                         .set((h, v) -> null)
                         .supports(h -> h.getBlock() instanceof AbstractSignBlock)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(AbstractSignBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(AbstractSignBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(AbstractSignBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(AbstractSignBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof AbstractSignBlock);
     }
     // @formatter:on

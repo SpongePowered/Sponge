@@ -41,7 +41,7 @@ public final class StemData {
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, StemBlock.AGE))
-                        .get(h -> h.get(StemBlock.AGE))
+                        .get(h -> h.getValue(StemBlock.AGE))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, StemBlock.AGE))
                         .supports(h -> h.getBlock() instanceof StemBlock);
     }

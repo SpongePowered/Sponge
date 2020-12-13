@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity.ai.goal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.goal.BreedGoal;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.world.IWorldWriter;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.animal.Animal;
@@ -50,23 +49,25 @@ import javax.annotation.Nullable;
 @Mixin(BreedGoal.class)
 public abstract class BreedGoalMixin {
 
+    // @formatter:off
     @Shadow @Final protected AnimalEntity animal;
-    @Shadow protected AnimalEntity targetMate;
+    @Shadow protected AnimalEntity partner;
 
-    @Shadow @Nullable private AnimalEntity shadow$getNearbyMate() {
+    @Shadow @Nullable private AnimalEntity shadow$getFreePartner() {
         // Shadow implements
         return null;
     }
+    // @formatter:on
 
     private boolean impl$spawnEntityResult;
 
     @Nullable
-    @Redirect(method = "shouldExecute",
+    @Redirect(method = "canUse",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/ai/goal/BreedGoal;getNearbyMate()Lnet/minecraft/entity/passive/AnimalEntity;"))
+            target = "Lnet/minecraft/entity/ai/goal/BreedGoal;getFreePartner()Lnet/minecraft/entity/passive/AnimalEntity;"))
     private AnimalEntity impl$callFindMateEvent(final BreedGoal entityAIMate) {
-        AnimalEntity nearbyMate = this.shadow$getNearbyMate();
+        AnimalEntity nearbyMate = this.shadow$getFreePartner();
         if (nearbyMate == null) {
             return null;
         }
@@ -86,6 +87,7 @@ public abstract class BreedGoalMixin {
         return nearbyMate;
     }
 
+    // TODO moved to AnimalEntity#spawnChildFromBreeding?
     @Inject(method = "spawnBaby",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
@@ -108,7 +110,7 @@ public abstract class BreedGoalMixin {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 // TODO API 8 is removing this TargetXXXX nonsense so that is why I put the parents into the Cause
                 frame.pushCause(this.animal);
-                frame.pushCause(this.targetMate);
+                frame.pushCause(this.partner);
                 final org.spongepowered.api.event.entity.BreedingEvent.Breed event =
                     SpongeEventFactory.createBreedingEventBreed(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ageable) baby);
                 this.impl$spawnEntityResult = !SpongeCommon.postEvent(event) && world.addEntity(baby);

@@ -43,14 +43,16 @@ import java.util.Set;
 @Mixin(EnderDragonEntity.class)
 public abstract class EnderDragonEntityMixin_API extends MobEntityMixin_API implements EnderDragon {
 
-    @Shadow public EnderDragonPartEntity[] dragonParts;
+    // @formatter:off
+    @Shadow private EnderDragonPartEntity[] subEntities;
     @Shadow @Final private PhaseManager phaseManager;
+    // @formatter:on
 
     @Override
     public Set<EnderDragonPart> getParts() {
         Builder<EnderDragonPart> builder = ImmutableSet.builder();
 
-        for (EnderDragonPartEntity part : this.dragonParts) {
+        for (EnderDragonPartEntity part : this.subEntities) {
             builder.add((EnderDragonPart) part);
         }
 

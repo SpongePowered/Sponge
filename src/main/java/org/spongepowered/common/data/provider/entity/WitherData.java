@@ -44,8 +44,8 @@ public final class WitherData {
         registrator
                 .asMutable(WitherEntity.class)
                     .create(Keys.WITHER_TARGETS)
-                        .get(h -> Stream.of(h.getWatchedTargetId(0), h.getWatchedTargetId(1), h.getWatchedTargetId(2))
-                                .map(id -> h.getEntityWorld().getEntityByID(id))
+                        .get(h -> Stream.of(h.getAlternativeTarget(0), h.getAlternativeTarget(1), h.getAlternativeTarget(2))
+                                .map(id -> h.getCommandSenderWorld().getEntity(id))
                                 // TODO filter null?                .filter(Objects::nonNull)
                                 .map(org.spongepowered.api.entity.Entity.class::cast)
                                 .collect(Collectors.toList())
@@ -56,12 +56,12 @@ public final class WitherData {
                                     break;
                                 }
                                 final Entity target = (Entity) v.get(i);
-                                h.updateWatchedTargetId(i, target == null ? 0 : target.getEntityId());
+                                h.setAlternativeTarget(i, target == null ? 0 : target.getId());
                             }
                         })
                 .asMutable(WitherEntityAccessor.class)
                     .create(Keys.BOSS_BAR)
-                        .get(h -> (BossBar) h.accessor$getBossInfo());
+                        .get(h -> (BossBar) h.accessor$bossEvent());
     }
     // @formatter:on
 }

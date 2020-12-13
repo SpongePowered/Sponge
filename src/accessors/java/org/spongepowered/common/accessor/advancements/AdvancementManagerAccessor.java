@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AdvancementManager.class)
 public interface AdvancementManagerAccessor {
 
-    @Accessor("advancementList") AdvancementList accessor$getAdvancementList();
+    @Accessor("advancements") AdvancementList accessor$advancements();
+
 }

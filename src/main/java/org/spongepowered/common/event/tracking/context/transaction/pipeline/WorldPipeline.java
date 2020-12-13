@@ -90,8 +90,8 @@ public final class WorldPipeline implements BlockPipeline {
         if (oldState == null) {
             return false;
         }
-        final int oldOpacity = oldState.getOpacity(serverWorld, pos);
-        final @Nullable TileEntity existing = this.chunkSupplier.get().getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+        final int oldOpacity = oldState.getLightBlock(serverWorld, pos);
+        final @Nullable TileEntity existing = this.chunkSupplier.get().getBlockEntity(pos, Chunk.CreateEntityType.CHECK);
         PipelineCursor formerState = new PipelineCursor(oldState, oldOpacity, pos, existing);
 
         for (final ResultingTransactionBySideEffect effect : this.worldEffects) {

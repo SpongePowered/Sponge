@@ -25,8 +25,8 @@
 package org.spongepowered.test.command;
 
 import com.google.common.collect.ImmutableList;
-import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
@@ -55,6 +55,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.registry.Registries;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
@@ -175,11 +176,11 @@ public final class CommandTest {
         );
 
         final Parameter.Key<ServerLocation> serverLocationKey = Parameter.key("serverLocation", ServerLocation.class);
-        final Parameter.Value<ServerLocation> serverLocationParmeter = Parameter.location().setKey(serverLocationKey).build();
+        final Parameter.Value<ServerLocation> serverLocationParameter = Parameter.location().setKey(serverLocationKey).build();
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(serverLocationParmeter)
+                        .parameter(serverLocationParameter)
                         .setExecutor(x -> {
                             x.sendMessage(Identity.nil(), Component.text(x.requireOne(serverLocationKey).toString()));
                             return CommandResult.success();
@@ -190,14 +191,18 @@ public final class CommandTest {
 
         final Parameter.Key<CatalogedValueParameter<?>> commandParameterKey =
                 Parameter.key("valueParameter", new TypeToken<CatalogedValueParameter<?>>() {});
+        final TypeToken<CatalogedValueParameter<?>> typeToken = new TypeToken<CatalogedValueParameter<?>>() {};
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(serverLocationParmeter)
+                        .parameter(serverLocationParameter)
                         .parameter(
-                                Parameter.catalogedElementWithMinecraftAndSpongeDefaults((Class<CatalogedValueParameter<?>>) (Class) CatalogedValueParameter.class)
-                                        .setKey(commandParameterKey)
-                                        .build())
+                                Parameter.registryElement(
+                                        typeToken,
+                                        commandContext -> null,
+                                        Registries.CATALOGED_VALUE_PARAMETER,
+                                        "sponge"
+                                ).setKey(commandParameterKey).build())
                         .setExecutor(x -> {
                             x.sendMessage(Identity.nil(), Component.text(x.requireOne(serverLocationKey).toString()));
                             x.sendMessage(Identity.nil(), Component.text(x.requireOne(commandParameterKey).getKey().toString()));

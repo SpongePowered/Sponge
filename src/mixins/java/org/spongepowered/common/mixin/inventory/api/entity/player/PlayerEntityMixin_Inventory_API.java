@@ -41,9 +41,9 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 public abstract class PlayerEntityMixin_Inventory_API implements Player, InventoryBridge {
 
     @Shadow @Final public PlayerInventory inventory;
-    @Shadow public Container openContainer;
+    @Shadow public Container containerMenu;
 
-    @Shadow public abstract EnderChestInventory shadow$getInventoryEnderChest();
+    @Shadow public abstract EnderChestInventory shadow$getEnderChestInventory();
 
     @Override
     public org.spongepowered.api.item.inventory.entity.PlayerInventory getInventory() {
@@ -57,7 +57,7 @@ public abstract class PlayerEntityMixin_Inventory_API implements Player, Invento
 
     @Override
     public Inventory getEnderChestInventory() {
-        return (Inventory) this.shadow$getInventoryEnderChest();
+        return (Inventory) this.shadow$getEnderChestInventory();
     }
 
     @Override

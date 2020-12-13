@@ -29,7 +29,7 @@ import org.spongepowered.api.data.type.ParrotType;
 
 public final class SpongeParrotType extends SpongeEntityMetadataType<Integer> implements ParrotType {
 
-    public SpongeParrotType(ResourceKey key, int metadata) {
+    public SpongeParrotType(final ResourceKey key, final int metadata) {
         super(key, metadata);
     }
 }

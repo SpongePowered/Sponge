@@ -42,14 +42,14 @@ public class NetherPortalData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.AXIS)
-                        .get(h -> AxisUtil.getFor(h.get(NetherPortalBlock.AXIS)))
+                        .get(h -> AxisUtil.getFor(h.getValue(NetherPortalBlock.AXIS)))
                         .set((h, v) -> {
                             final Direction.Axis axis = AxisUtil.getFor(v);
                             final EnumProperty<Direction.Axis> property = NetherPortalBlock.AXIS;
-                            if (property.getAllowedValues().size() < 3 && !property.getAllowedValues().contains(axis)) {
+                            if (property.getPossibleValues().size() < 3 && !property.getPossibleValues().contains(axis)) {
                                 return h;
                             }
-                            return h.with(property, axis);
+                            return h.setValue(property, axis);
                         })
                         .supports(h -> h.getBlock() instanceof NetherPortalBlock);
     }

@@ -30,10 +30,11 @@ import net.minecraft.command.ICommandSource;
 import net.minecraft.command.arguments.EntityAnchorArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -52,47 +53,44 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.command.CommandSourceAccessor;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.command.ICommandSourceBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.service.server.permission.SpongePermissions;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 @Mixin(CommandSource.class)
 public abstract class CommandSourceMixin implements CommandSourceBridge {
 
-    private static final String PROTECTED_CTOR = "(Lnet/minecraft/command/ICommandSource;Lnet/minecraft/util/math/Vec3d;"
-            + "Lnet/minecraft/util/math/Vec2f;Lnet/minecraft/world/server/ServerWorld;ILjava/lang/String;Lnet/minecraft/util/text/ITextComponent;"
+    private static final String PROTECTED_CTOR = "(Lnet/minecraft/command/ICommandSource;Lnet/minecraft/util/math/vector/Vector3d;"
+            + "Lnet/minecraft/util/math/vector/Vector2f;Lnet/minecraft/world/server/ServerWorld;ILjava/lang/String;Lnet/minecraft/util/text/ITextComponent;"
             + "Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/entity/Entity;ZLcom/mojang/brigadier/ResultConsumer;"
             + "Lnet/minecraft/command/arguments/EntityAnchorArgument$Type;)";
     private static final String PROTECTED_CTOR_METHOD = "<init>" + CommandSourceMixin.PROTECTED_CTOR + "V";
 
     @Shadow @Final private ICommandSource source;
-    @Shadow @Final @Mutable private Vec3d pos;
-    @Shadow @Final @Mutable private Vec2f rotation;
-    @Shadow @Final @Mutable private ServerWorld world;
+    @Shadow @Final @Mutable private Vector3d worldPosition;
+    @Shadow @Final @Mutable private Vector2f rotation;
+    @Shadow @Final @Mutable private ServerWorld level;
     @Shadow @Final @Mutable private int permissionLevel;
 
     @Shadow @Final private ITextComponent displayName;
-    @Shadow @Final private String name;
+    @Shadow @Final private String textName;
     @Shadow @Final @Nullable private Entity entity;
 
     @Shadow @Final private MinecraftServer server;
-    @Shadow @Final private boolean feedbackDisabled;
-    @Shadow @Final private ResultConsumer<CommandSource> resultConsumer;
-    @Shadow @Final private EntityAnchorArgument.Type entityAnchorType;
+    @Shadow @Final private boolean silent;
+    @Shadow @Final private ResultConsumer<CommandSource> consumer;
+    @Shadow @Final private EntityAnchorArgument.Type anchor;
     private Cause impl$cause;
     @Nullable private Supplier<String> impl$potentialPermissionNode = null;
 
     @Inject(method = CommandSourceMixin.PROTECTED_CTOR_METHOD, at = @At("RETURN"))
     private void impl$setCauseOnConstruction(
             final ICommandSource p_i49553_1_,
-            final Vec3d p_i49553_2_,
-            final Vec2f p_i49553_3_,
+            final Vector3d p_i49553_2_,
+            final Vector2f p_i49553_3_,
             final ServerWorld p_i49553_4_,
             final int p_i49553_5_,
             final String p_i49553_6_,
@@ -108,15 +106,15 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
         final EventContext context = this.impl$cause.getContext();
 
         context.get(EventContextKeys.LOCATION).ifPresent(x ->{
-            this.pos = VecHelper.toVec3d(x.getPosition());
-            this.world = (ServerWorld) x.getWorld();
+            this.worldPosition = VecHelper.toVanillaVector3d(x.getPosition());
+            this.level = (ServerWorld) x.getWorld();
         });
 
-        context.get(EventContextKeys.ROTATION).ifPresent(x -> this.rotation = new Vec2f((float) x.getX(), (float) x.getY()));
+        context.get(EventContextKeys.ROTATION).ifPresent(x -> this.rotation = new Vector2f((float) x.getX(), (float) x.getY()));
         context.get(EventContextKeys.SUBJECT).ifPresent(x -> {
             if (x instanceof EntityAccessor) {
-                this.permissionLevel = ((EntityAccessor) x).accessor$getPermissionLevel();
-            } else if (x instanceof MinecraftServer && !((MinecraftServer) x).isSinglePlayer()) {
+                this.permissionLevel = ((EntityAccessor) x).invoker$getPermissionLevel();
+            } else if (x instanceof MinecraftServer && !((MinecraftServer) x).isSingleplayer()) {
                 this.permissionLevel = 4;
             }
         });
@@ -129,14 +127,14 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
      */
     @Inject(method = {
             "withEntity",
-            "withPos",
-            "withRotation(Lnet/minecraft/util/math/Vec2f;)Lnet/minecraft/command/CommandSource;",
-            "withResultConsumer(Lcom/mojang/brigadier/ResultConsumer;)Lnet/minecraft/command/CommandSource;",
-            "withFeedbackDisabled",
-            "withPermissionLevel",
-            "withMinPermissionLevel",
-            "withEntityAnchorType",
-            "withWorld"
+            "withPosition",
+            "withRotation(Lnet/minecraft/util/math/vector/Vector2f;)Lnet/minecraft/command/CommandSource;",
+            "withCallback(Lcom/mojang/brigadier/ResultConsumer;)Lnet/minecraft/command/CommandSource;",
+            "withSuppressedOutput",
+            "withPermission",
+            "withMaximumPermission",
+            "withAnchor",
+            "withLevel"
     }, at = @At("RETURN"))
     private void impl$copyPermissionOnCopy(final CallbackInfoReturnable<CommandSource> cir) {
         if (cir.getReturnValue() != (Object) this) {
@@ -149,8 +147,8 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
     @Override
     public CommandCause bridge$withCurrentCause() {
         // Cause is set in ctor.
-        return (CommandCause) CommandSourceAccessor.accessor$createInstance(this.source, this.pos, this.rotation, this.world, this.permissionLevel,
-                this.name, this.displayName, this.server, this.entity, this.feedbackDisabled, this.resultConsumer, this.entityAnchorType);
+        return (CommandCause) CommandSourceAccessor.invoker$new(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel,
+                this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor);
     }
 
     /*
@@ -163,37 +161,37 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
      * methods.
      */
 
-    @Inject(method = "withWorld", at = @At("RETURN"))
+    @Inject(method = "withLevel", at = @At("RETURN"))
     private void impl$updateCauseOnWithWorld(final ServerWorld serverWorld, final CallbackInfoReturnable<CommandSource> cir) {
         if (cir.getReturnValue() != (Object) this) {
             final ServerLocation location = this.impl$cause.getContext().get(EventContextKeys.LOCATION)
                     .map(x -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld, x.getPosition()))
                     .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld,
-                            VecHelper.toVector3d(cir.getReturnValue().getPos())));
+                            VecHelper.toVector3d(cir.getReturnValue().getPosition())));
             ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION.get(), location));
         }
     }
 
-    @Inject(method = "withPos", at = @At("RETURN"))
-    private void impl$updateCauseOnWithPosition(final Vec3d pos, final CallbackInfoReturnable<CommandSource> cir) {
+    @Inject(method = "withPosition", at = @At("RETURN"))
+    private void impl$updateCauseOnWithPosition(final Vector3d pos, final CallbackInfoReturnable<CommandSource> cir) {
         if (cir.getReturnValue() != (Object) this) {
-            final Vector3d position = VecHelper.toVector3d(pos);
+            final org.spongepowered.math.vector.Vector3d position = VecHelper.toVector3d(pos);
             final ServerLocation location = this.impl$cause.getContext().get(EventContextKeys.LOCATION)
                     .map(x -> ServerLocation.of(x.getWorld(), position))
-                    .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) cir.getReturnValue().getWorld(), position));
+                    .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) cir.getReturnValue().getLevel(), position));
             ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION.get(), location));
         }
     }
 
-    @Inject(method = "withRotation(Lnet/minecraft/util/math/Vec2f;)Lnet/minecraft/command/CommandSource;", at = @At("RETURN"))
-    private void impl$updateCauseOnWithRotation(final Vec2f rotation, final CallbackInfoReturnable<CommandSource> cir) {
+    @Inject(method = "withRotation(Lnet/minecraft/util/math/vector/Vector2f;)Lnet/minecraft/command/CommandSource;", at = @At("RETURN"))
+    private void impl$updateCauseOnWithRotation(final Vector2f rotation, final CallbackInfoReturnable<CommandSource> cir) {
         if (cir.getReturnValue() != (Object) this) {
-            final Vector3d rot = new Vector3d(rotation.x, rotation.y, 0); // no roll
+            final org.spongepowered.math.vector.Vector3d rot = new org.spongepowered.math.vector.Vector3d(rotation.x, rotation.y, 0); // no roll
             ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.ROTATION.get(), rot));
         }
     }
 
-    @Inject(method = "hasPermissionLevel", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "hasPermission", at = @At(value = "HEAD"), cancellable = true)
     private void impl$checkPermission(final int opLevel, final CallbackInfoReturnable<Boolean> cir) {
         if (this.impl$potentialPermissionNode != null) {
             final String perm = this.impl$potentialPermissionNode.get();
@@ -205,7 +203,7 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
     }
 
     @Override
-    public void bridge$setPotentialPermissionNode(@Nullable final @org.checkerframework.checker.nullness.qual.Nullable Supplier<String> permission) {
+    public void bridge$setPotentialPermissionNode(final @Nullable Supplier<String> permission) {
         this.impl$potentialPermissionNode = permission;
     }
 

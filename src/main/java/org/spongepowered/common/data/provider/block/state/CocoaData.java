@@ -41,7 +41,7 @@ public final class CocoaData {
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, CocoaBlock.AGE))
-                        .get(h -> h.get(CocoaBlock.AGE))
+                        .get(h -> h.getValue(CocoaBlock.AGE))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, CocoaBlock.AGE))
                         .supports(h -> h.getBlock() instanceof CocoaBlock);
     }

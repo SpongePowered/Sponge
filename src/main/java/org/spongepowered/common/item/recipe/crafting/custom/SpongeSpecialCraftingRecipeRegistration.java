@@ -62,7 +62,7 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
     }
 
     @Override
-    public IRecipeSerializer<?> getSerializer() {
+    public IRecipeSerializer<?> getType() {
         return this.serializer;
     }
 

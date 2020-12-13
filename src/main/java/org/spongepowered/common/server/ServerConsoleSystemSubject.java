@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.server;
 
+import java.util.UUID;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ICommandSource;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.common.SpongeCommon;
@@ -51,15 +52,15 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
 
     @Override
     public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
-        SpongeCommon.getServer().sendMessage(SpongeAdventure.asVanilla(message));
+        SpongeCommon.getServer().sendMessage(SpongeAdventure.asVanilla(message), identity.uuid());
     }
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
         return new CommandSource(this,
-                Vec3d.ZERO,
-                Vec2f.ZERO,
-                SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD),
+                Vector3d.ZERO,
+                Vector2f.ZERO,
+                SpongeCommon.getServer().getLevel(World.OVERWORLD),
                 4,
                 "System Subject",
                 new StringTextComponent("System Subject"),
@@ -68,22 +69,22 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
     }
 
     @Override
-    public void sendMessage(final ITextComponent component) {
+    public void sendMessage(final ITextComponent component, final UUID identity) {
         SpongeCommon.getLogger().info(component.getString());
     }
 
     @Override
-    public boolean shouldReceiveFeedback() {
+    public boolean acceptsSuccess() {
         return true;
     }
 
     @Override
-    public boolean shouldReceiveErrors() {
+    public boolean acceptsFailure() {
         return true;
     }
 
     @Override
-    public boolean allowLogging() {
+    public boolean shouldInformAdmins() {
         return true;
     }
 

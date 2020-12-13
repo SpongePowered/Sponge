@@ -34,28 +34,30 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(net.minecraft.entity.ai.goal.RandomWalkingGoal.class)
 public abstract class RandomWalkingGoalMixin_API extends GoalMixin_API<Creature> implements RandomWalkingGoal {
 
-    @Shadow @Final @Mutable protected double speed;
-    @Shadow protected int executionChance;
+    // @formatter:off
+    @Shadow @Final @Mutable protected double speedModifier;
+    @Shadow protected int interval;
+    // @formatter:on
 
     @Override
     public double getSpeed() {
-        return this.speed;
+        return this.speedModifier;
     }
 
     @Override
     public RandomWalkingGoal setSpeed(double speed) {
-        this.speed = speed;
+        this.speedModifier = speed;
         return this;
     }
 
     @Override
     public int getExecutionChance() {
-        return this.executionChance;
+        return this.interval;
     }
 
     @Override
     public RandomWalkingGoal setExecutionChance(int executionChance) {
-        this.executionChance = executionChance;
+        this.interval = executionChance;
         return this;
     }
 }

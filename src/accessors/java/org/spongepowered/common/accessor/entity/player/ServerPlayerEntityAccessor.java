@@ -25,7 +25,7 @@
 package org.spongepowered.common.accessor.entity.player;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -34,23 +34,22 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(ServerPlayerEntity.class)
 public interface ServerPlayerEntityAccessor {
 
-    @Accessor("invulnerableDimensionChange") void accessor$setInvulnerableDimensionChange(boolean invulnerableDimensionChange);
+    @Accessor("lastSentHealth") void accessor$lastSentHealth(final float lastSentHealth);
 
-    @Accessor("language") String accessor$getLanguage();
+    @Accessor("lastSentFood") void accessor$lastSentFood(final int lastSentFood);
 
-    @Accessor("seenCredits") boolean accessor$getSeenCredits();
+    @Accessor("lastSentExp") void accessor$lastSentExp(final int lastSentExp);
 
-    @Accessor("chatColours") boolean accessor$getChatColours();
+    @Accessor("canChatColor") boolean accessor$canChatColor();
 
-    @Accessor("seenCredits") void accessor$setSeenCredits(boolean seenCredits);
+    @Accessor("isChangingDimension") void accessor$isChangingDimension(final boolean isChangingDimension);
 
-    @Accessor("enteredNetherPosition") void accessor$setEnteredNetherPosition(Vec3d value);
+    @Accessor("seenCredits") boolean accessor$seenCredits();
 
-    @Accessor("lastExperience") void accessor$setLastExperience(int value);
+    @Accessor("seenCredits") void accessor$seenCredits(final boolean seenCredits);
 
-    @Accessor("lastHealth") void accessor$setLastHealth(float value);
+    @Accessor("enteredNetherPosition") void accessor$enteredNetherPosition(final Vector3d enteredNetherPosition);
 
-    @Accessor("lastFoodLevel") void accessor$setLastFoodLevel(int value);
+    @Invoker("triggerDimensionChangeTriggers") void invoker$triggerDimensionChangeTriggers(final ServerWorld world);
 
-    @Invoker("func_213846_b") void accessor$func_213846_b(ServerWorld toWorld);
 }

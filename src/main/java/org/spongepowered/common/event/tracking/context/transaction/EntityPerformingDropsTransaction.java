@@ -110,7 +110,7 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
     public void restore() {
         this.destroyingEntity.getType()
             .spawn(this.worldSupplier.get(),
-                this.entityTag, null, null, this.destroyingEntity.getPosition(),
+                this.entityTag, null, null, this.destroyingEntity.blockPosition(),
             SpawnReason.COMMAND, false, false);
     }
 

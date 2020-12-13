@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -52,8 +51,8 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.hooks.SpongeImplHooks;
+import org.spongepowered.common.data.persistence.NBTTranslator;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 
@@ -155,7 +154,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
     }
 
     private void writeAttributeModifier(final ListNBT attributeModifiers, final net.minecraft.entity.ai.attributes.AttributeModifier attributeModifier, final EquipmentSlotType slot) {
-        final CompoundNBT modifierNbt = SharedMonsterAttributes.writeAttributeModifier(attributeModifier);
+        final CompoundNBT modifierNbt = attributeModifier.save();
         modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_NAME, attributeModifier.getName());
 
         if (slot != null) {
@@ -180,7 +179,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         this.itemType(itemType);
 
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            final CompoundNBT compound = NbtTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            final CompoundNBT compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (compound.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
                 compound.remove(Constants.Sponge.SPONGE_DATA);
             }
@@ -272,7 +271,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         final ItemType itemType = container.getCatalogType(Constants.ItemStack.TYPE, ItemType.class).orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            final CompoundNBT compound = NbtTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            final CompoundNBT compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (!compound.isEmpty()) {
                 SpongeItemStackBuilder.fixEnchantmentData(itemType, compound);
                 itemStack.setTag(compound);
@@ -324,7 +323,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         if (this.compound != null && this.compound.contains(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
             final CompoundNBT compoundTag = this.compound.getCompound(Constants.Forge.FORGE_CAPS);
             if (compoundTag != null) {
-                SpongeImplHooks.setCapabilitiesFromSpongeBuilder((net.minecraft.item.ItemStack) (Object) stack, compoundTag);
+                PlatformHooks.getInstance().getItemHooks().setCapabilitiesFromSpongeBuilder((net.minecraft.item.ItemStack) (Object) stack, compoundTag);
             }
         }
 

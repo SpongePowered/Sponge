@@ -42,6 +42,6 @@ public abstract class ProfileBanEntryMixin_API extends BanEntryMixin_API<com.moj
 
     @Override
     public GameProfile getProfile() {
-        return SpongeGameProfile.of(this.shadow$getValue());
+        return SpongeGameProfile.of(this.shadow$getUser());
     }
 }

@@ -28,9 +28,14 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.world.gen.feature.DungeonsFeature;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(DungeonsFeature.class)
 public interface DungeonsFeatureAccessor {
 
-    @Accessor("SPAWNERTYPES") EntityType<?>[] accessor$getSpawnerTypes();
+    @Accessor("MOBS")
+    static EntityType<?>[] accessor$MOBS() {
+        throw new UntransformedAccessorError();
+    }
+
 }

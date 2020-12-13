@@ -40,27 +40,29 @@ import java.util.Set;
 @Mixin(CommandBlockTileEntity.class)
 public abstract class CommandBlockTileEntityMixin_API extends TileEntityMixin_API implements CommandBlock {
 
-    @Shadow public abstract CommandBlockLogic getCommandBlockLogic();
+    // @formatter:off
+    @Shadow public abstract CommandBlockLogic shadow$getCommandBlock();
+    // @formatter:on
 
     @Override
     public void execute() {
-        this.getCommandBlockLogic().trigger(this.world);
+        this.shadow$getCommandBlock().performCommand(this.level);
     }
 
     @Override
     public String getName() {
-        return this.getCommandBlockLogic().getName().getString();
+        return this.shadow$getCommandBlock().getName().getString();
     }
 
     @Override
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
-        container.set(Constants.TileEntity.CommandBlock.STORED_COMMAND, this.getCommandBlockLogic().getCommand());
-        container.set(Constants.TileEntity.CommandBlock.SUCCESS_COUNT, this.getCommandBlockLogic().getSuccessCount());
-        container.set(Constants.TileEntity.CUSTOM_NAME, this.getCommandBlockLogic().getName());
-        container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.getCommandBlockLogic().shouldReceiveErrors());
-        if (this.getCommandBlockLogic().shouldReceiveErrors()) {
-            container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, SpongeAdventure.legacySection(SpongeAdventure.asAdventure(this.getCommandBlockLogic().getLastOutput())));
+        container.set(Constants.TileEntity.CommandBlock.STORED_COMMAND, this.shadow$getCommandBlock().getCommand());
+        container.set(Constants.TileEntity.CommandBlock.SUCCESS_COUNT, this.shadow$getCommandBlock().getSuccessCount());
+        container.set(Constants.TileEntity.CUSTOM_NAME, this.shadow$getCommandBlock().getName());
+        container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.shadow$getCommandBlock().shouldInformAdmins());
+        if (this.shadow$getCommandBlock().shouldInformAdmins()) {
+            container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, SpongeAdventure.legacySection(SpongeAdventure.asAdventure(this.shadow$getCommandBlock().getLastOutput())));
         }
         return container;
     }
@@ -80,6 +82,6 @@ public abstract class CommandBlockTileEntityMixin_API extends TileEntityMixin_AP
 
     @Override
     public String getIdentifier() {
-        return this.getCommandBlockLogic().getName().getString();
+        return this.shadow$getCommandBlock().getName().getString();
     }
 }

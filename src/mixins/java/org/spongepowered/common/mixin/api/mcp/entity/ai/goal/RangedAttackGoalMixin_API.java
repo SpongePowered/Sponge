@@ -34,30 +34,32 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(RangedAttackGoal.class)
 public abstract class RangedAttackGoalMixin_API implements RangedAttackAgainstAgentGoal {
 
-    @Shadow @Final @Mutable private double entityMoveSpeed;
-    @Shadow @Final @Mutable private int maxRangedAttackTime;
+    // @formatter:off
+    @Shadow @Final @Mutable private double speedModifier;
+    @Shadow @Final @Mutable private int attackIntervalMax;
     @Shadow @Final @Mutable private float attackRadius;
-    @Shadow @Final @Mutable private float maxAttackDistance;
+    @Shadow @Final @Mutable private float attackRadiusSqr;
+    // @formatter:on
 
     @Override
     public double getMoveSpeed() {
-        return this.entityMoveSpeed;
+        return this.speedModifier;
     }
 
     @Override
     public RangedAttackAgainstAgentGoal setMoveSpeed(final double speed) {
-        this.entityMoveSpeed = speed;
+        this.speedModifier = speed;
         return this;
     }
 
     @Override
     public int getDelayBetweenAttacks() {
-        return this.maxRangedAttackTime;
+        return this.attackIntervalMax;
     }
 
     @Override
     public RangedAttackAgainstAgentGoal setDelayBetweenAttacks(final int delay) {
-        this.maxRangedAttackTime = delay;
+        this.attackIntervalMax = delay;
         return this;
     }
 
@@ -69,7 +71,7 @@ public abstract class RangedAttackGoalMixin_API implements RangedAttackAgainstAg
     @Override
     public RangedAttackAgainstAgentGoal setAttackRadius(final float radius) {
         this.attackRadius = radius;
-        this.maxAttackDistance = this.attackRadius * this.attackRadius;
+        this.attackRadiusSqr = this.attackRadius * this.attackRadius;
         return this;
     }
 }

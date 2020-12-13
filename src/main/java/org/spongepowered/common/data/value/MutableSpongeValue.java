@@ -26,7 +26,7 @@ package org.spongepowered.common.data.value;
 
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.util.CopyHelper;
 
 import java.util.function.Function;
 

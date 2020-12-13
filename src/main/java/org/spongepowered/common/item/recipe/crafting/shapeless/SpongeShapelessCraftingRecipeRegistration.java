@@ -68,7 +68,7 @@ public class SpongeShapelessCraftingRecipeRegistration extends SpongeRecipeRegis
     @Override
     public void serializeShape(JsonObject json) {
         final JsonArray jsonarray = new JsonArray();
-        this.ingredients.stream().map(Ingredient::serialize).forEach(jsonarray::add);
+        this.ingredients.stream().map(Ingredient::toJson).forEach(jsonarray::add);
         json.add(Constants.Recipe.SHAPELESS_INGREDIENTS, jsonarray);
     }
 
@@ -86,10 +86,10 @@ public class SpongeShapelessCraftingRecipeRegistration extends SpongeRecipeRegis
             json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getID(), this.resultFunction));
+            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
         }
         if (this.remainingItemsFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_REMAINING_ITEMS, ResultUtil.cacheRemainingItemsFunction(this.getID(), this.remainingItemsFunction));
+            json.addProperty(Constants.Recipe.SPONGE_REMAINING_ITEMS, ResultUtil.cacheRemainingItemsFunction(this.getId(), this.remainingItemsFunction));
         }
     }
 }

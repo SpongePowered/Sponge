@@ -40,8 +40,8 @@ public final class WallTorchData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(WallTorchBlock.HORIZONTAL_FACING)))
-                        .set((h, v) -> DirectionUtil.set(h, v, WallTorchBlock.HORIZONTAL_FACING))
+                        .get(h -> DirectionUtil.getFor(h.getValue(WallTorchBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, WallTorchBlock.FACING))
                         .supports(h -> h.getBlock() instanceof WallTorchBlock);
     }
     // @formatter:on

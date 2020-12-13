@@ -34,5 +34,6 @@ import net.minecraft.potion.EffectInstance;
 @Mixin(ArrowEntity.class)
 public interface ArrowEntityAccessor {
 
-    @Accessor("customPotionEffects") Set<EffectInstance> accessor$getCustomPotionEffects();
+    @Accessor("effects") Set<EffectInstance> accessor$effects();
+
 }

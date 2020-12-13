@@ -24,50 +24,31 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.DamagingProjectileEntity;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.projectile.DamagingProjectile;
 import org.spongepowered.api.entity.projectile.explosive.fireball.FireballEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
 @Mixin(DamagingProjectileEntity.class)
-public abstract class DamagingProjectileEntityMixin extends EntityMixin {
-
-    @Shadow public LivingEntity shootingEntity;
-    @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
-
-    @Override
-    public void impl$readFromSpongeCompound(CompoundNBT compound) {
-        super.impl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, ((FireballEntity) this));
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(CompoundNBT compound) {
-        super.impl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, ((FireballEntity) this).shooter().get(), this.shootingEntity);
-    }
+public abstract class DamagingProjectileEntityMixin extends ProjectileEntityMixin {
 
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/DamagingProjectileEntity;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
-    private void onProjectileImpact(DamagingProjectileEntity projectile, RayTraceResult movingObjectPosition) {
-        if (movingObjectPosition.getType() == RayTraceResult.Type.MISS || ((WorldBridge) this.world).bridge$isFake()) {
-            this.onImpact(movingObjectPosition);
+    private void impl$callCollideImpactEvent(DamagingProjectileEntity projectile, RayTraceResult result) {
+        if (result.getType() == RayTraceResult.Type.MISS || ((WorldBridge) this.world).bridge$isFake()) {
+            this.shadow$onImpact(result);
             return;
         }
 
-        if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((FireballEntity) this).get(Keys.SHOOTER).orElse(null), movingObjectPosition)) {
+        if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((DamagingProjectile) this).get(Keys.SHOOTER).orElse(null), result)) {
             this.shadow$remove();
         } else {
-            this.onImpact(movingObjectPosition);
+            this.shadow$onImpact(result);
         }
     }
 }

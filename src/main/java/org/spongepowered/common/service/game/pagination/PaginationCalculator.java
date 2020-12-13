@@ -25,6 +25,8 @@
 package org.spongepowered.common.service.game.pagination;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.ArrayList;
+import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minecraft.util.text.ITextComponent;
@@ -146,18 +148,21 @@ final class PaginationCalculator {
      */
     @VisibleForTesting
     int getWidth(final Component text) {
-        final Iterable<ITextComponent> children = SpongeAdventure.asVanilla(text);
+        final ITextComponent vanilla = SpongeAdventure.asVanilla(text);
+        final List<ITextComponent> children = new ArrayList<>(1 + vanilla.getSiblings().size());
+        children.add(vanilla);
+        children.addAll(vanilla.getSiblings());
         int total = 0;
 
         for (final ITextComponent child : children) {
             final PrimitiveIterator.OfInt i_it;
             if (child instanceof StringTextComponent || child instanceof TranslationTextComponent) {
-                i_it = child.getUnformattedComponentText().codePoints().iterator();
+                i_it = child.getString().codePoints().iterator();
             } else {
                 continue;
             }
 
-            final boolean bold = child.getStyle().getBold();
+            final boolean bold = child.getStyle().isBold();
 
             Integer cp;
             boolean newLine = false;

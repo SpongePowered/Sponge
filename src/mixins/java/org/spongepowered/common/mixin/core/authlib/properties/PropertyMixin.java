@@ -36,9 +36,11 @@ import javax.annotation.Nullable;
 @Mixin(value = Property.class, remap = false)
 public abstract class PropertyMixin {
 
+    // @formatter:off
     @Shadow public abstract String getName();
     @Shadow public abstract String getValue();
     @Nullable @Shadow public abstract String getSignature();
+    // @formatter:on
 
     @Override
     public boolean equals(@Nullable final Object other) {

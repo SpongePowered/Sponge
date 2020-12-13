@@ -92,14 +92,14 @@ public class SpongeInventoryMenu implements InventoryMenu {
                 final net.minecraft.inventory.container.Container newContainer = ((ViewableCustomInventory) inventory).createMenu(-1, ((PlayerEntity)player).inventory, (PlayerEntity) player);
                 for (int i = 0; i < inventory.capacity(); i++) {
                     // And put its slots into the old container
-                    final Slot slot = newContainer.inventorySlots.get(i);
-                    container.inventorySlots.set(i, slot);
+                    final Slot slot = newContainer.slots.get(i);
+                    container.slots.set(i, slot);
                     // Update Container items
-                    ((ContainerAccessor)container).accessor$getInventoryItemStacks().set(i, slot.getStack());
+                    ((ContainerAccessor)container).accessor$lastSlots().set(i, slot.getItem());
                 }
                 // send update to Client
-                for (IContainerListener listener : ((ContainerAccessor) container).accessor$getListeners()) {
-                    listener.sendAllContents(container, ((ContainerAccessor) container).accessor$getInventoryItemStacks());
+                for (IContainerListener listener : ((ContainerAccessor) container).accessor$containerListeners()) {
+                    listener.refreshContainer(container, ((ContainerAccessor) container).accessor$lastSlots());
                 }
             }
         } else {
@@ -114,6 +114,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         new ArrayList<>(this.tracked.values()).stream().distinct().forEach(this::open);
     }
 
+    @Override
     public void setTitle(Component title) {
         this.title = title;
         this.reopen();
@@ -153,9 +154,11 @@ public class SpongeInventoryMenu implements InventoryMenu {
         this.closeHandler = handler;
     }
 
+    @Override
     public void registerClick(ClickHandler handler) {
         this.clickHandler = handler;
     }
+
     @Override
     public void registerSlotClick(SlotClickHandler handler) {
         this.slotClickHandler = handler;
@@ -166,6 +169,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         this.keySwapHandler = handler;
     }
 
+    @Override
     public void registerChange(SlotChangeHandler handler) {
         this.changeHandler = handler;
     }
@@ -337,7 +341,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     public boolean onChange(ItemStack newStack, ItemStack oldStack, Container container, int slotIndex, Slot slot) {
 
         // readonly by default cancels top inventory changes . but can be overridden by change callbacks
-        if (this.readonly && !(slot.inventory instanceof PlayerInventory)) {
+        if (this.readonly && !(slot.container instanceof PlayerInventory)) {
             return false;
         }
 

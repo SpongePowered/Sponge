@@ -24,35 +24,46 @@
  */
 package org.spongepowered.common.accessor.util.text;
 
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.Color;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(Style.class)
 public interface StyleAccessor {
 
-    @Accessor("color") TextFormatting accessor$getColor();
+    @Invoker("<init>")
+    static Style invoker$new(
+            final @Nullable Color color,
+            final @Nullable Boolean bold,
+            final @Nullable Boolean italic,
+            final @Nullable Boolean underlined,
+            final @Nullable Boolean strikethrough,
+            final @Nullable Boolean obfuscated,
+            final @Nullable ClickEvent clickEvent,
+            final @Nullable HoverEvent hoverEvent,
+            final @Nullable String insertion,
+            final @Nullable ResourceLocation font
+    ) {
+        throw new UntransformedInvokerError();
+    }
 
-    @Accessor("color") void accessor$setColor(TextFormatting color);
+    @Accessor("color") Color accessor$color();
 
-    @Accessor("bold") Boolean accessor$getBold();
+    @Accessor("bold") Boolean accessor$bold();
 
-    @Accessor("bold") void accessor$setBold(Boolean bold);
+    @Accessor("italic") Boolean accessor$italic();
 
-    @Accessor("italic") Boolean accessor$getItalic();
+    @Accessor("underlined") Boolean accessor$underlined();
 
-    @Accessor("italic") void accessor$setItalic(Boolean italic);
+    @Accessor("strikethrough") Boolean accessor$strikethrough();
 
-    @Accessor("underlined") Boolean accessor$getUnderlined();
+    @Accessor("obfuscated") Boolean accessor$obfuscated();
 
-    @Accessor("underlined") void accessor$setUnderlined(Boolean underlined);
-
-    @Accessor("strikethrough") Boolean accessor$getStrikethrough();
-
-    @Accessor("strikethrough") void accessor$setStrikethrough(Boolean strikethrough);
-
-    @Accessor("obfuscated") Boolean accessor$getObfuscated();
-
-    @Accessor("obfuscated") void accessor$setObfuscated(Boolean obfuscated);
 }

@@ -27,12 +27,14 @@ package org.spongepowered.common.accessor.entity.boss.dragon.phase;
 import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(PhaseType.class)
 public interface PhaseTypeAccessor {
 
     @Accessor("phases")
-    static PhaseType<?>[] accessor$getPhases() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    static PhaseType<?>[] accessor$phases() {
+        throw new UntransformedAccessorError();
     }
+
 }

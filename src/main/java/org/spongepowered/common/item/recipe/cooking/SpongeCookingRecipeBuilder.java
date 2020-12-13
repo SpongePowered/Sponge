@@ -64,7 +64,7 @@ public class SpongeCookingRecipeBuilder extends SpongeCatalogBuilder<RecipeRegis
     @Nullable private String group;
 
     @Override
-    public ResultStep ingredient(org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
+    public ResultStep ingredient(final org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
         this.ingredient = (Ingredient) (Object) ingredient;
         return this;
     }
@@ -83,58 +83,58 @@ public class SpongeCookingRecipeBuilder extends SpongeCatalogBuilder<RecipeRegis
     }
 
     @Override
-    public EndStep result(ItemType result) {
+    public EndStep result(final ItemType result) {
         this.result = new ItemStack((Item) result);
         this.resultFunction = null;
         return this;
     }
 
     @Override
-    public EndStep result(org.spongepowered.api.item.inventory.ItemStack result) {
+    public EndStep result(final org.spongepowered.api.item.inventory.ItemStack result) {
         this.result = ItemStackUtil.toNative(result);
         this.resultFunction = null;
         return this;
     }
 
     @Override
-    public EndStep result(ItemStackSnapshot result) {
+    public EndStep result(final ItemStackSnapshot result) {
         return this.result(result.createStack());
     }
 
     // currently unused
-    public EndStep result(Function<Inventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction, org.spongepowered.api.item.inventory.ItemStack exemplaryResult) {
+    public EndStep result(final Function<Inventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction, final org.spongepowered.api.item.inventory.ItemStack exemplaryResult) {
         this.result = ItemStackUtil.toNative(exemplaryResult);
         this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toInventory(inv)));
         return this;
     }
 
     @Override
-    public EndStep experience(double experience) {
+    public EndStep experience(final double experience) {
         checkState(experience >= 0, "The experience must be non-negative.");
         this.experience = (float) experience;
         return this;
     }
 
     @Override
-    public EndStep cookingTime(int ticks) {
+    public EndStep cookingTime(final int ticks) {
         this.cookingTime = ticks;
         return this;
     }
 
     @Override
-    public IngredientStep type(RecipeType<CookingRecipe> type) {
+    public IngredientStep type(final RecipeType<CookingRecipe> type) {
         this.type = (IRecipeType) type;
         return this;
     }
 
     @Override
-    public EndStep group(String group) {
+    public EndStep group(final String group) {
         this.group = group;
         return this;
     }
 
     @Override
-    protected RecipeRegistration build(ResourceKey key) {
+    protected RecipeRegistration build(final ResourceKey key) {
         checkNotNull(this.type);
         checkNotNull(this.ingredient);
         checkNotNull(this.result);
@@ -147,27 +147,27 @@ public class SpongeCookingRecipeBuilder extends SpongeCatalogBuilder<RecipeRegis
 
         final List<Ingredient> ingredientList = Collections.singletonList(this.ingredient);
 
-        IRecipeSerializer<?> serializer;
+        final IRecipeSerializer<?> serializer;
         if (this.type == IRecipeType.BLASTING) {
             if (this.cookingTime == null) {
                 this.cookingTime = 100;
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.BLASTING, SpongeCookingRecipeSerializer.Blasting.SPONGE_BLASTING);
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.BLASTING_RECIPE, SpongeCookingRecipeSerializer.Blasting.SPONGE_BLASTING);
         } else if (this.type == IRecipeType.CAMPFIRE_COOKING) {
             if (this.cookingTime == null) {
                 this.cookingTime = 600;
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.CAMPFIRE_COOKING, SpongeCookingRecipeSerializer.Campfire.SPONGE_CAMPFIRE_COOKING);
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.CAMPFIRE_COOKING_RECIPE, SpongeCookingRecipeSerializer.Campfire.SPONGE_CAMPFIRE_COOKING);
         } else if (this.type == IRecipeType.SMOKING) {
             if (this.cookingTime == null) {
                 this.cookingTime = 100;
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.SMOKING, SpongeCookingRecipeSerializer.Smoking.SPONGE_SMOKING);
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.SMOKING_RECIPE, SpongeCookingRecipeSerializer.Smoking.SPONGE_SMOKING);
         } else if (this.type == IRecipeType.SMELTING) {
             if (this.cookingTime == null) {
                 this.cookingTime = 200;
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.SMELTING, SpongeCookingRecipeSerializer.Smelting.SPONGE_SMELTING);
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.SMELTING_RECIPE, SpongeCookingRecipeSerializer.Smelting.SPONGE_SMELTING);
         } else {
             throw new IllegalArgumentException("Unknown RecipeType " + this.type);
         }

@@ -40,8 +40,8 @@ public final class EvokerData {
         registrator
                 .asMutable(EvokerEntityAccessor.class)
                     .create(Keys.WOLOLO_TARGET)
-                        .get(h -> (Sheep) h.accessor$getWololoTarget())
-                        .set((h, v) -> h.accessor$setWololoTarget((SheepEntity) v));
+                        .get(h -> (Sheep) h.accessor$wololoTarget())
+                        .set((h, v) -> h.accessor$wololoTarget((SheepEntity) v));
     }
     // @formatter:on
 }

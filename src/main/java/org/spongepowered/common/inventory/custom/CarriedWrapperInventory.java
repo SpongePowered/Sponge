@@ -60,8 +60,8 @@ public class CarriedWrapperInventory implements IInventory, CarriedBridge {
     // Delegation
 
     @Override
-    public int getSizeInventory() {
-        return this.wrapped.getSizeInventory();
+    public int getContainerSize() {
+        return this.wrapped.getContainerSize();
     }
 
     @Override
@@ -70,67 +70,67 @@ public class CarriedWrapperInventory implements IInventory, CarriedBridge {
     }
 
     @Override
-    public ItemStack getStackInSlot(int index) {
-        return this.wrapped.getStackInSlot(index);
+    public ItemStack getItem(int index) {
+        return this.wrapped.getItem(index);
     }
 
     @Override
-    public ItemStack decrStackSize(int index, int count) {
-        return this.wrapped.decrStackSize(index, count);
+    public ItemStack removeItem(int index, int count) {
+        return this.wrapped.removeItem(index, count);
     }
 
     @Override
-    public ItemStack removeStackFromSlot(int index) {
-        return this.wrapped.removeStackFromSlot(index);
+    public ItemStack removeItemNoUpdate(int index) {
+        return this.wrapped.removeItemNoUpdate(index);
     }
 
     @Override
-    public void setInventorySlotContents(int index, ItemStack stack) {
-        this.wrapped.setInventorySlotContents(index, stack);
+    public void setItem(int index, ItemStack stack) {
+        this.wrapped.setItem(index, stack);
     }
 
     @Override
-    public int getInventoryStackLimit() {
-        return this.wrapped.getInventoryStackLimit();
+    public int getMaxStackSize() {
+        return this.wrapped.getMaxStackSize();
     }
 
     @Override
-    public void markDirty() {
-        this.wrapped.markDirty();
+    public void setChanged() {
+        this.wrapped.setChanged();
     }
 
     @Override
-    public boolean isUsableByPlayer(PlayerEntity player) {
-        return this.wrapped.isUsableByPlayer(player);
+    public boolean stillValid(PlayerEntity player) {
+        return this.wrapped.stillValid(player);
     }
 
     @Override
-    public void openInventory(PlayerEntity player) {
-       this.wrapped.openInventory(player);
+    public void startOpen(PlayerEntity player) {
+       this.wrapped.startOpen(player);
     }
 
     @Override
-    public void closeInventory(PlayerEntity player) {
-        this.wrapped.closeInventory(player);
+    public void stopOpen(PlayerEntity player) {
+        this.wrapped.stopOpen(player);
     }
 
     @Override
-    public boolean isItemValidForSlot(int index, ItemStack stack) {
-        return this.wrapped.isItemValidForSlot(index, stack);
+    public boolean canPlaceItem(int index, ItemStack stack) {
+        return this.wrapped.canPlaceItem(index, stack);
     }
 
     @Override
-    public int count(Item itemIn) {
-        return this.wrapped.count(itemIn);
+    public int countItem(Item itemIn) {
+        return this.wrapped.countItem(itemIn);
     }
 
     @Override
-    public boolean hasAny(Set<Item> set) {
-        return this.wrapped.hasAny(set);
+    public boolean hasAnyOf(Set<Item> set) {
+        return this.wrapped.hasAnyOf(set);
     }
 
     @Override
-    public void clear() {
-        this.wrapped.clear();
+    public void clearContent() {
+        this.wrapped.clearContent();
     }
 }

@@ -44,18 +44,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
-
 @Mixin(IEntityReader.class)
 public interface IEntityReaderMixin_API extends ReadableEntityVolume {
 
     //@formatter:off
-
-    @Shadow List<net.minecraft.entity.Entity> shadow$getEntitiesInAABBexcluding(@Nullable net.minecraft.entity.Entity p_175674_1_, AxisAlignedBB p_175674_2_, @Nullable Predicate<? super net.minecraft.entity.Entity> p_175674_3_);
-    @Shadow<T extends net.minecraft.entity.Entity> List<T> shadow$getEntitiesWithinAABB(Class<? extends T> p_175647_1_, AxisAlignedBB p_175647_2_, @Nullable Predicate<? super T> p_175647_3_);
-    @Shadow List<? extends PlayerEntity> shadow$getPlayers();
-    @Nullable @Shadow PlayerEntity shadow$getClosestPlayer(double p_190525_1_, double p_190525_3_, double p_190525_5_, double p_190525_7_, @Nullable Predicate<net.minecraft.entity.Entity> p_190525_9_);
-
+    @Shadow List<net.minecraft.entity.Entity> shadow$getEntities(@Nullable net.minecraft.entity.Entity p_175674_1_, AxisAlignedBB p_175674_2_, @Nullable Predicate<? super net.minecraft.entity.Entity> p_175674_3_);
+    @Shadow<T extends net.minecraft.entity.Entity> List<T> shadow$getEntitiesOfClass(Class<? extends T> p_175647_1_, AxisAlignedBB p_175647_2_, @Nullable Predicate<? super T> p_175647_3_);
+    @Shadow List<? extends PlayerEntity> shadow$players();
     //@formatter:on
 
     @Override
@@ -91,14 +86,14 @@ public interface IEntityReaderMixin_API extends ReadableEntityVolume {
     @SuppressWarnings("unchecked")
     @Override
     default Collection<? extends Player> getPlayers() {
-        return Collections.unmodifiableCollection((List<? extends Player>) (List<?>) this.shadow$getPlayers());
+        return Collections.unmodifiableCollection((List<? extends Player>) (List<?>) this.shadow$players());
     }
 
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     @Override
     default Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
         return (Collection) this
-                .shadow$getEntitiesInAABBexcluding(null, VecHelper.toMinecraftAABB(box), entity -> entity instanceof Entity && filter.test((Entity) entity));
+                .shadow$getEntities(null, VecHelper.toMinecraftAABB(box), entity -> entity instanceof Entity && filter.test((Entity) entity));
     }
 
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
@@ -106,7 +101,7 @@ public interface IEntityReaderMixin_API extends ReadableEntityVolume {
     default <E extends Entity> Collection<? extends E> getEntities(final Class<? extends E> entityClass, final AABB box, @Nullable
     final Predicate<? super E> predicate) {
         final Predicate<? super net.minecraft.entity.Entity> filter = entity -> predicate == null || (entityClass.isInstance(entity) && predicate.test((E) entity));
-        final List<net.minecraft.entity.Entity> ts = this.shadow$getEntitiesWithinAABB((Class<net.minecraft.entity.Entity>) (Class<?>) entityClass,
+        final List<net.minecraft.entity.Entity> ts = this.shadow$getEntitiesOfClass((Class<net.minecraft.entity.Entity>) (Class<?>) entityClass,
                 VecHelper.toMinecraftAABB(box), filter);
         return (Collection) ts;
     }

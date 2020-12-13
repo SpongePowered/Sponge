@@ -25,12 +25,11 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import com.mojang.authlib.GameProfile;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.boss.dragon.EnderDragonPartEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -48,11 +47,10 @@ import net.minecraft.potion.Effects;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.NetworkTagManager;
+import net.minecraft.tags.ITagCollectionSupplier;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.CachedBlockInfo;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.Direction;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
@@ -61,9 +59,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Humanoid;
@@ -93,21 +89,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.util.ExperienceHolderUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.LivingEntityMixin;
-import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.ExperienceHolderUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -159,7 +155,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Shadow private BlockPos spawnPos;
     private boolean impl$affectsSpawning = true;
     private boolean impl$shouldRestoreInventory = false;
-    protected final boolean impl$isFake = SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this);
+    protected final boolean impl$isFake = ((PlatformEntityBridge) (PlayerEntity) (Object) this).bridge$isFakePlayer();
     protected Vector3d impl$targetedPosition;
 
     @Override
@@ -228,18 +224,13 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     }
 */
 
-    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
-    private void impl$getDisplayNameWithParsing(final CallbackInfoReturnable<ITextComponent> ci) {
-        ci.setReturnValue(LegacyTexts.parseComponent((StringTextComponent) ci.getReturnValue(), LegacyComponentSerializer.SECTION_CHAR));
-    }
-
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;isSleeping()Z"))
     private boolean impl$postSleepingEvent(final PlayerEntity self) {
         if (self.isSleeping()) {
             if (!((WorldBridge) this.world).bridge$isFake()) {
                 final CauseStackManager csm = PhaseTracker.getCauseStackManager();
                 csm.pushCause(this);
-                final BlockPos bedLocation = this.shadow$getBedPosition().get();
+                final BlockPos bedLocation = this.shadow$getSleepingPos().get();
                 final BlockSnapshot snapshot = ((ServerWorld) this.world).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
                 SpongeCommon.postEvent(SpongeEventFactory.createSleepingEventTick(csm.getCurrentCause(), snapshot, (Humanoid) this));
                 csm.popCause();
@@ -290,12 +281,11 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
      */
     @Redirect(method = "canPlayerEdit",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/item/ItemStack;canPlaceOn(Lnet/minecraft/tags/NetworkTagManager;Lnet/minecraft/util/CachedBlockInfo;)Z"))
-    private boolean impl$callChangeBlockPre(
-        final ItemStack stack, final NetworkTagManager tagManager, final CachedBlockInfo cachedBlockInfo, final BlockPos pos, final Direction facing, final ItemStack sameStack) {
+            target = "Lnet/minecraft/item/ItemStack;canPlaceOn(Lnet/minecraft/tags/ITagCollectionSupplier;Lnet/minecraft/util/CachedBlockInfo;)Z"))
+    private boolean impl$callChangeBlockPre(final ItemStack stack, final ITagCollectionSupplier tagSupplier, final CachedBlockInfo cachedBlockInfo) {
         // Lazy evaluation, if the stack isn't placeable anyways, might as well not
         // call the logic.
-        if (!stack.canPlaceOn(tagManager, cachedBlockInfo)) {
+        if (!stack.canPlaceOn(tagSupplier, cachedBlockInfo)) {
             return false;
         }
         // If we're going to throw an event, then do it.
@@ -312,7 +302,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
                 // Then go ahead and call the event and return if it was cancelled
                 // if it was cancelled, then there should be no changes needed to roll back
-                return !SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) this.world, pos, this).isCancelled();
+                return !SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) this.world, cachedBlockInfo.getPos(), this).isCancelled();
             }
         }
         // Otherwise, if all else is ignored, or we're not throwing events, we're just going to return the
@@ -347,7 +337,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         }
 
         final InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary((ServerPlayerEntity) (Object) this,
-                this.shadow$getHeldItem(hand), entityToInteractOn, hand, null);
+                this.shadow$getItemInHand(hand), entityToInteractOn, hand, null);
         if (event.isCancelled()) {
             cir.setReturnValue(ActionResultType.FAIL);
         }
@@ -359,9 +349,9 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
      * @author i509VCB - February 15th, 2020 - Update for 1.14.4
      * @author gabizou - November 15th, 2020 - Update for 1.15.2
      *
-     * @reason Rewrites the attackTargetEntityWithCurrentItem to throw an {@link AttackEntityEvent} prior
+     * @reason Rewrites the attack to throw an {@link AttackEntityEvent} prior
      * to the ensuing {@link org.spongepowered.api.event.entity.DamageEntityEvent}. This should cover all cases where players are
-     * attacking entities and those entities override {@link LivingEntity#attackEntityFrom(DamageSource, float)}
+     * attacking entities and those entities override {@link LivingEntity#hurt(DamageSource, float)}
      * and effectively bypass our damage event hooks.
      *
      * LVT Rename Table:
@@ -385,17 +375,17 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
      * @param targetEntity The target entity
      */
     @Overwrite
-    public void attackTargetEntityWithCurrentItem(final Entity targetEntity) {
+    public void attack(final Entity targetEntity) {
         // Sponge Start - Add SpongeImpl hook to override in forge as necessary
-        if (!SpongeImplHooks.checkAttackEntity((PlayerEntity) (Object) this, targetEntity)) {
+        if (!PlatformHooks.getInstance().getEntityHooks().checkAttackEntity((PlayerEntity) (Object) this, targetEntity)) {
             return;
         }
         // Sponge End
-        if (targetEntity.canBeAttackedWithItem()) {
-            if (!targetEntity.hitByEntity((PlayerEntity) (Object) this)) {
+        if (targetEntity.isAttackable()) {
+            if (!targetEntity.skipAttackInteraction((PlayerEntity) (Object) this)) {
                 // Sponge Start - Prepare our event values
-                // float damage = (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
-                final double originalBaseDamage = this.shadow$getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+                // float damage = (float) this.getEntityAttribute(Attributes.ATTACK_DAMAGE).getAttributeValue();
+                final double originalBaseDamage = this.shadow$getAttribute(Attributes.ATTACK_DAMAGE).getValue();
                 float damage = (float) originalBaseDamage;
                 // Sponge End
                 float enchantmentDamage = 0.0F;
@@ -413,7 +403,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                 final CreatureAttribute creatureAttribute = targetEntity instanceof LivingEntity
                     ? ((LivingEntity) targetEntity).getCreatureAttribute()
                     : CreatureAttribute.UNDEFINED;
-                final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchantmentFunction(this.shadow$getHeldItemMainhand(), creatureAttribute, attackStrength);
+                final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchantmentFunction(this.shadow$getMainHandItem(), creatureAttribute, attackStrength);
                 // This is kept for the post-damage event handling
                 final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream()
                     .map(ModifierFunction::getModifier)
@@ -446,7 +436,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                         isSprintingAttack = true;
                     }
 
-                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.shadow$isOnLadder() && !this.shadow$isInWater() && !this.shadow$isPotionActive(Effects.BLINDNESS) && !this.shadow$isPassenger() && targetEntity instanceof LivingEntity;
+                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.shadow$onClimbable() && !this.shadow$isInWater() && !this.shadow$hasEffect(Effects.BLINDNESS) && !this.shadow$isPassenger() && targetEntity instanceof LivingEntity;
                     isCriticalAttack = isCriticalAttack && !this.shadow$isSprinting();
 
                     if (isCriticalAttack) {
@@ -459,7 +449,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                     // damage = damage + enchantmentDamage; // Sponge - We don't need this since our event will re-assign the damage to deal
                     final double distanceWalkedDelta = (double) (this.distanceWalkedModified - this.prevDistanceWalkedModified);
 
-                    final ItemStack heldItem = this.shadow$getHeldItemMainhand();
+                    final ItemStack heldItem = this.shadow$getMainHandItem();
                     if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround && distanceWalkedDelta < (double) this.shadow$getAIMoveSpeed()) {
                         final ItemStack itemstack = heldItem;
 
@@ -470,7 +460,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
                     // Sponge Start - Create the event and throw it
                     final DamageSource damageSource = DamageSource.causePlayerDamage((PlayerEntity) (Object) this);
-                    final boolean isMainthread = !this.world.isRemote;
+                    final boolean isMainthread = !this.world.isClientSide;
                     if (isMainthread) {
                         PhaseTracker.getInstance().pushCause(damageSource);
                     }
@@ -596,24 +586,24 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                             this.shadow$onEnchantmentCritical(targetEntity);
                         }
 
-                        this.shadow$setLastAttackedEntity(targetEntity);
+                        this.shadow$setLastHurtMob(targetEntity);
 
                         if (targetEntity instanceof LivingEntity) {
                             EnchantmentHelper.applyThornEnchantments((LivingEntity) targetEntity, (PlayerEntity) (Object) this);
                         }
 
                         EnchantmentHelper.applyArthropodEnchantments((PlayerEntity) (Object) this, targetEntity);
-                        final ItemStack itemstack1 = this.shadow$getHeldItemMainhand();
+                        final ItemStack itemstack1 = this.shadow$getMainHandItem();
                         Entity entity = targetEntity;
 
                         if (targetEntity instanceof EnderDragonPartEntity) {
                             entity = ((EnderDragonPartEntity) targetEntity).dragon;
                         }
 
-                        if(!this.world.isRemote && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
+                        if(!this.world.isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
                             itemstack1.hitEntity((LivingEntity) entity, (PlayerEntity) (Object) this);
                             if(itemstack1.isEmpty()) {
-                                this.shadow$setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
+                                this.shadow$setItemInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
                             }
                         }
 

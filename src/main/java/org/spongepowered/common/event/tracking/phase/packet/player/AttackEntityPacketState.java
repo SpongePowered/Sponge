@@ -62,13 +62,13 @@ public final class AttackEntityPacketState extends BasicPacketState {
         // There are cases where a player is interacting with an entity that
         // doesn't exist on the server.
         @Nullable
-        net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.world);
+        net.minecraft.entity.Entity entity = useEntityPacket.getTarget(packetPlayer.level);
         return entity == null;
     }
 
     @Override
     public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
-        context.itemUsed(ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand()))
+        context.itemUsed(ItemStackUtil.cloneDefensive(playerMP.getMainHandItem()))
             .handUsed(HandTypes.MAIN_HAND.get());
     }
 
@@ -77,17 +77,17 @@ public final class AttackEntityPacketState extends BasicPacketState {
     public void unwind(BasicPacketContext context) {
         final ServerPlayerEntity player = context.getPacketPlayer();
         final CUseEntityPacket useEntityPacket = context.getPacket();
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
+        final net.minecraft.entity.Entity entity = useEntityPacket.getTarget(player.level);
         if (entity == null) {
             // Something happened?
             return;
         }
-        final World spongeWorld = (World) player.world;
+        final World spongeWorld = (World) player.level;
         if (entity instanceof CreatorTrackedBridge) {
             // TODO Minecraft 1.14 - How can attacking an Entity mean you created it??
             ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerEntityBridge) player).bridge$getUser());
         } else {
-            ((Entity) entity).offer(Keys.NOTIFIER, player.getUniqueID());
+            ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
         }
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized

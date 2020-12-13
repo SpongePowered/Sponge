@@ -38,7 +38,9 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(DifficultyCommand.class)
 public abstract class DifficultyCommandMixin {
 
-    @Shadow @Final private static DynamicCommandExceptionType FAILED_EXCEPTION;
+    // @formatter:off
+    @Shadow @Final private static DynamicCommandExceptionType ERROR_ALREADY_DIFFICULT;
+    // @formatter:on
 
     /**
      * @author Zidane
@@ -46,11 +48,11 @@ public abstract class DifficultyCommandMixin {
      */
     @Overwrite
     public static int setDifficulty(CommandSource source, Difficulty difficulty) throws CommandSyntaxException {
-        if (source.getWorld().getDifficulty() == difficulty) {
-            throw DifficultyCommandMixin.FAILED_EXCEPTION.create(difficulty.getTranslationKey());
+        if (source.getLevel().getDifficulty() == difficulty) {
+            throw DifficultyCommandMixin.ERROR_ALREADY_DIFFICULT.create(difficulty.getKey());
         } else {
-            source.getWorld().getWorldInfo().setDifficulty(difficulty);
-            source.sendFeedback(new TranslationTextComponent("commands.difficulty.success", difficulty.getDisplayName()), true);
+            source.getLevel().getWorldInfo().setDifficulty(difficulty);
+            source.sendSuccess(new TranslationTextComponent("commands.difficulty.success", difficulty.getDisplayName()), true);
             return 0;
         }
     }

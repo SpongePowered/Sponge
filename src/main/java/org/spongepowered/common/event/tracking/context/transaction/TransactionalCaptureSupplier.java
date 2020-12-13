@@ -253,7 +253,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     ) {
         final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) serverWorld);
         final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final @Nullable TileEntity tileEntity = ((ServerWorld) serverWorld).getTileEntity(pos);
+        final @Nullable TileEntity tileEntity = ((ServerWorld) serverWorld).getBlockEntity(pos);
         final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
             state,
             pos,
@@ -274,15 +274,15 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 return null;
             }
         }
-        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) entity.world);
+        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) entity.level);
         final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
         final CompoundNBT tag = new CompoundNBT();
-        entity.writeWithoutTypeId(tag);
+        entity.saveWithoutId(tag);
         final @Nullable DamageSource lastAttacker;
         if (entity instanceof LivingEntity) {
-            final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).accessor$getBestCombatEntry();
+            final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).invoker$getMostSignificantFall();
             if (entry != null) {
-                lastAttacker = ((CombatEntryAccessor) entry).accessor$getDamageSrc();
+                lastAttacker = ((CombatEntryAccessor) entry).accessor$source();
             } else {
                 lastAttacker = null;
             }
@@ -319,7 +319,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final BlockState currentState = tileentity.getBlockState();
         final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
             currentState,
-            tileentity.getPos(),
+            tileentity.getBlockPos().immutable(),
             BlockChangeFlags.NONE,
             tileentity,
             worldSupplier,
@@ -333,9 +333,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     private AddTileEntity createTileAdditionTransaction(final TileEntity tileentity,
         final Supplier<ServerWorld> worldSupplier, final Chunk chunk
     ) {
-        final BlockPos pos = tileentity.getPos().toImmutable();
+        final BlockPos pos = tileentity.getBlockPos().immutable();
         final BlockState currentBlock = chunk.getBlockState(pos);
-        final @Nullable TileEntity existingTile = chunk.getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+        final @Nullable TileEntity existingTile = chunk.getBlockEntity(pos, Chunk.CreateEntityType.CHECK);
 
         final SpongeBlockSnapshot added = TrackingUtil.createPooledSnapshot(
             currentBlock,

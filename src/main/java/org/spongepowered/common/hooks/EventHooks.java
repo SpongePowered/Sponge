@@ -39,7 +39,7 @@ public interface EventHooks {
 
     default ChangeEntityWorldEvent.Pre callChangeEntityWorldEventPre(final Entity entity, final ServerWorld toWorld) {
         final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                (org.spongepowered.api.entity.Entity) entity, (org.spongepowered.api.world.server.ServerWorld) entity.getEntityWorld(),
+                (org.spongepowered.api.entity.Entity) entity, (org.spongepowered.api.world.server.ServerWorld) entity.getCommandSenderWorld(),
                 (org.spongepowered.api.world.server.ServerWorld) toWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld);
         SpongeCommon.postEvent(event);
         return event;
@@ -49,7 +49,7 @@ public interface EventHooks {
             final ServerWorld originalDestinationWorld) {
         final ChangeEntityWorldEvent.Post event = SpongeEventFactory.createChangeEntityWorldEventPost(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 (org.spongepowered.api.entity.Entity) entity, (org.spongepowered.api.world.server.ServerWorld) fromWorld,
-                (org.spongepowered.api.world.server.ServerWorld) entity.getEntityWorld(),
+                (org.spongepowered.api.world.server.ServerWorld) entity.getCommandSenderWorld(),
                 (org.spongepowered.api.world.server.ServerWorld) originalDestinationWorld);
         SpongeCommon.postEvent(event);
     }

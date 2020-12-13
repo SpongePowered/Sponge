@@ -32,8 +32,10 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(SpellcastingIllagerEntity.class)
 public interface SpellcastingIllagerEntityAccessor {
 
-    @Accessor("spellTicks") int accessor$getSpellTicks();
-    @Accessor("spellTicks") void accessor$setSpellTicks(int spellTicks);
-    @Invoker("getSpellType") SpellcastingIllagerEntity.SpellType accessor$getSpellType();
+    @Accessor("spellCastingTickCount") int accessor$spellCastingTickCount();
+
+    @Accessor("spellCastingTickCount") void accessor$spellCastingTickCount(final int spellCastingTickCount);
+
+    @Invoker("getCurrentSpell") SpellcastingIllagerEntity.SpellType invoker$getCurrentSpell();
 
 }

@@ -31,7 +31,7 @@ import net.minecraft.dispenser.ProxyBlockSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.DispenserTileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -61,8 +61,8 @@ public class DispenserBlockMixin_Tracker {
     private ItemStack tracker$originalItem = ItemStack.EMPTY;
     private PhaseContext<?> tracker$context = PhaseContext.empty();
 
-    @Inject(method = "dispense", at = @At(value = "HEAD"))
-    private void tracker$createContextOnDispensing(final World worldIn, final BlockPos pos, final CallbackInfo ci) {
+    @Inject(method = "dispenseFrom", at = @At(value = "HEAD"))
+    private void tracker$createContextOnDispensing(final ServerWorld worldIn, final BlockPos pos, final CallbackInfo ci) {
         final net.minecraft.block.BlockState state = worldIn.getBlockState(pos);
         final SpongeBlockSnapshot spongeBlockSnapshot = ((TrackedWorldBridge) worldIn).bridge$createSnapshot(state, pos, BlockChangeFlags.ALL);
         final ChunkBridge mixinChunk = (ChunkBridge) worldIn.getChunkAt(pos);
@@ -74,13 +74,13 @@ public class DispenserBlockMixin_Tracker {
     }
 
 
-    @Inject(method = "dispense", at = @At(value = "RETURN"))
-    private void tracker$closeContextOnDispensing(final World worldIn, final BlockPos pos, final CallbackInfo ci) {
+    @Inject(method = "dispenseFrom", at = @At(value = "RETURN"))
+    private void tracker$closeContextOnDispensing(final ServerWorld worldIn, final BlockPos pos, final CallbackInfo ci) {
         this.tracker$context.close();
         this.tracker$context = PhaseContext.empty();
     }
 
-    @Inject(method = "dispense",
+    @Inject(method = "dispenseFrom",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/dispenser/IDispenseItemBehavior;dispense(Lnet/minecraft/dispenser/IBlockSource;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;"
@@ -92,14 +92,14 @@ public class DispenserBlockMixin_Tracker {
             ),
             locals = LocalCapture.CAPTURE_FAILSOFT
     )
-    private void tracker$storeOriginalItem(final World worldIn, final BlockPos pos, final CallbackInfo ci, final ProxyBlockSource source, final DispenserTileEntity dispenser, final int slotIndex, final ItemStack dispensedItem, final IDispenseItemBehavior behavior) {
+    private void tracker$storeOriginalItem(final ServerWorld worldIn, final BlockPos pos, final CallbackInfo ci, final ProxyBlockSource source, final DispenserTileEntity dispenser, final int slotIndex, final ItemStack dispensedItem, final IDispenseItemBehavior behavior) {
         this.tracker$originalItem = ItemStackUtil.cloneDefensiveNative(dispensedItem);
     }
 
 
-    @Redirect(method = "dispense",
+    @Redirect(method = "dispenseFrom",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/tileentity/DispenserTileEntity;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
+                    target = "Lnet/minecraft/tileentity/DispenserTileEntity;setItem(ILnet/minecraft/item/ItemStack;)V"))
     private void tracker$setInventoryContentsCallEvent(final DispenserTileEntity dispenserTileEntity, final int index, final ItemStack stack) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         // If we captured nothing, simply set the slot contents and return
@@ -117,11 +117,11 @@ public class DispenserBlockMixin_Tracker {
             final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(), ImmutableList.of(snapshot), original);
             SpongeCommon.postEvent(dropEvent);
             if (dropEvent.isCancelled()) {
-                dispenserTileEntity.setInventorySlotContents(index, this.tracker$originalItem);
+                dispenserTileEntity.setItem(index, this.tracker$originalItem);
                 return;
             }
 
-            dispenserTileEntity.setInventorySlotContents(index, stack);
+            dispenserTileEntity.setItem(index, stack);
         } finally {
             this.tracker$originalItem = ItemStack.EMPTY;
         }

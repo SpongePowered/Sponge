@@ -69,7 +69,7 @@ public class FilteringSlotLens extends DelegatingSlotLens {
             return (fabric, item) -> {
                 InventoryBridge inventory = fabric.fabric$get(slot);
                 if (inventory instanceof IInventory) {
-                    return ((IInventory) inventory).isItemValidForSlot(slot, ItemStackUtil.toNative(item));
+                    return ((IInventory) inventory).canPlaceItem(slot, ItemStackUtil.toNative(item));
                 }
                 return true;
             };

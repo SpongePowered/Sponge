@@ -45,13 +45,15 @@ import java.net.InetSocketAddress;
 @Mixin(ServerLoginNetHandler.class)
 public abstract class ServerLoginNetHandlerMixin_API implements ServerSideConnection {
 
-    @Shadow @Final public NetworkManager networkManager;
-    @Shadow private com.mojang.authlib.GameProfile loginGameProfile;
+    // @formatter:off
+    @Shadow @Final public NetworkManager connection;
+    @Shadow private com.mojang.authlib.GameProfile gameProfile;
     @Shadow public abstract void shadow$disconnect(ITextComponent reason);
+    // @formatter:on
 
     @Override
     public GameProfile getProfile() {
-        return SpongeGameProfile.of(this.loginGameProfile);
+        return SpongeGameProfile.of(this.gameProfile);
     }
 
     @Override
@@ -67,11 +69,11 @@ public abstract class ServerLoginNetHandlerMixin_API implements ServerSideConnec
 
     @Override
     public InetSocketAddress getAddress() {
-        return ((NetworkManagerBridge) this.networkManager).bridge$getAddress();
+        return ((NetworkManagerBridge) this.connection).bridge$getAddress();
     }
 
     @Override
     public InetSocketAddress getVirtualHost() {
-        return ((NetworkManagerBridge) this.networkManager).bridge$getVirtualHost();
+        return ((NetworkManagerBridge) this.connection).bridge$getVirtualHost();
     }
 }

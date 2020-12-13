@@ -41,7 +41,7 @@ public final class SnowData {
                 .asImmutable(BlockState.class)
                     .create(Keys.LAYER)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.LAYER, SnowBlock.LAYERS))
-                        .get(h -> h.get(SnowBlock.LAYERS))
+                        .get(h -> h.getValue(SnowBlock.LAYERS))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, SnowBlock.LAYERS))
                         .supports(h -> h.getBlock() instanceof SnowBlock);
     }

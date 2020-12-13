@@ -57,7 +57,7 @@ public final class SpongeRaidWave implements RaidWave {
          * If the wave is not a final wave, the bonus waves occur after the final wave.
          * If our wave was before the final wave, the amount of normal raids (which is set by the difficulty) would be greater than our wave's id.
          */
-        if (this.isFinal() || this.waveId < ((RaidAccessor) this.raid).accessor$getNumGroups()) {
+        if (this.isFinal() || this.waveId < ((RaidAccessor) this.raid).accessor$numGroups()) {
             return false;
         }
 
@@ -68,7 +68,7 @@ public final class SpongeRaidWave implements RaidWave {
     public boolean isFinal() {
         // The final wave is the last wave before any other extra waves caused by a level of Bad Omen which is higher than 1.
         // We can determine if our wave is the final wave if the amount of normal waves (discussed up in the detail comments for isBonus) is equal to our wave's id.
-        return this.waveId == ((RaidAccessor) this.raid).accessor$getNumGroups();
+        return this.waveId == ((RaidAccessor) this.raid).accessor$numGroups();
     }
 
     @Override

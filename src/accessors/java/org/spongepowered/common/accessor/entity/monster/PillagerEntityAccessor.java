@@ -28,11 +28,13 @@ import net.minecraft.entity.monster.PillagerEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(PillagerEntity.class)
 public interface PillagerEntityAccessor {
 
-    @Accessor("DATA_CHARGING_STATE") static DataParameter<Boolean> accessor$getDataChargingState() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("IS_CHARGING_CROSSBOW")
+    static DataParameter<Boolean> accessor$getIS_CHARGING_CROSSBOW() {
+        throw new UntransformedAccessorError();
     }
 }

@@ -63,7 +63,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<R
     @Override
     public ResultStep addIngredients(ItemType... ingredients) {
         for (ItemType ingredient : ingredients) {
-            this.ingredients.add(Ingredient.fromItems(() -> ((Item) ingredient)));
+            this.ingredients.add(Ingredient.of(() -> ((Item) ingredient)));
         }
         return this;
     }
@@ -71,7 +71,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<R
     @Override
     public ResultStep addIngredients(Supplier<ItemType>... ingredients) {
         for (Supplier<ItemType> ingredient : ingredients) {
-            this.ingredients.add(Ingredient.fromItems(() -> ((Item) ingredient.get())));
+            this.ingredients.add(Ingredient.of(() -> ((Item) ingredient.get())));
         }
         return this;
     }
@@ -135,7 +135,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<R
 
         final ItemStack resultStack = ItemStackUtil.toNative(this.result);
         final IRecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction,
-                this.ingredients, IRecipeSerializer.CRAFTING_SHAPELESS, SpongeShapelessCraftingRecipeSerializer.SPONGE_CRAFTING_SHAPELESS);
+                this.ingredients, IRecipeSerializer.SHAPELESS_RECIPE, SpongeShapelessCraftingRecipeSerializer.SPONGE_CRAFTING_SHAPELESS);
         return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredients, resultStack, this.resultFunction, this.remainingItemsFunction);
     }
 

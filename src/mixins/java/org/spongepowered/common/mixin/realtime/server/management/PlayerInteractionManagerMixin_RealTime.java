@@ -33,40 +33,40 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
 @Mixin(PlayerInteractionManager.class)
 public abstract class PlayerInteractionManagerMixin_RealTime {
 
-    @Shadow public ServerWorld world;
-    @Shadow private int ticks;
+    @Shadow public ServerWorld level;
+    @Shadow private int gameTicks;
     @Shadow public ServerPlayerEntity player;
 
     @Redirect(
         method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/server/management/PlayerInteractionManager;ticks:I",
+            target = "Lnet/minecraft/server/management/PlayerInteractionManager;gameTicks:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
             from = @At("HEAD"),
             to = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/server/management/PlayerInteractionManager;receivedFinishDiggingPacket:Z",
+                target = "Lnet/minecraft/server/management/PlayerInteractionManager;hasDelayedDestroy:Z",
                 opcode = Opcodes.GETFIELD
             )
         )
     )
     private void realTimeImpl$adjustForRealTimeDiggingTime(final PlayerInteractionManager self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.world).bridge$isFake()) {
-            this.ticks = modifier;
+        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((WorldBridge) this.level).bridge$isFake()) {
+            this.gameTicks = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.world.getServer()).realTimeBridge$getRealTimeTicks();
-        this.ticks += ticks;
+        final int ticks = (int) ((RealTimeTrackingBridge) this.level.getServer()).realTimeBridge$getRealTimeTicks();
+        this.gameTicks += ticks;
     }
 
 }

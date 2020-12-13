@@ -43,7 +43,7 @@ public final class WoolItemStackData {
                 .asImmutable(ItemStack.class)
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_WOOL.get(((BlockItem) h.getItem()).getBlock()))
-                        .supports(h -> h.getItem() instanceof BlockItem && SheepEntityAccessor.accessor$getWoolByColor().containsValue(((BlockItem) h.getItem()).getBlock()));
+                        .supports(h -> h.getItem() instanceof BlockItem && SheepEntityAccessor.accessor$ITEM_BY_DYE().containsValue(((BlockItem) h.getItem()).getBlock()));
     }
     // @formatter:on
 }

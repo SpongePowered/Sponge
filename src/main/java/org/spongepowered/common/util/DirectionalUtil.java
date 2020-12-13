@@ -76,7 +76,7 @@ public final class DirectionalUtil {
         final Set<Direction> directions = new HashSet<>();
 
         for (final Map.Entry<Direction, BooleanProperty> entry : sides.entrySet()) {
-            if (holder.get(entry.getValue())) {
+            if (holder.getValue(entry.getValue())) {
                 directions.add(entry.getKey());
             }
         }
@@ -123,7 +123,7 @@ public final class DirectionalUtil {
 
     public static BlockState set(BlockState holder, final Set<Direction> value, final Map<Direction, BooleanProperty> sides) {
         for (final Map.Entry<Direction, BooleanProperty> entry : sides.entrySet()) {
-            holder = holder.with(entry.getValue(), value.contains(entry.getKey()));
+            holder = holder.setValue(entry.getValue(), value.contains(entry.getKey()));
         }
         return holder;
     }

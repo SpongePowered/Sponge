@@ -107,6 +107,7 @@ public final class Constants {
     public static final String DEDICATED_SERVER = "net.minecraft.server.dedicated.DedicatedServer";
     public static final String MINECRAFT_SERVER = "net.minecraft.server.MinecraftServer";
     public static final String INTEGRATED_SERVER = "net.minecraft.server.integrated.IntegratedServer";
+    public static final String MINECRAFT = "minecraft";
 
     private Constants() {
     }
@@ -229,7 +230,7 @@ public final class Constants {
 
             public static final class DataRegistration {
                 public static final String INVENTORY = "inventory";
-                public static final String TILEENTITY = "tileentity";
+                public static final String BLOCKENTITY = "blockentity";
                 public static final String LOCATION = "location";
                 public static final String BLOCKSTATE = "blockstate";
                 public static final String ENTITY = "entity";
@@ -464,13 +465,6 @@ public final class Constants {
 
     public static final class Item {
 
-        public static final int HIDE_MISCELLANEOUS_FLAG = 32;
-
-        public static final int HIDE_CAN_PLACE_FLAG = 16;
-        public static final int HIDE_CAN_DESTROY_FLAG = 8;
-        public static final int HIDE_UNBREAKABLE_FLAG = 4;
-        public static final int HIDE_ATTRIBUTES_FLAG = 2;
-        public static final int HIDE_ENCHANTMENTS_FLAG = 1;
         // These are the various tag compound id's for getting to various places
         public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
         public static final String BLOCK_ENTITY_ID = "id";
@@ -591,7 +585,7 @@ public final class Constants {
             // Structure block entity
             public static final String DEFAULT_STRUCTURE_AUTHOR = ""; // intentionally empty, as in vanilla
             public static final boolean DEFAULT_STRUCTURE_IGNORE_ENTITIES = true;
-            public static final Supplier<StructureMode> DEFAULT_STRUCTURE_MODE = StructureModes.DATA;
+            public static final Supplier<StructureMode> DEFAULT_STRUCTURE_MODE = () -> StructureModes.DATA.get();
             public static final Vector3i DEFAULT_STRUCTURE_POSITION = Vector3i.ONE;
             public static final boolean DEFAULT_STRUCTURE_POWERED = false;
             public static final boolean DEFAULT_STRUCTURE_SHOW_AIR = false;
@@ -660,12 +654,12 @@ public final class Constants {
 
     public static final class Catalog {
 
-        public static final Supplier<DyeColor> DEFAULT_SHULKER_COLOR = DyeColors.PURPLE;
-        public static final Supplier<ComparatorMode> DEFAULT_COMPARATOR_MODE = ComparatorModes.COMPARE;
-        public static final Supplier<CatType> DEFAULT_CAT_TYPE = CatTypes.WHITE;
-        public static final Supplier<GameMode> DEFAULT_GAMEMODE = GameModes.NOT_SET;
-        public static final Supplier<ArtType> DEFAULT_ART = ArtTypes.KEBAB;
-        public static final Supplier<HandPreference> DEFAULT_HAND = HandPreferences.RIGHT;
+        public static final Supplier<DyeColor> DEFAULT_SHULKER_COLOR = DyeColors.PURPLE::get;
+        public static final Supplier<ComparatorMode> DEFAULT_COMPARATOR_MODE = ComparatorModes.COMPARE::get;
+        public static final Supplier<CatType> DEFAULT_CAT_TYPE = CatTypes.WHITE::get;
+        public static final Supplier<GameMode> DEFAULT_GAMEMODE = GameModes.NOT_SET::get;
+        public static final Supplier<ArtType> DEFAULT_ART = ArtTypes.KEBAB::get;
+        public static final Supplier<HandPreference> DEFAULT_HAND = HandPreferences.RIGHT::get;
 
         private Catalog() {
         }
@@ -756,8 +750,8 @@ public final class Constants {
 
         public static final class Horse {
 
-            public static final Supplier<HorseStyle> DEFAULT_STYLE = HorseStyles.NONE;
-            public static final Supplier<HorseColor> DERAULT_TYPE = HorseColors.WHITE;
+            public static final Supplier<HorseStyle> DEFAULT_STYLE = HorseStyles.NONE::get;
+            public static final Supplier<HorseColor> DERAULT_TYPE = HorseColors.WHITE::get;
 
             private Horse() {
             }
@@ -781,7 +775,7 @@ public final class Constants {
 
         public static final class Llama {
 
-            public static final Supplier<LlamaType> DEFAULT_TYPE = LlamaTypes.WHITE;
+            public static final Supplier<LlamaType> DEFAULT_TYPE = LlamaTypes.WHITE::get;
         }
 
         public static final class Minecart {
@@ -800,7 +794,7 @@ public final class Constants {
 
         public static final class Cat {
 
-            public static final Supplier<CatType> DEFAULT_TYPE = CatTypes.WHITE;
+            public static final Supplier<CatType> DEFAULT_TYPE = CatTypes.WHITE::get;
         }
 
         public static final class Panda {
@@ -810,7 +804,7 @@ public final class Constants {
 
         public static final class Parrot {
 
-            public static final Supplier<ParrotType> DEFAULT_TYPE = ParrotTypes.RED_AND_BLUE;
+            public static final Supplier<ParrotType> DEFAULT_TYPE = ParrotTypes.RED_AND_BLUE::get;
         }
 
         public static final class Player {
@@ -844,7 +838,7 @@ public final class Constants {
 
         public static final class Rabbit {
 
-            public static final Supplier<RabbitType> DEFAULT_TYPE = RabbitTypes.WHITE;
+            public static final Supplier<RabbitType> DEFAULT_TYPE = RabbitTypes.WHITE::get;
         }
 
         public static final class Ravager {
@@ -869,8 +863,8 @@ public final class Constants {
 
         /* TODO - Re-evaluate how the flags are used, The current flow of a World#setBlockState with an example of 3
             goes as follows:
-            (3 & 2 != 0) && (!world.isRemote || 3 & 4 == 0) && (world.isRemote || chunk.getLocationType().isTicking) ? world.notifyBlockUpdate() (send update to client)
-            (!world.isRemote && (3 & 1 != 0)) ? world.notifyNeighbors()
+            (3 & 2 != 0) && (!world.isClientSide || 3 & 4 == 0) && (world.isClientSide || chunk.getLocationType().isTicking) ? world.notifyBlockUpdate() (send update to client)
+            (!world.isClientSide && (3 & 1 != 0)) ? world.notifyNeighbors()
             3 & 16 == 0 ? {
               newFlag = 3 & -2 = 2;
               originalState.updateDiagonal(world, pos, 2);
@@ -992,14 +986,14 @@ public final class Constants {
                 return Collections.emptyList();
             }
             final List<Enchantment> enchantments = Lists.newArrayList();
-            final ListNBT list = itemStack.getEnchantmentTagList();
+            final ListNBT list = itemStack.getEnchantmentTags();
             for (int i = 0; i < list.size(); i++) {
                 final CompoundNBT compound = list.getCompound(i);
                 final short enchantmentId = compound.getShort(Item.ITEM_ENCHANTMENT_ID);
                 final short level = compound.getShort(Item.ITEM_ENCHANTMENT_LEVEL);
 
                 final EnchantmentType enchantmentType =
-                        (EnchantmentType) Registry.ENCHANTMENT.getByValue(enchantmentId);
+                        (EnchantmentType) Registry.ENCHANTMENT.byId(enchantmentId);
                 if (enchantmentType == null) {
                     continue;
                 }
@@ -1218,8 +1212,8 @@ public final class Constants {
 
         public static final ArgumentType<?> STANDARD_STRING_ARGUMENT_TYPE = StringArgumentType.string();
         public static final ArgumentType<?> GREEDY_STRING_ARGUMENT_TYPE = StringArgumentType.greedyString();
-        public static final ArgumentType<?> NBT_ARGUMENT_TYPE = NBTCompoundTagArgument.nbt();
-        public static final ResourceLocationArgument RESOURCE_LOCATION_TYPE = ResourceLocationArgument.resourceLocation();
+        public static final ArgumentType<?> NBT_ARGUMENT_TYPE = NBTCompoundTagArgument.compoundTag();
+        public static final ResourceLocationArgument RESOURCE_LOCATION_TYPE = ResourceLocationArgument.id();
         public static final String COMMAND_BLOCK_COMMAND = "";
         public static final String SELECTOR_COMMAND = "@";
         public static final String SPONGE_HELP_COMMAND = "sponge:help";

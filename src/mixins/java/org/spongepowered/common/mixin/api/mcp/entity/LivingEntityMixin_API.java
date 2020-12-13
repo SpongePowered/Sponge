@@ -29,8 +29,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.IAttribute;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -49,18 +48,20 @@ import java.util.Set;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_API extends EntityMixin_API implements Living {
 
+    // @formatter:off
     @Shadow public abstract float shadow$getHealth();
-    @Shadow public abstract IAttributeInstance shadow$getAttribute(IAttribute attribute);
+    @Shadow public abstract ModifiableAttributeInstance shadow$getAttribute(net.minecraft.entity.ai.attributes.Attribute attribute);
+    // @formatter:on
 
     @Override
     public Component getTeamRepresentation() {
-        return Component.text(this.shadow$getUniqueID().toString());
+        return Component.text(this.shadow$getUUID().toString());
     }
 
     @Override
     public Optional<Attribute> getAttribute(final AttributeType type) {
         Preconditions.checkNotNull(type, "AttributeType cannot be null");
-        return Optional.ofNullable((Attribute) this.shadow$getAttribute((IAttribute) type));
+        return Optional.ofNullable((Attribute) this.shadow$getAttribute((net.minecraft.entity.ai.attributes.Attribute) type));
     }
 
     @Override

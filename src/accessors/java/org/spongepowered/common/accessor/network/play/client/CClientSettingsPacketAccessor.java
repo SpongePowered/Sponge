@@ -31,5 +31,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CClientSettingsPacket.class)
 public interface CClientSettingsPacketAccessor {
 
-    @Accessor("view") int accessor$getView();
+    @Accessor("viewDistance") int accessor$viewDistance();
+    @Accessor("language") String accessor$language();
+
 }

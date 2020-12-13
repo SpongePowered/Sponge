@@ -34,23 +34,26 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
 import java.util.Map;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(Scoreboard.class)
 public interface ScoreboardAccessor {
 
-    @Accessor("entitiesScoreObjectives") Map<String, Map<ScoreObjective, Score>>  accessor$getEntitiesScoreObjectivesMap();
+    @Accessor("objectivesByName") Map<String, ScoreObjective> accessor$objectivesByName();
 
-    @Accessor("scoreObjectives") Map<String, ScoreObjective> accessor$getScoreObjectives();
+    @Accessor("objectivesByCriteria") Map<ScoreCriteria, List<ScoreObjective>> accessor$objectivesByCriteria();
 
-    @Accessor("scoreObjectiveCriterias") Map<ScoreCriteria, List<ScoreObjective>> accessor$getScoreObjectiveCriterias();
+    @Accessor("playerScores") Map<String, Map<ScoreObjective, Score>> accessor$playerScores();
 
-    @Accessor("entitiesScoreObjectives") Map<String, Map<ScoreObjective, Score>> accessor$getEntitiesScoreObjectives();
+    @Accessor("displayObjectives") ScoreObjective[] accessor$displayObjectives();
 
-    @Accessor("objectiveDisplaySlots") ScoreObjective[] accessor$getObjectiveDisplaySlots();
+    @Accessor("teamsByName") Map<String, ScorePlayerTeam> accessor$teamsByName();
 
-    @Accessor("teams") Map<String, ScorePlayerTeam> accessor$getTeams();
+    @Accessor("teamsByPlayer") Map<String, ScorePlayerTeam> accessor$teamsByPlayer();
 
-    @Accessor("teamMemberships") Map<String, ScorePlayerTeam> accessor$getTeamMemberships();
+    @Accessor("displaySlotNames")
+    static String[] accessor$displaySlotNames() {
+        throw new UntransformedAccessorError();
+    }
 
-    @Accessor("displaySlots") String[] accessor$getDisplaySlots();
 }

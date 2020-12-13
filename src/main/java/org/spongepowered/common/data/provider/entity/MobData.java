@@ -44,28 +44,28 @@ public final class MobData {
         registrator
                 .asMutable(MobEntity.class)
                     .create(Keys.DOMINANT_HAND)
-                        .get(h -> (HandPreference) (Object) h.getPrimaryHand())
+                        .get(h -> (HandPreference) (Object) h.getMainArm())
                         .set((h, v) -> h.setLeftHanded(v.equals(HandPreferences.LEFT.get())))
                     .create(Keys.LEASH_HOLDER)
                         .get(h -> ((Entity) h.getLeashHolder()))
-                        .set((h, v) -> h.setLeashHolder(h, true))
+                        .set((h, v) -> h.setLeashedTo(h, true))
                     .create(Keys.TARGET_ENTITY)
-                        .get(h -> (Living) h.getAttackTarget())
+                        .get(h -> (Living) h.getTarget())
                         .setAnd((h, v) -> {
                             if (!(v instanceof Living)) {
                                 return false;
                             }
-                            h.setAttackTarget((LivingEntity) v);
+                            h.setTarget((LivingEntity) v);
                             return true;
                         })
-                        .delete(h -> h.setAttackTarget(null))
+                        .delete(h -> h.setTarget(null))
                 .asMutable(MobEntityAccessor.class)
                     .create(Keys.IS_AI_ENABLED)
-                        .get(h -> !h.accessor$isAIDisabled())
-                        .set((h, v) -> h.accessor$setNoAI(!v))
+                        .get(h -> !h.invoker$isNoAi())
+                        .set((h, v) -> h.invoker$setNoAi(!v))
                     .create(Keys.IS_PERSISTENT)
-                        .get(h -> ((MobEntity) h).isNoDespawnRequired())
-                        .set(MobEntityAccessor::accessor$setPersistingRequired);
+                        .get(h -> ((MobEntity) h).isPersistenceRequired())
+                        .set(MobEntityAccessor::accessor$persistenceRequired);
     }
     // @formatter:on
 }

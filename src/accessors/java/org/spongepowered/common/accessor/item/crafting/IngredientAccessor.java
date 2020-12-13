@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.item.crafting;
 
+import com.google.gson.JsonObject;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,12 +32,21 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.stream.Stream;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(Ingredient.class)
 public interface IngredientAccessor {
 
-    @Accessor("matchingStacks") ItemStack[] accessor$getMatchingStacks();
-    @Invoker("fromItemListStream") static Ingredient accessor$fromItemListStream(Stream<? extends Ingredient.IItemList> stream) {
-        throw new IllegalStateException("Untransformed Accessor");
+    @Accessor("itemStacks") ItemStack[] accessor$itemStacks();
+
+    @Invoker("fromValues")
+    static Ingredient invoker$fromValues(final Stream<? extends Ingredient.IItemList> stream) {
+        throw new UntransformedInvokerError();
     }
+
+    @Invoker("valueFromJson")
+    static Ingredient.IItemList invoker$valueFromJson(final JsonObject json) {
+        throw new UntransformedInvokerError();
+    }
+
 }

@@ -50,12 +50,12 @@ public final class NotifyClientEffect implements ProcessingSideEffect {
         final Chunk chunk = pipeline.getAffectedChunk();
         final ServerWorld world = pipeline.getServerWorld();
 
-        // Vanilla flags & 2 to check if clients are notified. isRemote is redundant since it's guaranteed a server world.
+        // Vanilla flags & 2 to check if clients are notified. isClientSide is redundant since it's guaranteed a server world.
         // And the last bit is the equivalent to basically checking if the chunk is not a border and populated.
-        // if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (this.isRemote || chunk.getLocationType() != null && chunk.getLocationType().isAtLeast(ChunkHolder.LocationType.TICKING))) {
-        if (flag.notifyClients() && (chunk.getLocationType().isAtLeast(ChunkHolder.LocationType.TICKING))) {
+        // if ((flags & 2) != 0 && (!this.isClientSide || (flags & 4) == 0) && (this.isClientSide || chunk.getLocationType() != null && chunk.getLocationType().isAtLeast(ChunkHolder.LocationType.TICKING))) {
+        if (flag.notifyClients() && (chunk.getFullStatus().isOrAfter(ChunkHolder.LocationType.TICKING))) {
             // this.notifyBlockUpdate(pos, blockstate, newWorldState, flags);
-            world.notifyBlockUpdate(oldState.pos, oldState.state, newState, flag.getRawFlag());
+            world.sendBlockUpdated(oldState.pos, oldState.state, newState, flag.getRawFlag());
         }
         return EffectResult.NULL_PASS;
     }

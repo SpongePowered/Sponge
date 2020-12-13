@@ -52,7 +52,7 @@ public final class AddTileEntityToLoadedListInWorldEffect implements ProcessingS
         if (tileEntity == null) {
             return EffectResult.NULL_RETURN;
         }
-        serverWorld.loadedTileEntityList.add(tileEntity);
+        serverWorld.blockEntityList.add(tileEntity);
         return new EffectResult(oldState.state, false);
     }
 }

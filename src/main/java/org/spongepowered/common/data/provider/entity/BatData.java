@@ -38,8 +38,8 @@ public final class BatData {
         registrator
                 .asMutable(BatEntity.class)
                     .create(Keys.IS_SLEEPING)
-                        .get(BatEntity::getIsBatHanging)
-                        .set(BatEntity::setIsBatHanging);
+                        .get(BatEntity::isResting)
+                        .set(BatEntity::setResting);
     }
     // @formatter:on
 }

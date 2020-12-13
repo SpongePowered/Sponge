@@ -39,26 +39,26 @@ public final class AbstractFurnaceData {
         registrator
                 .asMutable(AbstractFurnaceTileEntityAccessor.class)
                     .create(Keys.FUEL)
-                        .get(AbstractFurnaceTileEntityAccessor::accessor$getBurnTime)
+                        .get(AbstractFurnaceTileEntityAccessor::accessor$litTime)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.accessor$setBurnTime(v);
+                            h.accessor$litTime(v);
                             return true;
                         })
                     .create(Keys.MAX_BURN_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getRecipesUsed()))
-                        .set((h, v) -> h.accessor$setRecipesUsed((int) v.getTicks()))
+                        .get(x -> new SpongeTicks(x.accessor$litDuration()))
+                        .set((h, v) -> h.accessor$litDuration((int) v.getTicks()))
                     .create(Keys.MAX_COOK_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getCookTimeTotal()))
-                        .set((h, v) -> h.accessor$setCookTimeTotal((int) v.getTicks()))
+                        .get(x -> new SpongeTicks(x.accessor$cookingTotalTime()))
+                        .set((h, v) -> h.accessor$cookingTotalTime((int) v.getTicks()))
                     .create(Keys.PASSED_COOK_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getCookTime()))
+                        .get(x -> new SpongeTicks(x.accessor$cookingProgress()))
                         .set((h, v) -> {
                             final int ticks = (int) v.getTicks();
-                            if (ticks < h.accessor$getCookTimeTotal()) {
-                                h.accessor$setCookTime(ticks);
+                            if (ticks < h.accessor$cookingTotalTime()) {
+                                h.accessor$cookingProgress(ticks);
                             }
                         });
     }

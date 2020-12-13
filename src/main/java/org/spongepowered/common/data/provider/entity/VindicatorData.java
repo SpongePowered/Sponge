@@ -38,8 +38,8 @@ public final class VindicatorData {
         registrator
                 .asMutable(VindicatorEntityAccessor.class)
                     .create(Keys.IS_JOHNNY)
-                        .get(VindicatorEntityAccessor::accessor$getIsJohnny)
-                        .set(VindicatorEntityAccessor::accessor$setIsJohnny);
+                        .get(VindicatorEntityAccessor::accessor$isJohnny)
+                        .set(VindicatorEntityAccessor::accessor$isJohnny);
     }
     // @formatter:on
 }

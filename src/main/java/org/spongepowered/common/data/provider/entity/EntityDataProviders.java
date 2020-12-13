@@ -53,7 +53,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         BoatData.register(this.registrator);
         CatData.register(this.registrator);
         ChickenData.register(this.registrator);
-        MinecartCommandBlockData.register(this.registrator);
+        CommandBlockMinecartData.register(this.registrator);
         CreeperData.register(this.registrator);
         DamagingProjectileData.register(this.registrator);
         DolphinData.register(this.registrator);
@@ -99,6 +99,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         PlayerData.register(this.registrator);
         PolarBearData.register(this.registrator);
         PotionData.register(this.registrator);
+        ProjectileData.register(this.registrator);
         PufferfishData.register(this.registrator);
         RabbitData.register(this.registrator);
         RavagerData.register(this.registrator);

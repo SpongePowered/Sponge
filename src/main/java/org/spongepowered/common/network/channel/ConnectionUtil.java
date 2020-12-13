@@ -42,12 +42,12 @@ public final class ConnectionUtil {
     }
 
     public static Set<ResourceKey> getRegisteredChannels(final EngineConnection connection) {
-        final NetworkManager networkManager = ((NetworkManagerHolderBridge) connection).bridge$getNetworkManager();
+        final NetworkManager networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
         return ((NetworkManagerBridge) networkManager).bridge$getRegisteredChannels();
     }
 
     public static TransactionStore getTransactionStore(final EngineConnection connection) {
-        final NetworkManager networkManager = ((NetworkManagerHolderBridge) connection).bridge$getNetworkManager();
+        final NetworkManager networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
         return ((NetworkManagerBridge) networkManager).bridge$getTransactionStore();
     }
 

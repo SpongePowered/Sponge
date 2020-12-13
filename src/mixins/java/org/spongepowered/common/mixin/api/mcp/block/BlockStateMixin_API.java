@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.fluid.IFluidState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -38,43 +35,20 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.mirror.Mirror;
-import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.block.BlockStateSerializerDeserializer;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.mixin.api.mcp.state.StateHolderMixin_API;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Objects;
 import java.util.Optional;
 
 @Mixin(net.minecraft.block.BlockState.class)
-public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockState, net.minecraft.block.BlockState> implements BlockState {
+public abstract class BlockStateMixin_API extends AbstractBlockStateMixin_API {
 
-    //@formatting:off
-    @Shadow public abstract Block shadow$getBlock();
-    @Shadow public abstract IFluidState shadow$getFluidState();
-    @Shadow public abstract net.minecraft.block.BlockState shadow$rotate(net.minecraft.util.Rotation rotation);
-    @Shadow public abstract net.minecraft.block.BlockState shadow$mirror(net.minecraft.util.Mirror rotation);
-    //@formatting:on
-
-    private String impl$serializedState;
-
-    @Override
-    public BlockType getType() {
-        return (BlockType) this.shadow$getBlock();
-    }
-
-    @Override
-    public FluidState getFluidState() {
-        return (FluidState) this.shadow$getFluidState();
-    }
+    private String api$serializedState;
 
     @Override
     public int getContentVersion() {
@@ -94,12 +68,12 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
                 .blockState((net.minecraft.block.BlockState) (Object) this)
                 .position(location.getBlockPosition())
                 .world((ServerWorld) location.getWorld());
-        if (this.shadow$getBlock().hasTileEntity() && location.getBlock().getType().equals(this.shadow$getBlock())) {
+        if (this.shadow$getBlock().isEntityBlock() && location.getBlock().getType().equals(this.shadow$getBlock())) {
             final BlockEntity tileEntity = location.getBlockEntity()
                     .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
             builder.add(((CustomDataHolderBridge) tileEntity).bridge$getManipulator());
             final CompoundNBT compound = new CompoundNBT();
-            ((net.minecraft.tileentity.TileEntity) tileEntity).write(compound);
+            ((net.minecraft.tileentity.TileEntity) tileEntity).save(compound);
             builder.addUnsafeCompound(compound);
         }
         return builder.build();
@@ -126,19 +100,10 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
     }
 
     public String impl$getSerializedString() {
-        if (this.impl$serializedState == null) {
-            this.impl$serializedState = BlockStateSerializerDeserializer.serialize(this);
+        if (this.api$serializedState == null) {
+            this.api$serializedState = BlockStateSerializerDeserializer.serialize(this);
         }
-        return this.impl$serializedState;
+        return this.api$serializedState;
     }
 
-    @Override
-    public BlockState rotate(final Rotation rotation) {
-        return (BlockState) this.shadow$rotate((net.minecraft.util.Rotation) (Object) Objects.requireNonNull(rotation, "Rotation cannot be null!"));
-    }
-
-    @Override
-    public BlockState mirror(final Mirror mirror) {
-        return (BlockState) this.shadow$mirror((net.minecraft.util.Mirror) (Object) Objects.requireNonNull(mirror, "Mirror cannot be null!"));
-    }
 }

@@ -31,7 +31,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(VindicatorEntity.class)
 public interface VindicatorEntityAccessor {
 
-    @Accessor("johnny") boolean accessor$getIsJohnny();
+    @Accessor("isJohnny") boolean accessor$isJohnny();
 
-    @Accessor("johnny") void accessor$setIsJohnny(boolean johnny);
+    @Accessor("isJohnny") void accessor$isJohnny(final boolean isJohnny);
+
 }

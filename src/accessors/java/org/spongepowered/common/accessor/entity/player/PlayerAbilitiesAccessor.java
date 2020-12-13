@@ -31,7 +31,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(PlayerAbilities.class)
 public interface PlayerAbilitiesAccessor {
 
-    @Accessor("flySpeed") void accessor$setFlySpeed(float flySpeed);
+    @Accessor("flyingSpeed") void accessor$flyingSpeed(final float flyingSpeed);
 
-    @Accessor("walkSpeed") void accessor$setWalkSpeed(float walkSpeed);
+    @Accessor("walkingSpeed") void accessor$walkingSpeed(final float walkingSpeed);
+
 }

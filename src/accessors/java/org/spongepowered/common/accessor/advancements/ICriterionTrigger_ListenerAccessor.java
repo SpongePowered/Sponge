@@ -32,8 +32,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ICriterionTrigger.Listener.class)
 public interface ICriterionTrigger_ListenerAccessor {
 
-    @Accessor("advancement") Advancement accessor$getAdvancement();
+    @Accessor("advancement") Advancement accessor$advancement();
 
-    @Accessor("criterionName") String accessor$getCriterionName();
+    @Accessor("criterion") String accessor$criterion();
 
 }

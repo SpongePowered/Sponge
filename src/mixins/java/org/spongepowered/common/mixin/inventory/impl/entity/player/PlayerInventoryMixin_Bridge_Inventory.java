@@ -45,12 +45,12 @@ import java.util.List;
 @Mixin(PlayerInventory.class)
 public abstract class PlayerInventoryMixin_Bridge_Inventory implements PlayerInventoryBridge, InventoryAdapter {
 
-    @Shadow public int currentItem;
+    @Shadow public int selected;
     @Shadow @Final public PlayerEntity player;
-    @Shadow @Final public NonNullList<ItemStack> mainInventory;
-    @Shadow @Final public NonNullList<ItemStack> armorInventory;
-    @Shadow @Final public NonNullList<ItemStack> offHandInventory;
-    @Shadow @Final private List<NonNullList<ItemStack>> allInventories;
+    @Shadow @Final public NonNullList<ItemStack> items;
+    @Shadow @Final public NonNullList<ItemStack> armor;
+    @Shadow @Final public NonNullList<ItemStack> offhand;
+    @Shadow @Final private List<NonNullList<ItemStack>> compartments;
 
     @Shadow private int timesChanged;
 
@@ -61,8 +61,8 @@ public abstract class PlayerInventoryMixin_Bridge_Inventory implements PlayerInv
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(final PlayerEntity playerIn, final CallbackInfo ci) {
         // Find offhand slot
-        for (final NonNullList<ItemStack> inventory : this.allInventories) {
-            if (inventory == this.offHandInventory) {
+        for (final NonNullList<ItemStack> inventory : this.compartments) {
+            if (inventory == this.offhand) {
                 break;
             }
             this.impl$offhandIndex += inventory.size();
@@ -73,7 +73,7 @@ public abstract class PlayerInventoryMixin_Bridge_Inventory implements PlayerInv
     public int bridge$getHeldItemIndex(final Hand hand) {
         switch (hand) {
             case MAIN_HAND:
-                return this.currentItem;
+                return this.selected;
             case OFF_HAND:
                 return this.impl$offhandIndex;
             default:
@@ -86,15 +86,15 @@ public abstract class PlayerInventoryMixin_Bridge_Inventory implements PlayerInv
         itemIndex = itemIndex % 9;
         if (notify && this.player instanceof ServerPlayerEntity) {
             final SHeldItemChangePacket packet = new SHeldItemChangePacket(itemIndex);
-            ((ServerPlayerEntity)this.player).connection.sendPacket(packet);
+            ((ServerPlayerEntity)this.player).connection.send(packet);
         }
-        this.currentItem = itemIndex;
+        this.selected = itemIndex;
     }
 
     @Override
     public void bridge$cleanupDirty() {
         if (this.timesChanged != this.impl$lastTimesChanged) {
-            this.player.openContainer.detectAndSendChanges();
+            this.player.containerMenu.broadcastChanges();
         }
     }
 

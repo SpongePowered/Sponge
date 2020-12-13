@@ -34,7 +34,7 @@ public final class SpongeTransactionType implements TransactionType {
 
     private final ResourceKey key;
 
-    public SpongeTransactionType(ResourceKey key) {
+    public SpongeTransactionType(final ResourceKey key) {
         this.key = checkNotNull(key);
     }
 

@@ -38,9 +38,11 @@ import org.spongepowered.common.bridge.entity.GrieferBridge;
 @Mixin(FarmlandBlock.class)
 public abstract class FarmlandBlockMixin extends BlockMixin {
 
+    // @formatter:off
     @Shadow public static void turnToDirt(final BlockState state, final World world, final BlockPos pos) {}
+    // @formatter:on
 
-    @Redirect(method = "onFallenUpon",
+    @Redirect(method = "fallOn",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/block/FarmlandBlock;turnToDirt(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"

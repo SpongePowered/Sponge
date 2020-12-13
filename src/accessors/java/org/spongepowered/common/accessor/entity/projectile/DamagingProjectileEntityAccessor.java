@@ -31,9 +31,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(DamagingProjectileEntity.class)
 public interface DamagingProjectileEntityAccessor {
 
-    @Accessor("accelerationX") void accessor$setAccelerationX(double accelerationX);
+    @Accessor("xPower") void accessor$xPower(final double xPower);
 
-    @Accessor("accelerationY") void accessor$setAccelerationY(double accelerationY);
+    @Accessor("yPower") void accessor$yPower(final double yPower);
 
-    @Accessor("accelerationZ") void accessor$setAccelerationZ(double accelerationZ);
+    @Accessor("zPower") void accessor$zPower(final double zPower);
+
 }

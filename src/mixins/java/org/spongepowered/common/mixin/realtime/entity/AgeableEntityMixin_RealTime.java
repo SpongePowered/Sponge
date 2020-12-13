@@ -35,22 +35,22 @@ import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 @Mixin(AgeableEntity.class)
 public abstract class AgeableEntityMixin_RealTime extends EntityMixin_RealTime {
 
-    @Shadow public abstract void setGrowingAge(int age);
+    @Shadow public abstract void shadow$setAge(int age);
 
-    @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/AgeableEntity;setGrowingAge(I)V"))
+    @Redirect(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/AgeableEntity;setAge(I)V"))
     private void realTimeImpl$adjustForRealTimeGrowingUp(final AgeableEntity self, final int age) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
-            this.setGrowingAge(age);
+        if (((WorldBridge) this.level).bridge$isFake()) {
+            this.shadow$setAge(age);
             return;
         }
         // Subtract the one the original update method added
-        final int diff = (int) ((RealTimeTrackingBridge) this.world).realTimeBridge$getRealTimeTicks() - 1;
+        final int diff = (int) ((RealTimeTrackingBridge) this.level).realTimeBridge$getRealTimeTicks() - 1;
         if (diff == 0) {
-            this.setGrowingAge(age);
+            this.shadow$setAge(age);
         } else if (age > 0) {
-            this.setGrowingAge(Math.max(0, age - diff));
+            this.shadow$setAge(Math.max(0, age - diff));
         } else {
-            this.setGrowingAge(Math.min(0, age + diff));
+            this.shadow$setAge(Math.min(0, age + diff));
         }
     }
 

@@ -40,8 +40,10 @@ import org.spongepowered.asm.mixin.Shadow;
 })
 public abstract class ResourceLocationMixin_API implements Key, ResourceKey {
 
+    // @formatter:off
     @Shadow public abstract String shadow$getNamespace();
     @Shadow public abstract String shadow$getPath();
+    // @formatter:on
 
     public String adventure$namespace() {
         return this.shadow$getNamespace();

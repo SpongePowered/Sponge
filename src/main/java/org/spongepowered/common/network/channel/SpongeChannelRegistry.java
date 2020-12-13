@@ -280,8 +280,8 @@ public class SpongeChannelRegistry implements ChannelRegistry {
     public boolean handlePlayPayload(final EngineConnection connection, final CCustomPayloadPacket packet) {
         final CCustomPayloadPacketAccessor accessor = (CCustomPayloadPacketAccessor) packet;
 
-        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$getChannel();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$getPayload();
+        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$identifier();
+        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
 
         return this.handlePlayPayload(connection, channel, payload);
     }
@@ -289,8 +289,8 @@ public class SpongeChannelRegistry implements ChannelRegistry {
     public boolean handlePlayPayload(final EngineConnection connection, final SCustomPayloadPlayPacket packet) {
         final SCustomPayloadPlayPacketAccessor accessor = (SCustomPayloadPlayPacketAccessor) packet;
 
-        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$getChannel();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$getPayload();
+        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$identifier();
+        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
 
         return this.handlePlayPayload(connection, channel, payload);
     }
@@ -338,9 +338,9 @@ public class SpongeChannelRegistry implements ChannelRegistry {
         // Server -> Client request
 
         final SCustomPayloadLoginPacketAccessor accessor = (SCustomPayloadLoginPacketAccessor) packet;
-        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$getChannel();
-        final int transactionId = accessor.accessor$getTransactionId();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$getPayload();
+        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$identifier();
+        final int transactionId = accessor.accessor$transactionId();
+        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
 
         try {
             return this.handleLoginRequestPayload(connection, channel, transactionId, payload);
@@ -386,8 +386,8 @@ public class SpongeChannelRegistry implements ChannelRegistry {
         // Client -> Server response
 
         final CCustomPayloadLoginPacketAccessor accessor = (CCustomPayloadLoginPacketAccessor) packet;
-        final int transactionId = accessor.accessor$getTransactionId();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$getPayload();
+        final int transactionId = accessor.accessor$transactionId();
+        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
 
         try {
             this.handleLoginResponsePayload(connection, transactionId, payload);

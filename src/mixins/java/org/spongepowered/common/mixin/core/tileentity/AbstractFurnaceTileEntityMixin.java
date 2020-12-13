@@ -59,10 +59,10 @@ import java.util.Optional;
 public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityMixin {
 
     @Shadow protected NonNullList<ItemStack> items;
-    @Shadow private int cookTime;
-    @Shadow private int burnTime;
+    @Shadow private int cookingProgress;
+    @Shadow private int cookingTotalTime;
 
-    @Shadow protected abstract boolean shadow$canSmelt(IRecipe<?> iRecipe);
+    @Shadow protected abstract boolean shadow$canBurn(final IRecipe<?> recipe);
 
     @Shadow @Final protected IRecipeType<? extends AbstractCookingRecipe> recipeType;
 
@@ -80,7 +80,7 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
                 Optional.of((CookingRecipe) recipe), Collections.singletonList(transaction));
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
-            this.burnTime = 0;
+            this.cookingTotalTime = 0;
             return;
         }
 
@@ -96,21 +96,21 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
     }
 
     private AbstractCookingRecipe impl$getCurrentRecipe() {
-        return this.world.getRecipeManager().getRecipe((IRecipeType<AbstractCookingRecipe>) this.recipeType,
-                (AbstractFurnaceTileEntity) (Object) this, this.world).orElse(null);
+        return this.level.getRecipeManager().getRecipeFor((IRecipeType<AbstractCookingRecipe>) this.recipeType,
+                (AbstractFurnaceTileEntity) (Object) this, this.level).orElse(null);
     }
 
     // Tick up and Start
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;canSmelt(Lnet/minecraft/item/crafting/IRecipe;)Z", ordinal = 1))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;canBurn(Lnet/minecraft/item/crafting/IRecipe;)Z", ordinal = 1))
     private boolean impl$checkIfCanSmelt(final AbstractFurnaceTileEntity furnace, final IRecipe<?> recipe) {
-        if (!this.shadow$canSmelt(recipe)) {
+        if (!this.shadow$canBurn(recipe)) {
             return false;
         }
 
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.items.get(1));
 
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
-        if (this.cookTime == 0) { // Start
+        if (this.cookingProgress == 0) { // Start
             final SmeltEvent.Start event = SpongeEventFactory.createSmeltEventStart(cause, fuel, (FurnaceBlockEntity) this, Optional.of((CookingRecipe) recipe), Collections.emptyList());
             SpongeCommon.postEvent(event);
             return !event.isCancelled();
@@ -132,7 +132,7 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
         final SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, (FurnaceBlockEntity) this, Optional.of((CookingRecipe) recipe), Collections.emptyList());
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
-            return this.cookTime; // dont tick down
+            return this.cookingProgress; // dont tick down
         }
 
         return clampedCookTime;
@@ -140,10 +140,10 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
 
     // Interrupt-Active - e.g. a player removing the currently smelting item
     @Inject(
-        method = "setInventorySlotContents",
+        method = "setItem",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;getCookTime()I"
+            target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;getTotalCookTime()I"
         )
     )
     private void impl$interruptSmelt(final CallbackInfo ci) {
@@ -156,12 +156,12 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
             shift = At.Shift.BEFORE,
             value = "FIELD",
             opcode = Opcodes.PUTFIELD,
-            target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;cookTime:I"
+            target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;cookingProgress:I"
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;smelt(Lnet/minecraft/item/crafting/IRecipe;)V"
+                target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;burn(Lnet/minecraft/item/crafting/IRecipe;)V"
             ),
             to = @At(
                 value = "INVOKE",
@@ -174,7 +174,7 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
     }
 
     private void impl$callInteruptSmeltEvent() {
-        if (this.cookTime > 0) {
+        if (this.cookingProgress > 0) {
             final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.items.get(1));
             final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             final AbstractCookingRecipe recipe = this.impl$getCurrentRecipe();
@@ -186,13 +186,13 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
 
     // Finish
     @Inject(
-        method = "smelt",
+        method = "burn",
         locals = LocalCapture.CAPTURE_FAILHARD,
         at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;shrink(I)V"))
     private void impl$afterSmeltItem(final IRecipe<?> recipe, final CallbackInfo ci) {
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.items.get(1));
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(recipe.getRecipeOutput());
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(recipe.getResultItem());
         final SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, (FurnaceBlockEntity) this,
                 Optional.ofNullable((CookingRecipe) recipe), Collections.singletonList(snapshot));
         SpongeCommon.postEvent(event);

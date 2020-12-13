@@ -47,7 +47,7 @@ import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
 public abstract class EntityMixin_EntityCollision implements CollisionCapabilityBridge {
 
-    @Shadow public abstract net.minecraft.world.World shadow$getEntityWorld();
+    @Shadow public abstract net.minecraft.world.World shadow$getCommandSenderWorld();
 
     private ResourceKey entityCollision$key;
     private int entityCollision$maxCollisions = 8;
@@ -55,7 +55,7 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void collisions$InjectActivationInformation(net.minecraft.entity.EntityType<?> type, net.minecraft.world.World world, CallbackInfo ci) {
-        if (world != null && !((WorldBridge) world).bridge$isFake() && ((WorldInfoBridge) world.getWorldInfo()).bridge$isValid()) {
+        if (world != null && !((WorldBridge) world).bridge$isFake() && ((WorldInfoBridge) world.getLevelData()).bridge$isValid()) {
             if ((net.minecraft.entity.Entity) (Object) this instanceof ItemEntity) {
                 final ItemEntity item = (ItemEntity) (Object) this;
                 final ItemStack itemstack = item.getItem();
@@ -65,8 +65,8 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
             } else {
                 this.entityCollision$key = ((Entity) this).getType().getKey();
             }
-            if (!this.shadow$getEntityWorld().isRemote()) {
-                this.collision$initializeCollisionState(this.shadow$getEntityWorld());
+            if (!this.shadow$getCommandSenderWorld().isClientSide()) {
+                this.collision$initializeCollisionState(this.shadow$getCommandSenderWorld());
             }
         }
     }
@@ -88,7 +88,7 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
 
     @Override
     public void collision$initializeCollisionState(final net.minecraft.world.World world) {
-        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
         final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
         final CollisionModCategory worldCollMod =
                 worldConfigAdapter.getOrCreateValue(s -> s.getEntityCollisionCategory().getModList().get(this.entityCollision$key.getNamespace()),

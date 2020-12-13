@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.monster.ZombiePigmanEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.SplittableRandom;

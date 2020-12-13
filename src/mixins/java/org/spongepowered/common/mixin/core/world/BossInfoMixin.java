@@ -42,19 +42,19 @@ public abstract class BossInfoMixin implements BossInfoBridge {
     @Shadow protected float percent;
     @Shadow protected BossInfo.Color color;
     @Shadow protected BossInfo.Overlay overlay;
-    @Shadow protected boolean createFog;
-    @Shadow protected boolean darkenSky;
-    @Shadow protected boolean playEndBossMusic;
+    @Shadow protected boolean darkenScreen;
+    @Shadow protected boolean playBossMusic;
+    @Shadow protected boolean createWorldFog;
 
     protected BossBar impl$adventure;
 
     @Override
     public void bridge$copyAndAssign(final BossBar adventure) {
         this.impl$adventure = adventure;
-        this.percent = adventure.percent();
-        this.darkenSky = adventure.hasFlag(BossBar.Flag.DARKEN_SCREEN);
-        this.playEndBossMusic = adventure.hasFlag(BossBar.Flag.PLAY_BOSS_MUSIC);
-        this.createFog = adventure.hasFlag(BossBar.Flag.CREATE_WORLD_FOG);
+        this.percent = adventure.progress();
+        this.darkenScreen = adventure.hasFlag(BossBar.Flag.DARKEN_SCREEN);
+        this.playBossMusic = adventure.hasFlag(BossBar.Flag.PLAY_BOSS_MUSIC);
+        this.createWorldFog = adventure.hasFlag(BossBar.Flag.CREATE_WORLD_FOG);
     }
 
     @Override
@@ -65,7 +65,7 @@ public abstract class BossInfoMixin implements BossInfoBridge {
                 this.percent,
                 SpongeAdventure.asAdventure(this.color),
                 SpongeAdventure.asAdventure(this.overlay),
-                SpongeAdventure.asAdventureFlags(this.darkenSky, this.playEndBossMusic, this.createFog)
+                SpongeAdventure.asAdventureFlags(this.darkenScreen, this.playBossMusic, this.createWorldFog)
             ));
         }
         return this.impl$adventure;
@@ -89,7 +89,7 @@ public abstract class BossInfoMixin implements BossInfoBridge {
 
     @Redirect(method = "setPercent", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;percent:F"))
     private void adventurePercent(final BossInfo $this, final float percent) {
-        this.bridge$asAdventure().percent(percent);
+        this.bridge$asAdventure().progress(percent);
     }
 
     @Redirect(method = "setColor", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;color:Lnet/minecraft/world/BossInfo$Color;"))
@@ -102,27 +102,27 @@ public abstract class BossInfoMixin implements BossInfoBridge {
         this.bridge$asAdventure().overlay(SpongeAdventure.asAdventure(overlay));
     }
 
-    @Redirect(method = "setDarkenSky", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;darkenSky:Z"))
-    private void adventureDarkenSky(final BossInfo $this, final boolean playEndBossMusic) {
-        if (playEndBossMusic) {
+    @Redirect(method = "setDarkenScreen", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;darkenScreen:Z"))
+    private void adventureDarkenScreen(final BossInfo $this, final boolean darkenScreen) {
+        if (darkenScreen) {
             this.bridge$asAdventure().addFlag(BossBar.Flag.DARKEN_SCREEN);
         } else {
             this.bridge$asAdventure().removeFlag(BossBar.Flag.DARKEN_SCREEN);
         }
     }
 
-    @Redirect(method = "setPlayEndBossMusic", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;playEndBossMusic:Z"))
-    private void adventurePlayEndBossMusic(final BossInfo $this, final boolean playEndBossMusic) {
-        if (playEndBossMusic) {
+    @Redirect(method = "setPlayBossMusic", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;playBossMusic:Z"))
+    private void adventurePlayBossMusic(final BossInfo $this, final boolean playBossMusic) {
+        if (playBossMusic) {
             this.bridge$asAdventure().addFlag(BossBar.Flag.PLAY_BOSS_MUSIC);
         } else {
             this.bridge$asAdventure().removeFlag(BossBar.Flag.PLAY_BOSS_MUSIC);
         }
     }
 
-    @Redirect(method = "setCreateFog", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;createFog:Z"))
-    private void adventureCreateFog(final BossInfo $this, final boolean createFog) {
-        if (createFog) {
+    @Redirect(method = "setCreateWorldFog", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;createWorldFog:Z"))
+    private void adventureCreateWorldFog(final BossInfo $this, final boolean createWorldFog) {
+        if (createWorldFog) {
             this.bridge$asAdventure().addFlag(BossBar.Flag.CREATE_WORLD_FOG);
         } else {
             this.bridge$asAdventure().removeFlag(BossBar.Flag.CREATE_WORLD_FOG);
@@ -138,7 +138,7 @@ public abstract class BossInfoMixin implements BossInfoBridge {
 
     @Redirect(method = "getPercent", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;percent:F"))
     private float percentRead(final BossInfo $this) {
-        return this.bridge$asAdventure().percent();
+        return this.bridge$asAdventure().progress();
     }
 
     @Redirect(method = "getColor", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;color:Lnet/minecraft/world/BossInfo$Color;"))
@@ -151,17 +151,17 @@ public abstract class BossInfoMixin implements BossInfoBridge {
         return SpongeAdventure.asVanilla(this.bridge$asAdventure().overlay());
     }
 
-    @Redirect(method = "shouldDarkenSky", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;darkenSky:Z"))
+    @Redirect(method = "shouldDarkenScreen", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;darkenScreen:Z"))
     private boolean darkenSkyRead(final BossInfo $this) {
         return this.bridge$asAdventure().hasFlag(BossBar.Flag.DARKEN_SCREEN);
     }
 
-    @Redirect(method = "shouldPlayEndBossMusic", at =@At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;playEndBossMusic:Z"))
+    @Redirect(method = "shouldPlayBossMusic", at =@At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;playBossMusic:Z"))
     private boolean playEndBossMusicRead(final BossInfo $this) {
         return this.bridge$asAdventure().hasFlag(BossBar.Flag.PLAY_BOSS_MUSIC);
     }
 
-    @Redirect(method = "shouldCreateFog", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;createFog:Z"))
+    @Redirect(method = "shouldCreateWorldFog", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossInfo;createWorldFog:Z"))
     private boolean createFogRead(final BossInfo $this) {
         return this.bridge$asAdventure().hasFlag(BossBar.Flag.CREATE_WORLD_FOG);
     }

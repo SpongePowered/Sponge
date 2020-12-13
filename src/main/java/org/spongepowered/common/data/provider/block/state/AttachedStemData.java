@@ -40,7 +40,7 @@ public final class AttachedStemData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(AttachedStemBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(AttachedStemBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, AttachedStemBlock.FACING))
                         .supports(h -> h.getBlock() instanceof AttachedStemBlock);
     }

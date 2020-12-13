@@ -39,7 +39,6 @@ import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -48,7 +47,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -57,24 +55,25 @@ import javax.annotation.Nullable;
 @Mixin(PlayerProfileCache.class)
 public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
-    @Shadow @Final @Mutable private final Map<String, PlayerProfileCache_ProfileEntryAccessor> usernameToProfileEntryMap = new ConcurrentHashMap<>();
-    @Shadow @Final @Mutable private final Map<UUID, PlayerProfileCache_ProfileEntryAccessor> uuidToProfileEntryMap = new ConcurrentHashMap<>();
-    @Shadow @Final @Mutable private final Deque<com.mojang.authlib.GameProfile> gameProfiles = new ConcurrentLinkedDeque<>();
+    // @formatter:off
+    @Shadow @Final @Mutable private final Map<String, PlayerProfileCache_ProfileEntryAccessor> profilesByName = new ConcurrentHashMap<>();
+    @Shadow @Final @Mutable private final Map<UUID, PlayerProfileCache_ProfileEntryAccessor> profilesByUUID = new ConcurrentHashMap<>();
 
-    @Nullable @Shadow public abstract com.mojang.authlib.GameProfile shadow$getProfileByUUID(UUID uniqueId);
+    @Nullable @Shadow public abstract com.mojang.authlib.GameProfile shadow$get(UUID uniqueId);
+    @Shadow protected abstract long shadow$getNextOperation();
+    // @formatter:on
 
     @Override
     public boolean remove(final GameProfile profile) {
         Objects.requireNonNull(profile, "profile");
         final UUID uniqueId = profile.getUniqueId();
-        final PlayerProfileCache_ProfileEntryAccessor entry = this.uuidToProfileEntryMap.remove(uniqueId);
+        final PlayerProfileCache_ProfileEntryAccessor entry = this.profilesByUUID.remove(uniqueId);
         if (entry != null) {
             if (profile.getName().isPresent()) {
-                this.usernameToProfileEntryMap.remove(profile.getName().get().toLowerCase(Locale.ROOT));
+                this.profilesByName.remove(profile.getName().get().toLowerCase(Locale.ROOT));
             }
-            this.gameProfiles.remove(entry.accessor$getGameProfile());
             // Only return true if the entry wasn't expired
-            return entry.accessor$getExpirationDate().getTime() >= System.currentTimeMillis();
+            return entry.invoker$getExpirationDate().getTime() >= System.currentTimeMillis();
         }
         return false;
     }
@@ -95,15 +94,14 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     public Collection<GameProfile> removeIf(final Predicate<GameProfile> filter) {
         Objects.requireNonNull(filter, "filter");
         final Collection<GameProfile> result = new ArrayList<>();
-        final Iterator<PlayerProfileCache_ProfileEntryAccessor> it = this.uuidToProfileEntryMap.values().iterator();
+        final Iterator<PlayerProfileCache_ProfileEntryAccessor> it = this.profilesByUUID.values().iterator();
         while (it.hasNext()) {
             final PlayerProfileCache_ProfileEntryAccessor entry = it.next();
-            final GameProfile profile = SpongeGameProfile.of(entry.accessor$getGameProfile());
-            final boolean isExpired = entry.accessor$getExpirationDate().getTime() < System.currentTimeMillis();
+            final GameProfile profile = SpongeGameProfile.of(entry.invoker$getProfile());
+            final boolean isExpired = entry.invoker$getExpirationDate().getTime() < System.currentTimeMillis();
             if (isExpired || filter.test(profile)) {
                 it.remove();
-                profile.getName().ifPresent(name -> this.usernameToProfileEntryMap.remove(name, entry));
-                this.gameProfiles.remove(entry.accessor$getGameProfile());
+                profile.getName().ifPresent(name -> this.profilesByName.remove(name, entry));
                 if (!isExpired) {
                     result.add(profile);
                 }
@@ -114,14 +112,14 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
     @Override
     public void clear() {
-        this.uuidToProfileEntryMap.clear();
-        this.usernameToProfileEntryMap.clear();
+        this.profilesByUUID.clear();
+        this.profilesByName.clear();
     }
 
     @Override
     public Optional<GameProfile> getById(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
-        return Optional.ofNullable(this.shadow$getProfileByUUID(uniqueId)).map(SpongeGameProfile::of);
+        return Optional.ofNullable(this.shadow$get(uniqueId)).map(SpongeGameProfile::of);
     }
 
     @Override
@@ -129,7 +127,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
         Objects.requireNonNull(uniqueIds, "uniqueIds");
         final Map<UUID, Optional<GameProfile>> result = new HashMap<>();
         for (final UUID uniqueId : uniqueIds) {
-            result.put(uniqueId, Optional.ofNullable(this.shadow$getProfileByUUID(uniqueId)).map(SpongeGameProfile::of));
+            result.put(uniqueId, Optional.ofNullable(this.shadow$get(uniqueId)).map(SpongeGameProfile::of));
         }
         return result.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(result);
     }
@@ -137,17 +135,16 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     @Override
     public Optional<GameProfile> getByName(final String name) {
         Objects.requireNonNull(name, "name");
-        @Nullable PlayerProfileCache_ProfileEntryAccessor entry = this.usernameToProfileEntryMap.get(name.toLowerCase(Locale.ROOT));
+        @Nullable PlayerProfileCache_ProfileEntryAccessor entry = this.profilesByName.get(name.toLowerCase(Locale.ROOT));
 
-        if (entry != null && System.currentTimeMillis() >= entry.accessor$getExpirationDate().getTime()) {
-            final com.mojang.authlib.GameProfile profile = entry.accessor$getGameProfile();
-            this.uuidToProfileEntryMap.remove(profile.getId());
-            this.usernameToProfileEntryMap.remove(profile.getName().toLowerCase(Locale.ROOT));
-            this.gameProfiles.remove(profile);
+        if (entry != null && System.currentTimeMillis() >= entry.invoker$getExpirationDate().getTime()) {
+            final com.mojang.authlib.GameProfile profile = entry.invoker$getProfile();
+            this.profilesByUUID.remove(profile.getId());
+            this.profilesByName.remove(profile.getName().toLowerCase(Locale.ROOT));
             entry = null;
         }
 
-        return entry == null ? Optional.empty() : Optional.of(SpongeGameProfile.of(entry.accessor$getGameProfile()));
+        return Optional.ofNullable(this.api$updateLastAccess(entry));
     }
 
     @Override
@@ -162,25 +159,37 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
     @Override
     public Stream<GameProfile> stream() {
-        return this.usernameToProfileEntryMap.values().stream()
-                .map(entry -> SpongeGameProfile.of(entry.accessor$getGameProfile()));
+        return this.profilesByName.values().stream()
+                .map(entry -> SpongeGameProfile.of(entry.invoker$getProfile()));
     }
 
     @Override
     public Collection<GameProfile> all() {
-        return this.stream().collect(ImmutableSet.toImmutableSet());
+        return this.profilesByName.values().stream()
+                .map(this::api$updateLastAccess)
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
     public Stream<GameProfile> streamOfMatches(final String name) {
         final String search = Objects.requireNonNull(name, "name").toLowerCase(Locale.ROOT);
-        return this.stream()
-                .filter(profile -> profile.getName().isPresent())
-                .filter(profile -> profile.getName().get().toLowerCase(Locale.ROOT).startsWith(search));
+        return this.profilesByName.values().stream()
+                .filter(profile -> profile.invoker$getProfile().getName() != null)
+                .filter(profile -> profile.invoker$getProfile().getName().toLowerCase(Locale.ROOT).startsWith(search))
+                .map(this::api$updateLastAccess);
     }
 
     @Override
     public Collection<GameProfile> allMatches(final String name) {
         return this.streamOfMatches(name).collect(ImmutableSet.toImmutableSet());
+    }
+
+    private @Nullable SpongeGameProfile api$updateLastAccess(final @Nullable PlayerProfileCache_ProfileEntryAccessor entry) {
+        // Update last accesses
+        if (entry == null) {
+            return null;
+        }
+        entry.invoker$setLastAccess(this.shadow$getNextOperation());
+        return SpongeGameProfile.of(entry.invoker$getProfile());
     }
 }

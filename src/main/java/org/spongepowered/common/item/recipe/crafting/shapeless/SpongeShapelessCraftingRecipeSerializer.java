@@ -57,15 +57,15 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
     public static IRecipeSerializer<?> SPONGE_CRAFTING_SHAPELESS = SpongeRecipeRegistration.register("crafting_shapeless", new SpongeShapelessCraftingRecipeSerializer());
 
     public ShapelessRecipe read(ResourceLocation recipeId, JsonObject json) {
-        final String s = JSONUtils.getString(json, Constants.Recipe.GROUP, "");
-        final NonNullList<Ingredient> nonnulllist = this.readIngredients(JSONUtils.getJsonArray(json, Constants.Recipe.SHAPELESS_INGREDIENTS));
+        final String s = JSONUtils.getAsString(json, Constants.Recipe.GROUP, "");
+        final NonNullList<Ingredient> nonnulllist = this.readIngredients(JSONUtils.getAsJsonArray(json, Constants.Recipe.SHAPELESS_INGREDIENTS));
         if (nonnulllist.isEmpty()) {
             throw new JsonParseException("No ingredients for shapeless recipe");
         }
         if (nonnulllist.size() > 9) {
             throw new JsonParseException("Too many ingredients for shapeless recipe");
         }
-        final ItemStack itemstack = ShapedRecipe.deserializeItem(JSONUtils.getJsonObject(json, Constants.Recipe.RESULT));
+        final ItemStack itemstack = ShapedRecipe.itemFromJson(JSONUtils.getAsJsonObject(json, Constants.Recipe.RESULT));
         final ItemStack spongeStack = ResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
         final Function<CraftingInventory, ItemStack> resultFunction = ResultUtil.deserializeResultFunction(json);
         final Function<CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction = ResultUtil.deserializeRemainingItemsFunction(json);
@@ -76,7 +76,7 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
         final NonNullList<Ingredient> nonnulllist = NonNullList.create();
         for (JsonElement element : json) {
             final Ingredient ingredient = IngredientUtil.spongeDeserialize(element);
-            if (!ingredient.hasNoMatchingItems()) {
+            if (!ingredient.isEmpty()) {
                 nonnulllist.add(ingredient);
             }
         }
@@ -84,12 +84,12 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
     }
 
     @Override
-    public ShapelessRecipe read(ResourceLocation p_199426_1_, PacketBuffer p_199426_2_) {
+    public ShapelessRecipe fromNetwork(ResourceLocation p_199426_1_, PacketBuffer p_199426_2_) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 
     @Override
-    public void write(PacketBuffer p_199427_1_, ShapelessRecipe p_199427_2_) {
+    public void toNetwork(PacketBuffer p_199427_1_, ShapelessRecipe p_199427_2_) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 }

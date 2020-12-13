@@ -37,7 +37,7 @@ public final class ExperienceHolderUtil {
     // run ExperienceHolderUtilsTest to check your results.
 
     /**
-     * A static version of {@link PlayerEntity#xpBarCap()}.
+     * A static version of {@link PlayerEntity#getXpNeededForNextLevel()}.
      *
      * @param level The player's level
      * @return The amount of XP between the specified level and the next level
@@ -49,7 +49,7 @@ public final class ExperienceHolderUtil {
     /**
      * Utility method for getting the total experience at an arbitrary level.
      * The formulas here are basically (slightly modified) integrals of those
-     * of {@link PlayerEntity#xpBarCap()}.
+     * of {@link PlayerEntity#getXpNeededForNextLevel()}.
      *
      * @param level The player's level
      * @return The total amount of XP a player would have if they are exactly
@@ -116,9 +116,9 @@ public final class ExperienceHolderUtil {
         // Once we're here, we have the correct level. The experience is the decimal fraction that we are through the
         // current level. This is why we require the experienceForCurrentLevel variable, we need the difference between
         // the current value and the beginning of the level.
-        holder.experience = (float) (value - experienceForCurrentLevel) / ExperienceHolderUtil.getExpBetweenLevels(level);
+        holder.experienceProgress = (float) (value - experienceForCurrentLevel) / ExperienceHolderUtil.getExpBetweenLevels(level);
         holder.experienceLevel = level;
-        holder.experienceTotal = value;
+        holder.totalExperience = value;
 
         if (holder instanceof ServerPlayerEntityBridge) {
             ((ServerPlayerEntityBridge) holder).bridge$refreshExp();
@@ -126,8 +126,8 @@ public final class ExperienceHolderUtil {
     }
 
     public static void setExperienceSinceLevel(final PlayerEntity holder, Integer value) {
-        while (value >= holder.xpBarCap()) {
-            value -= holder.xpBarCap();
+        while (value >= holder.getXpNeededForNextLevel()) {
+            value -= holder.getXpNeededForNextLevel();
         }
         ((PlayerEntityBridge) holder).bridge$setExperienceSinceLevel(value);
 

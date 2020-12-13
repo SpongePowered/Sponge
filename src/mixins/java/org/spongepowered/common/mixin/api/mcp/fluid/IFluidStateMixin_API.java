@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.fluid;
 
 import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.IFluidState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.fluid.FluidType;
@@ -35,26 +34,28 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(IFluidState.class)
-@Implements(@Interface(iface = FluidState.class, prefix = "api$"))
+@Mixin(net.minecraft.fluid.FluidState.class)
+@Implements(@Interface(iface = FluidState.class, prefix = "fluidState$"))
 public interface IFluidStateMixin_API extends FluidState {
 
-    @Shadow Fluid shadow$getFluid();
-    @Shadow net.minecraft.block.BlockState getBlockState();
+    // @formatter:off
+    @Shadow Fluid shadow$getType();
+    @Shadow net.minecraft.block.BlockState shadow$createLegacyBlock();
     @Shadow boolean shadow$isEmpty();
-
-    @Override
-    default FluidType getType() {
-        return (FluidType) this.shadow$getFluid();
-    }
+    // @formatter:on
 
     @Override
     default BlockState getBlock() {
-        return (BlockState) this.getBlockState();
+        return (BlockState) this.shadow$createLegacyBlock();
     }
 
     @Intrinsic
-    default boolean api$isEmpty() {
+    default FluidType fluidState$getType() {
+        return (FluidType) this.shadow$getType();
+    }
+
+    @Intrinsic
+    default boolean fluidState$isEmpty() {
         return this.shadow$isEmpty();
     }
 }

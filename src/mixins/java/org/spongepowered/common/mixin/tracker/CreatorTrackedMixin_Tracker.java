@@ -35,11 +35,11 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
-import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.util.Constants;
 
 import java.lang.ref.WeakReference;
@@ -169,8 +169,8 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
             final TameableEntity ownable = (TameableEntity) (Object) this;
             final Entity owner = ownable.getOwner();
             if (owner instanceof PlayerEntity) {
-                this.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, owner.getUniqueID());
-                return owner.getUniqueID();
+                this.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, owner.getUUID());
+                return owner.getUUID();
             }
         } else if (this.tracker$notifier != null && PlayerTracker.Type.NOTIFIER == type) {
             return this.tracker$notifier;
@@ -186,7 +186,7 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
             return null;
         }
 
-        final UUID uniqueId = creatorNbt.getUniqueId(Constants.UUID);
+        final UUID uniqueId = creatorNbt.getUUID(Constants.UUID);
         if (PlayerTracker.Type.CREATOR == type) {
             this.tracker$creator = uniqueId;
         } else if (PlayerTracker.Type.NOTIFIER == type) {

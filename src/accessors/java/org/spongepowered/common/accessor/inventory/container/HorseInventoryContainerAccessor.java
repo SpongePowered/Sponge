@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(HorseInventoryContainer.class)
 public interface HorseInventoryContainerAccessor {
 
-    @Accessor("horse") AbstractHorseEntity accessor$getHorse();
+    @Accessor("horse") AbstractHorseEntity accessor$horse();
+
 }

@@ -28,6 +28,8 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.world.storage.PlayerData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -43,13 +45,14 @@ import org.spongepowered.common.service.server.permission.SpongePermissionServic
 @Mixin(DedicatedPlayerList.class)
 public abstract class DedicatedPlayerListMixin extends PlayerList {
 
-    public DedicatedPlayerListMixin(final MinecraftServer server, final int p_i50688_2_) {
-        super(server, p_i50688_2_);
+    public DedicatedPlayerListMixin(final MinecraftServer server, final DynamicRegistries.Impl registryHolder,
+                                    final PlayerData playerIo, final int maxPlayers) {
+        super(server, registryHolder, playerIo, maxPlayers);
     }
 
-    @Inject(method = "canJoin", at = @At("HEAD"), cancellable = true)
-    private void onCanJoin(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
-        if (!this.isWhiteListEnabled() || this.getWhitelistedPlayers().isWhitelisted(profile)) {
+    @Inject(method = "isWhiteListed", at = @At("HEAD"), cancellable = true)
+    private void impl$checkForWhitelistBypassPermission(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
+        if (!this.isUsingWhitelist() || this.getWhiteList().isWhiteListed(profile)) {
             ci.setReturnValue(true);
             return;
         }
@@ -59,8 +62,8 @@ public abstract class DedicatedPlayerListMixin extends PlayerList {
         ci.setReturnValue(subject.hasPermission(LoginPermissions.BYPASS_WHITELIST_PERMISSION));
     }
 
-    @Inject(method = "bypassesPlayerLimit", at = @At("HEAD"), cancellable = true)
-    private void onBypassPlayerLimit(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
+    @Inject(method = "canBypassPlayerLimit", at = @At("HEAD"), cancellable = true)
+    private void impl$checkForPlayerLimitBypassPermission(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
         final PermissionService permissionService = Sponge.getServer().getServiceProvider().permissionService();
         final Subject subject = permissionService.getUserSubjects()
                 .getSubject(profile.getId().toString()).orElse(permissionService.getDefaults());

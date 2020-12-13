@@ -30,53 +30,61 @@ import net.minecraft.util.math.Rotations;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(ArmorStandEntity.class)
 public interface ArmorStandEntityAccessor {
 
-    @Accessor("DEFAULT_HEAD_ROTATION") static Rotations accessor$getDefaultHeadRotation() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DEFAULT_HEAD_POSE")
+    static Rotations accessor$DEFAULT_HEAD_POSE() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DEFAULT_BODY_ROTATION") static Rotations accessor$getDefaultBodyRotation() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DEFAULT_BODY_POSE")
+    static Rotations accessor$DEFAULT_BODY_POSE() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DEFAULT_LEFTARM_ROTATION") static Rotations accessor$getDefaultLeftarmRotation() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DEFAULT_LEFT_ARM_POSE")
+    static Rotations accessor$DEFAULT_LEFT_ARM_POSE() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DEFAULT_RIGHTARM_ROTATION") static Rotations accessor$getDefaultRightarmRotation() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DEFAULT_RIGHT_ARM_POSE")
+    static Rotations accessor$DEFAULT_RIGHT_ARM_POSE() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DEFAULT_LEFTLEG_ROTATION") static Rotations accessor$getDefaultLeftlegRotation() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DEFAULT_LEFT_LEG_POSE")
+    static Rotations accessor$DEFAULT_LEFT_LEG_POSE() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("DEFAULT_RIGHTLEG_ROTATION") static Rotations accessor$getDefaultRightlegRotation() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DEFAULT_RIGHT_LEG_POSE")
+    static Rotations accessor$DEFAULT_RIGHT_LEG_POSE() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("leftArmRotation") Rotations accessor$getLeftArmRotation();
+    @Accessor("disabledSlots") int accessor$disabledSlots();
 
-    @Accessor("rightArmRotation") Rotations accessor$getRightArmRotation();
+    @Accessor("disabledSlots") void accessor$disabledSlots(final int disabledSlots);
 
-    @Accessor("leftLegRotation") Rotations accessor$getLeftLegRotation();
+    @Accessor("leftArmPose") Rotations accessor$leftArmPose();
 
-    @Accessor("rightLegRotation") Rotations accessor$getRightLegRotation();
+    @Accessor("rightArmPose") Rotations accessor$rightArmPose();
 
-    @Accessor("disabledSlots") int accessor$getDisabledSlots();
+    @Accessor("leftLegPose") Rotations accessor$leftLegPose();
 
-    @Accessor("disabledSlots") void accessor$setDisabledSlots(int disabledSlots);
+    @Accessor("rightLegPose") Rotations accessor$rightLegPose();
 
-    @Invoker("setShowArms") void accessor$setShowArms(boolean showArms);
+    @Invoker("isDisabled") boolean invoker$isDisabled(final EquipmentSlotType slot);
 
-    @Invoker("setSmall") void accessor$setSmall(boolean small);
+    @Invoker("setSmall") void invoker$setSmall(final boolean small);
 
-    @Invoker("setNoBasePlate") void accessor$setNoBasePlate(boolean noBasePlate);
+    @Invoker("setShowArms") void invoker$setShowArms(final boolean showArms);
 
-    @Invoker("setMarker") void accessor$setMarker(boolean marker);
+    @Invoker("setNoBasePlate") void invoker$setNoBasePlate(final boolean noBasePlate);
 
-    @Invoker("isDisabled") boolean accessor$isDisabled(EquipmentSlotType slotIn);
+    @Invoker("setMarker") void invoker$setMarker(final boolean marker);
+
 }

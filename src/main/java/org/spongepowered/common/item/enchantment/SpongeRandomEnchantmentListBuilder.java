@@ -94,7 +94,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
         List<EnchantmentData> enchantments;
         if (this.pool == null || this.pool.isEmpty()) {
             checkNotNull(this.item, "The item cannot be null");
-            enchantments = EnchantmentHelper.buildEnchantmentList(new Random(this.seed + this.option),
+            enchantments = EnchantmentHelper.selectEnchantment(new Random(this.seed + this.option),
                                         ItemStackUtil.toNative(this.item), this.level, this.treasure);
 
 
@@ -106,7 +106,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     }
 
     /**
-     * See {@link EnchantmentHelper#buildEnchantmentList}
+     * See {@link EnchantmentHelper#selectEnchantment}
      */
     private List<EnchantmentData> basedOfFixedPool(Random randomIn, List<Enchantment> pool) {
         List<EnchantmentData> list = Lists.<EnchantmentData>newArrayList();
@@ -120,7 +120,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
 
             while (randomIn.nextInt(50) <= this.level)
             {
-                EnchantmentHelper.removeIncompatible(list1, Util.getLast(list));
+                EnchantmentHelper.filterCompatibleEnchantments(list1, Util.lastOf(list));
 
                 if (list1.isEmpty())
                 {
@@ -136,7 +136,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     }
 
     public static List<Enchantment> fromNative(List<EnchantmentData> list) {
-        return list.stream().map(data -> Enchantment.of(((EnchantmentType) data.enchantment), data.enchantmentLevel)).collect(Collectors.toList());
+        return list.stream().map(data -> Enchantment.of(((EnchantmentType) data.enchantment), data.level)).collect(Collectors.toList());
     }
 
     public static List<EnchantmentData> toNative(List<Enchantment> list) {

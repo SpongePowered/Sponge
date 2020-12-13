@@ -33,7 +33,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(SChangeBlockPacket.class)
 public interface SChangeBlockPacketAccessor {
 
-    @Accessor("pos") void accessor$setPos(BlockPos pos);
+    @Accessor("pos") void accessor$pos(final BlockPos pos);
 
-    @Accessor("state") void accessor$setState(BlockState state);
+    @Accessor("blockState") void accessor$blockState(final BlockState blockState);
+
 }

@@ -28,25 +28,33 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.util.Direction;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
-
-import javax.annotation.Nullable;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(HopperTileEntity.class)
 public interface HopperTileEntityAccessor {
 
-    @Accessor("transferCooldown") int accessor$getTransferCooldown();
+    @Accessor("cooldownTime") int accessor$cooldownTime();
 
-    @Accessor("transferCooldown") void accessor$setTransferCooldown(int transferCooldown);
+    @Accessor("cooldownTime") void accessor$cooldownTime(final int cooldownTime);
 
-    @Invoker("insertStack") static ItemStack accsssor$insertStack(@Nullable IInventory source, IInventory destination, ItemStack stack, int index,
-            @Nullable Direction direction) {
-        throw new RuntimeException("Untransformed accessor!");
+    @Invoker("tryMoveInItem")
+    static ItemStack invoker$tryMoveInItem(
+            final @Nullable IInventory source,
+            final IInventory destination,
+            final ItemStack stack,
+            final int index,
+            final @Nullable Direction direction
+    ) {
+        throw new UntransformedInvokerError();
     }
 
-    @Invoker("isInventoryEmpty") static boolean accsssor$isInventoryEmpty(IInventory inventoryIn, Direction side) {
-        throw new RuntimeException("Untransformed accessor!");
+    @Invoker("isEmptyContainer")
+    static boolean invoker$isEmptyContainer(final IInventory inventory, final Direction side) {
+        throw new UntransformedInvokerError();
     }
+
 }

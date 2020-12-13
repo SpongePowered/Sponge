@@ -27,22 +27,74 @@ package org.spongepowered.common.hooks;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SJoinGamePacket;
 import net.minecraft.network.play.server.SRespawnPacket;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.GameType;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
+
+import java.util.Set;
 
 public interface PacketHooks {
 
-    default SJoinGamePacket createSJoinGamePacket(final ServerPlayerEntity entity, final GameType gameType, final long seed, final boolean hardcoreMode,
-            final DimensionType dimensionType, final int maxPlayers, final WorldType worldType, final int viewDistance,
-            final boolean reducedDebugInfo, final boolean enableRespawnScreen) {
+    default SJoinGamePacket createSJoinGamePacket(
+          final ServerPlayerEntity entity,
+          final GameType gameType,
+          final GameType previousGameType,
+          final long seed,
+          final boolean hardcore,
+          final Set<RegistryKey<World>> levels,
+          final DynamicRegistries.Impl registryHolder,
+          final DimensionType dimensionType,
+          final RegistryKey<World> dimension,
+          final int maxPlayers,
+          final int chunkRadius,
+          final boolean reducedDebugInfo,
+          final boolean showDeathScreen,
+          final boolean isDebug,
+          final boolean isFlat
+    ) {
 
-        return new SJoinGamePacket(entity.getEntityId(), gameType, seed, hardcoreMode, dimensionType, maxPlayers, worldType, viewDistance,
-                reducedDebugInfo, enableRespawnScreen);
+        return new SJoinGamePacket(
+              entity.getId(),
+              gameType,
+              previousGameType,
+              seed,
+              hardcore,
+              levels,
+              registryHolder,
+              dimensionType,
+              dimension,
+              maxPlayers,
+              chunkRadius,
+              reducedDebugInfo,
+              showDeathScreen,
+              isDebug,
+              isFlat
+        );
     }
 
-    default SRespawnPacket createSRespawnPacket(final ServerPlayerEntity entity, final DimensionType dimensionType, final long seed,
-            final WorldType worldType, final GameType gameType) {
-        return new SRespawnPacket(dimensionType, seed, worldType, gameType);
+    default SRespawnPacket createSRespawnPacket(
+          final ServerPlayerEntity entity,
+          final DimensionType dimensionType,
+          final RegistryKey<World> dimension,
+          final long seed,
+          final GameType playerGameType,
+          final GameType previousPlayerGameType,
+          final boolean isDebug,
+          final boolean isFlat,
+          final boolean keepAllPlayerData
+    ) {
+        return new SRespawnPacket(
+              dimensionType,
+              dimension,
+              seed,
+              playerGameType,
+              previousPlayerGameType,
+              isDebug,
+              isFlat,
+              keepAllPlayerData
+        );
     }
+
 }

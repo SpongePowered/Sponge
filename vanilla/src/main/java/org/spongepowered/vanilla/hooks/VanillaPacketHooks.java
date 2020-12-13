@@ -24,28 +24,60 @@
  */
 package org.spongepowered.vanilla.hooks;
 
+import java.util.Set;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SJoinGamePacket;
 import net.minecraft.network.play.server.SRespawnPacket;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.GameType;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.hooks.PacketHooks;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public final class VanillaPacketHooks implements PacketHooks {
 
     @Override
-    public SJoinGamePacket createSJoinGamePacket(final ServerPlayerEntity entity, final GameType gameType, final long seed,
-            final boolean hardcodeMode, final DimensionType dimensionType, final int maxPlayers, final WorldType generatorType,
-            final int viewDistance, final boolean isReducedDebugMode, final boolean enableRespawnScreen) {
+    public SJoinGamePacket createSJoinGamePacket(
+          final ServerPlayerEntity entity,
+          final GameType gameType,
+          final GameType previousGameType,
+          final long seed,
+          final boolean hardcore,
+          final Set<RegistryKey<World>> levels,
+          final DynamicRegistries.Impl registryHolder,
+          final DimensionType dimensionType,
+          final RegistryKey<World> dimension,
+          final int maxPlayers,
+          final int chunkRadius,
+          final boolean reducedDebugInfo,
+          final boolean showDeathScreen,
+          final boolean isDebug,
+          final boolean isFlat
+    ) {
         if (((ServerPlayerEntityBridge) entity).bridge$getClientType() == ClientType.SPONGE_VANILLA) {
-            return new SJoinGamePacket(entity.getEntityId(), gameType, seed, hardcodeMode, dimensionType, maxPlayers, generatorType, viewDistance,
-                    isReducedDebugMode, enableRespawnScreen);
+            return PacketHooks.super.createSJoinGamePacket(
+                  entity,
+                  gameType,
+                  previousGameType,
+                  seed,
+                  hardcore,
+                  levels,
+                  registryHolder,
+                  dimensionType,
+                  dimension,
+                  maxPlayers,
+                  chunkRadius,
+                  reducedDebugInfo,
+                  showDeathScreen,
+                  isDebug,
+                  isFlat
+            );
         } else {
             DimensionType clientType;
             final SpongeDimensionType logicType = ((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType();
@@ -63,11 +95,30 @@ public final class VanillaPacketHooks implements PacketHooks {
     }
 
     @Override
-    public SRespawnPacket createSRespawnPacket(final ServerPlayerEntity entity, final DimensionType dimensionType, final long seed,
-            final WorldType worldType, final GameType gameType) {
+    public SRespawnPacket createSRespawnPacket(
+          final ServerPlayerEntity entity,
+          final DimensionType dimensionType,
+          final RegistryKey<World> dimension,
+          final long seed,
+          final GameType playerGameType,
+          final GameType previousPlayerGameType,
+          final boolean isDebug,
+          final boolean isFlat,
+          final boolean keepAllPlayerData
+    ) {
 
         if (((ServerPlayerEntityBridge) entity).bridge$getClientType() == ClientType.SPONGE_VANILLA) {
-            return new SRespawnPacket(dimensionType, seed, worldType, gameType);
+            return PacketHooks.super.createSRespawnPacket(
+                  entity,
+                  dimensionType,
+                  dimension,
+                  seed,
+                  playerGameType,
+                  previousPlayerGameType,
+                  isDebug,
+                  isFlat,
+                  keepAllPlayerData
+            );
         } else {
             DimensionType clientType;
             final SpongeDimensionType logicType = ((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType();

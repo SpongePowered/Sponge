@@ -33,7 +33,6 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("rawtypes")
 public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> {
 
     public static UnwindingState getInstance() {

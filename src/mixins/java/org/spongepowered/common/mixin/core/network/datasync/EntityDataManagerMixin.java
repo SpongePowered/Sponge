@@ -53,13 +53,13 @@ public abstract class EntityDataManagerMixin {
     // This overrides the setter for the entries of the
     // data manager to use a "faster" map.
     @SuppressWarnings("unused")
-    @Shadow @Final @Mutable private Map < Integer, EntityDataManager.DataEntry<? >> entries = new Int2ObjectOpenHashMap<>();
+    @Shadow @Final @Mutable private Map<Integer, EntityDataManager.DataEntry<?>> itemsById = new Int2ObjectOpenHashMap<>();
 
     // The rest is actually used in the overwrite below.
     @Shadow @Final private Entity entity;
-    @Shadow private boolean dirty;
+    @Shadow private boolean isDirty;
 
-    @Shadow protected abstract <T> EntityDataManager.DataEntry<T> getEntry(DataParameter<T> key);
+    @Shadow protected abstract <T> EntityDataManager.DataEntry<T> getItem(final DataParameter<T> key);
 
     /**
      * @author gabizou December 27th, 2017
@@ -73,7 +73,7 @@ public abstract class EntityDataManagerMixin {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     public <T> void set(final DataParameter<T> key, T value) {
-        final EntityDataManager.DataEntry<T> dataentry = this.<T>getEntry(key);
+        final EntityDataManager.DataEntry<T> dataentry = this.<T>getItem(key);
 
         // Sponge Start - set up the current value, so we don't have to retrieve it multiple times
         final T currentValue = dataentry.getValue();
@@ -83,7 +83,7 @@ public abstract class EntityDataManagerMixin {
             // Client side can have an entity, because reasons.......
             // Really silly reasons......
             // I don't know, ask Grum....
-            if (this.entity != null && this.entity.world != null && !this.entity.world.isRemote && !((EntityBridge) this.entity).bridge$isConstructing()) { // We only want to spam the server world ;)
+            if (this.entity != null && this.entity.level != null && !this.entity.level.isClientSide && !((EntityBridge) this.entity).bridge$isConstructing()) { // We only want to spam the server world ;)
                 final Optional<DataParameterConverter<T>> converter = ((DataParameterBridge) key).bridge$getDataConverter();
                 // At this point it is changing
                 if (converter.isPresent()) {
@@ -103,7 +103,7 @@ public abstract class EntityDataManagerMixin {
                         }
                         try {
                             value = converter.get().getValueFromEvent(currentValue, event.getEndResult().getSuccessfulData());
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             // Worst case scenario, we don't want to cause an issue, so we just set the value
                             value = incomingValue;
                         }
@@ -112,9 +112,9 @@ public abstract class EntityDataManagerMixin {
             }
             // Sponge End
             dataentry.setValue(value);
-            this.entity.notifyDataManagerChange(key);
+            this.entity.onSyncedDataUpdated(key);
             dataentry.setDirty(true);
-            this.dirty = true;
+            this.isDirty = true;
         }
     }
 }

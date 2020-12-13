@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(WitherEntity.class)
 public interface WitherEntityAccessor {
 
-    @Accessor("bossInfo") ServerBossInfo accessor$getBossInfo();
+    @Accessor("bossEvent") ServerBossInfo accessor$bossEvent();
+
 }

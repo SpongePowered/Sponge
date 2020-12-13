@@ -40,18 +40,18 @@ public final class SpellcastingIllagerData {
         registrator
                 .asMutable(SpellcastingIllagerEntityAccessor.class)
                     .create(Keys.CASTING_TIME)
-                        .get(SpellcastingIllagerEntityAccessor::accessor$getSpellTicks)
+                        .get(SpellcastingIllagerEntityAccessor::accessor$spellCastingTickCount)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.accessor$setSpellTicks(v);
+                            h.accessor$spellCastingTickCount(v);
                             return true;
                         })
                 .asMutable(SpellcastingIllagerEntity.class)
                     .create(Keys.CURRENT_SPELL)
-                        .get(h -> (SpellType) (Object) ((SpellcastingIllagerEntityAccessor) h).accessor$getSpellType())
-                        .set((h, v) -> h.setSpellType((SpellcastingIllagerEntity.SpellType) (Object) v));
+                        .get(h -> (SpellType) (Object) ((SpellcastingIllagerEntityAccessor) h).invoker$getCurrentSpell())
+                        .set((h, v) -> h.setIsCastingSpell((SpellcastingIllagerEntity.SpellType) (Object) v));
     }
     // @formatter:on
 }

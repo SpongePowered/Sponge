@@ -27,7 +27,7 @@ package org.spongepowered.common.data.value;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.ListValue;
-import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.util.CopyHelper;
 import org.spongepowered.common.data.key.SpongeKey;
 
 import java.util.ArrayList;

@@ -44,10 +44,12 @@ import java.util.Set;
 @Mixin(GoalSelector.class)
 public abstract class GoalSelectorMixin_API<O extends Agent> implements GoalExecutor<O> {
 
-    @Shadow @Final private Set<PrioritizedGoal> goals;
+    // @formatter:off
+    @Shadow @Final private Set<PrioritizedGoal> availableGoals;
 
     @Shadow public abstract void shadow$addGoal(int priority, net.minecraft.entity.ai.goal.Goal task);
     @Shadow public abstract void shadow$removeGoal(net.minecraft.entity.ai.goal.Goal task);
+    // @formatter:on
 
     @SuppressWarnings("unchecked")
     @Override
@@ -74,14 +76,14 @@ public abstract class GoalSelectorMixin_API<O extends Agent> implements GoalExec
 
     @Override
     public GoalExecutor<O> removeGoals(final GoalType type) {
-        this.goals.removeIf(goal -> ((GoalBridge)goal.getGoal()).bridge$getType() == type);
+        this.availableGoals.removeIf(goal -> ((GoalBridge)goal.getGoal()).bridge$getType() == type);
         return this;
     }
 
     @Override
     public List<? super Goal<? extends O>> getTasksByType(final GoalType type) {
         final ImmutableList.Builder<Goal<?>> tasks = ImmutableList.builder();
-        this.goals.stream().map(PrioritizedGoal::getGoal).map(Goal.class::cast)
+        this.availableGoals.stream().map(PrioritizedGoal::getGoal).map(Goal.class::cast)
                 .filter(goal -> goal.getType() == type)
                 .forEach(tasks::add);
         return tasks.build();
@@ -90,12 +92,12 @@ public abstract class GoalSelectorMixin_API<O extends Agent> implements GoalExec
     @Override
     public List<? super Goal<? extends O>> getTasks() {
         final ImmutableList.Builder<Goal<?>> tasks = ImmutableList.builder();
-        this.goals.stream().map(PrioritizedGoal::getGoal).map(Goal.class::cast).forEach(tasks::add);
+        this.availableGoals.stream().map(PrioritizedGoal::getGoal).map(Goal.class::cast).forEach(tasks::add);
         return tasks.build();
     }
 
     @Override
     public void clear() {
-        this.goals.clear();
+        this.availableGoals.clear();
     }
 }

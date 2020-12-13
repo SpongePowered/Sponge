@@ -33,5 +33,6 @@ import java.util.Map;
 @Mixin(GameRules.class)
 public interface GameRulesAccessor {
 
-    @Accessor("rules") Map<GameRules.RuleKey<?>, GameRules.RuleValue<?>> accessor$getRules();
+    @Accessor("rules") Map<GameRules.RuleKey<?>, GameRules.RuleValue<?>> accessor$rules();
+
 }

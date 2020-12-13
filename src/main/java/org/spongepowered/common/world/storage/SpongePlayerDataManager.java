@@ -31,7 +31,7 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
@@ -84,7 +84,7 @@ public final class SpongePlayerDataManager {
 
                     try (final InputStream stream = Files.newInputStream(playerFile)) {
                         compound = CompressedStreamTools.readCompressed(stream);
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throw new RuntimeException("Failed to decompress playerdata for playerfile " + playerFile, e);
                     }
 
@@ -92,7 +92,7 @@ public final class SpongePlayerDataManager {
                         throw new RuntimeException("Failed to decompress player data within [" + playerFile + "]!");
                     }
 
-                    final DataContainer container = NbtTranslator.getInstance().translateFrom(compound);
+                    final DataContainer container = NBTTranslator.getInstance().translateFrom(compound);
                     final SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
                     this.playerDataByUniqueId.put(data.getUniqueId(), data);
                 }
@@ -122,8 +122,8 @@ public final class SpongePlayerDataManager {
             lastPlayed = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.LAST_JOINED));
         }
         if (playerUniqueId == null) {
-            if (compound.hasUniqueId(Constants.UUID)) {
-                playerUniqueId = compound.getUniqueId(Constants.UUID);
+            if (compound.hasUUID(Constants.UUID)) {
+                playerUniqueId = compound.getUUID(Constants.UUID);
             }
         }
         if (playerUniqueId != null) {
@@ -153,7 +153,7 @@ public final class SpongePlayerDataManager {
     }
 
     private CompoundNBT createCompoundFor(final SpongePlayerData data) {
-        return NbtTranslator.getInstance().translate(data.toContainer());
+        return NBTTranslator.getInstance().translate(data.toContainer());
     }
 
     private void saveFile(final String id, final CompoundNBT compound) {

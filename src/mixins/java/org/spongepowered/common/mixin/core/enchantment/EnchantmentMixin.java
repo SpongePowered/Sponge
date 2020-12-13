@@ -33,12 +33,14 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(Enchantment.class)
 public abstract class EnchantmentMixin {
 
-    @Shadow public abstract String shadow$getName();
+    // @formatter:off
+    @Shadow public abstract String shadow$getDescriptionId();
+    // @formatter:on
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper("EnchantmentType")
-                .add("Name", this.shadow$getName())
+                .add("Name", this.shadow$getDescriptionId())
                 .add("Id", ((EnchantmentType) this).getKey())
                 .toString();
     }

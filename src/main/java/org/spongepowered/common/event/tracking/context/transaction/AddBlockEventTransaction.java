@@ -77,6 +77,6 @@ public class AddBlockEventTransaction extends BlockEventBasedTransaction {
 
     @Override
     public void restore() {
-        this.original.getServerWorld().ifPresent(world -> ((ServerWorldAccessor) world).accessor$getBlockEventQueue().remove(this.blockEvent));
+        this.original.getServerWorld().ifPresent(world -> ((ServerWorldAccessor) world).accessor$blockEvents().remove(this.blockEvent));
     }
 }

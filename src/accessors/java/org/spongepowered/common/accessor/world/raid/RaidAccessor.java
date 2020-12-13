@@ -31,6 +31,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Raid.class)
 public interface RaidAccessor {
 
-    @Accessor("numGroups") int accessor$getNumGroups();
+    @Accessor("numGroups") int accessor$numGroups();
 
 }

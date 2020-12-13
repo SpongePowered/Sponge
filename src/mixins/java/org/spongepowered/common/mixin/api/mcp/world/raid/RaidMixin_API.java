@@ -50,28 +50,30 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Mixin(Raid.class)
 public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
 
-    @Shadow @Final private Map<Integer, Set<AbstractRaiderEntity>> raiders;
-    @Shadow @Final @Mutable private ServerBossInfo bossInfo;
+    //@formatter:off
+    @Shadow @Final private Map<Integer, Set<AbstractRaiderEntity>> groupRaiderMap;
+    @Shadow @Final @Mutable private ServerBossInfo raidEvent;
     @Shadow private Raid.Status status;
 
-    @Shadow public abstract World shadow$getWorld();
-    @Shadow public abstract float shadow$getCurrentHealth();
+    @Shadow public abstract World shadow$getLevel();
+    @Shadow public abstract float shadow$getHealthOfLivingRaiders();
     @Shadow public abstract int shadow$getGroupsSpawned();
+    //@formatter:on
 
     @Override
     public ServerWorld getWorld() {
-        return (ServerWorld) this.shadow$getWorld();
+        return (ServerWorld) this.shadow$getLevel();
     }
 
     @Override
     public BossBar getBossBar() {
-        return SpongeAdventure.asAdventure(this.bossInfo);
+        return SpongeAdventure.asAdventure(this.raidEvent);
     }
 
     @Override
     public void setBossBar(final BossBar bossBar) {
         checkNotNull(bossBar, "BossBar cannot be null.");
-        this.bossInfo = SpongeAdventure.asVanillaServer(bossBar);
+        this.raidEvent = SpongeAdventure.asVanillaServer(bossBar);
     }
 
     @Override
@@ -91,11 +93,11 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
 
     @Override
     public int getTotalWaveAmount() {
-        return this.raiders.size();
+        return this.groupRaiderMap.size();
     }
 
     @Override
     public double getHealth() {
-        return this.shadow$getCurrentHealth();
+        return this.shadow$getHealthOfLivingRaiders();
     }
 }

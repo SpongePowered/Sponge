@@ -41,7 +41,7 @@ public final class SugarCaneData {
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, SugarCaneBlock.AGE))
-                        .get(h -> h.get(SugarCaneBlock.AGE))
+                        .get(h -> h.getValue(SugarCaneBlock.AGE))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, SugarCaneBlock.AGE))
                         .supports(h -> h.getBlock() instanceof SugarCaneBlock);
     }

@@ -36,7 +36,9 @@ import java.util.Set;
 @Mixin(TNTEntity.class)
 public abstract class TNTEntityMixin_API extends EntityMixin_API implements PrimedTNT {
 
+    // @formatter:off
     @Shadow private void shadow$explode() { }
+    // @formatter:on
 
     @Override
     public void detonate() {

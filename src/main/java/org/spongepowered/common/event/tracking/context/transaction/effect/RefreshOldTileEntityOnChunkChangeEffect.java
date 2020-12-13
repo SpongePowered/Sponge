@@ -48,10 +48,10 @@ public final class RefreshOldTileEntityOnChunkChangeEffect implements Processing
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
-        final @Nullable TileEntity existing = pipeline.getAffectedChunk().getTileEntity(oldState.pos, Chunk.CreateEntityType.CHECK);
+        final @Nullable TileEntity existing = pipeline.getAffectedChunk().getBlockEntity(oldState.pos, Chunk.CreateEntityType.CHECK);
         if (((BlockStateBridge) oldState.state).bridge$hasTileEntity()) {
             if (existing != null) {
-                existing.updateContainingBlockInfo();
+                existing.clearCache();
             }
         }
         return EffectResult.NULL_PASS;

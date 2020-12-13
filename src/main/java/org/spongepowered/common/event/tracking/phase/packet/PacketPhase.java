@@ -237,10 +237,10 @@ public final class PacketPhase {
 
     private static BasicInventoryPacketState fromWindowPacket(final CClickWindowPacket windowPacket) {
         final int mode = 0x01 << 9 << windowPacket.getClickType().ordinal();
-        final int packed = windowPacket.getUsedButton();
+        final int packed = windowPacket.getButtonNum();
         final int unpacked = mode == Constants.Networking.MODE_DRAG ? (0x01 << 6 << (packed >> 2 & 3)) | (0x01 << 3 << (packed & 3)) : (0x01 << (packed & 3));
 
-        final BasicInventoryPacketState inventory = PacketPhase.fromState(PacketPhase.clickType(windowPacket.getSlotId()) | mode | unpacked);
+        final BasicInventoryPacketState inventory = PacketPhase.fromState(PacketPhase.clickType(windowPacket.getSlotNum()) | mode | unpacked);
         if (inventory == PacketPhase.Inventory.INVENTORY) {
             SpongeCommon.getLogger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
         }
@@ -309,10 +309,10 @@ public final class PacketPhase {
         this.packetTranslationMap.put(CPlayerTryUseItemOnBlockPacket.class, packet -> {
             // Note that CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
             final CPlayerTryUseItemOnBlockPacket blockPlace = (CPlayerTryUseItemOnBlockPacket) packet;
-            final BlockPos blockPos = blockPlace.func_218794_c().getPos();
-            final Direction front = blockPlace.func_218794_c().getFace();
+            final BlockPos blockPos = blockPlace.getHitResult().getBlockPos();
+            final Direction front = blockPlace.getHitResult().getDirection();
             final MinecraftServer server = SpongeCommon.getServer();
-            if (blockPos.getY() < server.getBuildLimit() - 1 || front != Direction.UP && blockPos.getY() < server.getBuildLimit()) {
+            if (blockPos.getY() < server.getMaxBuildHeight() - 1 || front != Direction.UP && blockPos.getY() < server.getMaxBuildHeight()) {
                 return PacketPhase.General.PLACE_BLOCK;
             }
             return PacketPhase.General.INVALID;
@@ -336,7 +336,7 @@ public final class PacketPhase {
         this.packetTranslationMap.put(CTabCompletePacket.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(CClientStatusPacket.class, packet -> {
             final CClientStatusPacket clientStatus = (CClientStatusPacket) packet;
-            final CClientStatusPacket.State status = clientStatus.getStatus();
+            final CClientStatusPacket.State status = clientStatus.getAction();
             if (status == CClientStatusPacket.State.PERFORM_RESPAWN) {
                 return PacketPhase.General.REQUEST_RESPAWN;
             }
@@ -366,7 +366,7 @@ public final class PacketPhase {
             .put(CPlayerDiggingPacket.Action.ABORT_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
             .put(CPlayerDiggingPacket.Action.STOP_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
             .put(CPlayerDiggingPacket.Action.RELEASE_USE_ITEM, PacketPhase.General.INTERACTION)
-            .put(CPlayerDiggingPacket.Action.SWAP_HELD_ITEMS, PacketPhase.Inventory.SWAP_HAND_ITEMS)
+            .put(CPlayerDiggingPacket.Action.SWAP_ITEM_WITH_OFFHAND, PacketPhase.Inventory.SWAP_HAND_ITEMS)
             .build();
 
 }

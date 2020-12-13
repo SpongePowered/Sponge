@@ -50,7 +50,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
-public class HoconDataFormat extends SpongeCatalogType implements StringDataFormat {
+public final class HoconDataFormat extends SpongeCatalogType implements StringDataFormat {
 
     public HoconDataFormat(final ResourceKey key) {
         super(key);

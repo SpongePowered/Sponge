@@ -55,8 +55,8 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     private final List<Flag> flags = new ArrayList<>();
     private final Set<String> flagAliases = new HashSet<>();
     @Nullable private CommandExecutor commandExecutor;
-    @Nullable private Function<CommandCause, Optional<Component>> extendedDescription;
-    @Nullable private Function<CommandCause, Optional<Component>> shortDescription;
+    private Function<CommandCause, Optional<Component>> extendedDescription = cause -> Optional.empty();
+    private Function<CommandCause, Optional<Component>> shortDescription = cause -> Optional.empty();
     @Nullable private Predicate<CommandCause> executionRequirements;
     private boolean isTerminal = false;
 
@@ -101,14 +101,22 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
-    public Command.@NonNull Builder setExtendedDescription(@NonNull final Function<CommandCause, Optional<Component>> extendedDescriptionFunction) {
-        this.extendedDescription = extendedDescriptionFunction;
+    public Command.@NonNull Builder setExtendedDescription(@Nullable final Function<CommandCause, Optional<Component>> extendedDescriptionFunction) {
+        if (extendedDescriptionFunction == null) {
+            this.extendedDescription = cause -> Optional.empty();
+        } else {
+            this.extendedDescription = extendedDescriptionFunction;
+        }
         return this;
     }
 
     @Override
-    public Command.@NonNull Builder setShortDescription(@NonNull final Function<CommandCause, Optional<Component>> descriptionFunction) {
-        this.shortDescription = descriptionFunction;
+    public Command.@NonNull Builder setShortDescription(@Nullable final Function<CommandCause, Optional<Component>> descriptionFunction) {
+        if (descriptionFunction == null) {
+            this.shortDescription = cause -> Optional.empty();
+        } else {
+            this.shortDescription = descriptionFunction;
+        }
         return this;
     }
 

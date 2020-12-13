@@ -29,7 +29,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.FoxType;
 import org.spongepowered.common.accessor.entity.passive.FoxEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Optional;
 
@@ -43,32 +42,32 @@ public final class FoxData {
         registrator
                 .asMutable(FoxEntity.class)
                     .create(Keys.FIRST_TRUSTED)
-                        .get(h -> h.getDataManager().get(FoxEntityAccessor.accessor$getTrustedUuidMain()).orElse(null))
-                        .set((h, v) -> h.getDataManager().set(FoxEntityAccessor.accessor$getTrustedUuidMain(), Optional.ofNullable(v)))
+                        .get(h -> h.getEntityData().get(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_0()).orElse(null))
+                        .set((h, v) -> h.getEntityData().set(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_0(), Optional.ofNullable(v)))
                     .create(Keys.FOX_TYPE)
-                        .get(h -> (FoxType) (Object) h.getVariantType())
-                        .set((h, v) -> ((FoxEntityAccessor) h).accessor$setVariantType((FoxEntity.Type) (Object) v))
+                        .get(h -> (FoxType) (Object) h.getFoxType())
+                        .set((h, v) -> ((FoxEntityAccessor) h).invoker$setFoxType((FoxEntity.Type) (Object) v))
                     .create(Keys.IS_CROUCHING)
                         .get(FoxEntity::isCrouching)
-                        .set(FoxEntity::setCrouching)
+                        .set(FoxEntity::setIsCrouching)
                     .create(Keys.IS_DEFENDING)
-                        .get(h -> ((FoxEntityAccessor) h).accessor$isFoxAggroed())
-                        .set((h, v) -> ((FoxEntityAccessor) h).accessor$setFoxAggroed(v))
+                        .get(h -> ((FoxEntityAccessor) h).invoker$isDefending())
+                        .set((h, v) -> ((FoxEntityAccessor) h).invoker$setDefending(v))
                     .create(Keys.IS_FACEPLANTED)
-                        .get(FoxEntity::isStuck)
-                        .set((h, v) -> ((FoxEntityAccessor) h).accessor$setStuck(v))
+                        .get(FoxEntity::isFaceplanted)
+                        .set((h, v) -> ((FoxEntityAccessor) h).invoker$setFaceplanted(v))
                     .create(Keys.IS_INTERESTED)
-                        .get(FoxEntity::func_213467_eg)
-                        .set(FoxEntity::func_213502_u)
+                        .get(FoxEntity::isInterested)
+                        .set(FoxEntity::setIsInterested)
                     .create(Keys.IS_POUNCING)
-                        .get(FoxEntity::func_213480_dY)
-                        .set(FoxEntity::func_213461_s)
+                        .get(FoxEntity::isPouncing)
+                        .set(FoxEntity::setIsPouncing)
                     .create(Keys.IS_SLEEPING)
                         .get(FoxEntity::isSleeping)
-                        .set((h, v) -> ((FoxEntityAccessor) h).accessor$setSleeping(v))
+                        .set((h, v) -> ((FoxEntityAccessor) h).invoker$setSleeping(v))
                     .create(Keys.SECOND_TRUSTED)
-                        .get(h -> h.getDataManager().get(FoxEntityAccessor.accessor$getTrustedUuidSecondary()).orElse(null))
-                        .set((h, v) -> h.getDataManager().set(FoxEntityAccessor.accessor$getTrustedUuidSecondary(), Optional.ofNullable(v)));
+                        .get(h -> h.getEntityData().get(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_1()).orElse(null))
+                        .set((h, v) -> h.getEntityData().set(FoxEntityAccessor.accessor$DATA_TRUSTED_ID_1(), Optional.ofNullable(v)));
     }
     // @formatter:on
 }

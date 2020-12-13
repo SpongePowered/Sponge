@@ -56,14 +56,14 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
 
     //@formatter:off
     @Shadow @Final private TileEntityType<?> type;
-    @Shadow @Nullable private BlockState cachedBlockState;
-    @Shadow protected net.minecraft.world.World world;
-    @Shadow protected BlockPos pos;
+    @Shadow @Nullable private BlockState blockState;
+    @Shadow protected net.minecraft.world.World level;
+    @Shadow protected BlockPos worldPosition;
     @Nullable private Timing impl$timing;
 
-    @Shadow public abstract BlockPos shadow$getPos();
+    @Shadow public abstract BlockPos shadow$getBlockPos();
     @Shadow public abstract BlockState shadow$getBlockState();
-    @Shadow public abstract void shadow$markDirty();
+    @Shadow public abstract void shadow$setChanged();
     //@formatter:on
 
     @Override
@@ -138,17 +138,17 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
                 // Double check some mods are registering their tile entities and doing some "interesting"
                 // things with doing a to string on a tile entity not actually functionally valid in the game "yet".
             .add("tileType", ((BlockEntityType) this.type).getKey())
-            .add("world", this.world)
-            .add("pos", this.pos)
-            .add("blockMetadata", this.cachedBlockState)
+            .add("world", this.level)
+            .add("pos", this.worldPosition)
+            .add("blockMetadata", this.blockState)
             .toString();
     }
 
     protected MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
         return MoreObjects.toStringHelper(this)
             .add("type", ((BlockEntityType) this.type).getKey())
-            .add("world", ((ServerWorld) this.world).getKey())
-            .add("pos", this.pos);
+            .add("world", ((ServerWorld) this.level).getKey())
+            .add("pos", this.worldPosition);
     }
 
     @Override

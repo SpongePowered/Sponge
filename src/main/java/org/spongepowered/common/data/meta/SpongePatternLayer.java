@@ -31,7 +31,7 @@ import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.util.Constants;
 
-public class SpongePatternLayer implements BannerPatternLayer {
+public final class SpongePatternLayer implements BannerPatternLayer {
 
     private final BannerPatternShape id;
     private final DyeColor color;

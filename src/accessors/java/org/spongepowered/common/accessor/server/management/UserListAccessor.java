@@ -30,19 +30,22 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Map;
 
 @Mixin(UserList.class)
 public interface UserListAccessor<K, V extends UserListEntry<K>> {
 
-    @Accessor("LOGGER") static Logger accessor$getLogger() {
-        throw new IllegalStateException("Untransformed Accessor");
+    @Accessor("LOGGER")
+    static Logger accessor$LOGGER() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("values") Map<String, V> accessor$getValues();
+    @Accessor("map") Map<String, V> accessor$map();
 
-    @Invoker("getObjectKey") String accessor$getObjectKey(K obj);
+    @Invoker("getKeyForUser") String invoker$getKeyForUser(final K user);
 
-    @Invoker("removeExpired") void accessor$removeExpired();
+    @Invoker("removeExpired") void invoker$removeExpired();
+
 }

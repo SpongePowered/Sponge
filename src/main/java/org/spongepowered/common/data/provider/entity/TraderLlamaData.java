@@ -39,12 +39,12 @@ public final class TraderLlamaData {
         registrator
                 .asMutable(TraderLlamaEntityAccessor.class)
                     .create(Keys.DESPAWN_DELAY)
-                        .get(x -> Ticks.of(x.accessor$getDespawnDelay()))
+                        .get(x -> Ticks.of(x.accessor$despawnDelay()))
                         .setAnd((h, v) -> {
                             if (v.getTicks() < 0) {
                                 return false;
                             }
-                            h.accessor$setDespawnDelay((int) v.getTicks());
+                            h.accessor$despawnDelay((int) v.getTicks());
                             return true;
                         });
     }

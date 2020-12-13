@@ -187,40 +187,13 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         return "sponge";
     }
 
-//    @Inject(method = "tick", at = @At(value = "RETURN"))
-//    private void impl$completeTickCheckAnimation(CallbackInfo ci) {
-//        final int lastAnimTick = SpongeCommonEventFactory.lastAnimationPacketTick;
-//        final int lastPrimaryTick = SpongeCommonEventFactory.lastPrimaryPacketTick;
-//        final int lastSecondaryTick = SpongeCommonEventFactory.lastSecondaryPacketTick;
-//        if (SpongeCommonEventFactory.lastAnimationPlayer != null) {
-//            final ServerPlayerEntity player = SpongeCommonEventFactory.lastAnimationPlayer.get();
-//            if (player != null && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
-//                final BlockSnapshot blockSnapshot = BlockSnapshot.empty();
-//
-//                final RayTraceResult result = SpongeImplHooks.rayTraceEyes(player, SpongeImplHooks.getBlockReachDistance(player) + 1);
-//
-//                // Hit non-air block
-//                if (result instanceof BlockRayTraceResult) {
-//                    return;
-//                }
-//
-//                if (!player.getHeldItemMainhand().isEmpty() && SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), Hand.MAIN_HAND, null, blockSnapshot).isCancelled()) {
-//                    SpongeCommonEventFactory.lastAnimationPacketTick = 0;
-//                    SpongeCommonEventFactory.lastAnimationPlayer = null;
-//                    return;
-//                }
-//
-//                SpongeCommonEventFactory.callInteractBlockEventPrimary(player, player.getHeldItemMainhand(), Hand.MAIN_HAND, null);
-//            }
-//            SpongeCommonEventFactory.lastAnimationPlayer = null;
-//        }
-//        SpongeCommonEventFactory.lastAnimationPacketTick = 0;
-//
-//        TimingsManager.FULL_SERVER_TICK.stopTiming();
-//    }
+    @Inject(method = "tickServer", at = @At(value = "RETURN"))
+    private void impl$completeTickCheckAnimation(final CallbackInfo ci) {
+        TimingsManager.FULL_SERVER_TICK.stopTiming();
+    }
 
-    @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000, ordinal = 0))
-    private int getSaveTickInterval(final int tickInterval) throws SessionLockException {
+    @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 6000, ordinal = 0))
+    private int getSaveTickInterval(final int tickInterval) {
         if (!this.shadow$isDedicatedServer()) {
             return tickInterval;
         } else if (!this.shadow$isServerRunning()) {
@@ -230,7 +203,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
         final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().getWorld().getAutoPlayerSaveInterval();
         if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
-            this.shadow$getPlayerList().saveAllPlayerData();
+            this.shadow$getPlayerList().saveAll();
         }
 
         this.save(true, false, false);
@@ -338,7 +311,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      */
     @ModifyVariable(method = "sendMessage", at = @At("HEAD"), argsOnly = true)
     private ITextComponent impl$applyTranslation(final ITextComponent input) {
-        return NativeComponentRenderer.get().render(input.deepCopy(), Locale.getDefault());
+        return NativeComponentRenderer.apply(input.copy(), Locale.getDefault());
     }
 
     @Override

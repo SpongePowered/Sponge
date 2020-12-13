@@ -41,7 +41,9 @@ import java.util.Map;
 @Mixin(StatType.class)
 public abstract class StatTypeMixin_API implements StatisticCategory {
 
+    // @formatter:off
     @Shadow @Final private Map<Object, Stat<Object>> map;
+    // @formatter:on
 
     @Override
     public ResourceKey getKey() {

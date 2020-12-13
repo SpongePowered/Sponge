@@ -43,38 +43,40 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.advancement.SpongeFilteredTrigger;
 import org.spongepowered.common.advancement.SpongeTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.PlatformHooks;
 
 @Mixin(ICriterionTrigger.Listener.class)
 public abstract class ICriterionTrigger_ListenerMixin {
 
-    @Shadow @Final private ICriterionInstance criterionInstance;
+    // @formatter:off
+    @Shadow @Final private ICriterionInstance trigger;
     @Shadow @Final private Advancement advancement;
-    @Shadow @Final private String criterionName;
+    @Shadow @Final private String criterion;
+    // @formatter:on
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "grantCriterion", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "run", at = @At("HEAD"), cancellable = true)
     private void impl$callEvents(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
         final org.spongepowered.api.advancement.Advancement advancement =
                 (org.spongepowered.api.advancement.Advancement) this.advancement;
         AdvancementCriterion advancementCriterion = (AdvancementCriterion)
-                this.advancement.getCriteria().get(this.criterionName);
+                this.advancement.getCriteria().get(this.criterion);
         final CriterionBridge criterionBridge = (CriterionBridge) advancementCriterion;
         if (criterionBridge.bridge$getScoreCriterion() != null) {
             advancementCriterion = criterionBridge.bridge$getScoreCriterion();
         }
-        if (!SpongeImplHooks.onServerThread()) {
+        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) {
             // Some mods do advancement granting on async threads, and we can't allow for the spam to be thrown.
             return;
         }
         // Sponge filters are always handled in the trigger method
-        if (!(this.criterionInstance instanceof SpongeFilteredTrigger)) {
-            final FilteredTrigger filteredTrigger = (FilteredTrigger) this.criterionInstance;
+        if (!(this.trigger instanceof SpongeFilteredTrigger)) {
+            final FilteredTrigger filteredTrigger = (FilteredTrigger) this.trigger;
             if (filteredTrigger.getType() instanceof SpongeTrigger) {
                 final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
                 final ServerPlayer player = ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer();
@@ -88,7 +90,7 @@ public abstract class ICriterionTrigger_ListenerMixin {
                 }
             }
         }
-        PhaseTracker.getCauseStackManager().pushCause(this.criterionInstance);
+        PhaseTracker.getCauseStackManager().pushCause(this.trigger);
         // Handle the score criteria ourselves, with each trigger will
         // the score be increased by one.
         if (advancementCriterion instanceof ScoreAdvancementCriterion) {
@@ -99,7 +101,7 @@ public abstract class ICriterionTrigger_ListenerMixin {
         }
     }
 
-    @Inject(method = "grantCriterion", at = @At("RETURN"))
+    @Inject(method = "run", at = @At("RETURN"))
     private void impl$popCauseAtEndOfEvent(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
         PhaseTracker.getCauseStackManager().popCause();
     }

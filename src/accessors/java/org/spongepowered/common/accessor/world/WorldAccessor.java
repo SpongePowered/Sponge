@@ -27,7 +27,6 @@ package org.spongepowered.common.accessor.world;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.Dimension;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -35,23 +34,25 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(World.class)
 public interface WorldAccessor {
 
-    @Accessor("addedTileEntityList") List<TileEntity> accessor$getAddedTileEntityList();
+    @Accessor("pendingBlockEntities") List<TileEntity> accessor$pendingBlockEntities();
 
-    @Accessor("processingLoadedTiles") boolean accessor$getProcessingLoadedTiles();
+    @Accessor("updatingBlockEntities") boolean accessor$updatingBlockEntities();
 
-    @Accessor("dimension") void accessor$setDimension(Dimension newDimension);
-
-    @Invoker("getPendingTileEntityAt") @Nullable TileEntity accessor$getPendingTileEntityAt(BlockPos pos);
-
-    @Invoker("isValid") static boolean accessor$isValid(BlockPos pos) {
-        throw new UnsupportedOperationException("Accessor not mixed in!");
+    @Invoker("isInWorldBounds")
+    static boolean invoker$isInWorldBounds(final BlockPos pos) {
+        throw new UntransformedInvokerError();
     }
 
-    @Invoker("isOutsideBuildHeight") static boolean accessor$isOutsideBuildHeight(BlockPos pos) {
-        throw new UnsupportedOperationException("Accessor not mixed in!");
+    @Invoker("isOutsideBuildHeight")
+    static boolean invoker$isOutsideBuildHeight(final BlockPos pos) {
+        throw new UntransformedInvokerError();
     }
+
+    @Invoker("getPendingBlockEntityAt") @Nullable TileEntity invoker$getPendingBlockEntityAt(final BlockPos pos);
+
 }

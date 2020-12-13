@@ -55,24 +55,24 @@ public final class SignData {
                     .create(Keys.DIRECTION)
                         .get(h -> {
                             if (h.getBlockState().getBlock() instanceof StandingSignBlock) {
-                                return RotationUtils.getFor(h.getBlockState().get(StandingSignBlock.ROTATION));
+                                return RotationUtils.getFor(h.getBlockState().getValue(StandingSignBlock.ROTATION));
                             } else if (h.getBlockState().getBlock() instanceof WallSignBlock) {
-                                return DirectionUtil.getFor(h.getBlockState().get(WallSignBlock.FACING));
+                                return DirectionUtil.getFor(h.getBlockState().getValue(WallSignBlock.FACING));
                             }
                             return null;
                         })
                         .setAnd((h, v) -> {
                             if (h.getBlockState().getBlock() instanceof StandingSignBlock) {
-                                h.getWorld().setBlockState(h.getPos(), RotationUtils.set(h.getBlockState(), v, StandingSignBlock.ROTATION));
+                                h.getLevel().setBlockAndUpdate(h.getBlockPos(), RotationUtils.set(h.getBlockState(), v, StandingSignBlock.ROTATION));
                                 return true;
                             } else if (h.getBlockState().getBlock() instanceof WallSignBlock) {
-                                h.getWorld().setBlockState(h.getPos(), DirectionUtil.set(h.getBlockState(), v, WallSignBlock.FACING));
+                                h.getLevel().setBlockAndUpdate(h.getBlockPos(), DirectionUtil.set(h.getBlockState(), v, WallSignBlock.FACING));
                                 return true;
                             }
 
                             return false;
                         })
-                        .supports(h -> h.getWorld() != null)
+                        .supports(h -> h.getLevel() != null)
                 .asMutable(ServerLocation.class)
                     .create(Keys.SIGN_LINES)
                         .get(SignData::getSignLines)
@@ -94,8 +94,8 @@ public final class SignData {
         for (int i = 0; i < holder.signText.length; i++) {
             holder.signText[i] = SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i));
         }
-        holder.markDirty();
-        holder.getWorld().notifyBlockUpdate(holder.getPos(), holder.getBlockState(), holder.getBlockState(), 3);
+        holder.setChanged();
+        holder.getLevel().sendBlockUpdated(holder.getBlockPos(), holder.getBlockState(), holder.getBlockState(), 3);
     }
 
     private static List<Component> getSignLines(ServerLocation h) {

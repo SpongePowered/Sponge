@@ -40,22 +40,24 @@ import org.spongepowered.common.accessor.item.crafting.ShapelessRecipeAccessor;
 import java.util.Optional;
 
 @Mixin(ICraftingRecipe.class)
-@Implements(@Interface(iface = CraftingRecipe.class, prefix = "recipe$"))
+@Implements(@Interface(iface = CraftingRecipe.class, prefix = "craftingRecipe$"))
 public interface ICraftingRecipeMixin_API {
 
+    // @formatter:off
     @Shadow IRecipeType<?> shadow$getType();
+    // @formatter:on
 
-    default RecipeType<? extends CraftingRecipe> recipe$getType() {
+    default RecipeType<? extends CraftingRecipe> craftingRecipe$getType() {
         return (RecipeType<? extends CraftingRecipe>) this.shadow$getType();
     }
 
-    default Optional<String> recipe$getGroup() {
+    default Optional<String> craftingRecipe$getGroup() {
         String group = "";
         if (this instanceof ShapedRecipe) {
-            group = ((ShapedRecipeAccessor) this).accessor$getGroup();
+            group = ((ShapedRecipeAccessor) this).accessor$group();
         }
         if (this instanceof ShapelessRecipe) {
-            group = ((ShapelessRecipeAccessor) this).accessor$getGroup();
+            group = ((ShapelessRecipeAccessor) this).accessor$group();
         }
         if (group.isEmpty()) {
             return Optional.empty();

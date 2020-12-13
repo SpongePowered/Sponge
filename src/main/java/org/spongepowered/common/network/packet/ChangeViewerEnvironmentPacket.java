@@ -41,12 +41,12 @@ public final class ChangeViewerEnvironmentPacket implements Packet {
     }
 
     @Override
-    public void read(ChannelBuf buf) {
+    public void read(final ChannelBuf buf) {
         this.dimensionLogic = new ResourceLocation(buf.readString());
     }
 
     @Override
-    public void write(ChannelBuf buf) {
+    public void write(final ChannelBuf buf) {
         buf.writeString(this.dimensionLogic.toString());
     }
 }

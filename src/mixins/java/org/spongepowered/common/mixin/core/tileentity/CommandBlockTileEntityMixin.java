@@ -40,7 +40,7 @@ import org.spongepowered.common.bridge.permissions.SubjectBridge;
 @Mixin(CommandBlockTileEntity.class)
 public abstract class CommandBlockTileEntityMixin implements SubjectBridge, CommandSourceProviderBridge {
 
-    @Shadow @Final private CommandBlockLogic commandBlockLogic;
+    @Shadow @Final private CommandBlockLogic commandBlock;
 
     @Override
     public String bridge$getSubjectCollectionIdentifier() {
@@ -54,7 +54,7 @@ public abstract class CommandBlockTileEntityMixin implements SubjectBridge, Comm
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.commandBlockLogic.getCommandSource();
+        return this.commandBlock.createCommandSourceStack();
     }
 
 }

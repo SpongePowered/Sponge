@@ -54,7 +54,7 @@ public final class AddTileEntityToTickableListEffect implements ProcessingSideEf
             return EffectResult.NULL_RETURN;
         }
         if (tileEntity instanceof ITickableTileEntity) {
-            serverWorld.tickableTileEntities.add(tileEntity);
+            serverWorld.tickableBlockEntities.add(tileEntity);
         }
         return EffectResult.NULL_PASS;
     }

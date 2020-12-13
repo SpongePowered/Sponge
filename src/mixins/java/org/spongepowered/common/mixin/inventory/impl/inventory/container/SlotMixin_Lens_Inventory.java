@@ -40,8 +40,8 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 @Mixin(Slot.class)
 public abstract class SlotMixin_Lens_Inventory implements InventoryAdapter, LensGeneratorBridge {
 
-    @Shadow @Final private int slotIndex;
-    @Shadow @Final public IInventory inventory;
+    @Shadow @Final private int slot;
+    @Shadow @Final public IInventory container;
 
     @Override
     public SlotLensProvider lensGeneratorBridge$generateSlotLensProvider() {
@@ -59,8 +59,8 @@ public abstract class SlotMixin_Lens_Inventory implements InventoryAdapter, Lens
         // etc...
 
         try {
-            final Lens rootLens = ((InventoryAdapter) this.inventory).inventoryAdapter$getRootLens();
-            SlotLens lens = rootLens.getSlotLens(this.inventoryAdapter$getFabric(), this.slotIndex);
+            final Lens rootLens = ((InventoryAdapter) this.container).inventoryAdapter$getRootLens();
+            SlotLens lens = rootLens.getSlotLens(this.inventoryAdapter$getFabric(), this.slot);
             if (lens != null) {
                 return lens;
             }

@@ -40,7 +40,7 @@ public final class AnvilData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(AnvilBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(AnvilBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, AnvilBlock.FACING))
                         .supports(h -> h.getBlock() instanceof AnvilBlock);
     }

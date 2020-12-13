@@ -43,7 +43,7 @@ public abstract class ItemEntityMixin_Inventory {
     @Shadow private int pickupDelay;
 
     @Inject(
-        method = "onCollideWithPlayer",
+        method = "playerTouch",
         at = @At(
             value = "INVOKE",
             ordinal = 0,
@@ -56,12 +56,12 @@ public abstract class ItemEntityMixin_Inventory {
         }
     }
 
-    @Redirect(method = "onCollideWithPlayer", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/player/PlayerInventory;addItemStackToInventory(Lnet/minecraft/item/ItemStack;)Z"))
+    @Redirect(method = "playerTouch", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/player/PlayerInventory;add(Lnet/minecraft/item/ItemStack;)Z"))
     private boolean spongeImpl$throwPikcupEventForAddItem(final PlayerInventory inventory, final ItemStack itemStack, final PlayerEntity player) {
         final TrackedInventoryBridge inv = (TrackedInventoryBridge) inventory;
         inv.bridge$setCaptureInventory(true);
-        final boolean added = inventory.addItemStackToInventory(itemStack);
+        final boolean added = inventory.add(itemStack);
         inv.bridge$setCaptureInventory(false);
         inv.bridge$getCapturedSlotTransactions();
         if (!InventoryEventFactory.callPlayerChangeInventoryPickupEvent(player, inv)) {

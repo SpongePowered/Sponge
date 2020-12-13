@@ -29,11 +29,14 @@ import com.mojang.datafixers.types.templates.TypeTemplate;
 import net.minecraft.util.datafix.versions.V0100;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(V0100.class)
 public interface V0100Accessor {
 
-    @Invoker("equipment") static TypeTemplate equipment(Schema schema) {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Invoker("equipment")
+    static TypeTemplate invoker$equipment(final Schema schema) {
+        throw new UntransformedInvokerError();
     }
+
 }

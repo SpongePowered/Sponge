@@ -32,13 +32,14 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Score.class)
 public interface ScoreAccessor {
 
-    @Accessor("objective") ScoreObjective accessor$getObjective();
+    @Accessor("objective") ScoreObjective accessor$objective();
 
-    @Accessor("scorePoints") int accessor$getScorePoints();
+    @Accessor("count") int accessor$count();
 
-    @Accessor("scorePoints") void accessor$setScorePoints(int scorePoints);
+    @Accessor("count") void accessor$count(final int count);
 
-    @Accessor("forceUpdate") boolean accessor$getForceUpdate();
+    @Accessor("forceUpdate") boolean accessor$forceUpdate();
 
-    @Accessor("forceUpdate") void accessor$setForceUpdate(boolean forceUpdate);
+    @Accessor("forceUpdate") void accessor$forceUpdate(final boolean forceUpdate);
+
 }

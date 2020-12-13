@@ -30,7 +30,7 @@ import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeBodyPart extends SpongeCatalogType implements BodyPart {
 
-    public SpongeBodyPart(ResourceKey key) {
+    public SpongeBodyPart(final ResourceKey key) {
         super(key);
     }
 }

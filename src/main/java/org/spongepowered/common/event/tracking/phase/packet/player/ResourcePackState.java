@@ -48,7 +48,7 @@ public final class ResourcePackState extends BasicPacketState {
         final CResourcePackStatusPacketAccessor resource = phaseContext.getPacket();
         final ResourcePackStatusEvent.ResourcePackStatus status;
         ResourcePack pack;
-        switch (resource.accessor$getAction()) {
+        switch (resource.accessor$action()) {
             case ACCEPTED:
                 pack = mixinHandler.bridge$popReceivedResourcePack(true);
                 status = ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED;

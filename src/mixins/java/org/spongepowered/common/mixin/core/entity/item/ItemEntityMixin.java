@@ -73,7 +73,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
 
     @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = Constants.Entity.Item.DEFAULT_ITEM_MERGE_RADIUS))
     private double impl$changeSearchRadiusFromConfig(final double originalRadius) {
-        if (this.world.isRemote || ((WorldBridge) this.world).bridge$isFake()) {
+        if (this.world.isClientSide || ((WorldBridge) this.world).bridge$isFake()) {
             return originalRadius;
         }
         if (this.impl$cachedRadius == -1) {

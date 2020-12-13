@@ -74,7 +74,7 @@ public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistra
         this.pattern.forEach(jsonarray::add);
         json.add(Constants.Recipe.SHAPED_PATTERN, jsonarray);
         final JsonObject jsonobject = new JsonObject();
-        this.ingredientMap.forEach((key, value) -> jsonobject.add(String.valueOf(key), value.serialize()));
+        this.ingredientMap.forEach((key, value) -> jsonobject.add(String.valueOf(key), value.toJson()));
         json.add(Constants.Recipe.SHAPED_INGREDIENTS, jsonobject);
     }
 
@@ -92,10 +92,10 @@ public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistra
             json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getID(), this.resultFunction));
+            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
         }
         if (this.remainingItemsFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_REMAINING_ITEMS, ResultUtil.cacheRemainingItemsFunction(this.getID(), this.remainingItemsFunction));
+            json.addProperty(Constants.Recipe.SPONGE_REMAINING_ITEMS, ResultUtil.cacheRemainingItemsFunction(this.getId(), this.remainingItemsFunction));
         }
     }
 

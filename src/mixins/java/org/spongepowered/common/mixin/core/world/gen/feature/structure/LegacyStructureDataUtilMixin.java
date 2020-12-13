@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.feature.structure;
 
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.structure.LegacyStructureDataUtil;
 import net.minecraft.world.storage.DimensionSavedDataManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,7 +42,7 @@ public abstract class LegacyStructureDataUtilMixin {
      * @reason Allow the platform to determine how to create the legacy structure data updater
      */
     @Overwrite
-    public static LegacyStructureDataUtil func_215130_a(DimensionType p_215130_0_, @Nullable DimensionSavedDataManager p_215130_1_) {
-        return PlatformHooks.getInstance().getWorldGenerationHooks().createLegacyStructureDataUtil(p_215130_0_, p_215130_1_);
+    public static LegacyStructureDataUtil func_236992_a_(final RegistryKey<World> dimension, final @Nullable DimensionSavedDataManager savedData) {
+        return PlatformHooks.getInstance().getWorldGenerationHooks().createLegacyStructureDataUtil(dimension, savedData);
     }
 }

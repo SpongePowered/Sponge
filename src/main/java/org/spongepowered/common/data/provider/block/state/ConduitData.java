@@ -39,8 +39,8 @@ public final class ConduitData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(ConduitBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(ConduitBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(ConduitBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(ConduitBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof ConduitBlock);
     }
     // @formatter:on

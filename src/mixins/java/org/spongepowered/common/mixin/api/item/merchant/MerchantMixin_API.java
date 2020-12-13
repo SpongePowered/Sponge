@@ -45,12 +45,12 @@ import java.util.Collections;
 @Implements(@Interface(iface = IMerchant.class, prefix = "imerchant$"))
 public interface MerchantMixin_API extends Merchant {
 
-    default void imerchant$setCustomer(@Nullable final PlayerEntity player) {
+    default void imerchant$setTradingPlayer(@Nullable final PlayerEntity player) {
         this.setCustomer((Humanoid) player);
     }
 
     @Nullable
-    default PlayerEntity imerchant$getCustomer() {
+    default PlayerEntity imerchant$getTradingPlayer() {
         return (PlayerEntity) this.getCustomer()
             .filter(humanoid -> humanoid instanceof PlayerEntity)
             .orElse(null);
@@ -65,15 +65,15 @@ public interface MerchantMixin_API extends Merchant {
         return merchantRecipes;
     }
 
-    default void imerchant$onTrade(final MerchantOffer recipe) {
+    default void imerchant$notifyTrade(final MerchantOffer recipe) {
 
     }
 
-    default void imerchant$verifySellingItem(final ItemStack stack) {
+    default void imerchant$notifyTradeUpdated(final ItemStack stack) {
 
     }
 
-    default World imerchant$getWorld() {
+    default World imerchant$getLevel() {
         return ((World) this.getLocation().getWorld());
     }
 }

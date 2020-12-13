@@ -34,11 +34,11 @@ import java.util.Map;
 @ConfigSerializable
 public class BlockEntityTrackerCategory {
 
-    @Comment("If 'true', newly discovered tileentities will be added to this config with default settings.")
+    @Comment("If 'true', newly discovered block entities will be added to this config with default settings.")
     private boolean autoPopulate = false;
 
     @Setting("mods")
-    @Comment("Per-mod tileentity id mappings for controlling tracking behavior")
+    @Comment("Per-mod block entity id mappings for controlling tracking behavior")
     private Map<String, BlockEntityTrackerModCategory> modMapping = new HashMap<>();
 
     public Map<String, BlockEntityTrackerModCategory> getModMappings() {

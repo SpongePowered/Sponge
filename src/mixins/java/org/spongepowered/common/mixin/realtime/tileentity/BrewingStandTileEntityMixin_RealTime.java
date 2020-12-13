@@ -48,11 +48,11 @@ public abstract class BrewingStandTileEntityMixin_RealTime extends TileEntityMix
         )
     )
     private void realTimeImpl$adjustForRealTimeBrewTime(final BrewingStandTileEntity self, final int modifier) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.level).bridge$isFake()) {
             this.brewTime = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.world).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) this.level).realTimeBridge$getRealTimeTicks();
         this.brewTime = Math.max(0, this.brewTime - ticks);
     }
 

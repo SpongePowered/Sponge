@@ -34,11 +34,13 @@ import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 @Mixin(FunctionManager.class)
 public abstract class FunctionManagerMixin implements CommandSourceProviderBridge {
 
-    @Shadow public abstract CommandSource shadow$getCommandSource();
+    // @formatter:off
+    @Shadow public abstract CommandSource shadow$getGameLoopSender();
+    // @formatter:on
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.shadow$getCommandSource();
+        return this.shadow$getGameLoopSender();
     }
 
 }

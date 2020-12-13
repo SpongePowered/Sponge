@@ -40,8 +40,8 @@ public final class WallBannerData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(WallBannerBlock.HORIZONTAL_FACING)))
-                        .set((h, v) -> DirectionUtil.set(h, v, WallBannerBlock.HORIZONTAL_FACING))
+                        .get(h -> DirectionUtil.getFor(h.getValue(WallBannerBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, WallBannerBlock.FACING))
                         .supports(h -> h.getBlock() instanceof WallBannerBlock);
     }
     // @formatter:on

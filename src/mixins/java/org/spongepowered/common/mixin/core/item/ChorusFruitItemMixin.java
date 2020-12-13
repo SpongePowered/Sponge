@@ -37,13 +37,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(ChorusFruitItem.class)
 public abstract class ChorusFruitItemMixin {
 
-    @Redirect(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;attemptTeleport(DDDZ)Z"))
-    private boolean impl$createCauseFrameForTeleport(LivingEntity entity, double p_213373_1_, double p_213373_3_, double p_213373_5_,
-            boolean p_213373_7_) {
+    @Redirect(method = "finishUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;randomTeleport(DDDZ)Z"))
+    private boolean impl$createCauseFrameForTeleport(final LivingEntity entity, final double x, final double y, final double z,
+                                                     final boolean p_213373_7_) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.CHORUS_FRUIT);
 
-            return entity.attemptTeleport(p_213373_1_, p_213373_3_, p_213373_5_, p_213373_7_);
+            return entity.randomTeleport(x, y, z, p_213373_7_);
         }
     }
 }

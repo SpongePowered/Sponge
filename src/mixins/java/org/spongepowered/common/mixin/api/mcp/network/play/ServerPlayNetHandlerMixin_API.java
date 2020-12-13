@@ -47,9 +47,11 @@ import java.net.InetSocketAddress;
 @Mixin(ServerPlayNetHandler.class)
 public abstract class ServerPlayNetHandlerMixin_API implements ServerPlayerConnection {
 
-    @Shadow @Final public NetworkManager netManager;
+    // @formatter:off
+    @Shadow @Final public NetworkManager connection;
     @Shadow public ServerPlayerEntity player;
     @Shadow public abstract void shadow$disconnect(ITextComponent reason);
+    // @formatter:on
 
     @Override
     public GameProfile getProfile() {
@@ -74,16 +76,16 @@ public abstract class ServerPlayNetHandlerMixin_API implements ServerPlayerConne
 
     @Override
     public InetSocketAddress getAddress() {
-        return ((NetworkManagerBridge) this.netManager).bridge$getAddress();
+        return ((NetworkManagerBridge) this.connection).bridge$getAddress();
     }
 
     @Override
     public InetSocketAddress getVirtualHost() {
-        return ((NetworkManagerBridge) this.netManager).bridge$getVirtualHost();
+        return ((NetworkManagerBridge) this.connection).bridge$getVirtualHost();
     }
 
     @Override
     public int getLatency() {
-        return this.player.ping;
+        return this.player.latency;
     }
 }

@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.potion.EffectInstance;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.BodyParts;
@@ -63,15 +63,15 @@ public final class LivingData {
                             return true;
                         })
                     .create(Keys.ACTIVE_ITEM)
-                        .get(h -> ItemStackUtil.snapshotOf(h.getActiveItemStack()))
+                        .get(h -> ItemStackUtil.snapshotOf(h.getUseItem()))
                         .setAnd((h, v) -> {
                             if (v.isEmpty()) {
-                                h.stopActiveHand();
+                                h.releaseUsingItem();
                                 return true;
                             }
                             return false;
                         })
-                        .delete(LivingEntity::stopActiveHand)
+                        .delete(LivingEntity::releaseUsingItem)
                     .create(Keys.BODY_ROTATIONS)
                         .get(h -> {
                             final double headYaw = h.getRotationYawHead();
@@ -122,13 +122,13 @@ public final class LivingData {
 
                             h.setHealth(v.floatValue());
                             if (v == 0) {
-                                h.attackEntityFrom(DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE, 1000F);
+                                h.hurt(DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE, 1000F);
                             }
                             return true;
                         })
                     .create(Keys.IS_ELYTRA_FLYING)
-                        .get(LivingEntity::isElytraFlying)
-                        .set((h, v) -> ((EntityAccessor) h).accessor$setFlag(Constants.Entity.ELYTRA_FLYING_FLAG, v))
+                        .get(LivingEntity::isFallFlying)
+                        .set((h, v) -> ((EntityAccessor) h).invoker$setSharedFlag(Constants.Entity.ELYTRA_FLYING_FLAG, v))
                     .create(Keys.LAST_ATTACKER)
                         .get(h -> (Entity) h.getRevengeTarget())
                         .setAnd((h, v) -> {
@@ -144,7 +144,7 @@ public final class LivingData {
                         .set((h, v) -> ((LivingEntityBridge) h).bridge$setMaxAir(v))
                     .create(Keys.MAX_HEALTH)
                         .get(h -> (double) h.getMaxHealth())
-                        .set((h, v) -> h.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(v))
+                        .set((h, v) -> h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(v))
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
                             final Collection<EffectInstance> effects = h.getActivePotionEffects();
@@ -158,41 +158,41 @@ public final class LivingData {
                         })
                         .delete(LivingEntity::clearActivePotions)
                     .create(Keys.REMAINING_AIR)
-                        .get(h -> Math.max(0, h.getAir()))
+                        .get(h -> Math.max(0, h.getAirSupply()))
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > h.getMaxAir()) {
+                            if (v < 0 || v > h.getMaxAirSupply()) {
                                 return false;
                             }
-                            if (v == 0 && h.getAir() < 0) {
+                            if (v == 0 && h.getAirSupply() < 0) {
                                 return false;
                             }
-                            h.setAir(v);
+                            h.setAirSupply(v);
                             return true;
                         })
                     .create(Keys.SCALE)
                         .get(h -> (double) h.getRenderScale())
                     .create(Keys.STUCK_ARROWS)
-                        .get(LivingEntity::getArrowCountInEntity)
+                        .get(LivingEntity::getArrowCount)
                         .setAnd((h, v) -> {
                             if (v < 0 || v > Integer.MAX_VALUE) {
                                 return false;
                             }
-                            h.setArrowCountInEntity(v);
+                            h.setArrowCount(v);
                             return true;
                         })
                     .create(Keys.WALKING_SPEED)
-                        .get(h -> h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue())
+                        .get(h -> h.getAttribute(Attributes.MOVEMENT_SPEED).getValue())
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(v);
+                            h.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(v);
                             return true;
                         })
                 .asMutable(LivingEntityAccessor.class)
                     .create(Keys.LAST_DAMAGE_RECEIVED)
-                        .get(h -> (double) h.accessor$getLastDamage())
-                        .set((h, v) -> h.accessor$setLastDamage(v.floatValue()));
+                        .get(h -> (double) h.accessor$lastHurt())
+                        .set((h, v) -> h.accessor$lastHurt(v.floatValue()));
     }
     // @formatter:on
 }

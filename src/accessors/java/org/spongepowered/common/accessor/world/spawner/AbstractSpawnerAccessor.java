@@ -34,35 +34,36 @@ import java.util.List;
 @Mixin(AbstractSpawner.class)
 public interface AbstractSpawnerAccessor {
 
-    @Accessor("spawnDelay") int accessor$getSpawnDelay();
+    @Accessor("spawnDelay") int accessor$spawnDelay();
 
-    @Accessor("spawnDelay") void accessor$setSpawnDelay(int spawnDelay);
+    @Accessor("spawnDelay") void accessor$spawnDelay(final int spawnDelay);
 
-    @Accessor("potentialSpawns") List<WeightedSpawnerEntity> accessor$getPotentialSpawns();
+    @Accessor("spawnPotentials") List<WeightedSpawnerEntity> accessor$spawnPotentials();
 
-    @Accessor("spawnData") WeightedSpawnerEntity accessor$getSpawnData();
+    @Accessor("nextSpawnData") WeightedSpawnerEntity accessor$nextSpawnData();
 
-    @Accessor("minSpawnDelay") int accessor$getMinSpawnDelay();
+    @Accessor("minSpawnDelay") int accessor$minSpawnDelay();
 
-    @Accessor("minSpawnDelay") void accessor$setMinSpawnDelay(int minSpawnDelay);
+    @Accessor("minSpawnDelay") void accessor$minSpawnDelay(final int minSpawnDelay);
 
-    @Accessor("maxSpawnDelay") int accessor$getMaxSpawnDelay();
+    @Accessor("maxSpawnDelay") int accessor$maxSpawnDelay();
 
-    @Accessor("maxSpawnDelay") void accessor$setMaxSpawnDelay(int maxSpawnDelay);
+    @Accessor("maxSpawnDelay") void accessor$maxSpawnDelay(final int maxSpawnDelay);
 
-    @Accessor("spawnCount") int accessor$getSpawnCount();
+    @Accessor("spawnCount") int accessor$spawnCount();
 
-    @Accessor("spawnCount") void accessor$setSpawnCount(int spawnCount);
+    @Accessor("spawnCount") void accessor$spawnCount(final int spawnCount);
 
-    @Accessor("maxNearbyEntities") int accessor$getMaxNearbyEntities();
+    @Accessor("maxNearbyEntities") int accessor$maxNearbyEntities();
 
-    @Accessor("maxNearbyEntities") void accessor$setMaxNearbyEntities(int maxNearbyEntities);
+    @Accessor("maxNearbyEntities") void accessor$maxNearbyEntities(final int maxNearbyEntities);
 
-    @Accessor("activatingRangeFromPlayer") int accessor$getActivatingRangeFromPlayer();
+    @Accessor("requiredPlayerRange") int accessor$requiredPlayerRange();
 
-    @Accessor("activatingRangeFromPlayer") void accessor$setActivatingRangeFromPlayer(int activatingRangeFromPlayer);
+    @Accessor("requiredPlayerRange") void accessor$requiredPlayerRange(final int requiredPlayerRange);
 
-    @Accessor("spawnRange") int accessor$getSpawnRange();
+    @Accessor("spawnRange") int accessor$spawnRange();
 
-    @Accessor("spawnRange") void accessor$setSpawnRange(int spawnRange);
+    @Accessor("spawnRange") void accessor$spawnRange(final int spawnRange);
+
 }

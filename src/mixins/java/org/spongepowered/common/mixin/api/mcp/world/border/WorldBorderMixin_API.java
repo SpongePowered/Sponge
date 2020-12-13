@@ -39,22 +39,24 @@ import java.time.temporal.ChronoUnit;
 @Implements(@Interface(iface = WorldBorder.class, prefix = "worldBorder$"))
 public abstract class WorldBorderMixin_API implements WorldBorder {
 
+    //@formatter:off
     @Shadow public abstract double getCenterX();
     @Shadow public abstract double getCenterZ();
-    @Shadow public abstract double getTargetSize();
-    @Shadow public abstract void setTransition(double newSize);
-    @Shadow public abstract void setTransition(double oldSize, double newSize, long time);
-    @Shadow public abstract long getTimeUntilTarget();
-    @Shadow public abstract double getDamageBuffer();
-    @Shadow public abstract void setDamageBuffer(double buffer);
+    @Shadow public abstract double shadow$getLerpTarget();
+    @Shadow public abstract void shadow$setSize(double newSize);
+    @Shadow public abstract void shadow$lerpSizeBetween(double oldSize, double newSize, long time);
+    @Shadow public abstract long shadow$getLerpRemainingTime();
+    @Shadow public abstract double shadow$getDamageSafeZone();
+    @Shadow public abstract void shadow$setDamageSafeZone(double buffer);
     @Shadow public abstract void shadow$setCenter(double x, double z);
     @Shadow public abstract double shadow$getDamagePerBlock();
     @Shadow public abstract void shadow$setDamagePerBlock(double amount);
     @Shadow public abstract int shadow$getWarningTime();
     @Shadow public abstract void shadow$setWarningTime(int time);
-    @Shadow public abstract int shadow$getWarningDistance();
-    @Shadow public abstract void shadow$setWarningDistance(int distance);
-    @Shadow public abstract double shadow$getDiameter();
+    @Shadow public abstract int shadow$getWarningBlocks();
+    @Shadow public abstract void shadow$setWarningBlocks(int distance);
+    @Shadow public abstract double shadow$getSize();
+    //@formatter:on
 
     @Intrinsic
     public Duration worldBorder$getWarningTime() {
@@ -66,44 +68,44 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
         this.shadow$setWarningTime((int) time.toMillis());
     }
 
-    @Intrinsic
-    public double worldBorder$getWarningDistance() {
-        return this.shadow$getWarningDistance();
+    @Override
+    public double getWarningDistance() {
+        return this.shadow$getWarningBlocks();
     }
 
-    @Intrinsic
-    public void worldBorder$setWarningDistance(final double distance) {
-        this.shadow$setWarningDistance((int) distance);
+    @Override
+    public void setWarningDistance(final double distance) {
+        this.shadow$setWarningBlocks((int) distance);
     }
 
     @Override
     public double getNewDiameter() {
-        return this.getTargetSize();
+        return this.shadow$getLerpTarget();
     }
 
-    @Intrinsic
-    public double worldBorder$getDiameter() {
-        return this.shadow$getDiameter();
+    @Override
+    public double getDiameter() {
+        return this.shadow$getSize();
     }
 
     @Override
     public void setDiameter(final double diameter) {
-        this.setTransition(diameter);
+        this.shadow$setSize(diameter);
     }
 
     @Override
     public void setDiameter(final double diameter, final Duration time) {
-        this.setTransition(this.getDiameter(), diameter, time.toMillis());
+        this.shadow$lerpSizeBetween(this.getDiameter(), diameter, time.toMillis());
     }
 
     @Override
     public void setDiameter(final double startDiameter, final double endDiameter, final Duration time) {
-        this.setTransition(startDiameter, endDiameter, time.toMillis());
+        this.shadow$lerpSizeBetween(startDiameter, endDiameter, time.toMillis());
     }
 
     @Override
     public Duration getTimeRemaining() {
-        return Duration.of(this.getTimeUntilTarget(), ChronoUnit.MILLIS);
+        return Duration.of(this.shadow$getLerpRemainingTime(), ChronoUnit.MILLIS);
     }
 
     @Override
@@ -118,21 +120,21 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
 
     @Override
     public double getDamageThreshold() {
-        return this.getDamageBuffer();
+        return this.shadow$getDamageSafeZone();
     }
 
     @Override
     public void setDamageThreshold(final double distance) {
-        this.setDamageBuffer(distance);
+        this.shadow$setDamageSafeZone(distance);
     }
 
-    @Intrinsic
-    public double worldBorder$getDamageAmount() {
+    @Override
+    public double getDamageAmount() {
         return this.shadow$getDamagePerBlock();
     }
 
-    @Intrinsic
-    public void worldBorder$setDamageAmount(final double damage) {
+    @Override
+    public void setDamageAmount(final double damage) {
         this.shadow$setDamagePerBlock(damage);
     }
 

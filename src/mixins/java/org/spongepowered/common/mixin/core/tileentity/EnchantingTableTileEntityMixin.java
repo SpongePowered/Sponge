@@ -34,7 +34,7 @@ import org.spongepowered.common.bridge.CustomNameableBridge;
 public abstract class EnchantingTableTileEntityMixin implements CustomNameableBridge {
 
     @Override
-    public void bridge$setCustomDisplayName(ITextComponent component) {
-        ((EnchantingTableTileEntityAccessor) this).accessor$setCustomName(component);
+    public void bridge$setCustomDisplayName(final ITextComponent customName) {
+        ((EnchantingTableTileEntityAccessor) this).invoker$setCustomName(customName);
     }
 }

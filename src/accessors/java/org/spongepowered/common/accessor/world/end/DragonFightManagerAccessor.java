@@ -32,7 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(DragonFightManager.class)
 public interface DragonFightManagerAccessor {
 
-    // TODO - to be used for the key provider system on EnderDragon's Keys.BOSS_BAR
-    @Accessor("bossInfo") ServerBossInfo accessor$getBossInfo();
+    @Accessor("dragonEvent") ServerBossInfo accessor$dragonEvent();
 
 }

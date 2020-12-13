@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(HopperContainer.class)
 public interface HopperContainerAccessor {
 
-    @Accessor("hopperInventory") IInventory accessor$getHopperInventory();
+    @Accessor("hopper") IInventory accessor$hopper();
+
 }

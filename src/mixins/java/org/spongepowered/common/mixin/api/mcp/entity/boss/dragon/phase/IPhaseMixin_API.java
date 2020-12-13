@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.entity.boss.dragon.phase;
 
 import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.entity.boss.dragon.phase.PhaseType;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhase;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,17 +37,19 @@ import java.util.Optional;
 @Mixin(IPhase.class)
 public interface IPhaseMixin_API extends DragonPhase {
 
-    @Shadow Vec3d shadow$getTargetLocation();
-    @Shadow PhaseType<? extends IPhase> shadow$getType();
+    // @formatter:off
+    @Shadow net.minecraft.util.math.vector.Vector3d shadow$getFlyTargetLocation();
+    @Shadow PhaseType<? extends IPhase> shadow$getPhase();
+    // @formatter:on
 
     @Override
     default DragonPhaseType getType() {
-        return (DragonPhaseType) this.shadow$getType();
+        return (DragonPhaseType) this.shadow$getPhase();
     }
 
     @Override
     default Optional<Vector3d> getTargetPosition() {
-        final Vec3d vec = this.shadow$getTargetLocation();
+        final net.minecraft.util.math.vector.Vector3d vec = this.shadow$getFlyTargetLocation();
         return vec == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(vec));
     }
 

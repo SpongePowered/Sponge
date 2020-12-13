@@ -37,8 +37,10 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 @Implements(value = @Interface(iface = ArtType.class, prefix = "artType$"))
 public abstract class PaintingTypeMixin_API implements ArtType {
 
+    // @formatter:off
     @Shadow public abstract int shadow$getWidth();
     @Shadow public abstract int shadow$getHeight();
+    // @formatter:on
 
     @Override
     public ResourceKey getKey() {

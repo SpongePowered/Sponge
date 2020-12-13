@@ -61,25 +61,25 @@ public final class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamag
                 (net.minecraft.entity.Entity) this.proxy.get());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
         if (this.creative) {
-            accessor.accessor$setDamageAllowedInCreativeMode();
+            accessor.invoker$bypassInvul();
         }
         if (this.scales) {
-            damageSource.setDifficultyScaled();
+            damageSource.setScalesWithDifficulty();
         }
         if (this.magical) {
-            damageSource.setMagicDamage();
+            damageSource.setMagic();
         }
         if (this.bypasses) {
-            accessor.accessor$setDamageBypassesArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.absolute) {
-            accessor.accessor$setDamageIsAbsolute();
+            accessor.invoker$bypassMagic();
         }
         if (this.explosion) {
             damageSource.setExplosion();
         }
         if (this.exhaustion != null) {
-            accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
+            accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
         return (IndirectEntityDamageSource) damageSource;
     }

@@ -38,15 +38,15 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 @Mixin(Entity.class)
 public abstract class EntityMixin_RealTime {
 
-    @Shadow protected int rideCooldown;
-    @Shadow public World world;
-    @Shadow protected int portalCounter;
-    @Shadow public int timeUntilPortal;
+    @Shadow protected int boardingCooldown;
+    @Shadow public World level;
+    @Shadow protected int portalTime;
+    @Shadow private int portalCooldown;
 
     @Redirect(method = "baseTick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/entity/Entity;rideCooldown:I",
+            target = "Lnet/minecraft/entity/Entity;boardingCooldown:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
@@ -56,38 +56,38 @@ public abstract class EntityMixin_RealTime {
             ),
             to = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/entity/Entity;distanceWalkedModified:F",
+                target = "Lnet/minecraft/entity/Entity;walkDist:F",
                 opcode = Opcodes.GETFIELD
             )
         )
     )
     private void realTimeImpl$adjustForRealTimeEntityCooldown(final Entity self, final int modifier) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
-            this.rideCooldown = modifier;
+        if (((WorldBridge) this.level).bridge$isFake()) {
+            this.boardingCooldown = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.world).realTimeBridge$getRealTimeTicks();
-        this.rideCooldown = Math.max(0, this.rideCooldown - ticks);
+        final int ticks = (int) ((RealTimeTrackingBridge) this.level).realTimeBridge$getRealTimeTicks();
+        this.boardingCooldown = Math.max(0, this.boardingCooldown - ticks);
     }
 
-    @Redirect(method = "updatePortal",
+    @Redirect(method = "handleNetherPortal",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/entity/Entity;portalCounter:I",
+            target = "Lnet/minecraft/entity/Entity;portalTime:I",
             opcode = Opcodes.PUTFIELD, ordinal = 0
         ),
         slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getMaxInPortalTime()I"),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getPortalCooldown()I")
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getPortalWaitTime()I"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setPortalCooldown()V")
         )
     )
     private void realTimeImpl$adjustForRealTimePortalCounter(final Entity self, final int modifier) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
-            this.portalCounter = modifier;
+        if (((WorldBridge) this.level).bridge$isFake()) {
+            this.portalTime = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.world).realTimeBridge$getRealTimeTicks();
-        this.portalCounter += ticks;
+        final int ticks = (int) ((RealTimeTrackingBridge) this.level).realTimeBridge$getRealTimeTicks();
+        this.portalTime += ticks;
     }
 
 }

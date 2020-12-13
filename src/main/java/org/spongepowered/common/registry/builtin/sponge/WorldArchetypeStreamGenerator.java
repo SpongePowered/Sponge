@@ -32,11 +32,9 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;

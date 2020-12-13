@@ -28,24 +28,26 @@ import net.minecraft.util.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(DamageSource.class)
 public interface DamageSourceAccessor {
 
-    @SuppressWarnings("PublicStaticMixinMember") // MCDev Plugin needs an update.
-    @Invoker("<init>") static DamageSource accessor$createDamageSource(String id) {
-        throw new UnsupportedOperationException("Untransformed Accessor!");
+    @Invoker("<init>")
+    static DamageSource invoker$new(final String msgId) {
+        throw new UntransformedInvokerError();
     }
 
-    @Accessor("hungerDamage") void accessor$setHungerDamage(float damage);
+    @Accessor("exhaustion") void accessor$exhaustion(final float exhaustion);
 
-    @Accessor("damageType") void accessor$setDamageType(String id);
+    @Accessor("msgId") void accessor$msgId(final String msgId);
 
-    @Invoker("setDamageAllowedInCreativeMode") DamageSource accessor$setDamageAllowedInCreativeMode();
+    @Invoker("bypassArmor") DamageSource invoker$bypassArmor();
 
-    @Invoker("setDamageBypassesArmor") DamageSource accessor$setDamageBypassesArmor();
+    @Invoker("bypassInvul") DamageSource invoker$bypassInvul();
 
-    @Invoker("setDamageIsAbsolute") DamageSource accessor$setDamageIsAbsolute();
+    @Invoker("bypassMagic") DamageSource invoker$bypassMagic();
 
-    @Invoker("setFireDamage") DamageSource accessor$setFireDamage();
+    @Invoker("setIsFire") DamageSource invoker$setIsFire();
+
 }

@@ -50,7 +50,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 public abstract class NoteBlockMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
-    @Inject(method = "eventReceived(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;II)Z",
+    @Inject(method = "triggerEvent",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"),
             cancellable = true)
     private void impl$throwNoteBlockSoundEvent(BlockState state, World worldIn, BlockPos pos, int id, int param, CallbackInfoReturnable<Boolean> callbackInfo) {
@@ -59,7 +59,7 @@ public abstract class NoteBlockMixin extends BlockMixin {
         }
 
         //No noteblock sounds if the block above it isn't air
-        if (worldIn.getBlockState(pos.up()).getMaterial() != Material.AIR) {
+        if (worldIn.getBlockState(pos.above()).getMaterial() != Material.AIR) {
             return;
         }
 
@@ -74,7 +74,7 @@ public abstract class NoteBlockMixin extends BlockMixin {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(
                     frame.getCurrentCause(), (ServerWorld) worldIn, pos,
-                    NoteBlockInstrument.byState(state).getSound(), instrumentType,
+                    NoteBlockInstrument.byState(state).getSoundEvent(), instrumentType,
                     SpongeCommon.getRegistry().getCatalogRegistry().requireRegistry(NotePitch.class).getByValue(param), pitch);
             if (event.isCancelled()) {
                 callbackInfo.setReturnValue(true);

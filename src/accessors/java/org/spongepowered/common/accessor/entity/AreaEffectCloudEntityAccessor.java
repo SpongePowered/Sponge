@@ -35,21 +35,22 @@ import java.util.List;
 @Mixin(AreaEffectCloudEntity.class)
 public interface AreaEffectCloudEntityAccessor {
 
-    @Accessor("durationOnUse") void accessor$setDurationOnUse(int radiusOnUse);
+    @Accessor("effects") List<EffectInstance> accessor$effects();
 
-    @Accessor("durationOnUse") int accessor$getDurationOnUse();
+    @Accessor("effects") @Mutable void accessor$effects(final List<EffectInstance> effects);
 
-    @Accessor("effects") List<EffectInstance> accessor$getEffects();
+    @Accessor("waitTime") int accessor$waitTime();
 
-    @Mutable @Accessor("effects") void accessor$setEffects(List<EffectInstance> effects);
+    @Accessor("reapplicationDelay") int accessor$reapplicationDelay();
 
-    @Accessor("reapplicationDelay") int accessor$getReapplicationDelay();
+    @Accessor("reapplicationDelay") void accessor$reapplicationDelay(final int reapplicationDelay);
 
-    @Accessor("reapplicationDelay") void accessor$setReapplicationDelay(int delay);
+    @Accessor("durationOnUse") void accessor$durationOnUse(final int radiusOnUse);
 
-    @Accessor("radiusOnUse") float accessor$getRadiusOnUse();
+    @Accessor("durationOnUse") int accessor$durationOnUse();
 
-    @Accessor("radiusPerTick") float accessor$getRadiusPerTick();
+    @Accessor("radiusOnUse") float accessor$radiusOnUse();
 
-    @Accessor("waitTime") int accessor$getWaitTime();
+    @Accessor("radiusPerTick") float accessor$radiusPerTick();
+
 }

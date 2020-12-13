@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(MerchantContainer.class)
 public interface MerchantContainerAccessor {
 
-    @Accessor("merchant") IMerchant accessor$getMerchant();
+    @Accessor("trader") IMerchant accessor$trader();
+
 }

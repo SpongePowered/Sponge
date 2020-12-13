@@ -254,7 +254,7 @@ public final class SpongeCommandManager implements CommandManager {
     @Override
     public void updateCommandTreeForPlayer(@NonNull final ServerPlayer player) {
         Objects.requireNonNull(player, "player");
-        SpongeCommon.getServer().getCommandManager().send((ServerPlayerEntity) player);
+        SpongeCommon.getServer().getCommands().sendCommands((ServerPlayerEntity) player);
     }
 
     @Override

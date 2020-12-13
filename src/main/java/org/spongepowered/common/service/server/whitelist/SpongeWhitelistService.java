@@ -47,9 +47,9 @@ public final class SpongeWhitelistService implements WhitelistService {
     public Collection<GameProfile> getWhitelistedProfiles() {
         final List<GameProfile> profiles = new ArrayList<>();
 
-        final WhiteList list = SpongeCommon.getServer().getPlayerList().getWhitelistedPlayers();
-        for (final WhitelistEntry entry: ((UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry>) list).accessor$getValues().values()) {
-            profiles.add(SpongeGameProfile.of(((UserListEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$getValue()));
+        final WhiteList list = SpongeCommon.getServer().getPlayerList().getWhiteList();
+        for (final WhitelistEntry entry: ((UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry>) list).accessor$map().values()) {
+            profiles.add(SpongeGameProfile.of(((UserListEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$user()));
         }
 
         return profiles;
@@ -61,8 +61,8 @@ public final class SpongeWhitelistService implements WhitelistService {
         final UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry> whitelist = (UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry>) SpongeWhitelistService
             .getWhitelist();
 
-        whitelist.accessor$removeExpired();
-        return whitelist.accessor$getValues().containsKey(whitelist.accessor$getObjectKey(SpongeGameProfile.toMcProfile(profile)));
+        whitelist.invoker$removeExpired();
+        return whitelist.accessor$map().containsKey(whitelist.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile)));
     }
 
     @Override
@@ -80,6 +80,6 @@ public final class SpongeWhitelistService implements WhitelistService {
     }
 
     private static WhiteList getWhitelist() {
-        return SpongeCommon.getServer().getPlayerList().getWhitelistedPlayers();
+        return SpongeCommon.getServer().getPlayerList().getWhiteList();
     }
 }

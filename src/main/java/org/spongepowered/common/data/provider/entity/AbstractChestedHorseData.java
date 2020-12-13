@@ -39,7 +39,7 @@ public final class AbstractChestedHorseData {
                 .asMutable(AbstractChestedHorseEntity.class)
                     .create(Keys.HAS_CHEST)
                         .get(AbstractChestedHorseEntity::hasChest)
-                        .set(AbstractChestedHorseEntity::setChested);
+                        .set(AbstractChestedHorseEntity::setChest);
     }
     // @formatter:on
 }

@@ -27,10 +27,9 @@ package org.spongepowered.common.data.nbt.validation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeValidationType extends SpongeCatalogType implements ValidationType {
+public final class SpongeValidationType extends SpongeCatalogType implements ValidationType {
 
     public SpongeValidationType(final ResourceKey key) {
         super(key);
     }
-
 }

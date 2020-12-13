@@ -32,16 +32,16 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AxisAlignedBB.class)
 public interface AxisAlignedBBAccessor {
 
-    @Mutable @Accessor("minX") void accessor$setMinX(double minX);
+    @Accessor("minX") @Mutable void accessor$minX(final double minX);
 
-    @Mutable @Accessor("minY") void accessor$setMinY(double minY);
+    @Accessor("minY") @Mutable void accessor$minY(final double minY);
 
-    @Mutable @Accessor("minZ") void accessor$setMinZ(double minZ);
+    @Accessor("minZ") @Mutable void accessor$minZ(final double minZ);
 
-    @Mutable @Accessor("maxX") void accessor$setMaxX(double maxX);
+    @Accessor("maxX") @Mutable void accessor$maxX(final double maxX);
 
-    @Mutable @Accessor("maxY") void accessor$setMaxY(double maxY);
+    @Accessor("maxY") @Mutable void accessor$maxY(final double maxY);
 
-    @Mutable @Accessor("maxZ") void accessor$setMaxZ(double maxZ);
+    @Accessor("maxZ") @Mutable void accessor$maxZ(final double maxZ);
 
 }

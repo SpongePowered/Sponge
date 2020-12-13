@@ -27,7 +27,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.TrackableBridge;
@@ -36,7 +36,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class FluidTickContext extends LocationBasedTickContext<FluidTickContext> {
 
-    IFluidState tickingBlock;
+    FluidState tickingBlock;
     boolean providesModifier;
     World<?> world;
 
@@ -63,7 +63,7 @@ public class FluidTickContext extends LocationBasedTickContext<FluidTickContext>
         return this;
     }
 
-    public FluidTickContext fluid(IFluidState fluidState) {
+    public FluidTickContext fluid(FluidState fluidState) {
         this.tickingBlock = fluidState;
         return this;
     }

@@ -30,6 +30,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -42,15 +43,15 @@ import org.spongepowered.common.bridge.block.TrackedBlockBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.mixin.IncompatibleClassTransformationError;
 import org.spongepowered.common.util.ReflectionUtil;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(Block.class)
 public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
 
     // @formatter:off
-    @Shadow public static void shadow$spawnDrops(final BlockState state, final World worldIn, final BlockPos pos) {
-        throw new IllegalStateException("untransformed shadow");
+    @Shadow public static void shadow$dropResources(final BlockState state, final World worldIn, final BlockPos pos) {
+        throw new IncompatibleClassTransformationError("untransformed shadow");
     }
     // @formatter:on
     private final boolean tracker$hasNeighborLogicOverridden = ReflectionUtil.isNeighborChangedDeclared(this.getClass());
@@ -74,9 +75,9 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
     @Inject(
         method = {
             // Effectively, all the spawnDrops injection points we can scatter
-            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V",
-            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
-            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V"
+            "dropResources(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V",
+            "dropResources(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/IWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
+            "dropResources(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V"
         },
         at = @At("HEAD"),
         cancellable = true
@@ -89,9 +90,8 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(
-        method = "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V",
+        method = "dropResources(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V",
         at = @At("HEAD")
     )
     private static void tracker$captureBlockProposedToBeSpawningDrops(final BlockState state, final World worldIn,
@@ -109,13 +109,16 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
     }
 
     @Inject(
-        method = "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
+        method = "dropResources(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/IWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
         at = @At("HEAD")
     )
     private static void tracker$captureBlockProposedToBeSpawningDrops(
-        final BlockState state, final World worldIn,
+        final BlockState state, final IWorld worldIn,
         final BlockPos pos, final @Nullable TileEntity tileEntity, final CallbackInfo ci
     ) {
+        if (!(worldIn instanceof World)) {
+            return; // In the name of my father, and his father before him, I cast you out!
+        }
         final PhaseTracker server = PhaseTracker.SERVER;
         if (server.getSidedThread() != Thread.currentThread()) {
             return;
@@ -125,11 +128,11 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
-            .logBlockDrops(context, worldIn, pos, state, tileEntity);
+            .logBlockDrops(context, (World) worldIn, pos, state, tileEntity);
     }
 
     @Inject(
-        method = "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V",
+        method = "dropResources(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V",
         at = @At("HEAD")
     )
     private static void tracker$captureBlockProposedToBeSpawningDrops(final BlockState state, final World worldIn,
@@ -150,9 +153,9 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
 
     @Inject(
         method = {
-            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V",
-            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
-            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V"
+            "dropResources(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V",
+            "dropResources(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/IWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
+            "dropResources(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V"
         },
         at = @At("TAIL")
     )

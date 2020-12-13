@@ -29,7 +29,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.impl.GameRuleCommand;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -37,14 +36,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(GameRuleCommand.class)
 public abstract class GameRuleCommandMixin {
 
-    @Redirect(method = "func_223485_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getGameRules()Lnet/minecraft/world/GameRules;"))
-    private static GameRules impl$usePerWorldGameRules(MinecraftServer minecraftServer, CommandContext<CommandSource> p_223485_0_) {
-        final ServerWorld world = p_223485_0_.getSource().getWorld();
-        return world.getWorldInfo().getGameRulesInstance();
+    @Redirect(method = "setRule", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getGameRules()Lnet/minecraft/world/GameRules;"))
+    private static GameRules impl$usePerWorldGameRules(final MinecraftServer server, final CommandContext<CommandSource> context) {
+        return context.getSource().getLevel().getLevelData().getGameRules();
     }
 
-    @Redirect(method = "func_223486_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getGameRules()Lnet/minecraft/world/GameRules;"))
-    private static GameRules impl$usePerWorldGameRules(MinecraftServer minecraftServer, CommandSource p_223486_0_) {
-        return p_223486_0_.getWorld().getWorldInfo().getGameRulesInstance();
+    @Redirect(method = "queryRule", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getGameRules()Lnet/minecraft/world/GameRules;"))
+    private static GameRules impl$usePerWorldGameRules(final MinecraftServer server, final CommandSource source) {
+        return source.getLevel().getLevelData().getGameRules();
     }
 }

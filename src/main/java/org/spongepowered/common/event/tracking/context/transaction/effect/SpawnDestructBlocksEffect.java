@@ -57,7 +57,7 @@ public final class SpawnDestructBlocksEffect implements ProcessingSideEffect {
 
         final List<ItemStack> drops = oldState.drops;
 
-        drops.forEach(drop -> Block.spawnAsEntity(world, pos, drop));
+        drops.forEach(drop -> Block.popResource(world, pos, drop));
 
         return EffectResult.NULL_PASS;
     }

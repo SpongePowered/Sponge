@@ -40,7 +40,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 @Mixin(HopperTileEntity.class)
 public abstract class HopperTileEntityMixin extends LockableLootTileEntityMixin {
 
-    @Inject(method = "captureItem",
+    @Inject(method = "addItem(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/entity/item/ItemEntity;)Z",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ItemEntity;getItem()Lnet/minecraft/item/ItemStack;"))
     private static void impl$trackNotifierWhenTransferring(final IInventory inventory, final ItemEntity entityItem,
         final CallbackInfoReturnable<Boolean> callbackInfo) {
@@ -49,7 +49,7 @@ public abstract class HopperTileEntityMixin extends LockableLootTileEntityMixin 
                 if (inventory instanceof ActiveChunkReferantBridge && inventory instanceof TileEntity) {
                     final TileEntity te = (TileEntity) inventory;
                     final ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) inventory).bridge$getActiveChunk();
-                    spongeChunk.bridge$addTrackedBlockPosition(te.getBlockState().getBlock(), te.getPos(), creator, PlayerTracker.Type.NOTIFIER);
+                    spongeChunk.bridge$addTrackedBlockPosition(te.getBlockState().getBlock(), te.getBlockPos(), creator, PlayerTracker.Type.NOTIFIER);
                 }
             });
         }

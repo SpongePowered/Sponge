@@ -36,12 +36,12 @@ import java.util.Set;
 @Mixin(AdvancementList.class)
 public interface AdvancementListAccessor {
 
-    @Accessor("advancements") Map<ResourceLocation, Advancement> accessor$getAdvancements();
+    @Accessor("advancements") Map<ResourceLocation, Advancement> accessor$advancements();
 
-    @Accessor("roots") Set<Advancement> accessor$getRootsSet();
+    @Accessor("roots") Set<Advancement> accessor$roots();
 
-    @Accessor("nonRoots") Set<Advancement> accessor$getNonRootsSet();
+    @Accessor("tasks") Set<Advancement> accessor$tasks();
 
-    @Accessor("listener") AdvancementList.IListener accessor$getListener();
+    @Accessor("listener") AdvancementList.IListener accessor$listener();
 
 }

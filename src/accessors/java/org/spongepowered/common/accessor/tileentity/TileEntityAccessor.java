@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(TileEntity.class)
 public interface TileEntityAccessor {
 
-    @Accessor("world") void accessor$setWorld(World world);
+    @Accessor("level") void accessor$level(final World level);
+
 }

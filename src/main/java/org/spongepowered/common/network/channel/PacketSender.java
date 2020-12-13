@@ -47,7 +47,7 @@ public final class PacketSender {
 
     public static void sendTo(final EngineConnection connection, final IPacket<?> packet,
             final @Nullable Consumer<Future<? super Void>> listener) {
-        final NetworkManager networkManager = ((NetworkManagerHolderBridge) connection).bridge$getNetworkManager();
+        final NetworkManager networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
         GenericFutureListener<? extends Future<? super Void>> asyncListener = null;
         if (listener != null) {
             final EngineConnectionSide<?> side = connection.getSide();

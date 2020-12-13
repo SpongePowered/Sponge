@@ -32,7 +32,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(SPlayerListHeaderFooterPacket.class)
 public interface SPlayerListHeaderFooterPacketAccessor {
 
-    @Accessor("header") void accessor$setHeader(ITextComponent component);
+    @Accessor("header") void accessor$header(final ITextComponent header);
 
-    @Accessor("footer") void accessor$setFooter(ITextComponent component);
+    @Accessor("footer") void accessor$footer(final ITextComponent footer);
+
 }

@@ -36,7 +36,7 @@ import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.ILocationArgument;
 import net.minecraft.command.arguments.Vec3Argument;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -121,7 +121,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
 
         try {
             reader.skipWhitespace();
-            final Vec3d vec3d = SpongeServerLocationValueParameter.VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context.getCause());
+            final Vector3d vec3d = SpongeServerLocationValueParameter.VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context.getCause());
             final ResourceKey key = worldProperties.getKey();
             return Optional.of(
                     worldProperties.getWorld()

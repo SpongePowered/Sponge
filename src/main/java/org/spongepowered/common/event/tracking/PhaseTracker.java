@@ -137,7 +137,7 @@ public final class PhaseTracker implements CauseStackManager {
                                                    .map(TileEntity::getType)
                                                    .orElse(null);
                 if (type != null) {
-                    @Nullable ResourceLocation id = TileEntityType.getId(type);
+                    @Nullable ResourceLocation id = TileEntityType.getKey(type);
                     if (id == null) {
                         id = new ResourceLocation(source.getClass().getCanonicalName());
                     }
@@ -146,7 +146,7 @@ public final class PhaseTracker implements CauseStackManager {
                     // If we didn't map the tile entity yet, we should apply the mapping
                     // based on whether the source is the same as the TileEntity.
                     if (!contained) {
-                        autoFixedTiles.put(id.toString(), pos.equals(source.getPos()));
+                        autoFixedTiles.put(id.toString(), pos.equals(source.getBlockPos()));
                     }
                     final boolean useTile = contained && autoFixedTiles.get(id.toString());
                     if (useTile) {
@@ -254,7 +254,7 @@ public final class PhaseTracker implements CauseStackManager {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.FORCED);
                     for (final net.minecraft.entity.Entity entity : entities) {
                         // At this point, we don't care what the causes are...
-                        entity.getEntityWorld().addEntity(entity);
+                        entity.getCommandSenderWorld().addFreshEntity(entity);
                     }
                 }
 
@@ -744,7 +744,7 @@ public final class PhaseTracker implements CauseStackManager {
             throw new IllegalStateException(String.format(
                 "CauseStackManager called from off main thread (current='%s', expected='%s')!",
                 ThreadUtil.getDescription(Thread.currentThread()),
-                ThreadUtil.getDescription(SpongeCommon.getServer().getExecutionThread())
+                ThreadUtil.getDescription(SpongeCommon.getServer().getRunningThread())
             ));
         }
         this.checkProviders();

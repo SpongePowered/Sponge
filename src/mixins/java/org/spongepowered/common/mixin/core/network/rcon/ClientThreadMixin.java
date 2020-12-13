@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.network.rcon;
 
 import net.minecraft.network.rcon.ClientThread;
-import net.minecraft.network.rcon.IServer;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThread;
 import net.minecraft.network.rcon.RConUtils;
@@ -58,25 +57,25 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    @Shadow private void sendMultipacketResponse(final int p_72655_1_, final String p_72655_2_) throws IOException {}
-    @Shadow private void sendResponse(final int p_72654_1_, final int p_72654_2_, final String message) throws IOException {}
+    @Shadow private void shadow$sendCmdResponse(final int p_72655_1_, final String p_72655_2_) throws IOException {}
+    @Shadow private void shadow$send(final int p_72654_1_, final int p_72654_2_, final String message) throws IOException {}
     @Shadow private void closeSocket() {}
-    @Shadow private void sendLoginFailedResponse() throws IOException {}
+    @Shadow private void shadow$sendAuthFailure() throws IOException {}
 
-    @Shadow private boolean loggedIn;
-    @Shadow private Socket clientSocket;
+    @Shadow private boolean authed;
+    @Shadow @Final private Socket client;
     @Shadow @Final @Mutable private String rconPassword;
-    @Shadow @Final @Mutable private byte[] buffer;
+    @Shadow @Final @Mutable private byte[] buf;
 
     private RConConsoleSource impl$source;
 
-    protected ClientThreadMixin(final IServer p_i45300_1_, final String p_i45300_2_) {
-        super(p_i45300_1_, p_i45300_2_);
+    protected ClientThreadMixin(final String p_i45300_2_) {
+        super(p_i45300_2_);
     }
 
     @Inject(method = "closeSocket", at = @At("HEAD"))
     private void impl$rconLogoutCallback(final CallbackInfo ci) {
-        if (this.loggedIn) {
+        if (this.authed) {
             SpongeCommon.getServerScheduler().execute(() -> {
                 final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
                 causeStackManager.pushCause(this);
@@ -116,7 +115,7 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
                 causeStackManager.popCauses(2);
                 return event;
             }).get();
-        } catch (InterruptedException | ExecutionException ignored) {
+        } catch (final InterruptedException | ExecutionException ignored) {
             this.closeSocket();
             return;
         }
@@ -133,8 +132,8 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
                     break;
                 }
 
-                final BufferedInputStream bufferedinputstream = new BufferedInputStream(this.clientSocket.getInputStream());
-                final int i = bufferedinputstream.read(this.buffer, 0, this.buffer.length);
+                final BufferedInputStream bufferedinputstream = new BufferedInputStream(this.client.getInputStream());
+                final int i = bufferedinputstream.read(this.buf, 0, this.buf.length);
                 /// Sponge: START
                 if (i == -1) {
                     // We read end of file, which means that this socket should be closed.
@@ -146,22 +145,22 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
 
                 if (10 <= i) {
                     int j = 0;
-                    final int k = RConUtils.getBytesAsLEInt(this.buffer, 0, i);
+                    final int k = RConUtils.intFromByteArray(this.buf, 0, i);
 
                     if (k != i - 4) {
                         break;
                     }
 
                     j += 4;
-                    final int l = RConUtils.getBytesAsLEInt(this.buffer, j, i);
+                    final int l = RConUtils.intFromByteArray(this.buf, j, i);
                     j += 4;
-                    final int i1 = RConUtils.getRemainingBytesAsLEInt(this.buffer, j);
+                    final int i1 = RConUtils.intFromByteArray(this.buf, j);
                     j += 4;
 
                     switch (i1) {
                         case 2:
-                            if (this.loggedIn) {
-                                final String command = RConUtils.getBytesAsString(this.buffer, j, i);
+                            if (this.authed) {
+                                final String command = RConUtils.stringFromByteArray(this.buf, j, i);
                                 try {
                                     /// Sponge: START
                                     // Execute the command on the main thread and wait for it
@@ -170,22 +169,22 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
                                         // Only add the RemoteConnection here, the RconSource
                                         // will be added by the command manager
                                         causeStackManager.pushCause(this);
-                                        SpongeCommon.getServer().getCommandManager().handleCommand(this.impl$source.getCommandSource(), command);
+                                        SpongeCommon.getServer().getCommands().performCommand(this.impl$source.createCommandSourceStack(), command);
                                         causeStackManager.popCause();
                                     }).get();
-                                    final String logContents = this.impl$source.getLogContents();
-                                    this.impl$source.resetLog();
-                                    this.sendMultipacketResponse(l, logContents);
+                                    final String logContents = this.impl$source.getCommandResponse();
+                                    this.impl$source.prepareForCommand();
+                                    this.shadow$sendCmdResponse(l, logContents);
                                     /// Sponge: END
-                                } catch (Exception exception) {
-                                    this.sendMultipacketResponse(l, "Error executing: " + command + " (" + exception.getMessage() + ")");
+                                } catch (final Exception exception) {
+                                    this.shadow$sendCmdResponse(l, "Error executing: " + command + " (" + exception.getMessage() + ")");
                                 }
                                 continue;
                             }
-                            this.sendLoginFailedResponse();
+                            this.shadow$sendAuthFailure();
                             break; // Sponge: 'continue' -> 'break', disconnect when a invalid operation is requested
                         case 3:
-                            final String password = RConUtils.getBytesAsString(this.buffer, j, i);
+                            final String password = RConUtils.stringFromByteArray(this.buf, j, i);
                             if (!password.isEmpty() && password.equals(this.rconPassword)) {
                                 /// Sponge: START
                                 final RconConnectionEvent.Auth event = SpongeCommon.getServerScheduler().execute(() -> {
@@ -199,24 +198,24 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
                                     return event1;
                                 }).get();
                                 if (!event.isCancelled()) {
-                                    this.loggedIn = true;
-                                    this.sendResponse(l, 2, "");
+                                    this.authed = true;
+                                    this.shadow$send(l, 2, "");
                                     continue;
                                 }
                                 /// Sponge: END
                             }
 
-                            this.loggedIn = false;
-                            this.sendLoginFailedResponse();
+                            this.authed = false;
+                            this.shadow$sendAuthFailure();
                             break; // Sponge: 'continue' -> 'break', disconnect if login failed
                         default:
-                            this.sendMultipacketResponse(l, String.format("Unknown request %s", Integer.toHexString(i1)));
+                            this.shadow$sendCmdResponse(l, String.format("Unknown request %s", Integer.toHexString(i1)));
                             break; // Sponge: 'continue' -> 'break', disconnect when a invalid operation is requested
                     }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 break;
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 ClientThreadMixin.LOGGER.error("Exception whilst parsing RCON input", e);
                 break;
             }
@@ -226,11 +225,11 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
 
     @Override
     public boolean bridge$getLoggedIn() {
-        return this.loggedIn;
+        return this.authed;
     }
 
     @Override
-    public void bridge$setLoggedIn(boolean loggedIn) {
-        this.loggedIn = loggedIn;
+    public void bridge$setLoggedIn(final boolean loggedIn) {
+        this.authed = loggedIn;
     }
 }

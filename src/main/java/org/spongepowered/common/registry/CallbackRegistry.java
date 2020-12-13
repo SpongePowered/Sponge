@@ -24,23 +24,26 @@
  */
 package org.spongepowered.common.registry;
 
-import net.minecraft.util.ResourceLocation;
+import com.mojang.serialization.Lifecycle;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
 
 import java.util.function.BiConsumer;
 
 public final class CallbackRegistry<T> extends SimpleRegistry<T> {
 
-    private final BiConsumer<ResourceLocation, T> callback;
+    private final BiConsumer<RegistryKey<T>, T> callback;
 
-    public CallbackRegistry(BiConsumer<ResourceLocation, T> callback) {
+    public CallbackRegistry(final RegistryKey<? extends Registry<T>> key, final Lifecycle lifecycle, final BiConsumer<RegistryKey<T>, T> callback) {
+        super(key, lifecycle);
         this.callback = callback;
     }
 
     @Override
-    public <V extends T> V register(int id, ResourceLocation name, V instance) {
-        V value = super.register(id, name, instance);
-        this.callback.accept(name, instance);
+    public <V extends T> V register(final int id, final RegistryKey<T> key, final V instance, final Lifecycle lifecycle) {
+        V value = super.register(id, key, instance, lifecycle);
+        this.callback.accept(key, instance);
         return value;
     }
 }

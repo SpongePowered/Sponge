@@ -40,8 +40,8 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.data.holder.SimpleNbtDataHolder;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.holder.SimpleNBTDataHolder;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.util.Constants;
@@ -119,7 +119,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         this.uniqueId = entity.getUniqueId();
         this.manipulator = ((CustomDataHolderBridge) entity).bridge$getManipulator().copy();
         this.compound = new CompoundNBT();
-        ((net.minecraft.entity.Entity) entity).writeWithoutTypeId(this.compound);
+        ((net.minecraft.entity.Entity) entity).saveWithoutId(this.compound);
         return this;
     }
 
@@ -160,14 +160,14 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     public SpongeEntitySnapshotBuilder from(final net.minecraft.entity.Entity minecraftEntity) {
         this.entityType = ((Entity) minecraftEntity).getType();
         this.worldKey = ((Entity) minecraftEntity).getServerLocation().getWorldKey();
-        this.uniqueId = minecraftEntity.getUniqueID();
+        this.uniqueId = minecraftEntity.getUUID();
         final Transform transform = ((Entity) minecraftEntity).getTransform();
         this.position = transform.getPosition();
         this.rotation = transform.getRotation();
         this.scale = transform.getScale();
         this.manipulator = DataManipulator.mutableOf((Entity) minecraftEntity);
         this.compound = new CompoundNBT();
-        minecraftEntity.writeWithoutTypeId(this.compound);
+        minecraftEntity.saveWithoutId(this.compound);
         return this;
     }
 
@@ -206,7 +206,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
                 this.compound = new CompoundNBT();
             }
 
-            final SimpleNbtDataHolder dataHolder = new SimpleNbtDataHolder(this.compound, NBTDataTypes.ENTITY);
+            final SimpleNBTDataHolder dataHolder = new SimpleNBTDataHolder(this.compound, NBTDataTypes.ENTITY);
             dataHolder.copyFrom(this.manipulator);
             this.compound = dataHolder.data$getCompound();
 
@@ -232,7 +232,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         this.entityType = SpongeCommon.getRegistry().getCatalogRegistry().get(EntityType.class, net.kyori.adventure.key.Key.key(entityTypeId)).get();
         this.manipulator = null; // lazy read from nbt
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            this.compound = NbtTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            this.compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
         }
         if (container.contains(Constants.Entity.UUID)) {
             this.uniqueId = UUID.fromString(container.getString(Constants.Entity.UUID).get());

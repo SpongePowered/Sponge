@@ -39,8 +39,8 @@ public final class AbstractCoralPlantData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(AbstractCoralPlantBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(AbstractCoralPlantBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(AbstractCoralPlantBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(AbstractCoralPlantBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof AbstractCoralPlantBlock);
     }
     // @formatter:on

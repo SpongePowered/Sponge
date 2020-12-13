@@ -35,9 +35,10 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(LockableTileEntity.class)
 public interface LockableTileEntityAccessor {
 
-    @Accessor("code") LockCode accessor$getCode();
+    @Accessor("lockKey") LockCode accessor$lockKey();
 
-    @Accessor("code") void accessor$setCode(LockCode code);
+    @Accessor("lockKey") void accessor$lockKey(final LockCode lockKey);
 
-    @Invoker("setCustomName") void accessor$setCustomName(@Nullable ITextComponent component);
+    @Invoker("setCustomName") void invoker$setCustomName(final @Nullable ITextComponent customName);
+
 }

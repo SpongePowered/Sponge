@@ -35,7 +35,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimerTickList;
 import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -71,23 +70,20 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 
 @Mixin(Chunk.class)
 public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     // @formatter:off
     @Shadow @Final public static ChunkSection EMPTY_SECTION;
-    @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
     @Shadow @Final private ChunkSection[] sections;
-    @Shadow @Final private Map<Heightmap.Type, Heightmap> heightMap;
-    @Shadow @Final private World world;
-    @Shadow private volatile boolean dirty;
+    @Shadow @Final private World level;
 
-    @Shadow public abstract @Nullable TileEntity shadow$getTileEntity(BlockPos pos, Chunk.CreateEntityType creationMode);
+    @Shadow public abstract @Nullable TileEntity shadow$getBlockEntity(BlockPos pos, Chunk.CreateEntityType creationMode);
     @Shadow public abstract BlockState getBlockState(BlockPos pos);
     // @formatter:on
     private @MonotonicNonNull PhaseContext<@NonNull ?> tracker$postProcessContext = null;
@@ -96,10 +92,10 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     private void tracker$sanityCheckServerWorldSetBlockState(final BlockPos pos, final BlockState state, final boolean isMoving,
         final CallbackInfoReturnable<BlockState> cir
     ) {
-        if (!((WorldBridge) this.world).bridge$isFake()) {
+        if (!((WorldBridge) this.level).bridge$isFake()) {
             new PrettyPrinter(80).add("Illegal Direct Chunk Access")
                 .hr()
-                .add(new IllegalAccessException("No one should be accessing Chunk.setBlockState in a ServerWorld's environment"))
+                .add(new IllegalAccessException("No one should be accessing Chunk.setBlock in a ServerWorld's environment"))
                 .log(PhaseTracker.LOGGER, Level.WARN);
             cir.setReturnValue(null);
         }
@@ -107,7 +103,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 
     /**
      * Technically a full overwrite for {@link Chunk#setBlockState(BlockPos, BlockState, boolean)}
-     * and due to Sponge's hijacking of {@link ServerWorld#setBlockState(BlockPos, BlockState, int)},
+     * and due to Sponge's hijacking of {@link ServerWorld#setBlock(BlockPos, BlockState, int)},
      * it needs to be able to record transactions when necessary. This implementation allows for us to
      * further specify the types of transactions and what proxies are needing to set up where.
      *
@@ -118,12 +114,11 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
      * @return The changed block state if not null
      * @author gabizou - January 13th, 2020 - Minecraft 1.14.3
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     @NonNull
     public ChunkPipeline bridge$createChunkPipeline(final BlockPos pos, final BlockState newState, final BlockState currentState,
             final SpongeBlockChangeFlag flag) {
-        final boolean isFake = ((WorldBridge) this.world).bridge$isFake();
+        final boolean isFake = ((WorldBridge) this.level).bridge$isFake();
         if (isFake) {
             throw new IllegalStateException("Cannot call ChunkBridge.bridge$buildChunkPipeline in non-Server managed worlds");
         }
@@ -137,7 +132,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         ChunkSection chunksection = this.sections[yPos >> 4];
         if (chunksection == ChunkMixin_Tracker.EMPTY_SECTION) {
             if (newState.isAir()) {
-                return ChunkPipeline.nullReturn((Chunk) (Object) this, (ServerWorld) this.world);
+                return ChunkPipeline.nullReturn((Chunk) (Object) this, (ServerWorld) this.level);
             }
 
             chunksection = new ChunkSection(yPos >> 4 << 4);
@@ -146,9 +141,9 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 
         // Sponge Start - Build out the BlockTransaction
         final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-        final @Nullable TileEntity existing = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+        final @Nullable TileEntity existing = this.shadow$getBlockEntity(pos, Chunk.CreateEntityType.CHECK);
         // Build a transaction maybe?
-        final WeakReference<ServerWorld> ref = new WeakReference<>((ServerWorld) this.world);
+        final WeakReference<ServerWorld> ref = new WeakReference<>((ServerWorld) this.level);
         final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(currentState, pos, flag, existing,
             () -> Objects.requireNonNull(ref.get(), "ServerWorld dereferenced"),
             Optional::empty, Optional::empty
@@ -176,7 +171,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             .kickOff(transaction)
             .chunk((Chunk) (Object) this)
             .chunkSection(chunksection)
-            .world((ServerWorld) this.world);
+            .world((ServerWorld) this.level);
 
         // Populate the effects
         transaction.populateChunkEffects(builder);
@@ -189,12 +184,12 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         ((ActiveChunkReferantBridge) entityIn).bridge$setActiveChunk(this);
     }
 
-    @Inject(method = "removeEntityAtIndex", at = @At("RETURN"))
+    @Inject(method = "removeEntity(Lnet/minecraft/entity/Entity;I)V", at = @At("RETURN"))
     private void tracker$ResetEntityActiveChunk(final Entity entityIn, final int index, final CallbackInfo ci) {
         ((ActiveChunkReferantBridge) entityIn).bridge$setActiveChunk(null);
     }
 
-    @Inject(method = "postProcess", at = @At("HEAD"))
+    @Inject(method = "postProcessGeneration", at = @At("HEAD"))
     private void tracker$startChunkPostProcess(final CallbackInfo ci) {
         if (this.tracker$postProcessContext != null) {
             PhasePrinter.printMessageWithCaughtException(PhaseTracker.SERVER, "Expected to not have a chunk post process", "Chunk Post Process has not completed!", GenerationPhase.State.CHUNK_LOADING, this.tracker$postProcessContext, new NullPointerException("spongecommon.ChunkMixin_Tracker:tracker$postProcessContext is Null"));
@@ -202,11 +197,11 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         }
         this.tracker$postProcessContext = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)
             .chunk((Chunk) (Object) this)
-            .world((ServerWorld) this.world)
+            .world((ServerWorld) this.level)
             .buildAndSwitch();
     }
 
-    @Inject(method = "postProcess", at = @At("RETURN"))
+    @Inject(method = "postProcessGeneration", at = @At("RETURN"))
     private void tracker$endChunkPostProcess(final CallbackInfo ci) {
         if (this.tracker$postProcessContext == null) {
             PhasePrinter.printMessageWithCaughtException(PhaseTracker.getInstance(), "Expected to complete Chunk Post Process", "Chunk Post Process has a null PhaseContext", new NullPointerException("spongecommon.ChunkMixin_Tracker:tracker$postProcessContext is Null"));
@@ -238,7 +233,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 //    }
 
     @Inject(
-        method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
+        method = "setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))
     private void tracker$SetActiveChunkOnTileEntityAdd(final BlockPos pos, final TileEntity tileEntityIn, final CallbackInfo ci) {
         ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(this);
@@ -249,12 +244,11 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 //        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, null);
     }
 
-
-    @Inject(method = "getEntitiesWithinAABBForEntity", at = @At("RETURN"))
+    @Inject(method = "getEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/List;Ljava/util/function/Predicate;)V", at = @At("RETURN"))
     private void tracker$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
-        final java.util.function.Predicate<? super Entity> filter, final CallbackInfo ci
+        final Predicate<? super Entity> filter, final CallbackInfo ci
     ) {
-        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getPhaseContext().isCollision()) {
+        if (((WorldBridge) this.level).bridge$isFake() || PhaseTracker.getInstance().getPhaseContext().isCollision()) {
             return;
         }
 
@@ -266,7 +260,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             return;
         }
 
-        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, entityIn, listToFill);
+        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.level, entityIn, listToFill);
 
         if (event == null || event.isCancelled()) {
             if (event == null && !PhaseTracker.getInstance().getPhaseContext().isTicking()) {
@@ -300,7 +294,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 //    }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    @Redirect(method = "rescheduleTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/ChunkPrimerTickList;postProcess(Lnet/minecraft/world/ITickList;Ljava/util/function/Function;)V"))
+    @Redirect(method = "unpackTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/ChunkPrimerTickList;copyOut(Lnet/minecraft/world/ITickList;Ljava/util/function/Function;)V"))
     private void tracker$wrapRescheduledTicks(final ChunkPrimerTickList chunkPrimerTickList, final ITickList<?> tickList, final Function<BlockPos, ?> func) {
         if (!PhaseTracker.SERVER.onSidedThread()) {
             return;
@@ -308,7 +302,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         try (final ChunkLoadContext context = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)) {
             context.chunk((Chunk) (Object) this);
             context.buildAndSwitch();
-            chunkPrimerTickList.postProcess(tickList, func);
+            chunkPrimerTickList.copyOut(tickList, func);
         }
     }
 }

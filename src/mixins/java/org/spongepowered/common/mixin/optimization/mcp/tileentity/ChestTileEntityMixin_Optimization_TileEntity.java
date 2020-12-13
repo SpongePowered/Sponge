@@ -41,14 +41,15 @@ import org.spongepowered.common.mixin.core.tileentity.LockableLootTileEntityMixi
 @Mixin(ChestTileEntity.class)
 public abstract class ChestTileEntityMixin_Optimization_TileEntity extends LockableLootTileEntityMixin {
 
-    @Shadow protected float lidAngle;
-    @Shadow protected int numPlayersUsing;
-    @Shadow private int ticksSinceSync;
-    @Shadow protected float prevLidAngle;
+    @Shadow protected float openness;
+    @Shadow protected int openCount;
+    @Shadow private int tickInterval;
+    @Shadow protected float oOpenness; // old openness
 
     @Shadow protected abstract void shadow$playSound(SoundEvent soundIn);
-    @Shadow public static int shadow$calculatePlayersUsingSync(World p_213977_0_, LockableTileEntity p_213977_1_, int p_213977_2_, int p_213977_3_, int p_213977_4_, int p_213977_5_, int p_213977_6_) {
-        throw new UnsupportedOperationException("Shadowed calculatePlayersUsingSync");
+    @Shadow public static int shadow$getOpenCount(final World p_213977_0_, final LockableTileEntity p_213977_1_, final int p_213977_2_,
+            final int p_213977_3_, final int p_213977_4_, final int p_213977_5_, final int p_213977_6_) {
+        throw new UnsupportedOperationException("Shadowed getOpenCount");
     }
 
     /**
@@ -58,62 +59,63 @@ public abstract class ChestTileEntityMixin_Optimization_TileEntity extends Locka
      */
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     private void impl$DisableTickingChestsOnServer(final CallbackInfo ci) {
-        ++this.ticksSinceSync;
+        ++this.tickInterval;
         ci.cancel();
     }
 
     @Inject(method = "playSound", at = @At("HEAD"), cancellable = true)
-    private void impl$onPlaySound(SoundEvent soundIn, CallbackInfo ci) {
-        if (!this.shadow$getBlockState().has(ChestBlock.TYPE)) {
+    private void impl$onPlaySound(final SoundEvent soundIn, final CallbackInfo ci) {
+        if (!this.shadow$getBlockState().hasProperty(ChestBlock.TYPE)) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "openInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/ChestTileEntity;onOpenOrClose()V"))
-    private void impl$onOpenInventory(PlayerEntity player, CallbackInfo ci) {
+    @Inject(method = "startOpen", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/ChestTileEntity;signalOpenCount()V"))
+    private void impl$onOpenInventory(final PlayerEntity player, final CallbackInfo ci) {
         this.impl$doOpenLogic();
     }
 
-    @Inject(method = "closeInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/ChestTileEntity;onOpenOrClose()V"))
-    private void impl$onCloseInventory(PlayerEntity player, CallbackInfo ci) {
+    @Inject(method = "stopOpen", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/ChestTileEntity;signalOpenCount()V"))
+    private void impl$onCloseInventory(final PlayerEntity player, final CallbackInfo ci) {
         this.impl$doCloseLogic();
     }
 
     // Moved out of tick loop
     private void impl$doOpenLogic() {
-        int i = this.pos.getX();
-        int j = this.pos.getY();
-        int k = this.pos.getZ();
-
-        this.numPlayersUsing = ChestTileEntityMixin_Optimization_TileEntity.shadow$calculatePlayersUsingSync(this.world, (LockableTileEntity) (Object) this, this.ticksSinceSync, i, j, k, this.numPlayersUsing);
-        this.prevLidAngle = this.lidAngle;
-        float f = 0.1F;
-        if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F) {
-            this.shadow$playSound(SoundEvents.BLOCK_CHEST_OPEN);
+        final int x = this.worldPosition.getX();
+        final int y = this.worldPosition.getY();
+        final int z = this.worldPosition.getZ();
+        ++this.tickInterval;
+        this.openCount = ChestTileEntityMixin_Optimization_TileEntity.shadow$getOpenCount(this.level, (LockableTileEntity) (Object) this,
+                this.tickInterval, x, y, z, this.openCount);
+        this.oOpenness = this.openness;
+        // final float lvt_4_1_ = 0.1F; // inlined
+        if (this.openCount > 0 && this.openness == 0.0F) {
+            this.shadow$playSound(SoundEvents.CHEST_OPEN);
         }
     }
 
     // Moved out of tick loop
     private void impl$doCloseLogic() {
-        if (this.numPlayersUsing == 0/* && this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F*/) {
-            float f1 = this.lidAngle;
-            if (this.numPlayersUsing > 0) {
-                this.lidAngle += 0.1F;
+        if (this.openCount == 0 /*&& this.openness > 0.0F || this.openCount > 0 && this.openness < 1.0F*/) {
+            final float lvt_5_1_ = this.openness;
+            if (this.openCount > 0) {
+                this.openness += 0.1F;
             } else {
-                this.lidAngle -= 0.1F;
+                this.openness -= 0.1F;
             }
 
-            if (this.lidAngle > 1.0F) {
-                this.lidAngle = 1.0F;
+            if (this.openness > 1.0F) {
+                this.openness = 1.0F;
             }
 
-            float f2 = 0.5F;
-            if (this.lidAngle < 0.5F && f1 >= 0.5F) {
-                this.shadow$playSound(SoundEvents.BLOCK_CHEST_CLOSE);
+            // final float lvt_6_1_ = 0.5F; // inlined
+            if (this.openness < 0.5F && lvt_5_1_ >= 0.5F) {
+                this.shadow$playSound(SoundEvents.CHEST_CLOSE);
             }
 
-            if (this.lidAngle < 0.0F) {
-                this.lidAngle = 0.0F;
+            if (this.openness < 0.0F) {
+                this.openness = 0.0F;
             }
         }
     }

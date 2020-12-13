@@ -28,7 +28,6 @@ import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.ArmorMaterial;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,13 +44,15 @@ import java.util.function.Supplier;
 @Implements(@Interface(iface = ArmorMaterial.class, prefix = "armorMaterial$"))
 public abstract class ArmorMaterialMixin_API implements ArmorMaterial {
 
-    @Shadow public abstract net.minecraft.item.crafting.Ingredient shadow$getRepairMaterial();
+    // @formatter:off
+    @Shadow public abstract net.minecraft.item.crafting.Ingredient shadow$getRepairIngredient();
+    // @formatter:on
 
     private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, String nameIn, int maxDamageFactorIn, int[] damageReductionAmountsIn, int enchantabilityIn,
-        SoundEvent equipSoundIn, float p_i48533_8_, Supplier<net.minecraft.item.crafting.Ingredient> repairMaterialSupplier, CallbackInfo ci) {
+        SoundEvent equipSoundIn, float p_i48533_8_, float p_i231593_9_, Supplier<net.minecraft.item.crafting.Ingredient> repairMaterialSupplier, CallbackInfo ci) {
         this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), nameIn.toLowerCase());
     }
 
@@ -62,7 +63,7 @@ public abstract class ArmorMaterialMixin_API implements ArmorMaterial {
 
     @Override
     public Optional<Ingredient> getRepairIngredient() {
-        final net.minecraft.item.crafting.Ingredient repairMaterial = this.shadow$getRepairMaterial();
+        final net.minecraft.item.crafting.Ingredient repairMaterial = this.shadow$getRepairIngredient();
         return Optional.ofNullable(((Ingredient) (Object) repairMaterial));
     }
 

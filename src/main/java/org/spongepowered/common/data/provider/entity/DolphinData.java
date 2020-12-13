@@ -38,11 +38,11 @@ public final class DolphinData {
         registrator
                 .asMutable(DolphinEntity.class)
                     .create(Keys.HAS_FISH)
-                        .get(DolphinEntity::hasGotFish)
+                        .get(DolphinEntity::gotFish)
                         .set(DolphinEntity::setGotFish)
                     .create(Keys.SKIN_MOISTURE)
-                        .get(DolphinEntity::getMoistness)
-                        .set(DolphinEntity::setMoistness);
+                        .get(DolphinEntity::getMoistnessLevel)
+                        .set(DolphinEntity::setMoisntessLevel);
     }
     // @formatter:on
 }

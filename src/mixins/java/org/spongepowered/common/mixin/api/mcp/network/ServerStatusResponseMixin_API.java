@@ -44,10 +44,11 @@ import javax.annotation.Nullable;
 @Mixin(ServerStatusResponse.class)
 public abstract class ServerStatusResponseMixin_API implements ClientPingServerEvent.Response {
 
+    // @formatter:off
     @Shadow @Nullable private ITextComponent description;
     @Shadow @Nullable private ServerStatusResponse.Players players;
     @Shadow private ServerStatusResponse.Version version;
-    @Shadow @Nullable private String favicon;
+    // @formatter:on
 
 
     @Override

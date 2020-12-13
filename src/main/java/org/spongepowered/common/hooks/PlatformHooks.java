@@ -53,6 +53,10 @@ public final class PlatformHooks {
     private GeneralHooks generalHooks = new GeneralHooks() {};
     private PacketHooks packetHooks = new PacketHooks() {};
     private WorldGenerationHooks worldGenerationHooks = new WorldGenerationHooks() {};
+    private InventoryHooks inventoryHooks = new InventoryHooks() {};
+    private WorldHooks worldHooks = new WorldHooks() {};
+    private ItemHooks itemHooks = new ItemHooks() {};
+    private EntityHooks entityHooks = new EntityHooks() {};
 
     public static PlatformHooks getInstance() {
         return PlatformHooks.instance;
@@ -96,5 +100,37 @@ public final class PlatformHooks {
 
     public void setWorldGenerationHooks(final WorldGenerationHooks worldGenerationHooks) {
         this.worldGenerationHooks = Objects.requireNonNull(worldGenerationHooks);
+    }
+
+    public InventoryHooks getInventoryHooks() {
+        return this.inventoryHooks;
+    }
+
+    public void setInventoryHooks(final InventoryHooks inventoryHooks) {
+        this.inventoryHooks = inventoryHooks;
+    }
+
+    public WorldHooks getWorldHooks() {
+        return this.worldHooks;
+    }
+
+    public void setWorldHooks(final WorldHooks worldHooks) {
+        this.worldHooks = worldHooks;
+    }
+
+    public ItemHooks getItemHooks() {
+        return this.itemHooks;
+    }
+
+    public void setItemHooks(final ItemHooks itemHooks) {
+        this.itemHooks = itemHooks;
+    }
+
+    public EntityHooks getEntityHooks() {
+        return this.entityHooks;
+    }
+
+    public void setEntityHooks(final EntityHooks entityHooks) {
+        this.entityHooks = entityHooks;
     }
 }

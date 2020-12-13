@@ -43,42 +43,42 @@ public final class PlayerBorderListener implements IBorderListener {
     }
 
     @Override
-    public void onSizeChanged(final WorldBorder border, final double newSize) {
+    public void onBorderSizeSet(final WorldBorder border, final double newSize) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_SIZE));
     }
 
     @Override
-    public void onTransitionStarted(final WorldBorder border, final double oldSize, final double newSize, final long time) {
+    public void onBorderSizeLerping(final WorldBorder border, final double oldSize, final double newSize, final long time) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.LERP_SIZE));
     }
 
     @Override
-    public void onCenterChanged(final WorldBorder border, final double x, final double z) {
+    public void onBorderCenterSet(final WorldBorder border, final double x, final double z) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_CENTER));
     }
 
     @Override
-    public void onWarningTimeChanged(final WorldBorder border, final int newTime) {
+    public void onBorderSetWarningTime(final WorldBorder border, final int newTime) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_TIME));
     }
 
     @Override
-    public void onWarningDistanceChanged(final WorldBorder border, final int newDistance) {
+    public void onBorderSetWarningBlocks(final WorldBorder border, final int newDistance) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_BLOCKS));
     }
 
     @Override
-    public void onDamageAmountChanged(final WorldBorder border, final double newAmount) {
+    public void onBorderSetDamagePerBlock(final WorldBorder border, final double newAmount) {
     }
 
     @Override
-    public void onDamageBufferChanged(final WorldBorder border, final double newSize) {
+    public void onBorderSetDamageSafeZOne(final WorldBorder border, final double newSize) {
     }
 
     private void sendBorderPacket(final IPacket<?> packet) {
         for (final ServerPlayerEntity player : this.server.getPlayerList().getPlayers()) {
             if (player.dimension.getId() == this.dimensionId && !((ServerPlayer) player).getWorldBorder().isPresent()) {
-                player.connection.sendPacket(packet);
+                player.connection.send(packet);
             }
         }
     }

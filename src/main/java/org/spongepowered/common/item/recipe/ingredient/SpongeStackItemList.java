@@ -50,7 +50,7 @@ public class SpongeStackItemList extends SpongeItemList {
 
         for (ItemStack itemstack : this.stacks) {
             if (itemstack.getItem() == testStack.getItem()) {
-                if (ItemStack.areItemStackTagsEqual(itemstack, testStack)) {
+                if (ItemStack.matches(itemstack, testStack)) {
                     return true;
                 }
             }

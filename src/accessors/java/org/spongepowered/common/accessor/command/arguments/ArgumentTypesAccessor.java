@@ -28,15 +28,16 @@ import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Map;
 
 @Mixin(ArgumentTypes.class)
 public interface ArgumentTypesAccessor {
 
-    @Accessor("ID_TYPE_MAP")
-    static Map<ResourceLocation, ArgumentTypes_EntryAccessor> accessor$getID_TYPE_MAP() {
-        throw new AssertionError("This should not happen");
+    @Accessor("BY_NAME")
+    static Map<ResourceLocation, ArgumentTypes_EntryAccessor> accessor$BY_NAME() {
+        throw new UntransformedAccessorError();
     }
 
 }

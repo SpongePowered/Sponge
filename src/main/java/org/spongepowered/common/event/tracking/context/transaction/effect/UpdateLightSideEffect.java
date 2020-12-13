@@ -52,13 +52,13 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
         final int originalOpactiy = oldState.opacity;
         final ServerWorld serverWorld = pipeline.getServerWorld();
         final BlockState currentState = pipeline.getAffectedChunk().getBlockState(oldState.pos);
-        if (oldState.state != currentState && (((BlockStateBridge) currentState).bridge$getLightValue(serverWorld, oldState.pos) != originalOpactiy || currentState.isTransparent() || oldState.state.isTransparent())) {
+        if (oldState.state != currentState && (((BlockStateBridge) currentState).bridge$getLightValue(serverWorld, oldState.pos) != originalOpactiy || currentState.useShapeForLightOcclusion() || oldState.state.useShapeForLightOcclusion())) {
             // this.profiler.startSection("queueCheckLight");
-            serverWorld.getProfiler().startSection("queueCheckLight");
+            serverWorld.getProfiler().push("queueCheckLight");
             // this.getChunkProvider().getLightManager().checkBlock(pos);
-            serverWorld.getChunkProvider().getLightManager().checkBlock(oldState.pos);
+            serverWorld.getChunkSource().getLightEngine().checkBlock(oldState.pos);
             // this.profiler.endSection();
-            serverWorld.getProfiler().endSection();
+            serverWorld.getProfiler().pop();
         }
         return EffectResult.NULL_PASS;
     }

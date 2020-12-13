@@ -55,12 +55,12 @@ public abstract class BlockMixin_EntityCollision implements CollisionCapabilityB
     }
 
     @Override
-    public void collision$setMaxCollisions(int max) {
+    public void collision$setMaxCollisions(final int max) {
         this.entityCollision$maxCollisions = max;
     }
 
     @Override
-    public void collision$requiresCollisionsCacheRefresh(boolean flag) {
+    public void collision$requiresCollisionsCacheRefresh(final boolean flag) {
         this.entityCollision$refreshCache = flag;
     }
 
@@ -70,8 +70,8 @@ public abstract class BlockMixin_EntityCollision implements CollisionCapabilityB
     }
 
     @Override
-    public void collision$initializeCollisionState(net.minecraft.world.World world) {
-        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+    public void collision$initializeCollisionState(final net.minecraft.world.World world) {
+        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
         final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
         final EntityCollisionCategory worldCollCat = worldConfigAdapter.get().getEntityCollisionCategory();
 

@@ -57,24 +57,24 @@ public final class PaintingData {
                     .create(Keys.ART_TYPE)
                         .get(h -> (ArtType) h.art)
                         .setAnd((h, v) -> {
-                            if (!h.world.isRemote) {
+                            if (!h.world.isClientSide) {
                                 final PaintingType oldArt = h.art;
                                 h.art = (PaintingType) v;
-                                ((HangingEntityAccessor) h).accessor$updateFacingWithBoundingBox(h.getHorizontalFacing());
+                                ((HangingEntityAccessor) h).invoker$setDirection(h.getHorizontalFacing());
                                 if (!h.onValidSurface()) {
                                     h.art = oldArt;
-                                    ((HangingEntityAccessor) h).accessor$updateFacingWithBoundingBox(h.getHorizontalFacing());
+                                    ((HangingEntityAccessor) h).invoker$setDirection(h.getHorizontalFacing());
                                     return false;
                                 }
 
                                 final ChunkManagerAccessor chunkManager = (ChunkManagerAccessor) ((ServerWorld) h.world).getChunkProvider().chunkManager;
-                                final EntityTrackerAccessor paintingTracker = chunkManager.accessor$getEntityTrackers().get(h.getEntityId());
+                                final EntityTrackerAccessor paintingTracker = chunkManager.accessor$entityMap().get(h.getEntityId());
                                 if (paintingTracker == null) {
                                     return true;
                                 }
 
                                 final List<ServerPlayerEntity> players = new ArrayList<>();
-                                for (final ServerPlayerEntity player : paintingTracker.accessor$getTrackingPlayers()) {
+                                for (final ServerPlayerEntity player : paintingTracker.accessor$seenBy()) {
                                     final SDestroyEntitiesPacket packet = new SDestroyEntitiesPacket(h.getEntityId());
                                     player.connection.sendPacket(packet);
                                     players.add(player);

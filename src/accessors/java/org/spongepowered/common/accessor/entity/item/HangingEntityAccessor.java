@@ -27,13 +27,11 @@ package org.spongepowered.common.accessor.entity.item;
 import net.minecraft.entity.item.HangingEntity;
 import net.minecraft.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(HangingEntity.class)
 public interface HangingEntityAccessor {
 
-    @Invoker("updateFacingWithBoundingBox") void accessor$updateFacingWithBoundingBox(Direction facingDirectionIn);
+    @Invoker("setDirection") void invoker$setDirection(final Direction direction);
 
-    @Accessor("facingDirection") Direction accessor$facingDirection();
 }

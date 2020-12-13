@@ -38,7 +38,9 @@ import java.util.Random;
 @Mixin(VillagerTrades.ITrade.class)
 public interface VillagerTrades_ITradeMixin_API extends TradeOfferGenerator {
 
+    // @formatter:off
     @Shadow @Nullable MerchantOffer shadow$getOffer(Entity entity, Random random);
+    // @formatter:on
 
     @Override
     default TradeOffer apply(final org.spongepowered.api.entity.Entity merchant, final Random random) {

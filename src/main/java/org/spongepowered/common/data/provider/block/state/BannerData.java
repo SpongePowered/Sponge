@@ -40,7 +40,7 @@ public final class BannerData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> RotationUtils.getFor(h.get(BannerBlock.ROTATION)))
+                        .get(h -> RotationUtils.getFor(h.getValue(BannerBlock.ROTATION)))
                         .set((h, v) -> RotationUtils.set(h, v, BannerBlock.ROTATION))
                         .supports(h -> h.getBlock() instanceof BannerBlock);
     }

@@ -29,21 +29,24 @@ import net.minecraft.tileentity.BeaconTileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Set;
 
 @Mixin(BeaconTileEntity.class)
 public interface BeaconTileEntityAccessor {
 
-    @Accessor("VALID_EFFECTS") static Set<Effect> getValidEffects() {
-        throw new IllegalStateException("Untransformed accessor!");
+    @Accessor("VALID_EFFECTS")
+    static Set<Effect> accessor$getVALID_EFFECTS() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("primaryEffect") @Nullable Effect accessor$getPrimaryEffect();
+    @Accessor("primaryPower") @Nullable Effect accessor$primaryPower();
 
-    @Accessor("primaryEffect") void accessor$setPrimaryEffect(@Nullable Effect effect);
+    @Accessor("primaryPower") void accessor$primaryPower(final @Nullable Effect primaryPower);
 
-    @Accessor("secondaryEffect") @Nullable Effect accessor$getSecondaryEffect();
+    @Accessor("secondaryPower") @Nullable Effect accessor$secondaryPower();
 
-    @Accessor("secondaryEffect") void accessor$setSecondaryEffect(@Nullable Effect effect);
+    @Accessor("secondaryPower") void accessor$secondaryPower(final @Nullable Effect secondaryPower);
+
 }

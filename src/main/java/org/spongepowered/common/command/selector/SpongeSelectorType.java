@@ -68,7 +68,7 @@ public final class SpongeSelectorType implements SelectorType {
     @Override
     public final Selector.@NonNull Builder toBuilder() {
         final EntitySelectorParser parser = new EntitySelectorParser(new StringReader(this.selectorToken));
-        ((EntitySelectorParserAccessor) parser).accessor$parseSelector();
+        ((EntitySelectorParserAccessor) parser).invoker$parseSelector();
         return (Selector.Builder) parser;
     }
 

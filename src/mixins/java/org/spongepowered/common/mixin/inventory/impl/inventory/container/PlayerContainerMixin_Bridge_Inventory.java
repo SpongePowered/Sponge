@@ -35,10 +35,10 @@ import org.spongepowered.common.bridge.inventory.container.PlayerContainerBridge
 @Mixin(PlayerContainer.class)
 public abstract class PlayerContainerMixin_Bridge_Inventory implements PlayerContainerBridge {
 
-    @Shadow @Final private PlayerEntity player;
+    @Shadow @Final private PlayerEntity owner;
 
     @Override
     public void bridge$markClean() {
-        ((PlayerInventoryBridge) this.player.inventory).bridge$markClean();
+        ((PlayerInventoryBridge) this.owner.inventory).bridge$markClean();
     }
 }

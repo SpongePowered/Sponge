@@ -50,14 +50,17 @@ import java.util.function.Predicate;
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public abstract class ChunkMixin_EntityCollision {
 
-    @Shadow public abstract World shadow$getWorld();
+    @Shadow public abstract World shadow$getLevel();
 
-    @Inject(method = "getEntitiesWithinAABBForEntity",
+    @Inject(method = "getEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/List;Ljava/util/function/Predicate;)V",
             at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false), cancellable = true)
-    private void collisionsImpl$checkForCollisionRules(@Nullable Entity entity, AxisAlignedBB bb, List<Entity> entities, Predicate<? super Entity> filter,
-            CallbackInfo ci) {
+    private void collisionsImpl$checkForCollisionRules(final @Nullable Entity entity,
+            final AxisAlignedBB bb,
+            final List<Entity> entities,
+            final Predicate<? super Entity> filter,
+            final CallbackInfo ci) {
         // ignore players and entities with parts (ex. EnderDragon)
-        if (this.shadow$getWorld().isRemote() || entities == null || entity instanceof PlayerEntity || entity instanceof EnderDragonEntity) {
+        if (this.shadow$getLevel().isClientSide() || entities == null || entity instanceof PlayerEntity || entity instanceof EnderDragonEntity) {
             return;
         }
         // Run hook in LivingEntity to support maxEntityCramming
@@ -70,13 +73,13 @@ public abstract class ChunkMixin_EntityCollision {
         }
     }
 
-    @Inject(method = "getEntitiesOfTypeWithinAABB",
+    @Inject(method = "getEntitiesOfClass",
             at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false), cancellable = true)
-    private <T extends Entity> void collisionsImpl$checkForCollisionRules(Class<? extends T> entityClass, AxisAlignedBB bb,
-            List<T> entities, Predicate<? super T> filter, CallbackInfo ci) {
+    private <T extends Entity> void collisionsImpl$checkForCollisionRules(final Class<? extends T> entityClass, final AxisAlignedBB bb,
+            final List<T> entities, final Predicate<? super T> filter, final CallbackInfo ci) {
         // ignore player checks
         // ignore item check (ex. Hoppers)
-        if (this.shadow$getWorld().isRemote() || PlayerEntity.class.isAssignableFrom(entityClass) || ItemEntity.class == entityClass) {
+        if (this.shadow$getLevel().isClientSide() || PlayerEntity.class.isAssignableFrom(entityClass) || ItemEntity.class == entityClass) {
             return;
         }
 
@@ -85,8 +88,8 @@ public abstract class ChunkMixin_EntityCollision {
         }
     }
 
-    private <T extends Entity> boolean entityCollision$allowEntityCollision(List<T> entities) {
-        if (((WorldBridge) this.shadow$getWorld()).bridge$isFake()) {
+    private <T extends Entity> boolean entityCollision$allowEntityCollision(final List<T> entities) {
+        if (((WorldBridge) this.shadow$getLevel()).bridge$isFake()) {
             return true;
         }
 
@@ -116,7 +119,7 @@ public abstract class ChunkMixin_EntityCollision {
         }
 
         if (collisionBridge.collision$requiresCollisionsCacheRefresh()) {
-            collisionBridge.collision$initializeCollisionState(this.shadow$getWorld());
+            collisionBridge.collision$initializeCollisionState(this.shadow$getLevel());
             collisionBridge.collision$requiresCollisionsCacheRefresh(false);
         }
 

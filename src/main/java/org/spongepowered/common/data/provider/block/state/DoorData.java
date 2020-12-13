@@ -43,23 +43,23 @@ public final class DoorData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DOOR_HINGE)
-                        .get(h -> h.get(DoorBlock.HINGE) == DoorHingeSide.LEFT ? DoorHinges.LEFT.get() : DoorHinges.RIGHT.get())
+                        .get(h -> h.getValue(DoorBlock.HINGE) == DoorHingeSide.LEFT ? DoorHinges.LEFT.get() : DoorHinges.RIGHT.get())
                         .set((h, v) -> {
                             final DoorHingeSide side = v == DoorHinges.LEFT.get() ? DoorHingeSide.LEFT : DoorHingeSide.RIGHT;
-                            return h.with(DoorBlock.HINGE, side);
+                            return h.setValue(DoorBlock.HINGE, side);
                         })
                         .supports(h -> h.getBlock() instanceof DoorBlock)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(DoorBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(DoorBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, DoorBlock.FACING))
                         .supports(h -> h.getBlock() instanceof DoorBlock)
                     .create(Keys.IS_OPEN)
-                        .get(h -> h.get(DoorBlock.OPEN))
-                        .set((h, v) -> h.with(DoorBlock.OPEN, v))
+                        .get(h -> h.getValue(DoorBlock.OPEN))
+                        .set((h, v) -> h.setValue(DoorBlock.OPEN, v))
                         .supports(h -> h.getBlock() instanceof DoorBlock)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(DoorBlock.POWERED))
-                        .set((h, v) -> h.with(DoorBlock.POWERED, v))
+                        .get(h -> h.getValue(DoorBlock.POWERED))
+                        .set((h, v) -> h.setValue(DoorBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof DoorBlock)
                     .create(Keys.PORTION_TYPE)
                         .get(h -> PortionTypeUtil.getFromDoubleBlock(h, DoorBlock.HALF))

@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.bridge.world;
 
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public interface WorldBridge {
 
     /**
      * Gets whether this world is a usable world in the context of using
      * as {@link ServerWorldBridge} and an active server world. This
-     * lazy loads the flag if {@link World#isRemote} is {@code true},
+     * lazy loads the flag if {@link World#isClientSide} is {@code true},
      * {@link World#getWorldInfo()} returns {@code null},
      * {@link World#getWorldInfo()} has a null name, or
      * if this world is not an instance of {@link ServerWorldBridge}.
@@ -47,5 +46,5 @@ public interface WorldBridge {
 
     void bridge$clearFakeCheck();
 
-    void bridge$adjustDimensionLogic(SpongeDimensionType dimensionType);
+    void bridge$adjustDimensionLogic(DimensionType dimensionType);
 }

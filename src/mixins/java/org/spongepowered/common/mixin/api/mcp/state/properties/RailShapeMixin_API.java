@@ -52,9 +52,9 @@ public abstract class RailShapeMixin_API implements RailDirection {
     @Override
     public RailDirection cycleNext() {
         final SimpleRegistry<RailDirection> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(RailDirection.class);
-        RailDirection next = registry.getByValue(((RailShape) (Object) this).ordinal() + 1);
+        RailDirection next = registry.byId(((RailShape) (Object) this).ordinal() + 1);
         if (next == null) {
-            next = registry.getByValue(0);
+            next = registry.byId(0);
         }
         return next;
     }

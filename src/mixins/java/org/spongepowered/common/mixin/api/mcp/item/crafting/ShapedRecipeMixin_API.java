@@ -35,29 +35,31 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(ShapedRecipe.class)
 public abstract class ShapedRecipeMixin_API implements ShapedCraftingRecipe {
 
-    @Shadow @Final private int recipeWidth;
-    @Shadow @Final private int recipeHeight;
+    // @formatter:off
+    @Shadow @Final private int width;
+    @Shadow @Final private int height;
     @Shadow @Final private NonNullList<Ingredient> recipeItems;
+    // @formatter:on
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public org.spongepowered.api.item.recipe.crafting.Ingredient getIngredient(final int x, final int y) {
-        if (x < 0 || x >= this.recipeWidth || y < 0 || y >= this.recipeHeight) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
             throw new IndexOutOfBoundsException("Invalid ingredient predicate location");
         }
 
-        final int recipeItemIndex = x + y * this.recipeWidth;
+        final int recipeItemIndex = x + y * this.width;
         return ((org.spongepowered.api.item.recipe.crafting.Ingredient)(Object) this.recipeItems.get(recipeItemIndex));
     }
 
     @Override
     public int getWidth() {
-        return this.recipeWidth;
+        return this.width;
     }
 
     @Override
     public int getHeight() {
-        return this.recipeHeight;
+        return this.height;
     }
 
 }

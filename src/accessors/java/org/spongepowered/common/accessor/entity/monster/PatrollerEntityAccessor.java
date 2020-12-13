@@ -25,15 +25,14 @@
 package org.spongepowered.common.accessor.entity.monster;
 
 import net.minecraft.entity.monster.PatrollerEntity;
-import net.minecraft.entity.monster.SpellcastingIllagerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(PatrollerEntity.class)
 public interface PatrollerEntityAccessor {
 
-    @Accessor("patrolling") boolean accessor$getPatrolling();
-    @Accessor("patrolling") void accessor$setPatrolling(boolean patrolling);
+    @Accessor("patrolling") boolean accessor$patrolling();
+
+    @Accessor("patrolling") void accessor$patrolling(final boolean patrolling);
 
 }

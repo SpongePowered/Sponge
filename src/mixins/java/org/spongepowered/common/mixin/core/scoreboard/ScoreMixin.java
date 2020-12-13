@@ -56,7 +56,7 @@ public abstract class ScoreMixin implements ScoreBridge {
         this.impl$spongeScore = score;
     }
 
-    @Inject(method = "setScorePoints", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setScore", at = @At("HEAD"), cancellable = true)
     private void impl$sUpdateSpongeScore(final int points, final CallbackInfo ci) {
         if (this.scoreboard != null && ((ScoreboardBridge) this.scoreboard).bridge$isClient()) {
             return; // Let the normal logic take over.

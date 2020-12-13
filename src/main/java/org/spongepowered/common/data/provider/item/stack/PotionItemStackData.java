@@ -59,11 +59,11 @@ public final class PotionItemStackData {
                             final CompoundNBT tag = h.getOrCreateTag();
                             tag.putInt(Constants.Item.CUSTOM_POTION_COLOR, v.getRgb());
                         })
-                        .delete(h -> h.removeChildTag(Constants.Item.CUSTOM_POTION_COLOR))
+                        .delete(h -> h.removeTagKey(Constants.Item.CUSTOM_POTION_COLOR))
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION)
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
-                            final List<EffectInstance> effects = PotionUtils.getEffectsFromStack(h);
+                            final List<EffectInstance> effects = PotionUtils.getMobEffects(h);
                             return effects.isEmpty() ? null : ImmutableList.copyOf((List<PotionEffect>) (Object) effects);
                         })
                         .set((h, v) -> {
@@ -71,24 +71,24 @@ public final class PotionItemStackData {
                             final ListNBT list = v.stream()
                                     .map(effect -> {
                                         final CompoundNBT potionTag = new CompoundNBT();
-                                        ((EffectInstance) effect).write(potionTag);
+                                        ((EffectInstance) effect).save(potionTag);
                                         return potionTag;
                                     })
                                     .collect(NBTCollectors.toTagList());
                             tag.put(Constants.Item.CUSTOM_POTION_EFFECTS, list);
                         })
-                        .delete(h -> h.removeChildTag(Constants.Item.CUSTOM_POTION_EFFECTS))
+                        .delete(h -> h.removeTagKey(Constants.Item.CUSTOM_POTION_EFFECTS))
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION ||
                                 h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
                     .create(Keys.POTION_TYPE)
-                        .get(h -> (PotionType) PotionUtils.getPotionFromItem(h))
+                        .get(h -> (PotionType) PotionUtils.getPotion(h))
                         .set((h, v) -> {
                             h.getOrCreateTag();
-                            PotionUtils.addPotionToItemStack(h, (Potion) v);
+                            PotionUtils.setPotion(h, (Potion) v);
                         })
                         .delete(h -> {
                             if (h.hasTag()) {
-                                PotionUtils.addPotionToItemStack(h, Potions.EMPTY);
+                                PotionUtils.setPotion(h, Potions.EMPTY);
                             }
                         })
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION ||

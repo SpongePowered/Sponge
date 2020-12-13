@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PickupRule;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.common.accessor.entity.projectile.AbstractArrowEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -42,20 +40,17 @@ public final class AbstractArrowData {
         registrator
                 .asMutable(AbstractArrowEntity.class)
                     .create(Keys.ATTACK_DAMAGE)
-                        .get(AbstractArrowEntity::getDamage)
-                        .set(AbstractArrowEntity::setDamage)
+                        .get(AbstractArrowEntity::getBaseDamage)
+                        .set(AbstractArrowEntity::setBaseDamage)
                     .create(Keys.IS_CRITICAL_HIT)
-                        .get(AbstractArrowEntity::getIsCritical)
-                        .set(AbstractArrowEntity::setIsCritical)
+                        .get(AbstractArrowEntity::isCritArrow)
+                        .set(AbstractArrowEntity::setCritArrow)
                     .create(Keys.KNOCKBACK_STRENGTH)
-                        .get(h -> (double) ((AbstractArrowEntityAccessor) h).accessor$getKnockbackStrength())
-                        .set((h, v) -> h.setKnockbackStrength((int) Math.round(v)))
+                        .get(h -> (double) ((AbstractArrowEntityAccessor) h).accessor$knockback())
+                        .set((h, v) -> h.setKnockback((int) Math.round(v)))
                     .create(Keys.PICKUP_RULE)
-                        .get(h -> (PickupRule) (Object) h.pickupStatus)
-                        .set((h, v) -> h.pickupStatus = ((AbstractArrowEntity.PickupStatus) (Object) v))
-                    .create(Keys.SHOOTER)
-                        .get(h -> (ProjectileSource) h.getShooter())
-                        .set((h, v) -> h.setShooter((Entity) v));
+                        .get(h -> (PickupRule) (Object) h.pickup)
+                        .set((h, v) -> h.pickup = ((AbstractArrowEntity.PickupStatus) (Object) v));
     }
     // @formatter:on
 }

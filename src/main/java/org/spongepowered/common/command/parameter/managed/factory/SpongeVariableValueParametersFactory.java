@@ -24,14 +24,18 @@
  */
 package org.spongepowered.common.command.parameter.managed.factory;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.util.text.StringTextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.CatalogType;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.common.command.brigadier.argument.StandardArgumentParser;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeCatalogedElementParameterBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeDynamicChoicesBuilder;
@@ -40,7 +44,11 @@ import org.spongepowered.common.command.parameter.managed.builder.SpongeNumberRa
 import org.spongepowered.common.command.parameter.managed.builder.SpongeStaticChoicesBuilder;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeChoicesValueParameter;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -49,11 +57,11 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     @Override
     @NonNull
     public <T extends Enum<T>> ValueParameter<T> createEnumParameter(@NonNull final Class<T> enumClass) {
-        final ImmutableMap.Builder<String, Supplier<? extends T>> choices = ImmutableMap.builder();
+        final Map<String, Supplier<? extends T>> choices = new HashMap<>();
         for (final T e :  enumClass.getEnumConstants()) {
             choices.put(e.name().toLowerCase(), () -> e);
         }
-        return new SpongeChoicesValueParameter<>(choices.build(), true, true);
+        return new SpongeChoicesValueParameter<>(Collections.unmodifiableMap(choices), true, true);
     }
 
     @Override
@@ -67,8 +75,28 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public <T extends CatalogType> VariableValueParameters.@NonNull CatalogedTypeBuilder<T> createCatalogedTypesBuilder(@NonNull final Class<T> returnType) {
+    public <T> VariableValueParameters.@NonNull CatalogedTypeBuilder<T> createRegistryEntryBuilder(
+            @NonNull final Function<CommandContext, @Nullable RegistryHolder> holderProvider,
+            @NonNull final RegistryKey<? extends Registry<? extends T>> registryKey) {
+        return new SpongeCatalogedElementParameterBuilder<>(in -> {
+            final RegistryHolder holder = holderProvider.apply(in);
+            if (holder != null) {
+                return registryKey.asReference().find(holder).orElse(null);
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public <T> VariableValueParameters.@NonNull CatalogedTypeBuilder<T> createRegistryEntryBuilder(
+            @NonNull final Function<CommandContext, ? extends Registry<? extends T>> returnType) {
         return new SpongeCatalogedElementParameterBuilder<>(returnType);
+    }
+
+    @Override
+    public <T> VariableValueParameters.CatalogedTypeBuilder<T> createRegistryEntryBuilder(
+            @NonNull final DefaultedRegistryReference<? extends Registry<? extends T>> registryReference) {
+        return new SpongeCatalogedElementParameterBuilder<>(in -> registryReference.find().orElse(null));
     }
 
     @Override
@@ -77,22 +105,22 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public VariableValueParameters.NumberRangeBuilder<Integer> createIntegerNumberRangeBuilder() {
+    public VariableValueParameters.NumberRangeBuilder<@NonNull Integer> createIntegerNumberRangeBuilder() {
         return SpongeNumberRangeBuilder.intBuilder();
     }
 
     @Override
-    public VariableValueParameters.NumberRangeBuilder<Float> createFloatNumberRangeBuilder() {
+    public VariableValueParameters.NumberRangeBuilder<@NonNull Float> createFloatNumberRangeBuilder() {
         return SpongeNumberRangeBuilder.floatBuilder();
     }
 
     @Override
-    public VariableValueParameters.NumberRangeBuilder<Double> createDoubleNumberRangeBuilder() {
+    public VariableValueParameters.NumberRangeBuilder<@NonNull Double> createDoubleNumberRangeBuilder() {
         return SpongeNumberRangeBuilder.doubleBuilder();
     }
 
     @Override
-    public VariableValueParameters.NumberRangeBuilder<Long> createLongNumberRangeBuilder() {
+    public VariableValueParameters.NumberRangeBuilder<@NonNull Long> createLongNumberRangeBuilder() {
         return SpongeNumberRangeBuilder.longBuilder();
     }
 

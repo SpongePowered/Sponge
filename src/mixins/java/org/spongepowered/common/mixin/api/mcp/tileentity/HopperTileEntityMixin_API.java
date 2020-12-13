@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import org.spongepowered.api.block.entity.carrier.Hopper;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,12 +38,14 @@ import java.util.Set;
 @Mixin(HopperTileEntity.class)
 public abstract class HopperTileEntityMixin_API extends LockableLootTileEntityMixin_API<Hopper> implements Hopper {
 
-    @Shadow private int transferCooldown;
+    // @formatter:off
+    @Shadow private int cooldownTime;
+    // @formatter:on
 
     @Override
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
-        return container.set(Constants.TileEntity.Hopper.TRANSFER_COOLDOWN, this.transferCooldown);
+        return container.set(Constants.TileEntity.Hopper.TRANSFER_COOLDOWN, this.cooldownTime);
     }
 
     @Override

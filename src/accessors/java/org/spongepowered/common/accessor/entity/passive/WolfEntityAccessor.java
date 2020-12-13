@@ -28,23 +28,26 @@ import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(WolfEntity.class)
 public interface WolfEntityAccessor {
 
-    @Accessor("COLLAR_COLOR") static DataParameter<Integer> accessor$getCollarColor() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_COLLAR_COLOR")
+    static DataParameter<Integer> accessor$DATA_COLLAR_COLOR() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("isWet") boolean accessor$getIsWet();
+    @Accessor("isWet") boolean accessor$isWet();
 
-    @Accessor("isWet") void accessor$setIsWet(boolean isWet);
+    @Accessor("isWet") void accessor$isWet(final boolean isWet);
 
-    @Accessor("isShaking") boolean accessor$getIsShaking();
+    @Accessor("isShaking") boolean accessor$isShaking();
 
-    @Accessor("isShaking") void accessor$setIsShaking(boolean isWet);
+    @Accessor("isShaking") void accessor$isShaking(final boolean isShaking);
 
-    @Accessor("timeWolfIsShaking") void accessor$setTimeWolfIsShaking(float isWet);
+    @Accessor("shakeAnim") void accessor$shakeAnim(final float shakeAnim);
 
-    @Accessor("prevTimeWolfIsShaking") void accessor$setPrevTimeWolfIsShaking(float isWet);
+    @Accessor("shakeAnimO") void accessor$shakeAnimO(final float shakeAnim0);
+
 }

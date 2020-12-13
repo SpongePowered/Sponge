@@ -28,7 +28,6 @@ import net.minecraft.entity.passive.OcelotEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -65,7 +64,7 @@ public abstract class OcelotEntityMixin extends AgeableEntityMixin {
 
     @Inject(method = "func_213529_dV", at = @At(value = "HEAD"), cancellable = true)
     private void impl$IgnoreAISetupOnClientWorld(CallbackInfo ci) {
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             // Because ocelot AI tasks are added on the client, for whatever reason
             ci.cancel();
         }

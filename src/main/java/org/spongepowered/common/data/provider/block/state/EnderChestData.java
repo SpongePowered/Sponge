@@ -40,12 +40,12 @@ public final class EnderChestData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(EnderChestBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(EnderChestBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, EnderChestBlock.FACING))
                         .supports(h -> h.getBlock() instanceof EnderChestBlock)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(EnderChestBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(EnderChestBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(EnderChestBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(EnderChestBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof EnderChestBlock);
     }
     // @formatter:on

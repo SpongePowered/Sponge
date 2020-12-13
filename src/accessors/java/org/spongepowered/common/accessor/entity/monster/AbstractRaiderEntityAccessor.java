@@ -28,11 +28,14 @@ import net.minecraft.entity.monster.AbstractRaiderEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(AbstractRaiderEntity.class)
 public interface AbstractRaiderEntityAccessor {
 
-    @Accessor("field_213666_c") static DataParameter<Boolean> accessor$getDataIsCelebrating() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("IS_CELEBRATING")
+    static DataParameter<Boolean> accessor$IS_CELEBRATING() {
+        throw new UntransformedAccessorError();
     }
+
 }

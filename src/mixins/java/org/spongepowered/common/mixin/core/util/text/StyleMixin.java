@@ -24,21 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.util.text;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.util.text.StyleAccessor;
-import org.spongepowered.common.adventure.NbtLegacyHoverEventSerializer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.util.text.StyleBridge;
-
-import java.io.IOException;
 
 @Mixin(Style.class)
 public class StyleMixin implements StyleBridge {
@@ -52,31 +45,19 @@ public class StyleMixin implements StyleBridge {
             final Style $this = (Style) (Object) this;
             final StyleAccessor $access = (StyleAccessor) this;
             // font
-            // TODO(adventure): 1.16
+            builder.font(SpongeAdventure.asAdventure($this.getFont()));
             // color
-            builder.color(SpongeAdventure.asAdventureNamed($this.getColor()));
+            builder.color(SpongeAdventure.asAdventure($this.getColor()));
             // decorations
-            builder.decoration(TextDecoration.OBFUSCATED, TextDecoration.State.byBoolean($access.accessor$getObfuscated()));
-            builder.decoration(TextDecoration.BOLD, TextDecoration.State.byBoolean($access.accessor$getBold()));
-            builder.decoration(TextDecoration.STRIKETHROUGH, TextDecoration.State.byBoolean($access.accessor$getStrikethrough()));
-            builder.decoration(TextDecoration.UNDERLINED, TextDecoration.State.byBoolean($access.accessor$getUnderlined()));
-            builder.decoration(TextDecoration.ITALIC, TextDecoration.State.byBoolean($access.accessor$getItalic()));
+            builder.decoration(TextDecoration.OBFUSCATED, TextDecoration.State.byBoolean($access.accessor$obfuscated()));
+            builder.decoration(TextDecoration.BOLD, TextDecoration.State.byBoolean($access.accessor$bold()));
+            builder.decoration(TextDecoration.STRIKETHROUGH, TextDecoration.State.byBoolean($access.accessor$strikethrough()));
+            builder.decoration(TextDecoration.UNDERLINED, TextDecoration.State.byBoolean($access.accessor$underlined()));
+            builder.decoration(TextDecoration.ITALIC, TextDecoration.State.byBoolean($access.accessor$italic()));
             // events
             final HoverEvent hoverEvent = $this.getHoverEvent();
             if (hoverEvent != null) {
-                final net.kyori.adventure.text.event.HoverEvent.Action<?> action = SpongeAdventure.asAdventure(hoverEvent.getAction());
-                final Component value = SpongeAdventure.asAdventure(hoverEvent.getValue());
-                try {
-                    if (action == net.kyori.adventure.text.event.HoverEvent.Action.SHOW_TEXT) {
-                        builder.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(SpongeAdventure.asAdventure(hoverEvent.getValue())));
-                    } else if (action == net.kyori.adventure.text.event.HoverEvent.Action.SHOW_ITEM) {
-                        builder.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showItem(NbtLegacyHoverEventSerializer.INSTANCE.deserializeShowItem(value)));
-                    } else if (action == net.kyori.adventure.text.event.HoverEvent.Action.SHOW_ENTITY) {
-                        builder.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showEntity(NbtLegacyHoverEventSerializer.INSTANCE.deserializeShowEntity(value, SpongeAdventure.GSON::deserialize)));
-                    }
-                } catch (final IOException e) {
-                    // can't deal
-                }
+                builder.hoverEvent(SpongeAdventure.asAdventure(hoverEvent));
             }
             final ClickEvent clickEvent = $this.getClickEvent();
             if (clickEvent != null) {
@@ -87,12 +68,5 @@ public class StyleMixin implements StyleBridge {
             this.bridge$adventure = builder.build();
         }
         return this.bridge$adventure;
-    }
-
-    @Inject(method = "setParentStyle", at = @At("HEAD"))
-    private void preventParentCycles(final Style newParent, final CallbackInfoReturnable<Style> ci) {
-        if (newParent == (Style) (Object) this) {
-            throw new IllegalArgumentException("Cannot set style " + this + " as a parent of itself!");
-        }
     }
 }

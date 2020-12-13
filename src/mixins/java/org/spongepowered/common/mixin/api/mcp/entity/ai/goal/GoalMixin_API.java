@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai.goal;
 
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.Goal.Flag;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
-import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,10 +37,12 @@ import java.util.EnumSet;
 import java.util.Optional;
 
 @SuppressWarnings("unchecked")
-@Mixin(net.minecraft.entity.ai.goal.Goal.class)
-public abstract class GoalMixin_API<O extends Agent> implements Goal<O> {
+@Mixin(Goal.class)
+public abstract class GoalMixin_API<O extends Agent> implements org.spongepowered.api.entity.ai.goal.Goal<O> {
 
-    @Shadow public abstract EnumSet<net.minecraft.entity.ai.goal.Goal.Flag> shadow$getMutexFlags();
+    // @formatter:off
+    @Shadow public abstract EnumSet<Flag> shadow$getFlags();
+    // @formatter:on
 
     @Override
     public GoalType getType() {
@@ -52,14 +55,14 @@ public abstract class GoalMixin_API<O extends Agent> implements Goal<O> {
     }
 
     @Override
-    public boolean canRunConcurrentWith(Goal<O> other) {
-        final EnumSet<net.minecraft.entity.ai.goal.Goal.Flag> flagSet1 = this.shadow$getMutexFlags();
-        final EnumSet<net.minecraft.entity.ai.goal.Goal.Flag> flagSet2 = ((net.minecraft.entity.ai.goal.Goal) other).getMutexFlags();
+    public boolean canRunConcurrentWith(org.spongepowered.api.entity.ai.goal.Goal<O> other) {
+        final EnumSet<Flag> flagSet1 = this.shadow$getFlags();
+        final EnumSet<Flag> flagSet2 = ((Goal) other).getFlags();
         return flagSet1.stream().noneMatch(flagSet2::contains);
     }
 
     @Override
     public boolean canBeInterrupted() {
-        return ((net.minecraft.entity.ai.goal.Goal) (Object) this).isPreemptible();
+        return ((Goal) (Object) this).isInterruptable();
     }
 }

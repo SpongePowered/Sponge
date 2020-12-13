@@ -52,7 +52,7 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private Set<Advancement> children;
     @Shadow @Final private ResourceLocation id;
-    @Shadow @Final private ITextComponent displayText;
+    @Shadow @Final private ITextComponent chatComponent;
     @Shadow @Final private Advancement parent;
 
     @Override
@@ -97,7 +97,7 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
 
     @Override
     public Component asComponent() {
-        return SpongeAdventure.asAdventure(this.displayText);
+        return SpongeAdventure.asAdventure(this.chatComponent);
     }
 
     @Override

@@ -34,6 +34,7 @@ import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -50,25 +51,27 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
+import java.util.UUID;
 
 @Mixin(PlayerAdvancements.class)
 public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
 
-    @Shadow @Final private Map<Advancement, AdvancementProgress> progress;
+    // @formatter:off
+    @Shadow @Final private Map<Advancement, AdvancementProgress> advancements;
     @Shadow private ServerPlayerEntity player;
+    // @formatter:on
 
     private boolean impl$wasSuccess;
     @Nullable private Component impl$message;
@@ -84,11 +87,11 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
             at = @At(
                     value = "INVOKE",
                     ordinal = 0,
-                    target = "Lnet/minecraft/advancements/CriterionProgress;isObtained()Z"))
+                    target = "Lnet/minecraft/advancements/CriterionProgress;isDone()Z"))
     private boolean impl$onUnregisterListenersGetProgress(final CriterionProgress progress) {
         final CriterionProgressBridge mixinCriterionProgress = (CriterionProgressBridge) progress;
-        if (SpongeImplHooks.isFakePlayer(this.player) || !mixinCriterionProgress.bridge$isCriterionAvailable()) {
-            return progress.isObtained();
+        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || !mixinCriterionProgress.bridge$isCriterionAvailable()) {
+            return progress.isDone();
         }
 
         final AdvancementCriterion criterion = ((org.spongepowered.api.advancement.criteria.CriterionProgress) progress).getCriterion();
@@ -100,7 +103,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
             return ((CriterionProgressBridge) progress).bridge$getAdvancementProgress()
                     .get(mixinCriterion.bridge$getScoreCriterion()).get().achieved();
         }
-        return progress.isObtained();
+        return progress.isDone();
     }
 
     @Nullable
@@ -108,11 +111,10 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
             at = @At(
                     value = "INVOKE",
                     ordinal = 0,
-                    target = "Lnet/minecraft/advancements/AdvancementProgress;getCriterionProgress(Ljava/lang/String;)"
-                            + "Lnet/minecraft/advancements/CriterionProgress;"))
+                    target = "Lnet/minecraft/advancements/AdvancementProgress;getCriterion(Ljava/lang/String;)Lnet/minecraft/advancements/CriterionProgress;"))
     private CriterionProgress impl$updateProgressOnUnregister(final AdvancementProgress advancementProgress, final String criterion) {
-        if (SpongeImplHooks.isFakePlayer(this.player)) {
-            return advancementProgress.getCriterionProgress(criterion);
+        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer()) {
+            return advancementProgress.getCriterion(criterion);
         }
 
         final org.spongepowered.api.advancement.Advancement advancement =
@@ -124,13 +126,13 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
                 .get(criterionBridge.bridge$getScoreCriterion()).get().achieved()) {
             return null;
         }
-        return advancementProgress.getCriterionProgress(criterion);
+        return advancementProgress.getCriterion(criterion);
     }
 
     @Override
     public Set<AdvancementTree> bridge$getAdvancementTrees() {
         final ImmutableSet.Builder<AdvancementTree> builder = ImmutableSet.builder();
-        for (final Map.Entry<Advancement, AdvancementProgress> entry : this.progress.entrySet()) {
+        for (final Map.Entry<Advancement, AdvancementProgress> entry : this.advancements.entrySet()) {
             final org.spongepowered.api.advancement.Advancement advancement = (org.spongepowered.api.advancement.Advancement) entry.getKey();
             if (!advancement.getParent().isPresent()) {
                 advancement.getTree().ifPresent(builder::add);
@@ -146,29 +148,29 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
 
     @Override
     public void bridge$reloadAdvancementProgress() {
-        for (final AdvancementProgress progress : this.progress.values()) {
+        for (final AdvancementProgress progress : this.advancements.values()) {
             ((AdvancementProgressBridge) progress).bridge$updateProgressMap();
         }
     }
 
-    @Redirect(method = "grantCriterion",
+    @Redirect(method = "award",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/management/PlayerList;sendMessage(Lnet/minecraft/util/text/ITextComponent;)V"))
-    private void impl$updateTextOnGranting(final PlayerList list, final ITextComponent component) {
+                    target = "Lnet/minecraft/server/management/PlayerList;broadcastMessage(Lnet/minecraft/util/text/ITextComponent;Lnet/minecraft/util/text/ChatType;Ljava/util/UUID;)V"))
+    private void impl$updateTextOnGranting(final PlayerList playerList, final ITextComponent component, final ChatType p_232641_2_, final UUID p_232641_3_) {
         this.impl$message = SpongeAdventure.asAdventure(component);
         this.impl$wasSuccess = true;
     }
 
-    @Inject(method = "grantCriterion",
+    @Inject(method = "award",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/advancements/AdvancementRewards;apply(Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
+                    target = "Lnet/minecraft/advancements/AdvancementRewards;grant(Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
     private void impl$setWasSuccessonGrant(final Advancement advancement, final String string, final CallbackInfoReturnable<Boolean> ci) {
         this.impl$wasSuccess = true;
     }
 
-    @Inject(method = "grantCriterion",
+    @Inject(method = "award",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/advancements/PlayerAdvancements;ensureVisibility(Lnet/minecraft/advancements/Advancement;)V"))

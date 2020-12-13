@@ -51,9 +51,9 @@ public final class NBTCollectors {
     private static final Collector<Float, ?, ListNBT> TO_FLOAT_TAG_LIST = NBTCollectors.toTagList(FloatNBT::valueOf);
     private static final Collector<String, ?, ListNBT> TO_STRING_TAG_LIST = NBTCollectors.toTagList(StringNBT::valueOf);
 
-    private static final Collector<INBT, ?, List<String>> TO_STRING_LIST = NBTCollectors.toList(INBT::getString);
+    private static final Collector<INBT, ?, List<String>> TO_STRING_LIST = NBTCollectors.toList(INBT::getAsString);
 
-    private static <E> Collector<INBT, List<E>, List<E>> toList0(Function<INBT, E> toValueFunction) {
+    private static <E> Collector<INBT, List<E>, List<E>> toList0(final Function<INBT, E> toValueFunction) {
         return Collector.of(ArrayList::new,
                 (list, value) -> list.add(toValueFunction.apply(value)),
                 (first, second) -> {
@@ -63,11 +63,11 @@ public final class NBTCollectors {
                 list -> list);
     }
 
-    public static <E> Collector<INBT, ?, List<E>> toList(Function<INBT, E> toValueFunction) {
+    public static <E> Collector<INBT, ?, List<E>> toList(final Function<INBT, E> toValueFunction) {
         return NBTCollectors.toList0(toValueFunction);
     }
 
-    public static <E> Collector<E, ?, ListNBT> toTagList(Function<E, INBT> toTagFunction) {
+    public static <E> Collector<E, ?, ListNBT> toTagList(final Function<E, INBT> toTagFunction) {
         return Collector.of(ListNBT::new,
                 (list, value) -> list.add(toTagFunction.apply(value)),
                 (first, second) -> {

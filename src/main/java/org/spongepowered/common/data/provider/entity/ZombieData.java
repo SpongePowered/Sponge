@@ -38,8 +38,8 @@ public final class ZombieData {
         registrator
                 .asMutable(ZombieEntity.class)
                     .create(Keys.IS_ADULT)
-                        .get(h -> !h.isChild())
-                        .set((h, v) -> h.setChild(!v));
+                        .get(h -> !h.isBaby())
+                        .set((h, v) -> h.setBaby(!v));
     }
     // @formatter:on
 }

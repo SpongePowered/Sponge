@@ -49,7 +49,7 @@ public final class RemoveTileEntityFromChunkEffect implements ProcessingSideEffe
         if (tileEntity == null) {
             return EffectResult.NULL_RETURN;
         }
-        pipeline.getAffectedChunk().removeTileEntity(oldState.pos);
+        pipeline.getAffectedChunk().removeBlockEntity(oldState.pos);
         return EffectResult.NULL_RETURN;
     }
 }

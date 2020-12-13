@@ -35,7 +35,7 @@ public abstract class SpongeEntityMetadataType<T> extends SpongeCatalogType {
 
     private final T metadata;
 
-    public SpongeEntityMetadataType(ResourceKey key, T metadata) {
+    public SpongeEntityMetadataType(final ResourceKey key, final T metadata) {
         super(key);
         this.metadata = metadata;
     }

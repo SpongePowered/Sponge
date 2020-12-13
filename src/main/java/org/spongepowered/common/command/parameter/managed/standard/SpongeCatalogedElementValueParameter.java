@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.arguments.ArgumentType;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -35,25 +34,27 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 import org.spongepowered.common.util.Constants;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class SpongeCatalogedElementValueParameter<T extends CatalogType> extends AbstractArgumentParser<T> {
+public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgumentParser<T> {
 
     private final List<String> prefixes;
-    private final Class<T> catalogType;
+    private final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction;
 
-    public SpongeCatalogedElementValueParameter(final List<String> prefixes, final Class<T> catalogType) {
+    public SpongeCatalogedElementValueParameter(final List<String> prefixes,
+            final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction) {
         this.prefixes = prefixes;
-        this.catalogType = catalogType;
+        this.registryFunction = registryFunction;
     }
 
     @NonNull
@@ -61,11 +62,17 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
     public Optional<? extends T> getValue(final Parameter.@NonNull Key<? super T> parameterKey,
                                           final ArgumentReader.@NonNull Mutable reader,
                                           final CommandContext.@NonNull Builder context) throws ArgumentParseException {
+        final Registry<? extends T> registry = this.registryFunction.apply(context);
+        if (registry == null) {
+            throw reader.createException(Component.text("The registry associated with this parameter is not currently active."));
+        }
+        final ArgumentReader.Immutable snapshot = reader.getImmutable();
         try {
             final ResourceKey resourceKey = reader.parseResourceKey();
-            final Optional<T> result = SpongeCommon.getRegistry().getCatalogRegistry().get(this.catalogType, resourceKey);
+            final Optional<? extends T> result = registry.findValue(resourceKey);
             if (!result.isPresent()) {
-                throw reader.createException(Component.text("No " + this.catalogType.getSimpleName() + " with ID " + resourceKey.asString() + "exists"));
+                throw reader.createException(
+                        Component.text("Registry " + registry.key().asString() + " does not contain the ID " + resourceKey.asString()));
             }
             return result;
         } catch (final ArgumentParseException ex) {
@@ -73,9 +80,10 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
                 throw ex;
             }
 
+            reader.setState(snapshot);
             final String check = reader.parseUnquotedString();
             for (final String prefix : this.prefixes) {
-                final Optional<T> result = SpongeCommon.getRegistry().getCatalogRegistry().get(this.catalogType, ResourceKey.of(prefix, check));
+                final Optional<? extends T> result = registry.findValue(ResourceKey.of(prefix, check));
                 if (result.isPresent()) {
                     return result;
                 }
@@ -83,16 +91,20 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
 
             final String ids = this.prefixes.stream().map(x -> x + ":" + check).collect(Collectors.joining(", "));
             throw reader.createException(
-                    Component.text("No " + this.catalogType.getSimpleName() + " with any of the following IDs exist: " + ids));
+                    Component.text("Registry " + registry.key().asString() + " does not contain any of the following IDs: " + ids));
         }
     }
 
     @NonNull
     @Override
     public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
+        final Registry<? extends T> registry = this.registryFunction.apply(context);
+        if (registry == null) {
+            return Collections.emptyList();
+        }
         final String lowerCase = currentInput.toLowerCase();
-        return SpongeCommon.getRegistry().getCatalogRegistry().streamAllOf(this.catalogType)
-                .map(CatalogType::getKey)
+        return registry.stream()
+                .map(RegistryEntry::key)
                 .map(x -> {
                     if (x.asString().startsWith(lowerCase)) {
                         return x.asString();

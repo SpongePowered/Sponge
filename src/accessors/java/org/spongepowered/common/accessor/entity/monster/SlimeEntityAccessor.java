@@ -31,5 +31,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(SlimeEntity.class)
 public interface SlimeEntityAccessor {
 
-    @Invoker("setSlimeSize") void accessor$setSlimeSize(int size, boolean resetHealth);
+    @Invoker("setSize") void invoker$setSize(final int size, final boolean resetHealth);
+
 }

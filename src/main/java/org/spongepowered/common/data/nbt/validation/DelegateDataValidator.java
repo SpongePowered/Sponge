@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.persistence.DataView;
 
-public class DelegateDataValidator implements RawDataValidator {
+public final class DelegateDataValidator implements RawDataValidator {
 
     private final ImmutableList<RawDataValidator> validators;
     private final ValidationType type;

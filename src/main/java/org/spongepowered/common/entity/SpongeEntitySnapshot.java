@@ -46,7 +46,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
@@ -113,7 +113,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @Override
     public Optional<ServerLocation> getLocation() {
-        Optional<ServerWorld> optional = SpongeCommon.getGame().getServer().getWorldManager().getWorld(this.worldKey);
+        final Optional<ServerWorld> optional = SpongeCommon.getGame().getServer().getWorldManager().getWorld(this.worldKey);
         if (optional.isPresent()) {
             final ServerLocation location = ServerLocation.of(optional.get(), this.position);
             return Optional.of(location);
@@ -128,7 +128,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @Override
     public DataContainer toContainer() {
-        final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(this.compound == null ? new CompoundNBT() : this.compound);
+        final DataContainer unsafeNbt = NBTTranslator.getInstance().translateFrom(this.compound == null ? new CompoundNBT() : this.compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Queries.WORLD_KEY, this.worldKey.getFormatted())
@@ -157,12 +157,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     }
 
     @Override
-    public boolean validateRawData(DataView container) {
+    public boolean validateRawData(final DataView container) {
         return new SpongeEntitySnapshotBuilder().buildContent(container).isPresent();
     }
 
     @Override
-    public EntitySnapshot withRawData(DataView container) throws InvalidDataException {
+    public EntitySnapshot withRawData(final DataView container) throws InvalidDataException {
         final Optional<EntitySnapshot> snap = new SpongeEntitySnapshotBuilder().buildContent(container);
         return snap.orElseThrow(InvalidDataException::new);
     }
@@ -209,7 +209,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     @Override
     public Optional<Entity> restore() {
         if (this.entityReference != null) {
-            Entity entity = this.entityReference.get();
+            final Entity entity = this.entityReference.get();
             if (entity != null) {
                 return Optional.of(entity);
             }
@@ -219,21 +219,21 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
             return Optional.empty();
         }
         if (this.uniqueId != null) {
-            Optional<Entity> entity = world.get().getEntity(this.uniqueId);
+            final Optional<Entity> entity = world.get().getEntity(this.uniqueId);
             if (entity.isPresent()) {
                 return entity;
             }
         }
-        try (StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        try (final StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
-            Entity newEntity = world.get().createEntity(this.getType(), this.position);
+            final Entity newEntity = world.get().createEntity(this.getType(), this.position);
             if (newEntity != null) {
-                net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
+                final net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
                 if (this.compound != null) {
-                    nmsEntity.read(this.compound);
+                    nmsEntity.load(this.compound);
                 }
 
-                boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity);
+                final boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity);
                 if (spawnResult) {
                     return Optional.of((Entity) nmsEntity);
                 }
@@ -244,10 +244,10 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @Override
     public EntityArchetype createArchetype() {
-        EntityArchetype.Builder builder = new SpongeEntityArchetypeBuilder();
+        final EntityArchetype.Builder builder = new SpongeEntityArchetypeBuilder();
         builder.type(this.entityType);
         if (this.compound != null) {
-            builder.entityData(NbtTranslator.getInstance().translate(this.compound));
+            builder.entityData(NBTTranslator.getInstance().translate(this.compound));
         }
         return builder.build();
     }
@@ -257,15 +257,15 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
         if (this.compound == null) {
             return DataContainer.createNew();
         }
-        return NbtTranslator.getInstance().translate(this.compound);
+        return NBTTranslator.getInstance().translate(this.compound);
     }
 
     @Override
-    public EntitySnapshot data$withDataContainer(DataContainer container) {
+    public EntitySnapshot data$withDataContainer(final DataContainer container) {
         final SpongeEntitySnapshotBuilder builder = this.createBuilder();
         builder.worldKey = this.worldKey;
         builder.position = this.position;
-        builder.compound = NbtTranslator.getInstance().translate(container);;
+        builder.compound = NBTTranslator.getInstance().translate(container);;
         return builder.build();
     }
 
@@ -276,7 +276,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @SuppressWarnings("rawtypes")
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

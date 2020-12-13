@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.fluid;
 
-import static net.minecraft.command.arguments.BlockStateParser.STATE_INVALID_PROPERTY_VALUE;
+import static net.minecraft.command.arguments.BlockStateParser.ERROR_INVALID_VALUE;
 import static org.spongepowered.common.util.DataUtil.checkDataExists;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.IFluidState;
-import net.minecraft.state.IProperty;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -41,7 +41,6 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.fluid.FluidTypes;
 import org.spongepowered.common.util.Constants;
@@ -49,24 +48,24 @@ import org.spongepowered.common.util.Constants;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class SpongeFluidStateBuilder implements FluidState.Builder {
+public final class SpongeFluidStateBuilder implements org.spongepowered.api.fluid.FluidState.Builder {
 
-    private FluidState state = FluidTypes.EMPTY.get().getDefaultState();
+    private org.spongepowered.api.fluid.FluidState state = FluidTypes.EMPTY.get().getDefaultState();
 
     @Override
-    public FluidState.@NonNull Builder fluid(@NonNull final FluidType fluidType) {
+    public org.spongepowered.api.fluid.FluidState.@NonNull Builder fluid(@NonNull final FluidType fluidType) {
         this.state = Objects.requireNonNull(fluidType).getDefaultState();
         return this;
     }
 
     @Override
-    public FluidState.@NonNull Builder fromString(@NonNull final String id) {
+    public org.spongepowered.api.fluid.FluidState.@NonNull Builder fromString(@NonNull final String id) {
         this.state = this.parseString(id);
         return this;
     }
 
     @Override
-    public <V> FluidState.@NonNull Builder add(@NonNull final Key<@NonNull ? extends Value<V>> key, @NonNull final V value) {
+    public <V> org.spongepowered.api.fluid.FluidState.@NonNull Builder add(@NonNull final Key<@NonNull ? extends Value<V>> key, @NonNull final V value) {
         Objects.requireNonNull(this.state, "The fluid type must be set first");
         Objects.requireNonNull(key, "The key must not be null");
         Objects.requireNonNull(key, "The value must not be null");
@@ -75,27 +74,26 @@ public final class SpongeFluidStateBuilder implements FluidState.Builder {
     }
 
     @Override
-    public FluidState.@NonNull Builder from(@NonNull final FluidState holder) {
+    public org.spongepowered.api.fluid.FluidState.@NonNull Builder from(final org.spongepowered.api.fluid.@NonNull FluidState holder) {
         this.state = holder;
         return this;
     }
 
     @Override
-    @NonNull
-    public FluidState build() {
+    public org.spongepowered.api.fluid.@NonNull FluidState build() {
         Objects.requireNonNull(this.state, "There must be a FluidType specified.");
         return this.state;
     }
 
     @Override
-    public FluidState.@NonNull Builder reset() {
+    public org.spongepowered.api.fluid.FluidState.@NonNull Builder reset() {
         this.state = null;
         return this;
     }
 
     @Override
     @NonNull
-    public Optional<FluidState> build(@NonNull final DataView container) throws InvalidDataException {
+    public Optional<org.spongepowered.api.fluid.FluidState> build(@NonNull final DataView container) throws InvalidDataException {
         if (!container.contains(Constants.Fluids.FLUID_STATE)) {
             return Optional.empty();
         }
@@ -109,17 +107,17 @@ public final class SpongeFluidStateBuilder implements FluidState.Builder {
 
     // The following is adapted from BlockStateParser
 
-    private FluidState parseString(final String string) {
+    private org.spongepowered.api.fluid.FluidState parseString(final String string) {
         final StringReader reader = new StringReader(string);
         try {
             final Fluid fluid = this.readFluid(reader);
-            final IFluidState state;
+            final FluidState state;
             if (reader.canRead() && reader.peek() == '[') {
                 state = this.readProperties(reader, fluid);
             } else {
-                state = fluid.getDefaultState();
+                state = fluid.defaultFluidState();
             }
-            return (FluidState) state;
+            return (org.spongepowered.api.fluid.FluidState) (Object) state;
         } catch (final CommandSyntaxException e) {
             throw new IllegalArgumentException("The string " + string + " doe not parse into a valid FluidState", e);
         }
@@ -128,9 +126,9 @@ public final class SpongeFluidStateBuilder implements FluidState.Builder {
     private Fluid readFluid(final StringReader reader) throws CommandSyntaxException {
         final int cursor = reader.getCursor();
         final ResourceLocation fluidKey = ResourceLocation.read(reader);
-        return Registry.FLUID.getValue(fluidKey).orElseThrow(() -> {
+        return Registry.FLUID.getOptional(fluidKey).orElseThrow(() -> {
             reader.setCursor(cursor);
-            return BlockStateParser.STATE_BAD_ID.createWithContext(reader, fluidKey.toString());
+            return BlockStateParser.ERROR_UNKNOWN_BLOCK.createWithContext(reader, fluidKey.toString());
         });
     }
 
@@ -138,16 +136,16 @@ public final class SpongeFluidStateBuilder implements FluidState.Builder {
         reader.skip();
         reader.skipWhitespace();
 
-        IFluidState state = fluid.getDefaultState();
-        final StateContainer<?, ?> stateContainer = fluid.getStateContainer();
+        FluidState state = fluid.defaultFluidState();
+        final StateContainer<?, ?> stateContainer = fluid.getStateDefinition();
         while(reader.canRead() && reader.peek() != ']') {
             reader.skipWhitespace();
             final int cursor = reader.getCursor();
             final String propertyKey = reader.readString();
-            final IProperty<?> property = stateContainer.getProperty(propertyKey);
+            final Property<?> property = stateContainer.getProperty(propertyKey);
             if (property == null) {
                 reader.setCursor(cursor);
-                throw BlockStateParser.STATE_UNKNOWN_PROPERTY.createWithContext(reader, fluid.toString(), propertyKey);
+                throw BlockStateParser.ERROR_UNKNOWN_PROPERTY.createWithContext(reader, fluid.toString(), propertyKey);
             }
 
             reader.skipWhitespace();
@@ -167,31 +165,31 @@ public final class SpongeFluidStateBuilder implements FluidState.Builder {
                 }
 
                 if (reader.peek() != ']') {
-                    throw BlockStateParser.STATE_UNCLOSED.createWithContext(reader);
+                    throw BlockStateParser.ERROR_EXPECTED_END_OF_PROPERTIES.createWithContext(reader);
                 }
                 break;
             }
 
-            throw BlockStateParser.STATE_NO_VALUE.createWithContext(reader, fluid.toString(), propertyKey);
+            throw BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, fluid.toString(), propertyKey);
         }
 
         if (reader.canRead()) {
             reader.skip();
         } else {
-            throw BlockStateParser.STATE_UNCLOSED.createWithContext(reader);
+            throw BlockStateParser.ERROR_EXPECTED_END_OF_PROPERTIES.createWithContext(reader);
         }
 
         return (net.minecraft.fluid.FluidState) state;
     }
 
-    private <T extends Comparable<T>> IFluidState parseValue(
-            final IFluidState state, final StringReader reader, final IProperty<T> property, final int cursor) throws CommandSyntaxException {
-        final Optional<T> propertyValue = property.parseValue(reader.readString());
+    private <T extends Comparable<T>> FluidState parseValue(
+            final FluidState state, final StringReader reader, final Property<T> property, final int cursor) throws CommandSyntaxException {
+        final Optional<T> propertyValue = property.getValue(reader.readString());
         if (propertyValue.isPresent()) {
-            return state.with(property, propertyValue.get());
+            return state.setValue(property, propertyValue.get());
         } else {
             reader.setCursor(cursor);
-            throw STATE_INVALID_PROPERTY_VALUE.createWithContext(reader, state.getFluid().toString(), property.getName(), cursor);
+            throw ERROR_INVALID_VALUE.createWithContext(reader, state.getType().toString(), property.getName(), cursor);
         }
     }
 

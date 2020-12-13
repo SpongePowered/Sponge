@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.realtime.world;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -38,8 +37,6 @@ import javax.annotation.Nullable;
 public abstract class WorldMixin_RealTime implements RealTimeTrackingBridge {
 
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
-
-    @Shadow protected WorldInfo worldInfo;
 
     @Override
     public long realTimeBridge$getRealTimeTicks() {

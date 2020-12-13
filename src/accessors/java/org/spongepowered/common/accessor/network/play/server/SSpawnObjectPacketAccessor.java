@@ -34,15 +34,16 @@ import net.minecraft.network.play.server.SSpawnObjectPacket;
 @Mixin(SSpawnObjectPacket.class)
 public interface SSpawnObjectPacketAccessor {
 
-    @Accessor("entityId") void accessor$setEntityId(int value);
+    @Accessor("id") void accessor$id(final int id);
 
-    @Accessor("uniqueId") void accessor$setUniqueId(UUID value);
+    @Accessor("uuid") void accessor$uuid(final UUID uuid);
 
-    @Accessor("x") void accessor$setX(double value);
+    @Accessor("x") void accessor$x(final double x);
 
-    @Accessor("y") void accessor$setY(double value);
+    @Accessor("y") void accessor$y(final double y);
 
-    @Accessor("z") void accessor$setZ(double value);
+    @Accessor("z") void accessor$z(final double z);
 
-    @Accessor("type") void accessor$setType(EntityType<?> value);
+    @Accessor("type") void type(final EntityType<?> type);
+
 }

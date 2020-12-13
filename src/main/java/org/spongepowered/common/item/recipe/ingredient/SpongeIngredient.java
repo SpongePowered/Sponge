@@ -27,9 +27,10 @@ package org.spongepowered.common.item.recipe.ingredient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.hooks.SpongeHooks;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -55,14 +56,14 @@ public class SpongeIngredient extends Ingredient {
             return false;
         }
 
-        for (IItemList acceptedItem : this.acceptedItems) {
+        for (IItemList acceptedItem : this.values) {
             if (acceptedItem instanceof SpongeItemList) {
                 if (((SpongeItemList) acceptedItem).test(testStack)) {
                     return true;
                 }
             } else {
                 // TODO caching (relevant for TagList)
-                for (ItemStack stack : acceptedItem.getStacks()) {
+                for (ItemStack stack : acceptedItem.getItems()) {
                     if (stack.getItem() == testStack.getItem()) {
                         return true;
                     }
@@ -83,7 +84,7 @@ public class SpongeIngredient extends Ingredient {
     public static SpongeIngredient spongeFromPredicate(ResourceKey key, Predicate<org.spongepowered.api.item.inventory.ItemStack> predicate, net.minecraft.item.ItemStack... exemplaryIngredients) {
         final Predicate<ItemStack> mcPredicate = stack -> predicate.test(ItemStackUtil.fromNative(stack));
         if (SpongeIngredient.cachedPredicates.put(key.toString(), mcPredicate) != null) {
-            SpongeHooks.logWarning("Predicate ingredient registered twice! {} was replaced.", key.toString());
+            SpongeCommon.getLogger().warn(MessageFormat.format("Predicate ingredient registered twice! {} was replaced.", key.toString()));
         }
         final SpongePredicateItemList itemList = new SpongePredicateItemList(key.toString(), mcPredicate, exemplaryIngredients);
         return new SpongeIngredient(itemList);

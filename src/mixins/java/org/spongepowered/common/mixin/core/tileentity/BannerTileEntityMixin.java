@@ -41,7 +41,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.accessor.tileentity.BannerTileEntityAccessor;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
 import org.spongepowered.common.data.provider.item.stack.ShieldItemStackData;
@@ -53,26 +52,26 @@ import java.util.List;
 public abstract class BannerTileEntityMixin extends TileEntityMixin implements BannerTileEntityBridge, CustomNameableBridge {
 
     @Shadow private net.minecraft.item.DyeColor baseColor;
-    @Shadow private ListNBT patterns;
+    @Shadow private ListNBT itemPatterns;
 
     private List<BannerPatternLayer> impl$patternLayers = Lists.newArrayList();
 
-    @Inject(method = "read", at = @At("RETURN"))
+    @Inject(method = "load", at = @At("RETURN"))
     private void onSetItemValues(final CallbackInfo ci) {
         this.impl$updatePatterns();
     }
 
     private void impl$markDirtyAndUpdate() {
-        this.shadow$markDirty();
-        if (this.world != null && !this.world.isRemote) {
-            ((ServerWorld) this.world).getChunkProvider().markBlockChanged(this.shadow$getPos());
+        this.shadow$setChanged();
+        if (this.level != null && !this.level.isClientSide) {
+            ((ServerWorld) this.level).getChunkSource().blockChanged(this.shadow$getBlockPos());
         }
     }
 
     private void impl$updatePatterns() {
         this.impl$patternLayers.clear();
-        if (this.patterns != null) {
-            for (INBT pattern : this.patterns) {
+        if (this.itemPatterns != null) {
+            for (final INBT pattern : this.itemPatterns) {
                 this.impl$patternLayers.add(ShieldItemStackData.layerFromNbt((CompoundNBT) pattern));
             }
         }
@@ -88,9 +87,9 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
     public void bridge$setLayers(final List<BannerPatternLayer> layers) {
         this.impl$patternLayers = NonNullList.create();
         this.impl$patternLayers.addAll(layers);
-        this.patterns = new ListNBT();
+        this.itemPatterns = new ListNBT();
         for (final BannerPatternLayer layer : this.impl$patternLayers) {
-            this.patterns.add(ShieldItemStackData.layerToNbt(layer));
+            this.itemPatterns.add(ShieldItemStackData.layerToNbt(layer));
         }
         this.impl$markDirtyAndUpdate();
     }
@@ -114,7 +113,7 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
     }
 
     @Override
-    public void bridge$setCustomDisplayName(ITextComponent component) {
-        ((BannerTileEntityAccessor) this).accessor$func_213136_a(component);
+    public void bridge$setCustomDisplayName(final ITextComponent customName) {
+        ((BannerTileEntity) (Object) this).setCustomName(customName);
     }
 }

@@ -35,15 +35,18 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.UUID;
 
 @Mixin(net.minecraft.entity.ai.attributes.AttributeModifier.class)
-@Implements(@Interface(iface = AttributeModifier.class, prefix = "api$"))
+@Implements(@Interface(iface = AttributeModifier.class, prefix = "attributeModifier$"))
 public abstract class AttributeModifierMixin_API implements AttributeModifier {
+
+    // @formatter:off
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract double shadow$getAmount();
     @Shadow public abstract net.minecraft.entity.ai.attributes.AttributeModifier.Operation shadow$getOperation();
-    @Shadow public abstract UUID shadow$getID();
+    @Shadow public abstract UUID shadow$getId();
+    // @formatter:on
 
     @Intrinsic
-    public String api$getName() {
+    public String attributeModifier$getName() {
         return this.shadow$getName();
     }
 
@@ -53,13 +56,13 @@ public abstract class AttributeModifierMixin_API implements AttributeModifier {
     }
 
     @Intrinsic
-    public double api$getAmount() {
+    public double attributeModifier$getAmount() {
         return this.shadow$getAmount();
     }
 
     @Override
     public UUID getUniqueId() {
-        return this.shadow$getID();
+        return this.shadow$getId();
     }
 
 }

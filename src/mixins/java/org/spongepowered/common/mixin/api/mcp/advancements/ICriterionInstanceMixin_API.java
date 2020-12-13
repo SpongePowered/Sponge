@@ -40,11 +40,11 @@ import org.spongepowered.common.advancement.UnknownFilteredTriggerConfiguration;
 @Mixin(ICriterionInstance.class)
 public interface ICriterionInstanceMixin_API extends FilteredTrigger {
 
-    @Shadow ResourceLocation shadow$getId();
+    @Shadow ResourceLocation shadow$getCriterion();
 
     @Override
     default Trigger getType() {
-        final ICriterionTrigger triggerType = CriteriaTriggers.get(this.shadow$getId());
+        final ICriterionTrigger triggerType = CriteriaTriggers.getCriterion(this.shadow$getCriterion());
         Preconditions.checkNotNull(triggerType, "triggerType");
         return (Trigger) triggerType;
     }

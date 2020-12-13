@@ -42,7 +42,7 @@ public abstract class FarmTaskMixin {
      * would fail in forge environments. This changes the injection to a predictable
      * place where we still can forcibly call things but still cancel as needed.
      */
-    @Inject(method = "shouldExecute", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "canStillUse", at = @At(value = "HEAD"), cancellable = true)
     private void onCanGrief(final CallbackInfoReturnable<Boolean> cir, ServerWorld worldIn, VillagerEntity owner) {
         if (!((GrieferBridge) owner).bridge$canGrief()) {
             cir.setReturnValue(false);

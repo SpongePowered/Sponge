@@ -40,7 +40,7 @@ public final class WallSignData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(WallSignBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(WallSignBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, WallSignBlock.FACING))
                         .supports(h -> h.getBlock() instanceof WallSignBlock);
     }

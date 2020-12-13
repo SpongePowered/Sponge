@@ -34,7 +34,8 @@ import java.net.SocketAddress;
 @Mixin(NetworkManager.class)
 public interface NetworkManagerAccessor {
 
-    @Accessor("channel") Channel accessor$getChannel();
+    @Accessor("channel") Channel accessor$channel();
 
-    @Accessor("socketAddress") void accessor$setSocketAddress(SocketAddress socketAddress);
+    @Accessor("address") void accessor$address(final SocketAddress address);
+
 }

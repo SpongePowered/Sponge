@@ -45,7 +45,7 @@ public final class MinecraftBlockDamageSource extends DamageSource {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("Name", this.damageType)
+            .add("Name", this.msgId)
             .add("BlockSnapshot", this.blockSnapshot)
             .add("Location", this.location)
             .toString();

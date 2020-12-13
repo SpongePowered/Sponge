@@ -24,35 +24,16 @@
  */
 package org.spongepowered.common.registry;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.AdventureRegistry;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
-import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.common.adventure.AdventureRegistryImpl;
 
 @Singleton
 public final class SpongeGameRegistry implements GameRegistry {
-
-    private final SpongeCatalogRegistry catalogRegistry;
-    private final SpongeBuilderRegistry builderRegistry;
-    private final SpongeFactoryRegistry factoryRegistry;
-
-    @Inject
-    public SpongeGameRegistry(final SpongeCatalogRegistry catalogRegistry, final SpongeBuilderRegistry builderRegistry,
-        final SpongeFactoryRegistry factoryRegistry) {
-        this.catalogRegistry = catalogRegistry;
-        this.builderRegistry = builderRegistry;
-        this.factoryRegistry = factoryRegistry;
-    }
-
-    @Override
-    public SpongeCatalogRegistry getCatalogRegistry() {
-        return this.catalogRegistry;
-    }
 
     @Override
     public AdventureRegistry getAdventureRegistry() {
@@ -60,18 +41,7 @@ public final class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public SpongeBuilderRegistry getBuilderRegistry() {
-        return this.builderRegistry;
-    }
-
-    @Override
-    public FactoryRegistry getFactoryRegistry() {
-        return this.factoryRegistry;
-    }
-
-    @Override
     public RecipeRegistry getRecipeRegistry() {
         return ((RecipeRegistry) ((MinecraftServer) Sponge.getServer()).getRecipeManager());
     }
-
 }

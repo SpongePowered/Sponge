@@ -39,8 +39,8 @@ public final class BlazeData {
         registrator
                 .asMutable(BlazeEntity.class)
                     .create(Keys.IS_AFLAME)
-                        .get(BlazeEntity::isBurning)
-                        .set((h, v) -> ((BlazeEntityAccessor) h).accessor$setOnFire(v));
+                        .get(BlazeEntity::isOnFire)
+                        .set((h, v) -> ((BlazeEntityAccessor) h).invoker$setCharged(v));
     }
     // @formatter:on
 }

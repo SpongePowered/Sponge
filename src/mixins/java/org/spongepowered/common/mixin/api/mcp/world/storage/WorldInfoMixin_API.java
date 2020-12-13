@@ -58,12 +58,11 @@ import org.spongepowered.common.accessor.world.GameRulesAccessor;
 import org.spongepowered.common.accessor.world.GameRules_RuleValueAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
@@ -324,13 +323,13 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
             }
         } else {
             return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS,
-                NbtTranslator.getInstance().translateFrom(this.shadow$getGeneratorOptions()));
+                NBTTranslator.getInstance().translateFrom(this.shadow$getGeneratorOptions()));
         }
     }
 
     @Override
     public void setGeneratorSettings(final DataContainer generatorSettings) {
-        this.shadow$setGeneratorOptions(NbtTranslator.getInstance().translate(generatorSettings));
+        this.shadow$setGeneratorOptions(NBTTranslator.getInstance().translate(generatorSettings));
     }
 
     @Override
@@ -449,14 +448,14 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     public <V> void setGameRule(final GameRule<V> gameRule, final V value) {
         // TODO Minecraft 1.14 - Boy, this is baaaad....
         final GameRules.RuleValue<?> mValue = this.shadow$getGameRulesInstance().get((GameRules.RuleKey<?>) (Object) gameRule);
-        ((GameRules_RuleValueAccessor) mValue).accessor$setStringValue(value.toString());
+        ((GameRules_RuleValueAccessor) mValue).invoker$deserialize(value.toString());
     }
 
     @Override
     public Map<GameRule<?>, ?> getGameRules() {
         // TODO Minecraft 1.14 - Boy, this is baaaad....
         final Map<GameRules.RuleKey<?>, GameRules.RuleValue<?>> rules =
-            ((GameRulesAccessor) this.shadow$getGameRulesInstance()).accessor$getRules();
+            ((GameRulesAccessor) this.shadow$getGameRulesInstance()).accessor$rules();
 
         final Map<GameRule<?>, Object> apiRules = new HashMap<>();
         for (final Map.Entry<GameRules.RuleKey<?>, GameRules.RuleValue<?>> rule : rules.entrySet()) {

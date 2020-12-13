@@ -49,7 +49,6 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -58,7 +57,9 @@ import java.util.Optional;
 @Mixin(TNTMinecartEntity.class)
 public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin implements FusedExplosiveBridge, ExplosiveBridge {
 
-    @Shadow private int minecartTNTFuse;
+    // @formatter:off
+    @Shadow private int fuse;
+    // @formatter:on
 
     @Nullable private Integer impl$explosionRadius = null;
     private int impl$fuseDuration = Constants.Entity.Minecart.DEFAULT_FUSE_DURATION;
@@ -88,22 +89,22 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
 
     @Override
     public int bridge$getFuseTicksRemaining() {
-        return this.minecartTNTFuse;
+        return this.fuse;
     }
 
     @Override
     public void bridge$setFuseTicksRemaining(final int fuseTicks) {
-        this.minecartTNTFuse = fuseTicks;
+        this.fuse = fuseTicks;
     }
 
 
-    @Inject(method = "attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z",
+    @Inject(method = "hurt",
         at = @At("INVOKE"))
     private void impl$onAttackSetPrimeCause(final DamageSource damageSource, final float amount, final CallbackInfoReturnable<Boolean> ci) {
         this.impl$primeCause = damageSource;
     }
 
-    @Inject(method = "onActivatorRailPass(IIIZ)V",
+    @Inject(method = "activateMinecart(IIIZ)V",
         at = @At("INVOKE"))
     private void impl$onActivateSetPrimeCauseNotifier(final int x, final int y, final int z, final boolean receivingPower, final CallbackInfo ci) {
         if (((WorldBridge) this.world).bridge$isFake()) {
@@ -114,7 +115,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
         }
     }
 
-    @Inject(method = "ignite",
+    @Inject(method = "primeFuse",
         at = @At("INVOKE"),
         cancellable = true)
     private void impl$preIgnite(final CallbackInfo ci) {
@@ -124,7 +125,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
         }
     }
 
-    @Inject(method = "ignite",
+    @Inject(method = "primeFuse",
         at = @At("RETURN"))
     private void impl$postSpongeIgnite(final CallbackInfo ci) {
         this.bridge$setFuseTicksRemaining(this.impl$fuseDuration);
@@ -138,10 +139,10 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
     }
 
     @Redirect(
-        method = "explodeCart",
+        method = "explode",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
+            target = "Lnet/minecraft/world/World;explode(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
         )
     )
     @Nullable
@@ -160,7 +161,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
                 );
     }
 
-    @Inject(method = "explodeCart",
+    @Inject(method = "explode",
         at = @At("RETURN"))
     private void impL$postExplode(final CallbackInfo ci) {
         if (this.impl$detonationCancelled) {
@@ -168,9 +169,9 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
         }
     }
 
-    @Inject(method = "attackEntityFrom",
+    @Inject(method = "hurt",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/item/minecart/TNTMinecartEntity;explodeCart(D)V"))
+            target = "Lnet/minecraft/entity/item/minecart/TNTMinecartEntity;explode(D)V"))
     private void impl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);

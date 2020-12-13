@@ -33,11 +33,12 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(SCustomPayloadPlayPacket.class)
 public interface SCustomPayloadPlayPacketAccessor {
 
-    @Accessor("data") PacketBuffer accessor$getPayload();
+    @Accessor("identifier") ResourceLocation accessor$identifier();
 
-    @Accessor("data") void accessor$setPayload(PacketBuffer payload);
+    @Accessor("identifier") void accessor$identifier(final ResourceLocation identifier);
 
-    @Accessor("channel") ResourceLocation accessor$getChannel();
+    @Accessor("data") PacketBuffer accessor$data();
 
-    @Accessor("channel") void accessor$setChannel(ResourceLocation channel);
+    @Accessor("data") void accessor$data(final PacketBuffer data);
+
 }

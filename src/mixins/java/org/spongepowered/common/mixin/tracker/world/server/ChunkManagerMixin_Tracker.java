@@ -50,13 +50,13 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 @Mixin(ChunkManager.class)
 public abstract class ChunkManagerMixin_Tracker {
 
-    @Shadow @Final private ServerWorld world;
+    @Shadow @Final private ServerWorld level;
 
-    @Redirect(method = "track(Lnet/minecraft/entity/Entity;)V",
+    @Redirect(method = "addEntity(Lnet/minecraft/entity/Entity;)V",
         at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
     private IllegalStateException tracker$reportEntityAlreadyTrackedWithWorld(final String string, final Entity entityIn) {
         final IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn,
-                ((org.spongepowered.api.world.server.ServerWorld) this.world).getKey()));
+                ((org.spongepowered.api.world.server.ServerWorld) this.level).getKey()));
         if (SpongeConfigs.getCommon().get().getPhaseTracker().verboseErrors()) {
             PhasePrinter.printMessageWithCaughtException(PhaseTracker.getInstance(), "Exception tracking entity", "An entity that was already tracked was added to the tracker!", exception);
         }
@@ -67,12 +67,12 @@ public abstract class ChunkManagerMixin_Tracker {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setLoaded(Z)V"),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/longs/LongSet;add(J)Z", remap = false),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;addTileEntities(Ljava/util/Collection;)V")
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;addAllPendingBlockEntities(Ljava/util/Collection;)V")
         )
     )
     private void tracker$startLoad(final Chunk chunk, final boolean loaded) {
         try {
-            final boolean isFake = ((WorldBridge) chunk.getWorld()).bridge$isFake();
+            final boolean isFake = ((WorldBridge) chunk.getLevel()).bridge$isFake();
             if (isFake) {
                 return;
             }
@@ -94,7 +94,7 @@ public abstract class ChunkManagerMixin_Tracker {
             }
             GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.getInstance())
                 .source(chunk)
-                .world((ServerWorld) chunk.getWorld())
+                .world((ServerWorld) chunk.getLevel())
                 .chunk(chunk)
                 .buildAndSwitch();
         } finally {
@@ -105,13 +105,13 @@ public abstract class ChunkManagerMixin_Tracker {
     @Inject(method = "*",
         at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V", shift = At.Shift.BY, by = 2),
         slice = @Slice(
-            from = @At(value = "INVOKE",  target = "Lnet/minecraft/world/chunk/Chunk;postLoad()V")
+            from = @At(value = "INVOKE",  target = "Lnet/minecraft/world/chunk/Chunk;runPostLoad()V")
         ),
         expect = 1,
         require = 1
     )
     private void tracker$endLoad(final ChunkHolder chunkHolder, final IChunk chunk, final CallbackInfoReturnable<IChunk> cir) {
-        if (!((WorldBridge) this.world).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
+        if (!((WorldBridge) this.level).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;
             }

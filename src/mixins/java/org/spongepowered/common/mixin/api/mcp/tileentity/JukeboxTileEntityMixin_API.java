@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.JukeboxBlock;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.MusicDiscItem;
 import net.minecraft.tileentity.JukeboxTileEntity;
@@ -45,28 +44,30 @@ import java.util.Set;
 @Mixin(JukeboxTileEntity.class)
 public abstract class JukeboxTileEntityMixin_API extends TileEntityMixin_API implements Jukebox {
 
-    @Shadow public abstract net.minecraft.item.ItemStack getRecord();
-    @Shadow public abstract void setRecord(net.minecraft.item.ItemStack recordStack);
+    // @formatter:off
+    @Shadow public abstract net.minecraft.item.ItemStack shadow$getRecord();
+    @Shadow public abstract void shadow$setRecord(net.minecraft.item.ItemStack recordStack);
+    // @formatter:on
 
     @Override
     public void play() {
-        if (!this.getRecord().isEmpty()) {
-            this.world.playEvent(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.shadow$getPos(), Item.getIdFromItem(this.getRecord().getItem()));
+        if (!this.shadow$getRecord().isEmpty()) {
+            this.level.levelEvent(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.shadow$getBlockPos(), Item.getId(this.shadow$getRecord().getItem()));
         }
     }
 
     @Override
     public void stop() {
-        this.world.playEvent(Constants.WorldEvents.PLAY_RECORD_EVENT, this.shadow$getPos(), 0);
+        this.level.levelEvent(Constants.WorldEvents.PLAY_RECORD_EVENT, this.shadow$getBlockPos(), 0);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public void eject() {
-        final BlockState block = this.world.getBlockState(this.shadow$getPos());
+        final BlockState block = this.level.getBlockState(this.shadow$getBlockPos());
         if (block.getBlock() == Blocks.JUKEBOX) {
-            ((JukeboxBlockAccessor) block.getBlock()).accessor$dropRecord(this.world, this.shadow$getPos());
-            this.world.setBlockState(this.shadow$getPos(), block.with(JukeboxBlock.HAS_RECORD, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
+            ((JukeboxBlockAccessor) block.getBlock()).invoker$dropRecording(this.level, this.shadow$getBlockPos());
+            this.level.setBlock(this.shadow$getBlockPos(), block.setValue(JukeboxBlock.HAS_RECORD, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }
 
@@ -76,11 +77,11 @@ public abstract class JukeboxTileEntityMixin_API extends TileEntityMixin_API imp
         if (!(itemStack.getItem() instanceof MusicDiscItem)) {
             return;
         }
-        final BlockState block = this.world.getBlockState(this.shadow$getPos());
+        final BlockState block = this.level.getBlockState(this.shadow$getBlockPos());
         if (block.getBlock() == Blocks.JUKEBOX) {
             // Don't use BlockJukebox#insertRecord - it looses item data
-            this.setRecord(itemStack);
-            this.world.setBlockState(this.shadow$getPos(), block.with(JukeboxBlock.HAS_RECORD, true), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
+            this.shadow$setRecord(itemStack);
+            this.level.setBlock(this.shadow$getBlockPos(), block.setValue(JukeboxBlock.HAS_RECORD, true), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }
 

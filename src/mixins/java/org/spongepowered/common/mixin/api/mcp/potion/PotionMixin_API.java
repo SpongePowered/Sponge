@@ -40,7 +40,9 @@ import java.util.List;
 @Mixin(net.minecraft.potion.Potion.class)
 public abstract class PotionMixin_API implements PotionType {
 
+    // @formatter:off
     @Shadow @Final private ImmutableList<net.minecraft.potion.EffectInstance> effects;
+    // @formatter:on
 
     private ResourceKey impl$key;
 

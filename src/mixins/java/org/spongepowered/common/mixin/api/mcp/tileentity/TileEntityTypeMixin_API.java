@@ -36,7 +36,9 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 @Mixin(TileEntityType.class)
 public abstract class TileEntityTypeMixin_API implements BlockEntityType {
 
-    @Shadow public abstract boolean shadow$isValidBlock(Block block);
+    //@formatter:off
+    @Shadow public abstract boolean shadow$isValid(Block block);
+    //@formatter:on
 
     @Override
     public ResourceKey getKey() {
@@ -45,6 +47,6 @@ public abstract class TileEntityTypeMixin_API implements BlockEntityType {
 
     @Override
     public boolean isValidBlock(BlockType block) {
-        return this.shadow$isValidBlock((Block) block);
+        return this.shadow$isValid((Block) block);
     }
 }

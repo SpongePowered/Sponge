@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(EntityDataManager.class)
 public interface EntityDataManagerAccessor {
 
-    @Accessor("entity") Entity accessor$getEntity();
+    @Accessor("entity") Entity accessor$entity();
+
 }

@@ -41,8 +41,8 @@ public final class GuardianData {
         registrator
                 .asMutable(GuardianEntity.class)
                     .create(Keys.BEAM_TARGET_ENTITY)
-                        .get(h -> (Living) h.getTargetedEntity())
-                        .set((h, v) -> ((GuardianEntityAccessor) h).accessor$setTargetedEntity(((LivingEntity) v).getEntityId()));
+                        .get(h -> (Living) h.getActiveAttackTarget())
+                        .set((h, v) -> ((GuardianEntityAccessor) h).invoker$setActiveAttackTarget(((LivingEntity) v).getId()));
     }
     // @formatter:on
 }

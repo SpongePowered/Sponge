@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.accessor.world.server;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.entity.Entity;
@@ -35,25 +34,22 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Queue;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(ServerWorld.class)
 public interface ServerWorldAccessor {
 
-    @Accessor("LOGGER") static Logger accessor$LOGGER() {
-        throw new UnsupportedOperationException("Untransformed Accessor");
+    @Accessor("LOGGER")
+    static Logger accessor$LOGGER() {
+        throw new UntransformedAccessorError();
     }
 
-    @Invoker("hasDuplicateEntity") boolean accessor$hasDuplicateEntity(Entity entity);
+    @Accessor("tickingEntities") boolean accessor$tickingEntities();
 
-    @Accessor("entitiesById") Int2ObjectMap<Entity> accessor$getEntitiesById();
+    @Accessor("toAddAfterTick") Queue<Entity> accessor$toAddAfterTick();
 
-    @Accessor("tickingEntities") boolean accessor$isTickingEntities();
+    @Accessor("blockEvents") ObjectLinkedOpenHashSet<BlockEventData> accessor$blockEvents();
 
-    @Accessor("entitiesToAdd") Queue<Entity> accessor$getEntitiesToAdd();
+    @Invoker("removeFromChunk") void invoker$removeFromChunk(final Entity entity);
 
-    @Invoker("removeFromChunk") void accessor$removeFromChunk(Entity entityIn);
-
-    @Accessor("blockEventQueue") ObjectLinkedOpenHashSet<BlockEventData> accessor$getBlockEventQueue();
-
-    @Invoker("onEntityAdded") void accessor$onEntityAdded(Entity entityIn);
 }

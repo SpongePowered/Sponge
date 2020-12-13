@@ -25,7 +25,7 @@
 package org.spongepowered.common.util;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.state.IProperty;
+import net.minecraft.state.Property;
 import org.spongepowered.api.util.Direction;
 
 public final class RotationUtils {
@@ -34,8 +34,8 @@ public final class RotationUtils {
         return Direction.values()[(value + 8) % 16];
     }
 
-    public static BlockState set(final BlockState holder, final Direction value, final IProperty<Integer> property) {
-        return holder.with(property, (value.ordinal() + 8) % 16);
+    public static BlockState set(final BlockState holder, final Direction value, final Property<Integer> property) {
+        return holder.setValue(property, (value.ordinal() + 8) % 16);
     }
 
     private RotationUtils() {

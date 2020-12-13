@@ -39,20 +39,20 @@ public final class RavagerData {
         registrator
                 .asMutable(RavagerEntityAccessor.class)
                     .create(Keys.ATTACK_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getAttackTick()))
-                        .set((h, v) -> h.accessor$setAttackTick((int) v.getTicks()))
+                        .get(x -> new SpongeTicks(x.accessor$attackTick()))
+                        .set((h, v) -> h.accessor$attackTick((int) v.getTicks()))
                     .create(Keys.IS_IMMOBILIZED)
-                        .get(h -> h.accessor$getAttackTick() > 0 || h.accessor$getStunTick() > 0 || h.accessor$getRoarTick() > 0)
+                        .get(h -> h.accessor$attackTick() > 0 || h.accessor$stunnedTick() > 0 || h.accessor$roarTick() > 0)
                     .create(Keys.IS_ROARING)
-                        .get(h -> h.accessor$getRoarTick() > 0)
+                        .get(h -> h.accessor$roarTick() > 0)
                     .create(Keys.IS_STUNNED)
-                        .get(h -> h.accessor$getStunTick() > 0)
+                        .get(h -> h.accessor$stunnedTick() > 0)
                     .create(Keys.ROARING_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getRoarTick()))
-                        .set((h, v) -> h.accessor$setRoarTick((int) v.getTicks()))
+                        .get(x -> new SpongeTicks(x.accessor$roarTick()))
+                        .set((h, v) -> h.accessor$roarTick((int) v.getTicks()))
                     .create(Keys.STUNNED_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getStunTick()))
-                        .set((h, v) -> h.accessor$setStunTick((int) v.getTicks()));
+                        .get(x -> new SpongeTicks(x.accessor$stunnedTick()))
+                        .set((h, v) -> h.accessor$stunnedTick((int) v.getTicks()));
     }
     // @formatter:on
 }

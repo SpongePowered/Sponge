@@ -28,8 +28,8 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.IAttribute;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -80,18 +80,16 @@ import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(LivingEntity.class)
@@ -99,62 +97,62 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     // @formatter:off
     @Shadow public int hurtTime;
-    @Shadow public int maxHurtTime;
-    @Shadow public float attackedAtYaw;
-    @Shadow public float limbSwingAmount;
-    @Shadow protected int idleTime;
-    @Shadow protected int recentlyHit;
-    @Shadow protected int activeItemStackUseCount;
-    @Shadow protected float lastDamage;
-    @Shadow @Nullable protected PlayerEntity attackingPlayer;
+    @Shadow public int hurtDuration;
+    @Shadow public float hurtDir;
+    @Shadow public float animationSpeed;
+    @Shadow protected int noActionTime;
+    @Shadow protected int lastHurtByPlayerTime;
+    @Shadow protected int useItemRemaining;
+    @Shadow protected float lastHurt;
+    @Shadow @Nullable protected PlayerEntity lastHurtByPlayer;
     @Shadow private DamageSource lastDamageSource;
     @Shadow private long lastDamageStamp;
     @Shadow protected boolean dead;
     @Shadow public int deathTime;
-    @Shadow protected int scoreValue;
-    @Shadow protected ItemStack activeItemStack;
+    @Shadow protected int deathScore;
+    @Shadow protected ItemStack useItem;
 
-    @Shadow public abstract IAttributeInstance shadow$getAttribute(IAttribute attribute);
+    @Shadow public abstract ModifiableAttributeInstance shadow$getAttribute(Attribute attribute);
     @Shadow public abstract void shadow$setHealth(float health);
-    @Shadow public abstract void shadow$knockBack(Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);
-    @Shadow public abstract void shadow$setRevengeTarget(LivingEntity livingBase);
+    @Shadow public abstract void shadow$knockback(float p_70653_2_, double p_70653_3_, double p_70653_5_);
+    @Shadow public abstract void shadow$setLastHurtByMob(LivingEntity livingBase);
     @Shadow public abstract void shadow$setAbsorptionAmount(float amount);
-    @Shadow public abstract void shadow$setHeldItem(Hand hand, @Nullable ItemStack stack);
-    @Shadow public abstract void shadow$resetActiveHand();
-    @Shadow public abstract int shadow$getItemInUseCount();
+    @Shadow public abstract void shadow$setItemInHand(Hand hand, @Nullable ItemStack stack);
+    @Shadow public abstract void shadow$stopUsingItem();
+    @Shadow public abstract int shadow$getUseItemRemainingTicks();
     @Shadow public abstract float shadow$getAbsorptionAmount();
     @Shadow public abstract float shadow$getHealth();
-    @Shadow public abstract boolean shadow$isPotionActive(Effect potion);
-    @Shadow protected abstract boolean shadow$canBlockDamageSource(DamageSource p_184583_1_);
-    @Shadow public abstract ItemStack shadow$getItemStackFromSlot(EquipmentSlotType slotIn);
-    @Shadow public abstract ItemStack shadow$getHeldItemMainhand();
+    @Shadow public abstract boolean shadow$hasEffect(Effect potion);
+    @Shadow protected abstract boolean shadow$isDamageSourceBlocked(DamageSource p_184583_1_);
+    @Shadow public abstract ItemStack shadow$getItemBySlot(EquipmentSlotType slotIn);
+    @Shadow public abstract ItemStack shadow$getMainHandItem();
     @Shadow public abstract CombatTracker shadow$getCombatTracker();
-    @Shadow public void shadow$onKillCommand() { }
-    @Shadow public abstract Hand shadow$getActiveHand();
-    @Shadow protected abstract void shadow$markVelocityChanged();
-    @Shadow protected abstract void shadow$damageShield(float p_184590_1_);
+    @Shadow public void shadow$kill() { }
+    @Shadow public abstract Hand shadow$getUsedItemHand();
+    @Shadow protected abstract void shadow$markHurt();
+    @Shadow protected abstract void shadow$hurtCurrentlyUsedShield(float p_184590_1_);
     @Shadow protected abstract void shadow$playHurtSound(DamageSource p_184581_1_);
     @Shadow protected abstract void shadow$blockUsingShield(LivingEntity p_190629_1_);
     @Shadow protected abstract float shadow$getSoundVolume();
-    @Shadow protected abstract float shadow$getSoundPitch();
+    @Shadow protected abstract float shadow$getVoicePitch();
     @Shadow protected abstract SoundEvent shadow$getDeathSound();
     @Shadow public abstract boolean shadow$isSleeping();
-    @Shadow public abstract Optional<BlockPos> shadow$getBedPosition();
+    @Shadow public abstract Optional<BlockPos> shadow$getSleepingPos();
     @Shadow private boolean shadow$checkTotemDeathProtection(final DamageSource p_190628_1_) {
         return false; // SHADOWED
     }
-    @Shadow public abstract void shadow$onDeath(DamageSource cause);
-    @Shadow protected abstract void shadow$addItemParticles(ItemStack stack, int count);
-    @Shadow public abstract void shadow$wakeUp();
-    @Shadow protected abstract void shadow$damageEntity(DamageSource damageSrc, float damageAmount);
-    @Shadow public abstract boolean shadow$isOnLadder();
+    @Shadow public abstract void shadow$die(DamageSource cause);
+    @Shadow protected abstract void shadow$spawnItemParticles(ItemStack stack, int count);
+    @Shadow public abstract void shadow$stopSleeping();
+    @Shadow protected abstract void shadow$actuallyHurt(DamageSource damageSrc, float damageAmount);
+    @Shadow public abstract boolean shadow$onClimbable();
     @Shadow public abstract void shadow$setSprinting(boolean sprinting);
-    @Shadow public abstract void shadow$setLastAttackedEntity(Entity entityIn);
-    @Shadow protected abstract void shadow$damageArmor(float damage);
-    @Shadow public abstract ItemStack shadow$getHeldItem(Hand hand);
-    @Shadow protected abstract void shadow$dropInventory();
-    @Shadow protected abstract void shadow$spawnDrops(DamageSource damageSourceIn);
-    @Shadow @Nullable public abstract LivingEntity shadow$getAttackingEntity();
+    @Shadow public abstract void shadow$setLastHurtMob(Entity entityIn);
+    @Shadow protected abstract void shadow$hurtArmor(float damage);
+    @Shadow public abstract ItemStack shadow$getItemInHand(Hand hand);
+    @Shadow protected abstract void shadow$dropEquipment();
+    @Shadow protected abstract void shadow$dropAllDeathLoot(DamageSource damageSourceIn);
+    @Shadow @Nullable public abstract LivingEntity shadow$getKillCredit();
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
     // @formatter:on
 
@@ -255,7 +253,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 // Sponge End
                 
                 // Helmet
-                final ItemStack helmet = this.shadow$getItemStackFromSlot(EquipmentSlotType.HEAD);
+                final ItemStack helmet = this.shadow$getItemBySlot(EquipmentSlotType.HEAD);
                 // We still sanity check if a mod is calling to damage the entity with an anvil or falling block
                 // without using our mixin redirects in EntityFallingBlockMixin.
                 if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.ANVIL
@@ -268,7 +266,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
                 // Shield
                 if (shieldFunction.isPresent()) {
-                    this.shadow$damageShield((float) event.getBaseDamage());
+                    this.shadow$hurtCurrentlyUsedShield((float) event.getBaseDamage());
                     if (!damageSource.isProjectile()) {
                         final Entity entity = damageSource.getImmediateSource();
 
@@ -280,7 +278,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
                 // Armor
                 if (!damageSource.isUnblockable() && armorFunction.isPresent()) {
-                    this.shadow$damageArmor((float) event.getBaseDamage());
+                    this.shadow$hurtArmor((float) event.getBaseDamage());
                 }
                 // Resistance modifier post calculation
                 if (resistanceFunction.isPresent()) {
@@ -391,7 +389,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         if (thisEntity instanceof PlayerEntityBridge && ((PlayerEntityBridge) thisEntity).bridge$keepInventory()) {
             return;
         }
-        this.shadow$dropInventory();
+        this.shadow$dropEquipment();
     }
 
     /**
@@ -424,19 +422,19 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         // Sponge end
         if (this.shadow$isInvulnerableTo(source)) {
             return false;
-        } else if (this.world.isRemote) {
+        } else if (this.world.isClientSide) {
             return false;
             // Sponge - Also ignore our customary damage source
         } else if (this.shadow$getHealth() <= 0.0F && source != DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE) {
             return false;
-        } else if (source.isFireDamage() && this.shadow$isPotionActive(Effects.FIRE_RESISTANCE)) {
+        } else if (source.isFireDamage() && this.shadow$hasEffect(Effects.FIRE_RESISTANCE)) {
             return false;
         } else {
-            if (this.shadow$isSleeping() && !this.world.isRemote) {
-                this.shadow$wakeUp();
+            if (this.shadow$isSleeping() && !this.world.isClientSide) {
+                this.shadow$stopSleeping();
             }
 
-            this.idleTime = 0;
+            this.noActionTime = 0;
             final float f = amount;
             // Sponge - ignore as this is handled in our damageEntityHook
 //                if ((source == DamageSource.ANVIL || source == DamageSource.FALLING_BLOCK) && !this.getItemStackFromSlot(EntityEquipmentSlot.HEAD).isEmpty())
@@ -451,7 +449,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             // Sponge - set the 'shield blocking ran' flag to the proper value, since
             // we comment out the logic below
             float f1 = 0.0F;
-            final boolean flag = amount > 0.0F && this.shadow$canBlockDamageSource(source);
+            final boolean flag = amount > 0.0F && this.shadow$isDamageSourceBlocked(source);
 
             // Sponge start - this is handled in our bridge$damageEntityHook
             // but we need to account for the amount later.
@@ -479,11 +477,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 //                }
             // Sponge end
 
-            this.limbSwingAmount = 1.5F;
+            this.animationSpeed = 1.5F;
             boolean flag1 = true;
 
             if ((float) this.hurtResistantTime > 10.0F) {
-                if (amount <= this.lastDamage) { // Technically, this is wrong since 'amount' won't be 0 if a shield is used. However, we need bridge$damageEntityHook so that we process the shield, so we leave it as-is
+                if (amount <= this.lastHurt) { // Technically, this is wrong since 'amount' won't be 0 if a shield is used. However, we need bridge$damageEntityHook so that we process the shield, so we leave it as-is
                     return false;
                 }
 
@@ -491,56 +489,56 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 // only if the class is unmodded. If it's a modded class, then it should be calling our
                 // damageEntity method, which would re-run our bridge$damageEntityHook.
                 if (((EntityTypeBridge) this.shadow$getType()).bridge$overridesDamageEntity()) {
-                    this.shadow$damageEntity(source, amount - this.lastDamage);
+                    this.shadow$actuallyHurt(source, amount - this.lastHurt);
                 } else {
-                    if (!this.bridge$damageEntity(source, amount - this.lastDamage)) {
+                    if (!this.bridge$damageEntity(source, amount - this.lastHurt)) {
                         return false;
                     }
                 }
-                // this.damageEntity(source, amount - this.lastDamage); // handled above
+                // this.damageEntity(source, amount - this.lastHurt); // handled above
                 // Sponge end
-                this.lastDamage = amount;
+                this.lastHurt = amount;
                 flag1 = false;
             } else {
                 // Sponge start - reroute to our damage hook
                 if (((EntityTypeBridge) this.shadow$getType()).bridge$overridesDamageEntity()) {
-                    this.shadow$damageEntity(source, amount);
+                    this.shadow$actuallyHurt(source, amount);
                 } else {
                     if (!this.bridge$damageEntity(source, amount)) {
                         return false;
                     }
                 }
-                this.lastDamage = amount;
+                this.lastHurt = amount;
                 this.hurtResistantTime = 20;
                 // this.damageEntity(source, amount); // handled above
                 // Sponge end
-                this.maxHurtTime = 10;
-                this.hurtTime = this.maxHurtTime;
+                this.hurtDuration = 10;
+                this.hurtTime = this.hurtDuration;
             }
 
-            this.attackedAtYaw = 0.0F;
+            this.hurtDir = 0.0F;
             final Entity entity = source.getTrueSource();
 
             if (entity != null) {
                 if (entity instanceof LivingEntity) {
-                    this.shadow$setRevengeTarget((LivingEntity)entity);
+                    this.shadow$setLastHurtByMob((LivingEntity)entity);
                 }
 
                 if (entity instanceof PlayerEntity) {
-                    this.recentlyHit = 100;
-                    this.attackingPlayer = (PlayerEntity)entity;
+                    this.lastHurtByPlayerTime = 100;
+                    this.lastHurtByPlayer = (PlayerEntity)entity;
                 // Forge Start - use TameableEntity instead of WolfEntity
                 // } else if (entity1 instanceof WolfEntity) {
                 //    WolfEntity wolfentity = (WolfEntity)entity1;
                 } else if (entity instanceof TameableEntity) {
                     TameableEntity wolfentity = (TameableEntity)entity;
                     if (wolfentity.isTamed()) {
-                        this.recentlyHit = 100;
+                        this.lastHurtByPlayerTime = 100;
                         LivingEntity livingentity = wolfentity.getOwner();
                         if (livingentity != null && livingentity.getType() == EntityType.PLAYER) {
-                            this.attackingPlayer = (PlayerEntity)livingentity;
+                            this.lastHurtByPlayer = (PlayerEntity)livingentity;
                         } else {
-                            this.attackingPlayer = null;
+                            this.lastHurtByPlayer = null;
                         }
                     }
                 }
@@ -568,7 +566,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
 
                 if (source != DamageSource.DROWN && !flag) { // Sponge - remove 'amount > 0.0F' - it's redundant in Vanilla, and breaks our handling of shields
-                    this.shadow$markVelocityChanged();
+                    this.shadow$markHurt();
                 }
 
                 if (entity != null) {
@@ -579,10 +577,10 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                         d1 = (Math.random() - Math.random()) * 0.01D;
                     }
 
-                    this.attackedAtYaw = (float) (MathHelper.atan2(d0, d1) * 57.2957763671875D - (double) this.rotationYaw);
-                    this.shadow$knockBack(entity, 0.4F, d1, d0);
+                    this.hurtDir = (float) (MathHelper.atan2(d0, d1) * 57.2957763671875D - (double) this.rotationYaw);
+                    this.shadow$knockback(0.4F, d1, d0);
                 } else {
-                    this.attackedAtYaw = (float) (Math.random() * 2.0D * 180);
+                    this.hurtDir = (float) (Math.random() * 2.0D * 180);
                 }
             }
 
@@ -593,11 +591,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     // if (flag1 && soundevent != null) { Vanilla
                     // Sponge - Check that we're not vanished
                     if (!this.bridge$isVanished() && flag1 && soundevent != null) {
-                        this.shadow$playSound(soundevent, this.shadow$getSoundVolume(), this.shadow$getSoundPitch());
+                        this.shadow$playSound(soundevent, this.shadow$getSoundVolume(), this.shadow$getVoicePitch());
                     }
 
 
-                    this.shadow$onDeath(source); // Sponge tracker will redirect this call
+                    this.shadow$die(source); // Sponge tracker will redirect this call
                 }
             } else if (flag1) {
                 // Sponge - Check if we're vanished
@@ -632,7 +630,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             target = "Lnet/minecraft/entity/LivingEntity;addItemParticles(Lnet/minecraft/item/ItemStack;I)V"))
     private void impl$hideItemParticlesIfVanished(final LivingEntity livingEntity, final ItemStack stack, final int count) {
         if (!this.bridge$isVanished()) {
-            this.shadow$addItemParticles(stack, count);
+            this.shadow$spawnItemParticles(stack, count);
         }
     }
 
@@ -711,9 +709,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         cancellable = true,
         locals = LocalCapture.CAPTURE_FAILHARD,
         at = @At(value = "FIELD",
-            target = "Lnet/minecraft/entity/LivingEntity;activeItemStack:Lnet/minecraft/item/ItemStack;"))
+            target = "Lnet/minecraft/entity/LivingEntity;useItem:Lnet/minecraft/item/ItemStack;"))
     private void impl$onSetActiveItemStack(final Hand hand, final CallbackInfo ci, final ItemStack stack) {
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             return;
         }
 
@@ -729,16 +727,16 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         if (SpongeCommon.postEvent(event)) {
             ci.cancel();
         } else {
-            this.activeItemStackUseCount = event.getRemainingDuration();
+            this.useItemRemaining = event.getRemainingDuration();
         }
     }
 
     @Redirect(method = "setActiveHand",
         at = @At(value = "FIELD",
-            target = "Lnet/minecraft/entity/LivingEntity;activeItemStackUseCount:I"))
+            target = "Lnet/minecraft/entity/LivingEntity;useItemRemaining:I"))
     private void impl$getItemDuration(final LivingEntity this$0, final int count) {
-        if (this.world.isRemote) {
-            this.activeItemStackUseCount = count;
+        if (this.world.isClientSide) {
+            this.useItemRemaining = count;
         }
         // If we're on the server, do nothing, since we already set this field on onSetActiveItemStack
     }
@@ -761,26 +759,26 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    @Redirect(method = "updateActiveHand",
+    @Redirect(method = "updatingUsingItem",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/LivingEntity;getItemInUseCount()I",
+            target = "Lnet/minecraft/entity/LivingEntity;getUseItemRemainingTicks()I",
             ordinal = 0))
     private int impl$onGetRemainingItemDuration(final LivingEntity self) {
-        if (this.world.isRemote) {
-            return self.getItemInUseCount();
+        if (this.world.isClientSide) {
+            return self.getUseItemRemainingTicks();
         }
 
         final UseItemStackEvent.Tick event;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
-            final HandType handType = (HandType) (Object) this.shadow$getActiveHand();
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.useItem);
+            final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventTick(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot);
+                this.useItemRemaining, this.useItemRemaining, snapshot);
             SpongeCommon.postEvent(event);
         }
-        // Because the item usage will only finish if activeItemStackUseCount == 0 and decrements it first, it should be >= 1
-        this.activeItemStackUseCount = Math.max(event.getRemainingDuration(), 1);
+        // Because the item usage will only finish if useItemRemaining == 0 and decrements it first, it should be >= 1
+        this.useItemRemaining = Math.max(event.getRemainingDuration(), 1);
 
         if (event.isCancelled()) {
             // Get prepared for some cool hacks: We're within the condition for updateItemUse
@@ -788,40 +786,38 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             // condition evaluate to false, so an integer >= 25
             return 26;
         }
-        SpongeImplHooks.onUseItemTick((LivingEntity) (Object) this, this.activeItemStack, this.activeItemStackUseCount);
 
-
-        return this.shadow$getItemInUseCount();
+        return this.shadow$getUseItemRemainingTicks();
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Inject(method = "onItemUseFinish",
+    @Inject(method = "completeUsingItem",
         cancellable = true,
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/LivingEntity;triggerItemUseEffects(Lnet/minecraft/item/ItemStack;I)V"))
     private void impl$onUpdateItemUse(final CallbackInfo ci) {
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             return;
         }
 
 
         final UseItemStackEvent.Finish event;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
-            final HandType handType = (HandType) (Object) this.shadow$getActiveHand();
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.useItem);
+            final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventFinish(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot);
+                this.useItemRemaining, this.useItemRemaining, snapshot);
         }
         SpongeCommon.postEvent(event);
         if (event.getRemainingDuration() > 0) {
-            this.activeItemStackUseCount = event.getRemainingDuration();
+            this.useItemRemaining = event.getRemainingDuration();
             ci.cancel();
         } else if (event.isCancelled()) {
-            this.shadow$resetActiveHand();
+            this.shadow$stopUsingItem();
             ci.cancel();
         } else {
-            this.impl$activeItemStackCopy = this.activeItemStack.copy();
+            this.impl$activeItemStackCopy = this.useItem.copy();
         }
     }
 
@@ -829,7 +825,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/LivingEntity;setHeldItem(Lnet/minecraft/util/Hand;Lnet/minecraft/item/ItemStack;)V"))
     private void impl$onSetHeldItem(final LivingEntity self, final Hand hand, final ItemStack stack) {
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             self.setHeldItem(hand, stack);
             return;
         }
@@ -850,21 +846,21 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final HandType handType = (HandType) (Object) hand;
             this.impl$addSelfToFrame(frame, activeItemStackSnapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventReplace(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                this.activeItemStackUseCount, this.activeItemStackUseCount, activeItemStackSnapshot,
+                this.useItemRemaining, this.useItemRemaining, activeItemStackSnapshot,
                 new Transaction<>(ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy), snapshot));
         }
 
         if (SpongeCommon.postEvent(event)) {
-            this.shadow$setHeldItem(hand, this.impl$activeItemStackCopy.copy());
+            this.shadow$setItemInHand(hand, this.impl$activeItemStackCopy.copy());
             return;
         }
 
         if (!event.getItemStackResult().isValid()) {
-            this.shadow$setHeldItem(hand, this.impl$activeItemStackCopy.copy());
+            this.shadow$setItemInHand(hand, this.impl$activeItemStackCopy.copy());
             return;
         }
 
-        this.shadow$setHeldItem(hand, ItemStackUtil.fromSnapshotToNative(event.getItemStackResult().getFinal()));
+        this.shadow$setItemInHand(hand, ItemStackUtil.fromSnapshotToNative(event.getItemStackResult().getFinal()));
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -873,13 +869,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             target = "Lnet/minecraft/item/ItemStack;onPlayerStoppedUsing(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;I)V"))
     // stopActiveHand
     private void impl$onStopPlayerUsing(final ItemStack stack, final World world, final LivingEntity self, final int duration) {
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             stack.onPlayerStoppedUsing(world, self, duration);
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
-            final HandType handType = (HandType) (Object) this.shadow$getActiveHand();
+            final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
             if (!SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventStop(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 duration, duration, snapshot))) {
@@ -891,18 +887,18 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Inject(method = "resetActiveHand",
         at = @At("HEAD"))
     private void impl$onResetActiveHand(final CallbackInfo ci) {
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             return;
         }
 
         // If we finished using an item, impl$activeItemStackCopy will be non-null
         // However, if a player stopped using an item early, impl$activeItemStackCopy will not be set
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy != null ? this.impl$activeItemStackCopy : this.activeItemStack);
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy != null ? this.impl$activeItemStackCopy : this.useItem);
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             this.impl$addSelfToFrame(frame, snapshot);
             SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventReset(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot));
+                this.useItemRemaining, this.useItemRemaining, snapshot));
         }
         this.impl$activeItemStackCopy = null;
     }

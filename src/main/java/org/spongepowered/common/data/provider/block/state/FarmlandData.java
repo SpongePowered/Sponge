@@ -41,7 +41,7 @@ public final class FarmlandData {
                 .asImmutable(BlockState.class)
                     .create(Keys.MOISTURE)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.MOISTURE, FarmlandBlock.MOISTURE))
-                        .get(h -> h.get(FarmlandBlock.MOISTURE))
+                        .get(h -> h.getValue(FarmlandBlock.MOISTURE))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, FarmlandBlock.MOISTURE))
                         .supports(h -> h.getBlock() instanceof FarmlandBlock);
     }

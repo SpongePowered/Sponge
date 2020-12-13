@@ -32,29 +32,29 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.hooks.SpongeImplHooks;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 
 @Mixin(InventoryHelper.class)
 public abstract class InventoryHelperMixin_Inventory {
 
-    @Redirect(method = "dropInventoryItems(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/inventory/IInventory;)V",
+    @Redirect(method = "dropContents(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/inventory/IInventory;)V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/inventory/InventoryHelper;dropInventoryItems(Lnet/minecraft/world/World;DDDLnet/minecraft/inventory/IInventory;)V"))
+            target = "Lnet/minecraft/inventory/InventoryHelper;dropContents(Lnet/minecraft/world/World;DDDLnet/minecraft/inventory/IInventory;)V"))
     private static void impl$dropItemsAndThrowEvents(final World world, final double x, final double y, final double z, final IInventory inventory) {
         if (world instanceof ServerWorld) {
             // Don't drop items if we are restoring blocks
-            if (SpongeImplHooks.isRestoringBlocks(world)) {
+            if (PlatformHooks.getInstance().getWorldHooks().isRestoringBlocks(world)) {
                 return;
             }
             ContainerUtil.performBlockInventoryDrops((ServerWorld) world, x, y, z, inventory);
         } else {
-            for (int i = 0; i < inventory.getSizeInventory(); ++i) {
-                final ItemStack itemstack = inventory.getStackInSlot(i);
+            for (int i = 0; i < inventory.getContainerSize(); ++i) {
+                final ItemStack itemstack = inventory.getItem(i);
 
                 if (!itemstack.isEmpty()) {
-                    InventoryHelper.spawnItemStack(world, x, y, z, itemstack);
+                    InventoryHelper.dropItemStack(world, x, y, z, itemstack);
                 }
             }
         }

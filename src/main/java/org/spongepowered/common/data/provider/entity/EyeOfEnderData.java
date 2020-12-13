@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.item.EyeOfEnderEntityAccessor;
+import org.spongepowered.common.accessor.entity.projectile.EyeOfEnderEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
@@ -40,11 +40,11 @@ public final class EyeOfEnderData {
         registrator
                 .asMutable(EyeOfEnderEntityAccessor.class)
                     .create(Keys.WILL_SHATTER)
-                        .get(h -> !h.accessor$getShatterOrDrop())
-                        .set((h, v) -> h.accessor$setShatterOrDrop(!v))
+                        .get(h -> !h.accessor$surviveAfterDeath())
+                        .set((h, v) -> h.accessor$surviveAfterDeath(!v))
                     .create(Keys.DESPAWN_DELAY)
-                        .get(h -> new SpongeTicks(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - h.accessor$getDespawnTimer()))
-                        .set((h, v) -> h.accessor$setDespawnTimer(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - (int) v.getTicks()));
+                        .get(h -> new SpongeTicks(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - h.accessor$life()))
+                        .set((h, v) -> h.accessor$life(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - (int) v.getTicks()));
     }
     // @formatter:on
 }

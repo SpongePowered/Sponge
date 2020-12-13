@@ -32,19 +32,20 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(EndGatewayTileEntity.class)
 public interface EndGatewayTileEntityAccessor {
 
-    @Accessor("exitPortal") BlockPos accessor$getExitPortal();
+    @Accessor("age") long accessor$age();
 
-    @Accessor("exitPortal") void accessor$setExitPortal(BlockPos exitPortal);
+    @Accessor("age") void accessor$age(final long age);
 
-    @Accessor("exactTeleport") boolean accessor$getExactTeleport();
+    @Accessor("teleportCooldown") int accessor$teleportCooldown();
 
-    @Accessor("exactTeleport") void accessor$setExactTeleport(boolean exactTeleport);
+    @Accessor("teleportCooldown") void accessor$setTeleportCooldown(final int teleportCooldown);
 
-    @Accessor("age") long accessor$getAge();
+    @Accessor("exitPortal") BlockPos accessor$exitPortal();
 
-    @Accessor("age") void accessor$setAge(long age);
+    @Accessor("exitPortal") void accessor$exitPortal(final BlockPos exitPortal);
 
-    @Accessor("teleportCooldown") int accessor$getTeleportCooldown();
+    @Accessor("exactTeleport") boolean accessor$exactTeleport();
 
-    @Accessor("teleportCooldown") void accessor$setTeleportCooldown(int teleportCooldown);
+    @Accessor("exactTeleport") void accessor$exactTeleport(final boolean exactTeleport);
+
 }

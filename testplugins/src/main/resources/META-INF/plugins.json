@@ -402,7 +402,7 @@
         {
             "loader": "java_plain",
             "id": "tradetest",
-            "name": "Tradae Test",
+            "name": "Trade Test",
             "version": "8.0.0",
             "main-class": "org.spongepowered.test.trades.TradeTest",
             "description": "Testing Villager Trade functionality",

@@ -44,21 +44,20 @@ import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridg
 import org.spongepowered.common.bridge.server.management.PlayerProfileCache_ProfileEntryBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
-import java.util.Date;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
 @Mixin(PlayerProfileCache.class)
 public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridge {
 
-    @Shadow private void shadow$addEntry(final com.mojang.authlib.GameProfile profile, @Nullable final Date expiry) {}
-    @Shadow @Final private Map<UUID, PlayerProfileCache_ProfileEntryAccessor> uuidToProfileEntryMap;
-    @Shadow @Final private Map<String, PlayerProfileCache_ProfileEntryAccessor> usernameToProfileEntryMap;
+    @Shadow public void shadow$add(final com.mojang.authlib.GameProfile profile) {}
+    @Shadow @Final private Map<UUID, PlayerProfileCache_ProfileEntryAccessor> profilesByUUID;
+    @Shadow @Final private Map<String, PlayerProfileCache_ProfileEntryAccessor> profilesByName;
 
     private boolean impl$canSave = false;
 
@@ -66,14 +65,14 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
     public Optional<PlayerProfileCache_ProfileEntryBridge> bridge$getEntry(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
 
-        PlayerProfileCache_ProfileEntryAccessor accessor = this.uuidToProfileEntryMap.get(uniqueId);
+        final PlayerProfileCache_ProfileEntryAccessor accessor = this.profilesByUUID.get(uniqueId);
         if (accessor == null) {
             return Optional.empty();
         }
 
-        if (accessor.accessor$getExpirationDate().getTime() < System.currentTimeMillis()) {
-            this.uuidToProfileEntryMap.remove(uniqueId, accessor);
-            this.usernameToProfileEntryMap.remove(accessor.accessor$getGameProfile().getName(), accessor);
+        if (accessor.invoker$getExpirationDate().getTime() < System.currentTimeMillis()) {
+            this.profilesByUUID.remove(uniqueId, accessor);
+            this.profilesByName.remove(accessor.invoker$getProfile().getName(), accessor);
             return Optional.empty();
         }
 
@@ -85,14 +84,14 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
         Objects.requireNonNull(name, "name");
 
         final String lowerName = name.toLowerCase(Locale.ROOT);
-        PlayerProfileCache_ProfileEntryAccessor accessor = this.usernameToProfileEntryMap.get(lowerName);
+        final PlayerProfileCache_ProfileEntryAccessor accessor = this.profilesByName.get(lowerName);
         if (accessor == null) {
             return Optional.empty();
         }
 
-        if (accessor.accessor$getExpirationDate().getTime() < System.currentTimeMillis()) {
-            this.uuidToProfileEntryMap.remove(accessor.accessor$getGameProfile().getId(), accessor);
-            this.usernameToProfileEntryMap.remove(lowerName, accessor);
+        if (accessor.invoker$getExpirationDate().getTime() < System.currentTimeMillis()) {
+            this.profilesByUUID.remove(accessor.invoker$getProfile().getId(), accessor);
+            this.profilesByName.remove(lowerName, accessor);
             return Optional.empty();
         }
 
@@ -103,8 +102,8 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
     public void bridge$add(final com.mojang.authlib.GameProfile profile, final boolean full, final boolean signed) {
         Objects.requireNonNull(profile, "profile");
 
-        PlayerProfileCache_ProfileEntryAccessor accessor = this.uuidToProfileEntryMap.get(profile.getId());
-        final com.mojang.authlib.GameProfile current = accessor == null ? null : accessor.accessor$getGameProfile();
+        PlayerProfileCache_ProfileEntryAccessor accessor = this.profilesByUUID.get(profile.getId());
+        final com.mojang.authlib.GameProfile current = accessor == null ? null : accessor.invoker$getProfile();
         // Don't allow basic game profiles to overwrite the contents if already
         // an entry exists that is full.
         if (current != null && Objects.equals(current.getId(), profile.getId()) &&
@@ -112,9 +111,9 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
             return;
         }
 
-        this.shadow$addEntry(profile, null);
-        accessor = this.uuidToProfileEntryMap.get(profile.getId());
-        if (accessor == null || accessor.accessor$getGameProfile() != profile) {
+        this.shadow$add(profile);
+        accessor = this.profilesByUUID.get(profile.getId());
+        if (accessor == null || accessor.invoker$getProfile() != profile) {
             return;
         }
         final PlayerProfileCache_ProfileEntryBridge bridge = (PlayerProfileCache_ProfileEntryBridge) accessor;
@@ -126,8 +125,8 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
     public void bridge$add(final GameProfile profile, final boolean full, final boolean signed) {
         Objects.requireNonNull(profile, "profile");
 
-        PlayerProfileCache_ProfileEntryAccessor accessor = this.uuidToProfileEntryMap.get(profile.getUniqueId());
-        final com.mojang.authlib.GameProfile current = accessor == null ? null : accessor.accessor$getGameProfile();
+        PlayerProfileCache_ProfileEntryAccessor accessor = this.profilesByUUID.get(profile.getUniqueId());
+        final com.mojang.authlib.GameProfile current = accessor == null ? null : accessor.invoker$getProfile();
         final com.mojang.authlib.GameProfile mcProfile = SpongeGameProfile.toMcProfile(profile);
         // Don't allow basic game profiles to overwrite the contents if already
         // an entry exists that is full.
@@ -136,9 +135,9 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
             return;
         }
 
-        this.shadow$addEntry(mcProfile, null);
-        accessor = this.uuidToProfileEntryMap.get(profile.getUniqueId());
-        if (accessor == null || accessor.accessor$getGameProfile() != mcProfile) {
+        this.shadow$add(mcProfile);
+        accessor = this.profilesByUUID.get(profile.getUniqueId());
+        if (accessor == null || accessor.invoker$getProfile() != mcProfile) {
             return;
         }
         ((PlayerProfileCache_ProfileEntryBridge) accessor).bridge$set(profile, full, signed);
@@ -149,21 +148,23 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
         this.impl$canSave = flag;
     }
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerProfileCache;load()V"))
-    private void impl$callLoadAfterServerCreated(final PlayerProfileCache playerProfileCache) {
-        // NOOP
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerProfileCache;load()Ljava/util/List;"))
+    private List<?> impl$callLoadAfterServerCreated(final PlayerProfileCache playerProfileCache) {
+        return Collections.emptyList();
     }
 
-    @Inject(method = "addEntry(Lcom/mojang/authlib/GameProfile;Ljava/util/Date;)V", at = @At(value = "RETURN"))
-    private void impl$UpdateCacheUsername(final com.mojang.authlib.GameProfile profile, final Date date, final CallbackInfo ci) {
+    @Inject(method = "add", at = @At(value = "RETURN"))
+    private void impl$UpdateCacheUsername(final com.mojang.authlib.GameProfile profile, final CallbackInfo ci) {
         ((SpongeServer) Sponge.getServer()).getUsernameCache().setUsername(profile.getId(), profile.getName());
     }
 
-    @Redirect(method = "lookupProfile(Lcom/mojang/authlib/GameProfileRepository;Ljava/lang/String;)Lcom/mojang/authlib/GameProfile;",
-            at = @At(
-                value = "INVOKE",
-                target = "Lcom/mojang/authlib/GameProfileRepository;findProfilesByNames([Ljava/lang/String;Lcom/mojang/authlib/Agent;Lcom/mojang/authlib/ProfileLookupCallback;)V",
-                remap = false))
+    @Redirect(method = "lookupGameProfile",
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/mojang/authlib/GameProfileRepository;findProfilesByNames([Ljava/lang/String;Lcom/mojang/authlib/Agent;Lcom/mojang/authlib/ProfileLookupCallback;)V",
+            remap = false
+        )
+    )
     private static void impl$LookUpViaSponge(final GameProfileRepository repository, final String[] names,
             final Agent agent, final ProfileLookupCallback callback) {
         final GameProfileManager profileManager = Sponge.getServer().getGameProfileManager();

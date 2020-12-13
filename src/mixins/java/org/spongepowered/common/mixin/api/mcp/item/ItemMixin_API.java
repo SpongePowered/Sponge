@@ -42,8 +42,10 @@ import java.util.function.Supplier;
 @Mixin(Item.class)
 public abstract class ItemMixin_API implements ItemType {
 
+    // @formatter:off
     @Shadow public abstract int shadow$getMaxStackSize();
-    @Shadow public abstract String shadow$getTranslationKey();
+    @Shadow public abstract String shadow$getDescriptionId();
+    // @formatter:on
 
     @Nullable protected BlockType blockType = null;
 
@@ -59,7 +61,7 @@ public abstract class ItemMixin_API implements ItemType {
 
     @Override
     public Component asComponent() {
-        return Component.translatable(this.shadow$getTranslationKey());
+        return Component.translatable(this.shadow$getDescriptionId());
     }
 
     @Override

@@ -32,7 +32,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(PistonBlock.class)
 public interface PistonBlockAccessor {
 
-    @Accessor("isSticky") boolean accessor$getIsSticky();
+    @Accessor("isSticky") boolean accessor$isSticky();
 
-    @Mutable @Accessor("isSticky") void accessor$setIsSticky(boolean isSticke);
+    @Mutable @Accessor("isSticky") void accessor$isSticky(final boolean isSticky);
+
 }

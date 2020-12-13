@@ -30,6 +30,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalType;
@@ -58,13 +59,12 @@ public final class WrappedITeleporterPortalType implements PortalType {
     }
 
     @Override
-    public void generatePortal(ServerLocation location) {
+    public void generatePortal(ServerLocation location, Axis axis) {
         if (this.logicType != null) {
-            this.logicType.generatePortal(location);
+            this.logicType.generatePortal(location, axis);
         } else if (this.teleporter instanceof Teleporter) {
             final Teleporter mTeleporter = (Teleporter) this.teleporter;
-
-
+            // TODO
         }
     }
 
@@ -89,11 +89,11 @@ public final class WrappedITeleporterPortalType implements PortalType {
 
             if (entity instanceof ServerPlayer) {
                 portalLogic = PortalHelper.createVanillaPlayerPortalLogic((ServerPlayerEntity) entity,
-                    VecHelper.toVec3d(destination.getPosition()), (ServerWorld) entity.getServerLocation().getWorld(),
+                    VecHelper.toVanillaVector3d(destination.getPosition()), (ServerWorld) entity.getServerLocation().getWorld(),
                     (ServerWorld) destination.getWorld(), this);
             } else {
                 portalLogic = PortalHelper.createVanillaEntityPortalLogic((net.minecraft.entity.Entity) entity,
-                        VecHelper.toVec3d(destination.getPosition()), (ServerWorld) entity.getServerLocation().getWorld(),
+                        VecHelper.toVanillaVector3d(destination.getPosition()), (ServerWorld) entity.getServerLocation().getWorld(),
                         (ServerWorld) destination.getWorld(), this);
             }
 
@@ -102,11 +102,11 @@ public final class WrappedITeleporterPortalType implements PortalType {
             if (entity instanceof ServerPlayer) {
                 result = this.teleporter.bridge$placeEntity((ServerPlayerEntity) entity, (ServerWorld) entity.getWorld(),
                     (ServerWorld) destination.getWorld(), 0, PortalHelper.createVanillaPlayerPortalLogic((ServerPlayerEntity) entity,
-                    VecHelper.toVec3d(destination.getPosition()), (ServerWorld) entity.getWorld(), (ServerWorld) destination.getWorld(), this));
+                    VecHelper.toVanillaVector3d(destination.getPosition()), (ServerWorld) entity.getWorld(), (ServerWorld) destination.getWorld(), this));
             } else {
                 result = this.teleporter.bridge$placeEntity((net.minecraft.entity.Entity) entity, (ServerWorld) entity.getWorld(),
                     (ServerWorld) destination.getWorld(), 0, PortalHelper.createVanillaEntityPortalLogic((net.minecraft.entity.Entity) entity,
-                        VecHelper.toVec3d(destination.getPosition()), (ServerWorld) entity.getWorld(), (ServerWorld) destination.getWorld(), this));
+                        VecHelper.toVanillaVector3d(destination.getPosition()), (ServerWorld) entity.getWorld(), (ServerWorld) destination.getWorld(), this));
             }
         }
 

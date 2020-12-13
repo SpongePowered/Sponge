@@ -84,7 +84,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     @Override
     public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final BasicPacketContext context) {
         final CPlayerTryUseItemOnBlockPacket placeBlock = (CPlayerTryUseItemOnBlockPacket) packet;
-        final net.minecraft.item.ItemStack itemUsed = playerMP.getHeldItem(placeBlock.getHand());
+        final net.minecraft.item.ItemStack itemUsed = playerMP.getItemInHand(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
         context.itemUsed(itemstack);
         final HandType handType = (HandType) (Object) placeBlock.getHand();
@@ -126,15 +126,15 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
         // Swap the items used, the item used is what we want to "restore" it to the player
         final Hand hand = (Hand) (Object) context.getHandUsed();
-        final net.minecraft.item.ItemStack replaced = player.getHeldItem(hand);
-        player.setHeldItem(hand, ItemStackUtil.toNative(itemStack.copy()));
+        final net.minecraft.item.ItemStack replaced = player.getItemInHand(hand);
+        player.setItemInHand(hand, ItemStackUtil.toNative(itemStack.copy()));
         if (!TrackingUtil.processBlockCaptures(context) && !snapshot.isEmpty()) {
             PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), hand);
         } else {
-            player.setHeldItem(hand, replaced);
+            player.setItemInHand(hand, replaced);
         }
 
-        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
+        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
         trackedInventory.bridge$setCaptureInventory(false);
         trackedInventory.bridge$getCapturedSlotTransactions().clear();
     }

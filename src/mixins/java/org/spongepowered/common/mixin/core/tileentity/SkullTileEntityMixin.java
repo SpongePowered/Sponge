@@ -46,12 +46,12 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(SkullTileEntity.class)
 public abstract class SkullTileEntityMixin extends TileEntity implements ITickableTileEntity, SkullTileEntityBridge {
 
-    @Shadow private GameProfile playerProfile;
+    @Shadow private GameProfile owner;
 
-    @Nullable private CompletableFuture<?> impl$currentProfileFuture;
+    private @Nullable CompletableFuture<?> impl$currentProfileFuture;
 
-    public SkullTileEntityMixin(final TileEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    public SkullTileEntityMixin(final TileEntityType<?> type) {
+        super(type);
     }
 
     private void cancelResolveFuture() {
@@ -62,17 +62,17 @@ public abstract class SkullTileEntityMixin extends TileEntity implements ITickab
     }
 
     @Override
-    public void bridge$setUnresolvedPlayerProfile(final @Nullable GameProfile mcProfile) {
+    public void bridge$setUnresolvedPlayerProfile(final @Nullable GameProfile owner) {
         this.cancelResolveFuture();
-        this.playerProfile = mcProfile;
-        this.markDirty();
+        this.owner = owner;
+        this.setChanged();
     }
 
     /**
      * @reason Don't block the main thread while attempting to lookup a game profile.
      */
-    @Redirect(method = "updatePlayerProfile()V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/tileentity/SkullTileEntity;updateGameProfile(Lcom/mojang/authlib/GameProfile;)Lcom/mojang/authlib/GameProfile;"))
+    @Redirect(method = "updateOwnerProfile()V", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/tileentity/SkullTileEntity;updateGameprofile(Lcom/mojang/authlib/GameProfile;)Lcom/mojang/authlib/GameProfile;"))
     private GameProfile onUpdateProfile(final GameProfile input) {
         this.cancelResolveFuture();
         if (input == null) {
@@ -92,16 +92,16 @@ public abstract class SkullTileEntityMixin extends TileEntity implements ITickab
             return input;
         }
         future.thenAcceptAsync(profile -> {
-            this.playerProfile = SpongeGameProfile.toMcProfile(profile);
-            this.markDirty();
+            this.owner = SpongeGameProfile.toMcProfile(profile);
+            this.setChanged();
         }, SpongeCommon.getServer());
         this.impl$currentProfileFuture = future;
         return input;
     }
 
     @Override
-    public void remove() {
-        super.remove();
+    public void setRemoved() {
+        super.setRemoved();
         this.cancelResolveFuture();
     }
 }

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.entity.projectile;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.dispenser.IDispenseItemBehavior;
@@ -41,11 +39,9 @@ import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.common.accessor.block.DispenserBlockAccessor;
-import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Queue;
 
 public final class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
 
@@ -62,22 +58,22 @@ public final class DispenserSourceLogic implements ProjectileSourceLogic<Dispens
         if (projectile.isPresent()) {
             final Direction enumfacing = DispenserSourceLogic.getFacing((DispenserTileEntity) source);
             final net.minecraft.entity.Entity projectileEntity = (net.minecraft.entity.Entity) projectile.get();
-            final BlockPos adjustedPosition = projectileEntity.getPosition().add(enumfacing.getDirectionVec());
-            projectileEntity.setPosition(adjustedPosition.getX(), adjustedPosition.getY(), adjustedPosition.getZ());
+            final BlockPos adjustedPosition = projectileEntity.blockPosition().offset(enumfacing.getNormal());
+            projectileEntity.setPos(adjustedPosition.getX(), adjustedPosition.getY(), adjustedPosition.getZ());
         }
         return projectile;
     }
 
     public static Direction getFacing(final DispenserTileEntity dispenser) {
-        final BlockState state = dispenser.getWorld().getBlockState(dispenser.getPos());
-        return state.get(DispenserBlock.FACING);
+        final BlockState state = dispenser.getLevel().getBlockState(dispenser.getBlockPos());
+        return state.getValue(DispenserBlock.FACING);
     }
 
     @SuppressWarnings("unchecked")
     private <P extends Projectile> Optional<P> launch(final DispenserTileEntity dispenser, final EntityType<P> projectileType, final Item item) {
-        final IDispenseItemBehavior behavior = DispenserBlockAccessor.accessor$DISPENSE_BEHAVIOR_REGISTRY().get(item);
-        final ServerWorld world = (ServerWorld) dispenser.getWorld();
-        behavior.dispense(new ProxyBlockSource(world, dispenser.getPos()), new ItemStack(item));
+        final IDispenseItemBehavior behavior = DispenserBlockAccessor.accessor$DISPENSER_REGISTRY().get(item);
+        final ServerWorld world = (ServerWorld) dispenser.getLevel();
+        behavior.dispense(new ProxyBlockSource(world, dispenser.getBlockPos()), new ItemStack(item));
         final List<Entity> entities = world.getEntities((net.minecraft.entity.EntityType<?>) projectileType, entity -> true);
         if (entities.isEmpty()) {
             return Optional.empty();

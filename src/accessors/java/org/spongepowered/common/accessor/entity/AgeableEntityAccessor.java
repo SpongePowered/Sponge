@@ -28,11 +28,14 @@ import net.minecraft.entity.AgeableEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(AgeableEntity.class)
 public interface AgeableEntityAccessor {
 
-    @Accessor("BABY") static DataParameter<Boolean> accessor$getBaby() {
-        throw new IllegalStateException("Untransformed accessor!");
+    @Accessor("DATA_BABY_ID")
+    static DataParameter<Boolean> accessor$DATA_BABY_ID() {
+        throw new UntransformedAccessorError();
     }
+
 }

@@ -39,8 +39,8 @@ public final class SeaPickleData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(SeaPickleBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(SeaPickleBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(SeaPickleBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(SeaPickleBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof SeaPickleBlock);
     }
     // @formatter:on

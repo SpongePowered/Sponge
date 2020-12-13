@@ -30,6 +30,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,7 +44,9 @@ import javax.annotation.Nullable;
 @Mixin(HandSide.class)
 public abstract class HandSideMixin_API implements HandPreference {
 
-    @Shadow private ITextComponent handName;
+    // @formatter:off
+    @Shadow @Final private ITextComponent name;
+    // @formatter:on
 
     @Nullable private ResourceKey api$key;
 
@@ -59,6 +62,6 @@ public abstract class HandSideMixin_API implements HandPreference {
 
     @Override
     public Component asComponent() {
-        return SpongeAdventure.asAdventure(this.handName);
+        return SpongeAdventure.asAdventure(this.name);
     }
 }

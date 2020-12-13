@@ -67,20 +67,20 @@ public class HeldHandSlotLens extends AbstractLens implements SlotLens {
     @Override
     public ItemStack getStack(Fabric fabric) {
         PlayerInventory inv = this.getInventoryPlayer(fabric);
-        return inv.getCurrentItem();
+        return inv.getSelected();
     }
 
     @Override
     public boolean setStack(Fabric fabric, ItemStack stack) {
         PlayerInventory inv = this.getInventoryPlayer(fabric);
-        inv.mainInventory.set(inv.currentItem, stack);
+        inv.items.set(inv.selected, stack);
         return true;
     }
 
     @Override
     public int getOrdinal(Fabric fabric) {
         PlayerInventory inv = this.getInventoryPlayer(fabric);
-        return inv.currentItem;
+        return inv.selected;
     }
 
     @Override

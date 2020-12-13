@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ScoreObjective.class)
 public interface ScoreObjectiveAccessor {
 
-    @Accessor("scoreboard") Scoreboard accessor$getScoreboard();
+    @Accessor("scoreboard") Scoreboard accessor$scoreboard();
+
 }

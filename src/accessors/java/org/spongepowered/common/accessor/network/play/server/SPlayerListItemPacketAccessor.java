@@ -33,9 +33,10 @@ import net.minecraft.network.play.server.SPlayerListItemPacket;
 @Mixin(SPlayerListItemPacket.class)
 public interface SPlayerListItemPacketAccessor {
 
-    @Accessor("players") List<SPlayerListItemPacket.AddPlayerData> accessor$getPlayers();
+    @Accessor("action") SPlayerListItemPacket.Action accessor$action();
 
-    @Accessor("action") SPlayerListItemPacket.Action accessor$getAction();
+    @Accessor("action") void accessor$action(final SPlayerListItemPacket.Action action);
 
-    @Accessor("action") void accessor$setAction(SPlayerListItemPacket.Action action);
+    @Accessor("entries") List<SPlayerListItemPacket.AddPlayerData> accessor$entries();
+
 }

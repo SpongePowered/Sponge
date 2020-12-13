@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(VillagerEntity.class)
 public abstract class VillagerEntityMixin extends AbstractVillagerEntityMixin {
 
-    @Redirect(method = "onDeath",
+    @Redirect(method = "die",
         at = @At(value = "INVOKE",
             target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V",
             remap = false

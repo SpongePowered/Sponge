@@ -39,13 +39,13 @@ public final class AbstractHorseData {
         registrator
                 .asMutable(AbstractHorseEntity.class)
                     .create(Keys.IS_TAMED)
-                        .get(AbstractHorseEntity::isTame)
-                        .set(AbstractHorseEntity::setHorseTamed)
+                        .get(AbstractHorseEntity::isTamed)
+                        .set(AbstractHorseEntity::setTamed)
                     .create(Keys.TAMER)
-                        .get(AbstractHorseEntity::getOwnerUniqueId)
+                        .get(AbstractHorseEntity::getOwnerUUID)
                         .set((h, v) -> {
-                            h.setOwnerUniqueId(v);
-                            h.setHorseTamed(v != null);
+                            h.setOwnerUUID(v);
+                            h.setTamed(v != null);
                         })
                 .asMutable(AbstractHorseEntityBridge.class)
                     .create(Keys.IS_SADDLED)

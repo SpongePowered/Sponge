@@ -62,7 +62,6 @@ import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -408,7 +407,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         } else if (server.isSinglePlayer()) {
             serverWorld.setAllowedSpawnTypes(this.difficulty != Difficulty.PEACEFUL, true);
         } else {
-            serverWorld.setAllowedSpawnTypes(((MinecraftServerAccessor) server).accessor$allowSpawnMonsters(), server.getCanSpawnAnimals());
+            serverWorld.setAllowedSpawnTypes(((MinecraftServerAccessor) server).invoker$isSpawningMonsters(), server.getCanSpawnAnimals());
         }
 
         serverWorld

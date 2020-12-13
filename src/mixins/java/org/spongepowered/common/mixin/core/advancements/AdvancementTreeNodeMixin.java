@@ -42,7 +42,7 @@ import org.spongepowered.common.advancement.SpongeTreeLayout;
 @Mixin(AdvancementTreeNode.class)
 public abstract class AdvancementTreeNodeMixin {
 
-    @Inject(method = "layout", at = @At("RETURN"))
+    @Inject(method = "run", at = @At("RETURN"))
     private static void onLayout(Advancement root, CallbackInfo ci) {
         final AdvancementTree advancementTree = ((org.spongepowered.api.advancement.Advancement) root).getTree().get();
         final TreeLayout layout = new SpongeTreeLayout(advancementTree);

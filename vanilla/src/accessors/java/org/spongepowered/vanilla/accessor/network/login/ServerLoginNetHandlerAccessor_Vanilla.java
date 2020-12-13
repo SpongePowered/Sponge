@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ServerLoginNetHandler.class)
 public interface ServerLoginNetHandlerAccessor_Vanilla {
 
-    @Accessor("currentLoginState") ServerLoginNetHandler.State accessor$getState();
+    @Accessor("state") ServerLoginNetHandler.State accessor$getState();
 
-    @Accessor("currentLoginState") void accessor$setState(ServerLoginNetHandler.State state);
+    @Accessor("state") void accessor$setState(ServerLoginNetHandler.State state);
 }

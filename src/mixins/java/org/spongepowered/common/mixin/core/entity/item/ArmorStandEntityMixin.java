@@ -142,6 +142,6 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
      */
     @Overwrite
     public void onKillCommand() {
-        super.shadow$onKillCommand();
+        super.shadow$kill();
     }
 }

@@ -35,10 +35,10 @@ import org.spongepowered.common.data.datasync.DataParameterConverter;
 import java.util.List;
 import java.util.Optional;
 
-public class EntityFlagsConverter extends DataParameterConverter<Byte> {
+public final class EntityFlagsConverter extends DataParameterConverter<Byte> {
 
     public EntityFlagsConverter() {
-        super(EntityAccessor.accessor$getFlags());
+        super(EntityAccessor.accessor$DATA_SHARED_FLAGS_ID());
     }
 
     @Override

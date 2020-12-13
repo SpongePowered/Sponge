@@ -28,11 +28,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(EntityType.class)
 public interface EntityTypeAccessor {
 
-    @Invoker("register") static EntityType<Entity> accessor$register(String key, EntityType.Builder<Entity> builder) {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Invoker("register")
+    static EntityType<Entity> invoker$register(final String key, final EntityType.Builder<Entity> builder) {
+        throw new UntransformedAccessorError();
     }
+
 }

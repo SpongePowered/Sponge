@@ -45,7 +45,7 @@ public abstract class SpongeUserInventoryMixin_Lens_Bridge implements LensGenera
     @Shadow(remap = false) @Final NonNullList<ItemStack> armorInventory;
     @Shadow(remap = false) @Final NonNullList<ItemStack> offHandInventory;
 
-    @Shadow public abstract int getSizeInventory();
+    @Shadow public abstract int shadow$getContainerSize();
 
     @Override
     public SlotLensProvider lensGeneratorBridge$generateSlotLensProvider() {
@@ -53,14 +53,14 @@ public abstract class SpongeUserInventoryMixin_Lens_Bridge implements LensGenera
             .add(this.mainInventory.size())
             .add(this.offHandInventory.size())
             .add(this.armorInventory.size(), EquipmentSlotAdapter.class)
-            .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
+            .add(this.shadow$getContainerSize() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
             .build();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Lens lensGeneratorBridge$generateLens(SlotLensProvider slotLensProvider) {
-        return new PlayerInventoryLens(this.getSizeInventory(), (Class<? extends Inventory>) this.getClass(), slotLensProvider);
+        return new PlayerInventoryLens(this.shadow$getContainerSize(), (Class<? extends Inventory>) this.getClass(), slotLensProvider);
     }
 
 

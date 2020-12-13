@@ -42,13 +42,15 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = org.spongepowered.api.item.recipe.crafting.Ingredient.class, prefix = "ingredient$"))
 public abstract class IngredientMixin_API {
 
-    @Shadow private ItemStack[] matchingStacks;
-    @Shadow protected abstract void shadow$determineMatchingStacks();
+    // @formatter:off
+    @Shadow private ItemStack[] itemStacks;
+    @Shadow protected abstract void shadow$dissolve();
     @Shadow public abstract boolean shadow$test(@Nullable ItemStack p_test_1_);
+    // @formatter:on
 
     public List<org.spongepowered.api.item.inventory.ItemStackSnapshot> ingredient$displayedItems() {
-        this.shadow$determineMatchingStacks();
-        return Arrays.stream(this.matchingStacks).map(ItemStackUtil::snapshotOf).collect(Collectors.toList());
+        this.shadow$dissolve();
+        return Arrays.stream(this.itemStacks).map(ItemStackUtil::snapshotOf).collect(Collectors.toList());
     }
 
     public boolean ingredient$test(final org.spongepowered.api.item.inventory.ItemStack itemStack) {

@@ -36,11 +36,13 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 @Mixin(EnderDragonPartEntity.class)
 public abstract class EnderDragonPartEntityMixin_API extends EntityMixin_API implements EnderDragonPart {
 
-    @Shadow @Final public EnderDragonEntity dragon;
+    // @formatter:off
+    @Shadow @Final public EnderDragonEntity parentMob;
+    // @formatter:on
 
     @Override
     public EnderDragon getParent() {
-        return (EnderDragon) this.dragon;
+        return (EnderDragon) this.parentMob;
     }
 
 }

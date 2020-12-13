@@ -33,30 +33,30 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(StructureBlockTileEntity.class)
 public interface StructureBlockTileEntityAccessor {
 
-    @Accessor("author") String accessor$getAuthor();
+    @Accessor("author") String accessor$author();
 
-    @Accessor("author") void accessor$setAuthor(String author);
+    @Accessor("author") void accessor$author(final String author);
 
-    @Accessor("ignoreEntities") boolean accessor$getIgnoreEntities();
+    @Accessor("structurePos") BlockPos accessor$structurePos();
 
-    @Accessor("integrity") float accessor$getIntegrity();
+    @Accessor("structurePos") void accessor$structurePos(final BlockPos structurePos);
 
-    @Accessor("mode") StructureMode accessor$getMode();
+    @Accessor("structureSize") BlockPos accessor$structureSize();
 
-    @Accessor("mode") void accessor$setMode(StructureMode mode);
+    @Accessor("structureSize") void accessor$structureSize(final BlockPos structureSize);
 
-    @Accessor("position") BlockPos accessor$getPosition();
+    @Accessor("mode") StructureMode accessor$mode();
 
-    @Accessor("position") void accessor$setPosition(BlockPos position);
+    @Accessor("mode") void accessor$mode(final StructureMode mode);
 
-    @Accessor("showAir") boolean accessor$getShowAir();
+    @Accessor("ignoreEntities") boolean accessor$ignoreEntities();
 
-    @Accessor("showBoundingBox") boolean accessor$getShowBoundingBox();
+    @Accessor("showAir") boolean accessor$showAir();
 
-    @Accessor("seed") long accessor$getSeed();
+    @Accessor("showBoundingBox") boolean accessor$showBoundingBox();
 
-    @Accessor("size") BlockPos accessor$getSize();
+    @Accessor("integrity") float accessor$integrity();
 
-    @Accessor("size") void accessor$setSize(BlockPos size);
+    @Accessor("seed") long accessor$seed();
     
 }

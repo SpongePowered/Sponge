@@ -25,14 +25,12 @@
 package org.spongepowered.common.accessor.entity.passive;
 
 import net.minecraft.entity.passive.MooshroomEntity;
-import net.minecraft.entity.passive.WolfEntity;
-import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(MooshroomEntity.class)
 public interface MooshroomEntityAccessor {
 
-    @Invoker("setMooshroomType") void accessor$setMooshroomType(MooshroomEntity.Type type);
+    @Invoker("setMushroomType") void invoker$setMushroomType(final MooshroomEntity.Type mushroomType);
+
 }

@@ -58,9 +58,9 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
     @Shadow @Final @Mutable @Nullable private Scoreboard scoreboard;
     @Shadow private ITextComponent displayName;
     @Shadow private TextFormatting color;
-    @Shadow private ITextComponent prefix;
-    @Shadow private ITextComponent suffix;
-    @Shadow public abstract Collection<String> getMembershipCollection();
+    @Shadow private ITextComponent playerPrefix;
+    @Shadow private ITextComponent playerSuffix;
+    @Shadow public abstract Collection<String> getPlayers();
     // @formatter:on
 
     @SuppressWarnings("NullableProblems") @MonotonicNonNull private Component bridge$displayName;
@@ -77,10 +77,10 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setUpDisplayNames(final Scoreboard scoreboardIn, final String name, final CallbackInfo ci) {
+    private void impl$setUpDisplayNames(final Scoreboard scoreboard, final String name, final CallbackInfo ci) {
         this.bridge$displayName = SpongeAdventure.legacySection(name);
-        this.bridge$Prefix = SpongeAdventure.asAdventure(this.prefix);
-        this.bridge$Suffix = SpongeAdventure.asAdventure(this.suffix);
+        this.bridge$Prefix = SpongeAdventure.asAdventure(this.playerPrefix);
+        this.bridge$Suffix = SpongeAdventure.asAdventure(this.playerSuffix);
         this.bridge$Color = SpongeAdventure.asAdventureNamed(this.color);
     }
 
@@ -103,20 +103,20 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
         this.bridge$displayName = SpongeAdventure.asAdventure(name);
     }
 
-    @Inject(method = "setPrefix",
+    @Inject(method = "setPlayerPrefix",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;prefix:Lnet/minecraft/util/text/ITextComponent;",
+            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;playerPrefix:Lnet/minecraft/util/text/ITextComponent;",
             opcode = Opcodes.PUTFIELD,
             shift = At.Shift.AFTER))
     private void impl$doTeamUpdateForPrefix(final ITextComponent prefix, final CallbackInfo callbackInfo) {
         this.bridge$Prefix = SpongeAdventure.asAdventure(prefix);
     }
 
-    @Inject(method = "setSuffix",
+    @Inject(method = "setPlayerSuffix",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;suffix:Lnet/minecraft/util/text/ITextComponent;",
+            target = "Lnet/minecraft/scoreboard/ScorePlayerTeam;playerSuffix:Lnet/minecraft/util/text/ITextComponent;",
             opcode = Opcodes.PUTFIELD,
             shift = At.Shift.AFTER
         ))
@@ -159,7 +159,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
             throw new IllegalArgumentException(String.format("Prefix is %s characters long! It must be at most 16.", newPrefix.length()));
         }
         this.bridge$Prefix = text;
-        this.prefix = SpongeAdventure.asVanilla(text);
+        this.playerPrefix = SpongeAdventure.asVanilla(text);
         this.impl$doTeamUpdate();
     }
 
@@ -175,12 +175,12 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
             throw new IllegalArgumentException(String.format("Suffix is %s characters long! It must be at most 16.", newSuffix.length()));
         }
         this.bridge$Suffix = suffix;
-        this.suffix = SpongeAdventure.asVanilla(suffix);
+        this.playerSuffix = SpongeAdventure.asVanilla(suffix);
         this.impl$doTeamUpdate();
     }
 
     @Override
-    public void bridge$setColor(NamedTextColor color) {
+    public void bridge$setColor(final NamedTextColor color) {
         this.bridge$Color = color;
         this.color = SpongeAdventure.asVanilla(color);
         this.impl$doTeamUpdate();
@@ -189,7 +189,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
     @SuppressWarnings("EqualsBetweenInconvertibleTypes")
     @Override
     public Audience bridge$getTeamChannel(final ServerPlayerEntity player) {
-        return Audience.audience(this.getMembershipCollection().stream()
+        return Audience.audience(this.getPlayers().stream()
                 .map(name -> Sponge.getGame().getServer().getPlayer(name))
                 .filter(Optional::isPresent)
                 .map(Optional::get)

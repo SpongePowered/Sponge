@@ -37,7 +37,9 @@ import org.spongepowered.common.SpongeCommon;
 @Mixin(Raid.Status.class)
 public abstract class Raid_StatusMixin_API implements RaidStatus {
 
+    //@formatter:off
     @Shadow public abstract String shadow$getName();
+    //@formatter:on
 
     private ResourceKey api$key;
 

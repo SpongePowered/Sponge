@@ -31,6 +31,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Slot.class)
 public interface SlotAccessor {
 
-    @Accessor("slotNumber") int accessor$getSlotNumber();
-    @Accessor("slotIndex") int accessor$getSlotIndex();
+    @Accessor("slot") int accessor$slot();
+
+    @Accessor("index") int accessor$index();
+
 }

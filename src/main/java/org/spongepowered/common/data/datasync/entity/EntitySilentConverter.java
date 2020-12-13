@@ -35,10 +35,10 @@ import org.spongepowered.common.accessor.entity.EntityAccessor;
 import java.util.List;
 import java.util.Optional;
 
-public class EntitySilentConverter extends DataParameterConverter<Boolean> {
+public final class EntitySilentConverter extends DataParameterConverter<Boolean> {
 
     public EntitySilentConverter() {
-        super(EntityAccessor.accessor$getSilent());
+        super(EntityAccessor.accessor$DATA_SILENT());
     }
 
     @Override

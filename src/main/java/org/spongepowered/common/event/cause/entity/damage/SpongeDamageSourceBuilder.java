@@ -37,7 +37,7 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
     @Override
     public DamageSource build() throws IllegalStateException {
         checkState(this.damageType != null, "DamageType was null!");
-        final net.minecraft.util.DamageSource source = DamageSourceAccessor.accessor$createDamageSource(this.damageType.toString());
+        final net.minecraft.util.DamageSource source = DamageSourceAccessor.invoker$new(this.damageType.toString());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) source;
         if (!this.scales
                 && this.bypasses
@@ -61,7 +61,7 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
                 && this.exhaustion == null
                 && this.damageType.equals(DamageTypes.DRYOUT.get())
         ) {
-            return (DamageSource) net.minecraft.util.DamageSource.DRYOUT;
+            return (DamageSource) net.minecraft.util.DamageSource.DRY_OUT;
         }
         if (!this.scales
                 && !this.bypasses
@@ -148,28 +148,28 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
             return (DamageSource) net.minecraft.util.DamageSource.WITHER;
         }
         if (this.absolute) {
-            accessor.accessor$setDamageIsAbsolute();
+            accessor.invoker$bypassMagic();
         }
         if (this.bypasses) {
-            accessor.accessor$setDamageBypassesArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.creative) {
-            accessor.accessor$setDamageAllowedInCreativeMode();
+            accessor.invoker$bypassInvul();
         }
         if (this.magical) {
-            source.setMagicDamage();
+            source.setMagic();
         }
         if (this.scales) {
-            source.setDifficultyScaled();
+            source.setScalesWithDifficulty();
         }
         if (this.explosion) {
             source.setExplosion();
         }
         if (this.exhaustion != null) {
-            accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
+            accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
         if (this.fire) {
-            accessor.accessor$setFireDamage();
+            accessor.invoker$setIsFire();
         }
         return (DamageSource) source;
     }

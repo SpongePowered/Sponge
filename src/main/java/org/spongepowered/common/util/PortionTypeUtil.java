@@ -38,7 +38,7 @@ public final class PortionTypeUtil {
 
     @Nullable
     public static PortionType getFromBedBlock(final BlockState holder, final EnumProperty<BedPart> property) {
-        final BedPart part = holder.get(property);
+        final BedPart part = holder.getValue(property);
         switch (part) {
             case HEAD:
                 return PortionTypes.TOP.get();
@@ -52,32 +52,32 @@ public final class PortionTypeUtil {
     @Nullable
     public static BlockState setForBedBlock(final BlockState holder, final PortionType value, final EnumProperty<BedPart> property) {
         if (value == PortionTypes.TOP.get()) {
-            return holder.with(property, BedPart.HEAD);
+            return holder.setValue(property, BedPart.HEAD);
         }
         if (value == PortionTypes.BOTTOM.get()) {
-            return holder.with(property, BedPart.FOOT);
+            return holder.setValue(property, BedPart.FOOT);
         }
         return null;
     }
 
     public static PortionType getFromDoubleBlock(final BlockState holder, final EnumProperty<DoubleBlockHalf> property) {
-        final DoubleBlockHalf half = holder.get(property);
+        final DoubleBlockHalf half = holder.getValue(property);
         return half == DoubleBlockHalf.LOWER ? PortionTypes.BOTTOM.get() : PortionTypes.TOP.get();
     }
 
     public static BlockState setForDoubleBlock(final BlockState holder, final PortionType value, final EnumProperty<DoubleBlockHalf> property) {
         final DoubleBlockHalf half = value == PortionTypes.TOP.get() ? DoubleBlockHalf.UPPER : DoubleBlockHalf.LOWER;
-        return holder.with(property, half);
+        return holder.setValue(property, half);
     }
 
     public static PortionType getFromHalfBlock(final BlockState holder, final EnumProperty<Half> property) {
-        final Half half = holder.get(property);
+        final Half half = holder.getValue(property);
         return half == Half.BOTTOM ? PortionTypes.BOTTOM.get() : PortionTypes.TOP.get();
     }
 
     public static BlockState setForHalfBlock(final BlockState holder, final PortionType value, final EnumProperty<Half> property) {
         final Half half = value == PortionTypes.TOP.get() ? Half.TOP : Half.BOTTOM;
-        return holder.with(property, half);
+        return holder.setValue(property, half);
     }
 
     private PortionTypeUtil() {

@@ -24,11 +24,21 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import com.mojang.brigadier.arguments.*;
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.command.arguments.*;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.command.arguments.BlockStateArgument;
+import net.minecraft.command.arguments.ComponentArgument;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.command.arguments.GameProfileArgument;
+import net.minecraft.command.arguments.ItemArgument;
+import net.minecraft.command.arguments.ResourceLocationArgument;
+import net.minecraft.command.arguments.Vec2Argument;
+import net.minecraft.command.arguments.Vec3Argument;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
@@ -73,7 +83,7 @@ public final class CatalogedValueParameterStreamGenerator {
         return Stream.of(
                 new SpongeBigDecimalValueParameter(),
                 new SpongeBigIntegerValueParameter(),
-                StandardCatalogedArgumentParser.createConverter("block_state", BlockStateArgument.blockState(),
+                StandardCatalogedArgumentParser.createConverter("block_state", BlockStateArgument.block(),
                         (reader, cause, state) -> (BlockState) state.getState()),
                 StandardCatalogedArgumentParser.createIdentity("boolean", BoolArgumentType.bool()),
                 new SpongeColorValueParameter(), // Includes ColorArgumentParser.color(), but does more. TODO: what does 1.16 do?
@@ -83,28 +93,28 @@ public final class CatalogedValueParameterStreamGenerator {
                 new SpongeDurationValueParameter(),
                 // This is for a single entity. We'll have a separate one for multiple.
                 StandardCatalogedArgumentParser.createConverter("entity", EntityArgument.entity(),
-                        (reader, cause, selector) -> (Entity) selector.selectOne(cause.getSource())),
+                        (reader, cause, selector) -> (Entity) selector.findSingleEntity(cause.getSource())),
                 new SpongeGameProfileValueParameter(),
                 StandardCatalogedArgumentParser.createIdentity("integer", IntegerArgumentType.integer()),
                 new SpongeIPAddressValueParameter(),
                 StandardCatalogedArgumentParser.createConverter("item_stack_snapshot", ItemArgument.item(),
                         (reader, cause, converter) ->
-                                new SpongeItemStackSnapshot((ItemStack) (Object) converter.createStack(1, true))),
+                                new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))),
                 new SpongeServerLocationValueParameter(true),
                 new SpongeServerLocationValueParameter(false),
                 StandardCatalogedArgumentParser.createIdentity("long", LongArgumentType.longArg()),
                 StandardCatalogedArgumentParser.createConverter("many_entities", EntityArgument.entities(),
-                        (reader, cause, selector) -> selector.select(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())),
+                        (reader, cause, selector) -> selector.findEntities(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())),
                 StandardCatalogedArgumentParser.createConverter("many_game_profiles", GameProfileArgument.gameProfile(),
                         (reader, cause, converter) -> converter.getNames(cause.getSource())),
                 StandardCatalogedArgumentParser.createConverter("many_players", EntityArgument.players(),
-                        (reader, cause, selector) -> selector.selectPlayers(cause.getSource())),
+                        (reader, cause, selector) -> selector.findPlayers(cause.getSource())),
                 new SpongeNoneValueParameter(),
                 StandardCatalogedArgumentParser.createConverter("player", EntityArgument.player(),
-                        (reader, cause, selector) -> (Player) selector.selectOnePlayer(cause.getSource())),
+                        (reader, cause, selector) -> (Player) selector.findSinglePlayer(cause.getSource())),
                 new SpongePluginContainerValueParameter(),
                 StandardCatalogedArgumentParser.createIdentity("remaining_joined_strings", StringArgumentType.greedyString()),
-                StandardCatalogedArgumentParser.createConverter("resource_key", ResourceLocationArgument.resourceLocation(),
+                StandardCatalogedArgumentParser.createConverter("resource_key", ResourceLocationArgument.id(),
                         (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation),
                 StandardCatalogedArgumentParser.createIdentity("string", StringArgumentType.string()),
                 new SpongeTargetBlockValueParameter(),
@@ -118,7 +128,7 @@ public final class CatalogedValueParameterStreamGenerator {
                         "text_formatting_code_all",
                         StringArgumentType.greedyString(),
                         (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)),
-                StandardCatalogedArgumentParser.createConverter("text_json", ComponentArgument.component(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)),
+                StandardCatalogedArgumentParser.createConverter("text_json", ComponentArgument.textComponent(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)),
                 StandardCatalogedArgumentParser.createConverter(
                         "text_json_all",
                         StringArgumentType.greedyString(),
@@ -146,7 +156,7 @@ public final class CatalogedValueParameterStreamGenerator {
                         "vector2d",
                         Vec2Argument.vec2(),
                         (reader, cause, result) -> {
-                            final Vec3d r = result.getPosition(cause.getSource());
+                            final Vector3d r = result.getPosition(cause.getSource());
                             return new Vector2d(r.x, r.z);
                         }),
                 StandardCatalogedArgumentParser.createConverter(

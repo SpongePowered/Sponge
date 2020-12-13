@@ -37,14 +37,14 @@ import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 public abstract class LecternTileEntityMixin implements CommandSourceProviderBridge {
 
     @Shadow
-    private CommandSource createCommandSource(@Nullable final PlayerEntity playerEntity) {
+    private CommandSource createCommandSourceStack(@Nullable final PlayerEntity playerEntity) {
         throw new AssertionError("This method should be a shadow.");
     }
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
         // We assume that if a player is in the Cause, they're the one reading the book.
-        return this.createCommandSource(cause.first(PlayerEntity.class).orElse(null));
+        return this.createCommandSourceStack(cause.first(PlayerEntity.class).orElse(null));
     }
 
 }

@@ -43,16 +43,16 @@ public final class WolfData {
                         .get(h -> (DyeColor) (Object) h.getCollarColor())
                         .set((h, v) -> h.setCollarColor((net.minecraft.item.DyeColor) (Object) v))
                     .create(Keys.IS_BEGGING_FOR_FOOD)
-                        .get(WolfEntity::isBegging)
-                        .set(WolfEntity::setBegging)
+                        .get(WolfEntity::isInterested)
+                        .set(WolfEntity::setIsInterested)
                     .create(Keys.IS_WET)
-                        .get(h -> ((WolfEntityAccessor) h).accessor$getIsWet() || ((WolfEntityAccessor) h).accessor$getIsShaking())
+                        .get(h -> ((WolfEntityAccessor) h).accessor$isWet() || ((WolfEntityAccessor) h).accessor$isShaking())
                         .set((h, v) -> {
                             final WolfEntityAccessor accessor = (WolfEntityAccessor) h;
-                            accessor.accessor$setIsWet(v);
-                            accessor.accessor$setIsShaking(v);
-                            accessor.accessor$setTimeWolfIsShaking(0f);
-                            accessor.accessor$setPrevTimeWolfIsShaking(0f);
+                            accessor.accessor$isWet(v);
+                            accessor.accessor$isShaking(v);
+                            accessor.accessor$shakeAnim(0f);
+                            accessor.accessor$shakeAnimO(0f);
                         });
     }
     // @formatter:on

@@ -34,6 +34,6 @@ import java.util.Map;
 @Mixin(RaidManager.class)
 public interface RaidManagerAccessor {
 
-    @Accessor("byId") Map<Integer, Raid> accessor$getById();
+    @Accessor("raidMap") Map<Integer, Raid> accessor$raidMap();
 
 }

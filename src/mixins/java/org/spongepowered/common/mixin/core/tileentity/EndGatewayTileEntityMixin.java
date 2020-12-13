@@ -38,8 +38,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(EndGatewayTileEntity.class)
 public abstract class EndGatewayTileEntityMixin extends EndPortalTileEntity {
 
-    @Redirect(method = "teleportEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;teleportKeepLoaded(DDD)V"))
-    private void impl$createCauseFrameForTeleport(Entity entity, double x, double y, double z) {
+    @Redirect(method = "teleportEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;teleportToWithTicket(DDD)V"))
+    private void impl$createCauseFrameForTeleport(final Entity entity, final double x, final double y, final double z) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             // We'll already have the entity in the cause if they are a player and threw their pearl into it. We do not
             // want to re-arrange the cause
@@ -49,7 +49,7 @@ public abstract class EndGatewayTileEntityMixin extends EndPortalTileEntity {
             frame.pushCause(this);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.END_GATEWAY);
 
-            entity.teleportKeepLoaded(x, y, z);
+            entity.teleportToWithTicket(x, y, z);
         }
     }
 }

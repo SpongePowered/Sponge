@@ -141,7 +141,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
         try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER)) {
             context.buildAndSwitch();
             final BlockPos pos = VecHelper.toBlockPos(this.pos);
-            if (!World.isValid(pos)) { // Invalid position. Inline this check
+            if (!World.isInWorldBounds(pos)) { // Invalid position. Inline this check
                 return false;
             }
             final net.minecraft.block.BlockState current = world.getBlockState(pos);
@@ -154,19 +154,19 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
 //            if (current.getBlock().getClass() == BlockShulkerBox.class) {
 //                world.bridge$removeTileEntity(pos);
 //            }
-            world.removeTileEntity(pos);
-            world.setBlockState(pos, replaced, BlockChangeFlagManager.andNotifyClients(flag).getRawFlag());
+            world.removeBlockEntity(pos);
+            world.setBlock(pos, replaced, BlockChangeFlagManager.andNotifyClients(flag).getRawFlag());
             if (this.compound != null) {
-                @Nullable TileEntity te = world.getTileEntity(pos);
+                @Nullable TileEntity te = world.getBlockEntity(pos);
                 if (te != null) {
-                    te.read(this.compound);
+                    te.load((net.minecraft.block.BlockState) this.blockState, this.compound);
                 } else {
                     // Because, some mods will "unintentionally" only obey some of the rules but not all.
                     // In cases like this, we need to directly just say "fuck it" and deserialize from the compound directly.
                     try {
-                        te = TileEntity.create(this.compound);
+                        te = TileEntity.loadStatic((net.minecraft.block.BlockState) this.blockState, this.compound);
                         if (te != null) {
-                            world.getChunk(pos).addTileEntity(pos, te);
+                            world.getChunk(pos).setBlockEntity(pos, te);
                         }
                     } catch (Exception e) {
                         // Seriously? The mod should be broken then.
@@ -198,12 +198,12 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
                 }
 
                 if (te != null) {
-                    te.markDirty();
+                    te.setChanged();
                 }
 
             }
             // Finally, mark the location as being updated.
-            world.getChunkProvider().markBlockChanged(pos);
+            world.getChunkSource().blockChanged(pos);
             return true;
         }
     }

@@ -32,9 +32,14 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(BrewingStandTileEntity.class)
 public interface BrewingStandTileEntityAccessor {
 
-    @Invoker("canBrew") boolean accessor$canBrew();
-    @Accessor("brewTime") int accessor$getBrewTime();
-    @Accessor("brewTime") void accessor$setBrewTime(int brewTime);
-    @Accessor("fuel") int accessor$getFuel();
-    @Accessor("fuel") void accessor$setFuel(int fuel);
+    @Accessor("brewTime") int accessor$brewTime();
+
+    @Accessor("brewTime") void accessor$brewTime(final int brewTime);
+
+    @Accessor("fuel") int accessor$fuel();
+
+    @Accessor("fuel") void accessor$fuel(final int fuel);
+
+    @Invoker("isBrewable") boolean invoker$isBrewable();
+
 }

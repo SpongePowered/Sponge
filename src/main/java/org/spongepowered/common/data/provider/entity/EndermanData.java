@@ -39,8 +39,8 @@ public final class EndermanData {
         registrator
                 .asMutable(EndermanEntity.class)
                     .create(Keys.IS_SCREAMING)
-                        .get(EndermanEntity::isScreaming)
-                        .set((h, v) -> h.getDataManager().set(EndermanEntityAccessor.accessor$getScreaming(), v));
+                        .get(EndermanEntity::isCreepy)
+                        .set((h, v) -> h.getEntityData().set(EndermanEntityAccessor.accessor$DATA_CREEPY(), v));
     }
     // @formatter:on
 }

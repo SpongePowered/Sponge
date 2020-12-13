@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.fluid.IFluidState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
@@ -47,12 +46,15 @@ import java.util.Optional;
 @Mixin(IBlockReader.class)
 @Implements(@Interface(iface = PrimitiveGameVolume.class, prefix = "primitive$"))
 public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
-    @Shadow @Nullable TileEntity shadow$getTileEntity(BlockPos p_175625_1_);
+
+    //@formatter:off
+    @Shadow @Nullable TileEntity shadow$getBlockEntity(BlockPos p_175625_1_);
     @Shadow BlockState shadow$getBlockState(BlockPos p_180495_1_);
-    @Shadow IFluidState shadow$getFluidState(BlockPos p_204610_1_);
-    @Shadow int shadow$getLightValue(BlockPos p_217298_1_);
+    @Shadow net.minecraft.fluid.FluidState shadow$getFluidState(BlockPos p_204610_1_);
+    @Shadow int shadow$getLightEmission(BlockPos p_217298_1_);
     @Shadow int shadow$getMaxLightLevel();
-    @Shadow int shadow$getHeight();
+    @Shadow int shadow$getMaxBuildHeight();
+    //@formatter:on
 
     @Override
     default int getMaximumLight() {
@@ -61,17 +63,17 @@ public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
 
     @Override
     default int getEmittedLight(final Vector3i position) {
-        return this.shadow$getLightValue(new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return this.shadow$getLightEmission(new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @Override
     default int getEmittedLight(final int x, final int y, final int z) {
-        return this.shadow$getLightValue(new BlockPos(x, y, z));
+        return this.shadow$getLightEmission(new BlockPos(x, y, z));
     }
 
     @Intrinsic
     default int primitive$getHeight() {
-        return this.shadow$getHeight();
+        return this.shadow$getMaxBuildHeight();
     }
 
     @Override
@@ -81,7 +83,7 @@ public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
 
     @Override
     default Optional<? extends BlockEntity> getBlockEntity(final int x, final int y, final int z) {
-        return Optional.ofNullable((BlockEntity) this.shadow$getTileEntity(new BlockPos(x, y, z)));
+        return Optional.ofNullable((BlockEntity) this.shadow$getBlockEntity(new BlockPos(x, y, z)));
     }
 
     @Override
@@ -91,7 +93,7 @@ public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
 
     @Override
     default FluidState getFluid(final int x, final int y, final int z) {
-        return (FluidState) this.shadow$getFluidState(new BlockPos(x, y, z));
+        return (FluidState) (Object) this.shadow$getFluidState(new BlockPos(x, y, z));
     }
 
     @Override

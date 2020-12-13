@@ -30,7 +30,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
-import org.spongepowered.common.registry.SpongeFactoryRegistry;
+import org.spongepowered.common.registry.SpongeFactoryProvider;
 
 public final class RegisterFactoryEventImpl extends AbstractLifecycleEvent implements RegisterFactoryEvent {
 
@@ -43,7 +43,7 @@ public final class RegisterFactoryEventImpl extends AbstractLifecycleEvent imple
     public <T> T register(Class<T> factoryClass, T factory) throws DuplicateRegistrationException {
         Preconditions.checkNotNull(factory);
 
-        return (T) ((SpongeFactoryRegistry) Sponge.getRegistry().getFactoryRegistry()).registerFactory(factoryClass, factory);
+        return (T) ((SpongeFactoryProvider) Sponge.getRegistry().getFactoryRegistry()).registerFactory(factoryClass, factory);
     }
 
     @Override

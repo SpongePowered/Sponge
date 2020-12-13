@@ -55,7 +55,7 @@ public final class SpongeBlockStateMatcher extends AbstractSpongeStateMatcher<@N
     public List<BlockState> getCompatibleStates() {
         if (this.compatibleStates == null) {
             final Block blockType = (Block) this.type;
-            this.compatibleStates = blockType.getStateContainer().getValidStates()
+            this.compatibleStates = blockType.getStateDefinition().getPossibleStates()
                     .stream()
                     .filter(this::isValid)
                     .map(x -> (BlockState) x)

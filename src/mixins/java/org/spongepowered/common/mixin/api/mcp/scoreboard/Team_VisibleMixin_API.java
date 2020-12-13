@@ -40,7 +40,9 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 @Mixin(Team.Visible.class)
 public abstract class Team_VisibleMixin_API implements Visibility {
 
+    // @formatter:off
     @Shadow public abstract ITextComponent shadow$getDisplayName();
+    // @formatter:on
 
     private ResourceKey api$key;
 

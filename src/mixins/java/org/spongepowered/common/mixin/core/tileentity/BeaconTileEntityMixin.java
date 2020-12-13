@@ -44,11 +44,11 @@ public abstract class BeaconTileEntityMixin extends TileEntityMixin {
      * @param id The id
      * @return The potion by id, no validation
      */
-    @Redirect(method = "read",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/BeaconTileEntity;isBeaconEffect(I)Lnet/minecraft/potion/Effect;")
+    @Redirect(method = "load",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/BeaconTileEntity;getValidEffectById(I)Lnet/minecraft/potion/Effect;")
     )
     @Nullable
     private Effect impl$UsePotionUtilInsteadOfCheckingValidPotions(final int id) {
-        return Effect.get(id);
+        return Effect.byId(id);
     }
 }

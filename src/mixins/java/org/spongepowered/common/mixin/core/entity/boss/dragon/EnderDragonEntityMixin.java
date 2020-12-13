@@ -30,7 +30,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.boss.dragon.phase.HoverPhase;
 import net.minecraft.entity.boss.dragon.phase.IPhase;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,7 +51,7 @@ public abstract class EnderDragonEntityMixin extends MobEntityMixin {
      * place where we still can forcibly call things but still cancel as needed.
      */
     @Redirect(
-        method = "destroyBlocksInAABB",
+        method = "checkWalls",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"
@@ -69,7 +69,7 @@ public abstract class EnderDragonEntityMixin extends MobEntityMixin {
         ),
         require = 0 // Forge rewrites the material request to block.isAir
     )
-    private Block impl$onCanGrief(BlockState state) {
+    private Block impl$onCanGrief(final BlockState state) {
         return ((GrieferBridge) this).bridge$canGrief() ? state.getBlock() : Blocks.AIR;
     }
 
@@ -79,10 +79,10 @@ public abstract class EnderDragonEntityMixin extends MobEntityMixin {
      *
      * @author JBYoshi
      */
-    @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/dragon/phase/IPhase;getTargetLocation()Lnet/minecraft/util/math/Vec3d;"))
+    @Redirect(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/dragon/phase/IPhase;getFlyTargetLocation()Lnet/minecraft/util/math/vector/Vector3d;"))
     @Nullable
-    private Vec3d impl$getTargetLocationOrNull(IPhase iPhase) {
-        Vec3d target = iPhase.getTargetLocation();
+    private Vector3d impl$getTargetLocationOrNull(final IPhase phase) {
+        final Vector3d target = phase.getFlyTargetLocation();
         if (target != null && target.x == this.shadow$getPosX() && target.z == this.shadow$getPosZ()) {
             return null; // Skips the movement code
         }

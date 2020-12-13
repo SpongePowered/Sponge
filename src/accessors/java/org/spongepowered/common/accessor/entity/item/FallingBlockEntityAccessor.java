@@ -32,27 +32,28 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(FallingBlockEntity.class)
 public interface FallingBlockEntityAccessor {
 
-    @Accessor("dontSetBlock") boolean accessor$getDontSetBlock();
+    @Accessor("blockState") BlockState accessor$blockState();
 
-    @Accessor("dontSetBlock") void accessor$setDontSetAsBlock(boolean dontSetBlock);
+    @Accessor("blockState") void accessor$blockState(final BlockState blockState);
 
-    @Accessor("hurtEntities") boolean accessor$getHurtEntities();
+    @Accessor("time") int accessor$time();
 
-    @Accessor("hurtEntities") void accessor$setHurtEntities(boolean hurtEntities);
+    @Accessor("time") void accessor$time(final int fallTime);
 
-    @Accessor("fallHurtMax") int accessor$getFallHurtMax();
+    @Accessor("cancelDrop") boolean accessor$cancelDrop();
 
-    @Accessor("fallHurtMax") void accessor$setFallHurtMax(int fallHurtMax);
+    @Accessor("cancelDrop") void accessor$cancelDrop(final boolean cancelDrop);
 
-    @Accessor("fallHurtAmount") float accessor$getFallHurtAmount();
+    @Accessor("hurtEntities") boolean accessor$hurtEntities();
 
-    @Accessor("fallHurtAmount") void accessor$setFallHurtAmount(float fallHurtAmount);
+    @Accessor("hurtEntities") void accessor$hurtEntities(final boolean hurtEntities);
 
-    @Accessor("fallTile") BlockState accessor$getFallTile();
+    @Accessor("fallDamageMax") int accessor$fallDamageMax();
 
-    @Accessor("fallTile") void accessor$setFallTile(BlockState fallTile);
+    @Accessor("fallDamageMax") void accessor$fallDamageMax(final int fallDamageMax);
 
-    @Accessor("fallTime") int accessor$getFallTime();
+    @Accessor("fallDamageAmount") float accessor$fallDamageAmount();
 
-    @Accessor("fallTime") void accessor$setFallTime(int fallTime);
+    @Accessor("fallDamageAmount") void accessor$fallDamageAmount(final float fallDamageAmount);
+
 }

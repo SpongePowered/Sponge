@@ -43,7 +43,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -159,7 +159,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
         return SpongeBlockSnapshotBuilder.pooled()
                 .world(Constants.World.INVALID_WORLD_KEY)
                 .position(new Vector3i(0, 0, 0))
-                .blockState(Blocks.AIR.getDefaultState())
+                .blockState(Blocks.AIR.defaultBlockState())
                 .build();
     }
 
@@ -207,7 +207,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
     @Override
     @NonNull
     public SpongeBlockSnapshotBuilder reset() {
-        this.blockState = (BlockState) Blocks.AIR.getDefaultState();
+        this.blockState = (BlockState) Blocks.AIR.defaultBlockState();
         this.worldKey = Constants.World.INVALID_WORLD_KEY;
         this.creatorUniqueId = null;
         this.notifierUniqueId = null;
@@ -256,7 +256,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
         creatorUuid.ifPresent(s -> builder.creator(UUID.fromString(s)));
         notifierUuid.ifPresent(s -> builder.notifier(UUID.fromString(s)));
         container.getView(Constants.Sponge.UNSAFE_NBT)
-                .map(dataView -> NbtTranslator.getInstance().translate(dataView))
+                .map(dataView -> NBTTranslator.getInstance().translate(dataView))
                 .ifPresent(builder::addUnsafeCompound);
         if (container.contains(Constants.Sponge.SNAPSHOT_TILE_DATA)) {
             final List<DataView> dataViews = container.getViewList(Constants.Sponge.SNAPSHOT_TILE_DATA).get();
@@ -280,7 +280,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
     public SpongeBlockSnapshotBuilder tileEntity(final TileEntity added) {
         this.compound = null;
         final CompoundNBT tag = new CompoundNBT();
-        added.write(tag);
+        added.save(tag);
         this.compound = tag;
         return this;
     }

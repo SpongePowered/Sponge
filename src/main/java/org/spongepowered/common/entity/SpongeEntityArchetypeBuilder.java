@@ -103,7 +103,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         this.entityType = Objects.requireNonNull(entity.getType(), "Entity is returning a null EntityType!");
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final CompoundNBT compound = new CompoundNBT();
-        minecraftEntity.writeWithoutTypeId(compound);
+        minecraftEntity.saveWithoutId(compound);
         compound.putString(Constants.Sponge.EntityArchetype.ENTITY_ID, entity.getType().getKey().toString());
         compound.remove(Constants.UUID);
         compound.remove(Constants.UUID_MOST);
@@ -124,7 +124,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     }
 
     @Override
-    public <V> EntityArchetype.Builder add(Key<? extends Value<V>> key, V value) {
+    public <V> EntityArchetype.Builder add(final Key<? extends Value<V>> key, final V value) {
         if (this.manipulator == null) {
             this.manipulator = DataManipulator.mutableOf();
         }

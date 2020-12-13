@@ -47,12 +47,12 @@ public abstract class TraitMixin_Lens_Inventory implements IInventory, LensGener
 
     @Override
     public SlotLensProvider lensGeneratorBridge$generateSlotLensProvider() {
-        return new LensRegistrar.BasicSlotLensProvider(this.getSizeInventory());
+        return new LensRegistrar.BasicSlotLensProvider(this.getContainerSize());
     }
 
     @Override
     public Lens lensGeneratorBridge$generateLens(SlotLensProvider slotLensProvider) {
-        return LensRegistrar.getLens(this, slotLensProvider, this.getSizeInventory());
+        return LensRegistrar.getLens(this, slotLensProvider, this.getContainerSize());
     }
 
 }

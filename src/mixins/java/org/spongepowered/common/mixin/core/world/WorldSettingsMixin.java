@@ -47,8 +47,7 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
-import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 
 import javax.annotation.Nullable;
 
@@ -159,7 +158,7 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
 
     @Override
     public void bridge$setGeneratorSettings(final DataContainer generatorSettings) {
-        final CompoundNBT nbt = NbtTranslator.getInstance().translate(generatorSettings);
+        final CompoundNBT nbt = NBTTranslator.getInstance().translate(generatorSettings);
         this.generatorOptions = Dynamic.convert(NBTDynamicOps.INSTANCE, JsonOps.INSTANCE, nbt);
     }
 

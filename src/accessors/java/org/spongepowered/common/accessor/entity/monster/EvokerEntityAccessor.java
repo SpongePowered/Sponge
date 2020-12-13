@@ -25,15 +25,15 @@
 package org.spongepowered.common.accessor.entity.monster;
 
 import net.minecraft.entity.monster.EvokerEntity;
-import net.minecraft.entity.monster.PillagerEntity;
 import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(EvokerEntity.class)
 public interface EvokerEntityAccessor {
 
-    @Accessor("wololoTarget") SheepEntity accessor$getWololoTarget();
-    @Accessor("wololoTarget") void accessor$setWololoTarget(SheepEntity wololoTarget);
+    @Accessor("wololoTarget") SheepEntity accessor$wololoTarget();
+
+    @Accessor("wololoTarget") void accessor$wololoTarget(final SheepEntity wololoTarget);
+
 }

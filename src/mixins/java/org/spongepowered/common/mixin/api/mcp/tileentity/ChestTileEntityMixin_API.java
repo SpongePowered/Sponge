@@ -41,24 +41,23 @@ import java.util.Set;
 @Mixin(ChestTileEntity.class)
 public abstract class ChestTileEntityMixin_API extends LockableLootTileEntityMixin_API<Chest> implements Chest {
 
-
     @Override
     public Optional<Chest> getConnectedChest() {
         // Based off of the logic in ChestBlock.getChestInventory but without a blocked check and returning the TE instead of the inventory.
         ChestTileEntity chestTileEntity = (ChestTileEntity) (Object) this;
         BlockState chestState = chestTileEntity.getBlockState();
-        ChestType chestType = chestTileEntity.getBlockState().get(ChestBlock.TYPE);
-        World world = chestTileEntity.getWorld();
+        ChestType chestType = chestTileEntity.getBlockState().getValue(ChestBlock.TYPE);
+        World world = chestTileEntity.getLevel();
 
         if (chestType != ChestType.SINGLE) {
-            BlockPos connectedPos = chestTileEntity.getPos().offset(ChestBlock.getDirectionToAttached(chestState));
+            BlockPos connectedPos = chestTileEntity.getBlockPos().relative(ChestBlock.getConnectedDirection(chestState));
             BlockState connectedState = world.getBlockState(connectedPos);
 
             if (connectedState.getBlock() == chestState.getBlock()) {
-                ChestType connectedType = connectedState.get(ChestBlock.TYPE);
+                ChestType connectedType = connectedState.getValue(ChestBlock.TYPE);
 
-                if (connectedType != ChestType.SINGLE && chestType != connectedType && chestState.get(ChestBlock.FACING) == connectedState.get(ChestBlock.FACING)) {
-                    TileEntity connectedTileEntity = world.getTileEntity(connectedPos);
+                if (connectedType != ChestType.SINGLE && chestType != connectedType && chestState.getValue(ChestBlock.FACING) == connectedState.getValue(ChestBlock.FACING)) {
+                    TileEntity connectedTileEntity = world.getBlockEntity(connectedPos);
 
                     if (connectedTileEntity instanceof ChestTileEntity) {
                         return Optional.of((Chest) connectedTileEntity);

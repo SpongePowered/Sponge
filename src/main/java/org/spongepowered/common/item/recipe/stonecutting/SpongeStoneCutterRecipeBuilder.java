@@ -60,7 +60,7 @@ public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<R
 
     @Override
     public ResultStep ingredient(ItemType ingredient) {
-        this.ingredient = Ingredient.fromItems(() -> ((Item) ingredient));
+        this.ingredient = Ingredient.of(() -> ((Item) ingredient));
         return this;
     }
 
@@ -105,7 +105,7 @@ public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<R
     protected RecipeRegistration build(ResourceKey key) {
         final net.minecraft.item.ItemStack result = ItemStackUtil.toNative(this.result);
         final IRecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Collections.singleton(this.ingredient),
-                IRecipeSerializer.STONECUTTING, SpongeStonecuttingRecipeSerializer.SPONGE_STONECUTTING);
+                IRecipeSerializer.STONECUTTER, SpongeStonecuttingRecipeSerializer.SPONGE_STONECUTTING);
 
         return new SpongeStonecuttingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredient, result, this.resultFunction);
     }

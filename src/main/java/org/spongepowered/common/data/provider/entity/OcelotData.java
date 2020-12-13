@@ -38,8 +38,8 @@ public final class OcelotData {
         registrator
                 .asMutable(OcelotEntityAccessor.class)
                     .create(Keys.IS_TRUSTING)
-                        .get(OcelotEntityAccessor::accessor$isTrusting)
-                        .set(OcelotEntityAccessor::accessor$setTrusting);
+                        .get(OcelotEntityAccessor::invoker$isTrusting)
+                        .set(OcelotEntityAccessor::invoker$setTrusting);
     }
     // @formatter:on
 }

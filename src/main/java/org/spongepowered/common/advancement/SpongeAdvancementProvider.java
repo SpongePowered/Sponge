@@ -25,6 +25,7 @@
 package org.spongepowered.common.advancement;
 
 import com.google.gson.JsonObject;
+import net.minecraft.util.SharedConstants;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.io.FileUtils;
 import org.spongepowered.api.advancement.Advancement;
@@ -36,9 +37,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public final class SpongeAdvancementProvider {
-    private static final int PACK_VERSION_1_15 = 6;
 
-    public static void registerAdvancements(Registry<Advancement> advancements) {
+    public static void registerAdvancements(final Registry<Advancement> advancements) {
         final Path datapackPluginAdvancements = Paths.get("world").resolve("datapacks").resolve("plugin-advancements");
         try {
             FileUtils.deleteDirectory(datapackPluginAdvancements.toFile());
@@ -54,30 +54,27 @@ public final class SpongeAdvancementProvider {
             final JsonObject packDataRoot = new JsonObject();
             final JsonObject packData = new JsonObject();
             packDataRoot.add("pack", packData);
-            packData.addProperty("pack_format", SpongeAdvancementProvider.PACK_VERSION_1_15);
+            packData.addProperty("pack_format", SharedConstants.getCurrentVersion().getPackVersion());
             packData.addProperty("description", "Sponge Plugin provided Advancements");
             SpongeAdvancementProvider.saveToFile(packDataRoot, packMeta);
         }
     }
 
-    private static void save(Path datpackPath, net.minecraft.advancements.Advancement advancement) {
-        final Path namespacedData = datpackPath.resolve("data").resolve(advancement.getId().getNamespace());
+    private static void save(final Path datapackPath, final net.minecraft.advancements.Advancement advancement) {
+        final Path namespacedData = datapackPath.resolve("data").resolve(advancement.getId().getNamespace());
         final Path advancementFile = namespacedData.resolve("advancements").resolve(advancement.getId().getPath() + ".json");
-        SpongeAdvancementProvider.saveToFile(advancement.copy().serialize(), advancementFile);
-
-
+        SpongeAdvancementProvider.saveToFile(advancement.deconstruct().serializeToJson(), advancementFile);
     }
 
-    private static void saveToFile(JsonObject json, Path pathIn) {
+    private static void saveToFile(final JsonObject json, final Path pathIn) {
         try {
             Files.createDirectories(pathIn.getParent());
             try (BufferedWriter bufferedwriter = Files.newBufferedWriter(pathIn)) {
                 bufferedwriter.write(json.toString());
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException(e);
         }
-
     }
 
 }

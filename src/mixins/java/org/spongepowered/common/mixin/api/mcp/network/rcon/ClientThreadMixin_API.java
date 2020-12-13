@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.network.rcon;
 
 import net.minecraft.network.rcon.ClientThread;
-import net.minecraft.network.rcon.IServer;
 import net.minecraft.network.rcon.RConThread;
 import org.spongepowered.api.network.RemoteConnection;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
@@ -39,27 +39,29 @@ import java.net.Socket;
 @Mixin(ClientThread.class)
 public abstract class ClientThreadMixin_API extends RConThread implements RemoteConnection {
 
-    @Shadow private Socket clientSocket;
+    // @formatter:off
+    @Shadow @Final private Socket client;
+    // @formatter:on
 
-    protected ClientThreadMixin_API(IServer serverIn, String threadName) {
-        super(serverIn, threadName);
+    protected ClientThreadMixin_API(final String threadName) {
+        super(threadName);
     }
 
     @Override
     public InetSocketAddress getAddress() {
-        return (InetSocketAddress) this.clientSocket.getRemoteSocketAddress();
+        return (InetSocketAddress) this.client.getRemoteSocketAddress();
     }
 
     @Override
     public InetSocketAddress getVirtualHost() {
-        return (InetSocketAddress) this.clientSocket.getLocalSocketAddress();
+        return (InetSocketAddress) this.client.getLocalSocketAddress();
     }
 
     @Override
     public void close() {
         try {
-            this.clientSocket.close();
-        } catch (IOException ex) {
+            this.client.close();
+        } catch (final IOException ex) {
             SpongeCommon.getLogger().error("An error occurred while closing a RCON connection.", ex);
         }
     }

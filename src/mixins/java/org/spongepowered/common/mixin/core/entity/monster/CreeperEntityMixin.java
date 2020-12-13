@@ -106,7 +106,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
     @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
     private void onStateChange(final int state, final CallbackInfo ci) {
         this.bridge$setFuseDuration(this.impl$fuseDuration);
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             return;
         }
 
@@ -123,7 +123,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
 
     @Inject(method = "setCreeperState(I)V", at = @At("RETURN"))
     private void postStateChange(final int state, final CallbackInfo ci) {
-        if (this.world.isRemote) {
+        if (this.world.isClientSide) {
             return;
         }
 
@@ -160,7 +160,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
         }
     }
 
-    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/CreeperEntity;ignite()V"))
+    @Redirect(method = "func_230254_b_", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/CreeperEntity;ignite()V"))
     private void impl$onProcessIgnition(final CreeperEntity self) {
         this.impl$interactPrimeCancelled = !this.bridge$shouldPrime();
         if (!this.impl$interactPrimeCancelled) {
@@ -168,7 +168,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
         }
     }
 
-    @Redirect(method = "processInteract",
+    @Redirect(method = "func_230254_b_",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/item/ItemStack;damageItem(ILnet/minecraft/entity/LivingEntity;Ljava/util/function/Consumer;)V"
         )

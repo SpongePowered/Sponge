@@ -51,8 +51,8 @@ public final class ReplaceTileEntityInWorldEffect implements ProcessingSideEffec
         if (tileEntity == null || tileEntity.isRemoved()) {
             return EffectResult.NULL_RETURN;
         }
-        pipeline.getAffectedChunk().addTileEntity(pos, tileEntity);
-        serverWorld.addTileEntity(tileEntity);
+        pipeline.getAffectedChunk().setBlockEntity(pos, tileEntity);
+        serverWorld.addBlockEntity(tileEntity);
         return EffectResult.NULL_RETURN;
     }
 }

@@ -29,7 +29,7 @@ import org.spongepowered.api.data.type.CatType;
 
 public final class SpongeCatType extends SpongeEntityMetadataType<Integer> implements CatType {
 
-    public SpongeCatType(ResourceKey key, int metadata) {
+    public SpongeCatType(final ResourceKey key, final int metadata) {
         super(key, metadata);
     }
 }

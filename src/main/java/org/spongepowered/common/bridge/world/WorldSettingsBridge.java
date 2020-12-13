@@ -31,7 +31,6 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public interface WorldSettingsBridge {
 

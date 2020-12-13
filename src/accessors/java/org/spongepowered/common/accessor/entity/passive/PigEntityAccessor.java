@@ -28,12 +28,14 @@ import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(PigEntity.class)
 public interface PigEntityAccessor {
 
-    @Accessor("SADDLED")
-    static DataParameter<Boolean> accessor$getSaddled() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_SADDLE_ID")
+    static DataParameter<Boolean> accessor$DATA_SADDLE_ID() {
+        throw new UntransformedAccessorError();
     }
+
 }

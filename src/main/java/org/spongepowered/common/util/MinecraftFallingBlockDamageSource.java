@@ -34,8 +34,8 @@ public final class MinecraftFallingBlockDamageSource extends EntityDamageSource 
     }
 
     @Override
-    public FallingBlockEntity getTrueSource() {
-        return (FallingBlockEntity) super.getTrueSource();
+    public FallingBlockEntity getEntity() {
+        return (FallingBlockEntity) super.getEntity();
     }
 
 }

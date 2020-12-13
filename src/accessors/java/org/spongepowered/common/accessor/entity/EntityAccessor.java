@@ -26,64 +26,71 @@ package org.spongepowered.common.accessor.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(Entity.class)
 public interface EntityAccessor {
 
-    @Accessor("FLAGS") static DataParameter<Byte> accessor$getFlags() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_SHARED_FLAGS_ID")
+    static DataParameter<Byte> accessor$DATA_SHARED_FLAGS_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("AIR") static DataParameter<Integer> accessor$getAir() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_AIR_SUPPLY_ID")
+    static DataParameter<Integer> accessor$DATA_AIR_SUPPLY_ID() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("CUSTOM_NAME") static DataParameter<String> accessor$getCustomName() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_CUSTOM_NAME")
+    static DataParameter<String> accessor$DATA_CUSTOM_NAME() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("CUSTOM_NAME_VISIBLE") static DataParameter<Boolean> accessor$getCustomNameVisible() {
-        throw new IllegalStateException("Untransformed accessor!");
+    @Accessor("DATA_CUSTOM_NAME_VISIBLE")
+    static DataParameter<Boolean> accessor$DATA_CUSTOM_NAME_VISIBLE() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("SILENT") static DataParameter<Boolean> accessor$getSilent() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_SILENT")
+    static DataParameter<Boolean> accessor$DATA_SILENT() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("NO_GRAVITY") static DataParameter<Boolean> accessor$getNoGravity() {
-        throw new IllegalStateException("Untransformed Accessor!");
+    @Accessor("DATA_NO_GRAVITY")
+    static DataParameter<Boolean> accessor$DATA_NO_GRAVITY() {
+        throw new UntransformedAccessorError();
     }
 
-    @Accessor("rand") Random accessor$getRand();
+    @Accessor("remainingFireTicks") int accessor$remainingFireTicks();
 
-    @Accessor("fire") int accessor$getFire();
+    @Accessor("remainingFireTicks") void accessor$remainingFireTicks(final int remainingFireTicks);
 
-    @Accessor("fire") void accessor$setFire(int fire);
+    @Accessor("random") Random accessor$random();
 
-    @Accessor("inPortal") void accessor$setInPortal(boolean value);
+    @Accessor("isInsidePortal") void accessor$isInsidePortal(final boolean isInsidePortal);
 
-    @Accessor("lastPortalPos") void accessor$setLastPortalPos(BlockPos value);
+    @Accessor("portalTime") void accessor$portalTime(final int portalTime);
 
-    @Accessor("timeUntilPortal") void accessor$setTimeUntilPortal(int value);
+    @Accessor("portalEntrancePos") void accessor$portalEntrancePos(final BlockPos portalEntrancePos);
 
-    @Invoker("setFlag") void accessor$setFlag(int flag, boolean set);
+    @Invoker("setRot") void invoker$setRot(final float yRot, final float xRot);
 
-    @Invoker("getFireImmuneTicks") int accessor$getFireImmuneTicks();
+    @Invoker("getEncodeId") String invoker$getEncodeId();
 
-    @Invoker("getPermissionLevel") int accessor$getPermissionLevel();
+    @Invoker("removePassenger") void invoker$removePassenger(final Entity passenger);
 
-    @Invoker("getEntityString") String accessor$getEntityString();
+    @Invoker("setSharedFlag") void invoker$setSharedFlag(final int flag, final boolean value);
 
-    @Invoker("removePassenger") void accessor$removePassenger(Entity entity);
+    @Invoker("getFireImmuneTicks") int invoker$getFireImmuneTicks();
 
-    @Invoker("setRotation") void accessor$setRotation(float yaw, float pitch);
+    @Invoker("getPermissionLevel") int invoker$getPermissionLevel();
+
+    @Invoker("removeAfterChangingDimensions") void invoker$removeAfterChangingDimensions();
+
 }

@@ -62,10 +62,10 @@ public abstract class BoneMealItemMixin_Tracker {
     // Pending https://github.com/SpongePowered/Mixin/issues/312
     // @Group(name = "org.spongepowered.tracker:bonemeal", min = 1, max = 1)
     @Redirect(
-        method = "applyBonemeal",
+        method = "growCrop",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/block/IGrowable;grow(Lnet/minecraft/world/server/ServerWorld;Ljava/util/Random;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"
+            target = "Lnet/minecraft/block/IGrowable;performBonemeal(Lnet/minecraft/world/server/ServerWorld;Ljava/util/Random;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"
         ),
         require = 0, // Will be removed once the above github issue is resolved with a proper solution
         // Even though we're in a group, expecting this to succeed in forge environments will not work since there is a different mixin
@@ -74,7 +74,7 @@ public abstract class BoneMealItemMixin_Tracker {
     private static void tracker$wrapGrowWithPhaseEntry(IGrowable iGrowable, ServerWorld worldIn, Random rand, BlockPos pos, BlockState state,
             ItemStack stack) {
         if (((WorldBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_ALL) {
-            iGrowable.grow(worldIn, rand, pos, state);
+            iGrowable.performBonemeal(worldIn, rand, pos, state);
             return;
         }
 
@@ -88,7 +88,7 @@ public abstract class BoneMealItemMixin_Tracker {
                 .block(state)
                 .pos(pos)) {
                 context.buildAndSwitch();
-                iGrowable.grow(worldIn, rand, pos, state);
+                iGrowable.performBonemeal(worldIn, rand, pos, state);
             }
         }
 

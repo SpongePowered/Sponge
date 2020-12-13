@@ -61,7 +61,7 @@ public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistrati
 
     @Override
     public void serializeShape(JsonObject json) {
-        json.add(Constants.Recipe.STONECUTTING_INGREDIENT, this.ingredient.serialize());
+        json.add(Constants.Recipe.STONECUTTING_INGREDIENT, this.ingredient.toJson());
     }
 
     @Override
@@ -73,7 +73,7 @@ public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistrati
             json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getID(), this.resultFunction));
+            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
         }
     }
 }

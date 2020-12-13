@@ -40,7 +40,7 @@ public final class VexData {
         registrator
                 .asMutable(VexEntity.class)
                     .create(Keys.LIFE_TICKS)
-                        .get(h -> Ticks.of(((VexEntityAccessor) h).accessor$getLimitedLifeTicks()))
+                        .get(h -> Ticks.of(((VexEntityAccessor) h).accessor$limitedLifeTicks()))
                         .set((h, v) -> h.setLimitedLife((int) v.getTicks()));
     }
     // @formatter:on

@@ -67,13 +67,15 @@ import java.util.WeakHashMap;
 @Mixin(Commands.class)
 public abstract class CommandsMixin {
 
+    // @formatter:off
     @Shadow public abstract CommandDispatcher<CommandSource> shadow$getDispatcher();
-    @Shadow private void shadow$commandSourceNodesToSuggestionNodes(final CommandNode<CommandSource> rootCommandSource,
+    @Shadow private void shadow$fillUsableCommands(final CommandNode<CommandSource> rootCommandSource,
             final CommandNode<ISuggestionProvider> rootSuggestion,
             final CommandSource source,
             final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode) {
         throw new AssertionError("This shouldn't be callable");
     }
+    // @formatter:on
 
     private CauseStackManager.StackFrame impl$initFrame = null;
     private final WeakHashMap<ServerPlayerEntity, Map<CommandNode<CommandSource>, List<CommandNode<ISuggestionProvider>>>> impl$playerNodeCache =
@@ -108,7 +110,7 @@ public abstract class CommandsMixin {
     /*
      * Hides nodes that we have marked as "hidden"
      */
-    @Redirect(method = "commandSourceNodesToSuggestionNodes",
+    @Redirect(method = "fillUsableCommands",
             slice = @Slice(
                     from = @At("HEAD"),
                     to = @At(value = "INVOKE", target = "Ljava/util/Iterator;hasNext()Z")
@@ -118,7 +120,7 @@ public abstract class CommandsMixin {
         return this.impl$getChildrenFromNode(commandNode);
     }
 
-    @Redirect(method = "commandSourceNodesToSuggestionNodes",
+    @Redirect(method = "fillUsableCommands",
             at = @At(value = "INVOKE",
                     target = "Lcom/mojang/brigadier/tree/CommandNode;createBuilder()Lcom/mojang/brigadier/builder/ArgumentBuilder;",
                     remap = false))
@@ -136,7 +138,7 @@ public abstract class CommandsMixin {
     }
 
     @SuppressWarnings("unchecked")
-    @Redirect(method = "commandSourceNodesToSuggestionNodes", at =
+    @Redirect(method = "fillUsableCommands", at =
         @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", remap = false))
     private <K, V> V impl$preventPutIntoMapIfNodeIsComplex(final Map<K, V> map,
             final K key,
@@ -167,7 +169,7 @@ public abstract class CommandsMixin {
         return null; // it's ignored anyway.
     }
 
-    @Redirect(method = "commandSourceNodesToSuggestionNodes",
+    @Redirect(method = "fillUsableCommands",
             at = @At(value = "INVOKE",
                     target = "Lcom/mojang/brigadier/tree/CommandNode;addChild(Lcom/mojang/brigadier/tree/CommandNode;)V",
                     remap = false))
@@ -175,7 +177,7 @@ public abstract class CommandsMixin {
         // no-op, we did this above.
     }
 
-    @Redirect(method = "commandSourceNodesToSuggestionNodes",
+    @Redirect(method = "fillUsableCommands",
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/tree/CommandNode;canUse(Ljava/lang/Object;)Z", remap = false))
     private boolean impl$testPermissionAndPreventRecalculationWhenSendingNodes(
             final CommandNode<CommandSource> commandNode,
@@ -200,7 +202,7 @@ public abstract class CommandsMixin {
                         !hasCustomSuggestionsAlready
                 );
                 if (!this.impl$getChildrenFromNode(commandNode).isEmpty()) {
-                    this.shadow$commandSourceNodesToSuggestionNodes(commandNode, finalCommandNode, sourceButTyped, commandNodeToSuggestionNode);
+                    this.shadow$fillUsableCommands(commandNode, finalCommandNode, sourceButTyped, commandNodeToSuggestionNode);
                 }
             }
 
@@ -238,7 +240,7 @@ public abstract class CommandsMixin {
         return false;
     }
 
-    @Redirect(method = "commandSourceNodesToSuggestionNodes", at = @At(value = "INVOKE",
+    @Redirect(method = "fillUsableCommands", at = @At(value = "INVOKE",
             target = "Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;"
                     + "suggests(Lcom/mojang/brigadier/suggestion/SuggestionProvider;)"
                     + "Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;"), remap = false)
@@ -265,8 +267,7 @@ public abstract class CommandsMixin {
         return requiredArgumentBuilder;
     }
 
-    @Redirect(method = "send", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/Commands;commandSourceNodesToSuggestionNodes"
-            + "(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Lnet/minecraft/command/CommandSource;Ljava/util/Map;)V"))
+    @Redirect(method = "sendCommands", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/Commands;fillUsableCommands(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Lnet/minecraft/command/CommandSource;Ljava/util/Map;)V"))
     private void impl$addNonBrigSuggestions(
             final Commands commands,
             final CommandNode<CommandSource> p_197052_1_,
@@ -278,7 +279,7 @@ public abstract class CommandsMixin {
             this.impl$playerNodeCache.put(playerEntity, new IdentityHashMap<>());
             // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
             final IdentityHashMap<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> idMap = new IdentityHashMap<>(p_197052_4_);
-            this.shadow$commandSourceNodesToSuggestionNodes(p_197052_1_, p_197052_2_, p_197052_3_, idMap);
+            this.shadow$fillUsableCommands(p_197052_1_, p_197052_2_, p_197052_3_, idMap);
         } finally {
             this.impl$playerNodeCache.remove(playerEntity);
         }
@@ -289,7 +290,7 @@ public abstract class CommandsMixin {
     }
 
     @SuppressWarnings("unchecked")
-    @Redirect(method = "commandSourceNodesToSuggestionNodes",
+    @Redirect(method = "fillUsableCommands",
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/builder/ArgumentBuilder;build()Lcom/mojang/brigadier/tree/CommandNode;", remap = false))
     private CommandNode<ISuggestionProvider> impl$createSpongeArgumentNode(final ArgumentBuilder<ISuggestionProvider, ?> argumentBuilder) {
         if (argumentBuilder instanceof RequiredArgumentBuilder) {

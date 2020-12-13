@@ -25,10 +25,14 @@
 package org.spongepowered.common.hooks;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.dimension.DimensionTypes;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
+
+import java.util.Objects;
 
 /**
  * Dimension hooks to handle differences in logic between Sponge's Multi-World system
@@ -37,7 +41,7 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 public interface DimensionHooks {
 
     /**
-     * Asks the platform if the provided {@link SpongeDimensionType dimension type} should
+     * Asks the platform if the provided {@link DimensionType dimension type} should
      * generate a spawn on load as a default (typically a specific world's config file will
      * veto this post initial world creation)
      *
@@ -48,17 +52,20 @@ public interface DimensionHooks {
      * @param dimensionType The type
      * @return True to generate spawn on load as a default
      */
-    default boolean doesGenerateSpawnOnLoad(final SpongeDimensionType dimensionType) {
+    default boolean doesGenerateSpawnOnLoad(final DimensionType dimensionType) {
         return DimensionTypes.OVERWORLD.get() == dimensionType;
     }
 
-    default DimensionType getRespawnDimension(final ServerPlayerEntity entity, final DimensionType dimensionType, final boolean conqueredEnd) {
-        final ServerWorld world = entity.getServer().getWorld(entity.dimension);
+    default RegistryKey<World> getRespawnDimension(final ServerPlayerEntity entity, final RegistryKey<World> worldKey,
+            final boolean keepAllPlayerData) {
+        final RegistryKey<World> respawnDimension = keepAllPlayerData ? World.OVERWORLD : entity.getRespawnDimension();
+        final @Nullable ServerWorld world = Objects.requireNonNull(entity.getServer(), "Entity server cannot be null").getLevel(
+            respawnDimension);
         if (world == null) {
             // Should be impossible but be defensive
-            return dimensionType;
+            return world.func_234923_W_();
         }
 
-        return (conqueredEnd || !world.getDimension().canRespawnHere()) ? dimensionType : entity.dimension;
+        return (keepAllPlayerData || !world.func_230315_m_().func_241510_j_()) ? worldKey : entity.func_241141_L_();
     }
 }

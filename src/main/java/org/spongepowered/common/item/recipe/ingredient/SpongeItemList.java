@@ -44,7 +44,7 @@ public abstract class SpongeItemList implements Ingredient.IItemList {
     }
 
     @Override
-    public Collection<ItemStack> getStacks() {
+    public Collection<ItemStack> getItems() {
         return Arrays.asList(this.stacks);
     }
 

@@ -34,7 +34,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
-public class DataTranslatorTypeSerializer<T> implements TypeSerializer<T> {
+public final class DataTranslatorTypeSerializer<T> implements TypeSerializer<T> {
 
     private final DataTranslator<T> dataTranslator;
 

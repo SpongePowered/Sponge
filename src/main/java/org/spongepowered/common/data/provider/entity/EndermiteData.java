@@ -43,20 +43,20 @@ public final class EndermiteData {
                 .asMutable(EndermiteEntity.class)
                     .create(Keys.DESPAWN_DELAY)
                         .get(h -> {
-                            if (h.isNoDespawnRequired()) {
+                            if (h.isPersistenceRequired()) {
                                 return null;
                             }
-                            return new SpongeTicks(((EndermiteEntityAccessor) h).accessor$getLifetime());
+                            return new SpongeTicks(((EndermiteEntityAccessor) h).accessor$life());
                         })
                         .setAnd((h, v) -> {
-                            if (h.isNoDespawnRequired()) {
+                            if (h.isPersistenceRequired()) {
                                 return false;
                             }
                             final int ticks = (int) v.getTicks();
                             if (ticks < 0 || ticks > EndermiteData.DESPAWN_DELAY_MAX) {
                                 return false;
                             }
-                            ((EndermiteEntityAccessor) h).accessor$setLifetime(ticks);
+                            ((EndermiteEntityAccessor) h).accessor$life(ticks);
                             return true;
                         });
     }

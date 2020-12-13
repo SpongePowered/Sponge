@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.inventory.container;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.RepairContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IntReferenceHolder;
@@ -42,41 +41,39 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(RepairContainer.class)
-public abstract class RepairContainerMixin_Inventory {
+public abstract class RepairContainerMixin_Inventory extends AbstractRepairContainerMixin_Inventory {
 
-    @Shadow private String repairedItemName;
-    @Shadow @Final private IInventory outputSlot;
-    @Shadow @Final private IntReferenceHolder maximumCost;
-    @Shadow private int materialCost;
-    @Shadow @Final private IInventory inputSlots;
+    @Shadow private String itemName;
+    @Shadow @Final private IntReferenceHolder cost;
+    @Shadow private int repairItemCountCost;
 
-    @Inject(method = "updateRepairOutput", at = @At(value = "RETURN"))
+    @Inject(method = "createResult", at = @At(value = "RETURN"))
     private void impl$throwUpdateAnvilEvent(final CallbackInfo ci) {
         if (!ShouldFire.UPDATE_ANVIL_EVENT || !PhaseTracker.SERVER.onSidedThread()) {
             return;
         }
 
-        final ItemStack itemstack = this.inputSlots.getStackInSlot(0);
-        final ItemStack itemstack2 = this.inputSlots.getStackInSlot(1);
-        final ItemStack result = this.outputSlot.getStackInSlot(0);
+        final ItemStack itemstack = this.inputSlots.getItem(0);
+        final ItemStack itemstack2 = this.inputSlots.getItem(1);
+        final ItemStack result = this.resultSlots.getItem(0);
         final UpdateAnvilEvent event = InventoryEventFactory.callUpdateAnvilEvent(
                 (RepairContainer) (Object) this, itemstack, itemstack2, result,
-                this.repairedItemName, this.maximumCost.get(), this.materialCost);
+                this.itemName, this.cost.get(), this.repairItemCountCost);
 
         final ItemStackSnapshot finalItem = event.getResult().getFinal();
         if (event.isCancelled() || finalItem.isEmpty()) {
-            this.outputSlot.setInventorySlotContents(0, ItemStack.EMPTY);
-            this.maximumCost.set(0);
-            this.materialCost = 0;
-            ((RepairContainer)(Object) this).detectAndSendChanges();
+            this.resultSlots.setItem(0, ItemStack.EMPTY);
+            this.cost.set(0);
+            this.repairItemCountCost = 0;
+            ((RepairContainer)(Object) this).broadcastChanges();
             return;
         }
 
-        this.outputSlot.setInventorySlotContents(0, ItemStackUtil.fromSnapshotToNative(event.getResult().getFinal()));
-        this.maximumCost.set(event.getCosts().getFinal().getLevelCost());
-        this.materialCost = event.getCosts().getFinal().getMaterialCost();
+        this.resultSlots.setItem(0, ItemStackUtil.fromSnapshotToNative(event.getResult().getFinal()));
+        this.cost.set(event.getCosts().getFinal().getLevelCost());
+        this.repairItemCountCost = event.getCosts().getFinal().getMaterialCost();
 
-        ((RepairContainer)(Object) this).detectAndSendChanges();
+        ((RepairContainer)(Object) this).broadcastChanges();
     }
 
 }

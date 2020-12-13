@@ -27,11 +27,10 @@ package org.spongepowered.common.mixin.tracker.world.end;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
+import net.minecraft.world.ISeedReader;
 import net.minecraft.world.end.DragonFightManager;
 import net.minecraft.world.end.DragonSpawnState;
 import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.GenerationSettings;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -54,10 +53,11 @@ public abstract class DragonFightManagerMixin_Tracker {
     @Shadow protected abstract EnderDragonEntity shadow$createNewDragon();
     // @formatter:on
 
-    @Redirect(method = "generatePortal", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/feature/ConfiguredFeature;place(Lnet/"
-            + "minecraft/world/IWorld;Lnet/minecraft/world/gen/ChunkGenerator;Ljava/util/Random;Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean tracker$switchToFeatureState(final ConfiguredFeature configuredFeature, final IWorld worldIn,
-            final ChunkGenerator<? extends GenerationSettings> generator, final Random rand, final BlockPos pos) {
+    @Redirect(method = "spawnNewGateway(Lnet/minecraft/util/math/BlockPos;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/feature/ConfiguredFeature;place(Lnet/minecraft/world/ISeedReader;Lnet/minecraft/world/gen/ChunkGenerator;Ljava/util/Random;Lnet/minecraft/util/math/BlockPos;)Z"))
+    private boolean tracker$switchToFeatureState(final ConfiguredFeature configuredFeature, final ISeedReader worldIn, final ChunkGenerator generator,
+        final Random rand,
+        final BlockPos pos
+    ) {
 
         try (final FeaturePhaseContext context = GenerationPhase.State.FEATURE_PLACEMENT.createPhaseContext(PhaseTracker.SERVER)) {
             context
@@ -72,7 +72,7 @@ public abstract class DragonFightManagerMixin_Tracker {
         }
     }
 
-    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/end/DragonSpawnState;process(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/world/end/DragonFightManager;Ljava/util/List;ILnet/minecraft/util/math/BlockPos;)V"))
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/end/DragonSpawnState;tick(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/world/end/DragonFightManager;Ljava/util/List;ILnet/minecraft/util/math/BlockPos;)V"))
     private void tracker$switchToSpawnDragonState(final DragonSpawnState dragonSpawnState, final ServerWorld worldIn,
             final DragonFightManager manager, final List<EnderCrystalEntity> crystals, int respawnStateTicks, final BlockPos exitPortalLocation) {
         try (final SpawnDragonContext context = DragonPhase.State.SPAWN_DRAGON.createPhaseContext(PhaseTracker.SERVER)) {
@@ -82,7 +82,7 @@ public abstract class DragonFightManagerMixin_Tracker {
                     .buildAndSwitch()
             ;
             ++respawnStateTicks;
-            dragonSpawnState.process(worldIn, manager, crystals, respawnStateTicks, exitPortalLocation);
+            dragonSpawnState.tick(worldIn, manager, crystals, respawnStateTicks, exitPortalLocation);
         }
     }
 

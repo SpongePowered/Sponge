@@ -41,28 +41,28 @@ import org.spongepowered.common.network.status.SpongeStatusResponse;
 @Mixin(ServerStatusNetHandler.class)
 public abstract class ServerStatusNetHandlerMixin {
 
-    @Shadow @Final private static ITextComponent EXIT_MESSAGE;
+    @Shadow @Final private static ITextComponent DISCONNECT_REASON;
 
     @Shadow @Final private MinecraftServer server;
-    @Shadow @Final private NetworkManager networkManager;
-    @Shadow private boolean handled;
+    @Shadow @Final private NetworkManager connection;
+    @Shadow private boolean hasRequestedStatus;
 
     /**
      * @author Minecrell - January 18th, 2015
      * @reason Post the server status ping event for plugins.
      */
     @Overwrite
-    public void processServerQuery(final CServerQueryPacket packetIn) {
-        if (this.handled) {
-            this.networkManager.closeChannel(ServerStatusNetHandlerMixin.EXIT_MESSAGE);
+    public void handleStatusRequest(final CServerQueryPacket packetIn) {
+        if (this.hasRequestedStatus) {
+            this.connection.disconnect(ServerStatusNetHandlerMixin.DISCONNECT_REASON);
         } else {
-            this.handled = true;
+            this.hasRequestedStatus = true;
 
-            final ServerStatusResponse response = SpongeStatusResponse.post(this.server, new SpongeStatusClient(this.networkManager));
+            final ServerStatusResponse response = SpongeStatusResponse.post(this.server, new SpongeStatusClient(this.connection));
             if (response != null) {
-                this.networkManager.sendPacket(new SServerInfoPacket(response));
+                this.connection.send(new SServerInfoPacket(response));
             } else {
-                this.networkManager.closeChannel(null);
+                this.connection.disconnect(null);
             }
         }
     }

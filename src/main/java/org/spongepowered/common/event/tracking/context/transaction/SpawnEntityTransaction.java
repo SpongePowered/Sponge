@@ -79,8 +79,8 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
         super(TransactionTypes.SPAWN_ENTITY.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).getKey());
         this.worldSupplier = worldSupplier;
         this.entityToSpawn = entityToSpawn;
-        this.entityTag = entityToSpawn.writeWithoutTypeId(new CompoundNBT());
-        this.originalPosition = new Vector3d(entityToSpawn.getPosX(), entityToSpawn.getPosY(), entityToSpawn.getPosZ());
+        this.entityTag = entityToSpawn.saveWithoutId(new CompoundNBT());
+        this.originalPosition = new Vector3d(entityToSpawn.getX(), entityToSpawn.getY(), entityToSpawn.getZ());
         this.deducedSpawnType = deducedSpawnType;
     }
 
@@ -123,13 +123,13 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     @Override
     public void restore() {
         final ServerWorld serverWorld = this.worldSupplier.get();
-        if (((ServerWorldAccessor) serverWorld).accessor$isTickingEntities()) {
+        if (((ServerWorldAccessor) serverWorld).accessor$tickingEntities()) {
             // More than likely we could also be needing to remove the entity from both the entities to add
             // and the chunk.
-            ((ServerWorldAccessor) serverWorld).accessor$getEntitiesToAdd().remove(this.entityToSpawn);
-            ((ServerWorldAccessor) serverWorld).accessor$removeFromChunk(this.entityToSpawn);
+            ((ServerWorldAccessor) serverWorld).accessor$toAddAfterTick().remove(this.entityToSpawn);
+            ((ServerWorldAccessor) serverWorld).invoker$removeFromChunk(this.entityToSpawn);
         } else {
-            serverWorld.removeEntity(this.entityToSpawn);
+            serverWorld.despawn(this.entityToSpawn);
         }
     }
 

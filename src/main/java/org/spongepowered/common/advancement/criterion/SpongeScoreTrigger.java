@@ -24,22 +24,22 @@
  */
 package org.spongepowered.common.advancement.criterion;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
 import net.minecraft.advancements.criterion.CriterionInstance;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.advancements.criterion.EntityPredicate;
+import net.minecraft.loot.ConditionArrayParser;
+import net.minecraft.loot.ConditionArraySerializer;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 
-public class SpongeScoreTrigger extends AbstractCriterionTrigger<SpongeScoreTrigger.Instance> {
+public final class SpongeScoreTrigger extends AbstractCriterionTrigger<SpongeScoreTrigger.Instance> {
 
-    public static final SpongeScoreTrigger SCORE_TRIGGER = CriteriaTriggersAccessor.accessor$register(new SpongeScoreTrigger(new ResourceLocation("sponge:score")));
+    public static final SpongeScoreTrigger SCORE_TRIGGER = CriteriaTriggersAccessor.invoker$register(new SpongeScoreTrigger(new ResourceLocation("sponge:score")));
 
-    private ResourceLocation resourceLocation;
+    private final ResourceLocation resourceLocation;
 
-    private SpongeScoreTrigger(ResourceLocation resourceLocation) {
+    private SpongeScoreTrigger(final ResourceLocation resourceLocation) {
         this.resourceLocation = resourceLocation;
     }
 
@@ -49,24 +49,26 @@ public class SpongeScoreTrigger extends AbstractCriterionTrigger<SpongeScoreTrig
     }
 
     @Override
-    public SpongeScoreTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context) {
-        return new SpongeScoreTrigger.Instance(this.resourceLocation, -1);
+    protected Instance createInstance(final JsonObject jsonObject, final EntityPredicate.AndPredicate andPredicate,
+            final ConditionArrayParser conditionArrayParser) {
+        return new SpongeScoreTrigger.Instance(this.resourceLocation, andPredicate, -1);
     }
 
     public static class Instance extends CriterionInstance {
 
-        private int triggerTimes;
-        public Instance(ResourceLocation criterionIn, int triggerTimes) {
-            super(criterionIn);
+        private final int triggerTimes;
+
+        public Instance(final ResourceLocation criterionIn, final EntityPredicate.AndPredicate andPredicate, final int triggerTimes) {
+            super(criterionIn, andPredicate);
             this.triggerTimes = triggerTimes;
         }
 
         public static Instance of(int triggerTimes) {
-            return new Instance(SpongeScoreTrigger.SCORE_TRIGGER.getId(), triggerTimes);
+            return new Instance(SpongeScoreTrigger.SCORE_TRIGGER.getId(), EntityPredicate.AndPredicate.ANY, triggerTimes);
         }
 
         @Override
-        public JsonElement serialize() {
+        public JsonObject serializeToJson(final ConditionArraySerializer arraySerializer) {
             return new JsonObject();
         }
 

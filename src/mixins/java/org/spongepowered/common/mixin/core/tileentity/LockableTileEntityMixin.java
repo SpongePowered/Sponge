@@ -34,7 +34,7 @@ import org.spongepowered.common.bridge.CustomNameableBridge;
 public abstract class LockableTileEntityMixin extends TileEntityMixin implements CustomNameableBridge {
 
     @Override
-    public void bridge$setCustomDisplayName(ITextComponent component) {
-        ((LockableTileEntityAccessor) this).accessor$setCustomName(component);
+    public void bridge$setCustomDisplayName(final ITextComponent customName) {
+        ((LockableTileEntityAccessor) this).invoker$setCustomName(customName);
     }
 }

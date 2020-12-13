@@ -31,31 +31,32 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CPlayerPacket.class)
 public interface CPlayerPacketAccessor {
 
-    @Accessor("x") double accessor$getX();
+    @Accessor("x") double accessor$x();
 
-    @Accessor("x") void accessor$setX(double newX);
+    @Accessor("x") void accessor$x(final double x);
 
-    @Accessor("y") double accessor$getY();
+    @Accessor("y") double accessor$y();
 
-    @Accessor("y") void accessor$setY(double newY);
+    @Accessor("y") void accessor$y(final double y);
 
-    @Accessor("z") double accessor$getZ();
+    @Accessor("z") double accessor$z();
 
-    @Accessor("z") void accessor$setZ(double newZ);
+    @Accessor("z") void accessor$z(final double z);
 
-    @Accessor("yaw") float accessor$getYaw();
+    @Accessor("yRot") float accessor$yRot();
 
-    @Accessor("yaw") void accessor$setYaw(float newYaw);
+    @Accessor("yRot") void accessor$yRot(final float yRot);
 
-    @Accessor("pitch") float accessor$getPitch();
+    @Accessor("xRot") float accessor$xRot();
 
-    @Accessor("pitch") void accessor$setPitch(float newPitch);
+    @Accessor("xRot") void accessor$xRot(final float xRot);
 
-    @Accessor("onGround") boolean accessor$getOnGround();
+    @Accessor("onGround") boolean accessor$onGround();
 
-    @Accessor("moving") boolean accessor$getMoving();
+    @Accessor("hasPos") boolean accessor$hasPos();
 
-    @Accessor("moving") void accessor$setMoving(boolean moving);
+    @Accessor("hasPos") void accessor$hasPos(final boolean hasPos);
 
-    @Accessor("rotating") boolean accessor$getRotating();
+    @Accessor("hasRot") boolean accessor$hasRot();
+
 }

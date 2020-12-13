@@ -303,22 +303,22 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
                         (id, i, p, vi) -> new DispenserContainer(id, i, vi)));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x1.get(),
                 ContainerTypeInfo.ofGrid(9, 1,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X1, id, i, vi, 1)));
+                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x1, id, i, vi, 1)));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x2.get(),
                 ContainerTypeInfo.ofGrid(9, 2,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X2, id, i, vi, 2)));
+                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x2, id, i, vi, 2)));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x3.get(),
                 ContainerTypeInfo.ofGrid(9, 3,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X3, id, i, vi, 3)));
+                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x3, id, i, vi, 3)));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x4.get(),
                 ContainerTypeInfo.ofGrid(9, 4,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X4, id, i, vi, 4)));
+                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x4, id, i, vi, 4)));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x5.get(),
                 ContainerTypeInfo.ofGrid(9, 5,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X5, id, i, vi, 5)));
+                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x5, id, i, vi, 5)));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x6.get(),
                 ContainerTypeInfo.ofGrid(9, 6,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X6, id, i, vi, 6)));
+                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x6, id, i, vi, 6)));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.HOPPER.get(),
                 ContainerTypeInfo.ofGrid(5, 1,
                         (id, i, p, vi) -> new HopperContainer(id, i, vi)));
@@ -385,9 +385,9 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         // create the internal MerchantInventory (3 slots)
         // create the MerchantResultSlot
         // used to check if player is customer
-        // trigger sound (casted to Entity when !getWorld().isRemote) !!!
+        // trigger sound (casted to Entity when !getWorld().isClientSide) !!!
         // reset customer on close
-        // when closing and !getWorld().isRemote drop items back into world !!!
+        // when closing and !getWorld().isClientSide drop items back into world !!!
         // getOffers
         IMerchant merchant = null;
         ContainerTypeInfo.of(0, 0,
@@ -395,7 +395,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     }
     
     private static IWorldPosCallable toPos(PlayerEntity p) {
-        return IWorldPosCallable.of(p.world, p.getPosition());
+        return IWorldPosCallable.create(p.level, p.blockPosition());
     }
 
     @FunctionalInterface

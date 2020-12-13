@@ -39,13 +39,13 @@ public final class ChickenData {
         registrator
                 .asMutable(ChickenEntity.class)
                     .create(Keys.EGG_TIME)
-                        .get(h -> new SpongeTicks(h.timeUntilNextEgg))
+                        .get(h -> new SpongeTicks(h.eggTime))
                         .setAnd((h, v) -> {
                             final int ticks = (int) v.getTicks();
                             if (ticks < 0) {
                                 return false;
                             }
-                            h.timeUntilNextEgg = ticks;
+                            h.eggTime = ticks;
                             return true;
                         });
     }

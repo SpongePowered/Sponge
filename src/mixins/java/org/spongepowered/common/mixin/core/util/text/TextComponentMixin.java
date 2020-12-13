@@ -57,8 +57,8 @@ public class TextComponentMixin implements TextComponentBridge {
                 builder = Component.text().content(((StringTextComponent) (Object) this).getText());
             } else if ((Object) this instanceof TranslationTextComponent) {
                 final TranslationTextComponent $this = (TranslationTextComponent) (Object) this;
-                final List<Component> with = new ArrayList<>($this.getFormatArgs().length);
-                for (final Object arg : $this.getFormatArgs()) {
+                final List<Component> with = new ArrayList<>($this.getArgs().length);
+                for (final Object arg : $this.getArgs()) {
                     if (arg instanceof ITextComponent) {
                         with.add(SpongeAdventure.asAdventure((ITextComponent) arg));
                     } else {
@@ -67,19 +67,22 @@ public class TextComponentMixin implements TextComponentBridge {
                 }
                 builder = Component.translatable().key($this.getKey()).args(with.toArray(new Component[0]));
             } else if ((Object) this instanceof KeybindTextComponent) {
-                builder = Component.keybind().keybind(((KeybindTextComponent) (Object) this).getKeybind());
+                builder = Component.keybind().keybind(((KeybindTextComponent) (Object) this).getName());
             } else if ((Object) this instanceof ScoreTextComponent) {
                 final ScoreTextComponent $this = (ScoreTextComponent) (Object) this;
-                builder = Component.score().name($this.getName()).objective($this.getObjective()).value($this.getUnformattedComponentText());
+                builder = Component.score().name($this.getName()).objective($this.getObjective());
             } else if ((Object) this instanceof SelectorTextComponent) {
-                builder = Component.selector().pattern(((SelectorTextComponent) (Object) this).getSelector());
+                builder = Component.selector().pattern(((SelectorTextComponent) (Object) this).getPattern());
             } else if ((Object) this instanceof NBTTextComponent) {
                 if ((Object) this instanceof NBTTextComponent.Block) {
                     final NBTTextComponent.Block $this = (NBTTextComponent.Block) (Object) this;
-                    builder = Component.blockNBT().pos(BlockNBTComponent.Pos.fromString($this.func_218683_k())).nbtPath($this.func_218676_i()).interpret($this.func_218677_j());
+                    builder = Component.blockNBT().pos(BlockNBTComponent.Pos.fromString($this.getPos())).nbtPath($this.getNbtPath()).interpret($this.isInterpreting());
                 } else if ((Object) this instanceof NBTTextComponent.Entity) {
                     final NBTTextComponent.Entity $this = (NBTTextComponent.Entity) (Object) this;
-                    builder = Component.entityNBT().nbtPath($this.func_218676_i()).interpret($this.func_218677_j()).selector($this.func_218687_k());
+                    builder = Component.entityNBT().nbtPath($this.getNbtPath()).interpret($this.isInterpreting()).selector($this.getSelector());
+                } else if ((Object) this instanceof NBTTextComponent.Storage) {
+                    final NBTTextComponent.Storage $this = (NBTTextComponent.Storage) (Object) this;
+                    builder = Component.storageNBT().nbtPath($this.getNbtPath()).interpret($this.isInterpreting()).storage(SpongeAdventure.asAdventure($this.getId()));
                 }
             } else {
               throw new UnsupportedOperationException();

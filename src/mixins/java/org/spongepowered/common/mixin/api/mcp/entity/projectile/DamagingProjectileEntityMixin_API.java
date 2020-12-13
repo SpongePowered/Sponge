@@ -33,7 +33,7 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 import java.util.Set;
 
 @Mixin(DamagingProjectileEntity.class)
-public abstract class DamagingProjectileEntityMixin_API extends EntityMixin_API implements DamagingProjectile {
+public abstract class DamagingProjectileEntityMixin_API extends ProjectileEntityMixin_API implements DamagingProjectile {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

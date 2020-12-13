@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.network.play.server;
 
+import net.minecraft.network.play.server.SSendResourcePackPacket;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,7 +35,6 @@ import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPack
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import java.net.URISyntaxException;
-import net.minecraft.network.play.server.SSendResourcePackPacket;
 
 @Mixin(SSendResourcePackPacket.class)
 public abstract class SSendResourcePackPacketMixin implements SSendResourcePackPacketBridge {
@@ -45,7 +45,7 @@ public abstract class SSendResourcePackPacketMixin implements SSendResourcePackP
     private ResourcePack impl$pack;
 
     @Inject(method = "<init>(Ljava/lang/String;Ljava/lang/String;)V", at = @At("RETURN") , remap = false)
-    private void spongeImpl$setResourcePackOrThrowException(final String url, final String hash, final CallbackInfo ci) {
+    private void impl$setResourcePackOrThrowException(final String url, final String hash, final CallbackInfo ci) {
         try {
             this.impl$pack = SpongeResourcePack.create(url, hash);
         } catch (URISyntaxException e) {

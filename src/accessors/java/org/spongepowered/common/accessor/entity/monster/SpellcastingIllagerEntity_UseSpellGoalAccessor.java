@@ -31,6 +31,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(SpellcastingIllagerEntity.UseSpellGoal.class)
 public interface SpellcastingIllagerEntity_UseSpellGoalAccessor {
 
-    @Invoker("getCastingTime") int accessor$getCastingTime();
+    @Invoker("getCastingTime") int invoker$getCastingTime();
 
 }

@@ -42,8 +42,8 @@ public final class BannerData {
                     .create(Keys.BANNER_PATTERN_LAYERS)
                         .get(h -> ((BannerTileEntityBridge) h).bridge$getLayers())
                         .setAnd((h, v) -> {
-                            final World world = h.getWorld();
-                            if (world != null && !world.isRemote) { // This avoids a client crash because clientside.
+                            final World world = h.getLevel();
+                            if (world != null && !world.isClientSide) { // This avoids a client crash because clientside.
                                 ((BannerTileEntityBridge) h).bridge$setLayers(v);
                                 return true;
                             }
@@ -52,8 +52,8 @@ public final class BannerData {
                     .create(Keys.DYE_COLOR)
                         .get(h -> ((BannerTileEntityBridge) h).bridge$getBaseColor())
                         .setAnd((h, v) -> {
-                            final World world = h.getWorld();
-                            if (world != null && !world.isRemote) {
+                            final World world = h.getLevel();
+                            if (world != null && !world.isClientSide) {
                                 ((BannerTileEntityBridge) h).bridge$setBaseColor(v);
                                 return true;
                             }

@@ -61,11 +61,11 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
 
     @Shadow private CompoundNBT tag;
 
-    @Shadow private boolean isEmpty;
+    @Shadow private boolean emptyCacheFlag;
 
     @Override
     public <E> DataTransactionResult bridge$offerCustom(final Key<@NonNull ? extends Value<E>> key, final E value) {
-        if (this.isEmpty) {
+        if (this.emptyCacheFlag) {
             return DataTransactionResult.failNoData();
         }
         return CustomDataHolderBridge.super.bridge$offerCustom(key, value);
@@ -73,7 +73,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
 
     @Override
     public <E> Optional<E> bridge$getCustom(final Key<@NonNull ? extends Value<E>> key) {
-        if (this.isEmpty) {
+        if (this.emptyCacheFlag) {
             return Optional.empty();
         }
         return CustomDataHolderBridge.super.bridge$getCustom(key);
@@ -81,7 +81,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
 
     @Override
     public <E> DataTransactionResult bridge$removeCustom(final Key<@NonNull ? extends Value<E>> key) {
-        if (this.isEmpty) {
+        if (this.emptyCacheFlag) {
             return DataTransactionResult.failNoData();
         }
         return CustomDataHolderBridge.super.bridge$removeCustom(key);
@@ -113,7 +113,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
     // Read custom data from nbt
     @Inject(method = "<init>(Lnet/minecraft/nbt/CompoundNBT;)V", at = @At("RETURN"))
     private void impl$onRead(final CompoundNBT compound, final CallbackInfo info) {
-        if (!this.isEmpty) {
+        if (!this.emptyCacheFlag) {
             CustomDataHolderBridge.syncCustomToTag(this);
         }
         // Prune empty stack tag compound if its empty to enable stacking.

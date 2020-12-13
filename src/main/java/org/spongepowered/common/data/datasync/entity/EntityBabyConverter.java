@@ -38,7 +38,7 @@ import java.util.Optional;
 public final class EntityBabyConverter extends DataParameterConverter<Boolean> {
 
     public EntityBabyConverter() {
-        super(AgeableEntityAccessor.accessor$getBaby());
+        super(AgeableEntityAccessor.accessor$DATA_BABY_ID());
     }
 
     @Override

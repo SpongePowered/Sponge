@@ -31,5 +31,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(GameRules.RuleValue.class)
 public interface GameRules_RuleValueAccessor {
 
-    @Invoker("setStringValue") void accessor$setStringValue(String rawValue);
+    @Invoker("deserialize") void invoker$deserialize(final String serialized);
+
 }

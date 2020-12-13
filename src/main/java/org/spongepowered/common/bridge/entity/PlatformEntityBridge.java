@@ -48,4 +48,8 @@ public interface PlatformEntityBridge {
     default void bridge$remove(boolean keepData) {
         ((Entity) this).remove();
     }
+
+    default boolean bridge$isFakePlayer() {
+        return false;
+    }
 }

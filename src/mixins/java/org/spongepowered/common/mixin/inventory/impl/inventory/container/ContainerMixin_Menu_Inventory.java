@@ -51,10 +51,10 @@ import javax.annotation.Nullable;
 @Mixin(Container.class)
 public abstract class ContainerMixin_Menu_Inventory implements MenuBridge {
 
-    @Shadow @Final private List<IContainerListener> listeners;
-    @Shadow @Final private NonNullList<ItemStack> inventoryItemStacks;
+    @Shadow @Final private List<IContainerListener> containerListeners;
+    @Shadow @Final private NonNullList<ItemStack> lastSlots;
 
-    @Shadow @Final public List<Slot> inventorySlots;
+    @Shadow @Final public List<Slot> slots;
     @Nullable private SpongeInventoryMenu impl$menu;
 
     @Override
@@ -91,21 +91,21 @@ public abstract class ContainerMixin_Menu_Inventory implements MenuBridge {
 
     // Called when clicking in an inventory
     // InventoryMenu Callback
-    @Inject(method = "slotClick", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "doClick", at = @At(value = "HEAD"), cancellable = true)
     private void impl$onClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player, CallbackInfoReturnable<ItemStack> cir) {
         final SpongeInventoryMenu menu = this.bridge$getMenu();
         if (menu != null) {
-            menu.setOldCursor(player.inventory.getItemStack().copy());
+            menu.setOldCursor(player.inventory.getCarried().copy());
             if (!menu.onClick(slotId, dragType, clickTypeIn, player, (org.spongepowered.api.item.inventory.Container) this)) {
                 cir.setReturnValue(ItemStack.EMPTY);
                 // Accept all changes made by plugin
-                for (int i = 0; i < this.inventorySlots.size(); i++) {
-                    Slot slot = this.inventorySlots.get(i);
-                    this.inventoryItemStacks.set(i, slot.getStack().copy());
+                for (int i = 0; i < this.slots.size(); i++) {
+                    Slot slot = this.slots.get(i);
+                    this.lastSlots.set(i, slot.getItem().copy());
                 }
                 // and update client
-                for (IContainerListener listener : this.listeners) {
-                    listener.sendAllContents((Container) (Object) this, this.inventoryItemStacks);
+                for (IContainerListener listener : this.containerListeners) {
+                    listener.refreshContainer((Container) (Object) this, this.lastSlots);
                 }
             }
         }
@@ -113,7 +113,7 @@ public abstract class ContainerMixin_Menu_Inventory implements MenuBridge {
 
     // Called when a Container is closed
     // InventoryMenu Callback and resetting viewed and menu state
-    @Inject(method = "onContainerClosed", at = @At(value = "HEAD"))
+    @Inject(method = "removed", at = @At(value = "HEAD"))
     private void onOnContainerClosed(PlayerEntity player, CallbackInfo ci) {
         SpongeInventoryMenu menu = this.bridge$getMenu();
         if (menu != null) {

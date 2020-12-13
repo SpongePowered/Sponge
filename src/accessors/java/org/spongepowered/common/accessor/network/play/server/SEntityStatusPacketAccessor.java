@@ -31,7 +31,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(SEntityStatusPacket.class)
 public interface SEntityStatusPacketAccessor {
 
-    @Accessor("entityId") void accessor$setEntityId(int id);
+    @Accessor("entityId") void accessor$entityId(final int entityId);
 
-    @Accessor("logicOpcode") void accessor$setLogicOpcode(byte opcode);
+    @Accessor("eventId") void accessor$eventId(final byte eventId);
+
 }

@@ -32,5 +32,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(CombatTracker.class)
 public interface CombatTrackerAccessor {
 
-    @Invoker("getBestCombatEntry") CombatEntry accessor$getBestCombatEntry();
+    @Invoker("getMostSignificantFall") CombatEntry invoker$getMostSignificantFall();
+
 }

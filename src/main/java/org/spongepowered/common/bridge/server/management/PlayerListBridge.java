@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.bridge.server.management;
 
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.World;
 
 public interface PlayerListBridge {
 
     void bridge$reloadAdvancementProgress();
 
-    void bridge$setOriginalDestinationDimensionForRespawn(DimensionType dimensionType);
+    void bridge$setNewDestinationDimensionKey(RegistryKey<World> key);
 }

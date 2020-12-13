@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FlowingFluidBlock;
+import net.minecraft.fluid.FlowingFluid;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
@@ -125,7 +126,7 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
         final SpongeBlockSnapshot snapshot,
         final Block originalBlock
     ) {
-        if (phaseContext.tickingBlock instanceof FlowingFluidBlock) {
+        if (phaseContext.tickingBlock.getType() instanceof FlowingFluid) {
             if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;
             }

@@ -42,13 +42,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
-import java.util.UUID;
-
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 @Mixin(AbstractArrowEntity.class)
 public abstract class AbstractArrowEntityMixin extends EntityMixin {
@@ -120,7 +118,7 @@ public abstract class AbstractArrowEntityMixin extends EntityMixin {
                     this.rotationYaw += 180.0F;
                     this.prevRotationYaw += 180.0F;
                     this.ticksInAir = 0;
-                    if (!this.world.isRemote && this.shadow$getMotion().lengthSquared() < 1.0E-7D) {
+                    if (!this.world.isClientSide && this.shadow$getMotion().lengthSquared() < 1.0E-7D) {
                         if (this.pickupStatus == AbstractArrowEntity.PickupStatus.ALLOWED) {
                             this.shadow$entityDropItem(this.shadow$getArrowStack(), 0.1F);
                         }

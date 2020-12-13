@@ -47,8 +47,8 @@ import java.util.Map;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fabric, InventoryBridge, LensGeneratorBridge {
 
-    @Shadow public abstract ItemStack shadow$getItemStackFromSlot(EquipmentSlotType slotIn);
-    @Shadow public abstract void shadow$setItemStackToSlot(EquipmentSlotType slotIn, ItemStack stack);
+    @Shadow public abstract ItemStack shadow$getItemBySlot(EquipmentSlotType slotIn);
+    @Shadow public abstract void shadow$setItemSlot(EquipmentSlotType slotIn, ItemStack stack);
 
     private static final EquipmentSlotType[] SLOTS;
     private static final int MAX_STACK_SIZE = 64;
@@ -57,7 +57,7 @@ public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fab
         EquipmentSlotType[] values = EquipmentSlotType.values();
         SLOTS = new EquipmentSlotType[values.length];
         for (EquipmentSlotType slot : values) {
-            LivingEntityMixin_EquipmentFabric_Inventory.SLOTS[slot.getSlotIndex()] = slot;
+            LivingEntityMixin_EquipmentFabric_Inventory.SLOTS[slot.getIndex()] = slot;
         }
     }
 
@@ -73,12 +73,12 @@ public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fab
 
     @Override
     public ItemStack fabric$getStack(int index) {
-        return this.shadow$getItemStackFromSlot(LivingEntityMixin_EquipmentFabric_Inventory.SLOTS[index]);
+        return this.shadow$getItemBySlot(LivingEntityMixin_EquipmentFabric_Inventory.SLOTS[index]);
     }
 
     @Override
     public void fabric$setStack(int index, ItemStack stack) {
-        this.shadow$setItemStackToSlot(LivingEntityMixin_EquipmentFabric_Inventory.SLOTS[index], stack);
+        this.shadow$setItemSlot(LivingEntityMixin_EquipmentFabric_Inventory.SLOTS[index], stack);
     }
 
     @Override
@@ -94,7 +94,7 @@ public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fab
     @Override
     public void fabric$clear() {
         for (EquipmentSlotType slot : LivingEntityMixin_EquipmentFabric_Inventory.SLOTS) {
-            this.shadow$setItemStackToSlot(slot, ItemStack.EMPTY);
+            this.shadow$setItemSlot(slot, ItemStack.EMPTY);
         }
     }
 

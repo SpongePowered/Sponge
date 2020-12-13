@@ -38,7 +38,7 @@ import java.util.Optional;
 @Mixin(Criterion.class)
 public abstract class CriterionMixin_API implements DefaultedAdvancementCriterion {
 
-    @Shadow @Final private ICriterionInstance criterionInstance;
+    @Shadow @Final private ICriterionInstance trigger;
 
     @Override
     public String getName() {
@@ -47,6 +47,6 @@ public abstract class CriterionMixin_API implements DefaultedAdvancementCriterio
 
     @Override
     public Optional<FilteredTrigger<?>> getTrigger() {
-        return Optional.ofNullable((FilteredTrigger<?>) this.criterionInstance);
+        return Optional.ofNullable((FilteredTrigger<?>) this.trigger);
     }
 }

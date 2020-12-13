@@ -40,7 +40,7 @@ public final class SkullData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> RotationUtils.getFor(h.get(SkullBlock.ROTATION)))
+                        .get(h -> RotationUtils.getFor(h.getValue(SkullBlock.ROTATION)))
                         .set((h, v) -> RotationUtils.set(h, v, SkullBlock.ROTATION))
                         .supports(h -> h.getBlock() instanceof SkullBlock);
     }

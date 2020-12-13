@@ -40,7 +40,7 @@ public final class DispenserData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.get(DispenserBlock.FACING)))
+                        .get(h -> DirectionUtil.getFor(h.getValue(DispenserBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, DispenserBlock.FACING))
                         .supports(h -> h.getBlock() instanceof DispenserBlock);
     }

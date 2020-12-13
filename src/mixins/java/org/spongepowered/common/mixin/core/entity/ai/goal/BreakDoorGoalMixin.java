@@ -39,7 +39,6 @@ public abstract class BreakDoorGoalMixin extends InteractDoorGoal {
         super(entityLiving);
     }
 
-
     /**
      * @author gabizou - April 13th, 2018
      * @reason - Due to Forge's changes, there's no clear redirect or injection
@@ -47,13 +46,13 @@ public abstract class BreakDoorGoalMixin extends InteractDoorGoal {
      * at the gamerule check, but this can suffice for now.
      */
     @Redirect(
-        method = "shouldExecute",
+        method = "canUse",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/ai/goal/InteractDoorGoal;shouldExecute()Z"
+            target = "Lnet/minecraft/entity/ai/goal/InteractDoorGoal;canUse()Z"
         )
     )
     private boolean spongeShouldExecuteForGriefer(final InteractDoorGoal entityAIDoorInteract) {
-        return super.shouldExecute() && ((GrieferBridge) this.entity).bridge$canGrief();
+        return super.canUse() && ((GrieferBridge) this.mob).bridge$canGrief();
     }
 }

@@ -48,18 +48,20 @@ import javax.annotation.Nullable;
 @Mixin(LockableTileEntity.class)
 public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API implements NameableCarrierBlockEntity {
 
-    @Shadow @Nullable private LockCode code;
-    @Nullable @Shadow private ITextComponent customName; // Not really nullable, but it should be... - Roquette
+    // @formatter:off
+    @Shadow @Nullable private LockCode lockKey;
+    @Nullable @Shadow private ITextComponent name; // Not really nullable, but it should be... - Roquette
+    // @formatter:off
 
     @Override
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
-        if (this.code != null) {
-            container.set(Constants.TileEntity.LOCK_CODE, ((LockCodeAccessor) this.code).accessor$getLock());
+        if (this.lockKey != null) {
+            container.set(Constants.TileEntity.LOCK_CODE, ((LockCodeAccessor) this.lockKey).accessor$key());
         }
         final List<DataView> items = Lists.newArrayList();
-        for (int i = 0; i < ((IInventory) this).getSizeInventory(); i++) {
-            final ItemStack stack = ((IInventory) this).getStackInSlot(i);
+        for (int i = 0; i < ((IInventory) this).getContainerSize(); i++) {
+            final ItemStack stack = ((IInventory) this).getItem(i);
             if (!stack.isEmpty()) {
                 // todo make a helper object for this
                 final DataContainer stackView = DataContainer.createNew()
@@ -69,8 +71,8 @@ public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API im
                 items.add(stackView);
             }
         }
-        if (this.customName != null) {
-            container.set(Constants.TileEntity.LOCKABLE_CONTAINER_CUSTOM_NAME, this.customName);
+        if (this.name != null) {
+            container.set(Constants.TileEntity.LOCKABLE_CONTAINER_CUSTOM_NAME, this.name);
         }
         container.set(Constants.TileEntity.ITEM_CONTENTS, items);
         return container;

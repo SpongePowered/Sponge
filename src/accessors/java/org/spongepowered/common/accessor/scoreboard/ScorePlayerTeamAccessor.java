@@ -26,16 +26,16 @@ package org.spongepowered.common.accessor.scoreboard;
 
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import javax.annotation.Nullable;
-
 @Mixin(ScorePlayerTeam.class)
 public interface ScorePlayerTeamAccessor {
 
-    @Accessor("scoreboard") @Nullable Scoreboard accessor$getScoreboard();
+    @Accessor("scoreboard") @Nullable Scoreboard accessor$scoreboard();
 
-    @Mutable @Accessor("scoreboard") void accessor$setScoreboard(@Nullable Scoreboard scoreboard);
+    @Mutable @Accessor("scoreboard") void accessor$scoreboard(final @Nullable Scoreboard scoreboard);
+
 }

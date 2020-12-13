@@ -32,9 +32,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CommandBlockLogic.class)
 public interface CommandBlockLogicAccessor {
 
-    @Accessor("lastOutput") ITextComponent accessor$getLastOutput();
+    @Accessor("successCount") void accessor$successCount(final int successCount);
 
-    @Accessor("successCount") void accessor$setSuccessCount(int successCount);
+    @Accessor("lastOutput") ITextComponent accessor$lastOutput();
 
-    @Accessor("commandStored") void accessor$setCommandStored(String commandStored);
+    @Accessor("command") void accessor$command(final String command);
+
 }

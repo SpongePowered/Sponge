@@ -44,7 +44,7 @@ public final class AreaEffectCloudData {
                 .asMutable(AreaEffectCloudEntity.class)
                     .create(Keys.COLOR)
                         .get(h -> Color.ofRgb(h.getColor()))
-                        .set((h, v) -> h.setColor(v.getRgb()))
+                        .set((h, v) -> h.setFixedColor(v.getRgb()))
                     .create(Keys.DURATION)
                         .get(x -> new SpongeTicks(x.getDuration()))
                         .setAnd((h, v) -> {
@@ -66,24 +66,24 @@ public final class AreaEffectCloudData {
                         .get(h -> (double) h.getRadius())
                         .set((h, v) -> h.setRadius(v.floatValue()))
                     .create(Keys.RADIUS_ON_USE)
-                        .get(h -> (double) ((AreaEffectCloudEntityAccessor) h).accessor$getRadiusOnUse())
+                        .get(h -> (double) ((AreaEffectCloudEntityAccessor) h).accessor$radiusOnUse())
                         .set((h, v) -> h.setRadiusOnUse(v.floatValue()))
                     .create(Keys.RADIUS_PER_TICK)
-                        .get(h -> (double) ((AreaEffectCloudEntityAccessor) h).accessor$getRadiusPerTick())
+                        .get(h -> (double) ((AreaEffectCloudEntityAccessor) h).accessor$radiusPerTick())
                         .set((h, v) -> h.setRadiusPerTick(v.floatValue()))
                     .create(Keys.WAIT_TIME)
-                        .get(h -> new SpongeTicks(((AreaEffectCloudEntityAccessor) h).accessor$getWaitTime()))
+                        .get(h -> new SpongeTicks(((AreaEffectCloudEntityAccessor) h).accessor$waitTime()))
                         .set((h, v) -> h.setWaitTime((int) v.getTicks()))
                 .asMutable(AreaEffectCloudEntityAccessor.class)
                     .create(Keys.DURATION_ON_USE)
-                        .get(h -> new SpongeTicks(h.accessor$getDurationOnUse()))
-                        .set((h, v) -> h.accessor$setDurationOnUse((int) v.getTicks()))
+                        .get(h -> new SpongeTicks(h.accessor$durationOnUse()))
+                        .set((h, v) -> h.accessor$durationOnUse((int) v.getTicks()))
                     .create(Keys.POTION_EFFECTS)
-                        .get(h -> PotionEffectUtil.copyAsPotionEffects(h.accessor$getEffects()))
-                        .set((h, v) -> h.accessor$setEffects(PotionEffectUtil.copyAsEffectInstances(v)))
+                        .get(h -> PotionEffectUtil.copyAsPotionEffects(h.accessor$effects()))
+                        .set((h, v) -> h.accessor$effects(PotionEffectUtil.copyAsEffectInstances(v)))
                     .create(Keys.REAPPLICATION_DELAY)
-                        .get(h -> new SpongeTicks(h.accessor$getReapplicationDelay()))
-                        .set((h, v) -> h.accessor$setReapplicationDelay((int) v.getTicks()));
+                        .get(h -> new SpongeTicks(h.accessor$reapplicationDelay()))
+                        .set((h, v) -> h.accessor$reapplicationDelay((int) v.getTicks()));
     }
     // @formatter:on
 }

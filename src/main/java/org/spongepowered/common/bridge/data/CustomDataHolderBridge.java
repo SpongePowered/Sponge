@@ -41,7 +41,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 
 import java.lang.reflect.Type;
@@ -67,14 +67,14 @@ public interface CustomDataHolderBridge {
                 .map(key -> SpongeDataManager.getDatastoreRegistry().getDataStore(key, dataHolderType))
                 .collect(Collectors.toSet());
 
-        final DataContainer dataContainer = NbtTranslator.getInstance().translate(compound);
+        final DataContainer dataContainer = NBTTranslator.getInstance().translate(compound);
         dataContainer.remove(DataQuery.of(Constants.Forge.FORGE_DATA, Constants.Sponge.SPONGE_DATA, Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST));
         if (!dataStores.isEmpty()) {
             for (DataStore dataStore : dataStores) {
                 dataStore.serialize(manipulator, dataContainer);
             }
         }
-        final CompoundNBT serialized = NbtTranslator.getInstance().translate(dataContainer);
+        final CompoundNBT serialized = NBTTranslator.getInstance().translate(dataContainer);
         compound.merge(serialized); // TODO does this work?
 
         final CompoundNBT spongeData = object.data$getSpongeData();
@@ -82,7 +82,7 @@ public interface CustomDataHolderBridge {
         if (!failedData.isEmpty()) {
             final ListNBT failedList = new ListNBT();
             for (final DataView failedDatum : failedData) {
-                failedList.add(NbtTranslator.getInstance().translate(failedDatum));
+                failedList.add(NBTTranslator.getInstance().translate(failedDatum));
             }
             spongeData.put(Constants.Sponge.FAILED_CUSTOM_DATA, failedList);
         } else {
@@ -103,7 +103,7 @@ public interface CustomDataHolderBridge {
             return;
         }
         // There is some data present
-        final DataContainer allData = NbtTranslator.getInstance().translate(compound);
+        final DataContainer allData = NBTTranslator.getInstance().translate(compound);
         final DataView spongeData = allData.getView(Constants.Forge.ROOT).flatMap(forgeData -> forgeData.getView(Constants.Sponge.SPONGE_ROOT)).get();
         // Update data
         final List<DataView> updatedDataViews = spongeData.getViewList(Constants.Sponge.CUSTOM_MANIPULATOR_LIST).get()
