@@ -81,10 +81,10 @@ public final class SpongeBanService implements BanService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<Ban.Ip> getIpBans() {
+    public Collection<Ban.IP> getIpBans() {
         final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor = ((UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getIPBanList());
         accessor.invoker$removeExpired();
-        return new ArrayList<>((Collection<Ban.Ip>) (Object) accessor.accessor$map().values());
+        return new ArrayList<>((Collection<Ban.IP>) (Object) accessor.accessor$map().values());
     }
 
     @SuppressWarnings("unchecked")
@@ -98,11 +98,11 @@ public final class SpongeBanService implements BanService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<Ban.Ip> getBanFor(final InetAddress address) {
+    public Optional<Ban.IP> getBanFor(final InetAddress address) {
         final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
 
         accessor.invoker$removeExpired();
-        return Optional.ofNullable((Ban.Ip) accessor.accessor$map().get(accessor.invoker$getKeyForUser(((IPBanList) accessor).getIpFromAddress(new InetSocketAddress(address, 0)))));
+        return Optional.ofNullable((Ban.IP) accessor.accessor$map().get(accessor.invoker$getKeyForUser(((IPBanList) accessor).getIpFromAddress(new InetSocketAddress(address, 0)))));
     }
 
     @SuppressWarnings("unchecked")
@@ -137,7 +137,7 @@ public final class SpongeBanService implements BanService {
     @SuppressWarnings("unchecked")
     @Override
     public boolean pardon(final InetAddress address) {
-        final Optional<Ban.Ip> ban = this.getBanFor(address);
+        final Optional<Ban.IP> ban = this.getBanFor(address);
         final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
         accessor.invoker$removeExpired();
         return ban.isPresent() && this.removeBan(ban.get());
@@ -155,9 +155,9 @@ public final class SpongeBanService implements BanService {
             UserListUtil.removeEntry(this.getUserBanList(), ((Ban.Profile) ban).getProfile());
             return true;
         } else if (ban.getType().equals(BanTypes.IP.get())) {
-            Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
+            Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.IP) ban));
 
-            final InetSocketAddress inetSocketAddress = new InetSocketAddress(((Ban.Ip) ban).getAddress(), 0);
+            final InetSocketAddress inetSocketAddress = new InetSocketAddress(((Ban.IP) ban).getAddress(), 0);
             UserListUtil.removeEntry(this.getIPBanList(), this.getIPBanList().getIpFromAddress(inetSocketAddress));
             return true;
         }
@@ -176,9 +176,9 @@ public final class SpongeBanService implements BanService {
 
             UserListUtil.addEntry(this.getUserBanList(), (UserListEntry<?>) ban);
         } else if (ban.getType().equals(BanTypes.IP.get())) {
-            prevBan = this.getBanFor(((Ban.Ip) ban).getAddress());
+            prevBan = this.getBanFor(((Ban.IP) ban).getAddress());
 
-            Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
+            Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.IP) ban));
 
             UserListUtil.addEntry(this.getIPBanList(), (UserListEntry<?>) ban);
         } else {
@@ -192,7 +192,7 @@ public final class SpongeBanService implements BanService {
         if (ban.getType().equals(BanTypes.PROFILE)) {
             return this.isBanned(((Ban.Profile) ban).getProfile());
         } else if (ban.getType().equals(BanTypes.IP)) {
-            return this.isBanned(((Ban.Ip) ban).getAddress());
+            return this.isBanned(((Ban.IP) ban).getAddress());
         }
         throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
     }
