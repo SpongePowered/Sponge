@@ -22,27 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.registry;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.data.type.BodyPart;
-import org.spongepowered.common.data.type.SpongeBodyPart;
+import org.spongepowered.api.registry.RegistryKey;
 
-import java.util.stream.Stream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
-public final class BodyPartStreamGenerator {
+public final class RegistryLoader<T> {
 
-    private BodyPartStreamGenerator() {
+    private final Map<ResourceKey, T> values = new HashMap<>();
+
+    public static <T> RegistryLoader<T> of() {
+        return new RegistryLoader<>();
     }
 
-    public static Stream<BodyPart> stream() {
-        return Stream.of(
-            new SpongeBodyPart(ResourceKey.minecraft("chest")),
-            new SpongeBodyPart(ResourceKey.minecraft("head")),
-            new SpongeBodyPart(ResourceKey.minecraft("left_arm")),
-            new SpongeBodyPart(ResourceKey.minecraft("left_leg")),
-            new SpongeBodyPart(ResourceKey.minecraft("right_arm")),
-            new SpongeBodyPart(ResourceKey.minecraft("right_leg"))
-        );
+    public RegistryLoader<T> add(final RegistryKey<T> key, final Function<ResourceKey, ? super T> function) {
+        this.values.put(key.location(), function.apply(key.location()));
+        return this;
+    }
+
+    public RegistryLoader<T> addAll(final Function<ResourceKey, ? super T> function, final RegistryKey<T>... keys) {
+        for (final RegistryKey<T> key : keys) {
+            this.values.put(key.location(), function.apply(key.location()));
+        }
+
+        return this;
+    }
+
+    public Map<ResourceKey, T> values() {
+        return this.values;
     }
 }

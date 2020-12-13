@@ -52,7 +52,7 @@ public final class PhaseTypeRegistrar {
             .registerSupplier(DragonPhaseType.class, "sitting_attacking", () -> (DragonPhaseType) PhaseType.SITTING_ATTACKING)
             .registerSupplier(DragonPhaseType.class, "charging_player", () -> (DragonPhaseType) PhaseType.CHARGING_PLAYER)
             .registerSupplier(DragonPhaseType.class, "dying", () -> (DragonPhaseType) PhaseType.DYING)
-            .registerSupplier(DragonPhaseType.class, "hover", () -> (DragonPhaseType) PhaseType.HOVER)
+            .registerSupplier(DragonPhaseType.class, "hovering", () -> (DragonPhaseType) PhaseType.HOVERING)
         ;
     }
 }

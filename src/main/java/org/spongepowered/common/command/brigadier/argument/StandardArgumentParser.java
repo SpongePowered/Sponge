@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 /**
  * For use with ArgumentTypes in the base game
  */
-public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValueParameter<T> {
+public class StandardArgumentParser<S, T> extends implements ArgumentParser<T>, ValueParameter<T> {
 
     public static <T> StandardArgumentParser<T, T> createIdentity(final ArgumentType<T> type) {
         return new StandardArgumentParser<>(type, (reader, c, x) -> x);

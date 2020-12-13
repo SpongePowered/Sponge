@@ -100,6 +100,7 @@ public final class Constants {
     public static final String UUID_MOST = "UUIDMost";
     public static final String UUID_LEAST = "UUIDLeast";
     public static final BlockPos DUMMY_POS = new BlockPos(0, 0, 0);
+    public static final String MINECRAFT = "minecraft";
     public static final int MINECRAFT_DATA_VERSION = 2230;
     public static final String MINECRAFT_VERSION = "1.15.2";
     public static final int MINECRAFT_PROTOCOL_VERSION = 578;

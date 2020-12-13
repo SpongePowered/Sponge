@@ -34,16 +34,16 @@ import org.spongepowered.api.command.parameter.managed.standard.CatalogedValuePa
  */
 public final class StandardCatalogedArgumentParser<S, T> extends StandardArgumentParser<S, T> implements CatalogedValueParameter<T> {
 
-    public static <T> StandardCatalogedArgumentParser<T, T> createIdentity(final String key, final ArgumentType<T> type) {
+    public static <T> StandardCatalogedArgumentParser<T, T> createIdentity(final ResourceKey key, final ArgumentType<T> type) {
         return new StandardCatalogedArgumentParser<>(key, type, (reader, c, x) -> x);
     }
 
-    public static <S, T> StandardCatalogedArgumentParser<S, T> createCast(final String key, final ArgumentType<S> type, final Class<T> castType) {
+    public static <S, T> StandardCatalogedArgumentParser<S, T> createCast(final ResourceKey key, final ArgumentType<S> type, final Class<T> castType) {
         return new StandardCatalogedArgumentParser<>(key, type, (reader, c, x) -> castType.cast(x));
     }
 
     public static <S, T> StandardCatalogedArgumentParser<S, T> createConverter(
-            final String key,
+            final ResourceKey key,
             final ArgumentType<S> type,
             final StandardArgumentParser.Converter<S, T> converter) {
         return new StandardCatalogedArgumentParser<>(key, type, converter);
@@ -54,11 +54,11 @@ public final class StandardCatalogedArgumentParser<S, T> extends StandardArgumen
     private final ResourceKey key;
 
     private StandardCatalogedArgumentParser(
-            final String key,
+            final ResourceKey key,
             final ArgumentType<S> type,
             final StandardArgumentParser.Converter<S, T> converter) {
         super(type, converter);
-        this.key = ResourceKey.sponge(key);
+        this.key = key;
     }
 
     @Override

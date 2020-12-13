@@ -59,8 +59,6 @@ public final class ClickTypeStreamGenerator {
         );
     }
 
-
-
     private static class SpongeClickType<T> extends SpongeCatalogType implements ClickType<T> {
 
         public SpongeClickType(ResourceKey key) {

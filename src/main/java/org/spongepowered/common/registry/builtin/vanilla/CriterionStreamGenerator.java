@@ -45,10 +45,10 @@ public final class CriterionStreamGenerator {
                 CriterionStreamGenerator.newCriterion(ScoreCriteria.FOOD, ResourceKey.sponge("food")),
                 CriterionStreamGenerator.newCriterion(ScoreCriteria.HEALTH, ResourceKey.sponge("health")),
                 CriterionStreamGenerator.newCriterion(ScoreCriteria.LEVEL, ResourceKey.sponge("level")),
-                CriterionStreamGenerator.newCriterion(ScoreCriteria.PLAYER_KILL_COUNT, ResourceKey.sponge("player_kill_count")),
-                CriterionStreamGenerator.newCriterion(ScoreCriteria.TOTAL_KILL_COUNT, ResourceKey.sponge("total_kill_count")),
+                CriterionStreamGenerator.newCriterion(ScoreCriteria.KILL_COUNT_PLAYERS, ResourceKey.sponge("player_kill_count")),
+                CriterionStreamGenerator.newCriterion(ScoreCriteria.KILL_COUNT_ALL, ResourceKey.sponge("total_kill_count")),
                 CriterionStreamGenerator.newCriterion(ScoreCriteria.TRIGGER, ResourceKey.sponge("trigger")),
-                CriterionStreamGenerator.newCriterion(ScoreCriteria.XP, ResourceKey.sponge("xp"))
+                CriterionStreamGenerator.newCriterion(ScoreCriteria.EXPERIENCE, ResourceKey.sponge("experience"))
         );
     }
 

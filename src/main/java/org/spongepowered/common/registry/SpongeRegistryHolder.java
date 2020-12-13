@@ -106,7 +106,13 @@ public final class SpongeRegistryHolder implements RegistryHolder {
         this.rootRegistries.put(RegistryRoots.MINECRAFT, rootRegistry);
     }
 
-    public <T> Registry<T> newSimpleRegistry(final RegistryKey<T> key, final boolean isDynamic, @Nullable final Supplier<Map<ResourceKey, T>>
+    protected  <T> SpongeRegistryHolder registerSimple0(final RegistryKey<T> key, final boolean isDynamic, @Nullable final Supplier<Map<ResourceKey, T>>
+            defaultValues) {
+        this.registerSimple(key, isDynamic, defaultValues);
+        return this;
+    }
+
+    public <T> Registry<T> registerSimple(final RegistryKey<T> key, final boolean isDynamic, @Nullable final Supplier<Map<ResourceKey, T>>
             defaultValues) {
         Objects.requireNonNull(key, "key");
 

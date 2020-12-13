@@ -51,8 +51,8 @@ public final class DisplaySlotStreamGenerator {
         sidebarByColor.put(TextFormatting.RESET, new SpongeDisplaySlot(ResourceKey.sponge("sidebar_team_no_color"), 1, null, sidebarWithColor));
         for (final TextFormatting formatting : TextFormatting.values()) {
             if (formatting.isColor() && formatting != TextFormatting.RESET) {
-                sidebarByColor.put(formatting, new SpongeDisplaySlot(ResourceKey.sponge("sidebar_team_" + formatting.getFriendlyName()),
-                        3 + formatting.getColorIndex(), formatting, sidebarWithColor));
+                sidebarByColor.put(formatting, new SpongeDisplaySlot(ResourceKey.sponge("sidebar_team_" + formatting.getName()),
+                        3 + formatting.getId(), formatting, sidebarWithColor));
             }
         }
 

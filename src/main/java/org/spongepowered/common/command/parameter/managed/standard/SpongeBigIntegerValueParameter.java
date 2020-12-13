@@ -40,12 +40,8 @@ import java.util.Optional;
 
 public final class SpongeBigIntegerValueParameter extends CatalogedArgumentParser<BigInteger> {
 
-    private final ResourceKey key = ResourceKey.sponge("big_integer");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return this.key;
+    public SpongeBigIntegerValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

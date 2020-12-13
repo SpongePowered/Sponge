@@ -50,7 +50,7 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
         Objects.requireNonNull(key, "key");
 
         final SpongeRegistryHolder holder = this.getHolder();
-        return holder.newSimpleRegistry(key, isDynamic, null);
+        return holder.registerSimple(key, isDynamic, null);
     }
 
     @Override
@@ -60,7 +60,7 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
         Objects.requireNonNull(defaultValues, "defaultValues");
 
         final SpongeRegistryHolder holder = this.getHolder();
-        return holder.newSimpleRegistry(key, isDynamic, defaultValues);
+        return holder.registerSimple(key, isDynamic, defaultValues);
     }
 
     protected abstract SpongeRegistryHolder getHolder();

@@ -48,7 +48,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
-import org.spongepowered.common.command.parameter.managed.standard.SpongeBigDecimalValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeBigIntegerValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeColorValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeDataContainerValueParameter;
@@ -69,7 +68,6 @@ import org.spongepowered.math.vector.Vector2d;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -81,58 +79,36 @@ public final class CatalogedValueParameterStreamGenerator {
 
     public static Stream<CatalogedValueParameter<?>> stream() {
         return Stream.of(
-                new SpongeBigDecimalValueParameter(),
                 new SpongeBigIntegerValueParameter(),
-                StandardCatalogedArgumentParser.createConverter("block_state", BlockStateArgument.block(),
-                        (reader, cause, state) -> (BlockState) state.getState()),
-                StandardCatalogedArgumentParser.createIdentity("boolean", BoolArgumentType.bool()),
                 new SpongeColorValueParameter(), // Includes ColorArgumentParser.color(), but does more. TODO: what does 1.16 do?
                 new SpongeDataContainerValueParameter(),
                 new SpongeDateTimeValueParameter(),
                 StandardCatalogedArgumentParser.createIdentity("double", DoubleArgumentType.doubleArg()),
                 new SpongeDurationValueParameter(),
                 // This is for a single entity. We'll have a separate one for multiple.
-                StandardCatalogedArgumentParser.createConverter("entity", EntityArgument.entity(),
-                        (reader, cause, selector) -> (Entity) selector.findSingleEntity(cause.getSource())),
+                StandardCatalogedArgumentParser.createConverter("entity", EntityArgument.entity(), (reader, cause, selector) -> (Entity) selector.findSingleEntity(cause.getSource())),
                 new SpongeGameProfileValueParameter(),
                 StandardCatalogedArgumentParser.createIdentity("integer", IntegerArgumentType.integer()),
                 new SpongeIPAddressValueParameter(),
-                StandardCatalogedArgumentParser.createConverter("item_stack_snapshot", ItemArgument.item(),
-                        (reader, cause, converter) ->
-                                new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))),
+                StandardCatalogedArgumentParser.createConverter("item_stack_snapshot", ItemArgument.item(), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))),
                 new SpongeServerLocationValueParameter(true),
                 new SpongeServerLocationValueParameter(false),
                 StandardCatalogedArgumentParser.createIdentity("long", LongArgumentType.longArg()),
-                StandardCatalogedArgumentParser.createConverter("many_entities", EntityArgument.entities(),
-                        (reader, cause, selector) -> selector.findEntities(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())),
-                StandardCatalogedArgumentParser.createConverter("many_game_profiles", GameProfileArgument.gameProfile(),
-                        (reader, cause, converter) -> converter.getNames(cause.getSource())),
-                StandardCatalogedArgumentParser.createConverter("many_players", EntityArgument.players(),
-                        (reader, cause, selector) -> selector.findPlayers(cause.getSource())),
-                new SpongeNoneValueParameter(),
-                StandardCatalogedArgumentParser.createConverter("player", EntityArgument.player(),
-                        (reader, cause, selector) -> (Player) selector.findSinglePlayer(cause.getSource())),
+                StandardCatalogedArgumentParser.createConverter("many_entities", EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())),
+                StandardCatalogedArgumentParser.createConverter("many_game_profiles", GameProfileArgument.gameProfile(), (reader, cause, converter) -> converter.getNames(cause.getSource())),
+                StandardCatalogedArgumentParser.createConverter("many_players", EntityArgument.players(), (reader, cause, selector) -> selector.findPlayers(cause.getSource())),
+                new SpongeNoneValueParameter(), StandardCatalogedArgumentParser.createConverter("player", EntityArgument.player(), (reader, cause, selector) -> (Player) selector.findSinglePlayer(cause.getSource())),
                 new SpongePluginContainerValueParameter(),
                 StandardCatalogedArgumentParser.createIdentity("remaining_joined_strings", StringArgumentType.greedyString()),
-                StandardCatalogedArgumentParser.createConverter("resource_key", ResourceLocationArgument.id(),
-                        (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation),
+                StandardCatalogedArgumentParser.createConverter("resource_key", ResourceLocationArgument.id(), (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation),
                 StandardCatalogedArgumentParser.createIdentity("string", StringArgumentType.string()),
                 new SpongeTargetBlockValueParameter(),
                 new SpongeTargetEntityValueParameter(false),
                 new SpongeTargetEntityValueParameter(true),
-                StandardCatalogedArgumentParser.createConverter(
-                        "text_formatting_code",
-                        StringArgumentType.string(),
-                        (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)),
-                StandardCatalogedArgumentParser.createConverter(
-                        "text_formatting_code_all",
-                        StringArgumentType.greedyString(),
-                        (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)),
+                StandardCatalogedArgumentParser.createConverter("text_formatting_code", StringArgumentType.string(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)),
+                StandardCatalogedArgumentParser.createConverter("text_formatting_code_all", StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)),
                 StandardCatalogedArgumentParser.createConverter("text_json", ComponentArgument.textComponent(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)),
-                StandardCatalogedArgumentParser.createConverter(
-                        "text_json_all",
-                        StringArgumentType.greedyString(),
-                        (reader, cause, result) -> SpongeAdventure.json(result)),
+                StandardCatalogedArgumentParser.createConverter("text_json_all", StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.json(result)),
                 StandardCatalogedArgumentParser.createConverter("url", StringArgumentType.string(),
                         (reader, cause, input) -> {
                             try {
@@ -152,17 +128,12 @@ public final class CatalogedValueParameterStreamGenerator {
                                         .createWithContext(reader);
                             }
                         }),
-                StandardCatalogedArgumentParser.createConverter(
-                        "vector2d",
-                        Vec2Argument.vec2(),
+                StandardCatalogedArgumentParser.createConverter("vector2d", Vec2Argument.vec2(),
                         (reader, cause, result) -> {
                             final Vector3d r = result.getPosition(cause.getSource());
                             return new Vector2d(r.x, r.z);
                         }),
-                StandardCatalogedArgumentParser.createConverter(
-                        "vector3d",
-                        Vec3Argument.vec3(),
-                        (reader, cause, result) -> VecHelper.toVector3d(result.getPosition(cause.getSource()))),
+                StandardCatalogedArgumentParser.createConverter("vector3d", Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition(cause.getSource()))),
                 new SpongeWorldPropertiesValueParameter(true),
                 new SpongeWorldPropertiesValueParameter(false)
             );

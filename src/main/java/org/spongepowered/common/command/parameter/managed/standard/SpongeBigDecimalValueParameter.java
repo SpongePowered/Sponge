@@ -40,12 +40,8 @@ import java.util.Optional;
 
 public final class SpongeBigDecimalValueParameter extends CatalogedArgumentParser<BigDecimal> {
 
-    private final ResourceKey key = ResourceKey.sponge("big_decimal");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return this.key;
+    public SpongeBigDecimalValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override
