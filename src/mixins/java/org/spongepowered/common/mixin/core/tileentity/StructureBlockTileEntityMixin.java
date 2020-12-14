@@ -39,8 +39,8 @@ import org.spongepowered.math.vector.Vector3i;
 public abstract class StructureBlockTileEntityMixin extends TileEntityMixin implements StructureBlockTileEntityBridge {
 
     @Shadow private String author;
-    @Shadow private BlockPos position;
-    @Shadow private BlockPos size = BlockPos.ZERO;
+    @Shadow private BlockPos structurePos;
+    @Shadow private BlockPos structureSize = BlockPos.ZERO;
     @Shadow private net.minecraft.state.properties.StructureMode mode;
     @Shadow private boolean ignoreEntities;
     @Shadow private boolean showAir;
@@ -81,12 +81,12 @@ public abstract class StructureBlockTileEntityMixin extends TileEntityMixin impl
 
     @Override
     public Vector3i bridge$getPosition() {
-        return VecHelper.toVector3i(this.position);
+        return VecHelper.toVector3i(this.structurePos);
     }
 
     @Override
     public void bridge$setPosition(final Vector3i position) {
-        this.position = VecHelper.toBlockPos(checkNotNull(position, "position"));
+        this.structurePos = VecHelper.toBlockPos(checkNotNull(position, "position"));
     }
 
     @Override
@@ -101,12 +101,12 @@ public abstract class StructureBlockTileEntityMixin extends TileEntityMixin impl
 
     @Override
     public Vector3i bridge$getSize() {
-        return VecHelper.toVector3i(this.size);
+        return VecHelper.toVector3i(this.structureSize);
     }
 
     @Override
     public void bridge$setSize(final Vector3i size) {
-        this.size = VecHelper.toBlockPos(checkNotNull(size, "size"));
+        this.structureSize = VecHelper.toBlockPos(checkNotNull(size, "size"));
     }
 
 }
