@@ -33,6 +33,7 @@ import org.spongepowered.api.event.lifecycle.RegisterRegistryEvent;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
 import java.util.Map;
@@ -46,21 +47,21 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
     }
 
     @Override
-    public <T> Registry<T> register(final RegistryKey<T> key, final boolean isDynamic) throws DuplicateRegistrationException {
+    public <T> Registry<T> register(final RegistryType<T> key, final boolean isDynamic) throws DuplicateRegistrationException {
         Objects.requireNonNull(key, "key");
 
         final SpongeRegistryHolder holder = this.getHolder();
-        return holder.registerSimple(key, isDynamic, null);
+        return holder.createRegistry(key, isDynamic, null);
     }
 
     @Override
-    public <T> Registry<T> register(final RegistryKey<T> key, final boolean isDynamic, final Supplier<Map<ResourceKey, T>> defaultValues)
+    public <T> Registry<T> register(final RegistryType<T> key, final boolean isDynamic, final Supplier<Map<ResourceKey, T>> defaultValues)
             throws DuplicateRegistrationException {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(defaultValues, "defaultValues");
 
         final SpongeRegistryHolder holder = this.getHolder();
-        return holder.registerSimple(key, isDynamic, defaultValues);
+        return holder.createRegistry(key, isDynamic, defaultValues);
     }
 
     protected abstract SpongeRegistryHolder getHolder();

@@ -26,7 +26,7 @@ package org.spongepowered.common.registry;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryKey;
-import org.spongepowered.api.registry.RegistryLocation;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryReference;
 
 import java.util.Objects;
@@ -34,10 +34,10 @@ import java.util.StringJoiner;
 
 public class SpongeRegistryKey<T> implements RegistryKey<T> {
 
-    private final RegistryLocation registry;
+    private final RegistryType<T> registry;
     private final ResourceKey location;
 
-    public SpongeRegistryKey(final RegistryLocation registry, final ResourceKey location) {
+    public SpongeRegistryKey(final RegistryType<T> registry, final ResourceKey location) {
         Objects.requireNonNull(registry, "registry");
         Objects.requireNonNull(location, "location");
 
@@ -46,7 +46,7 @@ public class SpongeRegistryKey<T> implements RegistryKey<T> {
     }
 
     @Override
-    public RegistryLocation registry() {
+    public RegistryType<T> registry() {
         return this.registry;
     }
 
@@ -89,7 +89,7 @@ public class SpongeRegistryKey<T> implements RegistryKey<T> {
     public static final class FactoryImpl implements RegistryKey.Factory {
 
         @Override
-        public <T> RegistryKey<T> create(final RegistryLocation registry, final ResourceKey location) {
+        public <T> RegistryKey<T> create(final RegistryType<T> registry, final ResourceKey location) {
             Objects.requireNonNull(registry, "registry");
             Objects.requireNonNull(location, "location");
 

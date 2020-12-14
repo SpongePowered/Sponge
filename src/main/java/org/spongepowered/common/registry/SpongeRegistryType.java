@@ -25,15 +25,16 @@
 package org.spongepowered.common.registry;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.registry.RegistryLocation;
+import org.spongepowered.api.registry.RegistryType;
 
 import java.util.Objects;
 
-public final class SpongeRegistryLocation implements RegistryLocation {
+public final class SpongeRegistryType implements RegistryType {
 
-    private final ResourceKey root, location;
+    private final ResourceKey root;
+    private final ResourceKey location;
 
-    public SpongeRegistryLocation(final ResourceKey root, final ResourceKey location) {
+    public SpongeRegistryType(final ResourceKey root, final ResourceKey location) {
         Objects.requireNonNull(root, "root");
         Objects.requireNonNull(location, "location");
 
@@ -54,11 +55,11 @@ public final class SpongeRegistryLocation implements RegistryLocation {
     public static final class FactoryImpl implements Factory {
 
         @Override
-        public RegistryLocation create(final ResourceKey root, final ResourceKey location) {
+        public RegistryType create(final ResourceKey root, final ResourceKey location) {
             Objects.requireNonNull(root, "root");
             Objects.requireNonNull(location, "location");
 
-            return new SpongeRegistryLocation(root, location);
+            return new SpongeRegistryType(root, location);
         }
     }
 }

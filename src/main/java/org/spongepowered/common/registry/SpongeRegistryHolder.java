@@ -32,13 +32,11 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryKey;
-import org.spongepowered.api.registry.RegistryLocation;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.ValueNotFoundException;
 import org.spongepowered.common.accessor.util.RegistryKeyAccessor;
 import org.spongepowered.common.bridge.util.registry.MutableRegistryBridge;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
 import java.util.Objects;
@@ -50,95 +48,107 @@ import javax.annotation.Nullable;
 
 public final class SpongeRegistryHolder implements RegistryHolder {
 
-    private final Map<RegistryLocation, net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>>> rootRegistries;
+    private final Map<ResourceKey, net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>>> roots = new Object2ObjectOpenHashMap<>();
 
     public SpongeRegistryHolder() {
-        this.rootRegistries = new Object2ObjectOpenHashMap<>();
-
-        this.rootRegistries.put(RegistryRoots.MINECRAFT, new SimpleRegistry<>(net.minecraft.util.RegistryKey.createRegistryKey((ResourceLocation)
-                (Object) RegistryRoots.MINECRAFT.location()), Lifecycle.experimental()));
-
-        this.rootRegistries.put(RegistryRoots.SPONGE, new SimpleRegistry<>(RegistryKeyAccessor.invoker$create((ResourceLocation) (Object)
-                RegistryRoots.SPONGE.root(), (ResourceLocation) (Object) RegistryRoots.SPONGE.location()), Lifecycle.stable()));
-    }
-
-    @Override
-    public <T> Registry<T> registry(final RegistryKey<T> key) {
-        if (this.rootRegistries == null) {
-            throw new IllegalStateException("Root registry has not been set!");
-        }
-
-        Objects.requireNonNull(key, "key");
-
-        final net.minecraft.util.registry.Registry<?> found = this.rootRegistries.get(key.registry());
-        if (found == null) {
-            throw new ValueNotFoundException(String.format("No value was found for key '%s'!", key));
-        }
-
-        return (Registry<T>) found;
-    }
-
-    @Override
-    public <T> Optional<Registry<T>> findRegistry(final RegistryKey<T> key) {
-        Objects.requireNonNull(key, "key");
-
-        final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> rootRegistry = this.rootRegistries.get(key.registry());
-        if (rootRegistry == null) {
-            return Optional.empty();
-        }
-
-        return (Optional<Registry<T>>) (Object) rootRegistry.getOptional((ResourceLocation) (Object) key.location());
-    }
-
-    @Override
-    public Stream<Registry<?>> stream(final RegistryLocation registry) {
-        Objects.requireNonNull(registry, "registry");
-
-        final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> rootRegistry = this.rootRegistries.get(registry);
-        if (rootRegistry == null) {
-            return Stream.empty();
-        }
-
-        return (Stream<Registry<?>>) (Object) rootRegistry.stream();
+        this.roots.put(
+            RegistryRoots.MINECRAFT,
+            new SimpleRegistry<>(
+                net.minecraft.util.RegistryKey.createRegistryKey((ResourceLocation) (Object) RegistryRoots.MINECRAFT),
+                Lifecycle.experimental()
+            )
+        );
+        this.roots.put(
+            RegistryRoots.SPONGE,
+            new SimpleRegistry<>(
+                RegistryKeyAccessor.invoker$create(
+                    (ResourceLocation) (Object) RegistryRoots.SPONGE,
+                    (ResourceLocation) (Object) RegistryRoots.SPONGE
+                ),
+                Lifecycle.stable()
+            )
+        );
     }
 
     public void setRootMinecraftRegistry(final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> rootRegistry) {
-        this.rootRegistries.put(RegistryRoots.MINECRAFT, rootRegistry);
+        this.roots.put(RegistryRoots.MINECRAFT, rootRegistry);
     }
 
-    protected  <T> SpongeRegistryHolder registerSimple0(final RegistryKey<T> key, final boolean isDynamic, @Nullable final Supplier<Map<ResourceKey, T>>
+    @Override
+    public <T> Registry<T> registry(final RegistryType<T> type) {
+        Objects.requireNonNull(type, "type");
+        final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> root = this.roots.get(type.root());
+        if (root == null) {
+            throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
+        }
+        final net.minecraft.util.registry.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
+        if (registry == null) {
+            throw new ValueNotFoundException(String.format("No '%s' registry has been defined in root '%s'", type.location(), type.root()));
+        }
+        return (Registry<T>) registry;
+    }
+
+    @Override
+    public <T> Optional<Registry<T>> findRegistry(final RegistryType<T> type) {
+        Objects.requireNonNull(type, "type");
+        final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> root = this.roots.get(type.root());
+        if (root == null) {
+            return Optional.empty();
+        }
+        return (Optional<Registry<T>>) (Object) root.getOptional((ResourceLocation) (Object) type.location());
+    }
+
+    @Override
+    public Stream<Registry<?>> stream(final ResourceKey root) {
+        Objects.requireNonNull(root, "root");
+        final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> rootRegistry = this.roots.get(root);
+        if (rootRegistry == null) {
+            return Stream.empty();
+        }
+        return (Stream<Registry<?>>) (Object) rootRegistry.stream();
+    }
+
+    protected  <T> SpongeRegistryHolder registerSimple0(final RegistryType<T> key, final boolean isDynamic, @Nullable final Supplier<Map<ResourceKey, T>>
             defaultValues) {
-        this.registerSimple(key, isDynamic, defaultValues);
+        this.createRegistry(key, isDynamic, defaultValues);
         return this;
     }
 
-    public <T> Registry<T> registerSimple(final RegistryKey<T> key, final boolean isDynamic, @Nullable final Supplier<Map<ResourceKey, T>>
-            defaultValues) {
-        Objects.requireNonNull(key, "key");
+    public <T> Registry<T> createRegistry(
+        final RegistryType<T> type,
+        final boolean isDynamic,
+        final @Nullable Supplier<Map<ResourceKey, T>> defaultValues
+    ) {
+        Objects.requireNonNull(type, "type");
 
-        net.minecraft.util.registry.Registry<?> registry = this.rootRegistries.get(key.registry());
+        net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> root = this.roots.get(type.root());
+        if (root == null) {
+            throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
+        }
+        net.minecraft.util.registry.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
         if (registry != null) {
-            throw new DuplicateRegistrationException(String.format("Key '%s' has already been registered!", key.location()));
+            throw new DuplicateRegistrationException(String.format("Registry '%s' in root '%s' has already been defined", type.location(), type.root()));
         }
-        final net.minecraft.util.RegistryKey<net.minecraft.util.registry.Registry<T>> registryKey;
-
-        if (Constants.MINECRAFT.equals(key.location().getNamespace())) {
-            registryKey = net.minecraft.util.RegistryKey.createRegistryKey((ResourceLocation) (Object) key.location());
+        final net.minecraft.util.RegistryKey<net.minecraft.util.registry.Registry<T>> key;
+        if (net.minecraft.util.registry.Registry.ROOT_REGISTRY_NAME.equals(type.root())) {
+            key = net.minecraft.util.RegistryKey.createRegistryKey((ResourceLocation) (Object) type.location());
         } else {
-            registryKey = RegistryKeyAccessor.invoker$create((ResourceLocation) (Object) RegistryRoots.SPONGE.root(),
-                    (ResourceLocation) (Object) key.location());
+            key = RegistryKeyAccessor.invoker$create(
+                (ResourceLocation) (Object) RegistryRoots.SPONGE,
+                (ResourceLocation) (Object) type.location()
+            );
         }
-
-        registry = new SimpleRegistry<>(registryKey, Lifecycle.stable());
-
+        registry = new SimpleRegistry<>(key, Lifecycle.stable());
+        ((MutableRegistryBridge<T>) registry).bridge$setDynamic(isDynamic);
         if (defaultValues != null) {
             for (final Map.Entry<ResourceKey, T> entry : defaultValues.get().entrySet()) {
-                ((SimpleRegistry<T>) registry).register(net.minecraft.util.RegistryKey.create(registryKey,
-                        (ResourceLocation) (Object) entry.getKey()), entry.getValue(), Lifecycle.stable());
+                ((SimpleRegistry<T>) root).register(
+                    net.minecraft.util.RegistryKey.create(key, (ResourceLocation) (Object) entry.getKey()),
+                    entry.getValue(),
+                    Lifecycle.stable()
+                );
             }
         }
-        ((MutableRegistryBridge<T>) registry).bridge$setDynamic(isDynamic);
-
         return (Registry<T>) registry;
     }
 }

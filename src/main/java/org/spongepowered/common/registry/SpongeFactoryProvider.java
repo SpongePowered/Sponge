@@ -47,8 +47,7 @@ import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.FactoryProvider;
 import org.spongepowered.api.registry.RegistryKey;
-import org.spongepowered.api.registry.RegistryLocation;
-import org.spongepowered.api.registry.RegistryRoots;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.TypeNotFoundException;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.state.StateMatcher;
@@ -155,7 +154,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
             .registerFactory(RayTrace.Factory.class, new SpongeRayTraceFactory())
             .registerFactory(StateMatcher.Factory.class, new SpongeStateMatcherFactory())
             .registerFactory(RegistryKey.Factory.class, new SpongeRegistryKey.FactoryImpl())
-            .registerFactory(RegistryLocation.Factory.class, new SpongeRegistryLocation.FactoryImpl());
+            .registerFactory(RegistryType.Factory.class, new SpongeRegistryType.FactoryImpl());
         ;
     }
 
