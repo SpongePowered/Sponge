@@ -60,7 +60,6 @@ import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.persistence.DataSerializers;
-import org.spongepowered.common.registry.builtin.sponge.CatTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DisplaySlotStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.GoalTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.HorseColorStreamGenerator;

@@ -51,6 +51,9 @@ import org.spongepowered.api.data.type.CatTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.menu.ClickType;
+import org.spongepowered.api.item.inventory.menu.ClickTypes;
+import org.spongepowered.api.item.inventory.menu.handler.InventoryCallbackHandler;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
@@ -77,6 +80,7 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeWorldPr
 import org.spongepowered.common.data.type.SpongeBodyPart;
 import org.spongepowered.common.data.type.SpongeCatType;
 import org.spongepowered.common.economy.SpongeAccountDeletionResultType;
+import org.spongepowered.common.inventory.menu.handler.SpongeClickType;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector2d;
@@ -92,68 +96,68 @@ public final class SpongeRegistryLoaders {
     // @formatter:off
 
     public static RegistryLoader<AccountDeletionResultType> accountDeletionResultType() {
-        return RegistryLoader.of(loader -> loader .mapping(SpongeAccountDeletionResultType::new, mapper -> mapper.add(
-              AccountDeletionResultTypes.ABSENT,
-              AccountDeletionResultTypes.FAILED,
-              AccountDeletionResultTypes.SUCCESS,
-              AccountDeletionResultTypes.UNDELETABLE
+        return RegistryLoader.of(l -> l .mapping(SpongeAccountDeletionResultType::new, m -> m.add(
+                AccountDeletionResultTypes.ABSENT,
+                AccountDeletionResultTypes.FAILED,
+                AccountDeletionResultTypes.SUCCESS,
+                AccountDeletionResultTypes.UNDELETABLE
         )));
     }
 
     public static RegistryLoader<BanType> banType() {
-        return RegistryLoader.of(loader -> {
-            loader.add(BanTypes.IP, key -> new SpongeBanType(key, Ban.IP.class));
-            loader.add(BanTypes.PROFILE, key -> new SpongeBanType(key, Ban.Profile.class));
+        return RegistryLoader.of(l -> {
+            l.add(BanTypes.IP, k -> new SpongeBanType(k, Ban.IP.class));
+            l.add(BanTypes.PROFILE, k -> new SpongeBanType(k, Ban.Profile.class));
         });
     }
 
     public static RegistryLoader<BodyPart> bodyPart() {
-        return RegistryLoader.of(loader -> loader.mapping(SpongeBodyPart::new, mapper -> mapper.add(
-              BodyParts.CHEST,
-              BodyParts.HEAD,
-              BodyParts.LEFT_ARM,
-              BodyParts.LEFT_LEG,
-              BodyParts.RIGHT_ARM,
-              BodyParts.RIGHT_LEG
+        return RegistryLoader.of(l -> l.mapping(SpongeBodyPart::new, m -> m.add(
+                BodyParts.CHEST,
+                BodyParts.HEAD,
+                BodyParts.LEFT_ARM,
+                BodyParts.LEFT_LEG,
+                BodyParts.RIGHT_ARM,
+                BodyParts.RIGHT_LEG
         )));
     }
 
     public static RegistryLoader<CatalogedValueParameter<?>> catalogedValueParameter() {
-        return RegistryLoader.of(loader -> {
-            loader.add(CatalogedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
-            loader.add(CatalogedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
-            loader.add(CatalogedValueParameters.BLOCK_STATE, k -> StandardCatalogedArgumentParser.createConverter(k, BlockStateArgument.block(), (reader, cause, state) -> (BlockState) state.getState()));
-            loader.add(CatalogedValueParameters.BOOLEAN, k -> StandardCatalogedArgumentParser.createIdentity(k, BoolArgumentType.bool()));
-            loader.add(CatalogedValueParameters.COLOR, SpongeColorValueParameter::new); //Includes ColorArgumentParser.color(), but does more. TODO: what does 1.16 do?
-            loader.add(CatalogedValueParameters.DATA_CONTAINER, SpongeDataContainerValueParameter::new);
-            loader.add(CatalogedValueParameters.DATE_TIME, SpongeDateTimeValueParameter::new);
-            loader.add(CatalogedValueParameters.DOUBLE, k -> StandardCatalogedArgumentParser.createIdentity(k, DoubleArgumentType.doubleArg()));
-            loader.add(CatalogedValueParameters.DURATION, SpongeDurationValueParameter::new);
-            loader.add(CatalogedValueParameters.ENTITY, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entity(), (reader, cause, selector) -> (Entity) selector.findSingleEntity(cause.getSource())));
-            loader.add(CatalogedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
-            loader.add(CatalogedValueParameters.INTEGER, k -> StandardCatalogedArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
-            loader.add(CatalogedValueParameters.IP, SpongeIPAddressValueParameter::new);
-            loader.add(CatalogedValueParameters.ITEM_STACK_SNAPSHOT, k -> StandardCatalogedArgumentParser.createConverter(k, ItemArgument.item(), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
-            loader.add(CatalogedValueParameters.LOCATION_ALL, k -> new SpongeServerLocationValueParameter(k, true));
-            loader.add(CatalogedValueParameters.LOCATION_ONLINE_ONLY, k -> new SpongeServerLocationValueParameter(k, false));
-            loader.add(CatalogedValueParameters.LONG, k -> StandardCatalogedArgumentParser.createIdentity(k, LongArgumentType.longArg()));
-            loader.add(CatalogedValueParameters.MANY_ENTITIES, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())));
-            loader.add(CatalogedValueParameters.MANY_GAME_PROFILES, k -> StandardCatalogedArgumentParser.createConverter(k, GameProfileArgument.gameProfile(), (reader, cause, converter) -> converter.getNames(cause.getSource())));
-            loader.add(CatalogedValueParameters.MANY_PLAYERS, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.players(), (reader, cause, selector) -> selector.findPlayers(cause.getSource())));
-            loader.add(CatalogedValueParameters.NONE, SpongeNoneValueParameter::new);
-            loader.add(CatalogedValueParameters.PLAYER, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.player(), (reader, cause, selector) -> (Player) selector.findSinglePlayer(cause.getSource())));
-            loader.add(CatalogedValueParameters.PLUGIN, SpongePluginContainerValueParameter::new);
-            loader.add(CatalogedValueParameters.REMAINING_JOINED_STRINGS, k -> StandardCatalogedArgumentParser.createIdentity(k, StringArgumentType.greedyString()));
-            loader.add(CatalogedValueParameters.RESOURCE_KEY, k -> StandardCatalogedArgumentParser.createConverter(k, ResourceLocationArgument.id(), (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation));
-            loader.add(CatalogedValueParameters.STRING, k -> StandardCatalogedArgumentParser.createIdentity(k, StringArgumentType.string()));
-            loader.add(CatalogedValueParameters.TARGET_BLOCK, SpongeTargetBlockValueParameter::new);
-            loader.add(CatalogedValueParameters.TARGET_ENTITY, k -> new SpongeTargetEntityValueParameter(k, false));
-            loader.add(CatalogedValueParameters.TARGET_PLAYER, k -> new SpongeTargetEntityValueParameter(k, true));
-            loader.add(CatalogedValueParameters.TEXT_FORMATTING_CODE, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.string(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)));
-            loader.add(CatalogedValueParameters.TEXT_FORMATTING_CODE_ALL, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)));
-            loader.add(CatalogedValueParameters.TEXT_JSON, k -> StandardCatalogedArgumentParser.createConverter(k, ComponentArgument.textComponent(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)));
-            loader.add(CatalogedValueParameters.TEXT_JSON_ALL, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.json(result)));
-            loader.add(CatalogedValueParameters.URL, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.string(),
+        return RegistryLoader.of(l -> {
+            l.add(CatalogedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
+            l.add(CatalogedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
+            l.add(CatalogedValueParameters.BLOCK_STATE, k -> StandardCatalogedArgumentParser.createConverter(k, BlockStateArgument.block(), (reader, cause, state) -> (BlockState) state.getState()));
+            l.add(CatalogedValueParameters.BOOLEAN, k -> StandardCatalogedArgumentParser.createIdentity(k, BoolArgumentType.bool()));
+            l.add(CatalogedValueParameters.COLOR, SpongeColorValueParameter::new); //Includes ColorArgumentParser.color(), but does more. TODO: what does 1.16 do?
+            l.add(CatalogedValueParameters.DATA_CONTAINER, SpongeDataContainerValueParameter::new);
+            l.add(CatalogedValueParameters.DATE_TIME, SpongeDateTimeValueParameter::new);
+            l.add(CatalogedValueParameters.DOUBLE, k -> StandardCatalogedArgumentParser.createIdentity(k, DoubleArgumentType.doubleArg()));
+            l.add(CatalogedValueParameters.DURATION, SpongeDurationValueParameter::new);
+            l.add(CatalogedValueParameters.ENTITY, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entity(), (reader, cause, selector) -> (Entity) selector.findSingleEntity(cause.getSource())));
+            l.add(CatalogedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
+            l.add(CatalogedValueParameters.INTEGER, k -> StandardCatalogedArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
+            l.add(CatalogedValueParameters.IP, SpongeIPAddressValueParameter::new);
+            l.add(CatalogedValueParameters.ITEM_STACK_SNAPSHOT, k -> StandardCatalogedArgumentParser.createConverter(k, ItemArgument.item(), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
+            l.add(CatalogedValueParameters.LOCATION_ALL, k -> new SpongeServerLocationValueParameter(k, true));
+            l.add(CatalogedValueParameters.LOCATION_ONLINE_ONLY, k -> new SpongeServerLocationValueParameter(k, false));
+            l.add(CatalogedValueParameters.LONG, k -> StandardCatalogedArgumentParser.createIdentity(k, LongArgumentType.longArg()));
+            l.add(CatalogedValueParameters.MANY_ENTITIES, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())));
+            l.add(CatalogedValueParameters.MANY_GAME_PROFILES, k -> StandardCatalogedArgumentParser.createConverter(k, GameProfileArgument.gameProfile(), (reader, cause, converter) -> converter.getNames(cause.getSource())));
+            l.add(CatalogedValueParameters.MANY_PLAYERS, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.players(), (reader, cause, selector) -> selector.findPlayers(cause.getSource())));
+            l.add(CatalogedValueParameters.NONE, SpongeNoneValueParameter::new);
+            l.add(CatalogedValueParameters.PLAYER, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.player(), (reader, cause, selector) -> (Player) selector.findSinglePlayer(cause.getSource())));
+            l.add(CatalogedValueParameters.PLUGIN, SpongePluginContainerValueParameter::new);
+            l.add(CatalogedValueParameters.REMAINING_JOINED_STRINGS, k -> StandardCatalogedArgumentParser.createIdentity(k, StringArgumentType.greedyString()));
+            l.add(CatalogedValueParameters.RESOURCE_KEY, k -> StandardCatalogedArgumentParser.createConverter(k, ResourceLocationArgument.id(), (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation));
+            l.add(CatalogedValueParameters.STRING, k -> StandardCatalogedArgumentParser.createIdentity(k, StringArgumentType.string()));
+            l.add(CatalogedValueParameters.TARGET_BLOCK, SpongeTargetBlockValueParameter::new);
+            l.add(CatalogedValueParameters.TARGET_ENTITY, k -> new SpongeTargetEntityValueParameter(k, false));
+            l.add(CatalogedValueParameters.TARGET_PLAYER, k -> new SpongeTargetEntityValueParameter(k, true));
+            l.add(CatalogedValueParameters.TEXT_FORMATTING_CODE, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.string(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)));
+            l.add(CatalogedValueParameters.TEXT_FORMATTING_CODE_ALL, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)));
+            l.add(CatalogedValueParameters.TEXT_JSON, k -> StandardCatalogedArgumentParser.createConverter(k, ComponentArgument.textComponent(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)));
+            l.add(CatalogedValueParameters.TEXT_JSON_ALL, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.json(result)));
+            l.add(CatalogedValueParameters.URL, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.string(),
                     (reader, cause, input) -> {
                         try {
                             return new URL(input);
@@ -163,8 +167,8 @@ public final class SpongeRegistryLoaders {
                         }
                     })
             );
-            loader.add(CatalogedValueParameters.USER, SpongeUserValueParameter::new);
-            loader.add(CatalogedValueParameters.UUID, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.string(),
+            l.add(CatalogedValueParameters.USER, SpongeUserValueParameter::new);
+            l.add(CatalogedValueParameters.UUID, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.string(),
                     (reader, cause, input) -> {
                         try {
                             return UUID.fromString(input);
@@ -174,32 +178,38 @@ public final class SpongeRegistryLoaders {
                         }
                     })
             );
-            loader.add(CatalogedValueParameters.VECTOR2D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec2Argument.vec2(),
+            l.add(CatalogedValueParameters.VECTOR2D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec2Argument.vec2(),
                     (reader, cause, result) -> {
                         final Vector3d r = result.getPosition(cause.getSource());
                         return new Vector2d(r.x, r.z);
                     })
             );
-            loader.add(CatalogedValueParameters.VECTOR3D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition(cause.getSource()))));
-            loader.add(CatalogedValueParameters.WORLD_PROPERTIES_ALL, k -> new SpongeWorldPropertiesValueParameter(k, true));
-            loader.add(CatalogedValueParameters.WORLD_PROPERTIES_ONLINE_ONLY, k -> new SpongeWorldPropertiesValueParameter(k, false));
+            l.add(CatalogedValueParameters.VECTOR3D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition(cause.getSource()))));
+            l.add(CatalogedValueParameters.WORLD_PROPERTIES_ALL, k -> new SpongeWorldPropertiesValueParameter(k, true));
+            l.add(CatalogedValueParameters.WORLD_PROPERTIES_ONLINE_ONLY, k -> new SpongeWorldPropertiesValueParameter(k, false));
         });
     }
 
     public static RegistryLoader<CatType> catType() {
-        return RegistryLoader.of(loader -> {
-            loader.add(CatTypes.ALL_BLACK, key -> new SpongeCatType(key, 10));
-            loader.add(CatTypes.BLACK, key -> new SpongeCatType(key, 1));
-            loader.add(CatTypes.BRITISH_SHORTHAIR, key -> new SpongeCatType(key, 4));
-            loader.add(CatTypes.CALICO, key -> new SpongeCatType(key, 5));
-            loader.add(CatTypes.JELLIE, key -> new SpongeCatType(key, 9));
-            loader.add(CatTypes.PERSIAN, key -> new SpongeCatType(key, 6));
-            loader.add(CatTypes.RAGDOLL, key -> new SpongeCatType(key, 7));
-            loader.add(CatTypes.RED, key -> new SpongeCatType(key, 2));
-            loader.add(CatTypes.SIAMESE, key -> new SpongeCatType(key, 3));
-            loader.add(CatTypes.TABBY, key -> new SpongeCatType(key, 0));
-            loader.add(CatTypes.WHITE, key -> new SpongeCatType(key, 8));
+        return RegistryLoader.of(l -> {
+            l.add(CatTypes.ALL_BLACK, k -> new SpongeCatType(k, 10));
+            l.add(CatTypes.BLACK, k -> new SpongeCatType(k, 1));
+            l.add(CatTypes.BRITISH_SHORTHAIR, k -> new SpongeCatType(k, 4));
+            l.add(CatTypes.CALICO, k -> new SpongeCatType(k, 5));
+            l.add(CatTypes.JELLIE, k -> new SpongeCatType(k, 9));
+            l.add(CatTypes.PERSIAN, k -> new SpongeCatType(k, 6));
+            l.add(CatTypes.RAGDOLL, k -> new SpongeCatType(k, 7));
+            l.add(CatTypes.RED, k -> new SpongeCatType(k, 2));
+            l.add(CatTypes.SIAMESE, k -> new SpongeCatType(k, 3));
+            l.add(CatTypes.TABBY, k -> new SpongeCatType(k, 0));
+            l.add(CatTypes.WHITE, k -> new SpongeCatType(k, 8));
         });
+    }
+
+    public static RegistryLoader<ClickType<? extends InventoryCallbackHandler>> clickType() {
+        return RegistryLoader.of(l -> l .mapping(SpongeClickType::new, m -> m.add(
+                ClickTypes.CLICK_LEFT
+        )));
     }
 
     // @formatter:on
