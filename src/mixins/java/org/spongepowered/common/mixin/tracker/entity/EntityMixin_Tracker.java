@@ -76,8 +76,8 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Shadow protected abstract void shadow$setFlag(int flag, boolean set);
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract void shadow$setPosition(double x, double y, double z);
-    @Shadow public abstract void shadow$setMotion(Vector3d motionIn);
-    @Shadow public abstract void shadow$setMotion(double x, double y, double z);
+    @Shadow public abstract void shadow$setDeltaMovement(Vector3d motionIn);
+    @Shadow public abstract void shadow$setDeltaMovement(double x, double y, double z);
     @Shadow public abstract float getEyeHeight();
     @Shadow public abstract UUID shadow$getUUID();
     @Shadow protected abstract void shadow$setPose(Pose pose);

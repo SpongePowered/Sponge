@@ -296,7 +296,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Override
     public void bridge$initScoreboard() {
-        ((ServerScoreboardBridge) this.shadow$getWorldScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, true);
+        ((ServerScoreboardBridge) this.shadow$getScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, true);
     }
 
     @Override
@@ -357,7 +357,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     @SuppressWarnings("UnstableApiUsage")
     public Set<SkinPart> bridge$getSkinParts() {
-        final int mask = this.shadow$getEntityData().get(PLAYER_MODEL_FLAG);
+        final int mask = this.shadow$getEntityData().get(DATA_PLAYER_MODE_CUSTOMISATION);
         if (this.impl$skinPartMask != mask) {
             this.impl$skinParts = Sponge.getRegistry().getCatalogRegistry().streamAllOf(SkinPart.class)
                     .map(part -> (SpongeSkinPart) part)
@@ -376,7 +376,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             mask |= ((SpongeSkinPart) part).getMask();
         }
 
-        this.shadow$getEntityData().set(PLAYER_MODEL_FLAG, (byte) mask);
+        this.shadow$getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte) mask);
         this.impl$skinParts = ImmutableSet.copyOf(skinParts);
         this.impl$skinPartMask = mask;
     }
@@ -409,7 +409,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
             }
 
-            if (world == player.world) {
+            if (world == player.level) {
                 final MoveEntityEvent posEvent = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
                         (org.spongepowered.api.entity.Entity) player, VecHelper.toVector3d(player.position()),
                         new Vector3d(x, y, z), new Vector3d(x, y, z));
@@ -427,22 +427,22 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 actualX = posEvent.getDestinationPosition().getX();
                 actualY = posEvent.getDestinationPosition().getY();
                 actualZ = posEvent.getDestinationPosition().getZ();
-                actualYaw = rotateEvent.isCancelled() ? player.rotationYaw : rotateEvent.getToRotation().getY();
-                actualPitch = rotateEvent.isCancelled() ? player.rotationPitch : rotateEvent.getToRotation().getX();
+                actualYaw = rotateEvent.isCancelled() ? player.yRot : rotateEvent.getToRotation().getY();
+                actualPitch = rotateEvent.isCancelled() ? player.xRot : rotateEvent.getToRotation().getX();
 
-                this.shadow$setSpectatingEntity(player);
+                this.shadow$setCamera(player);
                 this.shadow$stopRiding();
 
                 if (player.isSleeping()) {
                     player.stopSleepInBed(true, true);
                 }
 
-                player.connection.setPlayerLocation(actualX, actualY, actualZ, (float) actualYaw, (float) actualPitch);
+                player.connection.teleport(actualX, actualY, actualZ, (float) actualYaw, (float) actualPitch);
 
-                player.setRotationYawHead((float) actualYaw);
+                player.setYHeadRot((float) actualYaw);
 
                 ChunkPos chunkpos = new ChunkPos(new BlockPos(actualX, actualY, actualZ));
-                world.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkpos, 1, player.getEntityId());
+                world.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, player.getId());
             } else {
                 final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre(player, world);
                 if (SpongeCommon.postEvent(preEvent)) {
@@ -499,7 +499,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
     }
 
-    @Inject(method = "removeEntity", at = @At("RETURN"))
+    @Inject(method = "sendRemoveEntity", at = @At("RETURN"))
     private void impl$removeHumanFromPlayerClient(final Entity entityIn, final CallbackInfo ci) {
         if (entityIn instanceof HumanEntity) {
             ((HumanEntity) entityIn).untrackFrom((ServerPlayerEntity) (Object) this);
@@ -510,7 +510,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             method = {"openContainer", "openHorseInventory"},
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/ServerPlayerEntity;closeScreen()V"
+                    target = "Lnet/minecraft/entity/player/ServerPlayerEntity;closeContainer()V()V"
             )
     )
     private void impl$closePreviousContainer(final ServerPlayerEntity self) {
@@ -533,10 +533,10 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
         // Sponge end
 
-        final boolean flag = this.level.getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES) && !event.isMessageCancelled();
+        final boolean flag = this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !event.isMessageCancelled();
         if (flag) {
             final ITextComponent itextcomponent = this.shadow$getCombatTracker().getDeathMessage();
-            this.connection.sendPacket(new SCombatPacket(this.shadow$getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent), (p_212356_2_) -> {
+            this.connection.send(new SCombatPacket(this.shadow$getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent), (p_212356_2_) -> {
                 if (!p_212356_2_.isSuccess()) {
                     int i = 256;
                     String s = itextcomponent.getStringTruncated(256);
@@ -546,17 +546,17 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                             (new TranslationTextComponent("death.attack.even_more_magic", this.shadow$getDisplayName())).applyTextStyle((p_212357_1_) -> {
                         p_212357_1_.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, itextcomponent1));
                     });
-                    this.connection.sendPacket(new SCombatPacket(this.shadow$getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent2));
+                    this.connection.send(new SCombatPacket(this.shadow$getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent2));
                 }
 
             });
             final Team team = this.shadow$getTeam();
             if (team != null && team.getDeathMessageVisibility() != Team.Visible.ALWAYS) {
                 if (team.getDeathMessageVisibility() == Team.Visible.HIDE_FOR_OTHER_TEAMS) {
-                    this.server.getPlayerList().sendMessageToAllTeamMembers(
+                    this.server.getPlayerList().broadcastToTeam(
                             (ServerPlayerEntity) (Object) this, itextcomponent);
                 } else if (team.getDeathMessageVisibility() == Team.Visible.HIDE_FOR_OWN_TEAM) {
-                    this.server.getPlayerList().sendMessageToTeamOrAllPlayers(
+                    this.server.getPlayerList().broadcastToAllExceptTeam(
                             (ServerPlayerEntity) (Object) this, itextcomponent);
                 }
             } else {
@@ -573,7 +573,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                     new SCombatPacket(this.shadow$getCombatTracker(), SCombatPacket.Event.ENTITY_DIED));
         }
 
-        this.shadow$spawnShoulderEntities();
+        this.shadow$removeEntitiesOnShoulder();
 
         // Sponge Start - update the keep inventory flag for dropping inventory
         // during the death update ticks
@@ -584,17 +584,17 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
         // Sponge End
 
-        this.shadow$getWorldScoreboard().forAllObjectives(
+        this.shadow$getScoreboard().forAllObjectives(
                 ScoreCriteria.DEATH_COUNT, this.shadow$getScoreboardName(), Score::increment);
         final LivingEntity livingentity = this.shadow$getKillCredit();
         if (livingentity != null) {
-            this.shadow$addStat(Stats.ENTITY_KILLED_BY.get(livingentity.getType()));
+            this.shadow$awardStat(Stats.ENTITY_KILLED_BY.get(livingentity.getType()));
             livingentity.awardKillScore((ServerPlayerEntity) (Object) this, this.deathScore, cause);
             this.shadow$createWitherRose(livingentity);
         }
 
         this.level.broadcastEntityEvent((ServerPlayerEntity) (Object) this, (byte) 3);
-        this.shadow$addStat(Stats.DEATHS);
+        this.shadow$awardStat(Stats.DEATHS);
         this.shadow$resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH));
         this.shadow$resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
         this.shadow$clearFire();

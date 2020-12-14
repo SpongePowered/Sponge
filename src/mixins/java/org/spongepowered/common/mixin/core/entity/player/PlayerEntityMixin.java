@@ -116,42 +116,42 @@ import java.util.stream.Collectors;
 public abstract class PlayerEntityMixin extends LivingEntityMixin implements PlayerEntityBridge, LocationTargetingBridge, GameProfileHolderBridge {
 
     // @formatter: off
-    @Shadow @Final protected static DataParameter<Byte> PLAYER_MODEL_FLAG;
+    @Shadow @Final protected static DataParameter<Byte> DATA_PLAYER_MODE_CUSTOMISATION;
     @Shadow public int experienceLevel;
-    @Shadow public int experienceTotal;
-    @Shadow public float experience;
+    @Shadow public int totalExperience;
+    @Shadow public float experienceProgress;
     @Shadow @Final public PlayerAbilities abilities;
     @Shadow @Final public net.minecraft.entity.player.PlayerInventory inventory;
-    @Shadow public Container openContainer;
-    @Shadow @Final public PlayerContainer container;
+    @Shadow public Container containerMenu;
+    @Shadow @Final public PlayerContainer inventoryMenu;
     @Shadow @Final private GameProfile gameProfile;
 
     @Shadow public abstract boolean shadow$isSpectator();
-    @Shadow public abstract int shadow$xpBarCap();
-    @Shadow @Nullable public abstract ItemEntity shadow$dropItem(final ItemStack droppedItem, final boolean dropAround, final boolean traceItem);
-    @Shadow public abstract FoodStats shadow$getFoodStats();
+    @Shadow public abstract int shadow$getXpNeededForNextLevel();
+    @Shadow @Nullable public abstract ItemEntity shadow$drop(final ItemStack droppedItem, final boolean dropAround, final boolean traceItem);
+    @Shadow public abstract FoodStats shadow$getFoodData();
     @Shadow public abstract GameProfile shadow$getGameProfile();
-    @Shadow public abstract Scoreboard shadow$getWorldScoreboard();
+    @Shadow public abstract Scoreboard shadow$getScoreboard();
     @Shadow public abstract boolean shadow$isCreative();
-    @Shadow public boolean shadow$canAttackPlayer(final PlayerEntity other) {
+    @Shadow public boolean shadow$canHarmPlayer(final PlayerEntity other) {
         return false;
     }
     @Shadow public abstract String shadow$getScoreboardName();
-    @Shadow public abstract float shadow$getAIMoveSpeed();
-    @Shadow public abstract void shadow$resetCooldown();
-    @Shadow public abstract float shadow$getCooledAttackStrength(float adjustTicks);
-    @Shadow public abstract void shadow$spawnSweepParticles();
-    @Shadow public abstract void shadow$onCriticalHit(Entity entityHit);
-    @Shadow public abstract void shadow$onEnchantmentCritical(Entity entityHit);
-    @Shadow public abstract void shadow$addStat(Stat<?> stat);
-    @Shadow public abstract void shadow$addStat(ResourceLocation stat, int amount);
-    @Shadow public abstract void shadow$addExhaustion(float exhaustion);
+    @Shadow public abstract float shadow$getSpeed();
+    @Shadow public abstract void shadow$resetAttackStrengthTicker();
+    @Shadow public abstract float shadow$getAttackStrengthScale(float adjustTicks);
+    @Shadow public abstract void shadow$sweepAttack();
+    @Shadow public abstract void shadow$crit(Entity entityHit);
+    @Shadow public abstract void shadow$magicCrit(Entity entityHit);
+    @Shadow public abstract void shadow$awardStat(Stat<?> stat);
+    @Shadow public abstract void shadow$awardStat(ResourceLocation stat, int amount);
+    @Shadow public abstract void shadow$causeFoodExhaustion(float exhaustion);
     @Shadow public abstract ITextComponent shadow$getDisplayName();
-    @Shadow protected abstract void shadow$spawnShoulderEntities();
-    @Shadow public abstract void shadow$addStat(ResourceLocation stat);
+    @Shadow protected abstract void shadow$removeEntitiesOnShoulder();
+    @Shadow public abstract void shadow$awardStat(ResourceLocation stat);
     // @formatter: on
 
-    @Shadow public float prevCameraYaw;
+    @Shadow public float oBob;
     @Shadow private BlockPos spawnPos;
     private boolean impl$affectsSpawning = true;
     private boolean impl$shouldRestoreInventory = false;
@@ -185,13 +185,13 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
     @Override
     public int bridge$getExperienceSinceLevel() {
-        return this.experienceTotal - ExperienceHolderUtil.xpAtLevel(this.experienceLevel);
+        return this.totalExperience - ExperienceHolderUtil.xpAtLevel(this.experienceLevel);
     }
 
     @Override
     public void bridge$setExperienceSinceLevel(final int experience) {
-        this.experienceTotal = ExperienceHolderUtil.xpAtLevel(this.experienceLevel) + experience;
-        this.experience = (float) experience / this.shadow$xpBarCap();
+        this.totalExperience = ExperienceHolderUtil.xpAtLevel(this.experienceLevel) + experience;
+        this.experienceProgress = (float) experience / this.shadow$getXpNeededForNextLevel();
     }
 
     @Override
@@ -261,7 +261,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         }
     }
 
-    @Redirect(method = "canUseCommandBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getPermissionLevel()I"))
+    @Redirect(method = "canUseGameMasterBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getPermissionLevel()I"))
     private int impl$checkPermissionForCommandBlock(final PlayerEntity playerEntity) {
         return ((Subject) this).hasPermission(Constants.Permissions.COMMAND_BLOCK_PERMISSION) ? Constants.Permissions.COMMAND_BLOCK_LEVEL : 0;
     }
@@ -279,13 +279,13 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
      *  the same return, otherwise, throw an event first and then return if the
      *  event is cancelled, or the stack.canPlaceOn
      */
-    @Redirect(method = "canPlayerEdit",
+    @Redirect(method = "mayUseItemAt",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/item/ItemStack;canPlaceOn(Lnet/minecraft/tags/ITagCollectionSupplier;Lnet/minecraft/util/CachedBlockInfo;)Z"))
+            target = "Lnet/minecraft/item/ItemStack;hasAdventureModePlaceTagForBlock(Lnet/minecraft/tags/ITagCollectionSupplier;Lnet/minecraft/util/CachedBlockInfo;)Z"))
     private boolean impl$callChangeBlockPre(final ItemStack stack, final ITagCollectionSupplier tagSupplier, final CachedBlockInfo cachedBlockInfo) {
         // Lazy evaluation, if the stack isn't placeable anyways, might as well not
         // call the logic.
-        if (!stack.canPlaceOn(tagSupplier, cachedBlockInfo)) {
+        if (!stack.hasAdventureModePlaceTagForBlock(tagSupplier, cachedBlockInfo)) {
             return false;
         }
         // If we're going to throw an event, then do it.
@@ -319,8 +319,8 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
      */
     @Overwrite
     @Nullable
-    public ItemEntity dropItem(final ItemStack itemStackIn, final boolean unused) {
-        return this.shadow$dropItem(itemStackIn, false, false);
+    public ItemEntity drop(final ItemStack itemStackIn, final boolean unused) {
+        return this.shadow$drop(itemStackIn, false, false);
     }
 
     @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)
@@ -396,12 +396,12 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                 // } else {
                 //     enchantmentDamage = EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), CreatureAttribute.UNDEFINED);
                 // }
-                final float attackStrength = this.shadow$getCooledAttackStrength(0.5F);
+                final float attackStrength = this.shadow$getAttackStrengthScale(0.5F);
 
                 final List<ModifierFunction<DamageModifier>> originalFunctions = new ArrayList<>();
 
                 final CreatureAttribute creatureAttribute = targetEntity instanceof LivingEntity
-                    ? ((LivingEntity) targetEntity).getCreatureAttribute()
+                    ? ((LivingEntity) targetEntity).getMobType()
                     : CreatureAttribute.UNDEFINED;
                 final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchantmentFunction(this.shadow$getMainHandItem(), creatureAttribute, attackStrength);
                 // This is kept for the post-damage event handling
@@ -419,7 +419,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                 originalFunctions.add(DamageEventHandler.provideCooldownAttackStrengthFunction((PlayerEntity) (Object) this, attackStrength));
                 damage = damage * (0.2F + attackStrength * attackStrength * 0.8F);
                 enchantmentDamage = enchantmentDamage * attackStrength;
-                this.shadow$resetCooldown();
+                this.shadow$resetAttackStrengthTicker();
 
                 if (damage > 0.0F || enchantmentDamage > 0.0F) {
                     final boolean isStrongAttack = attackStrength > 0.9F;
@@ -427,7 +427,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                     boolean isCriticalAttack = false;
                     boolean isSweapingAttack = false;
                     int knockbackModifier = 0;
-                    knockbackModifier = knockbackModifier + EnchantmentHelper.getKnockbackModifier((PlayerEntity) (Object) this);
+                    knockbackModifier = knockbackModifier + EnchantmentHelper.getKnockbackBonus((PlayerEntity) (Object) this);
 
                     if (this.shadow$isSprinting() && isStrongAttack) {
                         // Sponge - Only play sound after the event has be thrown and not cancelled.
@@ -450,7 +450,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                     final double distanceWalkedDelta = (double) (this.walkDist - this.walkDistO);
 
                     final ItemStack heldItem = this.shadow$getMainHandItem();
-                    if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround && distanceWalkedDelta < (double) this.shadow$getAIMoveSpeed()) {
+                    if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround && distanceWalkedDelta < (double) this.shadow$getSpeed()) {
                         final ItemStack itemstack = heldItem;
 
                         if (itemstack.getItem() instanceof SwordItem) {
@@ -459,7 +459,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                     }
 
                     // Sponge Start - Create the event and throw it
-                    final DamageSource damageSource = DamageSource.causePlayerDamage((PlayerEntity) (Object) this);
+                    final DamageSource damageSource = DamageSource.playerAttack((PlayerEntity) (Object) this);
                     final boolean isMainthread = !this.level.isClientSide;
                     if (isMainthread) {
                         PhaseTracker.getInstance().pushCause(damageSource);
@@ -488,19 +488,19 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
                     float targetOriginalHealth = 0.0F;
                     boolean litEntityOnFire = false;
-                    final int fireAspectModifier = EnchantmentHelper.getFireAspectModifier((PlayerEntity) (Object) this);
+                    final int fireAspectModifier = EnchantmentHelper.getFireAspect((PlayerEntity) (Object) this);
 
                     if (targetEntity instanceof LivingEntity) {
                         targetOriginalHealth = ((LivingEntity) targetEntity).getHealth();
 
-                        if (fireAspectModifier > 0 && !targetEntity.isBurning()) {
+                        if (fireAspectModifier > 0 && !targetEntity.isOnFire()) {
                             litEntityOnFire = true;
-                            targetEntity.setFire(1);
+                            targetEntity.setSecondsOnFire(1);
                         }
                     }
 
-                    final Vec3d targetMotion = targetEntity.getMotion();
-                    final boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage((PlayerEntity) (Object) this), damage);
+                    final net.minecraft.util.math.vector.Vector3d targetMotion = targetEntity.getDeltaMovement();
+                    final boolean attackSucceeded = targetEntity.hurt(DamageSource.playerAttack((PlayerEntity) (Object) this), damage);
 
                     if (attackSucceeded) {
                         if (knockbackModifier > 0) {
@@ -508,18 +508,18 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                                 ((LivingEntity) targetEntity).knockBack((PlayerEntity) (Object) this, (float) knockbackModifier * 0.5F, (double) MathHelper
                                     .sin(this.yRot * 0.017453292F), (double) (-MathHelper.cos(this.yRot * 0.017453292F)));
                             } else {
-                                targetEntity.addVelocity((double) (-MathHelper.sin(this.yRot * 0.017453292F) * (float) knockbackModifier * 0.5F), 0.1D, (double) (MathHelper.cos(this.yRot
+                                targetEntity.push((double) (-MathHelper.sin(this.yRot * 0.017453292F) * (float) knockbackModifier * 0.5F), 0.1D, (double) (MathHelper.cos(this.yRot
                                         * 0.017453292F) * (float) knockbackModifier * 0.5F));
                             }
 
-                            this.shadow$setMotion(this.shadow$getMotion().mul(0.6D, 1.0D, 0.6D));
+                            this.shadow$setDeltaMovement(this.shadow$getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
                             this.shadow$setSprinting(false);
                         }
 
                         if (isSweapingAttack) {
                             for (final LivingEntity livingEntity : this.level
-                                    .getEntitiesWithinAABB(LivingEntity.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
-                                if (livingEntity != (PlayerEntity) (Object) this && livingEntity != targetEntity && !this.shadow$isAlliedTo(livingEntity) && (!(livingEntity instanceof ArmorStandEntity) || !((ArmorStandEntity)livingEntity).hasMarker()) && this.shadow$distanceToSqr(livingEntity) < 9.0D) {
+                                    .getEntitiesOfClass(LivingEntity.class, targetEntity.getBoundingBox().inflate(1.0D, 0.25D, 1.0D))) {
+                                if (livingEntity != (PlayerEntity) (Object) this && livingEntity != targetEntity && !this.shadow$isAlliedTo(livingEntity) && (!(livingEntity instanceof ArmorStandEntity) || !((ArmorStandEntity)livingEntity).isMarker()) && this.shadow$distanceToSqr(livingEntity) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
                                     // livingEntity.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                     // livingEntity.attackEntityFrom(DamageSource.causePlayerDamage(this), 1.0F);
@@ -553,7 +553,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                                                     (double) MathHelper.sin(this.yRot * ((float)Math.PI / 180F)),
                                                     (double) -MathHelper.cos(this.yRot * ((float)Math.PI / 180F)));
 
-                                            livingEntity.attackEntityFrom(DamageSource.causePlayerDamage((PlayerEntity) (Object) this),
+                                            livingEntity.hurt(DamageSource.playerAttack((PlayerEntity) (Object) this),
                                                 (float) sweepingAttackEvent.getFinalOutputDamage());
                                         }
                                     }
@@ -561,49 +561,49 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                                 }
                             }
 
-                            this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, this.shadow$getSoundSource(), 1.0F, 1.0F);
-                            this.shadow$spawnSweepParticles();
+                            this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                            this.shadow$sweepAttack();
                         }
 
-                        if (targetEntity instanceof ServerPlayerEntity && targetEntity.velocityChanged) {
-                            ((ServerPlayerEntity) targetEntity).connection.sendPacket(new SEntityVelocityPacket(targetEntity));
-                            targetEntity.velocityChanged = false;
-                            targetEntity.setMotion(targetMotion);
+                        if (targetEntity instanceof ServerPlayerEntity && targetEntity.hurtMarked) {
+                            ((ServerPlayerEntity) targetEntity).connection.send(new SEntityVelocityPacket(targetEntity));
+                            targetEntity.hurtMarked = false;
+                            targetEntity.setDeltaMovement(targetMotion);
                         }
 
                         if (isCriticalAttack) {
-                            this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, this.shadow$getSoundSource(), 1.0F, 1.0F);
-                            this.shadow$onCriticalHit(targetEntity);
+                            this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                            this.shadow$crit(targetEntity);
                         }
 
                         if (!isCriticalAttack && !isSweapingAttack) {
                             if (isStrongAttack) {
-                                this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                                this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.shadow$getSoundSource(), 1.0F, 1.0F);
                             } else {
-                                this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_WEAK , this.shadow$getSoundSource(), 1.0F, 1.0F);
+                                this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_WEAK , this.shadow$getSoundSource(), 1.0F, 1.0F);
                             }
                         }
 
                         if (enchantmentDamage > 0.0F) {
-                            this.shadow$onEnchantmentCritical(targetEntity);
+                            this.shadow$magicCrit(targetEntity);
                         }
 
                         this.shadow$setLastHurtMob(targetEntity);
 
                         if (targetEntity instanceof LivingEntity) {
-                            EnchantmentHelper.applyThornEnchantments((LivingEntity) targetEntity, (PlayerEntity) (Object) this);
+                            EnchantmentHelper.doPostHurtEffects((LivingEntity) targetEntity, (PlayerEntity) (Object) this);
                         }
 
-                        EnchantmentHelper.applyArthropodEnchantments((PlayerEntity) (Object) this, targetEntity);
+                        EnchantmentHelper.doPostDamageEffects((PlayerEntity) (Object) this, targetEntity);
                         final ItemStack itemstack1 = this.shadow$getMainHandItem();
                         Entity entity = targetEntity;
 
                         if (targetEntity instanceof EnderDragonPartEntity) {
-                            entity = ((EnderDragonPartEntity) targetEntity).dragon;
+                            entity = ((EnderDragonPartEntity) targetEntity).parentMob;
                         }
 
                         if(!this.level.isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
-                            itemstack1.hitEntity((LivingEntity) entity, (PlayerEntity) (Object) this);
+                            itemstack1.hurtEnemy((LivingEntity) entity, (PlayerEntity) (Object) this);
                             if(itemstack1.isEmpty()) {
                                 this.shadow$setItemInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
                             }
@@ -611,24 +611,24 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
                         if (targetEntity instanceof LivingEntity) {
                             final float f5 = targetOriginalHealth - ((LivingEntity) targetEntity).getHealth();
-                            this.shadow$addStat(Stats.DAMAGE_DEALT, Math.round(f5 * 10.0F));
+                            this.shadow$awardStat(Stats.DAMAGE_DEALT, Math.round(f5 * 10.0F));
 
                             if (fireAspectModifier > 0) {
-                                targetEntity.setFire(fireAspectModifier * 4);
+                                targetEntity.setSecondsOnFire(fireAspectModifier * 4);
                             }
 
                             if (this.level instanceof ServerWorld && f5 > 2.0F) {
                                 final int k = (int) ((double) f5 * 0.5D);
-                                ((net.minecraft.world.server.ServerWorld) this.level).spawnParticle(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getPosX(), targetEntity.getPosY() + (double) (targetEntity.getHeight() * 0.5F), targetEntity.getPosZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
+                                ((net.minecraft.world.server.ServerWorld) this.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(), targetEntity.getY() + (double) (targetEntity.getHeight() * 0.5F), targetEntity.getZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
                             }
                         }
 
-                        this.shadow$addExhaustion(0.1F);
+                        this.shadow$causeFoodExhaustion(0.1F);
                     } else {
-                        this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                        this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundSource(), 1.0F, 1.0F);
 
                         if (litEntityOnFire) {
-                            targetEntity.extinguish();
+                            targetEntity.clearFire();
                         }
                     }
                 }
