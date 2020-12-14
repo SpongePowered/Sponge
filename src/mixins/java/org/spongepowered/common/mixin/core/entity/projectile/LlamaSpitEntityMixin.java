@@ -43,7 +43,7 @@ public abstract class LlamaSpitEntityMixin extends EntityMixin {
 
     @Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
     private void impl$onHitCollideEvent(final EntityRayTraceResult hitResult, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).bridge$isFake() || hitResult.getType() == RayTraceResult.Type.MISS) {
+        if (((WorldBridge) this.level).bridge$isFake() || hitResult.getType() == RayTraceResult.Type.MISS) {
             return;
         }
 
@@ -56,7 +56,7 @@ public abstract class LlamaSpitEntityMixin extends EntityMixin {
 
     @Inject(method = "onHitBlock", at = @At("HEAD"), cancellable = true)
     private void impl$onHitCollideEvent(final BlockRayTraceResult hitResult, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).bridge$isFake() || hitResult.getType() == RayTraceResult.Type.MISS) {
+        if (((WorldBridge) this.level).bridge$isFake() || hitResult.getType() == RayTraceResult.Type.MISS) {
             return;
         }
 

@@ -27,14 +27,12 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.entity.projectile.arrow.ArrowEntity;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -75,18 +73,18 @@ public abstract class AbstractArrowEntityMixin extends ProjectileEntityMixin {
      */
     @Inject(method = "onHitBlock", at = @At("HEAD"), cancellable = true)
     private void onProjectileHit(final BlockRayTraceResult hitResult, final CallbackInfo ci) {
-        if (!((WorldBridge) this.world).bridge$isFake() && hitResult.getType() != RayTraceResult.Type.MISS) {
+        if (!((WorldBridge) this.level).bridge$isFake() && hitResult.getType() != RayTraceResult.Type.MISS) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrowEntity) (Object) this,
                     ((ArrowEntity) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
                 this.shadow$playSound(SoundEvents.ARROW_HIT, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
                 // Make it almost look like it collided with something
                 BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult)hitResult;
-                BlockState blockstate = this.world.getBlockState(blockraytraceresult.getBlockPos());
+                BlockState blockstate = this.level.getBlockState(blockraytraceresult.getBlockPos());
                 this.lastState = blockstate;
                 Vector3d vec3d = blockraytraceresult.getLocation().subtract(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
                 this.shadow$setDeltaMovement(vec3d);
                 Vector3d vec3d1 = vec3d.normalize().scale(0.05F);
-                this.shadow$setPosition(this.shadow$getX() - vec3d1.x, this.shadow$getY() - vec3d1.y, this.shadow$getZ() -
+                this.shadow$setPos(this.shadow$getX() - vec3d1.x, this.shadow$getY() - vec3d1.y, this.shadow$getZ() -
                         vec3d1.z);
                 this.inGround = true;
                 this.shakeTime = 7;
@@ -104,7 +102,7 @@ public abstract class AbstractArrowEntityMixin extends ProjectileEntityMixin {
      */
     @Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
     private void onProjectileHit(final EntityRayTraceResult hitResult, final CallbackInfo ci) {
-        if (!((WorldBridge) this.world).bridge$isFake() && hitResult.getType() != RayTraceResult.Type.MISS) {
+        if (!((WorldBridge) this.level).bridge$isFake() && hitResult.getType() != RayTraceResult.Type.MISS) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrowEntity) (Object) this,
                     ((ArrowEntity) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
                 this.shadow$playSound(SoundEvents.ARROW_HIT, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
@@ -112,12 +110,12 @@ public abstract class AbstractArrowEntityMixin extends ProjectileEntityMixin {
 
                 // Deflect the arrow as if the entity was invulnerable
                 this.shadow$setDeltaMovement(this.shadow$getDeltaMovement().scale(-0.1D));
-                this.rotationYaw += 180.0F;
-                this.prevRotationYaw += 180.0F;
+                this.yRot += 180.0F;
+                this.yRotO += 180.0F;
                 this.life = 0;
-                if (!this.world.isClientSide && this.shadow$getDeltaMovement().lengthSqr() < 1.0E-7D) {
+                if (!this.level.isClientSide && this.shadow$getDeltaMovement().lengthSqr() < 1.0E-7D) {
                     if (this.pickup == AbstractArrowEntity.PickupStatus.ALLOWED) {
-                        this.shadow$entityDropItem(this.shadow$getPickupItem(), 0.1F);
+                        this.shadow$spawnAtLocation(this.shadow$getPickupItem(), 0.1F);
                     }
 
                     this.shadow$remove();

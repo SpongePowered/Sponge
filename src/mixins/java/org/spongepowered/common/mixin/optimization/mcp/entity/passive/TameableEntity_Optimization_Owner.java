@@ -52,7 +52,7 @@ public abstract class TameableEntity_Optimization_Owner extends AgeableEntityMix
     @Overwrite
     public UUID getOwnerUUID() {
         if (this.cachedOwner$OwnerId == null) {
-            this.cachedOwner$OwnerId = this.dataManager.get(TameableEntity_Optimization_Owner.DATA_OWNERUUID_ID).orNull();
+            this.cachedOwner$OwnerId = this.entityData.get(TameableEntity_Optimization_Owner.DATA_OWNERUUID_ID).orNull();
         }
         return this.cachedOwner$OwnerId;
     }
@@ -66,7 +66,7 @@ public abstract class TameableEntity_Optimization_Owner extends AgeableEntityMix
     @Overwrite
     public void setOwnerUUID(@Nullable final UUID ownerUuid) {
         this.cachedOwner$OwnerId = ownerUuid;
-        this.dataManager.set(TameableEntity_Optimization_Owner.DATA_OWNERUUID_ID, Optional.fromNullable(ownerUuid));
+        this.entityData.set(TameableEntity_Optimization_Owner.DATA_OWNERUUID_ID, Optional.fromNullable(ownerUuid));
     }
 
 }

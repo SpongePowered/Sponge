@@ -42,7 +42,7 @@ public abstract class ThrowableEntityMixin extends ProjectileEntityMixin {
         )
     )
     private void impl$handleProjectileImpact(final ThrowableEntity projectile, final RayTraceResult movingObjectPosition) {
-        if (((WorldBridge) this.world).bridge$isFake() || movingObjectPosition.getType() == RayTraceResult.Type.MISS) {
+        if (((WorldBridge) this.level).bridge$isFake() || movingObjectPosition.getType() == RayTraceResult.Type.MISS) {
             this.shadow$onHit(movingObjectPosition);
             return;
         }

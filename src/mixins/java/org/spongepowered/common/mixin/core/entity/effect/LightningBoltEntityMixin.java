@@ -104,7 +104,7 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
 
     @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/LightningBoltEntity;remove()V"))
     private void impl$ThrowEventAndProcess(final CallbackInfo ci) {
-        if (this.removed || this.world.isClientSide) {
+        if (this.removed || this.level.isClientSide) {
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -113,7 +113,7 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
 
             if (!strike.isCancelled()) {
                 for (final Entity e : strike.getEntities()) {
-                    ((net.minecraft.entity.Entity) e).thunderHit((ServerWorld) this.world, (LightningBoltEntity) (Object) this);
+                    ((net.minecraft.entity.Entity) e).thunderHit((ServerWorld) this.level, (LightningBoltEntity) (Object) this);
                 }
                 SpongeCommon.postEvent(SpongeEventFactory.createLightningEventPost(frame.getCurrentCause()));
             }

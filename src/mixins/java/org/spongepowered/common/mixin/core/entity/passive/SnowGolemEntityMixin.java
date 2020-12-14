@@ -39,7 +39,7 @@ public abstract class SnowGolemEntityMixin extends MobEntityMixin {
     @Inject(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;floor(D)I", ordinal = 3),
             cancellable = true)
     private void impl$onCanGrief(CallbackInfo ci) {
-        if (!this.world.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || !((GrieferBridge) this).bridge$canGrief()) {
+        if (!this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || !((GrieferBridge) this).bridge$canGrief()) {
             ci.cancel();
         }
     }

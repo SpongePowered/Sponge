@@ -227,11 +227,11 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;isSleeping()Z"))
     private boolean impl$postSleepingEvent(final PlayerEntity self) {
         if (self.isSleeping()) {
-            if (!((WorldBridge) this.world).bridge$isFake()) {
+            if (!((WorldBridge) this.level).bridge$isFake()) {
                 final CauseStackManager csm = PhaseTracker.getCauseStackManager();
                 csm.pushCause(this);
                 final BlockPos bedLocation = this.shadow$getSleepingPos().get();
-                final BlockSnapshot snapshot = ((ServerWorld) this.world).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
+                final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
                 SpongeCommon.postEvent(SpongeEventFactory.createSleepingEventTick(csm.getCurrentCause(), snapshot, (Humanoid) this));
                 csm.popCause();
             }
@@ -257,7 +257,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     private void impl$playNoSoundToOthersIfVanished(final World world, final PlayerEntity player, final double x, final double y, final double z,
             final SoundEvent sound, final SoundCategory category, final float volume, final float pitch) {
         if (!this.bridge$isVanished()) {
-            this.world.playSound(player, x, y, z, sound, category, volume, pitch);
+            this.level.playSound(player, x, y, z, sound, category, volume, pitch);
         }
     }
 
@@ -292,7 +292,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         // Just sanity checks, if the player is not in a managed world, then don't bother either.
         // some fake players may exist in pseudo worlds as well, which means we don't want to
         // process on them since the world is not a valid world to plugins.
-        if (this.world instanceof WorldBridge && !((WorldBridge) this.world).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+        if (this.level instanceof WorldBridge && !((WorldBridge) this.level).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             // Note that this can potentially cause phase contexts to auto populate frames
             // we shouldn't rely so much on them, but sometimes the extra information is provided
             // through this method.
@@ -302,7 +302,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
                 // Then go ahead and call the event and return if it was cancelled
                 // if it was cancelled, then there should be no changes needed to roll back
-                return !SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) this.world, cachedBlockInfo.getPos(), this).isCancelled();
+                return !SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) this.level, cachedBlockInfo.getPos(), this).isCancelled();
             }
         }
         // Otherwise, if all else is ignored, or we're not throwing events, we're just going to return the
@@ -447,7 +447,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                     }
 
                     // damage = damage + enchantmentDamage; // Sponge - We don't need this since our event will re-assign the damage to deal
-                    final double distanceWalkedDelta = (double) (this.distanceWalkedModified - this.prevDistanceWalkedModified);
+                    final double distanceWalkedDelta = (double) (this.walkDist - this.walkDistO);
 
                     final ItemStack heldItem = this.shadow$getMainHandItem();
                     if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround && distanceWalkedDelta < (double) this.shadow$getAIMoveSpeed()) {
@@ -460,7 +460,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
                     // Sponge Start - Create the event and throw it
                     final DamageSource damageSource = DamageSource.causePlayerDamage((PlayerEntity) (Object) this);
-                    final boolean isMainthread = !this.world.isClientSide;
+                    final boolean isMainthread = !this.level.isClientSide;
                     if (isMainthread) {
                         PhaseTracker.getInstance().pushCause(damageSource);
                     }
@@ -506,9 +506,10 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                         if (knockbackModifier > 0) {
                             if (targetEntity instanceof LivingEntity) {
                                 ((LivingEntity) targetEntity).knockBack((PlayerEntity) (Object) this, (float) knockbackModifier * 0.5F, (double) MathHelper
-                                    .sin(this.rotationYaw * 0.017453292F), (double) (-MathHelper.cos(this.rotationYaw * 0.017453292F)));
+                                    .sin(this.yRot * 0.017453292F), (double) (-MathHelper.cos(this.yRot * 0.017453292F)));
                             } else {
-                                targetEntity.addVelocity((double) (-MathHelper.sin(this.rotationYaw * 0.017453292F) * (float) knockbackModifier * 0.5F), 0.1D, (double) (MathHelper.cos(this.rotationYaw * 0.017453292F) * (float) knockbackModifier * 0.5F));
+                                targetEntity.addVelocity((double) (-MathHelper.sin(this.yRot * 0.017453292F) * (float) knockbackModifier * 0.5F), 0.1D, (double) (MathHelper.cos(this.yRot
+                                        * 0.017453292F) * (float) knockbackModifier * 0.5F));
                             }
 
                             this.shadow$setMotion(this.shadow$getMotion().mul(0.6D, 1.0D, 0.6D));
@@ -516,8 +517,9 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                         }
 
                         if (isSweapingAttack) {
-                            for (final LivingEntity livingEntity : this.world.getEntitiesWithinAABB(LivingEntity.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
-                                if (livingEntity != (PlayerEntity) (Object) this && livingEntity != targetEntity && !this.shadow$isOnSameTeam(livingEntity) && (!(livingEntity instanceof ArmorStandEntity) || !((ArmorStandEntity)livingEntity).hasMarker()) && this.shadow$getDistanceSq(livingEntity) < 9.0D) {
+                            for (final LivingEntity livingEntity : this.level
+                                    .getEntitiesWithinAABB(LivingEntity.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
+                                if (livingEntity != (PlayerEntity) (Object) this && livingEntity != targetEntity && !this.shadow$isAlliedTo(livingEntity) && (!(livingEntity instanceof ArmorStandEntity) || !((ArmorStandEntity)livingEntity).hasMarker()) && this.shadow$distanceToSqr(livingEntity) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
                                     // livingEntity.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                     // livingEntity.attackEntityFrom(DamageSource.causePlayerDamage(this), 1.0F);
@@ -548,8 +550,8 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                                         if (!sweepingAttackEvent.isCancelled()) {
                                             livingEntity
                                                 .knockBack((PlayerEntity) (Object) this, sweepingAttackEvent.getKnockbackModifier() * 0.4F,
-                                                    (double) MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F)),
-                                                    (double) -MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F)));
+                                                    (double) MathHelper.sin(this.yRot * ((float)Math.PI / 180F)),
+                                                    (double) -MathHelper.cos(this.yRot * ((float)Math.PI / 180F)));
 
                                             livingEntity.attackEntityFrom(DamageSource.causePlayerDamage((PlayerEntity) (Object) this),
                                                 (float) sweepingAttackEvent.getFinalOutputDamage());
@@ -559,7 +561,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                                 }
                             }
 
-                            this.world.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, this.shadow$getSoundCategory(), 1.0F, 1.0F);
+                            this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, this.shadow$getSoundSource(), 1.0F, 1.0F);
                             this.shadow$spawnSweepParticles();
                         }
 
@@ -570,15 +572,15 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                         }
 
                         if (isCriticalAttack) {
-                            this.world.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, this.shadow$getSoundCategory(), 1.0F, 1.0F);
+                            this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, this.shadow$getSoundSource(), 1.0F, 1.0F);
                             this.shadow$onCriticalHit(targetEntity);
                         }
 
                         if (!isCriticalAttack && !isSweapingAttack) {
                             if (isStrongAttack) {
-                                this.world.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, this.shadow$getSoundCategory(), 1.0F, 1.0F);
+                                this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, this.shadow$getSoundSource(), 1.0F, 1.0F);
                             } else {
-                                this.world.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_WEAK , this.shadow$getSoundCategory(), 1.0F, 1.0F);
+                                this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_WEAK , this.shadow$getSoundSource(), 1.0F, 1.0F);
                             }
                         }
 
@@ -600,7 +602,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                             entity = ((EnderDragonPartEntity) targetEntity).dragon;
                         }
 
-                        if(!this.world.isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
+                        if(!this.level.isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
                             itemstack1.hitEntity((LivingEntity) entity, (PlayerEntity) (Object) this);
                             if(itemstack1.isEmpty()) {
                                 this.shadow$setItemInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
@@ -615,15 +617,15 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                                 targetEntity.setFire(fireAspectModifier * 4);
                             }
 
-                            if (this.world instanceof ServerWorld && f5 > 2.0F) {
+                            if (this.level instanceof ServerWorld && f5 > 2.0F) {
                                 final int k = (int) ((double) f5 * 0.5D);
-                                ((net.minecraft.world.server.ServerWorld) this.world).spawnParticle(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getPosX(), targetEntity.getPosY() + (double) (targetEntity.getHeight() * 0.5F), targetEntity.getPosZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
+                                ((net.minecraft.world.server.ServerWorld) this.level).spawnParticle(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getPosX(), targetEntity.getPosY() + (double) (targetEntity.getHeight() * 0.5F), targetEntity.getPosZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
                             }
                         }
 
                         this.shadow$addExhaustion(0.1F);
                     } else {
-                        this.world.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundCategory(), 1.0F, 1.0F);
+                        this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundSource(), 1.0F, 1.0F);
 
                         if (litEntityOnFire) {
                             targetEntity.extinguish();

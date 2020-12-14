@@ -37,7 +37,6 @@ import net.minecraft.loot.LootParameterSets;
 import net.minecraft.loot.LootParameters;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.LootTables;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.math.MathHelper;
@@ -108,20 +107,20 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
     public int retrieve(ItemStack stack) {
         final PlayerEntity playerEntity = this.shadow$getPlayerOwner();
 
-        if (!this.world.isClientSide && playerEntity != null) {
+        if (!this.level.isClientSide && playerEntity != null) {
             int i = 0;
 
             // Sponge start
             final List<Transaction<ItemStackSnapshot>> transactions;
             if (this.nibble > 0) {
                 // Moved from below
-                final LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerWorld)this.world)
+                final LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerWorld)this.level)
                         .withParameter(LootParameters.ORIGIN, this.shadow$position())
                         .withParameter(LootParameters.TOOL, stack)
                         .withParameter(LootParameters.THIS_ENTITY, (net.minecraft.entity.Entity) (Object) this)
                         .withRandom(this.random)
                         .withLuck((float)this.luck + playerEntity.getLuck());
-                final LootTable lootTable = this.world.getServer().getLootTables().get(LootTables.FISHING);
+                final LootTable lootTable = this.level.getServer().getLootTables().get(LootTables.FISHING);
                 final List<ItemStack> list = lootTable.getRandomItems(lootcontext$builder.create(LootParameterSets.FISHING));
                 transactions = list.stream().map(ItemStackUtil::snapshotOf)
                         .map(snapshot -> new Transaction<>(snapshot, snapshot))
@@ -141,7 +140,7 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
             if (this.hookedIn != null) {
                 this.bringInHookedEntity();
                 CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayerEntity) playerEntity, stack, (FishingBobberEntity) (Object) this, Collections.emptyList());
-                this.world.broadcastEntityEvent((net.minecraft.entity.Entity) (Object) this, (byte) 31);
+                this.level.broadcastEntityEvent((net.minecraft.entity.Entity) (Object) this, (byte) 31);
                 i = this.hookedIn instanceof ItemEntity ? 3 : 5;
             } // Sponge: Remove else
 
@@ -158,14 +157,14 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
                     ItemStack itemstack = (ItemStack) (Object) transaction.getFinal().createStack();
                     // Sponge end
 
-                    ItemEntity entityitem = new ItemEntity(this.world, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), itemstack);
+                    ItemEntity entityitem = new ItemEntity(this.level, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), itemstack);
                     double d0 = playerEntity.getX() - this.shadow$getX();
                     double d1 = playerEntity.getY() - this.shadow$getY();
                     double d2 = playerEntity.getZ() - this.shadow$getZ();
                     double d3 = MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                     //double d4 = 0.1D;
                     entityitem.setDeltaMovement(d0 * 0.1D, d1 * 0.1D + MathHelper.sqrt(d3) * 0.08D, d2 * 0.1D);
-                    this.world.addFreshEntity(entityitem);
+                    this.level.addFreshEntity(entityitem);
                     playerEntity.level.addFreshEntity(new ExperienceOrbEntity(playerEntity.level, playerEntity.getX(), playerEntity.getY() + 0.5D,
                             playerEntity.getZ() + 0.5D,
                             this.random.nextInt(6) + 1));
@@ -194,7 +193,7 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
     @Inject(method = "checkCollision", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/ProjectileHelper;getHitResult(Lnet/minecraft/entity/Entity;Ljava/util/function/Predicate;)Lnet/minecraft/util/math/RayTraceResult;"))
     private void impl$callCollideImpactEvent(final CallbackInfo ci, final RayTraceResult hitResult) {
-        if (hitResult.getType() == RayTraceResult.Type.MISS || ((WorldBridge) this.world).bridge$isFake()) {
+        if (hitResult.getType() == RayTraceResult.Type.MISS || ((WorldBridge) this.level).bridge$isFake()) {
             return;
         }
 

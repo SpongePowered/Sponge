@@ -77,11 +77,11 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
 
     @ModifyConstant(method = "mergeWithNeighbours", constant = @Constant(doubleValue = Constants.Entity.Item.DEFAULT_ITEM_MERGE_RADIUS))
     private double impl$changeSearchRadiusFromConfig(final double originalRadius) {
-        if (this.world.isClientSide || ((WorldBridge) this.world).bridge$isFake()) {
+        if (this.level.isClientSide || ((WorldBridge) this.level).bridge$isFake()) {
             return originalRadius;
         }
         if (this.impl$cachedRadius == -1) {
-            final double configRadius = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().get().getWorld().getItemMergeRadius();
+            final double configRadius = ((WorldInfoBridge) this.level.getWorldInfo()).bridge$getConfigAdapter().get().getWorld().getItemMergeRadius();
             this.impl$cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
         return this.impl$cachedRadius;

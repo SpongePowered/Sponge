@@ -41,7 +41,7 @@ public abstract class ShulkerBulletEntityMixin extends EntityMixin {
 
     @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
     private void onBulletHitBlock(final RayTraceResult result, final CallbackInfo ci) {
-        if (!((WorldBridge) this.world).bridge$isFake() && result.getType() != RayTraceResult.Type.MISS
+        if (!((WorldBridge) this.level).bridge$isFake() && result.getType() != RayTraceResult.Type.MISS
                 && SpongeCommonEventFactory.handleCollideImpactEvent(
                 (net.minecraft.entity.Entity) (Object) this, ((Projectile) this).get(Keys.SHOOTER).orElse(null), result)) {
             this.shadow$remove(); // TODO do we want to kill the bullet here?

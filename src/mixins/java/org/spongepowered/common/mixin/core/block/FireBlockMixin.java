@@ -45,7 +45,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import java.util.Random;
 
 @Mixin(FireBlock.class)
-public abstract class FireBlockMixin extends BlockMixin {
+public abstract class FireBlockMixin extends AbstractFireBlockMixin {
 
     @Redirect(method = "tick",
         at = @At(

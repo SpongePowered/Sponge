@@ -148,7 +148,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow public abstract boolean shadow$onClimbable();
     @Shadow public abstract void shadow$setSprinting(boolean sprinting);
     @Shadow public abstract void shadow$setLastHurtMob(Entity entityIn);
-    @Shadow protected abstract void shadow$hurtArmor(float damage);
+    @Shadow protected abstract void shadow$hurtArmor(DamageSource source, float damage);
     @Shadow public abstract ItemStack shadow$getItemInHand(Hand hand);
     @Shadow protected abstract void shadow$dropEquipment();
     @Shadow protected abstract void shadow$dropAllDeathLoot(DamageSource damageSourceIn);
@@ -159,7 +159,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Nullable private ItemStack impl$activeItemStackCopy;
     @Nullable private Vector3d impl$preTeleportPosition;
     private int impl$deathEventsPosted;
-    private int impl$maxAir = this.shadow$getMaxAir();
+    private int impl$maxAir = this.shadow$getMaxAirSupply();
 
 /*    @Override
     public int bridge$getMaxAir() {
@@ -197,132 +197,132 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
  */
     @Override
     public boolean bridge$damageEntity(final DamageSource damageSource, float damage) {
-        if (!this.shadow$isInvulnerableTo(damageSource)) {
-            final boolean isHuman = (LivingEntity) (Object) this instanceof PlayerEntity;
-            // Sponge Start - Call platform hook for adjusting damage
-            damage = this.bridge$applyModDamage((LivingEntity) (Object) this, damageSource, damage);
-            // Sponge End
-            final float originalDamage = damage;
-            if (damage <= 0) {
+        if (this.shadow$isInvulnerableTo(damageSource)) {
+            return false;
+        }
+        final boolean isHuman = (LivingEntity) (Object) this instanceof PlayerEntity;
+        // Sponge Start - Call platform hook for adjusting damage
+        damage = this.bridge$applyModDamage((LivingEntity) (Object) this, damageSource, damage);
+        // Sponge End
+        final float originalDamage = damage;
+        if (damage <= 0) {
+            return false;
+        }
+
+        final List<DamageFunction> originalFunctions = new ArrayList<>();
+        final Optional<DamageFunction> hardHatFunction =
+                DamageEventHandler.createHardHatModifier((LivingEntity) (Object) this, damageSource);
+        final Optional<DamageFunction> armorFunction =
+                DamageEventHandler.createArmorModifiers((LivingEntity) (Object) this, damageSource);
+        final Optional<DamageFunction> resistanceFunction =
+                DamageEventHandler.createResistanceModifier((LivingEntity) (Object) this, damageSource);
+        final Optional<List<DamageFunction>> armorEnchantments =
+                DamageEventHandler.createEnchantmentModifiers((LivingEntity) (Object) this, damageSource);
+        final Optional<DamageFunction> absorptionFunction =
+                DamageEventHandler.createAbsorptionModifier((LivingEntity) (Object) this);
+        final Optional<DamageFunction> shieldFunction =
+                DamageEventHandler.createShieldFunction((LivingEntity) (Object) this, damageSource, damage);
+
+        hardHatFunction.ifPresent(originalFunctions::add);
+
+        shieldFunction.ifPresent(originalFunctions::add);
+
+        armorFunction.ifPresent(originalFunctions::add);
+
+        resistanceFunction.ifPresent(originalFunctions::add);
+
+        armorEnchantments.ifPresent(originalFunctions::addAll);
+
+        absorptionFunction.ifPresent(originalFunctions::add);
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            DamageEventHandler.generateCauseFor(damageSource, frame);
+
+            final DamageEntityEvent event = SpongeEventFactory
+                    .createDamageEntityEvent(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this, originalFunctions,
+                            originalDamage);
+            if (damageSource
+                    != DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
+                SpongeCommon.postEvent(event);
+            }
+            if (event.isCancelled()) {
                 return false;
             }
 
-            final List<DamageFunction> originalFunctions = new ArrayList<>();
-            final Optional<DamageFunction> hardHatFunction =
-                    DamageEventHandler.createHardHatModifier((LivingEntity) (Object) this, damageSource);
-            final Optional<DamageFunction> armorFunction =
-                    DamageEventHandler.createArmorModifiers((LivingEntity) (Object) this, damageSource);
-            final Optional<DamageFunction> resistanceFunction =
-                    DamageEventHandler.createResistanceModifier((LivingEntity) (Object) this, damageSource);
-            final Optional<List<DamageFunction>> armorEnchantments =
-                    DamageEventHandler.createEnchantmentModifiers((LivingEntity) (Object) this, damageSource);
-            final Optional<DamageFunction> absorptionFunction =
-                    DamageEventHandler.createAbsorptionModifier((LivingEntity) (Object) this);
-            final Optional<DamageFunction> shieldFunction =
-                    DamageEventHandler.createShieldFunction((LivingEntity) (Object) this, damageSource, damage);
+            damage = (float) event.getFinalDamage();
 
-            hardHatFunction.ifPresent(originalFunctions::add);
+            // Sponge Start - Allow the platform to adjust damage before applying armor/etc
+            damage = this.bridge$applyModDamageBeforeFunctions((LivingEntity) (Object) this, damageSource, damage);
+            // Sponge End
 
-            shieldFunction.ifPresent(originalFunctions::add);
-
-            armorFunction.ifPresent(originalFunctions::add);
-
-            resistanceFunction.ifPresent(originalFunctions::add);
-
-            armorEnchantments.ifPresent(originalFunctions::addAll);
-
-            absorptionFunction.ifPresent(originalFunctions::add);
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                DamageEventHandler.generateCauseFor(damageSource, frame);
-
-                final DamageEntityEvent event = SpongeEventFactory
-                        .createDamageEntityEvent(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this, originalFunctions,
-                                originalDamage);
-                if (damageSource
-                        != DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
-                    SpongeCommon.postEvent(event);
-                }
-                if (event.isCancelled()) {
-                    return false;
-                }
-
-                damage = (float) event.getFinalDamage();
-
-                // Sponge Start - Allow the platform to adjust damage before applying armor/etc
-                damage = this.bridge$applyModDamageBeforeFunctions((LivingEntity) (Object) this, damageSource, damage);
-                // Sponge End
-                
-                // Helmet
-                final ItemStack helmet = this.shadow$getItemBySlot(EquipmentSlotType.HEAD);
-                // We still sanity check if a mod is calling to damage the entity with an anvil or falling block
-                // without using our mixin redirects in EntityFallingBlockMixin.
-                if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.ANVIL
-                        || damageSource == DamageSource.FALLING_BLOCK && !helmet.isEmpty()) {
-                    helmet.damageItem((int) (event.getBaseDamage() * 4.0F + this.random.nextFloat() * event.getBaseDamage() * 2.0F),
-                            (LivingEntity) (Object) this, (entity) -> {
-                                entity.sendBreakAnimation(EquipmentSlotType.HEAD);
-                            });
-                }
-
-                // Shield
-                if (shieldFunction.isPresent()) {
-                    this.shadow$hurtCurrentlyUsedShield((float) event.getBaseDamage());
-                    if (!damageSource.isProjectile()) {
-                        final Entity entity = damageSource.getImmediateSource();
-
-                        if (entity instanceof LivingEntity) {
-                            this.shadow$blockUsingShield((LivingEntity) entity);
-                        }
-                    }
-                }
-
-                // Armor
-                if (!damageSource.isUnblockable() && armorFunction.isPresent()) {
-                    this.shadow$hurtArmor((float) event.getBaseDamage());
-                }
-                // Resistance modifier post calculation
-                if (resistanceFunction.isPresent()) {
-                    final float f2 = (float) event.getDamage(resistanceFunction.get().getModifier()) - damage;
-                    if (f2 > 0.0F && f2 < 3.4028235E37F) {
-                        if (((LivingEntity) (Object) this) instanceof ServerPlayerEntity) {
-                            ((ServerPlayerEntity) ((LivingEntity) (Object) this)).addStat(Stats.DAMAGE_RESISTED, Math.round(f2 * 10.0F));
-                        } else if (damageSource.getTrueSource() instanceof ServerPlayerEntity) {
-                            ((ServerPlayerEntity) damageSource.getTrueSource()).addStat(Stats.DAMAGE_DEALT_RESISTED, Math.round(f2 * 10.0F));
-                        }
-                    }
-                }
-
-
-                double absorptionModifier = absorptionFunction.map(function -> event.getDamage(function.getModifier())).orElse(0d);
-                if (absorptionFunction.isPresent()) {
-                    absorptionModifier = event.getDamage(absorptionFunction.get().getModifier());
-
-                }
-
-                final float f = (float) event.getFinalDamage() - (float) absorptionModifier;
-                this.shadow$setAbsorptionAmount(Math.max(this.shadow$getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
-                if (f > 0.0F && f < 3.4028235E37F && damageSource.getTrueSource() instanceof ServerPlayerEntity) {
-                    ((ServerPlayerEntity) damageSource.getTrueSource()).addStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(f * 10.0F));
-                }
-                if (damage != 0.0F) {
-                    if (isHuman) {
-                        ((PlayerEntity) (Object) this).addExhaustion(damageSource.getHungerDamage());
-                    }
-                    final float f2 = this.shadow$getHealth();
-
-                    this.shadow$setHealth(f2 - damage);
-                    this.shadow$getCombatTracker().trackDamage(damageSource, f2, damage);
-
-                    if (isHuman) {
-                        return true;
-                    }
-
-                    this.shadow$setAbsorptionAmount(this.shadow$getAbsorptionAmount() - damage);
-                }
-                return true;
+            // Helmet
+            final ItemStack helmet = this.shadow$getItemBySlot(EquipmentSlotType.HEAD);
+            // We still sanity check if a mod is calling to damage the entity with an anvil or falling block
+            // without using our mixin redirects in EntityFallingBlockMixin.
+            if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.ANVIL
+                    || damageSource == DamageSource.FALLING_BLOCK && !helmet.isEmpty()) {
+                helmet.hurtAndBreak((int) (event.getBaseDamage() * 4.0F + this.random.nextFloat() * event.getBaseDamage() * 2.0F),
+                        (LivingEntity) (Object) this, (entity) -> {
+                            entity.broadcastBreakEvent(EquipmentSlotType.HEAD);
+                        });
             }
+
+            // Shield
+            if (shieldFunction.isPresent()) {
+                this.shadow$hurtCurrentlyUsedShield((float) event.getBaseDamage());
+                if (!damageSource.isProjectile()) {
+                    final Entity entity = damageSource.getDirectEntity();
+
+                    if (entity instanceof LivingEntity) {
+                        this.shadow$blockUsingShield((LivingEntity) entity);
+                    }
+                }
+            }
+
+            // Armor
+            if (!damageSource.isBypassArmor() && armorFunction.isPresent()) {
+                this.shadow$hurtArmor(damageSource, (float) event.getBaseDamage());
+            }
+            // Resistance modifier post calculation
+            if (resistanceFunction.isPresent()) {
+                final float f2 = (float) event.getDamage(resistanceFunction.get().getModifier()) - damage;
+                if (f2 > 0.0F && f2 < 3.4028235E37F) {
+                    if (((LivingEntity) (Object) this) instanceof ServerPlayerEntity) {
+                        ((ServerPlayerEntity) ((LivingEntity) (Object) this)).awardStat(Stats.DAMAGE_RESISTED, Math.round(f2 * 10.0F));
+                    } else if (damageSource.getEntity() instanceof ServerPlayerEntity) {
+                        ((ServerPlayerEntity) damageSource.getEntity()).awardStat(Stats.DAMAGE_DEALT_RESISTED, Math.round(f2 * 10.0F));
+                    }
+                }
+            }
+
+
+            double absorptionModifier = absorptionFunction.map(function -> event.getDamage(function.getModifier())).orElse(0d);
+            if (absorptionFunction.isPresent()) {
+                absorptionModifier = event.getDamage(absorptionFunction.get().getModifier());
+
+            }
+
+            final float f = (float) event.getFinalDamage() - (float) absorptionModifier;
+            this.shadow$setAbsorptionAmount(Math.max(this.shadow$getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
+            if (f > 0.0F && f < 3.4028235E37F && damageSource.getEntity() instanceof ServerPlayerEntity) {
+                ((ServerPlayerEntity) damageSource.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(f * 10.0F));
+            }
+            if (damage != 0.0F) {
+                if (isHuman) {
+                    ((PlayerEntity) (Object) this).causeFoodExhaustion(damageSource.getFoodExhaustion());
+                }
+                final float f2 = this.shadow$getHealth();
+
+                this.shadow$setHealth(f2 - damage);
+                this.shadow$getCombatTracker().recordDamage(damageSource, f2, damage);
+
+                if (isHuman) {
+                    return true;
+                }
+
+                this.shadow$setAbsorptionAmount(this.shadow$getAbsorptionAmount() - damage);
+            }
+            return true;
         }
-        return false;
     }
 
     /**
@@ -340,7 +340,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Redirect(method = "dropExperience()V",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/LivingEntity;getExperiencePoints(Lnet/minecraft/entity/player/PlayerEntity;)I"))
+                    target = "Lnet/minecraft/entity/LivingEntity;getExperienceReward(Lnet/minecraft/entity/player/PlayerEntity;)I"))
     protected int impl$exposeGetExperienceForDeath(final LivingEntity entity, final PlayerEntity attackingPlayer) {
         return this.bridge$getExperiencePointsOnDeath(entity, attackingPlayer);
     }
@@ -355,9 +355,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         this.bridge$damageEntity(damageSource, damage);
     }
 
-    @Inject(method = "onDeath", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     private void impl$throwDestructEntityDeath(DamageSource cause, CallbackInfo ci) {
-        final boolean throwEvent = !((WorldBridge) this.world).bridge$isFake() && Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
+        final boolean throwEvent = !((WorldBridge) this.level).bridge$isFake() && Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
         if (!this.dead) { // isDead should be set later on in this method so we aren't re-throwing the events.
             if (throwEvent && this.impl$deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
@@ -372,7 +372,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    @Inject(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V"),
+    @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;broadcastEntityEvent(Lnet/minecraft/entity/Entity;B)V"),
             cancellable = true)
     private void impl$doNotSendStateForHumans(DamageSource cause, CallbackInfo ci) {
         if (((LivingEntity) (Object) this) instanceof HumanEntity) {
@@ -380,9 +380,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    @Redirect(method = "spawnDrops",
+    @Redirect(method = "dropAllDeathLoot",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/LivingEntity;dropInventory()V"
+                    target = "Lnet/minecraft/entity/LivingEntity;dropEquipment()V"
             )
     )
     private void tracker$dropInventory(final LivingEntity thisEntity) {
@@ -401,7 +401,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
      * @reason Reroute damageEntity calls to our hook in order to prevent damage.
      */
     @Overwrite
-    public boolean attackEntityFrom(final DamageSource source, final float amount) {
+    public boolean hurt(final DamageSource source, final float amount) {
         // Sponge start - Add certain hooks for necessities
         this.lastDamageSource = source;
         if (source == null) {
@@ -422,15 +422,15 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         // Sponge end
         if (this.shadow$isInvulnerableTo(source)) {
             return false;
-        } else if (this.world.isClientSide) {
+        } else if (this.level.isClientSide) {
             return false;
             // Sponge - Also ignore our customary damage source
         } else if (this.shadow$getHealth() <= 0.0F && source != DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE) {
             return false;
-        } else if (source.isFireDamage() && this.shadow$hasEffect(Effects.FIRE_RESISTANCE)) {
+        } else if (source.isFire() && this.shadow$hasEffect(Effects.FIRE_RESISTANCE)) {
             return false;
         } else {
-            if (this.shadow$isSleeping() && !this.world.isClientSide) {
+            if (this.shadow$isSleeping() && !this.level.isClientSide) {
                 this.shadow$stopSleeping();
             }
 
@@ -480,7 +480,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             this.animationSpeed = 1.5F;
             boolean flag1 = true;
 
-            if ((float) this.hurtResistantTime > 10.0F) {
+            if ((float) this.invulnerableTime > 10.0F) {
                 if (amount <= this.lastHurt) { // Technically, this is wrong since 'amount' won't be 0 if a shield is used. However, we need bridge$damageEntityHook so that we process the shield, so we leave it as-is
                     return false;
                 }
@@ -509,7 +509,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     }
                 }
                 this.lastHurt = amount;
-                this.hurtResistantTime = 20;
+                this.invulnerableTime = 20;
                 // this.damageEntity(source, amount); // handled above
                 // Sponge end
                 this.hurtDuration = 10;
@@ -517,7 +517,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             }
 
             this.hurtDir = 0.0F;
-            final Entity entity = source.getTrueSource();
+            final Entity entity = source.getEntity();
 
             if (entity != null) {
                 if (entity instanceof LivingEntity) {
@@ -532,7 +532,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 //    WolfEntity wolfentity = (WolfEntity)entity1;
                 } else if (entity instanceof TameableEntity) {
                     TameableEntity wolfentity = (TameableEntity)entity;
-                    if (wolfentity.isTamed()) {
+                    if (wolfentity.isTame()) {
                         this.lastHurtByPlayerTime = 100;
                         LivingEntity livingentity = wolfentity.getOwner();
                         if (livingentity != null && livingentity.getType() == EntityType.PLAYER) {
@@ -546,14 +546,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
             if (flag1) {
                 if (flag) {
-                    this.world.setEntityState((LivingEntity) (Object) this, (byte) 29);
-                } else if (source instanceof EntityDamageSource && ((EntityDamageSource) source).getIsThornsDamage()) {
-                    this.world.setEntityState((LivingEntity) (Object) this, (byte) 33);
+                    this.level.broadcastEntityEvent((LivingEntity) (Object) this, (byte) 29);
+                } else if (source instanceof EntityDamageSource && ((EntityDamageSource) source).isThorns()) {
+                    this.level.broadcastEntityEvent((LivingEntity) (Object) this, (byte) 33);
                 } else {
                     final byte b0;
                     if (source == DamageSource.DROWN) {
                         b0 = 36;
-                    } else if (source.isFireDamage()) {
+                    } else if (source.isFire()) {
                         b0 = 37;
                     } else if (source == DamageSource.SWEET_BERRY_BUSH) {
                         b0 = 44;
@@ -561,7 +561,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                         b0 = 2;
                     }
 
-                    this.world.setEntityState((LivingEntity) (Object) this, b0);
+                    this.level.broadcastEntityEvent((LivingEntity) (Object) this, b0);
                 }
 
 
@@ -570,14 +570,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 }
 
                 if (entity != null) {
-                    double d1 = entity.getPosX() - this.shadow$getX();
+                    double d1 = entity.getX() - this.shadow$getX();
                     double d0;
 
-                    for (d0 = entity.getPosZ() - this.shadow$getZ(); d1 * d1 + d0 * d0 < 1.0E-4D; d0 = (Math.random() - Math.random()) * 0.01D) {
+                    for (d0 = entity.getZ() - this.shadow$getZ(); d1 * d1 + d0 * d0 < 1.0E-4D; d0 = (Math.random() - Math.random()) * 0.01D) {
                         d1 = (Math.random() - Math.random()) * 0.01D;
                     }
 
-                    this.hurtDir = (float) (MathHelper.atan2(d0, d1) * 57.2957763671875D - (double) this.rotationYaw);
+                    this.hurtDir = (float) (MathHelper.atan2(d0, d1) * 57.2957763671875D - (double) this.yRot);
                     this.shadow$knockback(0.4F, d1, d0);
                 } else {
                     this.hurtDir = (float) (Math.random() * 2.0D * 180);
@@ -607,13 +607,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final boolean flag2 = !flag;// Sponge - remove 'amount > 0.0F' since it's handled in the event
             if (flag2) {
                 this.lastDamageSource = source;
-                this.lastDamageStamp = this.world.getGameTime();
+                this.lastDamageStamp = this.level.getGameTime();
             }
 
             if ((LivingEntity) (Object) this instanceof ServerPlayerEntity) {
                 CriteriaTriggers.ENTITY_HURT_PLAYER.trigger((ServerPlayerEntity) (Object) this, source, f, amount, flag);
                 if (f1 > 0.0F && f1 < 3.4028235E37F) {
-                    ((ServerPlayerEntity) ((LivingEntity) (Object) this)).addStat(Stats.DAMAGE_BLOCKED_BY_SHIELD, Math.round(f1 * 10.0F));
+                    ((ServerPlayerEntity) (Object) this).awardStat(Stats.DAMAGE_BLOCKED_BY_SHIELD, Math.round(f1 * 10.0F));
                 }
             }
 
@@ -627,20 +627,20 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Redirect(method = "triggerItemUseEffects",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/LivingEntity;addItemParticles(Lnet/minecraft/item/ItemStack;I)V"))
+            target = "Lnet/minecraft/entity/LivingEntity;spawnItemParticles(Lnet/minecraft/item/ItemStack;I)V"))
     private void impl$hideItemParticlesIfVanished(final LivingEntity livingEntity, final ItemStack stack, final int count) {
         if (!this.bridge$isVanished()) {
             this.shadow$spawnItemParticles(stack, count);
         }
     }
 
-    @Inject(method = "attemptTeleport", at = @At("HEAD"))
+    @Inject(method = "randomTeleport", at = @At("HEAD"))
     private void impl$snapshotPositionBeforeVanillaTeleportLogic(double x, double y, double z, boolean changeState,
             CallbackInfoReturnable<Boolean> cir) {
         this.impl$preTeleportPosition = new Vector3d(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
     }
 
-    @Inject(method = "attemptTeleport", at = @At(value = "RETURN", ordinal = 0, shift = At.Shift.BY, by = 2), cancellable = true)
+    @Inject(method = "randomTeleport", at = @At(value = "RETURN", ordinal = 0, shift = At.Shift.BY, by = 2), cancellable = true)
     private void impl$callMoveEntityEventForTeleport(double x, double y, double z, boolean changeState,
             CallbackInfoReturnable<Boolean> cir) {
 
@@ -658,13 +658,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     new Vector3d(x, y, z));
 
             if (SpongeCommon.postEvent(event)) {
-                this.shadow$setPositionAndUpdate(this.impl$preTeleportPosition.getX(), this.impl$preTeleportPosition.getY(),
+                this.shadow$teleportTo(this.impl$preTeleportPosition.getX(), this.impl$preTeleportPosition.getY(),
                         this.impl$preTeleportPosition.getZ());
                 cir.setReturnValue(false);
                 return;
             }
 
-            this.shadow$setPositionAndUpdate(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(),
+            this.shadow$teleportTo(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(),
                     event.getDestinationPosition().getZ());
         }
     }
@@ -705,13 +705,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
      */
     // Start implementation of UseItemstackEvent
 
-    @Inject(method = "setActiveHand",
+    @Inject(method = "startUsingItem",
         cancellable = true,
         locals = LocalCapture.CAPTURE_FAILHARD,
         at = @At(value = "FIELD",
             target = "Lnet/minecraft/entity/LivingEntity;useItem:Lnet/minecraft/item/ItemStack;"))
     private void impl$onSetActiveItemStack(final Hand hand, final CallbackInfo ci, final ItemStack stack) {
-        if (this.world.isClientSide) {
+        if (this.level.isClientSide) {
             return;
         }
 
@@ -731,11 +731,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    @Redirect(method = "setActiveHand",
+    @Redirect(method = "startUsingItem",
         at = @At(value = "FIELD",
             target = "Lnet/minecraft/entity/LivingEntity;useItemRemaining:I"))
     private void impl$getItemDuration(final LivingEntity this$0, final int count) {
-        if (this.world.isClientSide) {
+        if (this.level.isClientSide) {
             this.useItemRemaining = count;
         }
         // If we're on the server, do nothing, since we already set this field on onSetActiveItemStack
@@ -764,7 +764,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             target = "Lnet/minecraft/entity/LivingEntity;getUseItemRemainingTicks()I",
             ordinal = 0))
     private int impl$onGetRemainingItemDuration(final LivingEntity self) {
-        if (this.world.isClientSide) {
+        if (this.level.isClientSide) {
             return self.getUseItemRemainingTicks();
         }
 
@@ -796,7 +796,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/LivingEntity;triggerItemUseEffects(Lnet/minecraft/item/ItemStack;I)V"))
     private void impl$onUpdateItemUse(final CallbackInfo ci) {
-        if (this.world.isClientSide) {
+        if (this.level.isClientSide) {
             return;
         }
 
@@ -821,12 +821,12 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    @Redirect(method = "onItemUseFinish",
+    @Redirect(method = "completeUsingItem",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/LivingEntity;setHeldItem(Lnet/minecraft/util/Hand;Lnet/minecraft/item/ItemStack;)V"))
+            target = "Lnet/minecraft/entity/LivingEntity;setItemInHand(Lnet/minecraft/util/Hand;Lnet/minecraft/item/ItemStack;)V"))
     private void impl$onSetHeldItem(final LivingEntity self, final Hand hand, final ItemStack stack) {
-        if (this.world.isClientSide) {
-            self.setHeldItem(hand, stack);
+        if (this.level.isClientSide) {
+            self.setItemInHand(hand, stack);
             return;
         }
 
@@ -864,13 +864,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Redirect(method = "stopActiveHand",
+    @Redirect(method = "releaseUsingItem",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/item/ItemStack;onPlayerStoppedUsing(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;I)V"))
+            target = "Lnet/minecraft/item/ItemStack;releaseUsing(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;I)V"))
     // stopActiveHand
     private void impl$onStopPlayerUsing(final ItemStack stack, final World world, final LivingEntity self, final int duration) {
-        if (this.world.isClientSide) {
-            stack.onPlayerStoppedUsing(world, self, duration);
+        if (this.level.isClientSide) {
+            stack.releaseUsing(world, self, duration);
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -879,15 +879,15 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             this.impl$addSelfToFrame(frame, snapshot, handType);
             if (!SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventStop(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 duration, duration, snapshot))) {
-                stack.onPlayerStoppedUsing(world, self, duration);
+                stack.releaseUsing(world, self, duration);
             }
         }
     }
 
-    @Inject(method = "resetActiveHand",
+    @Inject(method = "stopUsingItem",
         at = @At("HEAD"))
     private void impl$onResetActiveHand(final CallbackInfo ci) {
-        if (this.world.isClientSide) {
+        if (this.level.isClientSide) {
             return;
         }
 

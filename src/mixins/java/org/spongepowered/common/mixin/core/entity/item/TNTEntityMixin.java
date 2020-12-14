@@ -127,7 +127,7 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$updateTNTPushPrime(final CallbackInfo ci) {
-        if (this.life == this.bridge$fuseDuration - 1 && !this.world.isClientSide) {
+        if (this.life == this.bridge$fuseDuration - 1 && !this.level.isClientSide) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 if (this.impl$detonator != null) {
                     frame.pushCause(this.impl$detonator);

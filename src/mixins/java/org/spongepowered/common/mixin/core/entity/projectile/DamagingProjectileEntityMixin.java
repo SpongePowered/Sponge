@@ -39,7 +39,7 @@ public abstract class DamagingProjectileEntityMixin extends ProjectileEntityMixi
 
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/DamagingProjectileEntity;onHit(Lnet/minecraft/util/math/RayTraceResult;)V"))
     private void impl$callCollideImpactEvent(DamagingProjectileEntity projectile, RayTraceResult result) {
-        if (result.getType() == RayTraceResult.Type.MISS || ((WorldBridge) this.world).bridge$isFake()) {
+        if (result.getType() == RayTraceResult.Type.MISS || ((WorldBridge) this.level).bridge$isFake()) {
             this.shadow$onHit(result);
             return;
         }

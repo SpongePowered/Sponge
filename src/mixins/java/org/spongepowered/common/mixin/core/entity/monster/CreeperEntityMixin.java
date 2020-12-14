@@ -107,7 +107,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
     @Inject(method = "setSwellDir", at = @At("INVOKE"), cancellable = true)
     private void onStateChange(final int state, final CallbackInfo ci) {
         this.bridge$setFuseDuration(this.impl$fuseDuration);
-        if (this.world.isClientSide) {
+        if (this.level.isClientSide) {
             return;
         }
 
@@ -124,7 +124,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
 
     @Inject(method = "setSwellDir", at = @At("RETURN"))
     private void postStateChange(final int state, final CallbackInfo ci) {
-        if (this.world.isClientSide) {
+        if (this.level.isClientSide) {
             return;
         }
 

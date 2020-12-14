@@ -244,12 +244,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             destinationWorld.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((ServerPlayerEntity) (Object) this).getId());
 
             if (this.shadow$getLevel() != destinationWorld) {
-                this.shadow$setLocationAndAngles(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.rotationYaw, this.rotationPitch);
+                this.shadow$absMoveTo(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.yRot, this.xRot);
 
                 EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) (Object) this, this.shadow$getLevel(),
                         (net.minecraft.world.server.ServerWorld) location.getWorld(), destinationWorld, false);
             } else {
-                this.connection.teleport(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.rotationYaw, this.rotationPitch,
+                this.connection.teleport(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.yRot, this.xRot,
                         new HashSet<>());
                 this.connection.resetPosition();
             }
@@ -327,7 +327,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public boolean bridge$keepInventory() {
         if (this.impl$keepInventory == null) {
-            return this.world.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
+            return this.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
         }
         return this.impl$keepInventory;
     }
@@ -357,7 +357,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     @SuppressWarnings("UnstableApiUsage")
     public Set<SkinPart> bridge$getSkinParts() {
-        final int mask = this.shadow$getDataManager().get(PLAYER_MODEL_FLAG);
+        final int mask = this.shadow$getEntityData().get(PLAYER_MODEL_FLAG);
         if (this.impl$skinPartMask != mask) {
             this.impl$skinParts = Sponge.getRegistry().getCatalogRegistry().streamAllOf(SkinPart.class)
                     .map(part -> (SpongeSkinPart) part)
@@ -376,7 +376,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             mask |= ((SpongeSkinPart) part).getMask();
         }
 
-        this.shadow$getDataManager().set(PLAYER_MODEL_FLAG, (byte) mask);
+        this.shadow$getEntityData().set(PLAYER_MODEL_FLAG, (byte) mask);
         this.impl$skinParts = ImmutableSet.copyOf(skinParts);
         this.impl$skinPartMask = mask;
     }
@@ -461,12 +461,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                     return;
                 }
 
-                this.shadow$setPosition(posEvent.getDestinationPosition().getX(), posEvent.getDestinationPosition().getY(),
+                this.shadow$setPos(posEvent.getDestinationPosition().getX(), posEvent.getDestinationPosition().getY(),
                         posEvent.getDestinationPosition().getZ());
 
                 if (!SpongeCommon.postEvent(rotateEvent)) {
-                    this.rotationYaw = (float) rotateEvent.getToRotation().getX();
-                    this.rotationPitch = (float) rotateEvent.getToRotation().getY();
+                    this.yRot = (float) rotateEvent.getToRotation().getX();
+                    this.xRot = (float) rotateEvent.getToRotation().getY();
                 }
 
                 EntityUtil.performPostChangePlayerWorldLogic(player, (net.minecraft.world.server.ServerWorld) preEvent.getOriginalWorld(),
@@ -483,7 +483,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @javax.annotation.Nullable
     @Overwrite
     public Entity changeDimension(ServerWorld destination) {
-        if (this.shadow$getEntityWorld().isClientSide || this.removed) {
+        if (this.shadow$getCommandSenderWorld().isClientSide || this.removed) {
             return (ServerPlayerEntity) (Object) this;
         }
 
@@ -533,7 +533,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
         // Sponge end
 
-        final boolean flag = this.world.getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES) && !event.isMessageCancelled();
+        final boolean flag = this.level.getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES) && !event.isMessageCancelled();
         if (flag) {
             final ITextComponent itextcomponent = this.shadow$getCombatTracker().getDeathMessage();
             this.connection.sendPacket(new SCombatPacket(this.shadow$getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent), (p_212356_2_) -> {
@@ -593,12 +593,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             this.shadow$createWitherRose(livingentity);
         }
 
-        this.world.broadcastEntityEvent((ServerPlayerEntity) (Object) this, (byte) 3);
+        this.level.broadcastEntityEvent((ServerPlayerEntity) (Object) this, (byte) 3);
         this.shadow$addStat(Stats.DEATHS);
         this.shadow$resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH));
         this.shadow$resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
-        this.shadow$extinguish();
-        this.shadow$setFlag(0, false);
+        this.shadow$clearFire();
+        this.shadow$setSharedFlag(0, false);
         this.shadow$getCombatTracker().recheckStatus();
     }
 

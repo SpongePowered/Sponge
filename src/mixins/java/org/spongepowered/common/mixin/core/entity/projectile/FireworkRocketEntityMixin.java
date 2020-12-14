@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
 import org.spongepowered.api.event.CauseStackManager;
@@ -97,7 +96,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
             target = "Lnet/minecraft/world/World;broadcastEntityEvent(Lnet/minecraft/entity/Entity;B)V")
     )
     private void impl$useSpongeExplosion(final World world, final Entity self, final byte state) {
-        if (this.world.isClientSide) {
+        if (this.level.isClientSide) {
             world.broadcastEntityEvent(self, state);
             return;
         }
@@ -117,7 +116,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$postPrimeEvent(final CallbackInfo ci) {
-        if (this.life == 1 && !this.world.isClientSide) {
+        if (this.life == 1 && !this.level.isClientSide) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$projectileSource);

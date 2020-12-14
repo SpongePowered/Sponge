@@ -30,9 +30,7 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.GoalSelector;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -68,9 +66,10 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 @Mixin(MobEntity.class)
 public abstract class MobEntityMixin extends LivingEntityMixin {
@@ -78,10 +77,12 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     // @formatter:off
     @Shadow @Final protected GoalSelector goalSelector;
     @Shadow @Final protected GoalSelector targetSelector;
-    @Shadow @Nullable private LivingEntity attackTarget;
+    @Shadow @Nullable private LivingEntity target;
     @Shadow @Nullable public abstract net.minecraft.entity.Entity shadow$getLeashHolder();
     @Shadow protected abstract void shadow$registerGoals();
+    @Shadow protected abstract void shadow$maybeDisableShield(PlayerEntity p_233655_1_, ItemStack p_233655_2_, ItemStack p_233655_3_);
     // @formatter:on
+
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/MobEntity;registerGoals()V"))
     private void impl$registerGoals(final MobEntity this$0) {
@@ -102,14 +103,14 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         }
     }
 
-    @Inject(method = "clearLeashed",
+    @Inject(method = "dropLeash",
         at = @At(value = "FIELD",
             target = "Lnet/minecraft/entity/MobEntity;leashHolder:Lnet/minecraft/entity/Entity;",
             opcode = Opcodes.PUTFIELD
         ),
         cancellable = true)
     private void impl$ThrowUnleashEvent(final boolean sendPacket, final boolean dropLead, final CallbackInfo ci) {
-        if (this.world.isClientSide) {
+        if (this.level.isClientSide) {
             return;
         }
 
@@ -137,14 +138,14 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
      *
      * @param entitylivingbaseIn The entity living base coming in
      */
-    @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
     private void onSetAttackTarget(@Nullable final LivingEntity entitylivingbaseIn, final CallbackInfo ci) {
-        if (this.world.isClientSide || entitylivingbaseIn == null) {
+        if (this.level.isClientSide || entitylivingbaseIn == null) {
             return;
         }
         //noinspection ConstantConditions
         if (EntityUtil.isUntargetable((net.minecraft.entity.Entity) (Object) this, entitylivingbaseIn)) {
-            this.attackTarget = null;
+            this.target = null;
             ci.cancel();
             return;
         }
@@ -153,7 +154,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
             if (event.isCancelled()) {
                 ci.cancel();
             } else {
-                this.attackTarget = ((LivingEntity) event.getTarget().orElse(null));
+                this.target = ((LivingEntity) event.getTarget().orElse(null));
             }
         }
     }
@@ -167,16 +168,16 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
      */
     @Nullable
     @Overwrite
-    public LivingEntity getAttackTarget() {
+    public LivingEntity getTarget() {
         // Sponge start
-        if (this.attackTarget != null) {
+        if (this.target != null) {
             //noinspection ConstantConditions
-            if (EntityUtil.isUntargetable((net.minecraft.entity.Entity) (Object) this, this.attackTarget)) {
-                this.attackTarget = null;
+            if (EntityUtil.isUntargetable((net.minecraft.entity.Entity) (Object) this, this.target)) {
+                this.target = null;
             }
         }
         // Sponge end
-        return this.attackTarget;
+        return this.target;
     }
 
     /**
@@ -185,7 +186,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
      * to avoid compatibility issues with Forge's change of the gamerule check to an
      * event check that doesn't exist in sponge except in the case of griefing data.
      */
-    @Redirect(method = "livingTick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/MobEntity;canPickUpLoot()Z"))
+    @Redirect(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/MobEntity;canPickUpLoot()Z"))
     private boolean impl$onCanGrief(final MobEntity thisEntity) {
         return thisEntity.canPickUpLoot() && ((GrieferBridge) this).bridge$canGrief();
     }
@@ -206,7 +207,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
      * @return True if the attack was successful
      */
     @Overwrite
-    public boolean attackEntityAsMob(final net.minecraft.entity.Entity targetEntity) {
+    public boolean doHurtTarget(final net.minecraft.entity.Entity targetEntity) {
         // Sponge Start - Prepare our event values
         // float baseDamage = this.getEntityAttribute(Attributes.attackDamage).getAttributeValue();
         final double originalBaseDamage = this.shadow$getAttribute(Attributes.ATTACK_DAMAGE).getValue();
@@ -219,11 +220,11 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
             originalFunctions.addAll(DamageEventHandler
                 .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), ((LivingEntity) targetEntity).getMobType(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
             // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
-            knockbackModifier += EnchantmentHelper.getKnockbackModifier((MobEntity) (Object) this);
+            knockbackModifier += EnchantmentHelper.getKnockbackBonus((MobEntity) (Object) this);
         }
 
         // Sponge Start - Throw our event and handle appropriately
-        final DamageSource damageSource = DamageSource.causeMobDamage((MobEntity) (Object) this);
+        final DamageSource damageSource = DamageSource.mobAttack((MobEntity) (Object) this);
         PhaseTracker.getCauseStackManager().pushCause(damageSource);
         final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
             originalFunctions, knockbackModifier, originalBaseDamage);
@@ -234,35 +235,29 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         }
         knockbackModifier = event.getKnockbackModifier();
         // boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causeMobDamage(this), baseDamage);
-        final boolean attackSucceeded = targetEntity.attackEntityFrom(damageSource, (float) event.getFinalOutputDamage());
+        final boolean attackSucceeded = targetEntity.hurt(damageSource, (float) event.getFinalOutputDamage());
         // Sponge End
         if (attackSucceeded) {
             if (knockbackModifier > 0 && targetEntity instanceof LivingEntity) {
-                ((LivingEntity)targetEntity).knockBack((MobEntity) (Object) this, (float) knockbackModifier * 0.5F,
-                    MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F)), -MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F)));
-                this.shadow$setMotion(this.shadow$getMotion().mul(0.6D, 1.0D, 0.6D));
+                ((LivingEntity)targetEntity).knockback(knockbackModifier * 0.5F,
+                        MathHelper.sin(this.yRot * ((float)Math.PI / 180F)), -MathHelper.cos(this.yRot * ((float)Math.PI / 180F)));
+                this.shadow$setDeltaMovement(this.shadow$getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
             }
 
-            final int j = EnchantmentHelper.getFireAspectModifier((MobEntity) (Object) this);
+            final int j = EnchantmentHelper.getFireAspect((MobEntity) (Object) this);
 
             if (j > 0) {
-                targetEntity.setFire(j * 4);
+                targetEntity.setSecondsOnFire(j * 4);
             }
 
             if (targetEntity instanceof PlayerEntity) {
                 final PlayerEntity playerentity = (PlayerEntity) targetEntity;
-                final ItemStack itemstack = this.shadow$getMainHandItem();
-                final ItemStack itemstack1 = playerentity.isHandActive() ? playerentity.getActiveItemStack() : ItemStack.EMPTY;
-                if (!itemstack.isEmpty() && !itemstack1.isEmpty() && itemstack.getItem() instanceof AxeItem && itemstack1.getItem() == Items.SHIELD) {
-                    final float f2 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier((MobEntity) (Object) this) * 0.05F;
-                    if (this.random.nextFloat() < f2) {
-                        playerentity.getCooldownTracker().setCooldown(Items.SHIELD, 100);
-                        this.world.setEntityState(playerentity, (byte)30);
-                    }
-                }
+                final ItemStack mainHandItem = this.shadow$getMainHandItem();
+                final ItemStack useItem = playerentity.isUsingItem() ? playerentity.getUseItem() : ItemStack.EMPTY;
+                this.shadow$maybeDisableShield(playerentity, mainHandItem, useItem);
             }
 
-            this.shadow$applyEnchantments((MobEntity) (Object) this, targetEntity);
+            this.shadow$doEnchantDamageEffects((MobEntity) (Object) this, targetEntity);
             this.shadow$setLastHurtMob(targetEntity);
         }
 
@@ -271,8 +266,8 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
 
     @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(final double value) {
-        if (!this.world.isClientSide) {
-            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getHardDespawnRange(), 2);
+        if (!this.level.isClientSide) {
+            return Math.pow(((WorldInfoBridge) this.level.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getHardDespawnRange(), 2);
         }
         return value;
     }
@@ -280,16 +275,16 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     // Note that this should inject twice.
     @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(final double value) {
-        if (!this.world.isClientSide) {
-            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getSoftDespawnRange(), 2);
+        if (!this.level.isClientSide) {
+            return Math.pow(((WorldInfoBridge) this.level.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getSoftDespawnRange(), 2);
         }
         return value;
     }
 
     @ModifyConstant(method = "checkDespawn", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(final int value) {
-        if (!this.world.isClientSide) {
-            return ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getMinimumLife() * 20;
+        if (!this.level.isClientSide) {
+            return ((WorldInfoBridge) this.level.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getMinimumLife() * 20;
         }
         return value;
     }
@@ -299,17 +294,17 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
             method = "checkDespawn()V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/World;getClosestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;"))
+                    target = "Lnet/minecraft/world/World;getNearestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;"))
     private PlayerEntity impl$getClosestPlayerForSpawning(final World world, final net.minecraft.entity.Entity entityIn, final double distance) {
         double bestDistance = -1.0D;
         PlayerEntity result = null;
 
-        for (final PlayerEntity player : world.getPlayers()) {
+        for (final PlayerEntity player : world.players()) {
             if (player == null || player.removed || !((PlayerEntityBridge) player).bridge$affectsSpawning()) {
                 continue;
             }
 
-            final double playerDistance = player.getDistanceSq(entityIn.getPosX(), entityIn.getPosY(), entityIn.getPosZ());
+            final double playerDistance = player.distanceToSqr(entityIn);
 
             if ((distance < 0.0D || playerDistance < distance * distance) && (bestDistance == -1.0D || playerDistance < bestDistance)) {
                 bestDistance = playerDistance;

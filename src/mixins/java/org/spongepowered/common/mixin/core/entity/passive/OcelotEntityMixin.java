@@ -65,7 +65,7 @@ public abstract class OcelotEntityMixin extends AgeableEntityMixin {
     // TODO maybe registerGoals? is this still needed?
     @Inject(method = "func_213529_dV", at = @At(value = "HEAD"), cancellable = true)
     private void impl$IgnoreAISetupOnClientWorld(CallbackInfo ci) {
-        if (this.world.isClientSide) {
+        if (this.level.isClientSide) {
             // Because ocelot AI tasks are added on the client, for whatever reason
             ci.cancel();
         }

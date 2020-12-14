@@ -195,7 +195,9 @@
     "entity.player.ChatVisibilityMixin",
     "entity.projectile.EggEntityMixin",
     "entity.projectile.SmallFireballEntityMixin",
-    "entity.projectile.SnowballEntityMixin"
+    "entity.projectile.SnowballEntityMixin",
+    "block.AbstractFireBlockMixin",
+    "block.CampfireBlockMixin"
   ],
   "client": [
     "client.MinecraftMixin",
