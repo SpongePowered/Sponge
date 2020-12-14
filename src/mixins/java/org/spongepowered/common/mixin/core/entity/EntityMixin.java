@@ -466,7 +466,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             frame.pushCause(this);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PORTAL);
 
-            Teleporter p = destination.getPortalForcer()
+            Teleporter p = destination.getPortalForcer();
             final DimensionChangeResult<Entity> result = EntityUtil.invokePortalTo((Entity) (Object) this, new WrappedITeleporterPortalType(
                     (PlatformITeleporterBridge) destination.getPortalForcer(), null), destination);
 

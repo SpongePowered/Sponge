@@ -76,6 +76,6 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
     @Override
     public boolean bridge$performAutosaveChecks() {
-        return this.shadow$isServerRunning();
+        return this.shadow$isRunning();
     }
 }

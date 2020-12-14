@@ -102,7 +102,7 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
         return NBTDataTypes.BLOCK_ENTITY;
     }
 
-    @Inject(method = "writeInternal", at = @At("RETURN"))
+    @Inject(method = "saveMetadata", at = @At("RETURN"))
     private void impl$writeSpongeData(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
         if (this.data$hasSpongeData()) {
             final CompoundNBT forgeCompound = compound.getCompound(Constants.Forge.FORGE_DATA);
@@ -117,8 +117,8 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
         }
     }
 
-    @Inject(method = "read", at = @At("RETURN"))
-    private void impl$readSpongeData(final CompoundNBT compound, final CallbackInfo ci) {
+    @Inject(method = "load", at = @At("RETURN"))
+    private void impl$readSpongeData(final BlockState p_230337_1_, final CompoundNBT compound, final CallbackInfo ci) {
         // If we are in Forge data is already present
         this.data$setCompound(compound); // For vanilla we set the incoming nbt
         if (this.data$hasSpongeData()) {

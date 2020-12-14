@@ -351,7 +351,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
      * @reason This shouldn't be used internally but a mod may still call it so we simply reroute to our hook.
      */
     @Overwrite
-    protected void damageEntity(final DamageSource damageSource, final float damage) {
+    protected void actuallyHurt(final DamageSource damageSource, final float damage) {
         this.bridge$damageEntity(damageSource, damage);
     }
 
