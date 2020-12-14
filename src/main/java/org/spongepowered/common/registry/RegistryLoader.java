@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import java.util.function.Consumer;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryKey;
 
@@ -35,24 +36,39 @@ public final class RegistryLoader<T> {
 
     private final Map<ResourceKey, T> values = new HashMap<>();
 
-    public static <T> RegistryLoader<T> of() {
-        return new RegistryLoader<>();
+    private RegistryLoader() {
     }
 
-    public RegistryLoader<T> add(final RegistryKey<T> key, final Function<ResourceKey, ? super T> function) {
+    public static <T> RegistryLoader<T> of(final Consumer<RegistryLoader<T>> consumer) {
+        final RegistryLoader<T> loader = new RegistryLoader<>();
+        consumer.accept(loader);
+        return loader;
+    }
+
+    public RegistryLoader<T> add(final RegistryKey<? extends T> key, final Function<ResourceKey, ? extends T> function) {
         this.values.put(key.location(), function.apply(key.location()));
         return this;
     }
 
-    public RegistryLoader<T> addAll(final Function<ResourceKey, ? super T> function, final RegistryKey<T>... keys) {
-        for (final RegistryKey<T> key : keys) {
-            this.values.put(key.location(), function.apply(key.location()));
-        }
+    public RegistryLoader<T> mapping(final Function<ResourceKey, ? extends T> function, final Consumer<Mapping<T>> consumer) {
+        consumer.accept(new Mapping<T>() {
+            @Override
+            public Mapping<T> add(final RegistryKey<? extends T>... keys) {
+                for (final RegistryKey<? extends T> key : keys) {
+                    RegistryLoader.this.values.put(key.location(), function.apply(key.location()));
+                }
+                return this;
+            }
+        });
 
         return this;
     }
 
     public Map<ResourceKey, T> values() {
         return this.values;
+    }
+
+    public interface Mapping<T> {
+        Mapping<T> add(final RegistryKey<? extends T>... keys);
     }
 }

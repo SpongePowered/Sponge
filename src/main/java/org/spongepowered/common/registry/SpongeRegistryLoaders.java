@@ -49,46 +49,43 @@ public final class SpongeRegistryLoaders {
     // @formatter:off
 
     public static RegistryLoader<AccountDeletionResultType> accountDeletionResultType() {
-        return RegistryLoader.<AccountDeletionResultType>of()
-            .addAll(SpongeAccountDeletionResultType::new,
-                    AccountDeletionResultTypes.ABSENT,
-                    AccountDeletionResultTypes.FAILED,
-                    AccountDeletionResultTypes.SUCCESS,
-                    AccountDeletionResultTypes.UNDELETABLE
-            )
-        ;
+        return RegistryLoader.of(loader -> {
+            loader .mapping(SpongeAccountDeletionResultType::new, mapper -> mapper.add(
+                  AccountDeletionResultTypes.ABSENT,
+                  AccountDeletionResultTypes.FAILED,
+                  AccountDeletionResultTypes.SUCCESS,
+                  AccountDeletionResultTypes.UNDELETABLE
+            ));
+        });
     }
 
     public static RegistryLoader<BanType> banType() {
-        return RegistryLoader.<BanType>of()
-            .add(BanTypes.IP, key -> new SpongeBanType(key, Ban.IP.class))
-            .add(BanTypes.PROFILE, key -> new SpongeBanType(key, Ban.Profile.class))
-        ;
+        return RegistryLoader.of(loader -> {
+            loader.add(BanTypes.IP, key -> new SpongeBanType(key, Ban.IP.class));
+            loader.add(BanTypes.PROFILE, key -> new SpongeBanType(key, Ban.Profile.class));
+        });
     }
 
     public static RegistryLoader<BodyPart> bodyPart() {
-        return RegistryLoader.<BodyPart>of()
-            .addAll(SpongeBodyPart::new,
-                    BodyParts.CHEST,
-                    BodyParts.HEAD,
-                    BodyParts.LEFT_ARM,
-                    BodyParts.LEFT_LEG,
-                    BodyParts.RIGHT_ARM,
-                BodyParts.RIGHT_LEG
-            )
-        ;
+        return RegistryLoader.of(loader -> {
+            loader.mapping(SpongeBodyPart::new, mapper -> mapper.add(
+                  BodyParts.CHEST,
+                  BodyParts.HEAD,
+                  BodyParts.LEFT_ARM,
+                  BodyParts.LEFT_LEG,
+                  BodyParts.RIGHT_ARM,
+                  BodyParts.RIGHT_LEG
+            ));
+        });
     }
 
     public static RegistryLoader<CatalogedValueParameter<?>> catalogedValueParameter() {
-        return RegistryLoader.of()
-            .add(CatalogedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new)
-            .add(CatalogedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new)
-            .add(CatalogedValueParameters.BLOCK_STATE, k -> StandardCatalogedArgumentParser.createConverter(k, BlockStateArgument.block(), (reader, cause, state) -> (BlockState) state.getState()))
-            .add(CatalogedValueParameters.BOOLEAN, k -> StandardCatalogedArgumentParser.createIdentity(k, BoolArgumentType.bool()))
-
-
-
-        ;
+        return RegistryLoader.of(loader -> {
+            loader.add(CatalogedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
+            loader.add(CatalogedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
+            loader.add(CatalogedValueParameters.BLOCK_STATE, k -> StandardCatalogedArgumentParser.createConverter(k, BlockStateArgument.block(), (reader, cause, state) -> (BlockState) state.getState()));
+            loader.add(CatalogedValueParameters.BOOLEAN, k -> StandardCatalogedArgumentParser.createIdentity(k, BoolArgumentType.bool()));
+        });
     }
 
     // @formatter:on
