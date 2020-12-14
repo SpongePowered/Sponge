@@ -52,13 +52,15 @@ import java.util.function.Consumer;
 @Mixin(CreeperEntity.class)
 public abstract class CreeperEntityMixin extends MonsterEntityMixin implements FusedExplosiveBridge, ExplosiveBridge {
 
-    @Shadow private int timeSinceIgnited;
-    @Shadow private int fuseTime;
+    // @formatter:off
+    @Shadow private int swell;
+    @Shadow private int maxSwell;
     @Shadow private int explosionRadius;
 
     @Shadow public abstract void shadow$ignite();
-    @Shadow public abstract int shadow$getCreeperState();
-    @Shadow public abstract void shadow$setCreeperState(int state);
+    @Shadow public abstract int shadow$getSwellDir();
+    @Shadow public abstract void shadow$setSwellDir(int state);
+    // @formatter:on
 
     private int impl$fuseDuration = Constants.Entity.Creeper.FUSE_DURATION;
     private boolean impl$interactPrimeCancelled;
@@ -89,7 +91,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
 
     @Override
     public int bridge$getFuseTicksRemaining() {
-        return this.fuseTime - this.timeSinceIgnited;
+        return this.maxSwell - this.swell;
     }
 
     @Override
@@ -98,30 +100,29 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
         // assuming it is within range of a player. Every tick that the creeper
         // is not within a range of a player, timeSinceIgnited is decremented
         // by one until zero.
-        this.timeSinceIgnited = 0;
-        this.fuseTime = fuseTicks;
+        this.swell = 0;
+        this.maxSwell = fuseTicks;
     }
 
-
-    @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
+    @Inject(method = "setSwellDir", at = @At("INVOKE"), cancellable = true)
     private void onStateChange(final int state, final CallbackInfo ci) {
         this.bridge$setFuseDuration(this.impl$fuseDuration);
         if (this.world.isClientSide) {
             return;
         }
 
-        final boolean isPrimed = this.shadow$getCreeperState() == Constants.Entity.Creeper.STATE_PRIMED;
+        final boolean isPrimed = this.shadow$getSwellDir() == Constants.Entity.Creeper.STATE_PRIMED;
 
         if (!isPrimed && state == Constants.Entity.Creeper.STATE_PRIMED && !this.bridge$shouldPrime()) {
             ci.cancel();
         } else if (isPrimed && state == Constants.Entity.Creeper.STATE_IDLE && !this.bridge$shouldDefuse()) {
             ci.cancel();
-        } else if (this.shadow$getCreeperState() != state) {
+        } else if (this.shadow$getSwellDir() != state) {
             this.impl$stateDirty = true;
         }
     }
 
-    @Inject(method = "setCreeperState(I)V", at = @At("RETURN"))
+    @Inject(method = "setSwellDir", at = @At("RETURN"))
     private void postStateChange(final int state, final CallbackInfo ci) {
         if (this.world.isClientSide) {
             return;
@@ -137,7 +138,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
         }
     }
 
-    @Redirect(method = "explode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"))
+    @Redirect(method = "explodeCreeper", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;explode(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"))
     @Nullable
     private net.minecraft.world.Explosion impl$useSpongeExplosion(final net.minecraft.world.World world, final Entity self, final double x,
         final double y, final double z, final float strength, final Mode mode) {
@@ -153,14 +154,14 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
                 });
     }
 
-    @Inject(method = "explode", at = @At("RETURN"))
+    @Inject(method = "explodeCreeper", at = @At("RETURN"))
     private void postExplode(final CallbackInfo ci) {
         if (this.impl$detonationCancelled) {
             this.impl$detonationCancelled = this.dead = false;
         }
     }
 
-    @Redirect(method = "func_230254_b_", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/CreeperEntity;ignite()V"))
+    @Redirect(method = "mobInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/CreeperEntity;ignite()V"))
     private void impl$onProcessIgnition(final CreeperEntity self) {
         this.impl$interactPrimeCancelled = !this.bridge$shouldPrime();
         if (!this.impl$interactPrimeCancelled) {
@@ -168,14 +169,14 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
         }
     }
 
-    @Redirect(method = "func_230254_b_",
+    @Redirect(method = "mobInteract",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/item/ItemStack;damageItem(ILnet/minecraft/entity/LivingEntity;Ljava/util/function/Consumer;)V"
+            target = "Lnet/minecraft/item/ItemStack;hurtAndBreak(ILnet/minecraft/entity/LivingEntity;Ljava/util/function/Consumer;)V"
         )
     )
     private void impl$onDamageFlintAndSteel(ItemStack fas, int amount, LivingEntity player, Consumer<LivingEntity> onBroken) {
         if (!this.impl$interactPrimeCancelled) {
-            fas.damageItem(amount, player, onBroken);
+            fas.hurtAndBreak(amount, player, onBroken);
         }
         this.impl$interactPrimeCancelled = false;
     }

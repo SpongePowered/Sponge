@@ -28,7 +28,6 @@ import net.minecraft.entity.projectile.DamagingProjectileEntity;
 import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.DamagingProjectile;
-import org.spongepowered.api.entity.projectile.explosive.fireball.FireballEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -38,17 +37,17 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 @Mixin(DamagingProjectileEntity.class)
 public abstract class DamagingProjectileEntityMixin extends ProjectileEntityMixin {
 
-    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/DamagingProjectileEntity;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/DamagingProjectileEntity;onHit(Lnet/minecraft/util/math/RayTraceResult;)V"))
     private void impl$callCollideImpactEvent(DamagingProjectileEntity projectile, RayTraceResult result) {
         if (result.getType() == RayTraceResult.Type.MISS || ((WorldBridge) this.world).bridge$isFake()) {
-            this.shadow$onImpact(result);
+            this.shadow$onHit(result);
             return;
         }
 
         if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((DamagingProjectile) this).get(Keys.SHOOTER).orElse(null), result)) {
             this.shadow$remove();
         } else {
-            this.shadow$onImpact(result);
+            this.shadow$onHit(result);
         }
     }
 }

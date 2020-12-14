@@ -255,7 +255,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
                 final ItemStack itemstack1 = playerentity.isHandActive() ? playerentity.getActiveItemStack() : ItemStack.EMPTY;
                 if (!itemstack.isEmpty() && !itemstack1.isEmpty() && itemstack.getItem() instanceof AxeItem && itemstack1.getItem() == Items.SHIELD) {
                     final float f2 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier((MobEntity) (Object) this) * 0.05F;
-                    if (this.rand.nextFloat() < f2) {
+                    if (this.random.nextFloat() < f2) {
                         playerentity.getCooldownTracker().setCooldown(Items.SHIELD, 100);
                         this.world.setEntityState(playerentity, (byte)30);
                     }

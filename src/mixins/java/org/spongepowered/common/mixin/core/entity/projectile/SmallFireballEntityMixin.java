@@ -49,13 +49,13 @@ public abstract class SmallFireballEntityMixin extends DamagingProjectileEntityM
      * @return
      */
     @Redirect(
-        method = "onImpact",
+        method = "onHitBlock",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/IWorldReader;isAirBlock(Lnet/minecraft/util/math/BlockPos;)Z"
+            target = "Lnet/minecraft/world/World;isEmptyBlock(Lnet/minecraft/util/math/BlockPos;)Z"
         )
     )
-    private boolean onCanGrief(final IWorldReader world, final BlockPos pos) {
-        return ((GrieferBridge) this).bridge$canGrief() && world.isAirBlock(pos);
+    private boolean onCanGrief(final World world, final BlockPos pos) {
+        return ((GrieferBridge) this).bridge$canGrief() && world.isEmptyBlock(pos);
     }
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SilverfishBlock;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.monster.SilverfishEntity;
 import net.minecraft.util.math.BlockPos;
@@ -40,7 +41,9 @@ import org.spongepowered.common.bridge.entity.GrieferBridge;
 @Mixin(targets = "net/minecraft/entity/monster/SilverfishEntity$SummonSilverfishGoal")
 public abstract class SilverfishEntity_SummonSilverfishGoalMixin extends Goal {
 
+    // @formatter:off
     @Shadow(aliases = "this$0") @Final private SilverfishEntity silverfish;
+    // @formatter:on
 
     /**
      * @author gabizou - April 13th, 2018
@@ -60,10 +63,10 @@ public abstract class SilverfishEntity_SummonSilverfishGoalMixin extends Goal {
             target = "Lnet/minecraft/world/World;destroyBlock(Lnet/minecraft/util/math/BlockPos;ZLnet/minecraft/entity/Entity;)Z"
         )
     )
-    private boolean impl$onCanGrief(final World world, final BlockPos pos, final boolean dropBlock) {
+    private boolean impl$onCanGrief(final World world, final BlockPos pos, final boolean dropBlock, final Entity entity) {
         final BlockState blockState = world.getBlockState(pos);
-        return ((GrieferBridge) this.silverfish).bridge$canGrief()
+        return ((GrieferBridge) entity).bridge$canGrief()
                ? world.destroyBlock(pos, dropBlock)
-               : world.setBlockState(pos, ((SilverfishBlock) blockState.getBlock()).getMimickedBlock().getDefaultState(), 3);
+               : world.setBlock(pos, ((SilverfishBlock) blockState.getBlock()).getHostBlock().defaultBlockState(), 3);
     }
 }

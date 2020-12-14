@@ -45,9 +45,9 @@ import java.util.Random;
 @Mixin(OcelotEntity.class)
 public abstract class OcelotEntityMixin extends AgeableEntityMixin {
 
-    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
+    @Redirect(method = "mobInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     private int impl$ThrowTameEvent(Random rand, int bound, PlayerEntity player, Hand hand) {
-        ItemStack stack = player.getHeldItem(hand);
+        ItemStack stack = player.getItemInHand(hand);
         int random = rand.nextInt(bound);
         if (random == 0) {
             stack.setCount(stack.getCount() + 1);
@@ -62,6 +62,7 @@ public abstract class OcelotEntityMixin extends AgeableEntityMixin {
         return 1;
     }
 
+    // TODO maybe registerGoals? is this still needed?
     @Inject(method = "func_213529_dV", at = @At(value = "HEAD"), cancellable = true)
     private void impl$IgnoreAISetupOnClientWorld(CallbackInfo ci) {
         if (this.world.isClientSide) {

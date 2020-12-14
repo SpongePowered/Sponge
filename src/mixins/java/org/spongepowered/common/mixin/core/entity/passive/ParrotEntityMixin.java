@@ -44,10 +44,10 @@ import java.util.Random;
 @Mixin(ParrotEntity.class)
 public abstract class ParrotEntityMixin extends AgeableEntityMixin {
 
-    @Redirect(method = "processInteract",
+    @Redirect(method = "mobInteract",
         at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     private int impl$TameEntityAndGetRandom(Random rand, int bound, PlayerEntity player, Hand hand) {
-        ItemStack stack = player.getHeldItem(hand);
+        ItemStack stack = player.getItemInHand(hand);
         int random = rand.nextInt(bound);
         if (random == 0) {
             stack.setCount(stack.getCount() + 1);

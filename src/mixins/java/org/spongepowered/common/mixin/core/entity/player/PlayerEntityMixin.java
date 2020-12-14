@@ -559,7 +559,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                                 }
                             }
 
-                            this.world.playSound(null, this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, this.shadow$getSoundCategory(), 1.0F, 1.0F);
+                            this.world.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, this.shadow$getSoundCategory(), 1.0F, 1.0F);
                             this.shadow$spawnSweepParticles();
                         }
 
@@ -570,15 +570,15 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                         }
 
                         if (isCriticalAttack) {
-                            this.world.playSound(null, this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, this.shadow$getSoundCategory(), 1.0F, 1.0F);
+                            this.world.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, this.shadow$getSoundCategory(), 1.0F, 1.0F);
                             this.shadow$onCriticalHit(targetEntity);
                         }
 
                         if (!isCriticalAttack && !isSweapingAttack) {
                             if (isStrongAttack) {
-                                this.world.playSound(null, this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, this.shadow$getSoundCategory(), 1.0F, 1.0F);
+                                this.world.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, this.shadow$getSoundCategory(), 1.0F, 1.0F);
                             } else {
-                                this.world.playSound(null, this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_WEAK , this.shadow$getSoundCategory(), 1.0F, 1.0F);
+                                this.world.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_WEAK , this.shadow$getSoundCategory(), 1.0F, 1.0F);
                             }
                         }
 
@@ -623,7 +623,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
                         this.shadow$addExhaustion(0.1F);
                     } else {
-                        this.world.playSound(null, this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundCategory(), 1.0F, 1.0F);
+                        this.world.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundCategory(), 1.0F, 1.0F);
 
                         if (litEntityOnFire) {
                             targetEntity.extinguish();

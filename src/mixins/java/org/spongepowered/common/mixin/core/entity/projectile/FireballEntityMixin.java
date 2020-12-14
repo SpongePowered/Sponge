@@ -62,9 +62,9 @@ public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin 
      * which may include redirecting the world.newExplosion method call instead of modifyargs,
      * but, it is what it is.
      */
-    @Redirect(method = "onImpact",
+    @Redirect(method = "onHit",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFZLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
+            target = "Lnet/minecraft/world/World;explode(Lnet/minecraft/entity/Entity;DDDFZLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
         )
     )
     @Nullable

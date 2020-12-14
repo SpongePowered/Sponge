@@ -30,8 +30,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.entity.projectile.arrow.ArrowEntity;
@@ -43,88 +44,83 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
 import javax.annotation.Nullable;
-import java.util.UUID;
 
 @Mixin(AbstractArrowEntity.class)
-public abstract class AbstractArrowEntityMixin extends EntityMixin {
+public abstract class AbstractArrowEntityMixin extends ProjectileEntityMixin {
 
-    @Shadow public UUID shootingEntity;
-    @Shadow private int ticksInAir;
-    @Shadow private double damage;
+    // @formatter:off
+    @Shadow private int life;
     @Shadow protected boolean inGround;
-    @Shadow public int arrowShake;
-    @Shadow public AbstractArrowEntity.PickupStatus pickupStatus;
+    @Shadow public int shakeTime;
+    @Shadow public AbstractArrowEntity.PickupStatus pickup;
+    @Shadow @Nullable private BlockState lastState;
 
-
-    @Shadow public abstract void shadow$setIsCritical(boolean critical);
-
-    @Shadow @Nullable private BlockState inBlockState;
-
+    @Shadow public abstract void shadow$setCritArrow(boolean critical);
     @Shadow public abstract void shadow$setPierceLevel(byte level);
-
     @Shadow public abstract void shadow$setShotFromCrossbow(boolean fromCrossbow);
+    @Shadow protected abstract ItemStack shadow$getPickupItem();
+    // @formatter:on
 
-    @Shadow protected abstract void shadow$func_213870_w();
 
-    @Shadow protected abstract ItemStack shadow$getArrowStack();
+    @Shadow protected abstract void resetPiercedEntities();
 
     // Not all ProjectileSources are entities (e.g. BlockProjectileSource).
     // This field is used to store a ProjectileSource that isn't an entity.
     @Nullable public ProjectileSource projectileSource;
 
-    @Override
-    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
-        super.impl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, (Arrow) this);
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
-        super.impl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Arrow) this).shooter().get(), this.shootingEntity);
-    }
-
     /**
      * Collide impact event post for plugins to cancel impact.
      */
-    @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
-    private void onProjectileHit(final RayTraceResult hitResult, final CallbackInfo ci) {
+    @Inject(method = "onHitBlock", at = @At("HEAD"), cancellable = true)
+    private void onProjectileHit(final BlockRayTraceResult hitResult, final CallbackInfo ci) {
         if (!((WorldBridge) this.world).bridge$isFake() && hitResult.getType() != RayTraceResult.Type.MISS) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrowEntity) (Object) this,
                     ((ArrowEntity) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
-                this.shadow$playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                this.shadow$playSound(SoundEvents.ARROW_HIT, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
                 // Make it almost look like it collided with something
-                if (hitResult.getType() == RayTraceResult.Type.BLOCK) {
-                    BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult)hitResult;
-                    BlockState blockstate = this.world.getBlockState(blockraytraceresult.getPos());
-                    this.inBlockState = blockstate;
-                    Vec3d vec3d = blockraytraceresult.getHitVec().subtract(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ());
-                    this.shadow$setMotion(vec3d);
-                    Vec3d vec3d1 = vec3d.normalize().scale(0.05F);
-                    this.shadow$setPosition(this.shadow$getPosX() - vec3d1.x, this.shadow$getPosY() - vec3d1.y, this.shadow$getPosZ() -
-                            vec3d1.z);
-                    this.inGround = true;
-                    this.arrowShake = 7;
-                    this.shadow$setIsCritical(false);
-                    this.shadow$setPierceLevel((byte)0);
-                    this.shadow$setShotFromCrossbow(false);
-                    this.shadow$func_213870_w();
-                } else {
-                    // Deflect the arrow as if the entity was invulnerable
-                    this.shadow$setMotion(this.shadow$getMotion().scale(-0.1D));
-                    this.rotationYaw += 180.0F;
-                    this.prevRotationYaw += 180.0F;
-                    this.ticksInAir = 0;
-                    if (!this.world.isClientSide && this.shadow$getMotion().lengthSquared() < 1.0E-7D) {
-                        if (this.pickupStatus == AbstractArrowEntity.PickupStatus.ALLOWED) {
-                            this.shadow$entityDropItem(this.shadow$getArrowStack(), 0.1F);
-                        }
+                BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult)hitResult;
+                BlockState blockstate = this.world.getBlockState(blockraytraceresult.getBlockPos());
+                this.lastState = blockstate;
+                Vector3d vec3d = blockraytraceresult.getLocation().subtract(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
+                this.shadow$setDeltaMovement(vec3d);
+                Vector3d vec3d1 = vec3d.normalize().scale(0.05F);
+                this.shadow$setPosition(this.shadow$getX() - vec3d1.x, this.shadow$getY() - vec3d1.y, this.shadow$getZ() -
+                        vec3d1.z);
+                this.inGround = true;
+                this.shakeTime = 7;
+                this.shadow$setCritArrow(false);
+                this.shadow$setPierceLevel((byte)0);
+                this.shadow$setShotFromCrossbow(false);
+                this.resetPiercedEntities();
 
-                        this.shadow$remove();
+                ci.cancel();
+            }
+        }
+    }
+    /**
+     * Collide impact event post for plugins to cancel impact.
+     */
+    @Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
+    private void onProjectileHit(final EntityRayTraceResult hitResult, final CallbackInfo ci) {
+        if (!((WorldBridge) this.world).bridge$isFake() && hitResult.getType() != RayTraceResult.Type.MISS) {
+            if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrowEntity) (Object) this,
+                    ((ArrowEntity) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
+                this.shadow$playSound(SoundEvents.ARROW_HIT, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
+                // Make it almost look like it collided with something
+
+                // Deflect the arrow as if the entity was invulnerable
+                this.shadow$setDeltaMovement(this.shadow$getDeltaMovement().scale(-0.1D));
+                this.rotationYaw += 180.0F;
+                this.prevRotationYaw += 180.0F;
+                this.life = 0;
+                if (!this.world.isClientSide && this.shadow$getDeltaMovement().lengthSqr() < 1.0E-7D) {
+                    if (this.pickup == AbstractArrowEntity.PickupStatus.ALLOWED) {
+                        this.shadow$entityDropItem(this.shadow$getPickupItem(), 0.1F);
                     }
+
+                    this.shadow$remove();
                 }
                 ci.cancel();
             }

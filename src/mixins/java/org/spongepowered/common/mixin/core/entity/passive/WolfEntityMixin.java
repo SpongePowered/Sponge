@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.passive;
 
+import net.minecraft.entity.IAngerable;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,24 +46,25 @@ import java.util.Random;
 @Mixin(WolfEntity.class)
 public abstract class WolfEntityMixin extends AgeableEntityMixin implements AggressiveEntityBridge {
 
-    @Shadow public abstract boolean shadow$isAngry();
-    @Shadow public abstract void shadow$setAngry(boolean angry);
+    // @formatter:off
+    @Shadow public abstract void shadow$startPersistentAngerTimer();
+    // @formatter:on
 
     @Override
     public boolean bridge$isAngry() {
-        return this.shadow$isAngry();
+        return ((IAngerable) this).isAngry();
     }
 
     @Override
     public void bridge$setAngry(boolean angry) {
-        this.shadow$setAngry(angry);
+        this.shadow$startPersistentAngerTimer();
     }
 
-    @Redirect(method = "processInteract",
+    @Redirect(method = "mobInteract",
         at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     private int impl$ChangeRandomForTameEvent(Random rand, int bound, PlayerEntity player, Hand hand) {
         int random = rand.nextInt(bound);
-        ItemStack stack = player.getHeldItem(hand);
+        ItemStack stack = player.getItemInHand(hand);
         if (random == 0) {
             stack.shrink(1);
             try {

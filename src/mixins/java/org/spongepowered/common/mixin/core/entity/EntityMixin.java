@@ -116,7 +116,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public boolean removed;
     @Shadow public float prevDistanceWalkedModified;
     @Shadow public float distanceWalkedModified;
-    @Shadow @Final protected Random rand;
+    @Shadow @Final protected Random random;
     @Shadow @Final protected EntityDataManager dataManager;
     @Shadow public DimensionType dimension;
     @Shadow public float prevRotationYaw;
@@ -128,9 +128,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public float fallDistance;
 
     @Shadow public abstract void shadow$setPosition(double x, double y, double z);
-    @Shadow public abstract double shadow$getPosX();
-    @Shadow public abstract double shadow$getPosZ();
-    @Shadow public abstract double shadow$getPosY();
+    @Shadow public abstract double shadow$getX();
+    @Shadow public abstract double shadow$getY();
+    @Shadow public abstract double shadow$getZ();
     @Shadow public abstract void shadow$remove();
     @Shadow public abstract void shadow$setCustomName(@Nullable ITextComponent name);
     @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
@@ -142,8 +142,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract void shadow$setInvisible(boolean invisible);
     @Shadow protected abstract int shadow$getFireImmuneTicks();
     @Shadow public abstract EntityType<?> shadow$getType();
-    @Shadow public abstract void shadow$setMotion(Vec3d motionIn);
-    @Shadow public abstract Vec3d shadow$getMotion();
     @Shadow public abstract boolean shadow$isInWater();
     @Shadow public abstract boolean shadow$isPassenger();
     @Shadow public abstract void shadow$setPositionAndUpdate(double x, double y, double z);
@@ -168,7 +166,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected abstract void shadow$setFlag(int flag, boolean set);
     @Shadow public abstract EntityDataManager shadow$getDataManager();
     @Shadow public abstract void shadow$setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
+    @Shadow public abstract net.minecraft.util.math.vector.Vector3d shadow$getDeltaMovement();
+    @Shadow public abstract void shadow$setDeltaMovement(net.minecraft.util.math.vector.Vector3d motion);
     // @formatter:on
+
+
+
 
     private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
@@ -245,7 +248,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                         event.getDestinationPosition().getZ());
             }
 
-            if (!destinationWorld.getChunkProvider().chunkExists((int) this.shadow$getPosX() >> 4, (int) this.shadow$getPosZ() >> 4)) {
+            if (!destinationWorld.getChunkProvider().chunkExists((int) this.shadow$getX() >> 4, (int) this.shadow$getZ() >> 4)) {
                 // Roll back the position
                 this.shadow$setPosition(originalPosition.x, originalPosition.y, originalPosition.z);
                 return false;
@@ -262,7 +265,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             originalWorld.resetUpdateEntityTick();
             destinationWorld.resetUpdateEntityTick();
 
-            final ChunkPos chunkPos = new ChunkPos((int) this.shadow$getPosX() >> 4, (int) this.shadow$getPosZ() >> 4);
+            final ChunkPos chunkPos = new ChunkPos((int) this.shadow$getX() >> 4, (int) this.shadow$getZ() >> 4);
             destinationWorld.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((Entity) (Object) this).getEntityId());
         }
 

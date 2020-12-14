@@ -37,10 +37,12 @@ import org.spongepowered.common.bridge.entity.GrieferBridge;
 @Mixin(targets = "net/minecraft/entity/monster/BlazeEntity$FireballAttackGoal")
 public abstract class BlazeEntity_FireballAttackGoalMixin extends Goal {
 
+    // @formatter:off
     @Shadow(aliases = "this$0") @Final private BlazeEntity blaze;
+    // @formatter:on
 
     @ModifyArg(method = "tick()V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addFreshEntity(Lnet/minecraft/entity/Entity;)Z"))
     private Entity impl$setCanGrief(final Entity entity) {
         ((GrieferBridge) entity).bridge$setCanGrief(((GrieferBridge) this.blaze).bridge$canGrief());
         return entity;

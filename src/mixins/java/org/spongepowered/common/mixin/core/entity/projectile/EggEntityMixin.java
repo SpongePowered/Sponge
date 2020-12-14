@@ -36,9 +36,9 @@ public abstract class EggEntityMixin extends ThrowableEntityMixin {
 
     public double impl$damageAmount;
 
-    @ModifyArg(method = "onImpact",
+    @ModifyArg(method = "onHitEntity",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z")
+            target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z")
     )
     private float onAttackEntityFromUseDamage(final float damage) {
         return (float) this.impl$damageAmount;

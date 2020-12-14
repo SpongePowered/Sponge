@@ -35,9 +35,10 @@ import net.minecraft.entity.monster.EndermanEntity;
 @Mixin(EndermanEntity.class)
 public abstract class EndermanEntityMixin extends MonsterEntityMixin {
 
-    @Shadow @Nullable public abstract BlockState getHeldBlockState();
-
-    @Shadow public abstract void setHeldBlockState(@Nullable BlockState state);
+    // @formatter:off
+    @Shadow @Nullable public abstract BlockState shadow$getCarriedBlock();
+    @Shadow public abstract void shadow$setCarriedBlock(@Nullable BlockState state);
+    // @formatter:on
 
     /**
      * @author gabizou - July 26th, 2018
@@ -49,8 +50,8 @@ public abstract class EndermanEntityMixin extends MonsterEntityMixin {
      */
     @Override
     public void bridge$onCancelledBlockChange(EntityTickContext phaseContext) {
-        if (this.getHeldBlockState() != null) {
-            this.setHeldBlockState(null);
+        if (this.shadow$getCarriedBlock() != null) {
+            this.shadow$setCarriedBlock(null);
         }
     }
 }

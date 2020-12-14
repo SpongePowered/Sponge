@@ -180,7 +180,22 @@
     "entity.item.ArmorStandEntityMixin",
     "entity.item.HangingEntityMixin",
     "entity.item.ItemFrameEntityMixin",
-    "entity.item.PaintingTypeMixin"
+    "entity.item.PaintingTypeMixin",
+    "entity.monster.EndermanEntity_TakeBlockGoalMixin",
+    "entity.monster.EndermanEntityMixin",
+    "entity.monster.GhastEntity_FireballAttackGoalMixin",
+    "entity.monster.SilverfishEntity_HideInStoneGoalMixin",
+    "entity.monster.SilverfishEntity_SummonSilverfishGoalMixin",
+    "entity.monster.ZombifiedPiglinEntityMixin",
+    "entity.passive.horse.AbstractHorseEntityMixin",
+    "entity.passive.OcelotEntityMixin",
+    "entity.passive.RabbitEntity_RaidFarmGoalMixin",
+    "entity.passive.ParrotEntityMixin",
+    "entity.passive.WolfEntityMixin",
+    "entity.player.ChatVisibilityMixin",
+    "entity.projectile.EggEntityMixin",
+    "entity.projectile.SmallFireballEntityMixin",
+    "entity.projectile.SnowballEntityMixin"
   ],
   "client": [
     "client.MinecraftMixin",

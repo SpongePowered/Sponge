@@ -36,8 +36,10 @@ import org.spongepowered.common.registry.MappedRegistry;
 @Mixin(LlamaEntity.class)
 public abstract class LlamaEntityMixin implements LlamaEntityBridge {
 
+    // @formatter:off
     @Shadow public abstract int shadow$getVariant();
     @Shadow public abstract void shadow$setVariant(final int p_190710_1_);
+    // @formatter:on
 
     private static final MappedRegistry<LlamaType, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(LlamaType.class);
 

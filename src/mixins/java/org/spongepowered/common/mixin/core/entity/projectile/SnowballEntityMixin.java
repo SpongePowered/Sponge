@@ -38,8 +38,8 @@ public abstract class SnowballEntityMixin extends ThrowableEntityMixin implement
     private double impl$damageAmount = 0;
     private boolean impl$damageSet = false;
 
-    @ModifyArg(method = "onImpact", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+    @ModifyArg(method = "onHitEntity", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"))
     private float impl$onAttackEntityFromUseCustomDamage(float damage) {
         return this.impl$damageSet ? (float) this.impl$damageAmount : damage;
     }

@@ -24,28 +24,30 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.monster.ZombiePigmanEntity;
+import net.minecraft.entity.IAngerable;
+import net.minecraft.entity.monster.ZombifiedPiglinEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.AggressiveEntityBridge;
 
-@Mixin(ZombiePigmanEntity.class)
-public abstract class ZombiePigmanEntityMixin extends MonsterEntityMixin implements AggressiveEntityBridge {
+@Mixin(ZombifiedPiglinEntity.class)
+public abstract class ZombifiedPiglinEntityMixin extends MonsterEntityMixin implements AggressiveEntityBridge {
 
-    @Shadow private int angerLevel;
-    @Shadow public abstract boolean isAngry();
+    // @formatter:off
+    @Shadow private int remainingPersistentAngerTime;
+    // @formatter:on
 
     @Override
     public boolean bridge$isAngry() {
-        return this.isAngry();
+        return ((IAngerable)this).isAngry();
     }
 
     @Override
     public void bridge$setAngry(boolean angry) {
         if (angry) {
-            this.angerLevel = 400 + this.rand.nextInt(400);
+            this.remainingPersistentAngerTime = 400 + this.random.nextInt(400);
         } else {
-            this.angerLevel = 0;
+            this.remainingPersistentAngerTime = 0;
         }
     }
 }

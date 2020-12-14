@@ -54,26 +54,12 @@ import java.util.Optional;
 public abstract class FireworkRocketEntityMixin extends EntityMixin implements FusedExplosiveBridge, ExplosiveBridge {
 
     // @formatter:off
-    @Shadow private int fireworkAge;
+    @Shadow private int life;
     @Shadow private int lifetime;
-    @Shadow protected abstract void func_213893_k();
     // @formatter:on
 
     private ProjectileSource impl$projectileSource = UnknownProjectileSource.UNKNOWN;
     private int impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
-
-
-    @Override
-    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
-        super.impl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, (FireworkRocket) this);
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
-        super.impl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.impl$projectileSource, (Entity) null);
-    }
 
     @Override
     public int bridge$getFuseDuration() {
@@ -87,12 +73,12 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
 
     @Override
     public int bridge$getFuseTicksRemaining() {
-        return this.lifetime - this.fireworkAge;
+        return this.lifetime - this.life;
     }
 
     @Override
     public void bridge$setFuseTicksRemaining(final int fuseTicks) {
-        this.fireworkAge = 0;
+        this.life = 0;
         this.lifetime = fuseTicks;
     }
 
@@ -106,13 +92,13 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
         this.impl$explosionRadius = radius == null ? Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS : radius;
     }
 
-    @Redirect(method = "func_213893_k()V",
+    @Redirect(method = "explode()V",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V")
+            target = "Lnet/minecraft/world/World;broadcastEntityEvent(Lnet/minecraft/entity/Entity;B)V")
     )
     private void impl$useSpongeExplosion(final World world, final Entity self, final byte state) {
         if (this.world.isClientSide) {
-            world.setEntityState(self, state);
+            world.broadcastEntityEvent(self, state);
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -125,13 +111,13 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
                 .sourceExplosive(((FireworkRocket) this))
                 .location(((FireworkRocket) this).getServerLocation())
                 .radius(this.impl$explosionRadius))
-                .ifPresent(explosion -> world.setEntityState(self, state));
+                .ifPresent(explosion -> world.broadcastEntityEvent(self, state));
         }
     }
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$postPrimeEvent(final CallbackInfo ci) {
-        if (this.fireworkAge == 1 && !this.world.isClientSide) {
+        if (this.life == 1 && !this.world.isClientSide) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$projectileSource);

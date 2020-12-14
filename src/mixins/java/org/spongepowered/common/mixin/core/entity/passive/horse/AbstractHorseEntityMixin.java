@@ -28,6 +28,8 @@ import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.SoundCategory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.passive.horse.AbstractHorseEntityBridge;
@@ -36,22 +38,23 @@ import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
 @Mixin(AbstractHorseEntity.class)
 public abstract class AbstractHorseEntityMixin extends AgeableEntityMixin implements AbstractHorseEntityBridge {
 
-    @Shadow protected Inventory horseChest;
-    @Shadow public abstract void shadow$setHorseSaddled(boolean saddled);
-    @Shadow protected abstract boolean shadow$getHorseWatchableBoolean(int index);
+    // @formatter:off
+    @Shadow protected Inventory inventory;
+    @Shadow public abstract void shadow$equipSaddle(@Nullable SoundCategory sound);
+    @Shadow public abstract boolean shadow$isSaddled();
+    // @formatter:on
 
     @Override
     public boolean bridge$isSaddled() {
-        return this.shadow$getHorseWatchableBoolean(4);
+        return this.shadow$isSaddled();
     }
 
     @Override
     public void bridge$setSaddled(boolean saddled) {
-        this.shadow$setHorseSaddled(saddled);
-        if (saddled && this.horseChest.getStackInSlot(0).getItem() != Items.SADDLE) {
-            this.horseChest.setInventorySlotContents(0, new ItemStack(Items.SADDLE));
-        } else if (!saddled) {
-            this.horseChest.removeStackFromSlot(0);
+        if (!this.shadow$isSaddled() && saddled) {
+            this.shadow$equipSaddle(null);
+        } else if (this.shadow$isSaddled() && !saddled){
+            this.inventory.setItem(0, ItemStack.EMPTY);
         }
     }
 }

@@ -51,7 +51,9 @@ import java.util.List;
 @Mixin(targets = "net/minecraft/entity/monster/EndermanEntity$PlaceBlockGoal")
 public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
 
+    // @formatter:off
     @Shadow @Final private EndermanEntity enderman;
+    // @formatter:on
 
     /**
      * @author gabizou - April 13th, 2018
@@ -65,15 +67,15 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
      * @return The block state that can be placed, or null if the enderman can't grief
      */
     @Redirect(
-        method = "shouldExecute()Z",
+        method = "canUse",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/monster/EndermanEntity;getHeldBlockState()Lnet/minecraft/block/BlockState;"
+            target = "Lnet/minecraft/entity/monster/EndermanEntity;getCarriedBlock()Lnet/minecraft/block/BlockState;"
         )
     )
     @Nullable
     private BlockState impl$onCanGrief(final EndermanEntity endermanEntity) {
-        final BlockState heldBlockState = endermanEntity.getHeldBlockState();
+        final BlockState heldBlockState = endermanEntity.getCarriedBlock();
         return ((GrieferBridge) this.enderman).bridge$canGrief() ? heldBlockState : null;
     }
 
@@ -81,11 +83,11 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
      * @reason Makes enderman check for block changes before they can place their blocks.
      * This allows plugins to cancel the event regardless without issue.
      */
-    @Redirect(method = "func_220836_a(Lnet/minecraft/world/IWorldReader;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)Z",
+    @Redirect(method = "canPlaceBlock",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/block/BlockState;isCollisionShapeOpaque(Lnet/minecraft/world/IBlockReader;Lnet/minecraft/util/math/BlockPos;)Z"))
+            target = "Lnet/minecraft/block/BlockState;isCollisionShapeFullBlock(Lnet/minecraft/world/IBlockReader;Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean impl$onPlaceBlockCancel(BlockState blockState, IBlockReader blockReaderIn, BlockPos blockPosIn) {
-        if (blockState.isCollisionShapeOpaque(blockReaderIn, blockPosIn)) {
+        if (blockState.isCollisionShapeFullBlock(blockReaderIn, blockPosIn)) {
             // Sponge start
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
                 final ServerLocation location = ServerLocation.of((ServerWorld) blockReaderIn, blockPosIn.getX(), blockPosIn.getY(), blockPosIn.getZ());
@@ -93,7 +95,7 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
                 list.add(location);
                 final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
                 final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, list,
-                    ((ServerWorld) this.enderman.getEntityWorld()));
+                    ((ServerWorld) this.enderman.level));
                 return !SpongeCommon.postEvent(event);
             }
             // Sponge end

@@ -38,7 +38,9 @@ import org.spongepowered.common.bridge.entity.GrieferBridge;
 @Mixin(targets = "net/minecraft/entity/passive/RabbitEntity$RaidFarmGoal")
 public abstract class RabbitEntity_RaidFarmGoalMixin extends MoveToBlockGoal {
 
+    // @formatter:off
     @Shadow @Final private RabbitEntity rabbit;
+    // @formatter:on
 
     public RabbitEntity_RaidFarmGoalMixin(final CreatureEntity entityCreature, final double a, final int b) {
         super(entityCreature, a, b);
@@ -53,12 +55,12 @@ public abstract class RabbitEntity_RaidFarmGoalMixin extends MoveToBlockGoal {
      * @param cir
      */
     @Inject(
-        method = "shouldExecute()Z",
+        method = "canUse()Z",
         at = @At(value = "HEAD"),
         cancellable = true
     )
     private void impl$onCanGrief(final CallbackInfoReturnable<Boolean> cir) {
-        if (this.runDelay <= 0) {
+        if (this.nextStartTick <= 0) {
             if (!((GrieferBridge) this.rabbit).bridge$canGrief()) {
                 cir.setReturnValue(false);
             }

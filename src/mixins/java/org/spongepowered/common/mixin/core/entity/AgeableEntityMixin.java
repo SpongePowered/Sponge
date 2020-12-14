@@ -40,7 +40,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(AgeableEntity.class)
 public abstract class AgeableEntityMixin extends MobEntityMixin {
 
-    @Inject(method = "setGrowingAge", at = @At("RETURN"))
+    @Inject(method = "setAge", at = @At("RETURN"))
     private void impl$callReadyToMateOnAgeUp(final int age, final CallbackInfo ci) {
         if (age == 0) {
             if (((AgeableEntity) (Object) this) instanceof AnimalEntity) {

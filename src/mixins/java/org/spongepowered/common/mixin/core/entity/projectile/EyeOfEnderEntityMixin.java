@@ -24,48 +24,32 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EyeOfEnderEntity;
-import net.minecraft.nbt.CompoundNBT;
-import org.spongepowered.api.entity.projectile.EyeOfEnder;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
-import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(EyeOfEnderEntity.class)
 public abstract class EyeOfEnderEntityMixin extends EntityMixin implements LocationTargetingBridge {
 
-    @Shadow private double targetX;
-    @Shadow private double targetY;
-    @Shadow private double targetZ;
-    private ProjectileSource projectileSource = UnknownProjectileSource.UNKNOWN;
-
-    @Override
-    public void impl$readFromSpongeCompound(CompoundNBT compound) {
-        super.impl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, (EyeOfEnder) this);
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(CompoundNBT compound) {
-        super.impl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, (Entity) null);
-    }
+    // @formatter:off
+    @Shadow private double tx;
+    @Shadow private double ty;
+    @Shadow private double tz;
+    // @formatter:on
 
     @Override
     public Vector3d bridge$getTargetedPosition() {
-        return new Vector3d(this.targetX, this.targetY, this.targetZ);
+        return new Vector3d(this.tx, this.ty, this.tz);
     }
 
     @Override
     public void bridge$setTargetedPosition(Vector3d vec) {
-        this.targetX = vec.getX();
-        this.targetY = vec.getY();
-        this.targetZ = vec.getZ();
+        this.tx = vec.getX();
+        this.ty = vec.getY();
+        this.tz = vec.getZ();
     }
 
 }

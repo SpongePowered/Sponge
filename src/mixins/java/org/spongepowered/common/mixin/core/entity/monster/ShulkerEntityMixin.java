@@ -40,12 +40,14 @@ import org.spongepowered.common.util.Constants;
 @Mixin(ShulkerEntity.class)
 public abstract class ShulkerEntityMixin extends MobEntityMixin implements ShulkerEntityBridge {
 
-    @Shadow @Final protected static DataParameter<Byte> COLOR;
-    @Shadow @Final protected static DataParameter<net.minecraft.util.Direction> ATTACHED_FACE;
+    // @formatter:off
+    @Shadow @Final protected static DataParameter<Byte> DATA_COLOR_ID;
+    @Shadow @Final protected static DataParameter<net.minecraft.util.Direction> DATA_ATTACH_FACE_ID;
+    // @formatter:on
 
     @Override
     public @Nullable DyeColor bridge$getColor() {
-        final int color = this.dataManager.get(ShulkerEntityMixin.COLOR);
+        final int color = this.dataManager.get(ShulkerEntityMixin.DATA_COLOR_ID);
         // The non colored variant
         if (color > 15) {
             return null;
@@ -56,17 +58,17 @@ public abstract class ShulkerEntityMixin extends MobEntityMixin implements Shulk
     @Override
     public void bridge$setColor(final @Nullable DyeColor color) {
         final int value = color == null ? 16 : ((net.minecraft.item.DyeColor) (Object) color).getId();
-        this.dataManager.set(ShulkerEntityMixin.COLOR, (byte) value);
+        this.dataManager.set(ShulkerEntityMixin.DATA_COLOR_ID, (byte) value);
     }
 
     @Override
     public Direction bridge$getDirection() {
-        return Constants.DirectionFunctions.getFor(this.dataManager.get(ShulkerEntityMixin.ATTACHED_FACE));
+        return Constants.DirectionFunctions.getFor(this.dataManager.get(ShulkerEntityMixin.DATA_ATTACH_FACE_ID));
     }
 
     @Override
     public void bridge$setDirection(final Direction direction) {
-        this.dataManager.set(ShulkerEntityMixin.ATTACHED_FACE, Constants.DirectionFunctions.getFor(direction));
+        this.dataManager.set(ShulkerEntityMixin.DATA_ATTACH_FACE_ID, Constants.DirectionFunctions.getFor(direction));
     }
 
 }

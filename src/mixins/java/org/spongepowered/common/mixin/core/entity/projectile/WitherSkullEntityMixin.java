@@ -56,13 +56,13 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
     private float impl$damage = 0.0f;
     private boolean impl$damageSet = false;
 
-    @ModifyArg(method = "onImpact",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+    @ModifyArg(method = "onHitEntity",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"))
     private float onAttackEntityFrom(final float amount) {
         if (this.impl$damageSet) {
             return this.impl$damage;
         }
-        if (this.shootingEntity != null) {
+        if (this.ownerUUID != null) {
             return Constants.Entity.WitherSkull.DEFAULT_WITHER_CREATED_SKULL_DAMAGE;
         }
         return Constants.Entity.WitherSkull.DEFAULT_NO_SOURCE_SKULL_DAMAGE;
@@ -99,8 +99,8 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
     }
 
     @Nullable
-    @Redirect(method = "onImpact", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFZLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"))
+    @Redirect(method = "onHit", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;explode(Lnet/minecraft/entity/Entity;DDDFZLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"))
     public net.minecraft.world.Explosion impl$CreateAndProcessExplosionEvent(final net.minecraft.world.World worldObj, final Entity self,
             final double x, final double y, final double z, final float strength, final boolean flaming, final Mode mode) {
         return this.bridge$throwExplosionEventAndExplosde(worldObj, self, x, y, z, strength, flaming, mode);

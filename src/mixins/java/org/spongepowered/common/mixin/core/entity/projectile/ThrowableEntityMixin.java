@@ -24,56 +24,33 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.ThrowableEntity;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.RayTraceResult;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.mixin.core.entity.EntityMixin;
-
-import javax.annotation.Nullable;
 
 @Mixin(ThrowableEntity.class)
 public abstract class ThrowableEntityMixin extends ProjectileEntityMixin {
 
-
-    @Shadow @Nullable public abstract LivingEntity shadow$getThrower();
-    @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
-
-    @Override
-    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
-        super.impl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, ((Projectile) this));
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
-        super.impl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Projectile) this).shooter().get(), this.shadow$getThrower());
-    }
-
     @Redirect(method = "tick()V",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/projectile/ThrowableEntity;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"
+            target = "Lnet/minecraft/entity/projectile/ThrowableEntity;onHit(Lnet/minecraft/util/math/RayTraceResult;)V"
         )
     )
     private void impl$handleProjectileImpact(final ThrowableEntity projectile, final RayTraceResult movingObjectPosition) {
         if (((WorldBridge) this.world).bridge$isFake() || movingObjectPosition.getType() == RayTraceResult.Type.MISS) {
-            this.onImpact(movingObjectPosition);
+            this.shadow$onHit(movingObjectPosition);
             return;
         }
 
-        if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, (ProjectileSource) this.shadow$getThrower(), movingObjectPosition)) {
+        if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, (ProjectileSource) this.shadow$getOwner(), movingObjectPosition)) {
             this.shadow$remove();
         } else {
-            this.onImpact(movingObjectPosition);
+            this.shadow$onHit(movingObjectPosition);
         }
     }
 }

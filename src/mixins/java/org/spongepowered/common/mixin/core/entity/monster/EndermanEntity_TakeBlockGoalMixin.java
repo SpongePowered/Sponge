@@ -40,7 +40,9 @@ import net.minecraft.entity.monster.EndermanEntity;
 @Mixin(targets = "net/minecraft/entity/monster/EndermanEntity$TakeBlockGoal")
 public abstract class EndermanEntity_TakeBlockGoalMixin extends Goal {
 
+    // @formatter:off
     @Shadow @Final private EndermanEntity enderman; //enderman
+    // @formatter:on
 
     /**
      * @author gabizou - April 13th, 2018
@@ -52,15 +54,15 @@ public abstract class EndermanEntity_TakeBlockGoalMixin extends Goal {
      * @return The held blockstate, if can grief, or air state if they cannot (the pickup checks if the block state is not null only)
      */
     @Redirect(
-        method = "shouldExecute()Z",
+        method = "canUse()Z",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/monster/EndermanEntity;getHeldBlockState()Lnet/minecraft/block/BlockState;"
+            target = "Lnet/minecraft/entity/monster/EndermanEntity;getCarriedBlock()Lnet/minecraft/block/BlockState;"
         )
     )
     @Nullable
     private BlockState onCanGrief(final EndermanEntity entityEnderman) {
-        final BlockState heldBlockState = entityEnderman.getHeldBlockState();
-        return ((GrieferBridge) this.enderman).bridge$canGrief() ? heldBlockState : Blocks.AIR.getDefaultState();
+        final BlockState heldBlockState = entityEnderman.getCarriedBlock();
+        return ((GrieferBridge) this.enderman).bridge$canGrief() ? heldBlockState : Blocks.AIR.defaultBlockState();
     }
 }
