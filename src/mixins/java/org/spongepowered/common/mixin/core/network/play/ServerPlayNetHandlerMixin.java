@@ -399,8 +399,8 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             final ItemStack heldItem = this.player.getItemInHand(packetIn.getHand());
 
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
-                frame.addContext(EventContextKeys.USED_HAND, handType);
+                frame.addContext(EventContextKeys.USED_ITEM.get(), ItemStackUtil.snapshotOf(heldItem));
+                frame.addContext(EventContextKeys.USED_HAND.get(), handType);
                 final AnimateHandEvent event =
                         SpongeEventFactory.createAnimateHandEvent(frame.getCurrentCause(), handType, (Humanoid) this.player);
                 if (SpongeCommon.postEvent(event)) {
