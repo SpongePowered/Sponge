@@ -38,10 +38,10 @@ public final class SelectorSortAlgorithmStreamGenerator {
 
     public static Stream<SelectorSortAlgorithm> stream() {
         return Stream.of(
-                new SpongeSelectorSortAlgorithm(EntitySelectorParser.ARBITRARY, ResourceKey.minecraft("arbitrary")),
-                new SpongeSelectorSortAlgorithm(EntitySelectorParser.FURTHEST, ResourceKey.minecraft("furthest")),
-                new SpongeSelectorSortAlgorithm(EntitySelectorParser.NEAREST, ResourceKey.minecraft("nearest")),
-                new SpongeSelectorSortAlgorithm(EntitySelectorParser.RANDOM, ResourceKey.minecraft("random"))
+                new SpongeSelectorSortAlgorithm(EntitySelectorParser.ORDER_ARBITRARY, ResourceKey.minecraft("arbitrary")),
+                new SpongeSelectorSortAlgorithm(EntitySelectorParser.ORDER_FURTHEST, ResourceKey.minecraft("furthest")),
+                new SpongeSelectorSortAlgorithm(EntitySelectorParser.ORDER_NEAREST, ResourceKey.minecraft("nearest")),
+                new SpongeSelectorSortAlgorithm(EntitySelectorParser.ORDER_RANDOM, ResourceKey.minecraft("random"))
         );
     }
 

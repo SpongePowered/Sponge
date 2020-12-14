@@ -94,7 +94,7 @@ public final class SpongeIPBanList extends IPBanList {
     @Override
     public String[] getUserList() {
         final List<String> ips = new ArrayList<>();
-        for (final Ban.Ip ban : Sponge.getServer().getServiceProvider().banService().getIpBans()) {
+        for (final Ban.IP ban : Sponge.getServer().getServiceProvider().banService().getIpBans()) {
             ips.add(this.getIpFromAddress(new InetSocketAddress(ban.getAddress(), 0)));
         }
         return ips.toArray(new String[0]);

@@ -34,6 +34,7 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.inventory.lens.Lens;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public final class SlotData {

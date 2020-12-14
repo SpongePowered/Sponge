@@ -31,6 +31,8 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 
+import java.util.function.Supplier;
+
 public final class BoundedUtil {
 
     /**
