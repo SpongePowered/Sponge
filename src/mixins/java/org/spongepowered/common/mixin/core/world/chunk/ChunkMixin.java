@@ -67,14 +67,14 @@ import java.util.function.Consumer;
 public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     // @formatter:off
-    @Shadow @Final private World world;
-    @Shadow @Final private ChunkPos pos;
-    @Shadow @Final private ClassInheritanceMultiMap<Entity>[] entityLists;
-    @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
+    @Shadow @Final private World level;
+    @Shadow @Final private ChunkPos chunkPos;
+    @Shadow @Final private ClassInheritanceMultiMap<Entity>[] entitySections;
+    @Shadow @Final private Map<BlockPos, TileEntity> blockEntities;
     @Shadow private boolean loaded;
-    @Shadow private boolean dirty;
+    @Shadow private boolean unsaved;
 
-    @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, net.minecraft.world.chunk.Chunk.CreateEntityType p_177424_2_);
+    @Shadow @Nullable public abstract TileEntity getBlockEntity(BlockPos pos, net.minecraft.world.chunk.Chunk.CreateEntityType p_177424_2_);
 
     @Shadow public abstract BlockState getBlockState(BlockPos pos);
     // @formatter:on
@@ -100,7 +100,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Override
     public void bridge$markChunkDirty() {
-        this.dirty = true;
+        this.unsaved = true;
     }
 
     @Override
@@ -237,8 +237,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("World", this.world)
-                .add("Position", this.pos.x + this.pos.z)
+                .add("World", this.level)
+                .add("Position", this.chunkPos.x + this.chunkPos.z)
                 .toString();
     }
 
