@@ -47,7 +47,7 @@ public abstract class EndGatewayTileEntityMixin extends EndPortalTileEntity {
                 frame.pushCause(entity);
             }
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.END_GATEWAY);
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE.get(), MovementTypes.END_GATEWAY.get());
 
             entity.teleportToWithTicket(x, y, z);
         }
