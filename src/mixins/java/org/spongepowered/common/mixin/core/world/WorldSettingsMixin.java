@@ -55,7 +55,7 @@ import javax.annotation.Nullable;
 public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSettingsBridge {
 
     // @formatter:off
-    @Shadow private boolean commandsAllowed;
+    @Shadow private boolean allowCommands;
     @Shadow private boolean bonusChestEnabled;
     @Shadow private JsonElement generatorOptions;
     // @formatter:on
@@ -189,7 +189,7 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
 
     @Override
     public void bridge$setCommandsEnabled(final boolean state) {
-        this.commandsAllowed = state;
+        this.allowCommands = state;
     }
 
     @Override
@@ -208,8 +208,7 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     }
 
     @Override
-    public void bridge$populateInfo(final WorldInfo info) {
-        final WorldInfoBridge infoBridge = (WorldInfoBridge) info;
+    public void bridge$populateInfo(final WorldInfoBridge infoBridge) {
 
         if (infoBridge.bridge$isSinglePlayerProperties()) {
             return;

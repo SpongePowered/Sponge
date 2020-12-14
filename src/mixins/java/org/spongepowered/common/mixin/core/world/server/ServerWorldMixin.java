@@ -77,7 +77,7 @@ import java.util.StringJoiner;
 public abstract class ServerWorldMixin extends WorldMixin implements ServerWorldBridge, PlatformServerWorldBridge, ResourceKeyBridge {
 
     // @formatter:off
-    @Shadow private @Final IServerWorldInfo field_241103_E_;
+    @Shadow @Final private IServerWorldInfo serverLevelData;
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
     @Shadow protected abstract void shadow$saveLevel() throws SessionLockException;
@@ -151,38 +151,38 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Override
     public void bridge$setWeather(Weather weather, long ticks) {
         if (weather == Weathers.CLEAR.get()) {
-            this.field_241103_E_.setClearWeatherTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.field_241103_E_.setRainTime(0);
-            this.field_241103_E_.setThunderTime(0);
-            this.field_241103_E_.setRaining(false);
-            this.field_241103_E_.setThundering(false);
+            this.serverLevelData.setClearWeatherTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.serverLevelData.setRainTime(0);
+            this.serverLevelData.setThunderTime(0);
+            this.serverLevelData.setRaining(false);
+            this.serverLevelData.setThundering(false);
         } else if (weather == Weathers.RAIN.get()) {
-            this.field_241103_E_.setClearWeatherTime(0);
-            this.field_241103_E_.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.field_241103_E_.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.field_241103_E_.setRaining(true);
-            this.field_241103_E_.setThundering(false);
+            this.serverLevelData.setClearWeatherTime(0);
+            this.serverLevelData.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.serverLevelData.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.serverLevelData.setRaining(true);
+            this.serverLevelData.setThundering(false);
         } else if (weather == Weathers.THUNDER.get()) {
-            this.field_241103_E_.setClearWeatherTime(0);
-            this.field_241103_E_.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.field_241103_E_.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.field_241103_E_.setRaining(true);
-            this.field_241103_E_.setThundering(true);
+            this.serverLevelData.setClearWeatherTime(0);
+            this.serverLevelData.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.serverLevelData.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.serverLevelData.setRaining(true);
+            this.serverLevelData.setThundering(true);
         }
     }
 
     @Override
     public long bridge$getDurationInTicks() {
         if (this.shadow$isThundering()) {
-            return this.field_241103_E_.getThunderTime();
+            return this.serverLevelData.getThunderTime();
         }
         if (this.shadow$isRaining()) {
-            return this.field_241103_E_.getRainTime();
+            return this.serverLevelData.getRainTime();
         }
-        if (this.field_241103_E_.getClearWeatherTime() > 0) {
-            return this.field_241103_E_.getClearWeatherTime();
+        if (this.serverLevelData.getClearWeatherTime() > 0) {
+            return this.serverLevelData.getClearWeatherTime();
         }
-        return Math.min(this.field_241103_E_.getThunderTime(), this.field_241103_E_.getRainTime());
+        return Math.min(this.serverLevelData.getThunderTime(), this.serverLevelData.getRainTime());
     }
 
     @Override
@@ -232,6 +232,11 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Override
     public void bridge$setManualSave(boolean state) {
         this.impl$isManualSave = state;
+    }
+
+    @Override
+    public IServerWorldInfo bridge$getServerLevelData() {
+        return this.serverLevelData;
     }
 
     @Override

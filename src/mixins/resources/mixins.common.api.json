@@ -331,14 +331,18 @@
         "mcp.world.raid.Raid_StatusMixin_API",
         "mcp.world.raid.RaidMixin_API",
         "mcp.world.server.ServerWorldMixin_API",
-        "mcp.world.storage.WorldInfoMixin_API",
+        "mcp.world.storage.ServerWorldInfoMixin_API",
         "mojang.authlib.properties.PropertyMixin_API",
         "service.permission.SubjectMixin_API",
         "mcp.scoreboard.ScoreCriteriaMixin_API",
         "mcp.entity.projectile.ProjectileEntityMixin_API",
         "world.LocatableBlockMixin_API",
         "mcp.util.registry.RegistryMixin_API",
-        "mcp.util.registry.MutableRegistryMixin_API"
+        "mcp.util.registry.MutableRegistryMixin_API",
+        "mcp.world.storage.IWorldInfoMixin_API",
+        "mcp.world.storage.IServerWorldInfoMixin_API",
+        "mcp.world.storage.DerivedWorldInfoMixin_API",
+        "mcp.world.storage.ISpawnWorldInfoMixin_API"
     ],
     "client": [
         "mcp.client.MinecraftMixin_API",

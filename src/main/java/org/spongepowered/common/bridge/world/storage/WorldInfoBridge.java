@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge.world.storage;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
@@ -43,9 +44,9 @@ public interface WorldInfoBridge {
 
     boolean bridge$isSinglePlayerProperties();
 
-    SpongeDimensionType bridge$getLogicType();
+    DimensionType bridge$getLogicType();
 
-    void bridge$setLogicType(SpongeDimensionType type, boolean updatePlayers);
+    void bridge$setLogicType(DimensionType type, boolean updatePlayers);
 
     UUID bridge$getUniqueId();
 
@@ -103,4 +104,6 @@ public interface WorldInfoBridge {
     @Nullable InheritableConfigHandle<WorldConfig> bridge$getConfigAdapter();
 
     void bridge$setConfigAdapter(final InheritableConfigHandle<WorldConfig> adapter);
+
+    void bridge$writeTrackedPlayerTable(CompoundNBT spongeDataCompound);
 }

@@ -25,10 +25,10 @@
 package org.spongepowered.common.bridge.world;
 
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 
@@ -78,7 +78,7 @@ public interface WorldSettingsBridge {
 
     void bridge$setRandomSeed(boolean state);
 
-    void bridge$populateInfo(WorldInfo info);
+    void bridge$populateInfo(WorldInfoBridge infoBridge);
 
     void bridge$setInfoConfigAdapter(InheritableConfigHandle<WorldConfig> configAdapter);
 

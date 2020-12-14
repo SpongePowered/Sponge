@@ -197,7 +197,12 @@
     "entity.projectile.SmallFireballEntityMixin",
     "entity.projectile.SnowballEntityMixin",
     "block.AbstractFireBlockMixin",
-    "block.CampfireBlockMixin"
+    "block.CampfireBlockMixin",
+    "world.storage.IWorldInfoMixin",
+    "world.storage.ISpawnWorldInfoMixin",
+    "world.storage.IServerWorldInfoMixin",
+    "world.storage.ServerWorldInfoMixin",
+    "world.storage.DerivedWorldInfoMixin"
   ],
   "client": [
     "client.MinecraftMixin",

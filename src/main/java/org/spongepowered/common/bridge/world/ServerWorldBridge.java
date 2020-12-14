@@ -29,6 +29,7 @@ import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.storage.IServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -67,4 +68,6 @@ public interface ServerWorldBridge {
     void bridge$triggerExplosion(Explosion explosion);
 
     void bridge$setManualSave(boolean state);
+
+    IServerWorldInfo bridge$getServerLevelData();
 }

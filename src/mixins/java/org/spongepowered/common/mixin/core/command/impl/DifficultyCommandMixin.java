@@ -30,6 +30,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.impl.DifficultyCommand;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Difficulty;
+import org.spongepowered.api.world.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -51,7 +52,7 @@ public abstract class DifficultyCommandMixin {
         if (source.getLevel().getDifficulty() == difficulty) {
             throw DifficultyCommandMixin.ERROR_ALREADY_DIFFICULT.create(difficulty.getKey());
         } else {
-            source.getLevel().getWorldInfo().setDifficulty(difficulty);
+            ((ServerWorldProperties)source.getLevel().getLevelData()).setDifficulty((org.spongepowered.api.world.difficulty.Difficulty) (Object) difficulty);
             source.sendSuccess(new TranslationTextComponent("commands.difficulty.success", difficulty.getDisplayName()), true);
             return 0;
         }
