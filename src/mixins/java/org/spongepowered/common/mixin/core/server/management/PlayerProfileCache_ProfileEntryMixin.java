@@ -35,7 +35,7 @@ import org.spongepowered.common.profile.SpongeGameProfile;
 @Mixin(targets = "net.minecraft.server.management.PlayerProfileCache$ProfileEntry")
 public abstract class PlayerProfileCache_ProfileEntryMixin implements PlayerProfileCache_ProfileEntryBridge {
 
-    @Shadow @Final private com.mojang.authlib.GameProfile gameProfile;
+    @Shadow @Final private com.mojang.authlib.GameProfile profile;
 
     private boolean impl$isFull;
     private boolean impl$isSigned;
@@ -75,7 +75,7 @@ public abstract class PlayerProfileCache_ProfileEntryMixin implements PlayerProf
         if (basic != null) {
             return basic;
         }
-        basic = this.impl$basic = SpongeGameProfile.basicOf(this.gameProfile);
+        basic = this.impl$basic = SpongeGameProfile.basicOf(this.profile);
         return basic;
     }
 
@@ -92,11 +92,11 @@ public abstract class PlayerProfileCache_ProfileEntryMixin implements PlayerProf
             if (!this.impl$isSigned) {
                 return null;
             }
-            full = this.impl$fullSigned = SpongeGameProfile.of(this.gameProfile);
+            full = this.impl$fullSigned = SpongeGameProfile.of(this.profile);
         } else {
             final GameProfile fullSigned = this.impl$fullSigned;
             full = this.impl$fullUnsigned = SpongeGameProfile.unsignedOf(
-                    fullSigned == null ? SpongeGameProfile.of(this.gameProfile) : fullSigned);
+                    fullSigned == null ? SpongeGameProfile.of(this.profile) : fullSigned);
         }
         return full;
     }
