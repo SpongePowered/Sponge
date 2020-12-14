@@ -173,7 +173,7 @@ public final class InventoryTest implements LoadableModule {
         final GridInventory inv27Grid = player.getInventory().query(PrimaryPlayerInventory.class).get().getStorage();
         final Inventory inv27Slots = Inventory.builder().slots(27).completeStructure().build();
         final Inventory inv27Slots2 = Inventory.builder().slots(27).completeStructure().build();
-        final ViewableInventory doubleMyInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x6.get())
+        final ViewableInventory doubleMyInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6.get())
                 .grid(inv27Slots.slots(), Vector2i.from(9, 3), Vector2i.from(0, 0))
                 .grid(inv27Slots2.slots(), Vector2i.from(9, 3), Vector2i.from(0, 3))
                 .completeStructure()
@@ -209,7 +209,7 @@ public final class InventoryTest implements LoadableModule {
                     case 8:
                     case 45:
                     case 53:
-                        this.last = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x6.get())
+                        this.last = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6.get())
                                 .fillDummy().item(slot.peek().createSnapshot())
                                 .completeStructure().build();
                         this.menu.setCurrentInventory(this.last);

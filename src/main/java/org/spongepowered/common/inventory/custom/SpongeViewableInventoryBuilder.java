@@ -298,25 +298,25 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     static
     {
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_3x3.get(),
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_3X3.get(),
                 ContainerTypeInfo.ofGrid(3, 3,
                         (id, i, p, vi) -> new DispenserContainer(id, i, vi)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x1.get(),
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X1.get(),
                 ContainerTypeInfo.ofGrid(9, 1,
                         (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x1, id, i, vi, 1)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x2.get(),
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X2.get(),
                 ContainerTypeInfo.ofGrid(9, 2,
                         (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x2, id, i, vi, 2)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x3.get(),
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X3.get(),
                 ContainerTypeInfo.ofGrid(9, 3,
                         (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x3, id, i, vi, 3)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x4.get(),
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X4.get(),
                 ContainerTypeInfo.ofGrid(9, 4,
                         (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x4, id, i, vi, 4)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x5.get(),
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X5.get(),
                 ContainerTypeInfo.ofGrid(9, 5,
                         (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x5, id, i, vi, 5)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9x6.get(),
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X6.get(),
                 ContainerTypeInfo.ofGrid(9, 6,
                         (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9x6, id, i, vi, 6)));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.HOPPER.get(),
