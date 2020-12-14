@@ -39,11 +39,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.command.registrar.tree.builder.RangeCommandTreeNode;
 
 import java.util.function.BiFunction;
 
-public final class SpongeRangeClientCompletionKey<N extends Number> implements ClientCompletionKey<CommandTreeNode.@NonNull Range<@NonNull N>> {
+public final class SpongeRangeClientCompletionKey<N extends Number> extends SpongeCatalogType implements ClientCompletionKey<CommandTreeNode.@NonNull Range<@NonNull N>> {
 
     @Nullable
     public static SpongeRangeClientCompletionKey<?> createFrom(final ResourceKey key, final IArgumentSerializer<?> serializer) {
@@ -62,22 +63,15 @@ public final class SpongeRangeClientCompletionKey<N extends Number> implements C
         return null;
     }
 
-    private final ResourceKey key;
     private final BiFunction<N, N, ArgumentType<?>> typeCreator;
     private final N min;
     private final N max;
 
     private SpongeRangeClientCompletionKey(final ResourceKey key, final BiFunction<N, N, ArgumentType<?>> typeCreator, final N min, final N max) {
-        this.key = key;
+        super(key);
         this.typeCreator = typeCreator;
         this.min = min;
         this.max = max;
-    }
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return this.key;
     }
 
     @Override

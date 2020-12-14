@@ -29,20 +29,15 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.Agent;
+import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeGoalType implements GoalType {
+public final class SpongeGoalType extends SpongeCatalogType implements GoalType {
 
-    private final ResourceKey key;
     private final Class<? extends Goal<? extends Agent>> goalClass;
 
-    public SpongeGoalType(ResourceKey key, Class<? extends Goal<? extends Agent>> goalClass) {
-        this.key = key;
+    public SpongeGoalType(final ResourceKey key, final Class<? extends Goal<? extends Agent>> goalClass) {
+        super(key);
         this.goalClass = goalClass;
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
     }
 
     @Override
@@ -51,10 +46,8 @@ public final class SpongeGoalType implements GoalType {
     }
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .addValue(this.key)
-            .add("goalClass", this.goalClass)
-            .toString();
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("goalClass", this.goalClass);
     }
 }

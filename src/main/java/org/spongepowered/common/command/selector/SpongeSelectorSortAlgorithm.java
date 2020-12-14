@@ -28,24 +28,18 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.vector.Vector3d;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
+import org.spongepowered.common.SpongeCatalogType;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public final class SpongeSelectorSortAlgorithm implements SelectorSortAlgorithm {
+public final class SpongeSelectorSortAlgorithm extends SpongeCatalogType implements SelectorSortAlgorithm {
 
     private final BiConsumer<Vector3d, List<? extends Entity>> sortAlgorithm;
-    private final ResourceKey resourceKey;
 
-    public SpongeSelectorSortAlgorithm(
-            final BiConsumer<Vector3d, List<? extends Entity>> sortAlgorithm, final ResourceKey resourceKey) {
+    public SpongeSelectorSortAlgorithm(final ResourceKey key, final BiConsumer<Vector3d, List<? extends Entity>> sortAlgorithm) {
+        super(key);
         this.sortAlgorithm = sortAlgorithm;
-        this.resourceKey = resourceKey;
-    }
-
-    @Override
-    public final ResourceKey getKey() {
-        return this.resourceKey;
     }
 
     public final BiConsumer<Vector3d, List<? extends Entity>> getSortAlgorithm() {

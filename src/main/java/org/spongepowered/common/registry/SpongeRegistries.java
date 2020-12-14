@@ -72,6 +72,10 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.placeholder.PlaceholderParser;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryRoots;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
@@ -125,6 +129,16 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 public final class SpongeRegistries {
+
+    public static final RegistryType<CommandRegistrar<?>> COMMAND_REGISTRAR = SpongeRegistries.spongeKey("command_registrar");
+
+    public static final RegistryType<QueryType> QUERY_TYPE = SpongeRegistries.spongeKey("query_type");
+
+    public static final RegistryType<SpawnType> SPAWN_TYPE = SpongeRegistries.spongeKey("spawn_type");
+
+    private static <V> RegistryType<V> spongeKey(final String key) {
+        return RegistryType.of(RegistryRoots.SPONGE, ResourceKey.sponge(key));
+    }
 
     public static void registerGlobalRegistries(final SpongeRegistryHolder registries) {
         VanillaRegistryLoader.load(registries);

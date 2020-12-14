@@ -39,7 +39,6 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.MatterTypes;
-import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.accessor.block.AbstractBlock_PropertiesAccessor;
@@ -111,33 +110,7 @@ public final class BlockData {
                             }
                         })
                     .create(Keys.REPRESENTED_INSTRUMENT)
-                        .get(h -> (InstrumentType) (Object) NoteBlockInstrument.byState(h))
-                    .create(Keys.WOOD_TYPE)
-                        .get(h -> {
-                            // Get the resource key of the block and stop if we're not in the minecraft namespace
-                            final ResourceKey key = ((BlockType) h.getBlock()).getKey();
-                            if (!key.getNamespace().equals(PluginManager.MINECRAFT_PLUGIN_ID)) {
-                                return null;
-                            }
-
-                            // Compare ids and determine the wood type to return
-                            final String id = key.getValue();
-                            if (id.contains("acacia_")) {
-                                return WoodTypes.ACACIA.get();
-                            } else if (id.contains("birch_")) {
-                                return WoodTypes.BIRCH.get();
-                            } else if (id.contains("dark_oak_")) {
-                                return WoodTypes.DARK_OAK.get();
-                            } else if (id.contains("jungle_")) {
-                                return WoodTypes.JUNGLE.get();
-                            } else if (id.contains("oak_")) {
-                                return WoodTypes.OAK.get();
-                            } else if (id.contains("spruce_")) {
-                                return WoodTypes.SPRUCE.get();
-                            }
-
-                            return null;
-                        });
+                        .get(h -> (InstrumentType) (Object) NoteBlockInstrument.byState(h));
     }
     // @formatter:on
 }

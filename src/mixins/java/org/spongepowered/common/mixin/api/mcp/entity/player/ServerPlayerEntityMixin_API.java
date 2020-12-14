@@ -87,7 +87,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPacketBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
-import org.spongepowered.common.effect.record.SpongeRecordType;
+import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.BookUtil;
@@ -227,7 +227,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     private void playRecord0(final Vector3i position, @Nullable final MusicDisc recordType) {
-        this.connection.send(SpongeRecordType.createPacket(position, recordType));
+        this.connection.send(SpongeMusicDisc.createPacket(position, recordType));
     }
 
     @Override

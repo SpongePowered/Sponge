@@ -43,6 +43,7 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
@@ -67,19 +68,21 @@ import java.util.stream.Collectors;
  * {@link #register(PluginContainer, LiteralArgumentBuilder, String...)}
  * method.</p>
  */
-public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
+public final class BrigadierCommandRegistrar extends SpongeCatalogType implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
 
     private static final TypeToken<LiteralArgumentBuilder<CommandSource>> COMMAND_TYPE = new TypeToken<LiteralArgumentBuilder<CommandSource>>() {};
 
-    public static final BrigadierCommandRegistrar INSTANCE = new BrigadierCommandRegistrar();
-    public static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("brigadier");
+    public static BrigadierCommandRegistrar INSTANCE;
 
     private boolean hasVanillaRegistered;
     private final List<LiteralCommandNode<CommandSource>> vanilla = new ArrayList<>();
 
     private SpongeCommandDispatcher dispatcher = new SpongeCommandDispatcher();
 
-    private BrigadierCommandRegistrar() {}
+    public BrigadierCommandRegistrar(final ResourceKey key) {
+        super(key);
+        BrigadierCommandRegistrar.INSTANCE = this;
+    }
 
     // For mods and others that use this. We get the plugin container from the CauseStack
     // TODO: Make sure this is valid. For Forge, I suspect we'll have done this in a context of some sort.
@@ -253,12 +256,6 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
             this.dispatcher = new SpongeCommandDispatcher();
             this.hasVanillaRegistered = false;
         }
-    }
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return BrigadierCommandRegistrar.RESOURCE_KEY;
     }
 
     private String createCommandString(final String command, final String argument) {

@@ -29,15 +29,15 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.command.registrar.tree.builder.EmptyCommandTreeNode;
 
-public final class SpongeBasicClientCompletionKey implements ClientCompletionKey<CommandTreeNode.@NonNull Basic> {
+public final class SpongeBasicClientCompletionKey extends SpongeCatalogType implements ClientCompletionKey<CommandTreeNode.@NonNull Basic> {
 
-    private final ResourceKey key;
     private final ArgumentType<?> argumentType;
 
     public SpongeBasicClientCompletionKey(final ResourceKey key, final ArgumentType<?> argumentType) {
-        this.key = key;
+        super(key);
         this.argumentType = argumentType;
     }
 
@@ -45,11 +45,4 @@ public final class SpongeBasicClientCompletionKey implements ClientCompletionKey
     public CommandTreeNode.@NonNull Basic createNode() {
         return new EmptyCommandTreeNode(this, this.argumentType);
     }
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return this.key;
-    }
-
 }
