@@ -99,7 +99,7 @@ public final class SpongeRaidWave implements RaidWave {
             SpongeRaidWave other = (SpongeRaidWave) obj;
             // Minecraft Tracks it's raids via an ID which is handled by the RaidManager.
             // Each world has it's own raid manager so we have to verify that the world the raids are in is also equal.
-            if (this.waveId == other.waveId && this.raid.getWorld() == this.raid.getWorld() && this.raid.getId() == other.raid.getId()) {
+            if (this.waveId == other.waveId && this.raid.getLevel() == other.raid.getLevel() && this.raid.getId() == other.raid.getId()) {
                 return true;
             }
         }

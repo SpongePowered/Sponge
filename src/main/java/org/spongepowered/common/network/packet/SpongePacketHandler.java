@@ -60,11 +60,11 @@ public final class SpongePacketHandler {
 
                     final ServerPlayerEntity sender = (ServerPlayerEntity) player;
                     final BlockPos pos = new BlockPos(requestPacket.x, requestPacket.y, requestPacket.z);
-                    if (!sender.world.isBlockLoaded(pos)) {
+                    if (!sender.level.isBlockLoaded(pos)) {
                         return;
                     }
 
-                    final ChunkBridge chunkBridge = (ChunkBridge) sender.world.getChunkAt(pos);
+                    final ChunkBridge chunkBridge = (ChunkBridge) sender.level.getChunkAt(pos);
                     final Optional<User> owner = chunkBridge.bridge$getBlockCreator(pos);
                     final Optional<User> notifier = chunkBridge.bridge$getBlockNotifier(pos);
 
@@ -78,7 +78,7 @@ public final class SpongePacketHandler {
                     }
 
                     final ServerPlayerEntity sender = (ServerPlayerEntity) player;
-                    final Entity entity = sender.world.getEntityByID(requestPacket.entityId);
+                    final Entity entity = sender.level.getEntityByID(requestPacket.entityId);
                     if (!(entity instanceof CreatorTrackedBridge)) {
                         return;
                     }

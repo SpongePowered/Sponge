@@ -42,22 +42,22 @@ public final class AbstractMinecartData {
         registrator
                 .asMutable(AbstractMinecartEntity.class)
                     .create(Keys.BLOCK_STATE)
-                        .get(h -> h.hasDisplayTile() ? (BlockState) h.getDisplayTile() : null)
-                        .set((h, v) -> h.setDisplayTile((net.minecraft.block.BlockState) v))
-                        .delete(h -> h.setHasDisplayTile(false))
+                        .get(h -> h.hasCustomDisplay() ? (BlockState) h.getDisplayBlockState() : null)
+                        .set((h, v) -> h.setDisplayBlockState((net.minecraft.block.BlockState) v))
+                        .delete(h -> h.setCustomDisplay(false))
                     .create(Keys.IS_ON_RAIL)
                         .get(h -> {
-                            final BlockPos pos = h.getPosition();
-                            if (h.getEntityWorld().getBlockState(pos).isIn(BlockTags.RAILS)) {
+                            final BlockPos pos = h.blockPosition();
+                            if (h.level.getBlockState(pos).is(BlockTags.RAILS)) {
                                 return true;
                             }
-                            final BlockPos posBelow = pos.add(0, -1, 0);
-                            return h.getEntityWorld().getBlockState(posBelow).isIn(BlockTags.RAILS);
+                            final BlockPos posBelow = pos.offset(0, -1, 0);
+                            return h.level.getBlockState(posBelow).is(BlockTags.RAILS);
                         })
                     .create(Keys.MINECART_BLOCK_OFFSET)
-                        .get(AbstractMinecartEntity::getDisplayTileOffset)
+                        .get(AbstractMinecartEntity::getDisplayOffset)
                         .setAnd(AbstractMinecartData::setBlockOffset)
-                        .deleteAnd(h -> AbstractMinecartData.setBlockOffset(h, h.getDefaultDisplayTileOffset()))
+                        .deleteAnd(h -> AbstractMinecartData.setBlockOffset(h, h.getDefaultDisplayOffset()))
                 .asMutable(MinecartEntityBridge.class)
                     .create(Keys.AIRBORNE_VELOCITY_MODIFIER)
                         .get(MinecartEntityBridge::bridge$getAirborneMod)
@@ -76,10 +76,10 @@ public final class AbstractMinecartData {
     // @formatter:on
 
     private static boolean setBlockOffset(final AbstractMinecartEntity holder, final Integer value) {
-        if (!holder.hasDisplayTile()) {
+        if (!holder.hasCustomDisplay()) {
             return false;
         }
-        holder.setDisplayTileOffset(value);
+        holder.setDisplayOffset(value);
         return true;
     }
 }

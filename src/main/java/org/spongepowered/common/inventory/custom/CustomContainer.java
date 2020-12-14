@@ -38,7 +38,7 @@ public class CustomContainer extends Container {
         super((net.minecraft.inventory.container.ContainerType<?>) type, id);
         this.inv = inventory;
 
-        for (int slot = 0; slot < inventory.getSizeInventory(); slot++) {
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
             this.addSlot(new Slot(inventory, slot, 0, 0));
         }
 
@@ -73,11 +73,11 @@ public class CustomContainer extends Container {
             final ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
 
-            if (index < this.inv.getSizeInventory()) {
-                if (!this.moveItemStackTo(itemstack1, this.inv.getSizeInventory(), this.slots.size(), true)) {
+            if (index < this.inv.getContainerSize()) {
+                if (!this.moveItemStackTo(itemstack1, this.inv.getContainerSize(), this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.moveItemStackTo(itemstack1, 0, this.inv.getSizeInventory(), false)) {
+            } else if (!this.moveItemStackTo(itemstack1, 0, this.inv.getContainerSize(), false)) {
                 return ItemStack.EMPTY;
             }
 

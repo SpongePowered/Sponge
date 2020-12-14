@@ -30,6 +30,7 @@ import net.minecraft.block.WallSignBlock;
 import net.minecraft.tileentity.SignTileEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.common.accessor.tileentity.SignTileEntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.DirectionUtil;
@@ -91,8 +92,9 @@ public final class SignData {
     }
 
     private static void setSignLines(final SignTileEntity holder, final List<Component> value) {
-        for (int i = 0; i < holder.signText.length; i++) {
-            holder.signText[i] = SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i));
+        final SignTileEntityAccessor accessor = (SignTileEntityAccessor) holder;
+        for (int i = 0; i < accessor.accessor$messages().length; i++) {
+            accessor.accessor$messages()[i] = SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i));
         }
         holder.setChanged();
         holder.getLevel().sendBlockUpdated(holder.getBlockPos(), holder.getBlockState(), holder.getBlockState(), 3);
@@ -103,9 +105,10 @@ public final class SignData {
     }
 
     private static List<Component> getSignLines(SignTileEntity h) {
-        final List<Component> lines = new ArrayList<>(h.signText.length);
-        for (int i = 0; i < h.signText.length; i++) {
-            lines.add(SpongeAdventure.asAdventure(h.signText[i]));
+        final SignTileEntityAccessor accessor = (SignTileEntityAccessor) h;
+        final List<Component> lines = new ArrayList<>(accessor.accessor$messages().length);
+        for (int i = 0; i < accessor.accessor$messages().length; i++) {
+            lines.add(SpongeAdventure.asAdventure(accessor.accessor$messages()[i]));
         }
         return lines;
     }

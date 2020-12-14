@@ -62,7 +62,7 @@ public final class PacketSender {
                 executor.execute(() -> listener.accept(future));
             };
         }
-        networkManager.sendPacket(packet, asyncListener);
+        networkManager.send(packet, asyncListener);
     }
 
     public static void sendTo(final EngineConnection connection, final IPacket<?> packet, final CompletableFuture<Void> future) {

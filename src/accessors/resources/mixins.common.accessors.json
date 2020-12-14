@@ -141,6 +141,7 @@
         "tileentity.HopperTileEntityAccessor",
         "tileentity.LockableTileEntityAccessor",
         "tileentity.MobSpawnerTileEntityAccessor",
+        "tileentity.SignTileEntityAccessor",
         "tileentity.SkullTileEntityAccessor",
         "tileentity.StructureBlockTileEntityAccessor",
         "util.CombatEntryAccessor",

@@ -73,12 +73,12 @@ public final class SpongeStatusResponse {
     }
 
     public static ServerStatusResponse create(MinecraftServer server) {
-        return SpongeStatusResponse.clone(server.getServerStatusResponse());
+        return SpongeStatusResponse.clone(server.getStatus());
     }
 
     private static ServerStatusResponse clone(ServerStatusResponse original) {
         ServerStatusResponse clone = new ServerStatusResponse();
-        clone.setServerDescription(original.getServerDescription());
+        clone.setDescription(original.getDescription());
         if (original.getFavicon() != null) {
             ((ClientPingServerEvent.Response) clone).setFavicon(((StatusResponse) original).getFavicon().get());
         }
@@ -92,8 +92,8 @@ public final class SpongeStatusResponse {
     private static ServerStatusResponse.Players clone(@Nullable ServerStatusResponse.Players original) {
         if (original != null) {
             ServerStatusResponse.Players clone = new ServerStatusResponse.Players(original.getMaxPlayers(),
-                    original.getOnlinePlayerCount());
-            clone.setPlayers(original.getPlayers());
+                    original.getNumPlayers());
+            clone.setSample(original.getSample());
             return clone;
         }
         return null;
@@ -105,11 +105,11 @@ public final class SpongeStatusResponse {
     }
 
     public static String getMotd(ServerStatusResponse response) {
-        return SpongeStatusResponse.getFirstLine(SpongeAdventure.legacySection(SpongeAdventure.asAdventure(response.getServerDescription())));
+        return SpongeStatusResponse.getFirstLine(SpongeAdventure.legacySection(SpongeAdventure.asAdventure(response.getDescription())));
     }
 
     public static String getUnformattedMotd(ServerStatusResponse response) {
-        return SpongeStatusResponse.getFirstLine(SpongeAdventure.plain(SpongeAdventure.asAdventure(response.getServerDescription())));
+        return SpongeStatusResponse.getFirstLine(SpongeAdventure.plain(SpongeAdventure.asAdventure(response.getDescription())));
     }
 
     private static String getFirstLine(String s) {

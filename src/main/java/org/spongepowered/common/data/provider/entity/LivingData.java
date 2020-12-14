@@ -74,9 +74,9 @@ public final class LivingData {
                         .delete(LivingEntity::releaseUsingItem)
                     .create(Keys.BODY_ROTATIONS)
                         .get(h -> {
-                            final double headYaw = h.getRotationYawHead();
-                            final double pitch = h.rotationPitch;
-                            final double yaw = h.rotationYaw;
+                            final double headYaw = h.getYHeadRot();
+                            final double pitch = h.xRot;
+                            final double yaw = h.yRot;
 
                             return ImmutableMap.of(
                                     BodyParts.HEAD.get(), new Vector3d(pitch, headYaw, 0),
@@ -87,29 +87,29 @@ public final class LivingData {
                             final Vector3d bodyRotation = v.get(BodyParts.CHEST.get());
 
                             if (bodyRotation != null) {
-                                h.rotationYaw = (float) bodyRotation.getY();
-                                h.rotationPitch = (float) bodyRotation.getX();
+                                h.yRot = (float) bodyRotation.getY();
+                                h.xRot = (float) bodyRotation.getX();
                             }
                             if (headRotation != null) {
-                                h.rotationYawHead = (float) headRotation.getY();
-                                h.rotationPitch = (float) headRotation.getX();
+                                h.yHeadRot = (float) headRotation.getY();
+                                h.xRot = (float) headRotation.getX();
                             }
                         })
                     .create(Keys.CHEST_ROTATION)
-                        .get(h -> new Vector3d(h.rotationPitch, h.rotationYaw, 0))
+                        .get(h -> new Vector3d(h.xRot, h.yRot, 0))
                         .set((h, v) -> {
                             final float headYaw = (float) v.getY();
                             final float pitch = (float) v.getX();
-                            h.setRotationYawHead(headYaw);
-                            h.rotationPitch = pitch;
+                            h.setYHeadRot(headYaw);
+                            h.xRot = pitch;
                         })
                     .create(Keys.HEAD_ROTATION)
-                        .get(h -> new Vector3d(h.rotationPitch, h.getRotationYawHead(), 0))
+                        .get(h -> new Vector3d(h.xRot, h.getYHeadRot(), 0))
                         .set((h, v) -> {
                             final float yaw = (float) v.getY();
                             final float pitch = (float) v.getX();
-                            h.rotationYaw = yaw;
-                            h.rotationPitch = pitch;
+                            h.yRot = yaw;
+                            h.xRot = pitch;
                         })
                     .create(Keys.HEALTH)
                         .get(h -> (double) h.getHealth())
@@ -130,15 +130,15 @@ public final class LivingData {
                         .get(LivingEntity::isFallFlying)
                         .set((h, v) -> ((EntityAccessor) h).invoker$setSharedFlag(Constants.Entity.ELYTRA_FLYING_FLAG, v))
                     .create(Keys.LAST_ATTACKER)
-                        .get(h -> (Entity) h.getRevengeTarget())
+                        .get(h -> (Entity) h.getLastHurtByMob())
                         .setAnd((h, v) -> {
                             if (v instanceof LivingEntity) {
-                                h.setRevengeTarget((LivingEntity) v);
+                                h.setLastHurtByMob((LivingEntity) v);
                                 return true;
                             }
                             return false;
                         })
-                        .delete(h -> h.setRevengeTarget(null))
+                        .delete(h -> h.setLastHurtByMob(null))
                     .create(Keys.MAX_AIR)
                         .get(LivingEntity::getMaxAir)
                         .set((h, v) -> ((LivingEntityBridge) h).bridge$setMaxAir(v))
@@ -147,7 +147,7 @@ public final class LivingData {
                         .set((h, v) -> h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(v))
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
-                            final Collection<EffectInstance> effects = h.getActivePotionEffects();
+                            final Collection<EffectInstance> effects = h.getActiveEffects();
                             return effects.isEmpty() ? null : PotionEffectUtil.copyAsPotionEffects(effects);
                         })
                         .set((h, v) -> {

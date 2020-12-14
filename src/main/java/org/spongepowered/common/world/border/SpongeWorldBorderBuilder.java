@@ -90,9 +90,9 @@ public class SpongeWorldBorderBuilder implements WorldBorder.Builder {
         final net.minecraft.world.border.WorldBorder border = new net.minecraft.world.border.WorldBorder();
         border.setCenter(this.center.getX(), this.center.getZ());
         border.setDamagePerBlock(this.damageAmount);
-        border.setDamageBuffer(this.damageThreshold);
-        border.setTransition(this.diameter);
-        border.setWarningDistance((int) this.warningDistance);
+        border.setDamageSafeZone(this.damageThreshold);
+        border.setSize(this.diameter);
+        border.setWarningBlocks((int) this.warningDistance);
         border.setWarningTime((int) this.warningTime.getSeconds());
         return (WorldBorder) border;
     }

@@ -55,37 +55,37 @@ public final class PaintingData {
         registrator
                 .asMutable(PaintingEntity.class)
                     .create(Keys.ART_TYPE)
-                        .get(h -> (ArtType) h.art)
+                        .get(h -> (ArtType) h.motive)
                         .setAnd((h, v) -> {
-                            if (!h.world.isClientSide) {
-                                final PaintingType oldArt = h.art;
-                                h.art = (PaintingType) v;
-                                ((HangingEntityAccessor) h).invoker$setDirection(h.getHorizontalFacing());
-                                if (!h.onValidSurface()) {
-                                    h.art = oldArt;
-                                    ((HangingEntityAccessor) h).invoker$setDirection(h.getHorizontalFacing());
+                            if (!h.level.isClientSide) {
+                                final PaintingType oldArt = h.motive;
+                                h.motive = (PaintingType) v;
+                                ((HangingEntityAccessor) h).invoker$setDirection(h.getDirection());
+                                if (!h.survives()) {
+                                    h.motive = oldArt;
+                                    ((HangingEntityAccessor) h).invoker$setDirection(h.getDirection());
                                     return false;
                                 }
 
-                                final ChunkManagerAccessor chunkManager = (ChunkManagerAccessor) ((ServerWorld) h.world).getChunkProvider().chunkManager;
-                                final EntityTrackerAccessor paintingTracker = chunkManager.accessor$entityMap().get(h.getEntityId());
+                                final ChunkManagerAccessor chunkManager = (ChunkManagerAccessor) ((ServerWorld) h.level).getChunkSource().chunkMap;
+                                final EntityTrackerAccessor paintingTracker = chunkManager.accessor$entityMap().get(h.getId());
                                 if (paintingTracker == null) {
                                     return true;
                                 }
 
                                 final List<ServerPlayerEntity> players = new ArrayList<>();
                                 for (final ServerPlayerEntity player : paintingTracker.accessor$seenBy()) {
-                                    final SDestroyEntitiesPacket packet = new SDestroyEntitiesPacket(h.getEntityId());
-                                    player.connection.sendPacket(packet);
+                                    final SDestroyEntitiesPacket packet = new SDestroyEntitiesPacket(h.getId());
+                                    player.connection.send(packet);
                                     players.add(player);
                                 }
                                 for (final ServerPlayerEntity player : players) {
                                     SpongeCommon.getServerScheduler().submit(Task.builder()
                                             .plugin(Launch.getInstance().getCommonPlugin())
-                                            .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.world).get().getEntity().getPaintingRespawnDelay()))
+                                            .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.level).get().getEntity().getPaintingRespawnDelay()))
                                             .execute(() -> {
                                                 final SSpawnPaintingPacket packet = new SSpawnPaintingPacket(h);
-                                                player.connection.sendPacket(packet);
+                                                player.connection.send(packet);
                                             })
                                             .build());
                                 }

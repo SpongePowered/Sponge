@@ -55,8 +55,8 @@ public class GlobalPalette<T> implements Palette.Immutable<T> {
             PaletteTypes.GLOBAL_BLOCK_PALETTE.get(),
             () -> (Stream<BlockState>) (Stream) Registry.BLOCK.stream()
                 .flatMap(block -> block.getStateContainer().getValidStates().stream()),
-            (type) -> Block.BLOCK_STATE_IDS.getId((net.minecraft.block.BlockState) type),
-            (id) -> (BlockState) Block.BLOCK_STATE_IDS.getByValue(id),
+            (type) -> Block.BLOCK_STATE_REGISTRY.getId((net.minecraft.block.BlockState) type),
+            (id) -> (BlockState) Block.BLOCK_STATE_REGISTRY.byId(id),
             BlockState.class
         )
     );

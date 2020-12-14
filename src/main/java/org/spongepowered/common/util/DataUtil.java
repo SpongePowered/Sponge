@@ -161,22 +161,22 @@ public final class DataUtil {
 
     public static double mind(final Property<Double> property) {
         //noinspection OptionalGetWithoutIsPresent
-        return property.getAllowedValues().stream().mapToDouble(i -> i).min().getAsDouble();
+        return property.getPossibleValues().stream().mapToDouble(i -> i).min().getAsDouble();
     }
 
     public static double maxd(final Property<Double> property) {
         //noinspection OptionalGetWithoutIsPresent
-        return property.getAllowedValues().stream().mapToDouble(i -> i).max().getAsDouble();
+        return property.getPossibleValues().stream().mapToDouble(i -> i).max().getAsDouble();
     }
 
     public static int mini(final IntegerProperty property) {
         //noinspection OptionalGetWithoutIsPresent
-        return property.getAllowedValues().stream().mapToInt(i -> i).min().getAsInt();
+        return property.getPossibleValues().stream().mapToInt(i -> i).min().getAsInt();
     }
 
     public static int maxi(final IntegerProperty property) {
         //noinspection OptionalGetWithoutIsPresent
-        return property.getAllowedValues().stream().mapToInt(i -> i).max().getAsInt();
+        return property.getPossibleValues().stream().mapToInt(i -> i).max().getAsInt();
     }
 
     public static <E, V extends Value<E>> E merge(MergeFunction function, Key<V> key,

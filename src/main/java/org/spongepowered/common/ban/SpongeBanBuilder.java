@@ -143,7 +143,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
         if (this.banType.equals(BanTypes.PROFILE.get())) {
             this.profile = ((Ban.Profile) ban).getProfile();
         } else {
-            this.address = ((Ban.Ip) ban).getAddress();
+            this.address = ((Ban.IP) ban).getAddress();
         }
 
         this.reason = ban.getReason().orElse(null);

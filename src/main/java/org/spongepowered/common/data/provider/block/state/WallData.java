@@ -40,30 +40,30 @@ public final class WallData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
-                        .get(h -> DirectionalUtil.getHorizontalUpFrom(h, WallBlock.EAST, WallBlock.WEST, WallBlock.NORTH, WallBlock.SOUTH,
+                        .get(h -> DirectionalUtil.getHorizontalUpFrom(h, WallBlock.EAST_WALL, WallBlock.WEST_WALL, WallBlock.NORTH_WALL, WallBlock.SOUTH_WALL,
                                 WallBlock.UP))
-                        .set((h, v) -> DirectionalUtil.setHorizontalUpFor(h, v, WallBlock.EAST, WallBlock.WEST, WallBlock.NORTH, WallBlock.SOUTH,
+                        .set((h, v) -> DirectionalUtil.setHorizontalUpFor(h, v, WallBlock.EAST_WALL, WallBlock.WEST_WALL, WallBlock.NORTH_WALL, WallBlock.SOUTH_WALL,
                                 WallBlock.UP))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_EAST)
-                        .get(h -> h.get(WallBlock.EAST))
-                        .set((h, v) -> h.with(WallBlock.EAST, v))
+                        .get(h -> h.get(WallBlock.EAST_WALL))
+                        .set((h, v) -> h.with(WallBlock.EAST_WALL, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_NORTH)
-                        .get(h -> h.get(WallBlock.NORTH))
-                        .set((h, v) -> h.with(WallBlock.NORTH, v))
+                        .get(h -> h.get(WallBlock.NORTH_WALL))
+                        .set((h, v) -> h.with(WallBlock.NORTH_WALL, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_SOUTH)
-                        .get(h -> h.get(WallBlock.SOUTH))
-                        .set((h, v) -> h.with(WallBlock.SOUTH, v))
+                        .get(h -> h.get(WallBlock.SOUTH_WALL))
+                        .set((h, v) -> h.with(WallBlock.SOUTH_WALL, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_UP)
                         .get(h -> h.get(WallBlock.UP))
                         .set((h, v) -> h.with(WallBlock.UP, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_WEST)
-                        .get(h -> h.get(WallBlock.WEST))
-                        .set((h, v) -> h.with(WallBlock.WEST, v))
+                        .get(h -> h.get(WallBlock.WEST_WALL))
+                        .set((h, v) -> h.with(WallBlock.WEST_WALL, v))
                         .supports(h -> h.getBlock() instanceof WallBlock);
     }
     // @formatter:on
