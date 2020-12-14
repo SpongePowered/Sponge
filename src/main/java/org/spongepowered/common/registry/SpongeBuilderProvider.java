@@ -103,7 +103,7 @@ import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
-import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.border.MutableWorldBorder;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.schematic.PaletteType;
@@ -272,7 +272,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
             .register(SoundType.Builder.class, SpongeSoundBuilder::new)
             .register(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
             .register(DataRegistration.Builder.class, SpongeDataRegistrationBuilder::new)
-            .register(WorldBorder.Builder.class, SpongeWorldBorderBuilder::new)
+            .register(MutableWorldBorder.Builder.class, SpongeWorldBorderBuilder::new)
             .register(Ingredient.Builder.class, SpongeIngredientBuilder::new)
             .register(ShapedCraftingRecipe.Builder.class, SpongeShapedCraftingRecipeBuilder::new)
             .register(ShapelessCraftingRecipe.Builder.class, SpongeShapelessCraftingRecipeBuilder::new)

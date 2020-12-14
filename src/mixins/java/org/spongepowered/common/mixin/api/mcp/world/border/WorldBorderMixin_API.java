@@ -24,118 +24,130 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.border;
 
-import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.border.MutableWorldBorder;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector2d;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 @Mixin(net.minecraft.world.border.WorldBorder.class)
-@Implements(@Interface(iface = WorldBorder.class, prefix = "worldBorder$"))
-public abstract class WorldBorderMixin_API implements WorldBorder {
+@Implements(@Interface(iface = MutableWorldBorder.class, prefix = "worldBorder$"))
+public abstract class WorldBorderMixin_API implements MutableWorldBorder {
 
     //@formatter:off
-    @Shadow public abstract double getCenterX();
-    @Shadow public abstract double getCenterZ();
+    @Shadow public abstract double shadow$getCenterX();
+    @Shadow public abstract double shadow$getCenterZ();
+    @Shadow public abstract void shadow$setCenter(final double x, final double z);
+    @Shadow public abstract double shadow$getSize();
+    @Shadow public abstract void shadow$setSize(final double newSize);
+    @Shadow public abstract void shadow$lerpSizeBetween(final double oldSize, final double newSize, final long time);
     @Shadow public abstract double shadow$getLerpTarget();
-    @Shadow public abstract void shadow$setSize(double newSize);
-    @Shadow public abstract void shadow$lerpSizeBetween(double oldSize, double newSize, long time);
     @Shadow public abstract long shadow$getLerpRemainingTime();
     @Shadow public abstract double shadow$getDamageSafeZone();
-    @Shadow public abstract void shadow$setDamageSafeZone(double buffer);
-    @Shadow public abstract void shadow$setCenter(double x, double z);
+    @Shadow public abstract void shadow$setDamageSafeZone(final double buffer);
     @Shadow public abstract double shadow$getDamagePerBlock();
-    @Shadow public abstract void shadow$setDamagePerBlock(double amount);
+    @Shadow public abstract void shadow$setDamagePerBlock(final double amount);
     @Shadow public abstract int shadow$getWarningTime();
-    @Shadow public abstract void shadow$setWarningTime(int time);
+    @Shadow public abstract void shadow$setWarningTime(final int time);
     @Shadow public abstract int shadow$getWarningBlocks();
-    @Shadow public abstract void shadow$setWarningBlocks(int distance);
-    @Shadow public abstract double shadow$getSize();
+    @Shadow public abstract void shadow$setWarningBlocks(final int distance);
+    @Shadow public abstract net.minecraft.world.border.WorldBorder.Serializer shadow$createSettings();
+    @Shadow public abstract void shadow$applySettings(final net.minecraft.world.border.WorldBorder.Serializer settings);
     //@formatter:on
 
+    @Override
+    public Vector2d getCenter() {
+        return new Vector2d(this.shadow$getCenterX(), this.shadow$getCenterZ());
+    }
+
     @Intrinsic
-    public Duration worldBorder$getWarningTime() {
-        return Duration.of(this.shadow$getWarningTime(), ChronoUnit.MILLIS);
+    @Override
+    public void setCenter(final double x, final double z) {
+        this.shadow$setCenter(x, z);
     }
 
     @Intrinsic
-    public void worldBorder$setWarningTime(final Duration time) {
-        this.shadow$setWarningTime((int) time.toMillis());
+    @Override
+    public double getSize() {
+        return this.shadow$getSize();
+    }
+
+    @Intrinsic
+    @Override
+    public void setSize(final double size) {
+        this.shadow$setSize(size);
     }
 
     @Override
-    public double getWarningDistance() {
-        return this.shadow$getWarningBlocks();
+    public void setSize(final double oldSize, final double newSize, final Duration duration) {
+        this.shadow$lerpSizeBetween(oldSize, newSize, duration.toMillis());
     }
 
     @Override
-    public void setWarningDistance(final double distance) {
-        this.shadow$setWarningBlocks((int) distance);
-    }
-
-    @Override
-    public double getNewDiameter() {
+    public double getLerpSizeTarget() {
         return this.shadow$getLerpTarget();
     }
 
     @Override
-    public double getDiameter() {
-        return this.shadow$getSize();
+    public Duration getLerpSizeTimeRemaining() {
+        return Duration.ofMillis(this.shadow$getLerpRemainingTime());
     }
 
     @Override
-    public void setDiameter(final double diameter) {
-        this.shadow$setSize(diameter);
-    }
-
-    @Override
-    public void setDiameter(final double diameter, final Duration time) {
-        this.shadow$lerpSizeBetween(this.getDiameter(), diameter, time.toMillis());
-    }
-
-    @Override
-    public void setDiameter(final double startDiameter, final double endDiameter, final Duration time) {
-        this.shadow$lerpSizeBetween(startDiameter, endDiameter, time.toMillis());
-    }
-
-    @Override
-    public Duration getTimeRemaining() {
-        return Duration.of(this.shadow$getLerpRemainingTime(), ChronoUnit.MILLIS);
-    }
-
-    @Override
-    public Vector3d getCenter() {
-        return new Vector3d(this.getCenterX(), 0, this.getCenterZ());
-    }
-
-    @Intrinsic
-    public void worldBorder$setCenter(final double x, final double z) {
-        this.shadow$setCenter(x, z);
-    }
-
-    @Override
-    public double getDamageThreshold() {
+    public double getSafeZone() {
         return this.shadow$getDamageSafeZone();
     }
 
     @Override
-    public void setDamageThreshold(final double distance) {
-        this.shadow$setDamageSafeZone(distance);
+    public void setSafeZone(final double safeZone) {
+        this.shadow$setDamageSafeZone(safeZone);
     }
 
+    @Intrinsic
     @Override
-    public double getDamageAmount() {
+    public double getDamagePerBlock() {
         return this.shadow$getDamagePerBlock();
     }
 
+    @Intrinsic
     @Override
-    public void setDamageAmount(final double damage) {
-        this.shadow$setDamagePerBlock(damage);
+    public void setDamagePerBlock(final double damagePerBlock) {
+        this.shadow$setDamagePerBlock(damagePerBlock);
     }
 
+    @Override
+    public Duration getWarningTime() {
+        return Duration.ofMillis(this.shadow$getWarningTime());
+    }
+
+    @Override
+    public void setWarningTime(final Duration time) {
+        this.shadow$setWarningTime((int) time.toMillis());
+    }
+
+    @Intrinsic
+    @Override
+    public int getWarningBlocks() {
+        return this.shadow$getWarningBlocks();
+    }
+
+    @Intrinsic
+    @Override
+    public void setWarningBlocks(final int warningBlocks) {
+        this.shadow$setWarningBlocks(warningBlocks);
+    }
+
+    @Override
+    public Snapshot createSnapshot() {
+        return (Snapshot) this.shadow$createSettings();
+    }
+
+    @Override
+    public void applySnapshot(final Snapshot snapshot) {
+        this.shadow$applySettings((net.minecraft.world.border.WorldBorder.Serializer) snapshot);
+    }
 }

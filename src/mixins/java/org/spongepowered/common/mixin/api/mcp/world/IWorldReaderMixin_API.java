@@ -50,7 +50,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.ProtoWorld;
-import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.border.MutableWorldBorder;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.dimension.DimensionType;
@@ -107,8 +107,8 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
     }
 
     @Override
-    default WorldBorder getBorder() {
-        return (WorldBorder) ((ICollisionReader) this).getWorldBorder();
+    default MutableWorldBorder getBorder() {
+        return (MutableWorldBorder) ((ICollisionReader) this).getWorldBorder();
     }
 
     @Override

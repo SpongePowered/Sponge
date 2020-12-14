@@ -35,7 +35,7 @@ import org.spongepowered.api.entity.living.trader.WanderingTrader;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.border.MutableWorldBorder;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.ServerWorldProperties;
@@ -297,12 +297,8 @@ public interface IServerWorldInfoMixin_API extends ISpawnWorldInfoMixin_API, Ser
     }
 
     @Override
-    default WorldBorder getWorldBorder() {
-        final net.minecraft.world.border.WorldBorder.Serializer settings = this.shadow$getWorldBorder();
-
-        final net.minecraft.world.border.WorldBorder mcBorder = new net.minecraft.world.border.WorldBorder();
-        mcBorder.applySettings(settings);
-        return (WorldBorder) mcBorder;
+    default MutableWorldBorder.Snapshot getWorldBorder() {
+        return (MutableWorldBorder.Snapshot) this.shadow$getWorldBorder();
     }
 
 }

@@ -166,6 +166,7 @@
         "world.WorldTypeAccessor",
         "world.biome.BiomeContainerAccessor",
         "world.border.WorldBorderAccessor",
+        "world.border.WorldBorder_SerializerAccessor",
         "world.chunk.ChunkAccessor",
         "world.dimension.DimensionAccessor",
         "world.dimension.DimensionTypeAccessor",

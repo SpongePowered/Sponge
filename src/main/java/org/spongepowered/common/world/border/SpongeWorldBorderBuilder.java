@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.world.border;
 
-import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.border.MutableWorldBorder;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.time.Duration;
 
-public class SpongeWorldBorderBuilder implements WorldBorder.Builder {
+public class SpongeWorldBorderBuilder implements MutableWorldBorder.Builder {
 
     private double diameter;
     private Vector3d center = Vector3d.ZERO; //use a default value otherwise null is used
@@ -39,7 +39,7 @@ public class SpongeWorldBorderBuilder implements WorldBorder.Builder {
     private double damageAmount;
 
     @Override
-    public WorldBorder.Builder from(final WorldBorder border) {
+    public MutableWorldBorder.Builder from(final MutableWorldBorder border) {
         this.diameter = border.getDiameter();
         this.center = border.getCenter();
         this.warningTime = border.getWarningTime();
@@ -50,43 +50,43 @@ public class SpongeWorldBorderBuilder implements WorldBorder.Builder {
     }
 
     @Override
-    public WorldBorder.Builder diameter(final double diameter) {
+    public MutableWorldBorder.Builder diameter(final double diameter) {
         this.diameter = diameter;
         return this;
     }
 
     @Override
-    public WorldBorder.Builder center(final double x, final double z) {
+    public MutableWorldBorder.Builder center(final double x, final double z) {
         this.center = new Vector3d(x, 0, z);
         return this;
     }
 
     @Override
-    public WorldBorder.Builder warningTime(final Duration time) {
-        this.warningTime = time;
+    public MutableWorldBorder.Builder warningTime(final Duration warningTime) {
+        this.warningTime = warningTime;
         return this;
     }
 
     @Override
-    public WorldBorder.Builder warningDistance(final double distance) {
+    public MutableWorldBorder.Builder warningDistance(final double distance) {
         this.warningDistance = distance;
         return this;
     }
 
     @Override
-    public WorldBorder.Builder damageThreshold(final double distance) {
+    public MutableWorldBorder.Builder damageThreshold(final double distance) {
         this.damageThreshold = distance;
         return this;
     }
 
     @Override
-    public WorldBorder.Builder damageAmount(final double damage) {
+    public MutableWorldBorder.Builder damageAmount(final double damage) {
         this.damageAmount = damage;
         return this;
     }
 
     @Override
-    public WorldBorder build() throws IllegalStateException {
+    public MutableWorldBorder build() throws IllegalStateException {
         final net.minecraft.world.border.WorldBorder border = new net.minecraft.world.border.WorldBorder();
         border.setCenter(this.center.getX(), this.center.getZ());
         border.setDamagePerBlock(this.damageAmount);
@@ -94,11 +94,11 @@ public class SpongeWorldBorderBuilder implements WorldBorder.Builder {
         border.setSize(this.diameter);
         border.setWarningBlocks((int) this.warningDistance);
         border.setWarningTime((int) this.warningTime.getSeconds());
-        return (WorldBorder) border;
+        return (MutableWorldBorder) border;
     }
 
     @Override
-    public WorldBorder.Builder reset() {
+    public MutableWorldBorder.Builder reset() {
         this.center = Vector3d.ZERO;
         this.damageAmount = 0;
         this.damageThreshold = 0;
