@@ -37,7 +37,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 public abstract class LivingEntityMixin_RealTime extends EntityMixin_RealTime {
 
     @Shadow public int deathTime;
-    @Shadow protected int idleTime;
+    @Shadow protected int noActionTime;
 
     @Redirect(method = "tickDeath",
         at = @At(value = "FIELD", target = "Lnet/minecraft/entity/LivingEntity;deathTime:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
@@ -46,7 +46,7 @@ public abstract class LivingEntityMixin_RealTime extends EntityMixin_RealTime {
             this.deathTime = vanillaNewDeathTime;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) self.getCommandSenderWorld()).realTimeBridge$getRealTimeTicks();
         int newDeathTime = this.deathTime + ticks;
         // At tick 20, XP is dropped and the death animation finishes. The
         // entity is also removed from the world... except in the case of

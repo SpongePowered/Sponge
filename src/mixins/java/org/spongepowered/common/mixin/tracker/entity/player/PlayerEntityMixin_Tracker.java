@@ -89,7 +89,7 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             return null;
         }
         // Sponge Start - redirect to our handling to capture and throw events.
-        if (!((WorldBridge) this.world).bridge$isFake()) {
+        if (!((WorldBridge) this.level).bridge$isFake()) {
             ((PlayerEntityBridge) this).bridge$shouldRestoreInventory(false);
             final PlayerEntity player = (PlayerEntity) (PlayerEntityBridge) this;
 
@@ -127,13 +127,13 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
                     final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
                     itemEntity.setDeltaMovement(-MathHelper.sin(f1) * f, 0.2F, MathHelper.cos(f1) * f);
                 } else {
-                    final float f8 = MathHelper.sin(this.rotationPitch * ((float)Math.PI / 180F));
-                    final float f2 = MathHelper.cos(this.rotationPitch * ((float)Math.PI / 180F));
-                    final float f3 = MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F));
-                    final float f4 = MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F));
-                    final float f5 = this.rand.nextFloat() * ((float)Math.PI * 2F);
-                    final float f6 = 0.02F * this.rand.nextFloat();
-                    itemEntity.setDeltaMovement((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
+                    final float f8 = MathHelper.sin(this.xRot * ((float)Math.PI / 180F));
+                    final float f2 = MathHelper.cos(this.xRot * ((float)Math.PI / 180F));
+                    final float f3 = MathHelper.sin(this.yRot * ((float)Math.PI / 180F));
+                    final float f4 = MathHelper.cos(this.yRot * ((float)Math.PI / 180F));
+                    final float f5 = this.random.nextFloat() * ((float)Math.PI * 2F);
+                    final float f6 = 0.02F * this.random.nextFloat();
+                    itemEntity.setDeltaMovement((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
                 }
 
                 return itemEntity;
@@ -141,7 +141,7 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
         }
         // Sponge end
         final double d0 = this.shadow$getEyeY() - 0.30000001192092896D;
-        final ItemEntity itemEntity = new ItemEntity(this.world, this.shadow$getX(), d0, this.shadow$getZ(), droppedItem);
+        final ItemEntity itemEntity = new ItemEntity(this.level, this.shadow$getX(), d0, this.shadow$getZ(), droppedItem);
         itemEntity.setPickUpDelay(40);
 
         if (traceItem) {
@@ -149,17 +149,17 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
         }
 
         if (dropAround) {
-            final float f = this.rand.nextFloat() * 0.5F;
-            final float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+            final float f = this.random.nextFloat() * 0.5F;
+            final float f1 = this.random.nextFloat() * ((float) Math.PI * 2F);
             itemEntity.setDeltaMovement(-MathHelper.sin(f1) * f, 0.2F, MathHelper.cos(f1) * f);
         } else {
-            final float f8 = MathHelper.sin(this.rotationPitch * ((float)Math.PI / 180F));
-            final float f2 = MathHelper.cos(this.rotationPitch * ((float)Math.PI / 180F));
-            final float f3 = MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F));
-            final float f4 = MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F));
-            final float f5 = this.rand.nextFloat() * ((float)Math.PI * 2F);
-            final float f6 = 0.02F * this.rand.nextFloat();
-            itemEntity.setDeltaMovement((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
+            final float f8 = MathHelper.sin(this.xRot * ((float)Math.PI / 180F));
+            final float f2 = MathHelper.cos(this.xRot * ((float)Math.PI / 180F));
+            final float f3 = MathHelper.sin(this.yRot * ((float)Math.PI / 180F));
+            final float f4 = MathHelper.cos(this.yRot * ((float)Math.PI / 180F));
+            final float f5 = this.random.nextFloat() * ((float)Math.PI * 2F);
+            final float f6 = 0.02F * this.random.nextFloat();
+            itemEntity.setDeltaMovement((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
         }
 
         return itemEntity;

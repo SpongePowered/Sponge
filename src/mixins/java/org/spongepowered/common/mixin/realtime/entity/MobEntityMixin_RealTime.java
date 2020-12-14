@@ -38,7 +38,7 @@ public abstract class MobEntityMixin_RealTime extends LivingEntityMixin_RealTime
 
 
     @Redirect(
-        method = "updateEntityActionState",
+        method = "serverAiStep",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/entity/MobEntity;noActionTime:I",
@@ -54,11 +54,11 @@ public abstract class MobEntityMixin_RealTime extends LivingEntityMixin_RealTime
     )
     private void realTimeImpl$adjustForRealTimeEntityDespawnAge(final MobEntity self, final int modifier) {
         if (((WorldBridge) this.level).bridge$isFake()) {
-            this.idleTime = modifier;
+            this.noActionTime = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
-        this.idleTime += ticks;
+        final int ticks = (int) ((RealTimeTrackingBridge) self.getCommandSenderWorld()).realTimeBridge$getRealTimeTicks();
+        this.noActionTime += ticks;
     }
 
 }
