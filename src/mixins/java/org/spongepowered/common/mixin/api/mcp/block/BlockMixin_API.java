@@ -95,7 +95,7 @@ public abstract class BlockMixin_API extends AbstractBlockMixin_API {
     }
 
     @Override
-    public boolean isAnyOf(Supplier<BlockType>... types) {
+    public boolean isAnyOf(Supplier<? extends BlockType>... types) {
         return Arrays.stream(types).map(Supplier::get).anyMatch(type -> type == this);
     }
 

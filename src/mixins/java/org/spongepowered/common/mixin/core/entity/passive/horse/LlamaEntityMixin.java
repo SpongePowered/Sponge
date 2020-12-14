@@ -31,7 +31,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.passive.horse.LlamaEntityBridge;
 import org.spongepowered.common.data.type.SpongeLlamaType;
-import org.spongepowered.common.registry.MappedRegistry;
 
 @Mixin(LlamaEntity.class)
 public abstract class LlamaEntityMixin implements LlamaEntityBridge {

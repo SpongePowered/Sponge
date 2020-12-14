@@ -61,7 +61,7 @@ public class SpongeIngredientBuilder implements Ingredient.Builder {
 
 
     @Override
-    public Ingredient.Builder with(Supplier<ItemType>... types) {
+    public Ingredient.Builder with(Supplier<? extends ItemType>... types) {
         this.reset();
         this.types = Arrays.stream(types).map(Supplier::get).toArray(ItemType[]::new);
         return this;

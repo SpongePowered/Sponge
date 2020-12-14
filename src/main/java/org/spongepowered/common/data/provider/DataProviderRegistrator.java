@@ -40,16 +40,16 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
-import org.spongepowered.common.util.CopyHelper;
 import org.spongepowered.common.data.persistence.datastore.SpongeDataStoreBuilder;
+import org.spongepowered.common.util.CopyHelper;
 import org.spongepowered.common.util.TypeTokenUtil;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -57,6 +57,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 public class DataProviderRegistrator {
 
@@ -85,14 +87,15 @@ public class DataProviderRegistrator {
         return this;
     }
 
-    @SuppressWarnings("rawtypes")
-    public <K, V extends Value<K>> DataProviderRegistrator dataStore(final Supplier<Key<V>> key, final BiConsumer<DataView, K> serializer, final Function<DataView, Optional<K>> deserializer) {
+    public <K, V extends Value<K>> DataProviderRegistrator dataStore(final DefaultedRegistryReference<? extends Key<V>> key, final BiConsumer<DataView, K> serializer,
+            final Function<DataView, Optional<K>> deserializer) {
         this.dataStoreBuilder.key(key.get(), serializer, deserializer);
         this.dataStoreBuilder.getDataHolderTypes().forEach(typeToken -> this.registerDataStoreDelegatingProvider(key, typeToken));
         return this;
     }
 
-    public <H extends DataHolder, K, V extends Value<K>> void registerDataStoreDelegatingProvider(final Supplier<Key<V>> key, final Type typeToken) {
+    public <H extends DataHolder, K, V extends Value<K>> void registerDataStoreDelegatingProvider(final DefaultedRegistryReference<? extends Key<V>> key,
+            final Type typeToken) {
         // Create dataprovider for mutable and immutable DataContainerHolders
         if (GenericTypeReflector.isSuperType(DataProviderRegistrator.MUTABLE, typeToken)) {
             this.asMutable(GenericTypeReflector.erase(typeToken))
@@ -393,7 +396,7 @@ public class DataProviderRegistrator {
             this.registrator = registrator;
         }
 
-        public <NE> MutableRegistration<H, NE> create(final Supplier<? extends Key<? extends Value<NE>>> suppliedKey) {
+        public <NE> MutableRegistration<H, NE> create(final DefaultedRegistryReference<? extends Key<? extends Value<NE>>> suppliedKey) {
             return this.create(suppliedKey.get());
         }
 
@@ -500,7 +503,7 @@ public class DataProviderRegistrator {
             this.registrator = registrator;
         }
 
-        public <NE> ImmutableRegistration<H, NE> create(final Supplier<? extends Key<? extends Value<NE>>> suppliedKey) {
+        public <NE> ImmutableRegistration<H, NE> create(final DefaultedRegistryReference<? extends Key<? extends Value<NE>>> suppliedKey) {
             return this.create(suppliedKey.get());
         }
 

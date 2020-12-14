@@ -175,7 +175,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         final int count = container.getInt(Constants.ItemStack.COUNT).get();
         this.quantity(count);
 
-        final ItemType itemType = container.getCatalogType(Constants.ItemStack.TYPE, ItemType.class).get();
+        final ItemType itemType = container.getRegistryType(Constants.ItemStack.TYPE, ItemType.class).get();
         this.itemType(itemType);
 
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
@@ -268,7 +268,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
             return Optional.empty();
         }
         final int count = container.getInt(Constants.ItemStack.COUNT).get();
-        final ItemType itemType = container.getCatalogType(Constants.ItemStack.TYPE, ItemType.class).orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
+        final ItemType itemType = container.getRegistryType(Constants.ItemStack.TYPE, ItemType.class).orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final CompoundNBT compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());

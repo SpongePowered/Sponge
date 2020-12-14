@@ -67,6 +67,7 @@ import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
@@ -99,7 +100,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 @Mixin(net.minecraft.world.World.class)
 public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_API<W>, World<W>, AutoCloseable {

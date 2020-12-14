@@ -33,7 +33,6 @@ import org.spongepowered.common.accessor.entity.passive.horse.HorseEntityAccesso
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.data.type.SpongeHorseColor;
 import org.spongepowered.common.data.type.SpongeHorseStyle;
-import org.spongepowered.common.registry.MappedRegistry;
 
 public final class HorseData {
 

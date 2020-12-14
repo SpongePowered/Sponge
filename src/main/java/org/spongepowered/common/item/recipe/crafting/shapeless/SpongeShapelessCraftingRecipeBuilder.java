@@ -40,8 +40,8 @@ import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
+import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
@@ -69,8 +69,8 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<R
     }
 
     @Override
-    public ResultStep addIngredients(Supplier<ItemType>... ingredients) {
-        for (Supplier<ItemType> ingredient : ingredients) {
+    public ResultStep addIngredients(Supplier<? extends ItemType>... ingredients) {
+        for (Supplier<? extends ItemType> ingredient : ingredients) {
             this.ingredients.add(Ingredient.of(() -> ((Item) ingredient.get())));
         }
         return this;

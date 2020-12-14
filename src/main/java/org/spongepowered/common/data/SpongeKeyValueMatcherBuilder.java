@@ -93,7 +93,7 @@ public final class SpongeKeyValueMatcherBuilder<V> implements KeyValueMatcher.Bu
     @Override
     public Optional<KeyValueMatcher<V>> build(final DataView container) throws InvalidDataException {
         Objects.requireNonNull(container, "container");
-        final Optional<Key> key = container.getCatalogType(Constants.KeyValueMatcher.KEY, Key.class);
+        final Optional<Key> key = container.getRegistryType(Constants.KeyValueMatcher.KEY, Key.class);
         if (!key.isPresent()) {
             return Optional.empty();
         }

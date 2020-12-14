@@ -73,7 +73,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     protected Optional<EntityArchetype> buildContent(final DataView container) throws InvalidDataException {
         final SpongeEntityArchetypeBuilder builder = new SpongeEntityArchetypeBuilder();
         if (container.contains(Constants.Sponge.EntityArchetype.ENTITY_TYPE)) {
-            builder.type(container.getCatalogType(Constants.Sponge.EntityArchetype.ENTITY_TYPE, EntityType.class)
+            builder.type(container.getRegistryType(Constants.Sponge.EntityArchetype.ENTITY_TYPE, EntityType.class)
                     .orElseThrow(() -> new InvalidDataException("Could not deserialize a TileEntityType!")));
         } else {
             throw new InvalidDataException("Missing the TileEntityType and BlockState! Cannot re-construct a TileEntityArchetype!");

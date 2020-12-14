@@ -32,7 +32,6 @@ import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.registry.Registries;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.type.SpongeCatType;
 import org.spongepowered.common.util.MissingImplementationException;
 
 public final class CatData {

@@ -41,6 +41,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.scheduler.TaskPriority;
 import org.spongepowered.api.util.Direction;

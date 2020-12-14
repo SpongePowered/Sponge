@@ -61,7 +61,6 @@ import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
-import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 import org.spongepowered.common.world.storage.SpongePlayerDataBuilder;
@@ -83,11 +82,7 @@ import java.util.Set;
 @Singleton
 public final class SpongeDataManager implements DataManager {
 
-    private static SpongeDataManager INSTANCE;
-
-    public static SpongeDataManager getInstance() {
-        return SpongeDataManager.INSTANCE;
-    }
+    public static SpongeDataManager INSTANCE;
 
     private final DataStoreRegistry dataStoreRegistry;
     private final DataProviderRegistry dataProviderRegistry;

@@ -32,22 +32,23 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.registry.SimpleRegistry;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.registry.Registries;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.entity.projectile.FireworkRocketEntityAccessor;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
-import org.spongepowered.common.registry.MappedRegistry;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class FireworkUtil {
+public final class FireworkUtil {
 
     public static @Nullable FireworkEffect getStarEffect(final ItemStack item) {
         Preconditions.checkArgument(item.getItem() == Items.FIREWORK_STAR, "Item is not a firework star!");
@@ -68,9 +69,8 @@ public class FireworkUtil {
         }
         if (compound.contains(Constants.Item.Fireworks.SHAPE_TYPE)) {
             final byte type = compound.getByte(Constants.Item.Fireworks.SHAPE_TYPE);
-            final MappedRegistry<FireworkShape, Byte> registry = SpongeCommon.getRegistry().getCatalogRegistry()
-                    .requireRegistry(FireworkShape.class);
-            @Nullable final FireworkShape shape = registry.getReverseMapping(type);
+            final SimpleRegistry<FireworkShape> registry = (SimpleRegistry<FireworkShape>) Sponge.getGame().registries().registry(Registries.FIREWORK_SHAPE);
+            @Nullable final FireworkShape shape = registry.byId(type);
             if (shape != null) {
                 builder.shape(shape);
             }
@@ -96,13 +96,12 @@ public class FireworkUtil {
     }
 
     public static CompoundNBT toCompound(final FireworkEffect effect) {
-        final MappedRegistry<FireworkShape, Byte> registry = SpongeCommon.getRegistry().getCatalogRegistry()
-                .requireRegistry(FireworkShape.class);
+        final SimpleRegistry<FireworkShape> registry = (SimpleRegistry<FireworkShape>) Sponge.getGame().registries().registry(Registries.FIREWORK_SHAPE);
 
         final CompoundNBT tag = new CompoundNBT();
         tag.putBoolean(Constants.Item.Fireworks.FLICKER, effect.flickers());
         tag.putBoolean(Constants.Item.Fireworks.TRAIL, effect.hasTrail());
-        tag.putByte(Constants.Item.Fireworks.SHAPE_TYPE, registry.requireMapping(effect.getShape()));
+        tag.putByte(Constants.Item.Fireworks.SHAPE_TYPE, (byte) registry.getId(effect.getShape()));
         final int[] colorsArray = effect.getColors().stream()
                 .mapToInt(Color::getRgb)
                 .toArray();
@@ -149,8 +148,8 @@ public class FireworkUtil {
                 return Optional.empty();
             }
 
-            final ListNBT effectsNbt = fireworks.getList(Constants.Item.Fireworks.EXPLOSIONS, Constants.NBT.TAG_COMPOUND);
-            effects = NBTStreams.toCompounds(effectsNbt)
+            final ListNBT effectCompounds = fireworks.getList(Constants.Item.Fireworks.EXPLOSIONS, Constants.NBT.TAG_COMPOUND);
+            effects = NBTStreams.toCompounds(effectCompounds)
                     .map(FireworkUtil::fromCompound)
                     .collect(Collectors.toList());
         } else {

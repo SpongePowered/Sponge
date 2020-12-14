@@ -94,9 +94,9 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public <T> VariableValueParameters.CatalogedTypeBuilder<T> createRegistryEntryBuilder(
-            @NonNull final DefaultedRegistryReference<? extends Registry<? extends T>> registryReference) {
-        return new SpongeCatalogedElementParameterBuilder<>(in -> registryReference.find().orElse(null));
+    public <T> VariableValueParameters.CatalogedTypeBuilder<T> createRegistryEntryBuilder(@NonNull final DefaultedRegistryReference<?
+            extends Registry<? extends T>> reference) {
+        return new SpongeCatalogedElementParameterBuilder<>(in -> reference.find().orElse(null));
     }
 
     @Override

@@ -67,7 +67,6 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
         this.lastAttacker = lastAttacker;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
         @Nullable final GameTransaction<@NonNull ?> parent
@@ -75,7 +74,7 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
         return Optional.of((context, stackFrame) -> {
             stackFrame.pushCause(this.destroyingEntity);
             this.lastAttacker.get()
-                .ifPresent(attacker -> stackFrame.addContext((Supplier) EventContextKeys.LAST_DAMAGE_SOURCE, attacker));
+                .ifPresent(attacker -> stackFrame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE, (org.spongepowered.api.event.cause.entity.damage.source.DamageSource) attacker));
         });
     }
 

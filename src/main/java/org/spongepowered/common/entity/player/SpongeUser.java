@@ -78,7 +78,6 @@ import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -90,6 +89,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 public final class SpongeUser implements User, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder, BridgeSubject, SubjectBridge,
         DataCompoundHolder, InvulnerableTrackedBridge, VanishableBridge, GameProfileHolderBridge {

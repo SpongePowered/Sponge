@@ -29,8 +29,7 @@ import net.minecraft.state.Property;
 import net.minecraft.state.StateHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-
-import java.util.function.Supplier;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
 
 public final class BoundedUtil {
 

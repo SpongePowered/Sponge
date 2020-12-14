@@ -36,13 +36,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
+public final class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
 
     private boolean trail = false;
     private boolean flicker = false;
     private List<Color> colors = Lists.newArrayList();
     private List<Color> fades = Lists.newArrayList();
-    private Supplier<? extends FireworkShape> shape = FireworkShapes.SMALL_BALL;
+    private Supplier<FireworkShape> shape = FireworkShapes.SMALL_BALL;
 
     @Override
     public SpongeFireworkEffectBuilder trail(final boolean trail) {

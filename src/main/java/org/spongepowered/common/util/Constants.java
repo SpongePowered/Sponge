@@ -69,6 +69,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
@@ -586,7 +587,7 @@ public final class Constants {
             // Structure block entity
             public static final String DEFAULT_STRUCTURE_AUTHOR = ""; // intentionally empty, as in vanilla
             public static final boolean DEFAULT_STRUCTURE_IGNORE_ENTITIES = true;
-            public static final Supplier<StructureMode> DEFAULT_STRUCTURE_MODE = () -> StructureModes.DATA.get();
+            public static final Supplier<StructureMode> DEFAULT_STRUCTURE_MODE = StructureModes.DATA;
             public static final Vector3i DEFAULT_STRUCTURE_POSITION = Vector3i.ONE;
             public static final boolean DEFAULT_STRUCTURE_POWERED = false;
             public static final boolean DEFAULT_STRUCTURE_SHOW_AIR = false;
@@ -655,12 +656,11 @@ public final class Constants {
 
     public static final class Catalog {
 
-        public static final Supplier<DyeColor> DEFAULT_SHULKER_COLOR = DyeColors.PURPLE::get;
-        public static final Supplier<ComparatorMode> DEFAULT_COMPARATOR_MODE = ComparatorModes.COMPARE::get;
-        public static final Supplier<CatType> DEFAULT_CAT_TYPE = CatTypes.WHITE::get;
-        public static final Supplier<GameMode> DEFAULT_GAMEMODE = GameModes.NOT_SET::get;
-        public static final Supplier<ArtType> DEFAULT_ART = ArtTypes.KEBAB::get;
-        public static final Supplier<HandPreference> DEFAULT_HAND = HandPreferences.RIGHT::get;
+        public static final Supplier<DyeColor> DEFAULT_SHULKER_COLOR = DyeColors.PURPLE;
+        public static final Supplier<ComparatorMode> DEFAULT_COMPARATOR_MODE = ComparatorModes.COMPARE;
+        public static final Supplier<GameMode> DEFAULT_GAMEMODE = GameModes.NOT_SET;
+        public static final Supplier<ArtType> DEFAULT_ART = ArtTypes.KEBAB;
+        public static final Supplier<HandPreference> DEFAULT_HAND = HandPreferences.RIGHT;
 
         private Catalog() {
         }
@@ -751,8 +751,8 @@ public final class Constants {
 
         public static final class Horse {
 
-            public static final Supplier<HorseStyle> DEFAULT_STYLE = HorseStyles.NONE::get;
-            public static final Supplier<HorseColor> DERAULT_TYPE = HorseColors.WHITE::get;
+            public static final Supplier<HorseStyle> DEFAULT_STYLE = HorseStyles.NONE;
+            public static final Supplier<HorseColor> DERAULT_TYPE = HorseColors.WHITE;
 
             private Horse() {
             }
@@ -776,7 +776,7 @@ public final class Constants {
 
         public static final class Llama {
 
-            public static final Supplier<LlamaType> DEFAULT_TYPE = LlamaTypes.WHITE::get;
+            public static final Supplier<LlamaType> DEFAULT_TYPE = LlamaTypes.WHITE;
         }
 
         public static final class Minecart {
@@ -795,7 +795,7 @@ public final class Constants {
 
         public static final class Cat {
 
-            public static final Supplier<CatType> DEFAULT_TYPE = CatTypes.WHITE::get;
+            public static final Supplier<CatType> DEFAULT_TYPE = CatTypes.WHITE;
         }
 
         public static final class Panda {
@@ -805,7 +805,7 @@ public final class Constants {
 
         public static final class Parrot {
 
-            public static final Supplier<ParrotType> DEFAULT_TYPE = ParrotTypes.RED_AND_BLUE::get;
+            public static final Supplier<ParrotType> DEFAULT_TYPE = ParrotTypes.RED_AND_BLUE;
         }
 
         public static final class Player {
@@ -839,7 +839,7 @@ public final class Constants {
 
         public static final class Rabbit {
 
-            public static final Supplier<RabbitType> DEFAULT_TYPE = RabbitTypes.WHITE::get;
+            public static final Supplier<RabbitType> DEFAULT_TYPE = RabbitTypes.WHITE;
         }
 
         public static final class Ravager {
