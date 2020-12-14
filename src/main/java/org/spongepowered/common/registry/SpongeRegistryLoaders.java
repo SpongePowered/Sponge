@@ -192,17 +192,17 @@ public final class SpongeRegistryLoaders {
 
     public static RegistryLoader<CatType> catType() {
         return RegistryLoader.of(l -> {
-            l.add(CatTypes.ALL_BLACK, k -> new SpongeCatType(k, 10));
-            l.add(CatTypes.BLACK, k -> new SpongeCatType(k, 1));
-            l.add(CatTypes.BRITISH_SHORTHAIR, k -> new SpongeCatType(k, 4));
-            l.add(CatTypes.CALICO, k -> new SpongeCatType(k, 5));
-            l.add(CatTypes.JELLIE, k -> new SpongeCatType(k, 9));
-            l.add(CatTypes.PERSIAN, k -> new SpongeCatType(k, 6));
-            l.add(CatTypes.RAGDOLL, k -> new SpongeCatType(k, 7));
-            l.add(CatTypes.RED, k -> new SpongeCatType(k, 2));
-            l.add(CatTypes.SIAMESE, k -> new SpongeCatType(k, 3));
-            l.add(CatTypes.TABBY, k -> new SpongeCatType(k, 0));
-            l.add(CatTypes.WHITE, k -> new SpongeCatType(k, 8));
+            l.add(10, CatTypes.ALL_BLACK, SpongeCatType::new);
+            l.add(1, CatTypes.BLACK, SpongeCatType::new);
+            l.add(4, CatTypes.BRITISH_SHORTHAIR, SpongeCatType::new);
+            l.add(5, CatTypes.CALICO, SpongeCatType::new);
+            l.add(9, CatTypes.JELLIE, SpongeCatType::new);
+            l.add(6, CatTypes.PERSIAN, SpongeCatType::new);
+            l.add(7, CatTypes.RAGDOLL, SpongeCatType::new);
+            l.add(2, CatTypes.RED, SpongeCatType::new);
+            l.add(3, CatTypes.SIAMESE, SpongeCatType::new);
+            l.add(0, CatTypes.TABBY, SpongeCatType::new);
+            l.add(8, CatTypes.WHITE, SpongeCatType::new);
         });
     }
 

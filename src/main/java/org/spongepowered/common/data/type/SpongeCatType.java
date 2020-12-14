@@ -26,10 +26,11 @@ package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.CatType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeCatType extends SpongeEntityMetadataType<Integer> implements CatType {
+public final class SpongeCatType extends SpongeCatalogType implements CatType {
 
-    public SpongeCatType(final ResourceKey key, final int metadata) {
-        super(key, metadata);
+    public SpongeCatType(final ResourceKey key) {
+        super(key);
     }
 }

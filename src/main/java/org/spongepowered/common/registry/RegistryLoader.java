@@ -25,6 +25,8 @@
 package org.spongepowered.common.registry;
 
 import java.util.function.Consumer;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryKey;
 
@@ -35,6 +37,7 @@ import java.util.function.Function;
 public final class RegistryLoader<T> {
 
     private final Map<ResourceKey, T> values = new HashMap<>();
+    private @MonotonicNonNull Map<ResourceKey, Integer> ids;
 
     private RegistryLoader() {
     }
@@ -50,12 +53,21 @@ public final class RegistryLoader<T> {
         return this;
     }
 
+    public RegistryLoader<T> add(final int id, final RegistryKey<? extends T> key, final Function<ResourceKey, ? extends T> function) {
+        this.values.put(key.location(), function.apply(key.location()));
+        if (this.ids == null) {
+            this.ids = new HashMap<>();
+        }
+        this.ids.put(key.location(), id);
+        return this;
+    }
+
     public RegistryLoader<T> mapping(final Function<ResourceKey, ? extends T> function, final Consumer<Mapping<T>> consumer) {
         consumer.accept(new Mapping<T>() {
             @Override
             public Mapping<T> add(final RegistryKey<? extends T>... keys) {
                 for (final RegistryKey<? extends T> key : keys) {
-                    RegistryLoader.this.values.put(key.location(), function.apply(key.location()));
+                    RegistryLoader.this.add(key, function);
                 }
                 return this;
             }
@@ -66,6 +78,10 @@ public final class RegistryLoader<T> {
 
     public Map<ResourceKey, T> values() {
         return this.values;
+    }
+
+    public @Nullable Map<ResourceKey, Integer> ids() {
+        return this.ids;
     }
 
     public interface Mapping<T> {

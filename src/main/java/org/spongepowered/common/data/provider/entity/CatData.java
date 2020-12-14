@@ -25,10 +25,12 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.passive.CatEntity;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.registry.Registries;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.data.type.SpongeCatType;
 import org.spongepowered.common.util.MissingImplementationException;
@@ -45,11 +47,10 @@ public final class CatData {
                     .create(Keys.CAT_TYPE)
                         .get(h -> {
                             final int type = h.getCatType();
-                            return Sponge.getRegistry().getCatalogRegistry().streamAllOf(CatType.class)
-                                    .filter(t -> ((SpongeCatType)t).getMetadata() == type)
-                                    .findFirst().orElse(null);
+                            return ((Registry<CatType>) Sponge.getGame().registries().registry(Registries.CAT_TYPE))
+                                    .byId(type);
                         })
-                        .set((h, v) -> h.setCatType(((SpongeCatType) v).getMetadata()))
+                        .set((h, v) -> h.setCatType(((Registry<CatType>) Sponge.getGame().registries().registry(Registries.CAT_TYPE)).getId(v)))
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) h.getCollarColor())
                         .set((h, v) -> h.setCollarColor((net.minecraft.item.DyeColor) (Object) v))
