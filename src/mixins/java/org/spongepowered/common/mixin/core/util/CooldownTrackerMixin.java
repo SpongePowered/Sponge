@@ -44,7 +44,7 @@ public abstract class CooldownTrackerMixin implements CooldownTrackerBridge {
     private int impl$lastSetCooldownResult;
 
     @Inject(
-            method = "setCooldown",
+            method = "addCooldown",
             at = @At(
                     value = "HEAD",
                     remap = false
@@ -60,7 +60,7 @@ public abstract class CooldownTrackerMixin implements CooldownTrackerBridge {
     }
 
     @ModifyVariable(
-            method = "setCooldown",
+            method = "addCooldown",
             at = @At(
                     value = "HEAD",
                     remap = false

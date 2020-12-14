@@ -46,7 +46,7 @@ public abstract class CooldownTrackerServerMixin extends CooldownTrackerMixin {
 
     @Shadow @Final private ServerPlayerEntity player;
 
-    @Shadow protected abstract void notifyOnSet(Item itemIn, int ticksIn);
+    @Shadow protected abstract void onCooldownStarted(Item itemIn, int ticksIn);
 
     @Override
     protected int impl$throwSetCooldownEvent(final ItemType type, final int ticks) {
@@ -58,7 +58,7 @@ public abstract class CooldownTrackerServerMixin extends CooldownTrackerMixin {
                 ticks, ticks, type, (ServerPlayer) this.player, beforeCooldown);
 
         if (Sponge.getEventManager().post(event)) {
-            this.notifyOnSet((Item) type, beforeCooldown.orElse(0));
+            this.onCooldownStarted((Item) type, beforeCooldown.orElse(0));
             return -1;
         } else {
             return event.getNewCooldown();
