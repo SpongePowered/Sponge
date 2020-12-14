@@ -90,12 +90,12 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow @Final protected Thread serverThread;
     @Shadow @Final private PlayerProfileCache profileCache;
     @Shadow @Final private static Logger LOGGER;
-    @Shadow private int tickCounter;
+    @Shadow private int tickCount;
 
-    @Shadow public abstract CommandSource shadow$getCommandSource();
-    @Shadow public abstract Iterable<ServerWorld> shadow$getWorlds();
+    @Shadow public abstract CommandSource shadow$createCommandSourceStack();
+    @Shadow public abstract Iterable<ServerWorld> shadow$getAllLevels();
     @Shadow public abstract boolean shadow$isDedicatedServer();
-    @Shadow public abstract boolean shadow$isServerRunning();
+    @Shadow public abstract boolean shadow$isRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
 
     @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
@@ -142,19 +142,19 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         return this.getClass().getSimpleName();
     }
 
-    @Inject(method = "tick", at = @At(value = "HEAD"))
+    @Inject(method = "tickServer", at = @At(value = "HEAD"))
     private void impl$onServerTickStart(final CallbackInfo ci) {
         TimingsManager.FULL_SERVER_TICK.startTiming();
     }
 
-    @Inject(method = "tick", at = @At("TAIL"))
+    @Inject(method = "tickServer", at = @At("TAIL"))
     private void impl$tickServerScheduler(final BooleanSupplier hasTimeLeft, final CallbackInfo ci) {
         this.getScheduler().tick();
     }
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.shadow$getCommandSource();
+        return this.shadow$createCommandSourceStack();
     }
 
     // The Audience of the Server is actually a Forwarding Audience - so any message sent to
@@ -167,7 +167,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     }
 
     // We want to save the username cache json, as we normally bypass it.
-    @Inject(method = "save", at = @At("RETURN"))
+    @Inject(method = "saveAllChunks", at = @At("RETURN"))
     private void impl$saveUsernameCacheOnSave(
             final boolean suppressLog,
             final boolean flush,
@@ -196,20 +196,20 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     private int getSaveTickInterval(final int tickInterval) {
         if (!this.shadow$isDedicatedServer()) {
             return tickInterval;
-        } else if (!this.shadow$isServerRunning()) {
+        } else if (!this.shadow$isRunning()) {
             // Don't autosave while server is stopping
-            return this.tickCounter + 1;
+            return this.tickCount + 1;
         }
 
         final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().getWorld().getAutoPlayerSaveInterval();
-        if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
+        if (autoPlayerSaveInterval > 0 && (this.tickCount % autoPlayerSaveInterval == 0)) {
             this.shadow$getPlayerList().saveAll();
         }
 
         this.save(true, false, false);
 
         // force check to fail as we handle everything above
-        return this.tickCounter + 1;
+        return this.tickCount + 1;
     }
 
     /**
@@ -218,7 +218,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      */
     @Overwrite
     public boolean save(final boolean suppressLog, final boolean flush, final boolean isForced) throws SessionLockException {
-        for (final ServerWorld world : this.shadow$getWorlds()) {
+        for (final ServerWorld world : this.shadow$getAllLevels()) {
             final SerializationBehavior serializationBehavior = ((WorldInfoBridge) world.getWorldInfo()).bridge$getSerializationBehavior();
             boolean log = !suppressLog;
 
@@ -235,7 +235,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
                 // Not forced means this is an auto-save or a shut down, handle accordingly
 
                 // If the server isn't running or we hit Vanilla's save interval, save our configs
-                if (!this.shadow$isServerRunning() || this.tickCounter % 6000 == 0) {
+                if (!this.shadow$isRunning() || this.tickCount % 6000 == 0) {
                     ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().save();
                 }
 
@@ -255,12 +255,12 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
                     }
 
                     // Now check the interval vs the tick counter and skip it
-                    if (this.tickCounter % autoSaveInterval != 0) {
+                    if (this.tickCount % autoSaveInterval != 0) {
                         continue;
                     }
                 }
 
-                world.save(null, false, world.disableLevelSaving);
+                world.save(null, false, world.noSave);
 
                 if (log) {
                     if (this.bridge$performAutosaveChecks()) {
@@ -277,7 +277,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
                 ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().save();
 
-                world.save(null, false, world.disableLevelSaving);
+                world.save(null, false, world.noSave);
             }
         }
 
@@ -289,8 +289,8 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      * @reason Set the difficulty without marking as custom
      */
     @Overwrite
-    public void setDifficultyForAllWorlds(final Difficulty difficulty, final boolean forceDifficulty) {
-        for (final ServerWorld world : this.shadow$getWorlds()) {
+    public void setDifficulty(final Difficulty difficulty, final boolean forceDifficulty) {
+        for (final ServerWorld world : this.shadow$getAllLevels()) {
             ((SpongeServer) SpongeCommon.getServer()).getWorldManager().adjustWorldForDifficulty(world, difficulty, forceDifficulty);
         }
     }
