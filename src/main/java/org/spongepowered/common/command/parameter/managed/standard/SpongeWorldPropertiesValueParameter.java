@@ -44,18 +44,12 @@ import java.util.stream.Collectors;
 
 public final class SpongeWorldPropertiesValueParameter extends CatalogedArgumentParser<WorldProperties> {
 
-    private final ResourceKey resourceKey;
     private final boolean selectAll;
 
-    public SpongeWorldPropertiesValueParameter(final boolean selectAll) {
-        this.selectAll = selectAll;
-        this.resourceKey = selectAll ? ResourceKey.sponge("world_properties_all") : ResourceKey.sponge("world_properties_online_only");
-    }
+    public SpongeWorldPropertiesValueParameter(final ResourceKey key, final boolean selectAll) {
+        super(key);
 
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return this.resourceKey;
+        this.selectAll = selectAll;
     }
 
     @Override

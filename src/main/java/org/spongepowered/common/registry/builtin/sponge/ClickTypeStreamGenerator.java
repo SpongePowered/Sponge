@@ -29,7 +29,7 @@ import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.handler.ClickHandler;
 import org.spongepowered.api.item.inventory.menu.handler.KeySwapHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.inventory.menu.handler.SpongeClickType;
 
 import java.util.stream.Stream;
 
@@ -57,13 +57,6 @@ public final class ClickTypeStreamGenerator {
                 new SpongeClickType<SlotClickHandler>(ResourceKey.sponge("shift_click_left")),
                 new SpongeClickType<SlotClickHandler>(ResourceKey.sponge("shift_click_right"))
         );
-    }
-
-    private static class SpongeClickType<T> extends SpongeCatalogType implements ClickType<T> {
-
-        public SpongeClickType(ResourceKey key) {
-            super(key);
-        }
     }
 }
 

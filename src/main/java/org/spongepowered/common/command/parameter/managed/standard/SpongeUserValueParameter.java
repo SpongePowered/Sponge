@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -54,13 +53,10 @@ import java.util.stream.Collectors;
 
 public final class SpongeUserValueParameter extends CatalogedArgumentParser<User> {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("user");
     private final EntityArgument selectorArgumentType = EntityArgument.player();
 
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeUserValueParameter.RESOURCE_KEY;
+    public SpongeUserValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

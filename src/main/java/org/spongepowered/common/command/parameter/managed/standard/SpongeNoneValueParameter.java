@@ -40,12 +40,8 @@ import java.util.Optional;
 
 public final class SpongeNoneValueParameter extends CatalogedArgumentParser<Void> {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("none");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeNoneValueParameter.RESOURCE_KEY;
+    public SpongeNoneValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

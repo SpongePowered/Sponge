@@ -41,12 +41,8 @@ import java.util.stream.Collectors;
 
 public final class SpongePluginContainerValueParameter extends CatalogedArgumentParser<PluginContainer> {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("plugin");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongePluginContainerValueParameter.RESOURCE_KEY;
+    public SpongePluginContainerValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

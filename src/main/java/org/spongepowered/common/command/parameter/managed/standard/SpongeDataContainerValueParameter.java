@@ -44,12 +44,8 @@ import java.util.Optional;
 
 public final class SpongeDataContainerValueParameter extends CatalogedArgumentParser<DataContainer> {
 
-    private static final ResourceKey KEY = ResourceKey.sponge("data_container");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeDataContainerValueParameter.KEY;
+    public SpongeDataContainerValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

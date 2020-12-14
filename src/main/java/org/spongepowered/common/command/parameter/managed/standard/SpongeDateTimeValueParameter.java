@@ -43,12 +43,8 @@ import java.util.Optional;
 
 public final class SpongeDateTimeValueParameter extends CatalogedArgumentParser<LocalDateTime> {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("date_time");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeDateTimeValueParameter.RESOURCE_KEY;
+    public SpongeDateTimeValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

@@ -61,18 +61,11 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
 
     private static final Vec3Argument VEC_3_ARGUMENT = Vec3Argument.vec3(false);
     private static final Pattern STARTS_WITH_NUMBER = Pattern.compile("^\\s*((-)?[0-9]|~|\\^)");
-    private final ResourceKey resourceKey;
     private final boolean selectAllWorlds;
 
-    public SpongeServerLocationValueParameter(final boolean selectAllWorlds) {
+    public SpongeServerLocationValueParameter(final ResourceKey key, final boolean selectAllWorlds) {
+        super(key);
         this.selectAllWorlds = selectAllWorlds;
-        this.resourceKey = selectAllWorlds ?  ResourceKey.sponge("location_all") : ResourceKey.sponge("location_online_only");
-    }
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return this.resourceKey;
     }
 
     @Override

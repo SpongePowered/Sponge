@@ -41,12 +41,8 @@ import java.util.Optional;
 
 public final class SpongeIPAddressValueParameter extends CatalogedArgumentParser<InetAddress> {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("ip");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeIPAddressValueParameter.RESOURCE_KEY;
+    public SpongeIPAddressValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

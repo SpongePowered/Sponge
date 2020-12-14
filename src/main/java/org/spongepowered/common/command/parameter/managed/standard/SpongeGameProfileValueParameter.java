@@ -50,12 +50,10 @@ import java.util.stream.Collectors;
 
 public final class SpongeGameProfileValueParameter extends CatalogedArgumentParser<GameProfile> {
 
-    private final ResourceKey resourceKey = ResourceKey.sponge("game_profile");
     private final GameProfileArgument argument = GameProfileArgument.gameProfile();
 
-    @Override
-    public ResourceKey getKey() {
-        return this.resourceKey;
+    public SpongeGameProfileValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

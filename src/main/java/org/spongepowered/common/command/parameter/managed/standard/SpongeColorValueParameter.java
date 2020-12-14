@@ -50,14 +50,11 @@ import java.util.stream.Collectors;
 
 public final class SpongeColorValueParameter extends CatalogedArgumentParser<Color> {
 
-    private final static ResourceKey RESOURCE_KEY = ResourceKey.sponge("color");
     private final static Pattern HEX_CODE = Pattern.compile("#[0-9A-Fa-f]{6}");
     private final ColorArgument colorArgumentType = ColorArgument.color();
 
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeColorValueParameter.RESOURCE_KEY;
+    public SpongeColorValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

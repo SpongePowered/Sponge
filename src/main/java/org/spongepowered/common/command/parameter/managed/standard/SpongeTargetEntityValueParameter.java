@@ -33,28 +33,19 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.util.blockray.RayTraceResult;
-import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.command.brigadier.argument.CatalogedZeroAdvanceValueParameter;
 
 import java.util.Optional;
 
 public final class SpongeTargetEntityValueParameter extends CatalogedZeroAdvanceValueParameter<Entity> {
 
-    private final ResourceKey resourceKey;
     private final boolean isPlayerOnly;
 
-    public SpongeTargetEntityValueParameter(final boolean isPlayerOnly) {
+    public SpongeTargetEntityValueParameter(final ResourceKey key, final boolean isPlayerOnly) {
+        super(key);
         this.isPlayerOnly = isPlayerOnly;
-        this.resourceKey = isPlayerOnly ? ResourceKey.sponge("target_entity") : ResourceKey.sponge("target_player");
-    }
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return this.resourceKey;
     }
 
     @Override

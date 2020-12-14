@@ -132,7 +132,6 @@ import org.spongepowered.common.data.persistence.NBTDataFormat;
 import org.spongepowered.common.event.tracking.context.transaction.type.BlockTransactionTypeStreamGenerator;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.registry.builtin.sponge.BlockOperationStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.CatalogedValueParameterStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ClickTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ClientCompletionKeyStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStreamGenerator;

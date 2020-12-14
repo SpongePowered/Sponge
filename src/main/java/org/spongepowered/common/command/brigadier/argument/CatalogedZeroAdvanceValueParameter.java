@@ -27,6 +27,7 @@ package org.spongepowered.common.command.brigadier.argument;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.arguments.ArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -42,6 +43,10 @@ import java.util.Optional;
 public abstract class CatalogedZeroAdvanceValueParameter<T> extends CatalogedArgumentParser<T> {
 
     private static final List<ClientCompletionType> NONE_KEY = Collections.singletonList(ClientCompletionTypes.NONE.get());
+
+    public CatalogedZeroAdvanceValueParameter(final ResourceKey key) {
+        super(key);
+    }
 
     @Override
     @NonNull

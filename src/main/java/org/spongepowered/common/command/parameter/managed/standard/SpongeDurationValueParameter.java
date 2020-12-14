@@ -41,12 +41,8 @@ import java.util.Optional;
 
 public final class SpongeDurationValueParameter extends CatalogedArgumentParser<Duration> {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("duration");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeDurationValueParameter.RESOURCE_KEY;
+    public SpongeDurationValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override
