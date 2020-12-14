@@ -24,77 +24,67 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.world.storage.IPlayerFileData;
-import net.minecraft.world.storage.SaveHandler;
-import net.minecraft.world.storage.WorldInfo;
-import org.apache.logging.log4j.Logger;
+import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.world.storage.IServerConfiguration;
+import net.minecraft.world.storage.IServerWorldInfo;
+import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.world.storage.ServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.util.Constants;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
-@Mixin(SaveHandler.class)
-public abstract class SaveHandlerMixin implements IPlayerFileData {
+@Mixin(SaveFormat.LevelSave.class)
+public abstract class SaveFormat_LevelSaveMixin {
 
-    @Shadow public abstract File shadow$getWorldDirectory();
+    // @formatter:off
+    @Shadow @Final private Path levelPath;
+    // @formatter:on
 
-    @Nullable private Exception impl$capturedException;
-    @Nullable private Path impl$file;
-
-    @ModifyArg(method = "checkSessionLock",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SessionLockException;<init>(Ljava/lang/String;)V", ordinal = 0, remap = false))
+    @ModifyArg(method = "checkLock",
+        at = @At(value = "INVOKE", target = "Ljava/lang/IllegalStateException;<init>(Ljava/lang/String;)V", ordinal = 0, remap = false))
     private String modifyMinecraftExceptionOutputIfNotInitializationTime(final String message) {
-        return "The save folder for world " + this.shadow$getWorldDirectory() + " is being accessed from another location, aborting";
+        return "The save folder for world " + this.levelPath + " is being accessed from another location, aborting";
     }
 
-    @ModifyArg(method = "checkSessionLock",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SessionLockException;<init>(Ljava/lang/String;)V", ordinal = 1, remap = false))
-    private String modifyMinecraftExceptionOutputIfIOException(final String message) {
-        return "Failed to check session lock for world " + this.shadow$getWorldDirectory() + ", aborting";
-    }
-
-    @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
-    private void impl$saveSpongeLevelData(final WorldInfo info, final CompoundNBT compound, final CallbackInfo ci) {
+    @Inject(method = "saveDataTag(Lnet/minecraft/util/registry/DynamicRegistries;Lnet/minecraft/world/storage/IServerConfiguration;Lnet/minecraft/nbt/CompoundNBT;)V", at = @At("RETURN"))
+    private void impl$saveSpongeLevelData(final DynamicRegistries registries, final IServerConfiguration info, final CompoundNBT compound, final CallbackInfo ci) {
         if (!Sponge.isServerAvailable() || !((WorldInfoBridge) info).bridge$isValid()) {
             return;
         }
 
+        final String levelName = info.getLevelName();
         try {
             final CompoundNBT spongeLevelCompound = new CompoundNBT();
             ((WorldInfoBridge) info).bridge$writeSpongeLevelData(spongeLevelCompound);
 
             // If the returned compound is empty then we should warn the user.
             if (spongeLevelCompound.isEmpty()) {
-                new PrettyPrinter().add("Sponge Level NBT for world %s is empty!", info.getWorldName()).centre().hr()
+                new PrettyPrinter().add("Sponge Level NBT for world %s is empty!", levelName).centre().hr()
                         .add("When trying to save Sponge data for the world %s, an empty NBT compound was provided. The old Sponge data file was "
-                                        + "left intact.", info.getWorldName())
+                                        + "left intact.", levelName)
                         .add()
                         .add("The following information may be useful in debugging:")
                         .add()
@@ -107,7 +97,7 @@ public abstract class SaveHandlerMixin implements IPlayerFileData {
                 return;
             }
 
-            final Path spongeLevelFile = this.shadow$getWorldDirectory().toPath().resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT);
+            final Path spongeLevelFile = this.levelPath.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT);
             final Path newSpongeLevelFile = spongeLevelFile.resolveSibling(Constants.Sponge.World.LEVEL_SPONGE_DAT_NEW);
             final Path oldSpongeLevelFile = spongeLevelFile.resolveSibling(Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
 
@@ -118,9 +108,8 @@ public abstract class SaveHandlerMixin implements IPlayerFileData {
             // Before we continue, is the file zero length?
             if (newSpongeLevelFile.toFile().length() == 0) {
                 // Then we just delete the file and tell the user that we didn't save properly.
-                new PrettyPrinter().add("Zero length level_sponge.dat file was created for %s!", info.getWorldName()).centre().hr()
-                        .add("When saving the data file for the world %s, a zero length file was written. Sponge has discarded this file.",
-                                info.getWorldName())
+                new PrettyPrinter().add("Zero length level_sponge.dat file was created for %s!", levelName).centre().hr()
+                        .add("When saving the data file for the world %s, a zero length file was written. Sponge has discarded this file.", levelName)
                         .add()
                         .add("The following information may be useful in debugging:")
                         .add()
@@ -145,15 +134,16 @@ public abstract class SaveHandlerMixin implements IPlayerFileData {
         }
     }
 
-    @Inject(method = "loadWorldInfo", at = @At("RETURN"))
-    private void impl$loadSpongeLevelDataBeforeVanilla(final CallbackInfoReturnable<WorldInfo> cir) {
+
+    @Inject(method = "getDataTag", at = @At("RETURN"))
+    private void impl$loadSpongeLevelDataBeforeVanilla(final CallbackInfoReturnable<IServerConfiguration> cir) {
         if (!Sponge.isServerAvailable()) {
             return;
         }
 
-        final WorldInfo info = cir.getReturnValue();
+        final ServerWorldInfo info = (ServerWorldInfo) cir.getReturnValue();
 
-        final Path spongeLevelFile = this.shadow$getWorldDirectory().toPath().resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT);
+        final Path spongeLevelFile = this.levelPath.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT);
         final Path oldSpongeLevelFile = spongeLevelFile.resolveSibling(Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
 
         boolean exceptionRaised = false;
@@ -169,16 +159,15 @@ public abstract class SaveHandlerMixin implements IPlayerFileData {
             if (this.impl$loadSpongeLevelData(info, oldSpongeLevelFile, false)) {
                 if (exceptionRaised) {
                     // Tell the user we successfully loaded a backup
-                    SpongeCommon.getLogger().warn("Successfully loaded backup data file {} for world '{}'.", oldSpongeLevelFile.getFileName().toString(),
-                            info.getWorldName());
+                    SpongeCommon.getLogger().warn("Successfully loaded backup data file {} for world '{}'.",
+                            oldSpongeLevelFile.getFileName().toString(), info.getLevelName());
 
                     // Delete the "current" file so we don't accidentally make it the backup file.
                     try {
                         Files.deleteIfExists(oldSpongeLevelFile);
                     } catch (final IOException e) {
                         // This server has some disk issues, bring it down to prevent more damage..
-                        throw new RuntimeException(String.format("Failed to delete the old Sponge level file in world '%s'!", info.getWorldName()),
-                                e);
+                        throw new RuntimeException(String.format("Failed to delete the old Sponge level file in world '%s'!", info.getLevelName()), e);
                     }
                 }
                 return;
@@ -188,67 +177,17 @@ public abstract class SaveHandlerMixin implements IPlayerFileData {
         }
 
         if (exceptionRaised) {
-            throw new RuntimeException("Unable to load sponge level data for world '" + info.getWorldName() + "'!");
+            throw new RuntimeException("Unable to load sponge level data for world '" + info.getLevelName() + "'!");
         }
     }
 
-    /**
-     * Redirects the {@link File#exists()} checking that if the file exists, grab
-     * the file for later usage to read the file attributes for pre-existing data.
-     */
-    @Redirect(method = "readPlayerData", at = @At(value = "INVOKE", target = "Ljava/io/File;isFile()Z", remap = false))
-    private boolean impl$grabFileToField(final File localFile) {
-        final boolean isFile = localFile.isFile();
-        this.impl$file = isFile ? localFile.toPath() : null;
-        return isFile;
-    }
-
-    @Redirect(method = "readPlayerData", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;read(Lnet/minecraft/nbt/CompoundNBT;)V"))
-    private void impl$readSpongePlayerData(final PlayerEntity playerEntity, final CompoundNBT compound) throws IOException {
-        playerEntity.read(compound);
-        ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().readPlayerData(compound, null, this.impl$file == null ? null :
-                Files.readAttributes(this.impl$file, BasicFileAttributes.class).creationTime().toInstant());
-        this.impl$file = null;
-    }
-
-    @Inject(method = "writePlayerData",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/nbt/CompressedStreamTools;writeCompressed(Lnet/minecraft/nbt/CompoundNBT;Ljava/io/OutputStream;)V",
-            shift = At.Shift.AFTER))
-    private void impl$saveSpongePlayerData(final PlayerEntity player, final CallbackInfo callbackInfo) {
-        ((SpongeServer) Sponge.getServer()).getPlayerDataManager().savePlayer(player.getUniqueID());
-    }
-
-    @Inject(
-        method = "writePlayerData",
-        at = @At(value = "INVOKE",
-            target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
-            remap = false),
-        locals = LocalCapture.CAPTURE_FAILHARD)
-    private void impl$trackExceptionForLogging(final PlayerEntity player, final CallbackInfo ci, final Exception exception) {
-        this.impl$capturedException = exception;
-    }
-
-    @Redirect(
-        method = "writePlayerData",
-        at = @At(
-            value = "INVOKE",
-            target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
-            remap = false
-        )
-    )
-    private void impl$useStoredException(final Logger logger, final String message, final Object param) {
-        logger.warn(message, param, this.impl$capturedException);
-        this.impl$capturedException = null;
-    }
-
-    private boolean impl$loadSpongeLevelData(final WorldInfo info, final Path levelFile, final boolean isCurrent) {
+    private boolean impl$loadSpongeLevelData(final IServerWorldInfo info, final Path levelFile, final boolean isCurrent) {
         final CompoundNBT compound;
         try (final InputStream stream = Files.newInputStream(levelFile)) {
             compound = CompressedStreamTools.readCompressed(stream);
         } catch (final Exception ex) {
             final PrettyPrinter errorPrinter = new PrettyPrinter()
-                    .add("Unable to load level data from world '%s' for file '%s'!", info.getWorldName(), levelFile.getFileName().toString())
+                    .add("Unable to load level data from world '%s' for file '%s'!", info.getLevelName(), levelFile.getFileName().toString())
                     .centre()
                     .hr();
             // We can't read it - but let's copy the file so we can ask for it to inspect what it looks like later.
@@ -277,4 +216,6 @@ public abstract class SaveHandlerMixin implements IPlayerFileData {
         ((WorldInfoBridge) info).bridge$readSpongeLevelData(compound);
         return true;
     }
+
+
 }

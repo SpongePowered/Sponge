@@ -139,7 +139,7 @@ public final class SpongePlayerDataManager {
         }
     }
 
-    public void savePlayer(final UUID uniqueId) {
+    public void saveSpongePlayerData(final UUID uniqueId) {
         if (uniqueId == null) {
             throw new IllegalArgumentException("Player unique id cannot be null!");
         }
