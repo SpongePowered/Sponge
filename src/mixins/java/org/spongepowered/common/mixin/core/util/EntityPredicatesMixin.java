@@ -38,18 +38,15 @@ import java.util.function.Predicate;
 @Mixin(EntityPredicates.class)
 public abstract class EntityPredicatesMixin {
 
-    @Shadow @Final @Mutable public static Predicate<Entity> NOT_SPECTATING = entity -> {
+    @Shadow @Final @Mutable public static Predicate<Entity> NO_SPECTATORS = entity -> {
         if (entity instanceof VanishableBridge && ((VanishableBridge) entity).bridge$isVanished()) {
             // Sponge: Count vanished entities as spectating
             return false;
         }
-        if (entity.isSpectator()) {
-            return false;
-        }
-        return true;
+        return !entity.isSpectator();
     };
 
-    @Shadow @Final @Mutable public static Predicate<Entity> CAN_AI_TARGET = entity ->{
+    @Shadow @Final @Mutable public static Predicate<Entity> ATTACK_ALLOWED = entity ->{
         if (entity instanceof VanishableBridge
             && ((VanishableBridge) entity).bridge$isVanished()
             && ((VanishableBridge) entity).bridge$isUntargetable()) {
