@@ -74,7 +74,7 @@ public abstract class EntityMixin_Optimization_Collision {
 
     @SuppressWarnings("deprecation")
     @Redirect(method = "updateFluidHeightAndDoFluidPushing",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(IIIIII)Z"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;hasChunksAt(IIIIII)Z"))
     private boolean activeCollision$IgnoreAreaIsLoaded(final World world, final int xStart, final int yStart, final int zStart,
             final int xEnd, final int yEnd, final int zEnd) {
         if (((WorldBridge) world).bridge$isFake()) {

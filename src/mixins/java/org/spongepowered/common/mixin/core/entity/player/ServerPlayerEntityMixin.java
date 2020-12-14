@@ -524,7 +524,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
      * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
      */
     @Overwrite
-    public void onDeath(final DamageSource cause) {
+    public void die(final DamageSource cause) {
         // Sponge start - Call Destruct Death Event
         final DestructEntityEvent.Death event = SpongeCommonEventFactory.callDestructEntityEventDeath((ServerPlayerEntity) (Object) this, cause,
                 Audiences.server());

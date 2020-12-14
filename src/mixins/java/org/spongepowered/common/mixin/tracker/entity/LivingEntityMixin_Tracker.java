@@ -45,20 +45,20 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
 
     // @formatter:off
     @Shadow protected boolean dead;
-    @Shadow protected int scoreValue;
-    @Shadow protected int recentlyHit;
+    @Shadow protected int deathScore;
+    @Shadow protected int lastHurtByPlayerTime;
 
-    @Shadow protected abstract void shadow$onDeathUpdate();
-    @Shadow protected abstract int shadow$getExperiencePoints(PlayerEntity player);
-    @Shadow protected abstract boolean shadow$canDropLoot();
+    @Shadow protected abstract void shadow$tickDeath();
+    @Shadow protected abstract int shadow$getExperienceReward(PlayerEntity player);
+    @Shadow protected abstract boolean shadow$shouldDropExperience();
     @Shadow protected abstract void shadow$dropLoot(DamageSource damageSourceIn, boolean p_213354_2_);
     @Shadow protected abstract void shadow$dropInventory();
     @Shadow public abstract CombatTracker shadow$getCombatTracker();
-    @Shadow @Nullable public abstract LivingEntity shadow$getAttackingEntity();
-    @Shadow public void shadow$onDeath(final DamageSource cause) {}
+    @Shadow @Nullable public abstract LivingEntity shadow$getKillCredit();
+    @Shadow public void shadow$die(final DamageSource cause) {}
     @Shadow protected abstract void shadow$spawnDrops(DamageSource damageSourceIn);
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
-    @Shadow public abstract boolean shadow$isServerWorld();
+    @Shadow public abstract boolean shadow$isEffectiveAi();
     // @formatter:on
 
     /**
@@ -73,24 +73,24 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
      */
     @Redirect(method = "baseTick()V",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/LivingEntity;onDeathUpdate()V"))
+                    target = "Lnet/minecraft/entity/LivingEntity;tickDeath()V"))
     private void tracker$enterDeathPhase(final LivingEntity livingEntity) {
         final PhaseTracker instance = PhaseTracker.SERVER;
         if (!instance.onSidedThread()) {
-            this.shadow$onDeathUpdate();
+            this.shadow$tickDeath();
             return;
         }
-        if (((WorldBridge) this.world).bridge$isFake()) {
-            this.shadow$onDeathUpdate();
+        if (((WorldBridge) this.level).bridge$isFake()) {
+            this.shadow$tickDeath();
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
         if (!context.doesBlockEventTracking()) {
-            this.shadow$onDeathUpdate();
+            this.shadow$tickDeath();
             return;
         }
         try (final EffectTransactor ignored = context.getTransactor().ensureEntityDropTransactionEffect((LivingEntity) (Object) this)) {
-            this.shadow$onDeathUpdate();
+            this.shadow$tickDeath();
         }
     }
 
@@ -110,7 +110,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
         if (!instance.onSidedThread()) {
             return;
         }
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.level).bridge$isFake()) {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
@@ -120,7 +120,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
         try (final EffectTransactor ignored = context.getTransactor().ensureEntityDropTransactionEffect((LivingEntity) (Object) this)) {
             // Create new EntityDeathTransaction
             // Add new EntityDeathEffect
-            this.shadow$onDeath(cause);
+            this.shadow$die(cause);
         }
         // Sponge End
     }

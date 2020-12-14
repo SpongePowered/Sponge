@@ -60,7 +60,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
 
     @ModifyConstant(method = "handleMoveVehicle", constant = @Constant(doubleValue = 100, ordinal = 0), slice =
         @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;lengthSqr()D", ordinal = 1),
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/vector/Vector3d;lengthSqr()D", ordinal = 1),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;isSingleplayerOwner()Z", ordinal = 0))
     )
     private double movementCheck$onVehicleMovedTooQuicklyCheck(final double val) {
@@ -75,11 +75,11 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/entity/Entity;move(Lnet/minecraft/entity/MoverType;Lnet/minecraft/util/math/Vec3d;)V",
+                target = "Lnet/minecraft/entity/Entity;move(Lnet/minecraft/entity/MoverType;Lnet/minecraft/util/math/vector/Vector3d;)V",
                 ordinal = 0),
             to  = @At(
                 value = "INVOKE",
-                target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
+                target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V",
                 ordinal = 0,
                 remap = false)
     ))

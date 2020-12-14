@@ -45,7 +45,7 @@ public abstract class LivingEntityMixin_EntityCollision extends EntityMixin_Enti
 
     private boolean runningCollideWithNearby = false;
 
-    @Inject(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;collideWithNearbyEntities()V"))
+    @Inject(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;pushEntities()V"))
     private void collisions$canUpdateCollisions(final CallbackInfo ci) {
         this.runningCollideWithNearby = true;
     }

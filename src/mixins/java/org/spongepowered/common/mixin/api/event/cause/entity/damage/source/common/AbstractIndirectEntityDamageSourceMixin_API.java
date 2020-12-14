@@ -62,13 +62,13 @@ public abstract class AbstractIndirectEntityDamageSourceMixin_API implements Ind
             commonIndirect.setExplosion();
         }
         if (this.isMagic()) {
-            commonIndirect.setMagicDamage();
+            commonIndirect.setMagic();
         }
         if (this.isScaledByDifficulty()) {
-            commonIndirect.setDifficultyScaled();
+            commonIndirect.setScalesWithDifficulty();
         }
         if (this.doesAffectCreative()) {
-            commonIndirect.canHarmInCreative();
+            commonIndirect.isBypassInvul();
         }
     }
 

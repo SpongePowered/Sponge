@@ -41,7 +41,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 @Mixin(net.minecraft.entity.player.PlayerInventory.class)
 public abstract class PlayerInventoryMixin_Tracker implements TrackedInventoryBridge {
 
-    @Shadow public abstract ItemStack shadow$getStackInSlot(int index);
+    @Shadow public abstract ItemStack shadow$getItem(int index);
     @Shadow protected abstract int shadow$addResource(int p_191973_1_, ItemStack p_191973_2_);
 
 
@@ -63,15 +63,15 @@ public abstract class PlayerInventoryMixin_Tracker implements TrackedInventoryBr
         }
     }
 
-    @Redirect(method = "storePartialItemStack", at = @At(value = "INVOKE", target =
+    @Redirect(method = "addResource(Lnet/minecraft/item/ItemStack;)I", at = @At(value = "INVOKE", target =
             "Lnet/minecraft/entity/player/PlayerInventory;addResource(ILnet/minecraft/item/ItemStack;)I"))
     private int impl$ifCaptureDoTransactions(final net.minecraft.entity.player.PlayerInventory inv, final int index, final ItemStack stack) {
         if (this.bridge$capturingInventory()) {
             // Capture items getting picked up
             final Slot slot = index == 40 ? ((PlayerInventory) this).getOffhand() : this.impl$getSpongeSlotByIndex(index);
-            final ItemStackSnapshot original = ItemStackUtil.snapshotOf(this.shadow$getStackInSlot(index));
+            final ItemStackSnapshot original = ItemStackUtil.snapshotOf(this.shadow$getItem(index));
             final int result = this.shadow$addResource(index, stack);
-            final ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(this.shadow$getStackInSlot(index));
+            final ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(this.shadow$getItem(index));
             this.bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, original, replacement));
             return result;
         }

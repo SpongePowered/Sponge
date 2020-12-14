@@ -61,13 +61,13 @@ public abstract class AbstractEntityDamageSourceMixin_API implements EntityDamag
             commonSource.setExplosion();
         }
         if (this.isMagic()) {
-            commonSource.setMagicDamage();
+            commonSource.setMagic();
         }
         if (this.isScaledByDifficulty()) {
-            commonSource.setDifficultyScaled();
+            commonSource.setScalesWithDifficulty();
         }
         if (this.doesAffectCreative()) {
-            commonSource.canHarmInCreative();
+            commonSource.isBypassInvul();
         }
     }
 

@@ -61,7 +61,7 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
     @Shadow public abstract void disconnect(ITextComponent textComponent);
 
     @Redirect(method = "tick",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;playerTick()V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;doTick()V"))
     private void tracker$wrapPlayerTickWithPhase(final ServerPlayerEntity player) {
         if (((PlatformEntityBridge) player).bridge$isFakePlayer() || ((WorldBridge) player.level).bridge$isFake()) {
             player.tick();
@@ -77,8 +77,8 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
 
     @Redirect(method = "handleUseItemOn",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerInteractionManager;useItemOn(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Hand;Lnet/minecraft/util/math/BlockRayTraceResult;)Lnet/minecraft/util/ActionResultType;"))
-    private ActionResultType tracker$checkState(final PlayerInteractionManager interactionManager, final PlayerEntity playerIn,
+            target = "Lnet/minecraft/server/management/PlayerInteractionManager;useItemOn(Lnet/minecraft/entity/player/ServerPlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Hand;Lnet/minecraft/util/math/BlockRayTraceResult;)Lnet/minecraft/util/ActionResultType;"))
+    private ActionResultType tracker$checkState(final PlayerInteractionManager interactionManager, final ServerPlayerEntity playerIn,
              final net.minecraft.world.World worldIn, final ItemStack stack, final Hand hand, final BlockRayTraceResult rayTraceResult) {
         final ActionResultType actionResult = interactionManager.useItemOn(this.player, worldIn, stack, hand, rayTraceResult);
         if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
@@ -93,13 +93,13 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
             // Only do a restore if something actually changed. The client does an identity check ('==')
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            final boolean isInteractionCancelled = ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$isInteractBlockRightClickCancelled();
-            if (!ItemStack.areItemStacksEqual(itemStack, this.player.getHeldItem(hand)) && isInteractionCancelled) {
+            final boolean isInteractionCancelled = ((PlayerInteractionManagerBridge) this.player.gameMode).bridge$isInteractBlockRightClickCancelled();
+            if (!ItemStack.matches(itemStack, this.player.getItemInHand(hand)) && isInteractionCancelled) {
                 PacketPhaseUtil.handlePlayerSlotRestore(this.player, itemStack, hand);
             }
         }
         context.interactItemChanged(false);
-        ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$setInteractBlockRightClickCancelled(false);
+        ((PlayerInteractionManagerBridge) this.player.gameMode).bridge$setInteractBlockRightClickCancelled(false);
         return actionResult;
     }
 
@@ -110,13 +110,13 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
      * suggesting that when the packet is about to be actually processed (before
      * the switch statement), we keep track of the last primary packet ticking.
      */
-    @Inject(method = "processPlayerDigging",
+    @Inject(method = "handlePlayerAction",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/network/play/client/CPlayerDiggingPacket;getPosition()Lnet/minecraft/util/math/BlockPos;"))
+            target = "Lnet/minecraft/network/play/client/CPlayerDiggingPacket;getPos()Lnet/minecraft/util/math/BlockPos;"))
     private void tracker$updateLastPrimaryPacket(final CPlayerDiggingPacket packetIn, final CallbackInfo ci) {
         if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
             return;
         }
-        SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeCommon.getServer().getTickCounter();
+        SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeCommon.getServer().getTickCount();
     }
 }

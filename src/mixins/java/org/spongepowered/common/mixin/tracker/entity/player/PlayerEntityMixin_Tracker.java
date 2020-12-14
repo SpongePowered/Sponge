@@ -66,7 +66,7 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
 
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     public void impl$callDestructEntityDeath(final DamageSource cause, final CallbackInfo ci) {
-        if (this.shadow$isServerWorld()) {
+        if (this.shadow$isEffectiveAi()) {
             // Sponge start - Fire DestructEntityEvent.Death
             final DestructEntityEvent.Death event = SpongeCommonEventFactory.callDestructEntityEventDeath((PlayerEntity) (Object) this, cause);
             if (event.isCancelled()) {

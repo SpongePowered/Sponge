@@ -65,17 +65,17 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
 
     // @formatter:off
     @Shadow @Final private EntityType<?> type;
-    @Shadow public World world;
+    @Shadow public World level;
     @Shadow public boolean removed;
     @Shadow public Vector3d position;
-    @Shadow public float rotationYaw;
-    @Shadow public float rotationPitch;
-    @Shadow @Final protected Random rand;
+    @Shadow public float yRot;
+    @Shadow public float xRot;
+    @Shadow @Final protected Random random;
 
-    @Shadow public abstract void shadow$extinguish();
-    @Shadow protected abstract void shadow$setFlag(int flag, boolean set);
+    @Shadow public abstract void shadow$clearFire();
+    @Shadow protected abstract void shadow$setSharedFlag(int flag, boolean set);
     @Shadow @Nullable public abstract Team getTeam();
-    @Shadow public abstract void shadow$setPosition(double x, double y, double z);
+    @Shadow public abstract void shadow$setPos(double x, double y, double z);
     @Shadow public abstract void shadow$setDeltaMovement(Vector3d motionIn);
     @Shadow public abstract void shadow$setDeltaMovement(double x, double y, double z);
     @Shadow public abstract float getEyeHeight();
@@ -125,7 +125,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
         if (!instance.onSidedThread()) {
             return;
         }
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.level).bridge$isFake()) {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
@@ -145,7 +145,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
         if (!instance.onSidedThread()) {
             return;
         }
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.level).bridge$isFake()) {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
