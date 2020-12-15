@@ -33,9 +33,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
@@ -61,15 +59,5 @@ public abstract class OcelotEntityMixin extends AgeableEntityMixin {
         }
         return 1;
     }
-
-    // TODO maybe registerGoals? is this still needed?
-    @Inject(method = "func_213529_dV", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$IgnoreAISetupOnClientWorld(CallbackInfo ci) {
-        if (this.level.isClientSide) {
-            // Because ocelot AI tasks are added on the client, for whatever reason
-            ci.cancel();
-        }
-    }
-
 
 }
