@@ -31,6 +31,7 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -46,13 +47,14 @@ public final class SpongeBlockRayTrace extends AbstractSpongeRayTrace<@NonNull L
         super(SpongeBlockRayTrace.DEFAULT_FILTER);
     }
 
-    @Override final Optional<RayTraceResult<@NonNull LocatableBlock>> testSelectLocation(final ServerWorld serverWorld,
+    @Override
+    final Optional<RayTraceResult<@NonNull LocatableBlock>> testSelectLocation(final ServerWorld serverWorld,
             final Vector3d location,
             final Vector3d exitLocation) {
 
         final LocatableBlock initialBlock = this.getBlock(serverWorld, location, exitLocation);
         if (this.select.test(initialBlock)) {
-            return Optional.of(new SpongeRayTraceResult<>(initialBlock, this.start));
+            return Optional.of(new SpongeRayTraceResult<>(initialBlock, VecHelper.toVector3d(location)));
         }
         return Optional.empty();
     }
