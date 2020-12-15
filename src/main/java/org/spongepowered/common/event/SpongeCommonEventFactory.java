@@ -196,7 +196,7 @@ public final class SpongeCommonEventFactory {
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.empty(), ItemStackSnapshot.empty());
             final DropItemEvent.Dispense dispense =
                 SpongeEventFactory.createClickContainerEventDropOutsideCreative(frame.getCurrentCause(),
-                        ((org.spongepowered.api.item.inventory.Container) player.openContainer), cursorTransaction, entities,
+                        ((org.spongepowered.api.item.inventory.Container) player.containerMenu), cursorTransaction, entities,
                         Optional.empty(), Collections.emptyList());
             SpongeCommon.postEvent(dispense);
             if (!dispense.isCancelled()) {
@@ -340,7 +340,7 @@ public final class SpongeCommonEventFactory {
         final TrackedWorldBridge world, final BlockPos pos, final net.minecraft.block.BlockState blockstate, final int eventId
     ) {
         final boolean extending = (eventId == 0);
-        final net.minecraft.util.Direction direction = blockstate.get(DirectionalBlock.FACING);
+        final net.minecraft.util.Direction direction = blockstate.getValue(DirectionalBlock.FACING);
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((org.spongepowered.api.world.server.ServerWorld) world).state((BlockState) blockstate).position(pos.getX(), pos.getY(), pos.getZ()).build();
 
         // Sets toss out duplicate values (even though there shouldn't be any)
@@ -348,24 +348,24 @@ public final class SpongeCommonEventFactory {
         locations.add(ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, pos.getX(), pos.getY(), pos.getZ()));
 
         final PistonBlockStructureHelper movedBlocks = new PistonBlockStructureHelper((ServerWorld) world, pos, direction, extending);
-        movedBlocks.canMove(); // calculates blocks to be moved
+        movedBlocks.resolve(); // calculates blocks to be moved
 
-        Stream.concat(movedBlocks.getBlocksToMove().stream(), movedBlocks.getBlocksToDestroy().stream())
+        Stream.concat(movedBlocks.getToPush().stream(), movedBlocks.getToDestroy().stream())
             .map(block -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, block.getX(), block.getY(), block.getZ()))
             .collect(Collectors.toCollection(() -> locations)); // SUPER
         // efficient
         // code!
 
         // If the piston is extending and there are no blocks to destroy, add the offset location for protection purposes
-        if (extending && movedBlocks.getBlocksToDestroy().isEmpty()) {
-            final List<BlockPos> movedPositions = movedBlocks.getBlocksToMove();
+        if (extending && movedBlocks.getToDestroy().isEmpty()) {
+            final List<BlockPos> movedPositions = movedBlocks.getToPush();
             final BlockPos offsetPos;
             // If there are no blocks to move, add the offset of piston
             if (movedPositions.isEmpty()) {
-                offsetPos = pos.offset(direction);
+                offsetPos = pos.relative(direction);
             } else {
                 // Add the offset of last block set to move
-                offsetPos = movedPositions.get(movedPositions.size() - 1).offset(direction);
+                offsetPos = movedPositions.get(movedPositions.size() - 1).relative(direction);
             }
             locations.add(ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
         }
@@ -528,7 +528,7 @@ public final class SpongeCommonEventFactory {
 
             final Map<Direction, BlockState> neighbors = new EnumMap<>(Direction.class);
             for (final net.minecraft.util.Direction notificationSide : notifiedSides) {
-                final BlockPos offset = sourcePos.offset(notificationSide);
+                final BlockPos offset = sourcePos.relative(notificationSide);
                 final Direction direction = DirectionFacingProvider.getInstance().getKey(notificationSide).get();
                 final net.minecraft.block.BlockState notificationState = ((ServerWorld) world).getBlockState(offset);
                 neighbors.put(direction, (BlockState) notificationState);
@@ -553,7 +553,7 @@ public final class SpongeCommonEventFactory {
             }
             final InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(frame.getCurrentCause(), (Entity) entity,
                     Optional.ofNullable(hitVec));
-            if (entity instanceof Player && !((org.spongepowered.api.world.server.ServerWorld) player.world).getProperties().isPVPEnabled()) {
+            if (entity instanceof Player && !((org.spongepowered.api.world.server.ServerWorld) player.getLevel()).getProperties().isPVPEnabled()) {
                 event.setCancelled(true); // if PvP is disabled for world, cancel
             }
             SpongeCommon.postEvent(event);
@@ -718,9 +718,9 @@ public final class SpongeCommonEventFactory {
             return;
         }
 
-        final double deltaX = entity.prevPosX - entity.getPosX();
-        final double deltaY = entity.prevPosY - entity.getPosY();
-        final double deltaZ = entity.prevPosZ - entity.getPosZ();
+        final double deltaX = entity.xOld - entity.getX();
+        final double deltaY = entity.yOld - entity.getY();
+        final double deltaZ = entity.zOld - entity.getZ();
         final double deltaChange = Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2);
         if (deltaChange < 1f / 256) {
             return;
@@ -731,14 +731,13 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
 
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(), (Entity) entity,
-                    new Vector3d(entity.prevPosX, entity.prevPosY, entity.prevPosZ), new Vector3d(entity.getPosX(), entity.getPosY(), entity.getPosZ()),
-                    new Vector3d(entity.getPosX(), entity.getPosY(), entity.getPosZ()));
+                    new Vector3d(entity.xOld, entity.yOld, entity.zOld), new Vector3d(entity.getX(), entity.getY(), entity.getZ()),
+                    new Vector3d(entity.getX(), entity.getY(), entity.getZ()));
 
             if (SpongeCommon.postEvent(event)) {
-                entity.setPosition(entity.prevPosX, entity.prevPosY, entity.prevPosZ);
+                entity.setPos(entity.xOld, entity.yOld, entity.zOld);
             } else {
-                entity.setPosition(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(),
-                        event.getDestinationPosition().getZ());
+                entity.setPos(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(), event.getDestinationPosition().getZ());
             }
         }
     }
@@ -749,7 +748,7 @@ public final class SpongeCommonEventFactory {
      * @param entity The event
      */
     public static void callNaturalRotateEntityEvent(final net.minecraft.entity.Entity entity) {
-        if (entity.removed || !ShouldFire.ROTATE_ENTITY_EVENT || (entity.rotationPitch == entity.prevRotationPitch && entity.rotationYaw == entity.prevRotationYaw)) {
+        if (entity.removed || !ShouldFire.ROTATE_ENTITY_EVENT || (entity.xRot == entity.xRotO && entity.yRot == entity.yRotO)) {
             return;
         }
 
@@ -757,15 +756,14 @@ public final class SpongeCommonEventFactory {
             frame.pushCause(entity);
 
             final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), (Entity) entity,
-                    new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0), new Vector3d(entity.rotationPitch,
-                    entity.rotationYaw, 0));
+                    new Vector3d(entity.xRotO, entity.yRotO, 0), new Vector3d(entity.xRot, entity.yRot, 0));
 
             if (SpongeCommon.postEvent(event)) {
-                entity.rotationPitch = entity.prevRotationPitch;
-                entity.rotationYaw = entity.prevRotationYaw;
+                entity.xRot = entity.xRotO;
+                entity.yRot = entity.yRotO;
             } else {
-                entity.rotationPitch = (float) event.getToRotation().getX();
-                entity.rotationYaw = (float) event.getToRotation().getY();
+                entity.xRot = (float) event.getToRotation().getX();
+                entity.yRot = (float) event.getToRotation().getY();
             }
         }
     }
@@ -783,8 +781,8 @@ public final class SpongeCommonEventFactory {
 
         if (source instanceof EntityDamageSource) {
             final EntityDamageSource damageSource = (EntityDamageSource) source;
-            if (damageSource.getImmediateSource() instanceof CreatorTrackedBridge) {
-                final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) damageSource.getImmediateSource();
+            if (damageSource.getDirectEntity() instanceof CreatorTrackedBridge) {
+                final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) damageSource.getDirectEntity();
                 if (creatorBridge != null) {
                     sourceCreator = creatorBridge.tracked$getCreatorReference();
                 }
@@ -801,7 +799,7 @@ public final class SpongeCommonEventFactory {
 
             final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(frame.getCurrentCause(),
                     originalChannel, Optional.of(originalChannel), originalMessage, originalMessage, (Living) entity,
-                    entity.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY), messageCancelled);
+                    entity.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY), messageCancelled);
             SpongeCommon.postEvent(event);
 
             return event;
@@ -854,18 +852,18 @@ public final class SpongeCommonEventFactory {
             final Optional<User> creator = PhaseTracker.getInstance().getPhaseContext().getCreator();
             creator.ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
 
-            final ServerLocation impactPoint = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) projectile.world, VecHelper.toVector3d(movingObjectPosition.getHitVec()));
+            final ServerLocation impactPoint = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) projectile.level, VecHelper.toVector3d(movingObjectPosition.getLocation()));
             boolean cancelled = false;
 
             if (movingObjectType == RayTraceResult.Type.BLOCK) {
                 final BlockRayTraceResult blockMovingObjectPosition = (BlockRayTraceResult) movingObjectPosition;
-                final BlockPos blockPos = blockMovingObjectPosition.getPos();
+                final BlockPos blockPos = blockMovingObjectPosition.getBlockPos();
                 if (blockPos.getY() <= 0) {
                     return false;
                 }
 
-                final BlockSnapshot targetBlock = ((World) projectile.world).createSnapshot(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-                final Direction side = DirectionFacingProvider.getInstance().getKey(blockMovingObjectPosition.getFace()).get();
+                final BlockSnapshot targetBlock = ((World) projectile.level).createSnapshot(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                final Direction side = DirectionFacingProvider.getInstance().getKey(blockMovingObjectPosition.getDirection()).get();
 
                 final CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.getCurrentCause(),
                         impactPoint, targetBlock.getState(),
@@ -874,7 +872,7 @@ public final class SpongeCommonEventFactory {
                 // Track impact block if event is not cancelled
                 if (!cancelled && creator.isPresent()) {
                     final BlockPos targetPos = VecHelper.toBlockPos(impactPoint.getBlockPosition());
-                    final ChunkBridge spongeChunk = (ChunkBridge) projectile.world.getChunkAt(targetPos);
+                    final ChunkBridge spongeChunk = (ChunkBridge) projectile.level.getChunkAt(targetPos);
                     spongeChunk.bridge$addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, creator.get(), PlayerTracker.Type.NOTIFIER);
                 }
             } else if (movingObjectType == RayTraceResult.Type.ENTITY) { // entity
@@ -899,9 +897,9 @@ public final class SpongeCommonEventFactory {
             if (clientSource && container.getSlot(0) != null) {
                 if (!(container instanceof PlayerContainer)) {
                     // Inventory closed by client, reopen window and send container
-                    player.openContainer = container;
+                    player.containerMenu = container;
                     final Slot slot = container.getSlot(0);
-                    final IInventory slotInventory = slot.inventory;
+                    final IInventory slotInventory = slot.container;
                     ITextComponent title;
                     // TODO get name from last open
                     if (slotInventory instanceof INamedContainerProvider) {
@@ -910,10 +908,10 @@ public final class SpongeCommonEventFactory {
                         // expected fallback for unknown types
                         title = null;
                     }
-                    slotInventory.openInventory(player);
-                    player.connection.sendPacket(new SOpenWindowPacket(container.windowId, container.getType(), title));
+                    slotInventory.startOpen(player);
+                    player.connection.send(new SOpenWindowPacket(container.containerId, container.getType(), title));
                     // resync data to client
-                    player.sendContainerToPlayer(container);
+                    player.refreshContainer(container);
                 } else {
                     // TODO: Maybe print a warning or throw an exception here?
                     // The player gui cannot be opened from the
@@ -927,7 +925,7 @@ public final class SpongeCommonEventFactory {
                 handleCustomCursor(player, event.getCursorTransaction().getOriginal());
             }
         } else {
-            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
+            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.containerMenu;
             mixinContainer.bridge$getCapturedSlotTransactions().clear();
             mixinContainer.bridge$setCaptureInventory(false);
             // Handle cursor
@@ -936,8 +934,8 @@ public final class SpongeCommonEventFactory {
             } else if (event.getCursorTransaction().getCustom().isPresent()) {
                 handleCustomCursor(player, event.getCursorTransaction().getFinal());
             }
-            if (!clientSource && player.openContainer != null && player.connection != null) {
-                player.closeScreen();
+            if (!clientSource && player.containerMenu != null && player.connection != null) {
+                player.closeContainer();
             }
         }
 
@@ -1017,7 +1015,7 @@ public final class SpongeCommonEventFactory {
 
         // SECOND throw the ConstructEntityEvent
         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) entity.world, posX, posY, posZ), new Vector3d(0, 0, 0), EntityTypes.ITEM.get());
+        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) entity.level, posX, posY, posZ), new Vector3d(0, 0, 0), EntityTypes.ITEM.get());
         frame.removeContext(EventContextKeys.SPAWN_TYPE);
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {

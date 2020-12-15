@@ -38,7 +38,7 @@ public final class PigData {
         registrator
                 .asMutable(PigEntity.class)
                     .create(Keys.IS_SADDLED)
-                        .get(PigEntity::getSaddled)
+                        .get(PigEntity::isSaddled)
                         .set(PigEntity::setSaddled);
     }
     // @formatter:on

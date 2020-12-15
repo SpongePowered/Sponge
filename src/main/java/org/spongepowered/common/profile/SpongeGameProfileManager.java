@@ -60,7 +60,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
 
     public SpongeGameProfileManager(final Server server) {
         this.usernameCache = ((SpongeServer) server).getUsernameCache();
-        this.cache = (PlayerProfileCacheBridge) ((MinecraftServer) server).getPlayerProfileCache();
+        this.cache = (PlayerProfileCacheBridge) ((MinecraftServer) server).getProfileCache();
         this.gameLookupExecutorService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
                 .setNameFormat("Sponge - Async User Lookup Thread").build());
     }

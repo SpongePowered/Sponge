@@ -43,7 +43,7 @@ import org.spongepowered.common.advancement.SpongeTreeLayout;
 public abstract class AdvancementTreeNodeMixin {
 
     @Inject(method = "run", at = @At("RETURN"))
-    private static void onLayout(Advancement root, CallbackInfo ci) {
+    private static void impl$onLayout(Advancement root, CallbackInfo ci) {
         final AdvancementTree advancementTree = ((org.spongepowered.api.advancement.Advancement) root).getTree().get();
         final TreeLayout layout = new SpongeTreeLayout(advancementTree);
         final Cause cause = Sponge.getServer().getCauseStackManager().getCurrentCause();

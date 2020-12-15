@@ -35,6 +35,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.FolderName;
+import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -60,6 +62,7 @@ import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -173,10 +176,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             return;
         }
 
-        // Note: Uses the overworld's player data
-        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) world.getSaveHandler();
-        final File file = new File(saveHandler.accessor$getPlayersDirectory(),
-            this.profile.getId().toString() + ".dat");
+        final SaveFormat.LevelSave storageSource = ((MinecraftServerAccessor) Sponge.getServer()).accessor$storageSource();
+        final File file = storageSource.getLevelPath(FolderName.PLAYER_DATA_DIR).resolve(this.profile.getId().toString() + ".dat").toFile();
         if (!file.exists()) {
             return;
         }
@@ -211,7 +212,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             this.enderChest = new SpongeUserInventoryEnderchest(this);
             if (this.compound.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9)) {
                 final ListNBT nbttaglist1 = this.compound.getList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
-                this.enderChest.read(nbttaglist1);
+                this.enderChest.fromTag(nbttaglist1);
             }
         }
         return this;
@@ -279,7 +280,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.loadEnderInventory();
 
         compound.put(Constants.Entity.Player.INVENTORY, this.inventory.writeList(new ListNBT()));
-        compound.put(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.write());
+        compound.put(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.createTag());
         compound.putInt(Constants.Entity.Player.SELECTED_ITEM_SLOT, this.inventory.currentItem);
 
         compound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(this.x, this.y, this.z));
@@ -492,22 +493,23 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     public void save() {
         Preconditions.checkState(this.isInitialized(), "User {} is not initialized", this.profile.getId());
-        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) ((SpongeWorldManager) Sponge.getServer().getWorldManager()).getDefaultWorld();
-        final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), this.getUniqueId() + ".dat");
+
+        final SaveFormat.LevelSave storageSource = ((MinecraftServerAccessor) Sponge.getServer()).accessor$storageSource();
+        final File file = storageSource.getLevelPath(FolderName.PLAYER_DATA_DIR).resolve(this.getUniqueId() + ".dat").toFile();
         CompoundNBT compound;
         try {
-            compound = CompressedStreamTools.readCompressed(new FileInputStream(dataFile));
+            compound = CompressedStreamTools.readCompressed(new FileInputStream(file));
         } catch (final IOException ignored) {
             // Nevermind
             compound = new CompoundNBT();
         }
         this.writeCompound(compound);
-        try (final FileOutputStream out = new FileOutputStream(dataFile)) {
+        try (final FileOutputStream out = new FileOutputStream(file)) {
             CompressedStreamTools.writeCompressed(compound, out);
             SpongeUser.dirtyUsers.remove(this);
             this.invalidate();
         } catch (final IOException e) {
-            SpongeCommon.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
+            SpongeCommon.getLogger().warn("Failed to save user file [{}]!", file, e);
         }
     }
 
@@ -528,9 +530,9 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         } else if (slotIn == EquipmentSlotType.OFFHAND) {
             return this.inventory.offHandInventory.get(0);
         } else {
-            return slotIn.getSlotType() == EquipmentSlotType.Group.ARMOR ? this.inventory.armorInventory.get(
-                slotIn.getIndex()) :
-                net.minecraft.item.ItemStack.EMPTY;
+            return slotIn.getType() == EquipmentSlotType.Group.ARMOR ?
+                    this.inventory.armorInventory.get(slotIn.getIndex()) :
+                    net.minecraft.item.ItemStack.EMPTY;
         }
     }
 
@@ -540,7 +542,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             this.inventory.mainInventory.set(this.inventory.currentItem, stack);
         } else if (slotIn == EquipmentSlotType.OFFHAND) {
             this.inventory.offHandInventory.set(0, stack);
-        } else if (slotIn.getSlotType() == EquipmentSlotType.Group.ARMOR) {
+        } else if (slotIn.getType() == EquipmentSlotType.Group.ARMOR) {
             this.inventory.armorInventory.set(slotIn.getIndex(), stack);
         }
     }
@@ -557,7 +559,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public Optional<ServerPlayer> getPlayer() {
-        return Optional.ofNullable((ServerPlayer) SpongeCommon.getServer().getPlayerList().getPlayerByUUID(this.profile.getId()));
+        return Optional.ofNullable((ServerPlayer) SpongeCommon.getServer().getPlayerList().getPlayer(this.profile.getId()));
     }
 
     @Override

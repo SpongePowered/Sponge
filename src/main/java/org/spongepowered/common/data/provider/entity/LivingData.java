@@ -140,7 +140,7 @@ public final class LivingData {
                         })
                         .delete(h -> h.setLastHurtByMob(null))
                     .create(Keys.MAX_AIR)
-                        .get(LivingEntity::getMaxAir)
+                        .get(LivingEntity::getMaxAirSupply)
                         .set((h, v) -> ((LivingEntityBridge) h).bridge$setMaxAir(v))
                     .create(Keys.MAX_HEALTH)
                         .get(h -> (double) h.getMaxHealth())
@@ -151,12 +151,12 @@ public final class LivingData {
                             return effects.isEmpty() ? null : PotionEffectUtil.copyAsPotionEffects(effects);
                         })
                         .set((h, v) -> {
-                            h.clearActivePotions();
+                            h.removeAllEffects();
                             for (final PotionEffect effect : v) {
-                                h.addPotionEffect(PotionEffectUtil.copyAsEffectInstance(effect));
+                                h.addEffect(PotionEffectUtil.copyAsEffectInstance(effect));
                             }
                         })
-                        .delete(LivingEntity::clearActivePotions)
+                        .delete(LivingEntity::removeAllEffects)
                     .create(Keys.REMAINING_AIR)
                         .get(h -> Math.max(0, h.getAirSupply()))
                         .setAnd((h, v) -> {
@@ -170,7 +170,7 @@ public final class LivingData {
                             return true;
                         })
                     .create(Keys.SCALE)
-                        .get(h -> (double) h.getRenderScale())
+                        .get(h -> (double) h.getScale())
                     .create(Keys.STUCK_ARROWS)
                         .get(LivingEntity::getArrowCount)
                         .setAnd((h, v) -> {

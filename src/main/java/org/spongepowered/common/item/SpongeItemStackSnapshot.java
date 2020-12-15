@@ -96,7 +96,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         builder.add(customData.asImmutable());
         keyBuilder.addAll(customData.getKeys());
         valueBuilder.addAll(customData.getValues());
-        this.damageValue = ItemStackUtil.toNative(itemStack).getDamage();
+        this.damageValue = ItemStackUtil.toNative(itemStack).getDamageValue();
         this.manipulators = builder.build();
         this.privateStack = itemStack.copy();
         this.keys = keyBuilder.build();

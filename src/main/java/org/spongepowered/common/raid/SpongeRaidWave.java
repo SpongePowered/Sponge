@@ -79,14 +79,14 @@ public final class SpongeRaidWave implements RaidWave {
     @Override
     public boolean addRaider(Raider raider, boolean addToRaidHealth) {
         checkNotNull(raider, "Raider cannot be null.");
-        return this.raid.joinRaid(this.waveId, (AbstractRaiderEntity) raider, addToRaidHealth);
+        return this.raid.addWaveMob(this.waveId, (AbstractRaiderEntity) raider, addToRaidHealth);
     }
 
     @Override
     public boolean removeRaider(Raider raider) {
         checkNotNull(raider, "Raider cannot be null.");
         if (raider.raidWave().isPresent() && this.equals(raider.raidWave().get().get())) {
-            this.raid.leaveRaid((AbstractRaiderEntity) raider, true);
+            this.raid.removeFromRaid((AbstractRaiderEntity) raider, true);
             return true;
         }
 

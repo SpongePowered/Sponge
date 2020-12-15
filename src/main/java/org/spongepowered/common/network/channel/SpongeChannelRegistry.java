@@ -208,7 +208,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
             return;
         }
 
-        ((NetworkManagerBridge) ((ServerLoginNetHandler) connection).networkManager).bridge$setClientType(clientType);
+        ((NetworkManagerBridge) ((ServerLoginNetHandler) connection).connection).bridge$setClientType(clientType);
     }
 
     /**

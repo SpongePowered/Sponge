@@ -144,7 +144,7 @@ public final class VolumeStreamUtils {
         return ((chunk, chunkSection, pos) -> {
             if (chunk.getBiomes() == null) {
                 if (chunk instanceof Chunk) {
-                    return ((Chunk) chunk).getWorld().getNoiseBiomeRaw(pos.getX(), pos.getY(), pos.getZ());
+                    return ((Chunk) chunk).getLevel().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
                 } else {
                     return Biomes.OCEAN;
                 }
@@ -191,12 +191,12 @@ public final class VolumeStreamUtils {
 
             return Arrays.stream(chunk.getSections())
                 .filter(Objects::nonNull)
-                .filter(chunkSection -> chunkSection.getYLocation() >= minYSection && chunkSection.getYLocation() <= maxYSection)
+                .filter(chunkSection -> chunkSection.bottomBlockY() >= minYSection && chunkSection.bottomBlockY() <= maxYSection)
                 .flatMap(
                 chunkSection -> IntStream.range(zStart, zEnd)
                     .mapToObj(z -> IntStream.range(xStart, xEnd)
                         .mapToObj(x -> {
-                            final int sectionY = chunkSection.getYLocation();
+                            final int sectionY = chunkSection.bottomBlockY();
                             final int yStart = sectionY == minYSection ? minYOffset : 0;
                             final int yEnd = sectionY == maxYSection ? maxYOffset + 1 : 16; // plus 1 because of IntStream range exclusive
                             return IntStream.range(yStart, yEnd)

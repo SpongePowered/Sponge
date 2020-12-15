@@ -288,7 +288,7 @@ public final class EntityUtil {
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
-                    entityToSpawn.level.addEntity(entityToSpawn);
+                    entityToSpawn.level.addFreshEntity(entityToSpawn);
                     return true;
                 }
             }
@@ -301,7 +301,7 @@ public final class EntityUtil {
                 }
             });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        ((net.minecraft.world.World) entity.getWorld()).addEntity((Entity) entity);
+        ((net.minecraft.world.World) entity.getWorld()).addFreshEntity((Entity) entity);
         return true;
     }
 
