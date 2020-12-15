@@ -22,62 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.ai.goal;
+package org.spongepowered.common.mixin.core.entity.passive;
 
-import net.minecraft.entity.ai.goal.BreedGoal;
+import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.passive.AnimalEntity;
-import org.spongepowered.api.entity.living.animal.Animal;
+import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.TristateResult;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
 
-import javax.annotation.Nullable;
+@Mixin(AnimalEntity.class)
+public abstract class AnimalEntityMixin extends AgeableEntityMixin {
 
-@Mixin(BreedGoal.class)
-public abstract class BreedGoalMixin {
-
-    // @formatter:off
-    @Shadow @Final protected AnimalEntity animal;
-    @Shadow protected AnimalEntity partner;
-
-    @Shadow @Nullable private AnimalEntity shadow$getFreePartner() {
-        // Shadow implements
-        return null;
-    }
-    // @formatter:on
-
-    @Nullable
-    @Redirect(method = "canUse",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/entity/ai/goal/BreedGoal;getFreePartner()Lnet/minecraft/entity/passive/AnimalEntity;"))
-    private AnimalEntity impl$callFindMateEvent(final BreedGoal entityAIMate) {
-        AnimalEntity nearbyMate = this.shadow$getFreePartner();
-        if (nearbyMate == null) {
-            return null;
-        }
-
-        if (ShouldFire.BREEDING_EVENT_FIND_MATE) {
+    @Inject(method = "spawnChildFromBreeding",
+            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/entity/passive/AnimalEntity;getLoveCause()Lnet/minecraft/entity/player/ServerPlayerEntity;",
+                    ordinal = 0),
+            cancellable = true)
+    private void impl$cancelSpawnResultIfMarked(ServerWorld p_234177_1_, AnimalEntity partner, final CallbackInfo ci, AgeableEntity offspring) {
+        if (ShouldFire.BREEDING_EVENT_BREED) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(this.animal);
-                final org.spongepowered.api.event.entity.BreedingEvent.FindMate event =
-                    SpongeEventFactory.createBreedingEventFindMate(frame.getCurrentCause(), TristateResult.Result.DEFAULT,
-                        TristateResult.Result.DEFAULT, (Animal) nearbyMate, true);
-                if (SpongeCommon.postEvent(event) || event.getResult() == TristateResult.Result.DENY) {
-                    nearbyMate = null;
+                frame.pushCause(this);
+                frame.pushCause(partner);
+                final org.spongepowered.api.event.entity.BreedingEvent.Breed event =
+                        SpongeEventFactory.createBreedingEventBreed(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ageable) offspring);
+
+                if (!(!SpongeCommon.postEvent(event) && level.addFreshEntity(offspring))) {
+                    ci.cancel();
                 }
             }
         }
-
-        return nearbyMate;
     }
 
 }

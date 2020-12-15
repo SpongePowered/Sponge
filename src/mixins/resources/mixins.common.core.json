@@ -202,7 +202,8 @@
     "world.storage.ISpawnWorldInfoMixin",
     "world.storage.IServerWorldInfoMixin",
     "world.storage.ServerWorldInfoMixin",
-    "world.storage.DerivedWorldInfoMixin"
+    "world.storage.DerivedWorldInfoMixin",
+    "entity.passive.AnimalEntityMixin"
   ],
   "client": [
     "client.MinecraftMixin",

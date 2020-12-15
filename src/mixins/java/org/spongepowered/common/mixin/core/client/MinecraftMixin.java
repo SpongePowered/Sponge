@@ -80,7 +80,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         }
     }
 
-    @Inject(method = "runGameLoop", at = @At("TAIL"))
+    @Inject(method = "runTick", at = @At("TAIL"))
     private void impl$tickClientScheduler(boolean renderWorldIn, CallbackInfo ci) {
         this.getScheduler().tick();
     }
