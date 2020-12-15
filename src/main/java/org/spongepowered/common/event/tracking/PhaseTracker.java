@@ -53,10 +53,10 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.event.cause.entity.SpongeSpawnTypes;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.ThreadUtil;
@@ -251,7 +251,7 @@ public final class PhaseTracker implements CauseStackManager {
                 try (final CauseStackManager.StackFrame frame = this.pushCauseFrame()) {
                     // We are forcing the spawn, as we can't throw the proper event at the proper time, so
                     // we'll just mark it as "forced".
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.FORCED);
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpongeSpawnTypes.FORCED);
                     for (final net.minecraft.entity.Entity entity : entities) {
                         // At this point, we don't care what the causes are...
                         entity.getCommandSenderWorld().addFreshEntity(entity);
