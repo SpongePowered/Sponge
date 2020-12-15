@@ -90,7 +90,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.NetworkManagerAccessor;
 import org.spongepowered.common.accessor.network.play.client.CClientSettingsPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
@@ -118,7 +117,7 @@ import java.util.Set;
 
 // See also: SubjectMixin_API and SubjectMixin
 @Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implements SubjectBridge, LocationTargetingBridge, ServerPlayerEntityBridge {
+public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implements SubjectBridge, ServerPlayerEntityBridge {
 
     // @formatter:off
     @Shadow public ServerPlayNetHandler connection;
@@ -338,15 +337,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             return 0;
         }
         return super.bridge$getExperiencePointsOnDeath(entity, attackingPlayer);
-    }
-
-    @Override
-    public void bridge$setTargetedPosition(@org.checkerframework.checker.nullness.qual.Nullable final Vector3d position) {
-        this.impl$targetedPosition = position;
-
-        if (position != null) {
-            this.connection.send(new SSpawnPositionPacket(VecHelper.toBlockPos(position)));
-        }
     }
 
     @Override
