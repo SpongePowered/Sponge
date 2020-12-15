@@ -22,29 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.item;
+package org.spongepowered.common.accessor.item;
 
-import org.spongepowered.api.data.type.ArmorMaterial;
-import org.spongepowered.api.item.recipe.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
+import net.minecraft.item.ArmorMaterial;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
-
-@Mixin(net.minecraft.item.ArmorMaterial.class)
-@Implements(@Interface(iface = ArmorMaterial.class, prefix = "armorMaterial$"))
-public abstract class ArmorMaterialMixin_API implements ArmorMaterial {
-
-    // @formatter:off
-    @Shadow public abstract net.minecraft.item.crafting.Ingredient shadow$getRepairIngredient();
-    // @formatter:on
-
-    @Override
-    public Optional<Ingredient> getRepairIngredient() {
-        final net.minecraft.item.crafting.Ingredient repairMaterial = this.shadow$getRepairIngredient();
-        return Optional.ofNullable(((Ingredient) (Object) repairMaterial));
-    }
-
+@Mixin(ArmorMaterial.class)
+public interface ArmorMaterialAccessor {
+    @Accessor("name") String accessor$name();
 }

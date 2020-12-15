@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.monster.PhantomEntity;
@@ -36,6 +37,7 @@ import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.ItemTier;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.state.properties.AttachFace;
 import net.minecraft.state.properties.ChestType;
 import net.minecraft.state.properties.DoorHingeSide;
 import net.minecraft.state.properties.Half;
@@ -47,6 +49,7 @@ import net.minecraft.state.properties.StairsShape;
 import net.minecraft.tileentity.BannerPattern;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.raid.Raid;
 import org.spongepowered.api.ResourceKey;
@@ -63,8 +66,6 @@ import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.StringDataFormat;
-import org.spongepowered.api.data.type.ArmorMaterial;
-import org.spongepowered.api.data.type.AttachmentSurface;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BoatType;
 import org.spongepowered.api.data.type.BodyPart;
@@ -73,8 +74,6 @@ import org.spongepowered.api.data.type.ComparatorMode;
 import org.spongepowered.api.data.type.DoorHinge;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.FoxType;
-import org.spongepowered.api.data.type.HandPreference;
-import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.MatterType;
 import org.spongepowered.api.data.type.MooshroomType;
@@ -97,8 +96,6 @@ import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
-import org.spongepowered.api.entity.attribute.AttributeOperation;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.cause.entity.DismountType;
 import org.spongepowered.api.event.cause.entity.MovementType;
@@ -119,11 +116,11 @@ import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.world.WorldArchetype;
-import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.common.accessor.item.ArmorMaterialAccessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.persistence.HoconDataFormat;
@@ -167,16 +164,30 @@ import java.util.stream.Stream;
 
 public final class SpongeRegistries {
 
-    public static void registerGlobalRegistries(final SpongeRegistryHolder holder) {
-        holder
-                .registerSimple0(Registries.ACCOUNT_DELETION_RESULT_TYPE, false, )
+    public static void registerGlobalRegistries(final SpongeRegistryHolder registries) {
+        registries.createVanillaRegistry(Registries.ARMOR_MATERIAL, net.minecraft.item.ArmorMaterial.values(), am -> ((ArmorMaterialAccessor) (Object) am).accessor$name());
+        registries.createVanillaRegistry(Registries.ATTACHMENT_SURFACE, net.minecraft.state.properties.AttachFace.values(), AttachFace::getSerializedName);
+        registries.createVanillaRegistry(Registries.ATTRIBUTE_OPERATION, AttributeModifier.Operation.values(), ImmutableMap.of(
+              // names come from net.minecraft.world.level.storage.loot.functions.SetAttributesFunction.Modifier#operationFromString
+              AttributeModifier.Operation.ADDITION, "addition",
+              AttributeModifier.Operation.MULTIPLY_BASE, "multiply_base",
+              AttributeModifier.Operation.MULTIPLY_TOTAL, "multiply_total"
+        ));
+        registries.createVanillaRegistry(Registries.DIFFICULTY, net.minecraft.world.Difficulty.values(), Difficulty::getKey);
+        registries.createVanillaRegistry(Registries.GAME_MODE, GameType.values(), GameType::getName);
+        registries.createVanillaRegistry(Registries.HAND_PREFERENCE, HandSide.values(), ImmutableMap.of(
+            HandSide.LEFT, "left",
+            HandSide.RIGHT, "right"
+        ));
+        registries.createVanillaRegistry(Registries.HAND_TYPE, Hand.values(), ImmutableMap.of(
+            Hand.MAIN_HAND, "main_hand",
+            Hand.OFF_HAND, "off_hand"
+        ));
+
         this
                 .generateRegistry(AccountDeletionResultType.class, ResourceKey.sponge("account_deletion_result_type"), AccountDeletionResultTypeGenerator
                         .stream(), true, false)
                 .generateRegistry(AdvancementType.class, ResourceKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true, false)
-                .generateRegistry(ArmorMaterial.class, ResourceKey.minecraft("armor_material"), Arrays.stream(net.minecraft.item.ArmorMaterial.values()), true, false)
-                .generateRegistry(AttachmentSurface.class, ResourceKey.minecraft("attach_face"), Arrays.stream(net.minecraft.state.properties.AttachFace.values()), true, false)
-                .generateRegistry(AttributeOperation.class, ResourceKey.minecraft("attribute_operation"), Arrays.stream(AttributeModifier.Operation.values()), true, false)
                 .generateRegistry(BanType.class, ResourceKey.minecraft("ban_type"), BanTypeStreamGenerator.stream(), true, false)
                 .generateRegistry(BannerPatternShape.class, ResourceKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true, false)
                 .generateRegistry(BoatType.class, ResourceKey.minecraft("boat_type"), Arrays.stream(net.minecraft.entity.item.BoatEntity.Type.values()), true, false)
@@ -191,7 +202,6 @@ public final class SpongeRegistries {
                 .generateRegistry(DamageModifierType.class, ResourceKey.sponge("damage_modifier_type"), DamageModifierTypeStreamGenerator.stream(), true, true)
                 .generateRegistry(DamageType.class, ResourceKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true, true)
                 .generateCallbackRegistry(DataRegistration.class, ResourceKey.sponge("data_registration"), Stream.empty(), (key, value) -> ((SpongeDataManager) Sponge.getGame().getDataManager()).registerCustomDataRegistration((SpongeDataRegistration) value), false, true)
-                .generateRegistry(Difficulty.class, ResourceKey.sponge("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true, false)
                 .generateRegistry(DismountType.class, ResourceKey.minecraft("dismount_type"), DismountTypeStreamGenerator.stream(), true, false)
                 .generateRegistry(DyeColor.class, ResourceKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true, false)
                 .generateRegistry(CatalogedValueParameter.class, ResourceKey.sponge("value_parameter"), CatalogedValueParameterStreamGenerator.stream(), true, true)
@@ -200,10 +210,7 @@ public final class SpongeRegistries {
                 .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), EquipmentTypeStreamGenerator.stream(), true, false)
                 .generateRegistry(EventContextKey.class, ResourceKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true, true)
                 .generateRegistry(FoxType.class, ResourceKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true, false)
-                .generateRegistry(GameMode.class, ResourceKey.minecraft("game_mode"), Arrays.stream(GameType.values()), true, false)
                 .generateRegistry(GoalExecutorType.class, ResourceKey.minecraft("goal_executor_type"), GoalExecutorTypeStreamGenerator.stream(), true, false)
-                .generateRegistry(HandPreference.class, ResourceKey.minecraft("hand_preference"), Arrays.stream(HandSide.values()), true, false)
-                .generateRegistry(HandType.class, ResourceKey.minecraft("hand_type"), Arrays.stream(Hand.values()), true, false)
                 .generateRegistry(DoorHinge.class, ResourceKey.minecraft("door_hinge"), Arrays.stream(DoorHingeSide.values()), true, false)
                 .generateRegistry(InstrumentType.class, ResourceKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true, false)
                 .generateRegistry(Key.class, ResourceKey.sponge("key"), KeyStreamGenerator.stream(), true, true)

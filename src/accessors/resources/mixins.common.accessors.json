@@ -97,6 +97,7 @@
         "inventory.container.AbstractRepairContainerAccessor",
         "inventory.container.SlotAccessor",
         "inventory.container.WorkbenchContainerAccessor",
+        "item.ArmorMaterialAccessor",
         "item.BucketItemAccessor",
         "item.MerchantOfferAccessor",
         "item.MusicDiscItemAccessor",
