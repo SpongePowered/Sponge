@@ -59,7 +59,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -267,7 +267,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(final double value) {
         if (!this.level.isClientSide) {
-            return Math.pow(((WorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().getEntity().getHardDespawnRange(), 2);
+            return Math.pow(((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().getEntity().getHardDespawnRange(), 2);
         }
         return value;
     }
@@ -276,7 +276,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(final double value) {
         if (!this.level.isClientSide) {
-            return Math.pow(((WorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().getEntity().getSoftDespawnRange(), 2);
+            return Math.pow(((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().getEntity().getSoftDespawnRange(), 2);
         }
         return value;
     }
@@ -284,7 +284,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @ModifyConstant(method = "checkDespawn", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(final int value) {
         if (!this.level.isClientSide) {
-            return ((WorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().getEntity().getMinimumLife() * 20;
+            return ((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().getEntity().getMinimumLife() * 20;
         }
         return value;
     }

@@ -34,7 +34,6 @@ import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.gen.GeneratorModifierType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -103,7 +102,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     @Override
     public DimensionType getDimensionType() {
-        return ((WorldSettingsBridge) this).bridge$getLogicType();
+        return ((WorldSettingsBridge) this).bridge$getDimensionType();
     }
 
     @Override

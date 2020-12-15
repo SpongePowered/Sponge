@@ -32,14 +32,13 @@ import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.customdata.CustomDataConfig;
 import org.spongepowered.common.config.inheritable.GlobalConfig;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.common.world.server.SpongeWorldManager;
-import org.spongepowered.configurate.ConfigurateException;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -83,7 +82,7 @@ public final class SpongeGameConfigs {
     }
 
     public static InheritableConfigHandle<WorldConfig> getForWorld(final net.minecraft.world.World mcWorld) {
-        return ((WorldInfoBridge) mcWorld.getLevelData()).bridge$getConfigAdapter();
+        return ((IServerWorldInfoBridge) mcWorld.getLevelData()).bridge$getConfigAdapter();
     }
 
     public static boolean doesWorldConfigExist(final ResourceKey world) {

@@ -69,7 +69,7 @@ import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
@@ -174,8 +174,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final WorldInfo worldInfo = new WorldInfo((WorldSettings) (Object) archetype, key.getValue());
         ((ResourceKeyBridge) worldInfo).bridge$setKey(key);
-        ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
-        ((WorldInfoBridge) worldInfo).bridge$setModCreated(true);
+        ((IServerWorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
+        ((IServerWorldInfoBridge) worldInfo).bridge$setModCreated(true);
 
         SpongeCommon.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 archetype, (WorldProperties) worldInfo));
@@ -226,7 +226,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         ((ResourceKeyBridge) worldInfo).bridge$setKey(key);
 
-        final SpongeDimensionType logicType = ((WorldInfoBridge) worldInfo).bridge$getLogicType();
+        final SpongeDimensionType logicType = ((IServerWorldInfoBridge) worldInfo).bridge$getDimensionType();
 
         final DimensionType dimensionType = Registry.DIMENSION_TYPE.getValue((ResourceLocation) (Object) key).orElseGet(() -> this.
                 createDimensionType(key, logicType, worldDirectory.getFileName().toString(), ((SimpleRegistryAccessor) Registry.DIMENSION_TYPE)
@@ -237,7 +237,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         MinecraftServerAccessor.accessor$LOGGER().info("Loading World '{}' ({})", key, logicType.getKey().getFormatted());
 
         final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(logicType, key);
-        ((WorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
+        ((IServerWorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
 
         final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getProgressListenerFactory()
                 .create(11);
@@ -308,7 +308,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final WorldInfo worldInfo = (WorldInfo) properties;
 
-        final SpongeDimensionType logicType = ((WorldInfoBridge) properties).bridge$getLogicType();
+        final SpongeDimensionType logicType = ((IServerWorldInfoBridge) properties).bridge$getDimensionType();
 
         ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType(logicType);
 
@@ -316,7 +316,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 .getFormatted());
 
         final InheritableConfigHandle<WorldConfig> adapter = SpongeGameConfigs.createWorld(logicType, properties.getKey());
-        ((WorldInfoBridge) properties).bridge$setConfigAdapter(adapter);
+        ((IServerWorldInfoBridge) properties).bridge$setConfigAdapter(adapter);
 
         final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getProgressListenerFactory().create(11);
 
@@ -711,7 +711,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final BlockPos spawnPoint = world.getSpawnPoint();
         world.getChunkProvider().releaseTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(spawnPoint), 11, key);
 
-        ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().save();
+        ((IServerWorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().save();
         ((ServerWorldBridge) world).bridge$setManualSave(true);
 
         try {
@@ -744,8 +744,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         if (forceDifficulty) {
             // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
-            if (!((WorldInfoBridge) world.getWorldInfo()).bridge$hasCustomDifficulty()) {
-                ((WorldInfoBridge) world.getWorldInfo()).bridge$forceSetDifficulty(newDifficulty);
+            if (!((IServerWorldInfoBridge) world.getWorldInfo()).bridge$hasCustomDifficulty()) {
+                ((IServerWorldInfoBridge) world.getWorldInfo()).bridge$forceSetDifficulty(newDifficulty);
             }
         } else {
             world.getWorldInfo().setDifficulty(newDifficulty);
@@ -887,30 +887,30 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 }
                 ((ResourceKeyBridge) worldInfo).bridge$setKey(worldRegistration.getKey());
 
-                ((WorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
+                ((IServerWorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
 
-                ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
+                ((IServerWorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
 
                 SpongeCommon.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(
                         PhaseTracker.getCauseStackManager().getCurrentCause(),
                         (WorldArchetype) (Object) defaultSettings, (WorldProperties) worldInfo));
             } else {
-                ((WorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
+                ((IServerWorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
                 worldInfo.setWorldName(isDefaultWorld ? saveName : this.getDirectoryName(key));
 
                 // This may be an existing world created before Sponge was installed, handle accordingly
                 if (((ResourceKeyBridge) worldInfo).bridge$getKey() == null) {
                     ((ResourceKeyBridge) worldInfo).bridge$setKey(worldRegistration.getKey());
-                    ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
+                    ((IServerWorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
                 }
 
                 defaultSettings = new WorldSettings(worldInfo);
             }
 
-            if (((WorldInfoBridge) worldInfo).bridge$getLogicType() != null) {
-                ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType(((WorldInfoBridge) worldInfo).bridge$getLogicType());
+            if (((IServerWorldInfoBridge) worldInfo).bridge$getDimensionType() != null) {
+                ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType(((IServerWorldInfoBridge) worldInfo).bridge$getDimensionType());
             } else {
-                ((WorldInfoBridge) worldInfo).bridge$setLogicType(((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType(), false);
+                ((IServerWorldInfoBridge) worldInfo).bridge$setDimensionType(((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType(), false);
             }
 
             if (isDefaultWorld) {
@@ -1000,7 +1000,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         chunkProvider.getLightManager().func_215598_a(5);
 
         // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
-        if (!((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesKeepSpawnLoaded()) {
+        if (!((IServerWorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesKeepSpawnLoaded()) {
             chunkProvider.releaseTicket(VanillaWorldManager.SPAWN_CHUNKS, spawnChunkPos, 11, (ResourceLocation) (Object) apiWorld.getKey());
         }
     }
@@ -1126,7 +1126,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 apiWorld));
 
-        final boolean generateSpawnOnLoad = ((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesGenerateSpawnOnLoad() || isDefaultWorld;
+        final boolean generateSpawnOnLoad = ((IServerWorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesGenerateSpawnOnLoad() || isDefaultWorld;
 
         if (generateSpawnOnLoad) {
             this.loadSpawnChunks(serverWorld, listener);

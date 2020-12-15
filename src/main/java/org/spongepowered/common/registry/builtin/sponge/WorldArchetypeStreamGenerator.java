@@ -57,7 +57,7 @@ public final class WorldArchetypeStreamGenerator {
         final WorldSettings archetype = new WorldSettings(SpongeWorldArchetypeBuilder.RANDOM.nextLong(), GameType.SURVIVAL, true, false,
                 WorldType.DEFAULT);
         ((ResourceKeyBridge) (Object) archetype).bridge$setKey(key);
-        ((WorldSettingsBridge) (Object) archetype).bridge$setLogicType((SpongeDimensionType) dimensionType.get());
+        ((WorldSettingsBridge) (Object) archetype).bridge$setDimensionType((SpongeDimensionType) dimensionType.get());
         ((WorldSettingsBridge) (Object) archetype).bridge$setDifficulty(Difficulty.NORMAL);
         if (dimensionType.get() == DimensionTypes.OVERWORLD.get()) {
             ((WorldSettingsBridge) (Object) archetype).bridge$setGenerateSpawnOnLoad(true);

@@ -31,7 +31,6 @@ import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.SaveFormat;
 import net.minecraft.world.storage.ServerWorldInfo;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
@@ -71,14 +70,14 @@ public abstract class SaveFormat_LevelSaveMixin {
 
     @Inject(method = "saveDataTag(Lnet/minecraft/util/registry/DynamicRegistries;Lnet/minecraft/world/storage/IServerConfiguration;Lnet/minecraft/nbt/CompoundNBT;)V", at = @At("RETURN"))
     private void impl$saveSpongeLevelData(final DynamicRegistries registries, final IServerConfiguration info, final CompoundNBT compound, final CallbackInfo ci) {
-        if (!Sponge.isServerAvailable() || !((WorldInfoBridge) info).bridge$isValid()) {
+        if (!Sponge.isServerAvailable() || !((IServerWorldInfoBridge) info).bridge$isValid()) {
             return;
         }
 
         final String levelName = info.getLevelName();
         try {
             final CompoundNBT spongeLevelCompound = new CompoundNBT();
-            ((WorldInfoBridge) info).bridge$writeSpongeLevelData(spongeLevelCompound);
+            ((IServerWorldInfoBridge) info).bridge$writeSpongeLevelData(spongeLevelCompound);
 
             // If the returned compound is empty then we should warn the user.
             if (spongeLevelCompound.isEmpty()) {
@@ -89,7 +88,7 @@ public abstract class SaveFormat_LevelSaveMixin {
                         .add("The following information may be useful in debugging:")
                         .add()
                         .add("World: %s", ((ResourceKeyBridge) info).bridge$getKey())
-                        .add("Valid flag: ", ((WorldInfoBridge) info).bridge$isValid())
+                        .add("Valid flag: ", ((IServerWorldInfoBridge) info).bridge$isValid())
                         .add()
                         .add("Stack trace:")
                         .add(new Exception())
@@ -114,8 +113,8 @@ public abstract class SaveFormat_LevelSaveMixin {
                         .add("The following information may be useful in debugging:")
                         .add()
                         .add("World: %s", ((ResourceKeyBridge) info).bridge$getKey())
-                        .add("Is Mod Created: ", ((WorldInfoBridge) info).bridge$isModCreated())
-                        .add("Valid flag: ", ((WorldInfoBridge) info).bridge$isValid())
+                        .add("Is Mod Created: ", ((IServerWorldInfoBridge) info).bridge$isModCreated())
+                        .add("Valid flag: ", ((IServerWorldInfoBridge) info).bridge$isValid())
                         .add()
                         .add("Stack trace:")
                         .add(new Exception())
@@ -213,7 +212,7 @@ public abstract class SaveFormat_LevelSaveMixin {
             return false;
         }
 
-        ((WorldInfoBridge) info).bridge$readSpongeLevelData(compound);
+        ((IServerWorldInfoBridge) info).bridge$readSpongeLevelData(compound);
         return true;
     }
 

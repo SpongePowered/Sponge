@@ -22,31 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.hooks;
+package org.spongepowered.common.accessor.world.gen;
 
-import net.minecraft.world.DimensionType;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.world.dimension.DimensionTypes;
+import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.world.Dimension;
+import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-/**
- * Dimension hooks to handle differences in logic between Sponge's Multi-World system
- * and a platform's version of it.
- */
-public interface DimensionHooks {
+import java.util.Optional;
 
-    /**
-     * Asks the platform if the provided {@link DimensionType dimension type} should
-     * generate a spawn on load as a default (typically a specific world's config file will
-     * veto this post initial world creation)
-     *
-     * <p>Sponge's DimensionType is not a 1:1 mapping to Mojang's {@link DimensionType} and
-     * it is left up to the platform to calculate the correlation between the two and determine
-     * the appropriate return value</p>
-     *
-     * @param dimensionType The type
-     * @return True to generate spawn on load as a default
-     */
-    default boolean doesGenerateSpawnOnLoad(final DimensionType dimensionType) {
-        return DimensionTypes.OVERWORLD.get(Sponge.getServer().registries()) == dimensionType;
+@Mixin(DimensionGeneratorSettings.class)
+public interface DimensionGeneratorSettingsAccessor {
+
+    @Invoker("<init>") static DimensionGeneratorSettings invoker$construct(long seed, boolean generateFeatures, boolean generateBonusChest,
+        SimpleRegistry<Dimension> dimensionRegistry, Optional<String> legacyCustomOptions) {
+        throw new UntransformedInvokerError();
     }
 }

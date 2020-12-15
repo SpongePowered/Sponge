@@ -159,9 +159,6 @@
     "world.chunk.ChunkMixin",
     "world.dimension.DimensionMixin",
     "world.dimension.DimensionTypeMixin",
-    "world.dimension.EndDimensionMixin",
-    "world.dimension.NetherDimensionMixin",
-    "world.dimension.OverworldDimensionMixin",
     "world.gen.feature.structure.LegacyStructureDataUtilMixin",
     "world.server.ChunkManager_EntityTrackerMixin",
     "world.server.ChunkManagerMixin",
@@ -199,11 +196,10 @@
     "block.AbstractFireBlockMixin",
     "block.CampfireBlockMixin",
     "world.storage.IWorldInfoMixin",
-    "world.storage.ISpawnWorldInfoMixin",
     "world.storage.IServerWorldInfoMixin",
     "world.storage.ServerWorldInfoMixin",
-    "world.storage.DerivedWorldInfoMixin",
-    "entity.passive.AnimalEntityMixin"
+    "entity.passive.AnimalEntityMixin",
+    "world.storage.ServerWorldInfoMixin"
   ],
   "client": [
     "client.MinecraftMixin",

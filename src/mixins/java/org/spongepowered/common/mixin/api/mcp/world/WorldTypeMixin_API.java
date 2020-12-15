@@ -28,7 +28,6 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.world.WorldType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.world.gen.GeneratorModifierType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

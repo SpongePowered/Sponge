@@ -36,9 +36,8 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Objects;
 
-@SuppressWarnings("ConstantConditions")
 @Mixin(ISpawnWorldInfo.class)
-@Implements(@Interface(iface = WorldProperties.class, prefix = "worldproperties$"))
+@Implements(@Interface(iface = WorldProperties.class, prefix = "worldProperties$"))
 public interface ISpawnWorldInfoMixin_API extends IWorldInfoMixin_API, WorldProperties {
 
     // @formatter:off
@@ -52,7 +51,8 @@ public interface ISpawnWorldInfoMixin_API extends IWorldInfoMixin_API, WorldProp
 
     @Override
     default void setSpawnPosition(final Vector3i position) {
-        Objects.requireNonNull(position);
+        Objects.requireNonNull(position, "position");
+
         this.shadow$setSpawn(VecHelper.toBlockPos(position), this.shadow$getSpawnAngle());
     }
 }

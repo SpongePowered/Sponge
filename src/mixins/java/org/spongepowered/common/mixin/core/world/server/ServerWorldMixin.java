@@ -29,13 +29,14 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IProgressUpdate;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.IServerWorldInfo;
+import net.minecraft.world.storage.ServerWorldInfo;
 import net.minecraft.world.storage.SessionLockException;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
@@ -51,6 +52,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.accessor.world.server.ServerChunkProviderAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
@@ -58,7 +60,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -256,12 +258,13 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Overwrite
     public void save(@Nullable IProgressUpdate progress, boolean flush, boolean skipSave) throws SessionLockException {
         final ServerWorld this$ = (ServerWorld) (Object) this;
+        final ServerWorldInfo levelData = (ServerWorldInfo) this.shadow$getLevelData();
 
-        ServerChunkProvider serverchunkprovider = this$.getChunkProvider();
+        ServerChunkProvider serverchunkprovider = this$.getChunkSource();
 
         if (!skipSave) {
 
-            final SerializationBehavior behavior = ((WorldInfoBridge) this$.getWorldInfo()).bridge$getSerializationBehavior();
+            final SerializationBehavior behavior = ((IServerWorldInfoBridge) levelData).bridge$getSerializationBehavior();
 
             if (progress != null) {
                 progress.displaySavingString(new TranslationTextComponent("menu.savingLevel"));
@@ -276,10 +279,10 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
                 this.getWorldBorder().copyTo(this$.getWorldInfo());
 
-                this$.getWorldInfo().setCustomBossEvents(((ServerWorldBridge) this$).bridge$getBossBarManager().write());
+                levelData.setCustomBossEvents(((ServerWorldBridge) this$).bridge$getBossBarManager().save());
 
-                this$.getSaveHandler().saveWorldInfoWithPlayer(this$.getWorldInfo(), this.shadow$getDimension().getType() == DimensionType.OVERWORLD
-                        ? this.shadow$getServer().getPlayerList().getHostPlayerData() : null);
+                ((MinecraftServerAccessor) SpongeCommon.getServer()).accessor$storageSource().saveDataTag(SpongeCommon.getServer().registryAccess()
+                    , (ServerWorldInfo) this.levelData, this.shadow$dimension() == World.OVERWORLD ? SpongeCommon.getServer().getPlayerList().getSingleplayerData() : null);
 
                 // Sponge End
             }
@@ -301,8 +304,8 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Override
     public String toString() {
         return new StringJoiner(",", ServerWorld.class.getSimpleName() + "[", "]")
-                .add("key=" + ((org.spongepowered.api.world.server.ServerWorld) this).getKey())
-                .add("dimensionType=" + Registry.DIMENSION_TYPE.getKey(this.shadow$getDimension().getType()))
+                .add("key=" + this.shadow$dimension())
+                .add("dimensionType=" + this.shadow$dimensionType())
                 .toString();
     }
 }

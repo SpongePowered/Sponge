@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Mixin(IWorldInfo.class)
-@Implements(@Interface(iface = WorldProperties.class, prefix = "worldproperties$"))
+@Implements(@Interface(iface = WorldProperties.class, prefix = "worldProperties$"))
 public interface IWorldInfoMixin_API extends WorldProperties {
 
     // @formatter:off
@@ -60,12 +60,16 @@ public interface IWorldInfoMixin_API extends WorldProperties {
     @Shadow boolean shadow$isHardcore();
     @Shadow GameRules shadow$getGameRules();
     @Shadow Difficulty shadow$getDifficulty();
-    @Shadow boolean shadow$isDifficultyLocked();
     // @formatter:on
 
     @Override
     default Vector3i getSpawnPosition() {
         return new Vector3i(this.shadow$getXSpawn(), this.shadow$getYSpawn(), this.shadow$getZSpawn());
+    }
+
+    @Override
+    default void setSpawnPosition(final Vector3i position) {
+        throw new UnsupportedOperationException("Only vanilla implemented mutable spawn world properties are supported!");
     }
 
     @Override
@@ -79,7 +83,7 @@ public interface IWorldInfoMixin_API extends WorldProperties {
     }
 
     @Intrinsic
-    default boolean worldproperties$isHardcore() {
+    default boolean worldProperties$isHardcore() {
         return this.shadow$isHardcore();
     }
 
@@ -87,7 +91,6 @@ public interface IWorldInfoMixin_API extends WorldProperties {
     default org.spongepowered.api.world.difficulty.Difficulty getDifficulty() {
         return (org.spongepowered.api.world.difficulty.Difficulty) (Object) this.shadow$getDifficulty();
     }
-
 
     @Override
     default  <V> V getGameRule(final GameRule<V> gameRule) {

@@ -28,7 +28,7 @@ import net.minecraft.block.Block;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
@@ -71,7 +71,7 @@ public abstract class BlockMixin_EntityCollision implements CollisionCapabilityB
 
     @Override
     public void collision$initializeCollisionState(final net.minecraft.world.World world) {
-        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
+        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
         final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
         final EntityCollisionCategory worldCollCat = worldConfigAdapter.get().getEntityCollisionCategory();
 

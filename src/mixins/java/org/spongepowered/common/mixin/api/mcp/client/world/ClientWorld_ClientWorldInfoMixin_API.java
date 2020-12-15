@@ -22,12 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.storage;
+package org.spongepowered.common.mixin.api.mcp.client.world;
 
-import net.minecraft.world.storage.IWorldInfo;
+import net.minecraft.client.world.ClientWorld;
+import org.spongepowered.api.world.client.ClientWorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.api.mcp.world.storage.ISpawnWorldInfoMixin_API;
 
-@Mixin(IWorldInfo.class)
-public interface ISpawnWorldInfoMixin extends IWorldInfoMixin {
-
+@Mixin(ClientWorld.ClientWorldInfo.class)
+public abstract class ClientWorld_ClientWorldInfoMixin_API implements ISpawnWorldInfoMixin_API, ClientWorldProperties {
 }

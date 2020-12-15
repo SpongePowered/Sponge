@@ -72,7 +72,7 @@ import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.command.ICommandSourceBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -99,7 +99,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         CommandSourceProviderBridge, SubjectProxy, ICommandSourceBridge {
 
     // @formatter:off
-    @Shadow @Final protected Thread serverThread;
     @Shadow @Final private PlayerProfileCache profileCache;
     @Shadow @Final private static Logger LOGGER;
     @Shadow private int tickCount;
@@ -112,8 +111,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract boolean shadow$isDedicatedServer();
     @Shadow public abstract boolean shadow$isRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
-    @Shadow public abstract ServerWorld shadow$overworld();
-    @Shadow public abstract CustomServerBossInfoManager shadow$getCustomBossEvents();
     // @formatter:on
 
     @Shadow public abstract ResourcePackList getPackRepository();
@@ -240,12 +237,12 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Overwrite
     public boolean saveAllChunks(final boolean suppressLog, final boolean flush, final boolean isForced) {
         for (final ServerWorld world : this.shadow$getAllLevels()) {
-            final SerializationBehavior serializationBehavior = ((WorldInfoBridge) world.getLevelData()).bridge$getSerializationBehavior();
+            final SerializationBehavior serializationBehavior = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getSerializationBehavior();
             boolean log = !suppressLog;
 
             // Not forced happens during ticks and when shutting down
             if (!isForced) {
-                final InheritableConfigHandle<WorldConfig> adapter = ((WorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
+                final InheritableConfigHandle<WorldConfig> adapter = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();.
                 final int autoSaveInterval = adapter.get().getWorld().getAutoSaveInterval();
                 if (log) {
                     if (this.bridge$performAutosaveChecks()) {
@@ -257,7 +254,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
                 // If the server isn't running or we hit Vanilla's save interval, save our configs
                 if (!this.shadow$isRunning() || this.tickCount % 6000 == 0) {
-                    ((WorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter().save();
+                    ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter().save();
                 }
 
                 final boolean canSaveAtAll = serializationBehavior != SerializationBehavior.NONE;
@@ -296,16 +293,12 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
                     MinecraftServerMixin.LOGGER.info("Manually saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
                 }
 
-                ((WorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter().save();
+                ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter().save();
 
                 world.save(null, false, world.noSave);
             }
         }
 
-        ServerWorld serverworld1 = this.shadow$overworld();
-        IServerWorldInfo iserverworldinfo = this.worldData.overworldData();
-        iserverworldinfo.setWorldBorder(serverworld1.getWorldBorder().createSettings());
-        this.worldData.setCustomBossEvents(this.shadow$getCustomBossEvents().save());
         this.storageSource.saveDataTag(this.registryHolder, this.worldData, this.shadow$getPlayerList().getSingleplayerData());
 
         return true;

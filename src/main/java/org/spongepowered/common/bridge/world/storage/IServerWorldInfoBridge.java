@@ -37,16 +37,16 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface WorldInfoBridge {
+public interface IServerWorldInfoBridge {
 
     @Nullable
     ServerWorld bridge$getWorld();
 
     boolean bridge$isSinglePlayerProperties();
 
-    DimensionType bridge$getLogicType();
+    DimensionType bridge$getDimensionType();
 
-    void bridge$setLogicType(DimensionType type, boolean updatePlayers);
+    void bridge$setDimensionType(DimensionType type, boolean updatePlayers);
 
     UUID bridge$getUniqueId();
 

@@ -191,7 +191,10 @@
         "entity.item.ItemFrameEntityAccessor",
         "entity.monster.AbstractRaiderEntityAccessor",
         "world.LockCodeAccessor",
-        "util.RegistryKeyAccessor"
+        "util.RegistryKeyAccessor",
+        "world.gen.settings.DimensionGeneratorSettingsAccessor",
+        "world.WorldSettingsAccessor",
+        "world.gen.DimensionGeneratorSettingsAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.storage;
 
-import net.minecraft.command.TimerCallbackManager;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.GameType;
 import net.minecraft.world.storage.IServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -37,8 +35,9 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.api.world.gen.WorldGeneratorSettings;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.storage.ServerWorldProperties;
+import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Implements;
@@ -47,7 +46,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -57,11 +56,10 @@ import java.util.UUID;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(IServerWorldInfo.class)
-@Implements(@Interface(iface = ServerWorldProperties.class, prefix = "worldproperties$"))
+@Implements(@Interface(iface = ServerWorldProperties.class, prefix = "serverWorldProperties$"))
 public interface IServerWorldInfoMixin_API extends ISpawnWorldInfoMixin_API, ServerWorldProperties {
 
     // @formatter:off
-    @Shadow String shadow$getLevelName();
     @Shadow void shadow$setThundering(boolean p_76069_1_);
     @Shadow int shadow$getRainTime();
     @Shadow void shadow$setRainTime(int p_76080_1_);
@@ -75,16 +73,11 @@ public interface IServerWorldInfoMixin_API extends ISpawnWorldInfoMixin_API, Ser
     @Shadow void shadow$setWanderingTraderSpawnChance(int p_230397_1_);
     @Shadow void shadow$setWanderingTraderId(UUID p_230394_1_);
     @Shadow GameType shadow$getGameType();
-    @Shadow void shadow$setWorldBorder(net.minecraft.world.border.WorldBorder.Serializer p_230393_1_);
     @Shadow net.minecraft.world.border.WorldBorder.Serializer shadow$getWorldBorder();
     @Shadow boolean shadow$isInitialized();
-    @Shadow void shadow$setInitialized(boolean p_76091_1_);
     @Shadow boolean shadow$getAllowCommands();
     @Shadow void shadow$setGameType(GameType p_230392_1_);
-    @Shadow TimerCallbackManager<MinecraftServer> shadow$getScheduledEvents();
-    @Shadow void shadow$setGameTime(long p_82572_1_);
     @Shadow void shadow$setDayTime(long p_76068_1_);
-
     // @formatter:on
 
     @Override
@@ -94,7 +87,7 @@ public interface IServerWorldInfoMixin_API extends ISpawnWorldInfoMixin_API, Ser
 
     @Override
     default Optional<ServerWorld> getWorld() {
-        return Optional.ofNullable((ServerWorld) ((WorldInfoBridge) this).bridge$getWorld());
+        return Optional.ofNullable((ServerWorld) ((IServerWorldInfoBridge) this).bridge$getWorld());
     }
 
     @Override
@@ -102,17 +95,15 @@ public interface IServerWorldInfoMixin_API extends ISpawnWorldInfoMixin_API, Ser
         this.shadow$setDayTime(dayTime.asTicks().getTicks());
     }
 
-
     @Override
     default DimensionType getDimensionType() {
-        return (DimensionType) ((WorldInfoBridge) this).bridge$getLogicType();
+        return (DimensionType) ((IServerWorldInfoBridge) this).bridge$getDimensionType();
     }
 
     @Override
     default void setDimensionType(final DimensionType dimensionType) {
-        ((WorldInfoBridge) this).bridge$setLogicType((net.minecraft.world.DimensionType) dimensionType, true);
+        ((IServerWorldInfoBridge) this).bridge$setDimensionType((net.minecraft.world.DimensionType) dimensionType, true);
     }
-
 
     @Override
     default GameMode getGameMode() {
@@ -130,104 +121,97 @@ public interface IServerWorldInfoMixin_API extends ISpawnWorldInfoMixin_API, Ser
     }
 
     @Intrinsic
-    default boolean worldproperties$isInitialized() {
+    default boolean serverWorldProperties$isInitialized() {
         return this.shadow$isInitialized();
     }
 
-
     @Override
     default boolean isPVPEnabled() {
-        return ((WorldInfoBridge) this).bridge$isPVPEnabled();
+        return ((IServerWorldInfoBridge) this).bridge$isPVPEnabled();
     }
 
     @Override
     default void setPVPEnabled(final boolean state) {
-        ((WorldInfoBridge) this).bridge$setPVPEnabled(state);
-    }
-
-
-    @Override
-    default boolean doesGenerateBonusChest() {
-        return ((WorldInfoBridge) this).bridge$doesGenerateBonusChest();
-    }
-
-    @Override
-    default void setGenerateBonusChest(final boolean state) {
-        ((WorldInfoBridge) this).bridge$setGenerateBonusChest(state);
+        ((IServerWorldInfoBridge) this).bridge$setPVPEnabled(state);
     }
 
     @Override
     default UUID getUniqueId() {
-        return ((WorldInfoBridge) this).bridge$getUniqueId();
+        return ((IServerWorldInfoBridge) this).bridge$getUniqueId();
     }
 
     @Override
     default boolean isEnabled() {
-        return ((WorldInfoBridge) this).bridge$isEnabled();
+        return ((IServerWorldInfoBridge) this).bridge$isEnabled();
     }
 
     @Override
     default void setEnabled(final boolean state) {
-        ((WorldInfoBridge) this).bridge$setEnabled(state);
+        ((IServerWorldInfoBridge) this).bridge$setEnabled(state);
     }
 
     @Override
     default boolean doesLoadOnStartup() {
-        return ((WorldInfoBridge) this).bridge$doesLoadOnStartup();
+        return ((IServerWorldInfoBridge) this).bridge$doesLoadOnStartup();
     }
 
     @Override
     default void setLoadOnStartup(final boolean state) {
-        ((WorldInfoBridge) this).bridge$setLoadOnStartup(state);
+        ((IServerWorldInfoBridge) this).bridge$setLoadOnStartup(state);
     }
 
     @Override
     default boolean doesKeepSpawnLoaded() {
-        return ((WorldInfoBridge) this).bridge$doesKeepSpawnLoaded();
+        return ((IServerWorldInfoBridge) this).bridge$doesKeepSpawnLoaded();
     }
 
     @Override
     default void setKeepSpawnLoaded(final boolean state) {
-        ((WorldInfoBridge) this).bridge$setKeepSpawnLoaded(state);
+        ((IServerWorldInfoBridge) this).bridge$setKeepSpawnLoaded(state);
     }
 
     @Override
     default boolean doesGenerateSpawnOnLoad() {
-        return ((WorldInfoBridge) this).bridge$doesGenerateSpawnOnLoad();
+        return ((IServerWorldInfoBridge) this).bridge$doesGenerateSpawnOnLoad();
     }
 
     @Override
     default void setGenerateSpawnOnLoad(final boolean state) {
-        ((WorldInfoBridge) this).bridge$setGenerateSpawnOnLoad(state);
+        ((IServerWorldInfoBridge) this).bridge$setGenerateSpawnOnLoad(state);
+    }
+
+    @Override
+    default WorldGeneratorSettings getWorldGeneratorSettings() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties have generator are supported!");
     }
 
     @Override
     default SerializationBehavior getSerializationBehavior() {
-        return ((WorldInfoBridge) this).bridge$getSerializationBehavior();
+        return ((IServerWorldInfoBridge) this).bridge$getSerializationBehavior();
     }
 
     @Override
     default void setSerializationBehavior(final SerializationBehavior behavior) {
-        ((WorldInfoBridge) this).bridge$setSerializationBehavior(Objects.requireNonNull(behavior));
+        ((IServerWorldInfoBridge) this).bridge$setSerializationBehavior(Objects.requireNonNull(behavior));
     }
 
     @Intrinsic
-    default int worldproperties$getWanderingTraderSpawnDelay() {
+    default int serverWorldProperties$getWanderingTraderSpawnDelay() {
         return this.shadow$getWanderingTraderSpawnDelay();
     }
 
     @Intrinsic
-    default void worldproperties$setWanderingTraderSpawnDelay(final int delay) {
+    default void serverWorldProperties$setWanderingTraderSpawnDelay(final int delay) {
         this.shadow$setWanderingTraderSpawnDelay(delay);
     }
 
     @Intrinsic
-    default int worldproperties$getWanderingTraderSpawnChance() {
+    default int serverWorldProperties$getWanderingTraderSpawnChance() {
         return this.shadow$getWanderingTraderSpawnChance();
     }
 
     @Intrinsic
-    default void worldproperties$setWanderingTraderSpawnChance(final int chance) {
+    default void serverWorldProperties$setWanderingTraderSpawnChance(final int chance) {
         this.shadow$setWanderingTraderSpawnChance(chance);
     }
 
@@ -258,7 +242,6 @@ public interface IServerWorldInfoMixin_API extends ISpawnWorldInfoMixin_API, Ser
 
     @Override
     default Ticks getRunningWeatherDuration() {
-        // TODO Minecraft 1.14 - Weather has no finite maximum and we don't know how much it started with so....I guess I'll hardcode it? How do I implement this??
         if (this.shadow$isRaining()) {
             return new SpongeTicks(6000 - this.shadow$getRainTime());
         } else if (this.shadow$isThundering()) {

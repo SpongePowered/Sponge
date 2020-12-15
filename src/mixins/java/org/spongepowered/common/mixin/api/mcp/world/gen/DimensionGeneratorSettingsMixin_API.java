@@ -22,67 +22,59 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.storage;
+package org.spongepowered.common.mixin.api.mcp.world.gen;
 
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.WorldSettings;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
-import net.minecraft.world.storage.ServerWorldInfo;
 import org.spongepowered.api.world.gen.WorldGeneratorSettings;
-import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.WorldSettingsAccessor;
 
-import java.util.Optional;
-import java.util.UUID;
-
-@SuppressWarnings("ConstantConditions")
-@Mixin(ServerWorldInfo.class)
-@Implements(@Interface(iface = ServerWorldProperties.class, prefix = "serverWorldProperties$"))
-public abstract class ServerWorldInfoMixin_API implements IServerWorldInfoMixin_API {
+@Mixin(DimensionGeneratorSettings.class)
+@Implements(@Interface(iface = WorldGeneratorSettings.class, prefix = "worldGeneratorSettings$"))
+public abstract class DimensionGeneratorSettingsMixin_API implements WorldGeneratorSettings {
 
     // @formatter:off
-    @Shadow private boolean initialized;
-    @Shadow private UUID wanderingTraderId;
-    @Shadow private WorldSettings settings;
-    @Shadow @Final private DimensionGeneratorSettings worldGenSettings;
+    @Mutable @Shadow @Final private long seed;
+    @Mutable @Shadow @Final private boolean generateFeatures;
+    @Mutable @Shadow @Final private boolean generateBonusChest;
 
-    @Shadow public abstract void shadow$setDifficulty(Difficulty difficulty);
+    @Shadow public abstract long shadow$seed();
+    @Shadow public abstract boolean shadow$generateFeatures();
+    @Shadow public abstract boolean shadow$generateBonusChest();
     // @formatter:on
 
     @Intrinsic
-    public boolean serverWorldProperties$isInitialized() {
-        return this.initialized;
+    public long worldGeneratorSettings$getSeed() {
+        return this.shadow$seed();
     }
 
     @Override
-    public WorldGeneratorSettings getWorldGeneratorSettings() {
-        return (WorldGeneratorSettings) this.worldGenSettings;
+    public void setSeed(long seed) {
+        this.seed = seed;
     }
 
     @Override
-    public void setHardcore(final boolean state) {
-        ((WorldSettingsAccessor) (Object) this.settings).accessor$setHardcode(state);
+    public boolean doFeaturesGenerate() {
+        return this.shadow$generateFeatures();
     }
 
     @Override
-    public void setCommandsEnabled(final boolean state) {
-        ((WorldSettingsAccessor) (Object) this.settings).accessor$setAllowCommands(state);
+    public void setFeaturesGenerate(boolean featuresGenerate) {
+        this.generateFeatures = featuresGenerate;
     }
 
     @Override
-    public void setDifficulty(final org.spongepowered.api.world.difficulty.Difficulty difficulty) {
-        this.shadow$setDifficulty((Difficulty) (Object) difficulty);
+    public boolean doesGenerateBonusChest() {
+        return this.shadow$generateBonusChest();
     }
 
     @Override
-    public Optional<UUID> getWanderTraderUniqueId() {
-        return Optional.ofNullable(this.wanderingTraderId);
+    public void setGenerateBonusChest(boolean generateBonusChest) {
+        this.generateBonusChest = generateBonusChest;
     }
-
 }

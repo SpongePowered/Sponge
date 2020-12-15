@@ -46,8 +46,6 @@ import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.gen.GeneratorModifierType;
-import org.spongepowered.api.world.gen.GeneratorModifierTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.math.vector.Vector3d;

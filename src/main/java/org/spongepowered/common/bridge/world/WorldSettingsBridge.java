@@ -25,22 +25,21 @@
 package org.spongepowered.common.bridge.world;
 
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.api.world.gen.WorldGeneratorSettings;
+import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 
 public interface WorldSettingsBridge {
 
-    SpongeDimensionType bridge$getLogicType();
+    DimensionType bridge$getDimensionType();
+
+    WorldGeneratorSettings bridge$getWorldGeneratorSettings();
 
     Difficulty bridge$getDifficulty();
-
-    boolean bridge$isSeedRandomized();
-
-    DataContainer bridge$getGeneratorSettings();
 
     SerializationBehavior bridge$getSerializationBehavior();
 
@@ -54,13 +53,13 @@ public interface WorldSettingsBridge {
 
     boolean bridge$isPVPEnabled();
 
-    void bridge$setLogicType(SpongeDimensionType dimensionType);
+    void bridge$setDimensionType(DimensionType dimensionType);
+
+    void bridge$setWorldGeneratorSettings(WorldGeneratorSettings worldGeneratorSettings);
 
     void bridge$setDifficulty(Difficulty difficulty);
 
     void bridge$setSerializationBehavior(SerializationBehavior behavior);
-
-    void bridge$setGeneratorSettings(DataContainer generatorSettings);
 
     void bridge$setEnabled(boolean state);
 
@@ -74,11 +73,7 @@ public interface WorldSettingsBridge {
 
     void bridge$setCommandsEnabled(boolean state);
 
-    void bridge$setGenerateBonusChest(boolean state);
-
-    void bridge$setRandomSeed(boolean state);
-
-    void bridge$populateInfo(WorldInfoBridge infoBridge);
+    void bridge$populateInfo(IServerWorldInfoBridge infoBridge);
 
     void bridge$setInfoConfigAdapter(InheritableConfigHandle<WorldConfig> configAdapter);
 
