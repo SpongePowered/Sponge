@@ -39,7 +39,10 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.scoreboard.ServerScoreboard.Action;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.registry.Registries;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -327,8 +330,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Overwrite
     public void setDisplayObjective(final int slot, @Nullable final ScoreObjective objective) {
         final Objective apiObjective = objective == null ? null : ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
-        final MappedRegistry<DisplaySlot, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(DisplaySlot.class);
-        final DisplaySlot displaySlot = registry.getReverseMapping(slot);
+        final DisplaySlot displaySlot = (DisplaySlot) ((Registry) Sponge.getGame().registries().registry(Registries.DISPLAY_SLOT)).byId(slot);
         this.bridge$updateDisplaySlot(apiObjective, displaySlot);
     }
 
