@@ -25,18 +25,13 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.BoatEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.Boat;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import java.util.Collection;
 import java.util.Set;
 
 @Mixin(BoatEntity.class)

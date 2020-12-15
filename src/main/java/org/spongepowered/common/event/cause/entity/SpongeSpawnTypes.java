@@ -22,24 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.event.cause.entity;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.common.world.portal.EndPortalType;
-import org.spongepowered.common.world.portal.NetherPortalType;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryScope;
+import org.spongepowered.api.registry.RegistryScopes;
+import org.spongepowered.common.registry.SpongeRegistries;
 
-import java.util.stream.Stream;
+@SuppressWarnings("unused")
+@RegistryScopes(scopes = RegistryScope.GAME)
+public final class SpongeSpawnTypes {
 
-public final class PortalTypeStreamGenerator {
+    // @formatter:off
 
-    private PortalTypeStreamGenerator() {
+    // SORTFIELDS:ON
+
+    public static final DefaultedRegistryReference<SpawnType> ENTITY_DEATH = SpongeSpawnTypes.key(ResourceKey.sponge("entity_death"));
+
+    public static final DefaultedRegistryReference<SpawnType> FORCED = SpongeSpawnTypes.key(ResourceKey.sponge("forced"));
+
+    // SORTFIELDS:OFF
+
+    // @formatter:on
+
+    private SpongeSpawnTypes() {
     }
 
-    public static Stream<PortalType> stream() {
-        return Stream.of(
-            new EndPortalType(ResourceKey.minecraft("end")),
-            new NetherPortalType(ResourceKey.minecraft("nether"))
-        );
+    private static DefaultedRegistryReference<SpawnType> key(final ResourceKey location) {
+        return RegistryKey.of(SpongeRegistries.SPAWN_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
     }
 }

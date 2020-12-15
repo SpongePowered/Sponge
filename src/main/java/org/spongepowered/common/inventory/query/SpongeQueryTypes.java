@@ -22,27 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.inventory.query;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.data.type.ParrotType;
-import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.data.type.SpongeParrotType;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.item.inventory.query.QueryType;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryScope;
+import org.spongepowered.api.registry.RegistryScopes;
+import org.spongepowered.common.registry.SpongeRegistries;
 
-import java.util.stream.Stream;
+@SuppressWarnings("unused")
+@RegistryScopes(scopes = RegistryScope.GAME)
+public final class SpongeQueryTypes {
 
-public final class ParrotTypeStreamGenerator {
+    // @formatter:off
 
-    private ParrotTypeStreamGenerator() {
+    // SORTFIELDS:ON
+
+    public static final DefaultedRegistryReference<QueryType> LENS = SpongeQueryTypes.key(ResourceKey.sponge("lens"));
+
+    public static final DefaultedRegistryReference<QueryType> SLOT_LENS = SpongeQueryTypes.key(ResourceKey.sponge("slot_lens"));
+
+    public static final DefaultedRegistryReference<QueryType> UNION = SpongeQueryTypes.key(ResourceKey.sponge("union"));
+
+    // SORTFIELDS:OFF
+
+    // @formatter:on
+
+    private SpongeQueryTypes() {
     }
 
-    public static Stream<Tuple<ParrotType, Integer>> stream() {
-        return Stream.of(
-            Tuple.of(new SpongeParrotType(ResourceKey.minecraft("red_and_blue"), 0), 0),
-            Tuple.of(new SpongeParrotType(ResourceKey.minecraft("blue"), 1), 1),
-            Tuple.of(new SpongeParrotType(ResourceKey.minecraft("green"), 2), 2),
-            Tuple.of(new SpongeParrotType(ResourceKey.minecraft("yellow_and_blue"), 3), 3),
-            Tuple.of(new SpongeParrotType(ResourceKey.minecraft("grey"), 4), 4)
-        );
+    private static DefaultedRegistryReference<QueryType> key(final ResourceKey location) {
+        return RegistryKey.of(SpongeRegistries.QUERY_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
     }
 }

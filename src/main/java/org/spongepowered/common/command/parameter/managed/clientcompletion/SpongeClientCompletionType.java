@@ -28,20 +28,15 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeClientCompletionType implements ClientCompletionType {
+public final class SpongeClientCompletionType extends SpongeCatalogType implements ClientCompletionType {
 
-    private final ResourceKey key;
     @Nullable private final ArgumentType<?> type;
 
-    public SpongeClientCompletionType(final String id, @Nullable final ArgumentType<?> type) {
-        this.key = ResourceKey.sponge(id);
+    public SpongeClientCompletionType(final ResourceKey key, @Nullable final ArgumentType<?> type) {
+        super(key);
         this.type = type;
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
     }
 
     @Nullable

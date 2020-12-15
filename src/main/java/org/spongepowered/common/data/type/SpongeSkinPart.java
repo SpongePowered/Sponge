@@ -24,23 +24,21 @@
  */
 package org.spongepowered.common.data.type;
 
-import com.google.common.base.MoreObjects;
 import net.kyori.adventure.text.Component;
+import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.api.registry.Registries;
 import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart {
 
-    private final int ordinal;
-    private final int mask;
     private final Component component;
 
-    public SpongeSkinPart(final ResourceKey key, final int ordinal, final Component label) {
+    public SpongeSkinPart(final ResourceKey key) {
         super(key);
-        this.ordinal = ordinal;
-        this.component = label;
-        this.mask = 1 << this.ordinal;
+        this.component = Component.translatable("options.modelPart." + key);
     }
 
     @Override
@@ -48,17 +46,8 @@ public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart 
         return this.component;
     }
 
-    public boolean test(final int flags) {
-        return (flags & this.mask) != 0;
-    }
-
-    @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .add("ordinal", this.ordinal);
-    }
-
     public int getMask() {
-        return this.mask;
+        final SimpleRegistry<SkinPart> registry = (SimpleRegistry<SkinPart>) Sponge.getGame().registries().registry(Registries.SKIN_PART);
+        return 1 << registry.getId(this);
     }
 }

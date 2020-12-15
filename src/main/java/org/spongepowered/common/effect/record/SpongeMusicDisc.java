@@ -39,7 +39,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;
 
-public final class SpongeRecordType extends SpongeCatalogType implements MusicDisc {
+public final class SpongeMusicDisc extends SpongeCatalogType implements MusicDisc {
 
     /**
      * This is the effect ID that is used by the Effect packet to play a record effect.
@@ -50,7 +50,7 @@ public final class SpongeRecordType extends SpongeCatalogType implements MusicDi
     private final MusicDiscItem item;
     private final int id;
 
-    public SpongeRecordType(ResourceKey key, MusicDiscItem item) {
+    public SpongeMusicDisc(final ResourceKey key, final MusicDiscItem item) {
         super(key);
         this.item = item;
         this.id = Registry.ITEM.getId(item);
@@ -65,10 +65,10 @@ public final class SpongeRecordType extends SpongeCatalogType implements MusicDi
         return (SoundType) ((MusicDiscItemAccessor) this.item).accessor$sound();
     }
 
-    public static SPlaySoundEventPacket createPacket(Vector3i position, @Nullable MusicDisc recordType) {
+    public static SPlaySoundEventPacket createPacket(final Vector3i position, @Nullable final MusicDisc recordType) {
         checkNotNull(position, "position");
         final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
-        return new SPlaySoundEventPacket(SpongeRecordType.EFFECT_ID, pos, recordType == null ? 0 :
-                ((SpongeRecordType) recordType).getId(), false);
+        return new SPlaySoundEventPacket(SpongeMusicDisc.EFFECT_ID, pos, recordType == null ? 0 :
+                ((SpongeMusicDisc) recordType).getId(), false);
     }
 }
