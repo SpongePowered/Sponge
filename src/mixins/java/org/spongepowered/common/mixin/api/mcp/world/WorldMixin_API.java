@@ -85,7 +85,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
-import org.spongepowered.common.effect.record.SpongeRecordType;
+import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.util.Constants;
@@ -253,7 +253,7 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
 
     private void api$playRecord(final Vector3i position, @javax.annotation.Nullable final MusicDisc recordType) {
         this.shadow$getServer().getPlayerList().broadcastAll(
-                SpongeRecordType.createPacket(position, recordType), this.shadow$dimension());
+                SpongeMusicDisc.createPacket(position, recordType), this.shadow$dimension());
     }
 
     @Override

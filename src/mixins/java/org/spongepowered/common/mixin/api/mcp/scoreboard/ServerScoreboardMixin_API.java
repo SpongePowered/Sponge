@@ -27,7 +27,10 @@ package org.spongepowered.common.mixin.api.mcp.scoreboard;
 import net.kyori.adventure.text.Component;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.util.registry.SimpleRegistry;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.registry.Registries;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
@@ -65,7 +68,8 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
 
     @Override
     public Optional<Objective> getObjective(final DisplaySlot slot) {
-        final ScoreObjective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[((SpongeDisplaySlot) slot).getIndex()];
+        final SimpleRegistry<DisplaySlot> registry = (SimpleRegistry<DisplaySlot>) Sponge.getGame().registries().registry(Registries.DISPLAY_SLOT);
+        final ScoreObjective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[registry.getId(slot)];
         if (objective != null) {
             return Optional.of(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
         }

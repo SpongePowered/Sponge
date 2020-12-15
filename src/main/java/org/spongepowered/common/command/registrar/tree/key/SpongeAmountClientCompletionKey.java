@@ -29,16 +29,16 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.command.registrar.tree.builder.AmountCommandTreeNode;
 
-public final class SpongeAmountClientCompletionKey implements ClientCompletionKey<CommandTreeNode.@NonNull Amount> {
+public final class SpongeAmountClientCompletionKey extends SpongeCatalogType implements ClientCompletionKey<CommandTreeNode.@NonNull Amount> {
 
-    private final ResourceKey key;
     private final ArgumentType<?> ifSingle;
     private final ArgumentType<?> ifMultiple;
 
     public SpongeAmountClientCompletionKey(final ResourceKey key, final ArgumentType<?> ifSingle, final ArgumentType<?> ifMultiple) {
-        this.key = key;
+        super(key);
         this.ifSingle = ifSingle;
         this.ifMultiple = ifMultiple;
     }
@@ -47,11 +47,4 @@ public final class SpongeAmountClientCompletionKey implements ClientCompletionKe
     public CommandTreeNode.@NonNull Amount createNode() {
         return new AmountCommandTreeNode(this, this.ifSingle, this.ifMultiple);
     }
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return this.key;
-    }
-
 }

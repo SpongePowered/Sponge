@@ -38,26 +38,23 @@ import java.util.function.Function;
 
 public final class SpongeDisplaySlot extends SpongeCatalogType implements DisplaySlot {
 
-    private final int index;
     private final @Nullable TextFormatting formatting;
     private final @Nullable Function<TextFormatting, DisplaySlot> withColorFunction;
 
     private @Nullable NamedTextColor color;
 
-    public SpongeDisplaySlot(ResourceKey key, int index) {
-        this(key, index, null, null);
+    public SpongeDisplaySlot(final ResourceKey key) {
+        this(key, null, null);
     }
 
-    public SpongeDisplaySlot(ResourceKey key, int index,
-            @Nullable TextFormatting color, @Nullable Function<TextFormatting, DisplaySlot> withColorFunction) {
+    public SpongeDisplaySlot(final ResourceKey key, @Nullable final TextFormatting color, @Nullable final Function<TextFormatting, DisplaySlot> withColorFunction) {
         super(key);
         this.withColorFunction = withColorFunction;
-        this.index = index;
         this.formatting = color;
     }
 
     @Override
-    public DisplaySlot withTeamColor(@Nullable NamedTextColor color) {
+    public DisplaySlot withTeamColor(@Nullable final NamedTextColor color) {
         if (this.withColorFunction == null) {
             return this;
         }
@@ -72,10 +69,6 @@ public final class SpongeDisplaySlot extends SpongeCatalogType implements Displa
             this.color = SpongeAdventure.asAdventureNamed(this.formatting);
         }
         return Optional.ofNullable(this.color);
-    }
-
-    public int getIndex() {
-        return this.index;
     }
 
     @Override

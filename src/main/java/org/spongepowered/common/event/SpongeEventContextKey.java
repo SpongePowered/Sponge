@@ -26,37 +26,31 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.MoreObjects;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.EventContextKey;
+import org.spongepowered.common.SpongeCatalogType;
 
 import java.lang.reflect.Type;
 
-public final class SpongeEventContextKey<T> implements EventContextKey<T> {
+public final class SpongeEventContextKey<T> extends SpongeCatalogType implements EventContextKey<T> {
 
-    private final ResourceKey key;
     private final Type allowed;
 
     SpongeEventContextKey(final SpongeEventContextKeyBuilder<T> builder) {
-        this.key = builder.key;
+        super(builder.key);
         this.allowed = builder.typeClass;
     }
 
     public SpongeEventContextKey(final ResourceKey key, final TypeToken<T> allowed) {
-        this.key = checkNotNull(key, "key");
+        super(checkNotNull(key, "key"));
         this.allowed = checkNotNull(allowed, "allowed").getType();
     }
 
     public SpongeEventContextKey(final ResourceKey key, final Class<T> allowed) {
-        this.key = checkNotNull(key, "key");
+        super(checkNotNull(key, "key"));
         this.allowed = checkNotNull(allowed, "allowed");
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
     }
 
     @Override
@@ -73,29 +67,5 @@ public final class SpongeEventContextKey<T> implements EventContextKey<T> {
     @Override
     public T cast(final Object value) {
         return (T) value;
-    }
-
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("key", this.key)
-            .toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (!(o instanceof EventContextKey)) {
-            return false;
-        }
-        return this.key.equals(((EventContextKey<?>) o).getKey());
-    }
-
-    @Override
-    public int hashCode() {
-        return this.key.hashCode();
     }
 }

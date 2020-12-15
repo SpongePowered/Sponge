@@ -31,19 +31,17 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorType;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.accessor.command.arguments.EntitySelectorParserAccessor;
 
-public final class SpongeSelectorType implements SelectorType {
+public final class SpongeSelectorType extends SpongeCatalogType implements SelectorType {
 
     private final String selectorToken;
-    private final ResourceKey resourceKey;
     private final Selector selector;
 
-    public SpongeSelectorType(
-            final String selectorToken,
-            final ResourceKey resourceKey) {
+    public SpongeSelectorType(final ResourceKey key, final String selectorToken) {
+        super(key);
         this.selectorToken = selectorToken;
-        this.resourceKey = resourceKey;
         try {
             this.selector = (Selector) new EntitySelectorParser(new StringReader(this.selectorToken)).parse();
         } catch (final CommandSyntaxException exception) {
@@ -71,11 +69,4 @@ public final class SpongeSelectorType implements SelectorType {
         ((EntitySelectorParserAccessor) parser).invoker$parseSelector();
         return (Selector.Builder) parser;
     }
-
-    @Override
-    @NonNull
-    public final ResourceKey getKey() {
-        return this.resourceKey;
-    }
-
 }

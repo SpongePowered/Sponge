@@ -30,7 +30,7 @@ import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeGoalExecutorType extends SpongeCatalogType implements GoalExecutorType {
 
-    public SpongeGoalExecutorType(ResourceKey key) {
+    public SpongeGoalExecutorType(final ResourceKey key) {
         super(key);
     }
 }
