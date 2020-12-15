@@ -60,7 +60,7 @@ public final class SpongePacketHandler {
 
                     final ServerPlayerEntity sender = (ServerPlayerEntity) player;
                     final BlockPos pos = new BlockPos(requestPacket.x, requestPacket.y, requestPacket.z);
-                    if (!sender.level.isBlockLoaded(pos)) {
+                    if (!sender.level.hasChunkAt(pos)) {
                         return;
                     }
 
@@ -78,7 +78,7 @@ public final class SpongePacketHandler {
                     }
 
                     final ServerPlayerEntity sender = (ServerPlayerEntity) player;
-                    final Entity entity = sender.level.getEntityByID(requestPacket.entityId);
+                    final Entity entity = sender.level.getEntity(requestPacket.entityId);
                     if (!(entity instanceof CreatorTrackedBridge)) {
                         return;
                     }
@@ -91,7 +91,7 @@ public final class SpongePacketHandler {
                 });
         SpongePacketHandler.channel.register(ChangeViewerEnvironmentPacket.class, 3).addHandler(ClientSideConnection.class,
                 (packet, connection) -> {
-                    final ClientWorld world = Minecraft.getInstance().world;
+                    final ClientWorld world = Minecraft.getInstance().level;
                     if (world == null) {
                         return;
                     }

@@ -22,26 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.accessor.entity.monster;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import net.minecraft.entity.monster.ZombifiedPiglinEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.SplittableRandom;
+@Mixin(ZombifiedPiglinEntity.class)
+public interface ZombifiedPiglinEntityAccessor {
 
-public final class ZombiePigmanData {
+    @Accessor("remainingPersistentAngerTime") int accessor$remainingPersistentAngerTime();
 
-    private ZombiePigmanData() {
-    }
-
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(ZombiePigmanEntityAccessor.class)
-                    .create(Keys.ANGER_LEVEL)
-                        .get(ZombiePigmanEntityAccessor::accessor$getAngerLevel)
-                        .set(ZombiePigmanEntityAccessor::accessor$setAngerLevel)
-                        .resetOnDelete(400 + new SplittableRandom().nextInt(400));
-    }
-    // @formatter:on
+    @Accessor("remainingPersistentAngerTime") void accessor$remainingPersistentAngerTime(final int remainingPersistentAngerTime);
 }

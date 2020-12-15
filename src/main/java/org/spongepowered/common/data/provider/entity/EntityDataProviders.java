@@ -122,7 +122,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         WitherData.register(this.registrator);
         WolfData.register(this.registrator);
         ZombieData.register(this.registrator);
-        ZombiePigmanData.register(this.registrator);
+        ZombifiedPiglinData.register(this.registrator);
         ZombieVillagerData.register(this.registrator);
     }
 }

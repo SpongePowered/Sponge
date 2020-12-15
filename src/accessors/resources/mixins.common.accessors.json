@@ -61,7 +61,7 @@
         "entity.monster.VexEntityAccessor",
         "entity.monster.VindicatorEntityAccessor",
         "entity.monster.ZombieEntityAccessor",
-        "entity.monster.ZombiePigmanEntityAccessor",
+        "entity.monster.ZombifiedPiglinEntityAccessor",
         "entity.passive.AbstractChestedHorseEntityAccessor",
         "entity.passive.AnimalEntityAccessor",
         "entity.passive.FoxEntityAccessor",
