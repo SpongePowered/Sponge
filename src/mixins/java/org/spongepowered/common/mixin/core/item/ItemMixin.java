@@ -34,7 +34,9 @@ import java.util.StringJoiner;
 @Mixin(Item.class)
 public abstract class ItemMixin implements ItemBridge {
 
+    // @formatter:off
     @Shadow private String descriptionId;
+    // @formatter:on
 
     @Override
     public String toString() {

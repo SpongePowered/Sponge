@@ -51,7 +51,9 @@ import javax.annotation.Nullable;
 @Mixin(CompoundNBT.class)
 public abstract class CompoundNBTMixin {
 
-    @Shadow @Final private Map<String, INBT> tagMap;
+    // @formatter:off
+    @Shadow @Final private Map<String, INBT> tags;
+    // @formatter:on
 
     @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/INBT;copy()Lnet/minecraft/nbt/INBT;"))
     @Nullable
@@ -72,7 +74,7 @@ public abstract class CompoundNBTMixin {
             } catch (Throwable error) {
                 printer.addWrapped(80, "Unable to get the string of this compound. Printing out some of the entries to better assist");
 
-                for (final Map.Entry<String, INBT> entry : this.tagMap.entrySet()) {
+                for (final Map.Entry<String, INBT> entry : this.tags.entrySet()) {
                     try {
                         printer.addWrapped(80, "%s : %s", entry.getKey(), entry.getValue());
                     } catch (Throwable throwable) {

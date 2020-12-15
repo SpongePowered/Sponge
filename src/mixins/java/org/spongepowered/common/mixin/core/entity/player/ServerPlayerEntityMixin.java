@@ -383,7 +383,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
      * @reason Ensure that the teleport hook honors our events
      */
     @Overwrite
-    public void teleport(net.minecraft.world.server.ServerWorld world, double x, double y, double z, float yaw, float pitch) {
+    public void teleportTo(net.minecraft.world.server.ServerWorld world, double x, double y, double z, float yaw, float pitch) {
         final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
         double actualX;
         double actualY;
@@ -497,7 +497,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     @Redirect(
-            method = {"openContainer", "openHorseInventory"},
+            method = {"openMenu", "openHorseInventory"},
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/entity/player/ServerPlayerEntity;closeContainer()V()V"
@@ -529,13 +529,10 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             this.connection.send(new SCombatPacket(this.shadow$getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent), (p_212356_2_) -> {
                 if (!p_212356_2_.isSuccess()) {
                     int i = 256;
-                    String s = itextcomponent.getStringTruncated(256);
-                    final ITextComponent itextcomponent1 = new TranslationTextComponent("death.attack.message_too_long", (new StringTextComponent(s)).applyTextStyle(
-                            TextFormatting.YELLOW));
-                    final ITextComponent itextcomponent2 =
-                            (new TranslationTextComponent("death.attack.even_more_magic", this.shadow$getDisplayName())).applyTextStyle((p_212357_1_) -> {
-                        p_212357_1_.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, itextcomponent1));
-                    });
+                    String s = itextcomponent.getString(256);
+                    final ITextComponent itextcomponent1 = new TranslationTextComponent("death.attack.message_too_long", (new StringTextComponent(s)).withStyle(TextFormatting.YELLOW));
+                    final ITextComponent itextcomponent2 = new TranslationTextComponent("death.attack.even_more_magic", this.shadow$getDisplayName())
+                                    .withStyle((p_212357_1_) -> p_212357_1_.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, itextcomponent1)));
                     this.connection.send(new SCombatPacket(this.shadow$getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent2));
                 }
 
@@ -592,7 +589,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         this.shadow$getCombatTracker().recheckStatus();
     }
 
-    @Redirect(method = "copyFrom",
+    @Redirect(method = "restoreFrom",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$RuleKey;)Z"))
     private boolean tracker$useKeepFromBridge(final GameRules gameRules, final GameRules.RuleKey<?> key,
@@ -615,7 +612,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         return ((SpongeUserManager) SpongeCommon.getGame().getServer().getUserManager()).forceRecreateUser(SpongeGameProfile.of(this.shadow$getGameProfile()));
     }
 
-    @Inject(method = "copyFrom", at = @At("HEAD"))
+    @Inject(method = "restoreFrom", at = @At("HEAD"))
     private void impl$copyDataOnRespawn(final ServerPlayerEntity oldPlayer, final boolean respawnFromEnd, final CallbackInfo ci) {
         // Copy Sponge data
         if (oldPlayer instanceof DataCompoundHolder) {

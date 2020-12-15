@@ -52,7 +52,9 @@ import java.util.Optional;
 @Mixin(FireballEntity.class)
 public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin implements FireballEntityBridge, ExplosiveBridge {
 
+    // @formatter:off
     @Shadow public int explosionPower;
+    // @formatter:on
 
     /**
      * @author gabizou April 13th, 2018

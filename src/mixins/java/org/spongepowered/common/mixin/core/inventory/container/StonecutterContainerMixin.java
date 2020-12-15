@@ -45,9 +45,11 @@ import java.util.List;
 @Mixin(StonecutterContainer.class)
 public abstract class StonecutterContainerMixin {
 
-    @Shadow @Final private Slot resultSlot;
+    // @formatter:off
+    @Shadow @Final Slot resultSlot;
     @Shadow private List<StonecuttingRecipe> recipes;
     @Shadow @Final private IntReferenceHolder selectedRecipeIndex;
+    // @formatter:on
 
     @Inject(method = "setupResultSlot", at = @At(value = "RETURN"))
     private void impl$updateRecipeResultSlot(final CallbackInfo ci) {

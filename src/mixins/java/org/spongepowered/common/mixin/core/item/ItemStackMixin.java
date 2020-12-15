@@ -56,12 +56,13 @@ import java.util.Optional;
 @Mixin(net.minecraft.item.ItemStack.class)
 public abstract class ItemStackMixin implements CustomDataHolderBridge, DataCompoundHolder {
 
-    @Shadow public abstract void shadow$setTag(@Nullable CompoundNBT nbt);
-    @Shadow @Nullable public abstract CompoundNBT shadow$getTag();
-
+    // @formatter:off
+    @Shadow private boolean emptyCacheFlag;
     @Shadow private CompoundNBT tag;
 
-    @Shadow private boolean emptyCacheFlag;
+    @Shadow public abstract void shadow$setTag(@Nullable CompoundNBT nbt);
+    @Shadow @Nullable public abstract CompoundNBT shadow$getTag();
+    // @formatter:on
 
     @Override
     public <E> DataTransactionResult bridge$offerCustom(final Key<@NonNull ? extends Value<E>> key, final E value) {

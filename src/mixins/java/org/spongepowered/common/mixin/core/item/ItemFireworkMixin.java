@@ -116,8 +116,8 @@ public abstract class ItemFireworkMixin {
 
     /**
      * Private method for bridging the duplicate between
-     * {@link #onItemRightClick(World, PlayerEntity, Hand)} and
-     * {@link #onItemUse(PlayerEntity, World, BlockPos, Hand, EnumFacing, float, float, float)}
+     * {@link #spongeImpl$ThrowPreBeforeSpawning(World, PlayerEntity, Hand, CallbackInfoReturnable, ItemStack)} and
+     * {@link #spongeImpl$ThrowPrimeEventsIfCancelled(ItemUseContext, CallbackInfoReturnable)}
      * since both follow the same logic, but differ in how they are called.
      *
      * @param world The world
@@ -167,8 +167,8 @@ public abstract class ItemFireworkMixin {
      * Private method for throwing the prime events on the firework. If
      * the prime is cancelled, then the firework will not be spawned.
      * This is to bridge the same logic between
-     * {@link #onItemUse(PlayerEntity, World, BlockPos, Hand, EnumFacing, float, float, float)}
-     * {@link #onItemRightClick(World, PlayerEntity, Hand)}.
+     * {@link #spongeImpl$InjectPrimeEventAndCancel(ItemUseContext, CallbackInfoReturnable, ItemStack, net.minecraft.util.math.vector.Vector3d, FireworkRocketEntity)}
+     * {@link #spongeImpl$InjectPrimeEventAndCancel(World, PlayerEntity, Hand, CallbackInfoReturnable, ItemStack, FireworkRocketEntity)}.
      *
      * @param world The world
      * @param player The player using the item

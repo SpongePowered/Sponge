@@ -148,8 +148,6 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Shadow public abstract void shadow$awardStat(ResourceLocation stat);
     // @formatter: on
 
-    @Shadow public float oBob;
-    @Shadow private BlockPos spawnPos;
     private boolean impl$affectsSpawning = true;
     private boolean impl$shouldRestoreInventory = false;
     protected final boolean impl$isFake = ((PlatformEntityBridge) (PlayerEntity) (Object) this).bridge$isFakePlayer();
@@ -481,7 +479,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                     if (attackSucceeded) {
                         if (knockbackModifier > 0) {
                             if (targetEntity instanceof LivingEntity) {
-                                ((LivingEntity) targetEntity).knockBack((PlayerEntity) (Object) this, (float) knockbackModifier * 0.5F, (double) MathHelper
+                                ((LivingEntity) targetEntity).knockback((float) knockbackModifier * 0.5F, (double) MathHelper
                                     .sin(this.yRot * 0.017453292F), (double) (-MathHelper.cos(this.yRot * 0.017453292F)));
                             } else {
                                 targetEntity.push((double) (-MathHelper.sin(this.yRot * 0.017453292F) * (float) knockbackModifier * 0.5F), 0.1D, (double) (MathHelper.cos(this.yRot
@@ -524,8 +522,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                                             sweapingFunctions, 1, 1.0D);
                                         SpongeCommon.postEvent(sweepingAttackEvent);
                                         if (!sweepingAttackEvent.isCancelled()) {
-                                            livingEntity
-                                                .knockBack((PlayerEntity) (Object) this, sweepingAttackEvent.getKnockbackModifier() * 0.4F,
+                                            livingEntity.knockback((sweepingAttackEvent.getKnockbackModifier() * 0.4F,
                                                     (double) MathHelper.sin(this.yRot * ((float)Math.PI / 180F)),
                                                     (double) -MathHelper.cos(this.yRot * ((float)Math.PI / 180F)));
 
@@ -595,7 +592,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
                             if (this.level instanceof ServerWorld && f5 > 2.0F) {
                                 final int k = (int) ((double) f5 * 0.5D);
-                                ((net.minecraft.world.server.ServerWorld) this.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(), targetEntity.getY() + (double) (targetEntity.getHeight() * 0.5F), targetEntity.getZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
+                                ((net.minecraft.world.server.ServerWorld) this.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(), targetEntity.getY() + (double) (targetEntity.getBbHeight() * 0.5F), targetEntity.getZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
                             }
                         }
 
