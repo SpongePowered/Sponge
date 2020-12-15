@@ -59,7 +59,7 @@ public abstract class FluidMixin_API implements FluidType {
     }
 
     @Override
-    public Optional<StateProperty<?>> getStatePropertyByName(String name) {
+    public Optional<StateProperty<?>> getStatePropertyByName(final String name) {
         return Optional.ofNullable((StateProperty) this.shadow$getStateDefinition().getProperty(name));
     }
 }

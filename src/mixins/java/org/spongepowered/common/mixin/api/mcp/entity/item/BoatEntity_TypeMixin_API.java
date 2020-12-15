@@ -26,16 +26,11 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.BoatEntity;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.type.BoatType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 
 @Mixin(BoatEntity.Type.class)
 public abstract class BoatEntity_TypeMixin_API implements BoatType {
@@ -43,18 +38,6 @@ public abstract class BoatEntity_TypeMixin_API implements BoatType {
     // @formatter:off
     @Shadow @Final private Block planks;
     // @formatter:on
-
-    private ResourceKey api$key;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(final String enumName, final int ordinal, final Block p_i48146_3_, final String p_i48146_4_, final CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), enumName.toLowerCase());
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
 
     @Override
     public BlockType getRepresentedBlock() {

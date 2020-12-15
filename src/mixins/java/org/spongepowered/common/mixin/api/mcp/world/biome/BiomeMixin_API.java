@@ -25,11 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.world.biome;
 
 import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.biome.BiomeBridge;
 
 @Mixin(Biome.class)
 public abstract class BiomeMixin_API implements BiomeType {
@@ -38,11 +36,6 @@ public abstract class BiomeMixin_API implements BiomeType {
     @Shadow public abstract float shadow$getBaseTemperature();
     @Shadow public abstract float shadow$getDownfall();
     //@formatter:on
-
-    @Override
-    public ResourceKey getKey() {
-        return ((BiomeBridge) this).bridge$getKey();
-    }
 
     @Override
     public double getTemperature() {

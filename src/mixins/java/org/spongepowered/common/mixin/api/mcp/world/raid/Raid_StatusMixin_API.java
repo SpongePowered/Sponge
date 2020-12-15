@@ -25,32 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.world.raid;
 
 import net.minecraft.world.raid.Raid;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 
 @Mixin(Raid.Status.class)
 public abstract class Raid_StatusMixin_API implements RaidStatus {
-
-    //@formatter:off
-    @Shadow public abstract String shadow$getName();
-    //@formatter:on
-
-    private ResourceKey api$key;
-
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void api$setKey(final CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), this.shadow$getName().toLowerCase());
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
-
 }
