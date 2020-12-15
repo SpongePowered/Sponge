@@ -27,19 +27,11 @@ package org.spongepowered.common.mixin.api.mcp.util;
 import net.kyori.adventure.text.Component;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-
-import javax.annotation.Nullable;
 
 @Mixin(HandSide.class)
 public abstract class HandSideMixin_API implements HandPreference {
@@ -47,18 +39,6 @@ public abstract class HandSideMixin_API implements HandPreference {
     // @formatter:off
     @Shadow @Final private ITextComponent name;
     // @formatter:on
-
-    @Nullable private ResourceKey api$key;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKeyAndTranslation(String enumName, int ordinal, ITextComponent name, CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), ((TranslationTextComponent) name).getKey().replace("options.mainHand.", ""));
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
 
     @Override
     public Component asComponent() {

@@ -25,27 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.SpellcastingIllagerEntity;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.SpellType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 
 @Mixin(SpellcastingIllagerEntity.SpellType.class)
 public abstract class SpellcastingIllagerEntity_SpellTypeMixin_API implements SpellType {
-
-    private ResourceKey api$key;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, int idIn, double xParticleSpeed, double yParticleSpeed, double zParticleSpeed,
-        CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), enumName.toLowerCase());
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
 }

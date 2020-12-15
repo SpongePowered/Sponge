@@ -131,6 +131,7 @@
         "server.management.PlayerListAccessor",
         "server.management.PlayerProfileCache_ProfileEntryAccessor",
         "server.management.PlayerProfileCacheAccessor",
+        "state.StateHolderAccessor",
         "tileentity.AbstractFurnaceTileEntityAccessor",
         "tileentity.BannerPatternAccessor",
         "tileentity.BannerTileEntityAccessor",

@@ -22,12 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.passive;
+package org.spongepowered.common.accessor.state;
 
-import net.minecraft.entity.passive.FoxEntity;
-import org.spongepowered.api.data.type.FoxType;
+import java.util.Collection;
+import net.minecraft.state.StateHolder;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-@Mixin(FoxEntity.Type.class)
-public abstract class FoxEntity_TypeMixin_API implements FoxType {
+@Mixin(StateHolder.class)
+public interface StateHolderAccessor {
+  @Invoker("findNextInCollection")
+  static <T> T invoker$findNextInCollection(final Collection<T> collection, final T element) {
+    throw new UntransformedInvokerError();
+  }
 }

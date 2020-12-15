@@ -26,8 +26,6 @@ package org.spongepowered.common.registry;
 
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.HashMap;
-import java.util.function.Function;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.ResourceKey;
@@ -112,37 +110,16 @@ public final class SpongeRegistryHolder implements RegistryHolder {
 
     public <T> Registry<T> createRegistry(
         final RegistryType<T> type,
+        final @Nullable Map<ResourceKey, T> defaultValues
+    ) {
+        return this.createRegistry(type, defaultValues != null ? () -> defaultValues : null, false);
+    }
+
+    public <T> Registry<T> createRegistry(
+        final RegistryType<T> type,
         final @Nullable Supplier<Map<ResourceKey, T>> defaultValues
     ) {
         return this.createRegistry(type, defaultValues, false);
-    }
-
-    public <A, I> Registry<A> createVanillaRegistry(
-      final RegistryType<A> type,
-      final I[] values,
-      final Function<I, String> name
-    ) {
-        return this.createRegistry(type, () -> {
-            final Map<ResourceKey, A> map = new HashMap<>();
-            for (final I value : values) {
-                map.put(ResourceKey.minecraft(name.apply(value)), (A) value);
-            }
-            return map;
-        }, false);
-    }
-
-    public <A, I> Registry<A> createVanillaRegistry(
-        final RegistryType<A> type,
-        final I[] values,
-        final Map<I, String> byName
-    ) {
-        return this.createRegistry(type, () -> {
-            final Map<ResourceKey, A> map = new HashMap<>();
-            for (final Map.Entry<I, String> value : byName.entrySet()) {
-                map.put(ResourceKey.minecraft(value.getValue()), (A) value.getKey());
-            }
-            return map;
-        }, false);
     }
 
     public <T> Registry<T> createRegistry(
@@ -152,7 +129,7 @@ public final class SpongeRegistryHolder implements RegistryHolder {
     ) {
         Objects.requireNonNull(type, "type");
 
-        net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> root = this.roots.get(type.root());
+        final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> root = this.roots.get(type.root());
         if (root == null) {
             throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
         }

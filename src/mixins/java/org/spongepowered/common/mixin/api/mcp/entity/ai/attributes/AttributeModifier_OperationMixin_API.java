@@ -25,26 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.entity.ai.attributes;
 
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 
 @Mixin(AttributeModifier.Operation.class)
 public abstract class AttributeModifier_OperationMixin_API implements AttributeOperation {
-
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void api$setKey(String enumName, int ordinal, int id, CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), enumName.toLowerCase());
-    }
-
-    private ResourceKey api$key;
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
 }

@@ -24,40 +24,19 @@
  */
 package org.spongepowered.common.mixin.api.mcp.state.properties;
 
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.state.properties.DoorHingeSide;
-import net.minecraft.util.registry.SimpleRegistry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.DoorHinge;
-import org.spongepowered.api.data.type.DoorHinges;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.state.StateHolderAccessor;
 
 @Mixin(DoorHingeSide.class)
 public abstract class DoorHingeSideMixin_API implements DoorHinge {
-
-    private ResourceKey api$key;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), enumName.toLowerCase());
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
-
     @Override
     public DoorHinge cycleNext() {
-        final SimpleRegistry<DoorHinge> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(DoorHinge.class);
-        final int index = registry.getId(this);
-        DoorHinge next = registry.byId(index + 1);
-        if (next == null) {
-            next = DoorHinges.LEFT.get();
-        }
-        return next;
+        return (DoorHinge) (Object) StateHolderAccessor.invoker$findNextInCollection(
+            BlockStateProperties.DOOR_HINGE.getPossibleValues(),
+            (DoorHingeSide) (Object) this
+        );
     }
 }

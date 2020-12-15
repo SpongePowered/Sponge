@@ -25,15 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.PandaEntity;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.PandaGene;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 
 @Mixin(PandaEntity.Gene.class)
 public abstract class PandaEntity_GeneMixin_API implements PandaGene {
@@ -42,20 +37,8 @@ public abstract class PandaEntity_GeneMixin_API implements PandaGene {
     @Shadow public abstract boolean shadow$isRecessive();
     // @formatter:on
 
-    private ResourceKey api$key;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, int p_i51468_3_, String name, boolean p_i51468_5_, CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name);
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
-
-    @Override
     @Intrinsic
+    @Override
     public boolean isRecessive() {
         return this.shadow$isRecessive();
     }

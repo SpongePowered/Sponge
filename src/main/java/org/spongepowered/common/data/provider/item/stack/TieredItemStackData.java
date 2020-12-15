@@ -29,7 +29,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.TieredItem;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.ToolType;
+import org.spongepowered.api.data.type.ItemTier;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class TieredItemStackData {
@@ -46,8 +46,8 @@ public final class TieredItemStackData {
                             final Item item = h.getItem();
                             if (item instanceof TieredItem) {
                                 final IItemTier tier = ((TieredItem) item).getTier();
-                                if (tier instanceof ToolType) {
-                                    return (ToolType) tier;
+                                if (tier instanceof ItemTier) {
+                                    return (ItemTier) tier;
                                 }
                             }
                             return null;

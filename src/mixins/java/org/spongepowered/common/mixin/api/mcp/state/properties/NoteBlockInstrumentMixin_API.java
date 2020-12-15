@@ -26,15 +26,10 @@ package org.spongepowered.common.mixin.api.mcp.state.properties;
 
 import net.minecraft.state.properties.NoteBlockInstrument;
 import net.minecraft.util.SoundEvent;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 
 @Mixin(NoteBlockInstrument.class)
 public abstract class NoteBlockInstrumentMixin_API implements InstrumentType {
@@ -42,18 +37,6 @@ public abstract class NoteBlockInstrumentMixin_API implements InstrumentType {
     // @formatter:off
     @Shadow public abstract SoundEvent shadow$getSoundEvent();
     // @formatter:on
-    
-    private ResourceKey api$key;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, String name, SoundEvent sound, CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name.toLowerCase());
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
 
     @Override
     public SoundType getSound() {

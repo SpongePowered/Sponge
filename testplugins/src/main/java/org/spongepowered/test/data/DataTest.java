@@ -68,7 +68,7 @@ import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.api.data.type.SlabPortions;
 import org.spongepowered.api.data.type.SpellTypes;
 import org.spongepowered.api.data.type.StairShapes;
-import org.spongepowered.api.data.type.ToolTypes;
+import org.spongepowered.api.data.type.ItemTiers;
 import org.spongepowered.api.data.type.TropicalFishShapes;
 import org.spongepowered.api.data.type.VillagerTypes;
 import org.spongepowered.api.data.type.WireAttachmentType;
@@ -1210,9 +1210,9 @@ public final class DataTest  {
 
         // Keys.TICKS_REMAINING
 
-        this.checkGetData(jungleAxe, Keys.TOOL_TYPE, ToolTypes.WOOD.get());
+        this.checkGetData(jungleAxe, Keys.TOOL_TYPE, ItemTiers.WOOD.get());
         final ItemStack diamondPick = ItemStack.of(ItemTypes.DIAMOND_PICKAXE);
-        this.checkGetData(diamondPick, Keys.TOOL_TYPE, ToolTypes.DIAMOND.get());
+        this.checkGetData(diamondPick, Keys.TOOL_TYPE, ItemTiers.DIAMOND.get());
 
         // Keys.TRACKS_OUTPUT
 
