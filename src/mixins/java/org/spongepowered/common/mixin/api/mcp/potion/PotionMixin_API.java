@@ -25,10 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.potion;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.potion.Potion;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.asm.mixin.Final;
@@ -44,21 +40,10 @@ public abstract class PotionMixin_API implements PotionType {
     @Shadow @Final private ImmutableList<net.minecraft.potion.EffectInstance> effects;
     // @formatter:on
 
-    private ResourceKey impl$key;
-
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public List<PotionEffect> getEffects() {
         return ((List) this.effects); // PotionEffect is mixed into
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        if (this.impl$key == null) {
-            final ResourceLocation location = Registry.POTION.getKey((Potion) (Object) this);
-            this.impl$key = (ResourceKey) (Object) location;
-        }
-        return this.impl$key;
     }
 
 }

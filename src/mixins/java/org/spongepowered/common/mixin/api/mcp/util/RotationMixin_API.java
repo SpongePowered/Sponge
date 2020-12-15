@@ -25,31 +25,20 @@
 package org.spongepowered.common.mixin.api.mcp.util;
 
 import net.minecraft.util.Rotation;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
-
-import java.util.Locale;
 
 @Mixin(Rotation.class)
 public abstract class RotationMixin_API implements org.spongepowered.api.util.rotation.Rotation {
 
-    //@formatter:off
+    // @formatter:off
     @Shadow public abstract Rotation shadow$getRotated(Rotation rotation);
-    //@formatter:on
-
-    private final ResourceKey api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), ((Rotation) (Object) this).name().toLowerCase(Locale.ENGLISH));
+    // @formatter:on
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public org.spongepowered.api.util.rotation.Rotation and(final org.spongepowered.api.util.rotation.Rotation rotation) {
         return (org.spongepowered.api.util.rotation.Rotation) (Object) this.shadow$getRotated((Rotation) (Object) rotation);
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
     }
 
     @SuppressWarnings({"ConstantConditions", "RedundantCast"})

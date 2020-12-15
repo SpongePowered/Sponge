@@ -25,13 +25,8 @@
 package org.spongepowered.common.registry;
 
 import net.minecraft.advancements.FrameType;
-import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.passive.fish.TropicalFishEntity;
-import net.minecraft.scoreboard.ScoreCriteria;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.state.properties.Half;
 import net.minecraft.tileentity.BannerPattern;
-import net.minecraft.world.raid.Raid;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementType;
@@ -47,17 +42,10 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.StringDataFormat;
 import org.spongepowered.api.data.type.BannerPatternShape;
-import org.spongepowered.api.data.type.BoatType;
 import org.spongepowered.api.data.type.BodyPart;
-import org.spongepowered.api.data.type.ComparatorMode;
 import org.spongepowered.api.data.type.MatterType;
-import org.spongepowered.api.data.type.MooshroomType;
-import org.spongepowered.api.data.type.PortionType;
-import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.TropicalFishShape;
-import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
@@ -72,13 +60,9 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.placeholder.PlaceholderParser;
-import org.spongepowered.api.registry.Registry;
-import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
-import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
-import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
@@ -94,33 +78,7 @@ import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.persistence.NBTDataFormat;
 import org.spongepowered.common.event.tracking.context.transaction.type.BlockTransactionTypeStreamGenerator;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
-import org.spongepowered.common.registry.builtin.sponge.BlockOperationStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.ClickTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.ClientCompletionKeyStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.CommandRegistrarStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.DamageModifierTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.DismountTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.EventContextKeyStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.GoalExecutorTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.KeyStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.MatterTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.MovementTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.PaletteTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.ParticleOptionStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.PlaceholderParserStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.PortalTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.QueryTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.SelectorSortAlgorithmStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.SelectorTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.SkinPartStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.TeleportHelperFilterStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.WeatherStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.WorldArchetypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.CriterionStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.EquipmentGroupStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.EquipmentTypeStreamGenerator;
@@ -149,11 +107,9 @@ public final class SpongeRegistries {
                 .generateRegistry(AdvancementType.class, ResourceKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true, false)
                 .generateRegistry(BanType.class, ResourceKey.minecraft("ban_type"), BanTypeStreamGenerator.stream(), true, false)
                 .generateRegistry(BannerPatternShape.class, ResourceKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true, false)
-                .generateRegistry(BoatType.class, ResourceKey.minecraft("boat_type"), Arrays.stream(net.minecraft.entity.item.BoatEntity.Type.values()), true, false)
                 .generateRegistry(BodyPart.class, ResourceKey.minecraft("body_part"), BodyPartStreamGenerator.stream(), true, false)
                 .generateRegistry(ClientCompletionKey.class, ResourceKey.sponge("client_completion_key"), ClientCompletionKeyStreamGenerator.stream(), true, false)
                 .generateRegistry(ClientCompletionType.class, ResourceKey.sponge("client_completion_type"), ClientCompletionTypeStreamGenerator.stream(), true, false)
-                .generateRegistry(ComparatorMode.class, ResourceKey.minecraft("comparator_mode"), Arrays.stream(net.minecraft.state.properties.ComparatorMode.values()), true, false)
                 .generateRegistry(Criterion.class, ResourceKey.sponge("criterion"), CriterionStreamGenerator.stream(), true, false)
                 .registerRegistry(Currency.class, ResourceKey.sponge("currency"), true)
                 .generateRegistry(DamageModifierType.class, ResourceKey.sponge("damage_modifier_type"), DamageModifierTypeStreamGenerator.stream(), true, true)
@@ -168,26 +124,21 @@ public final class SpongeRegistries {
                 .generateRegistry(GoalExecutorType.class, ResourceKey.minecraft("goal_executor_type"), GoalExecutorTypeStreamGenerator.stream(), true, false)
                 .generateRegistry(Key.class, ResourceKey.sponge("key"), KeyStreamGenerator.stream(), true, true)
                 .generateRegistry(MatterType.class, ResourceKey.sponge("matter_type"), MatterTypeStreamGenerator.stream(), true, false)
-                .generateRegistry(MooshroomType.class, ResourceKey.minecraft("mooshroom_type"), Arrays.stream(MooshroomEntity.Type.values()), true, false)
                 .generateRegistry(MovementType.class, ResourceKey.sponge("movement_type"), MovementTypeStreamGenerator.stream(), true, true)
                 .generateRegistry(MusicDisc.class, ResourceKey.minecraft("music_disc"), MusicDiscStreamGenerator.stream(), true, false)
                 .generateRegistry(PaletteType.class, ResourceKey.sponge("palette"), PaletteTypeStreamGenerator.stream(), true, true)
                 .generateRegistry(ParticleOption.class, ResourceKey.sponge("particle_option"), ParticleOptionStreamGenerator.stream(), true, false)
                 .generateRegistry(PlaceholderParser.class, ResourceKey.sponge("placeholder"), PlaceholderParserStreamGenerator.stream(), true, true)
                 .generateRegistry(PortalType.class, ResourceKey.minecraft("portal_type"), PortalTypeStreamGenerator.stream(), true, true)
-                .generateRegistry(PortionType.class, ResourceKey.minecraft("portion_type"), Arrays.stream(Half.values()), true, false)
                 .generateRegistry(QueryType.class, ResourceKey.sponge("query_type"), QueryTypeStreamGenerator.stream(), true, true)
-                .generateRegistry(RaidStatus.class, ResourceKey.minecraft("raid_status"), Arrays.stream(Raid.Status.values()), true, false)
                 .generateRegistry(SelectorSortAlgorithm.class, ResourceKey.minecraft("selector_sort_algorithm"), SelectorSortAlgorithmStreamGenerator.stream(), true, false)
                 .generateRegistry(SelectorType.class, ResourceKey.minecraft("selector_type"), SelectorTypeStreamGenerator.stream(), true, false)
                 .generateRegistry(SkinPart.class, ResourceKey.minecraft("skin_part"), SkinPartStreamGenerator.stream(), true, false)
                 .generateRegistry(SpawnType.class, ResourceKey.sponge("spawn_type"), SpawnTypeStreamGenerator.stream(), true, true)
-                .generateRegistry(StructureMode.class, ResourceKey.minecraft("structure_mode"), Arrays.stream(net.minecraft.state.properties.StructureMode.values()), true, false)
                 .generateRegistry(TropicalFishShape.class, ResourceKey.minecraft("tropical_fish_shape"), Arrays.stream(TropicalFishEntity.Type.values()), true, false)
                 .generateRegistry(Weather.class, ResourceKey.minecraft("weather"), WeatherStreamGenerator.stream(), true, false)
                 .generateRegistry(WoodType.class, ResourceKey.minecraft("wood_type"), WoodTypeStreamGenerator.stream(), true, false)
                 .generateRegistry(WorldArchetype.class, ResourceKey.minecraft("world_archetype"), WorldArchetypeStreamGenerator.stream(), true, true)
-                .generateRegistry(Visibility.class, ResourceKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true, false)
                 .generateRegistry(ClickType.class, ResourceKey.minecraft("click_type"), ClickTypeStreamGenerator.stream(), true, false)
                 .generateRegistry(StringDataFormat.class, ResourceKey.sponge("string_data_format"), Stream.of(new JsonDataFormat(ResourceKey.sponge("json")), new HoconDataFormat(ResourceKey.sponge("hocon"))), true, false)
                 .generateRegistry(DataFormat.class, ResourceKey.sponge("data_format"), Stream.of(new NBTDataFormat(ResourceKey.sponge("nbt"))), true, false)

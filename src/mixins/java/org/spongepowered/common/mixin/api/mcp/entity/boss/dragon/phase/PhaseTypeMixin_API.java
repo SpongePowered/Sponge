@@ -24,29 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.boss.dragon.phase;
 
-import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.entity.boss.dragon.phase.PhaseType;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 
 @Mixin(PhaseType.class)
 public abstract class PhaseTypeMixin_API implements DragonPhaseType {
-
-    private ResourceKey api$key;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(int idIn, Class<? extends IPhase> clazzIn, String name, CallbackInfo ci) {
-        // Honestly, fuck off Mojang with HoldingPattern instead of Holding_Pattern or holding_pattern
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), String.join("_", name.split("(?<=.)(?=\\p{Lu})")).toLowerCase());
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
 }

@@ -26,27 +26,20 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 
 @Mixin(TileEntityType.class)
 public abstract class TileEntityTypeMixin_API implements BlockEntityType {
 
-    //@formatter:off
-    @Shadow public abstract boolean shadow$isValid(Block block);
-    //@formatter:on
+    // @formatter:off
+    @Shadow public abstract boolean shadow$isValid(final Block block);
+    // @formatter:on
 
     @Override
-    public ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
-    }
-
-    @Override
-    public boolean isValidBlock(BlockType block) {
+    public boolean isValidBlock(final BlockType block) {
         return this.shadow$isValid((Block) block);
     }
 }

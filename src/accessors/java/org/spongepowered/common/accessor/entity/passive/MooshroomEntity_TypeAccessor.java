@@ -22,33 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.potion;
+package org.spongepowered.common.accessor.entity.passive;
 
-import net.kyori.adventure.text.Component;
-import net.minecraft.potion.Effect;
-import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
+import net.minecraft.entity.passive.MooshroomEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(Effect.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potionEffectType$"))
-public abstract class EffectMixin_API implements PotionEffectType {
-
-    // @formatter:off
-    @Shadow public abstract boolean shadow$isInstantenous();
-    @Shadow public abstract ITextComponent shadow$getDisplayName();
-    // @formatter:on
-
-    public boolean potionEffectType$isInstant() {
-        return this.shadow$isInstantenous();
-    }
-
-    @Override
-    public Component asComponent() {
-        return SpongeAdventure.asAdventure(this.shadow$getDisplayName());
-    }
+@Mixin(MooshroomEntity.Type.class)
+public interface MooshroomEntity_TypeAccessor {
+    @Accessor("type") String accessor$type();
 }

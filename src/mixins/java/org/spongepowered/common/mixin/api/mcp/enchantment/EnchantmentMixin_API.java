@@ -27,9 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.enchantment;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Final;
@@ -40,8 +37,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.enchantment.Enchantment.class)
 @Implements(@Interface(iface = EnchantmentType.class, prefix = "enchantment$"))
@@ -58,20 +53,6 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     @Shadow public abstract boolean shadow$isTreasureOnly();
     @Shadow public abstract boolean shadow$isCurse();
     // @formatter:on
-
-    @Nullable private ResourceLocation api$id;
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public ResourceKey getKey() {
-        if (this.api$id == null) {
-            final ResourceLocation id = Registry.ENCHANTMENT.getKey((Enchantment) (Object) this);
-            if (id != null) {
-                this.api$id = id;
-            }
-        }
-        return (ResourceKey) (Object) this.api$id;
-    }
 
     @Override
     public int getWeight() {

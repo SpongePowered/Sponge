@@ -25,15 +25,8 @@
 package org.spongepowered.common.mixin.inventory.api.inventory.container;
 
 import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ContainerType.class)
 public class ContainerTypeMixin_Inventory_API implements org.spongepowered.api.item.inventory.ContainerType {
-
-    @Override
-    public ResourceKey getKey() {
-        return (ResourceKey)(Object) Registry.MENU.getKey(((ContainerType) (Object) this));
-    }
 }

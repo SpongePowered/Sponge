@@ -29,8 +29,6 @@ import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.state.StateContainer;
-import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
@@ -53,16 +51,6 @@ public abstract class BlockMixin_API extends AbstractBlockMixin_API {
     @Shadow public abstract String shadow$getDescriptionId();
     @Shadow public abstract net.minecraft.block.BlockState shadow$defaultBlockState();
     // @formatter:on
-
-    private ResourceKey api$key;
-
-    @Override
-    public final ResourceKey getKey() {
-        if (this.api$key == null) {
-            this.api$key = (ResourceKey) (Object) Registry.BLOCK.getKey((Block) (Object) this);
-        }
-        return this.api$key;
-    }
 
     @Override
     public BlockState getDefaultState() {
@@ -90,17 +78,17 @@ public abstract class BlockMixin_API extends AbstractBlockMixin_API {
     }
 
     @Override
-    public Optional<StateProperty<?>> getStatePropertyByName(String name) {
+    public Optional<StateProperty<?>> getStatePropertyByName(final String name) {
         return Optional.ofNullable((StateProperty<?>) this.stateDefinition.getProperty(name));
     }
 
     @Override
-    public boolean isAnyOf(Supplier<? extends BlockType>... types) {
+    public boolean isAnyOf(final Supplier<? extends BlockType>... types) {
         return Arrays.stream(types).map(Supplier::get).anyMatch(type -> type == this);
     }
 
     @Override
-    public boolean isAnyOf(BlockType... types) {
+    public boolean isAnyOf(final BlockType... types) {
         return Arrays.stream(types).anyMatch(type -> type == this);
     }
 }

@@ -25,19 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.util;
 
 import net.minecraft.util.Mirror;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeCommon;
-
-import java.util.Locale;
 
 @Mixin(Mirror.class)
 public abstract class MirrorMixin_API implements org.spongepowered.api.util.mirror.Mirror {
-
-    private final ResourceKey api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), ((Mirror) (Object) this).name().toLowerCase(Locale.ENGLISH));
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
 }
