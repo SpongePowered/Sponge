@@ -26,12 +26,16 @@ package org.spongepowered.common.inventory.query;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.Registries;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.registry.RegistryScopes;
-import org.spongepowered.common.registry.SpongeRegistries;
+import org.spongepowered.common.inventory.lens.Lens;
+
+import java.util.Set;
 
 @SuppressWarnings("unused")
 @RegistryScopes(scopes = RegistryScope.GAME)
@@ -41,11 +45,11 @@ public final class SpongeQueryTypes {
 
     // SORTFIELDS:ON
 
-    public static final DefaultedRegistryReference<QueryType> LENS = SpongeQueryTypes.key(ResourceKey.sponge("lens"));
+    public static final DefaultedRegistryReference<QueryType.OneParam<Lens>> LENS = SpongeQueryTypes.oneParamKey(ResourceKey.sponge("lens"));
 
-    public static final DefaultedRegistryReference<QueryType> SLOT_LENS = SpongeQueryTypes.key(ResourceKey.sponge("slot_lens"));
+    public static final DefaultedRegistryReference<QueryType.OneParam<Set<Inventory>>> SLOT_LENS = SpongeQueryTypes.oneParamKey(ResourceKey.sponge("slot_lens"));
 
-    public static final DefaultedRegistryReference<QueryType> UNION = SpongeQueryTypes.key(ResourceKey.sponge("union"));
+    public static final DefaultedRegistryReference<QueryType.OneParam<Inventory>> UNION = SpongeQueryTypes.oneParamKey(ResourceKey.sponge("union"));
 
     // SORTFIELDS:OFF
 
@@ -54,7 +58,15 @@ public final class SpongeQueryTypes {
     private SpongeQueryTypes() {
     }
 
-    private static DefaultedRegistryReference<QueryType> key(final ResourceKey location) {
-        return RegistryKey.of(SpongeRegistries.QUERY_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
+    private static DefaultedRegistryReference<QueryType.NoParam> noParamKey(final ResourceKey location) {
+        return RegistryKey.of(Registries.QUERY_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
+    }
+
+    private static <T1> DefaultedRegistryReference<QueryType.OneParam<T1>> oneParamKey(final ResourceKey location) {
+        return RegistryKey.of(Registries.QUERY_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
+    }
+
+    private static <T1, T2> DefaultedRegistryReference<QueryType.TwoParam<T1, T2>> twoParamKey(final ResourceKey location) {
+        return RegistryKey.of(Registries.QUERY_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
     }
 }

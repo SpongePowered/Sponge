@@ -151,7 +151,6 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Nameable;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.LocatableBlock;
@@ -162,8 +161,6 @@ import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
-import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
@@ -263,7 +260,6 @@ import org.spongepowered.plugin.PluginContainer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
@@ -532,7 +528,7 @@ public final class SpongeRegistryLoaders {
             l.add(TextFormatting.RED.getId() + 3, DisplaySlots.SIDEBAR_TEAM_RED, SpongeDisplaySlot::new);
             l.add(TextFormatting.WHITE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_WHITE, SpongeDisplaySlot::new);
             l.add(TextFormatting.YELLOW.getId() + 3, DisplaySlots.SIDEBAR_TEAM_YELLOW, SpongeDisplaySlot::new);
-        })
+        });
     }
 
     public static RegistryLoader<EventContextKey<?>> eventContextKey() {
