@@ -120,6 +120,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract boolean shadow$isCommandBlockEnabled();
     @Shadow public abstract boolean shadow$isSpawningMonsters();
     @Shadow public abstract boolean shadow$isSpawningAnimals();
+    @Shadow public abstract boolean shadow$isNetherEnabled();
     // @formatter:on
 
     @Shadow @Final protected IServerConfiguration worldData;
@@ -238,6 +239,11 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Override
     public boolean isAnimalSpawnsEnabled() {
         return this.shadow$isSpawningAnimals();
+    }
+
+    @Override
+    public boolean isMultiWorldEnabled() {
+        return this.shadow$isNetherEnabled();
     }
 
     @Override
