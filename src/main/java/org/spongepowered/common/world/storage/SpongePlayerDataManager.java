@@ -66,7 +66,7 @@ public final class SpongePlayerDataManager {
 
     public void load() {
         try {
-            this.playersDirectory = ((SpongeWorldManager) this.server.getWorldManager()).getSavesDirectory().resolve("data").resolve(
+            this.playersDirectory = ((SpongeWorldManager) this.server.getWorldManager()).getDefaultWorldDirectory().resolve("data").resolve(
                 SpongePlayerDataManager.SPONGE_DATA);
             Files.createDirectories(this.playersDirectory);
 

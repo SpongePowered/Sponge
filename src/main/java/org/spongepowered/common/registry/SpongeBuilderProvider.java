@@ -106,7 +106,7 @@ import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.gen.WorldGeneratorSettings;
+import org.spongepowered.api.world.gen.WorldGenerationSettings;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
@@ -187,7 +187,7 @@ import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 import org.spongepowered.common.world.biome.SpongeVirtualBiomeTypeBuilder;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
-import org.spongepowered.common.world.gen.SpongeWorldGeneratorSettingsBuilder;
+import org.spongepowered.common.world.gen.SpongeWorldGenerationSettingsBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.volume.stream.SpongeStreamOptionsBuilder;
 
@@ -312,7 +312,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
             .register(PaletteType.Builder.class, SpongePaletteTypeBuilder::new)
             .register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new)
             .register(FluidState.Builder.class, SpongeFluidStateBuilder::new)
-            .register(WorldGeneratorSettings.Builder.class, SpongeWorldGeneratorSettingsBuilder::new)
+            .register(WorldGenerationSettings.Builder.class, SpongeWorldGenerationSettingsBuilder::new)
         ;
     }
 }

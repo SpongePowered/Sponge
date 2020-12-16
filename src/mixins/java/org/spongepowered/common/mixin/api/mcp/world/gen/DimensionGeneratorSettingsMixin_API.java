@@ -25,7 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen;
 
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
-import org.spongepowered.api.world.gen.WorldGeneratorSettings;
+import org.spongepowered.api.world.gen.MutableWorldGenerationSettings;
+import org.spongepowered.api.world.gen.WorldGenerationSettings;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -35,8 +36,8 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(DimensionGeneratorSettings.class)
-@Implements(@Interface(iface = WorldGeneratorSettings.class, prefix = "worldGeneratorSettings$"))
-public abstract class DimensionGeneratorSettingsMixin_API implements WorldGeneratorSettings {
+@Implements(@Interface(iface = WorldGenerationSettings.class, prefix = "worldGenerationSettings$"))
+public abstract class DimensionGeneratorSettingsMixin_API implements MutableWorldGenerationSettings {
 
     // @formatter:off
     @Mutable @Shadow @Final private long seed;
@@ -49,7 +50,7 @@ public abstract class DimensionGeneratorSettingsMixin_API implements WorldGenera
     // @formatter:on
 
     @Intrinsic
-    public long worldGeneratorSettings$getSeed() {
+    public long worldGenerationSettings$getSeed() {
         return this.shadow$seed();
     }
 

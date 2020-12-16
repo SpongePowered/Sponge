@@ -24,18 +24,18 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.dedicated;
 
-import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
-import net.minecraft.command.Commands;
+import net.minecraft.resources.DataPackRegistries;
+import net.minecraft.resources.ResourcePackList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.WorldType;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
+import net.minecraft.world.storage.IServerConfiguration;
+import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -45,22 +45,23 @@ import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.vanilla.VanillaServer;
 
-import java.io.File;
 import java.net.Proxy;
 
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer implements VanillaServer {
 
-    public DedicatedServerMixin_Vanilla(final File p_i50590_1_, final Proxy p_i50590_2_, final DataFixer dataFixerIn,
-        final Commands p_i50590_4_, final YggdrasilAuthenticationService p_i50590_5_,
-        final MinecraftSessionService p_i50590_6_, final GameProfileRepository p_i50590_7_,
-        final PlayerProfileCache p_i50590_8_, final IChunkStatusListenerFactory p_i50590_9_,
-        final String p_i50590_10_) {
-        super(p_i50590_1_, p_i50590_2_, dataFixerIn, p_i50590_4_, p_i50590_5_, p_i50590_6_, p_i50590_7_, p_i50590_8_, p_i50590_9_, p_i50590_10_);
+    public DedicatedServerMixin_Vanilla(Thread p_i232576_1_, DynamicRegistries.Impl p_i232576_2_,
+            SaveFormat.LevelSave p_i232576_3_, IServerConfiguration p_i232576_4_,
+            ResourcePackList p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
+            DataPackRegistries p_i232576_8_, MinecraftSessionService p_i232576_9_,
+            GameProfileRepository p_i232576_10_, PlayerProfileCache p_i232576_11_,
+            IChunkStatusListenerFactory p_i232576_12_) {
+        super(p_i232576_1_, p_i232576_2_, p_i232576_3_, p_i232576_4_, p_i232576_5_, p_i232576_6_, p_i232576_7_, p_i232576_8_, p_i232576_9_,
+                p_i232576_10_, p_i232576_11_, p_i232576_12_);
     }
 
-    @Override
-    public void run() {
+    @Inject(method = "initServer", at = @At("HEAD"))
+    private void vanilla$runEngineStartLifecycle(final CallbackInfoReturnable<Boolean> cir) {
         // Save config now that registries have been initialized
         ConfigHandle.setSaveSuppressed(false);
 
@@ -76,11 +77,9 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
         lifecycle.callStartingEngineEvent(this);
 
         lifecycle.establishDataPackRegistries();
-
-        super.run();
     }
 
-    @Inject(method = "init", at = @At("RETURN"))
+    @Inject(method = "initServer", at = @At("RETURN"))
     private void vanilla$callStartedEngineAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.callStartedEngineEvent(this);
@@ -89,7 +88,7 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
     }
 
     @Override
-    protected void loadAllWorlds(final String saveName, final String worldNameIn, final long seed, final WorldType type, final JsonElement generatorOptions) {
-        this.getWorldManager().loadAllWorlds(saveName, worldNameIn, seed, type, generatorOptions, false, null, Difficulty.NORMAL);
+    protected void loadLevel() {
+        this.getWorldManager().loadLevel();
     }
 }

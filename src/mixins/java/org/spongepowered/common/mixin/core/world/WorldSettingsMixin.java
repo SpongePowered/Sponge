@@ -29,7 +29,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.gen.WorldGeneratorSettings;
+import org.spongepowered.api.world.gen.WorldGenerationSettings;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -54,7 +54,7 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     private DimensionType impl$dimensionType;
     private Difficulty impl$difficulty;
     // Sponge End
-    private WorldGeneratorSettings impl$worldGeneratorSettings;
+    private WorldGenerationSettings impl$worldGenerationSettings;
     private SerializationBehavior impl$serializationBehavior = SerializationBehavior.AUTOMATIC;
     private boolean impl$isEnabled = true;
     private boolean impl$loadOnStartup = true;
@@ -80,8 +80,8 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     }
 
     @Override
-    public WorldGeneratorSettings bridge$getWorldGeneratorSettings() {
-        return this.impl$worldGeneratorSettings;
+    public WorldGenerationSettings bridge$getWorldGenerationSettings() {
+        return this.impl$worldGenerationSettings;
     }
 
     @Override
@@ -125,8 +125,8 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     }
 
     @Override
-    public void bridge$setWorldGeneratorSettings(final WorldGeneratorSettings worldGeneratorSettings) {
-        this.impl$worldGeneratorSettings = worldGeneratorSettings;
+    public void bridge$setWorldGenerationSettings(final WorldGenerationSettings worldGenerationSettings) {
+        this.impl$worldGenerationSettings = worldGenerationSettings;
     }
 
     @Override

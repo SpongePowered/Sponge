@@ -35,7 +35,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.gen.WorldGeneratorSettings;
+import org.spongepowered.api.world.gen.WorldGenerationSettings;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
@@ -181,7 +181,7 @@ public interface IServerWorldInfoMixin_API extends ISpawnWorldInfoMixin_API, Ser
     }
 
     @Override
-    default WorldGeneratorSettings getWorldGeneratorSettings() {
+    default WorldGenerationSettings getWorldGeneratorSettings() {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties have generator are supported!");
     }
 

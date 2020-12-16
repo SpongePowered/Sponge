@@ -28,7 +28,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.gen.WorldGeneratorSettings;
+import org.spongepowered.api.world.gen.WorldGenerationSettings;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
@@ -37,7 +37,7 @@ public interface WorldSettingsBridge {
 
     DimensionType bridge$getDimensionType();
 
-    WorldGeneratorSettings bridge$getWorldGeneratorSettings();
+    WorldGenerationSettings bridge$getWorldGenerationSettings();
 
     Difficulty bridge$getDifficulty();
 
@@ -55,7 +55,7 @@ public interface WorldSettingsBridge {
 
     void bridge$setDimensionType(DimensionType dimensionType);
 
-    void bridge$setWorldGeneratorSettings(WorldGeneratorSettings worldGeneratorSettings);
+    void bridge$setWorldGenerationSettings(WorldGenerationSettings worldGenerationSettings);
 
     void bridge$setDifficulty(Difficulty difficulty);
 

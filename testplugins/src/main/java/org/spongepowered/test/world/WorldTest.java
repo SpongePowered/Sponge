@@ -288,7 +288,7 @@ public final class WorldTest {
                             final ResourceKey worldKey = context.requireOne(worldKeyParameter);
                             final String renameWorld = context.requireOne(renameWorldKeyParameter);
 
-                            Sponge.getServer().getWorldManager().renameWorld(worldKey, renameWorld).whenComplete((aBoolean, throwable) -> {
+                            Sponge.getServer().getWorldManager().moveWorld(worldKey, renameWorld).whenComplete((aBoolean, throwable) -> {
                                 if (throwable != null) {
                                     context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
                                 }

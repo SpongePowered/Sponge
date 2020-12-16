@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.server;
 import com.google.inject.Injector;
 import net.minecraft.command.CommandSource;
 import net.minecraft.resources.ResourcePackList;
-import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
@@ -38,7 +37,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.IServerConfiguration;
-import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.SaveFormat;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
@@ -111,9 +109,8 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract boolean shadow$isDedicatedServer();
     @Shadow public abstract boolean shadow$isRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
+    @Shadow public abstract ResourcePackList shadow$getPackRepository();
     // @formatter:on
-
-    @Shadow public abstract ResourcePackList getPackRepository();
 
     @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
     @Nullable private ResourcePack impl$resourcePack;
@@ -242,7 +239,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
             // Not forced happens during ticks and when shutting down
             if (!isForced) {
-                final InheritableConfigHandle<WorldConfig> adapter = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();.
+                final InheritableConfigHandle<WorldConfig> adapter = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
                 final int autoSaveInterval = adapter.get().getWorld().getAutoSaveInterval();
                 if (log) {
                     if (this.bridge$performAutosaveChecks()) {
@@ -349,9 +346,9 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         SpongeRecipeProvider.registerRecipes(catalogRegistry.getRegistry(RecipeRegistration.class));
         SpongeAdvancementProvider.registerAdvancements(catalogRegistry.getRegistry(Advancement.class));
 
-        this.getPackRepository().reload();
+        this.shadow$getPackRepository().reload();
         final List<String> disabledPacks = this.worldData.getDataPackConfig().getDisabled();
-        for (String selectedPack : this.getPackRepository().getSelectedIds()) {
+        for (String selectedPack : this.shadow$getPackRepository().getSelectedIds()) {
             if (!disabledPacks.contains(selectedPack) && !datapacksToLoad.contains(selectedPack)) {
                 datapacksToLoad.add(selectedPack);
             }

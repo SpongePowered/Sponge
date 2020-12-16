@@ -28,7 +28,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import net.minecraft.world.storage.ServerWorldInfo;
-import org.spongepowered.api.world.gen.WorldGeneratorSettings;
+import org.spongepowered.api.world.gen.WorldGenerationSettings;
 import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -61,8 +61,8 @@ public abstract class ServerWorldInfoMixin_API implements IServerWorldInfoMixin_
     }
 
     @Override
-    public WorldGeneratorSettings getWorldGeneratorSettings() {
-        return (WorldGeneratorSettings) this.worldGenSettings;
+    public WorldGenerationSettings getWorldGeneratorSettings() {
+        return (WorldGenerationSettings) this.worldGenSettings;
     }
 
     @Override

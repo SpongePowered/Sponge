@@ -24,20 +24,18 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.integrated;
 
-import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.command.Commands;
+import net.minecraft.resources.DataPackRegistries;
+import net.minecraft.resources.ResourcePackList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.storage.IServerConfiguration;
+import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,53 +46,52 @@ import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.vanilla.VanillaServer;
 
-import java.io.File;
 import java.net.Proxy;
 
 @Mixin(IntegratedServer.class)
 public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer implements MinecraftServerBridge, VanillaServer  {
 
-    @Shadow @Final private Minecraft mc;
-    @Shadow @Final private WorldSettings worldSettings;
+    @Shadow private boolean paused;
 
-    @Shadow private boolean isGamePaused;
-
-    public IntegratedServerMixin_Vanilla(File p_i50590_1_, Proxy p_i50590_2_, DataFixer dataFixerIn,
-        Commands p_i50590_4_, YggdrasilAuthenticationService p_i50590_5_,
-        MinecraftSessionService p_i50590_6_, GameProfileRepository p_i50590_7_,
-        PlayerProfileCache p_i50590_8_, IChunkStatusListenerFactory p_i50590_9_,
-        String p_i50590_10_) {
-        super(p_i50590_1_, p_i50590_2_, dataFixerIn, p_i50590_4_, p_i50590_5_, p_i50590_6_, p_i50590_7_, p_i50590_8_, p_i50590_9_, p_i50590_10_);
+    public IntegratedServerMixin_Vanilla(Thread p_i232576_1_, DynamicRegistries.Impl p_i232576_2_,
+            SaveFormat.LevelSave p_i232576_3_, IServerConfiguration p_i232576_4_,
+            ResourcePackList p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
+            DataPackRegistries p_i232576_8_, MinecraftSessionService p_i232576_9_,
+            GameProfileRepository p_i232576_10_, PlayerProfileCache p_i232576_11_,
+            IChunkStatusListenerFactory p_i232576_12_) {
+        super(p_i232576_1_, p_i232576_2_, p_i232576_3_, p_i232576_4_, p_i232576_5_, p_i232576_6_, p_i232576_7_, p_i232576_8_, p_i232576_9_,
+                p_i232576_10_,
+                p_i232576_11_, p_i232576_12_);
     }
 
-    @Override
-    public void run() {
+    @Inject(method = "initServer", at = @At("HEAD"))
+    private void vanilla$runEngineStartLifecycle(final CallbackInfoReturnable<Boolean> cir) {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.establishServerServices();
+
         lifecycle.establishServerFeatures();
         lifecycle.establishCommands();
 
         lifecycle.callStartingEngineEvent(this);
-        super.run();
     }
 
-    @Inject(method = "init", at = @At("RETURN"))
-    private void vanilla$callEngineStartedAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "initServer", at = @At("RETURN"))
+    private void vanilla$callStartedEngineAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.callStartedEngineEvent(this);
     }
 
     @Override
-    public void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, JsonElement generatorOptions) {
-        this.getWorldManager().loadAllWorlds(saveName, worldNameIn, seed, type, generatorOptions, true, this.worldSettings, this.mc.gameSettings.difficulty);
+    public void loadLevel() {
+        this.getWorldManager().loadLevel();
     }
 
     @Override
     public boolean bridge$performAutosaveChecks() {
-        if (!this.isServerRunning()) {
+        if (!this.isRunning()) {
             return false;
         }
 
-        return !this.isGamePaused;
+        return !this.paused;
     }
 }

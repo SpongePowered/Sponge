@@ -24,38 +24,29 @@
  */
 package org.spongepowered.common.world.server;
 
-import com.google.gson.JsonElement;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.server.WorldManager;
-import org.spongepowered.api.world.storage.WorldProperties;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.UUID;
 
 public interface SpongeWorldManager extends WorldManager {
 
-    ResourceKey VANILLA_OVERWORLD = ResourceKey.minecraft("overworld");
-    ResourceKey VANILLA_THE_NETHER = ResourceKey.minecraft("the_nether");
-    ResourceKey VANILLA_THE_END = ResourceKey.minecraft("the_end");
-
-    Path getSavesDirectory();
+    Path getDefaultWorldDirectory();
 
     boolean registerPendingWorld(ResourceKey key, WorldArchetype archetype);
 
-    @Nullable
-    ServerWorld getWorld(final DimensionType dimensionType);
-
-    @Nullable
-    ServerWorld getWorld0(final ResourceKey key);
+    static RegistryKey<World> createRegistryKey(final ResourceKey key) {
+        return RegistryKey.create(Registry.DIMENSION_REGISTRY, (ResourceLocation) (Object) key);
+    }
 
     void unloadWorld0(final ServerWorld world) throws IOException;
 
@@ -64,17 +55,16 @@ public interface SpongeWorldManager extends WorldManager {
 
     void adjustWorldForDifficulty(ServerWorld world, Difficulty newDifficulty, boolean forceDifficulty);
 
-    void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions, boolean isSinglePlayer,
-            @Nullable WorldSettings defaultSettings, Difficulty defaultDifficulty);
+    void loadLevel();
 
     default String getDirectoryName(final ResourceKey key) {
-        if (SpongeWorldManager.VANILLA_OVERWORLD.equals(key)) {
+        if (World.OVERWORLD.location().equals(key)) {
             return "";
         }
-        if (SpongeWorldManager.VANILLA_THE_NETHER.equals(key)) {
+        if (World.NETHER.location().equals(key)) {
             return "DIM-1";
         }
-        if (SpongeWorldManager.VANILLA_THE_END.equals(key)) {
+        if (World.END.location().equals(key)) {
             return "DIM1";
         }
         return key.getValue();

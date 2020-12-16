@@ -194,7 +194,8 @@
         "util.RegistryKeyAccessor",
         "world.gen.settings.DimensionGeneratorSettingsAccessor",
         "world.WorldSettingsAccessor",
-        "world.gen.DimensionGeneratorSettingsAccessor"
+        "world.gen.DimensionGeneratorSettingsAccessor",
+        "world.storage.SaveFormat_LevelSaveAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",
