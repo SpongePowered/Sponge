@@ -146,7 +146,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         // TODO Check coordinates and if world is loaded here.
         Preconditions.checkState(this.location != null, "Location is null!");
 
-        final World<?> world = this.location.getWorld();
+        final World<?, ?> world = this.location.getWorld();
         final Vector3d origin = this.location.getPosition();
         final net.minecraft.world.Explosion explosion = new net.minecraft.world.Explosion((net.minecraft.world.World) world,
                 (Entity) this.sourceExplosive, origin.getX(), origin.getY(), origin.getZ(), this.radius,

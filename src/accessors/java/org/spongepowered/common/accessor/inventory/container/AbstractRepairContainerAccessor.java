@@ -26,6 +26,7 @@ package org.spongepowered.common.accessor.inventory.container;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.AbstractRepairContainer;
+import net.minecraft.util.IWorldPosCallable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -33,5 +34,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface AbstractRepairContainerAccessor {
 
     @Accessor("player") PlayerEntity accessor$player();
+
+    @Accessor("access") IWorldPosCallable accessor$access();
 
 }

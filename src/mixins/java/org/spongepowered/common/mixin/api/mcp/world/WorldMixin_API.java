@@ -72,6 +72,7 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.HeightTypes;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Final;
@@ -100,9 +101,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @Mixin(net.minecraft.world.World.class)
-public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_API<W>, World<W>, AutoCloseable {
+public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W, L>> implements IWorldMixin_API<W>, World<W, L>, AutoCloseable {
 
     // @formatter:off
     @Shadow public @Final Random random;

@@ -38,7 +38,7 @@ public class FluidTickContext extends LocationBasedTickContext<FluidTickContext>
 
     FluidState tickingBlock;
     boolean providesModifier;
-    World<?> world;
+    World<?, ?> world;
 
     protected FluidTickContext(final IPhaseState<FluidTickContext> phaseState, final PhaseTracker tracker) {
         super(phaseState, tracker);

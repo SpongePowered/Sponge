@@ -38,7 +38,7 @@ public class BlockTickContext extends LocationBasedTickContext<BlockTickContext>
 
     BlockBridge tickingBlock;
     boolean providesModifier;
-    World<?> world;
+    World<?, ?> world;
 
     protected BlockTickContext(final IPhaseState<BlockTickContext> phaseState, final PhaseTracker tracker) {
         super(phaseState, tracker);

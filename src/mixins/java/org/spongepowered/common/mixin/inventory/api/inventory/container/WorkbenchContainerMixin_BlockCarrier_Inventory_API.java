@@ -37,16 +37,16 @@ import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
 @Mixin(WorkbenchContainer.class)
 public abstract class WorkbenchContainerMixin_BlockCarrier_Inventory_API implements DefaultSingleBlockCarrier {
 
-    @Shadow @Final private IWorldPosCallable worldPosCallable;
+    @Shadow @Final private IWorldPosCallable access;
 
     @Override
     public ServerLocation getLocation() {
-        return this.worldPosCallable.apply((world, pos) -> ServerLocation.of(((ServerWorld) world), pos.getX(), pos.getY(), pos.getZ())).orElse(null);
+        return this.access.evaluate((world, pos) -> ServerLocation.of(((ServerWorld) world), pos.getX(), pos.getY(), pos.getZ())).orElse(null);
     }
 
     @Override
-    public World<?> getWorld() {
-        return this.worldPosCallable.apply((world, pos) -> (World<?>) world).orElse(null);
+    public World<?, ?> getWorld() {
+        return this.access.evaluate((world, pos) -> (World<?, ?>) world).orElse(null);
     }
 
 }

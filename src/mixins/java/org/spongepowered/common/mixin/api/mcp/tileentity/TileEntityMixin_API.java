@@ -84,8 +84,8 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     }
 
     @Override
-    public World<?> getWorld() {
-        return (World<?>) this.level;
+    public World<?, ?> getWorld() {
+        return (World<?, ?>) this.level;
     }
 
     @Override

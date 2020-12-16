@@ -28,8 +28,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
@@ -77,7 +79,7 @@ public final class SpongeGameConfigs {
         return SpongeGameConfigs.trackerConfigAdapter;
     }
 
-    public static InheritableConfigHandle<WorldConfig> getForWorld(final org.spongepowered.api.world.World<?> spongeWorld) {
+    public static InheritableConfigHandle<WorldConfig> getForWorld(final org.spongepowered.api.world.World<?, ?> spongeWorld) {
         return SpongeGameConfigs.getForWorld((net.minecraft.world.World) spongeWorld);
     }
 
@@ -128,7 +130,7 @@ public final class SpongeGameConfigs {
     }
 
     private static String getLegacyValue(final ResourceKey dimensionType) {
-        if (dimensionType.equals(DimensionTypes.THE_NETHER.get().getKey())) {
+        if (dimensionType.equals(DimensionTypes.THE_NETHER.get(Sponge.getServer().registries()).getKey())) {
             return "nether";
         } else {
             return dimensionType.getValue();

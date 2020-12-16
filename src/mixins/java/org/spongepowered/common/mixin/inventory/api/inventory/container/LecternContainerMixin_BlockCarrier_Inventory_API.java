@@ -40,16 +40,16 @@ import java.lang.reflect.Field;
 @Mixin(LecternContainer.class)
 public abstract class LecternContainerMixin_BlockCarrier_Inventory_API implements DefaultSingleBlockCarrier {
 
-    @Shadow @Final private IInventory lecternInventory;
+    @Shadow @Final private IInventory lectern;
     private LecternTileEntity impl$lectern;
 
     @Override
     public ServerLocation getLocation() {
         if (this.impl$lectern == null) {
             try {
-                final Field field = this.lecternInventory.getClass().getDeclaredField("this$0");
+                final Field field = this.lectern.getClass().getDeclaredField("this$0");
                 field.setAccessible(true);
-                this.impl$lectern = (LecternTileEntity) field.get(this.lecternInventory);
+                this.impl$lectern = (LecternTileEntity) field.get(this.lectern);
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new IllegalStateException(e);
             }
@@ -58,8 +58,8 @@ public abstract class LecternContainerMixin_BlockCarrier_Inventory_API implement
     }
 
     @Override
-    public World<?> getWorld() {
-        return ((BlockEntity) this.lecternInventory).getWorld();
+    public World<?, ?> getWorld() {
+        return ((BlockEntity) this.lectern).getWorld();
     }
 
 }

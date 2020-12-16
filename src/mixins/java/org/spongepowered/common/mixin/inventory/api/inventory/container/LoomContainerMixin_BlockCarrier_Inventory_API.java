@@ -38,17 +38,17 @@ import org.spongepowered.math.vector.Vector3i;
 @Mixin(LoomContainer.class)
 public abstract class LoomContainerMixin_BlockCarrier_Inventory_API implements DefaultSingleBlockCarrier {
 
-    @Final @Shadow private IWorldPosCallable worldPos;
+    @Final @Shadow private IWorldPosCallable access;
 
     @Override
     public ServerLocation getLocation() {
-        return this.worldPos.apply((world, pos) ->
+        return this.access.evaluate((world, pos) ->
                 ServerLocation.of(((ServerWorld) world), new Vector3i(pos.getX(), pos.getY(), pos.getZ()))
         ).orElse(null);
     }
 
     @Override
-    public World<?> getWorld() {
-        return this.worldPos.apply((world, pos) -> (World<?>) world).orElse(null);
+    public World<?, ?> getWorld() {
+        return this.access.evaluate((world, pos) -> (World<?, ?>) world).orElse(null);
     }
 }
