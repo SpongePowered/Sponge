@@ -58,6 +58,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.profile.GameProfileManager;
@@ -67,6 +68,7 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.user.UserManager;
+import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.asm.mixin.Final;
@@ -112,7 +114,15 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract void shadow$halt(boolean p_71263_1_);
     @Shadow public abstract int shadow$getPlayerIdleTimeout();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
+    @Shadow public abstract boolean shadow$isHardcore();
+    @Shadow public abstract boolean shadow$getForceGameType();
+    @Shadow public abstract boolean shadow$isPvpAllowed();
+    @Shadow public abstract boolean shadow$isCommandBlockEnabled();
+    @Shadow public abstract boolean shadow$isSpawningMonsters();
+    @Shadow public abstract boolean shadow$isSpawningAnimals();
     // @formatter:on
+
+    @Shadow @Final protected IServerConfiguration worldData;
 
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
@@ -176,7 +186,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public boolean hasWhitelist() {
+    public boolean isWhitelistEnabled() {
         return this.shadow$getPlayerList().isUsingWhitelist();
     }
 
@@ -186,8 +196,48 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public boolean getOnlineMode() {
+    public boolean isOnlineModeEnabled() {
         return this.shadow$usesAuthentication();
+    }
+
+    @Override
+    public boolean isHardcoreModeEnabled() {
+        return this.shadow$isHardcore();
+    }
+
+    @Override
+    public Difficulty getDifficulty() {
+        return (Difficulty) (Object) this.worldData.getDifficulty();
+    }
+
+    @Override
+    public GameMode getGameMode() {
+        return (GameMode) (Object) this.worldData.getGameType();
+    }
+
+    @Override
+    public boolean isGameModeEnforced() {
+        return this.shadow$getForceGameType();
+    }
+
+    @Override
+    public boolean isPVPEnabled() {
+        return this.shadow$isPvpAllowed();
+    }
+
+    @Override
+    public boolean areCommandBlocksEnabled() {
+        return this.shadow$isCommandBlockEnabled();
+    }
+
+    @Override
+    public boolean isMonsterSpawnsEnabled() {
+        return this.shadow$isSpawningMonsters();
+    }
+
+    @Override
+    public boolean isAnimalSpawnsEnabled() {
+        return this.shadow$isSpawningAnimals();
     }
 
     @Override
@@ -226,7 +276,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public Component getMotd() {
+    public Component getMOTD() {
         return SpongeAdventure.legacySection(this.shadow$getMotd());
     }
 
@@ -280,7 +330,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public Optional<ResourcePack> getDefaultResourcePack() {
+    public Optional<ResourcePack> getResourcePack() {
         return Optional.ofNullable(((MinecraftServerBridge) this).bridge$getResourcePack());
     }
 
