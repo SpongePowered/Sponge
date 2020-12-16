@@ -234,7 +234,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 
     @Inject(
         method = "setBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;clearRemoved()V"))
     private void tracker$SetActiveChunkOnTileEntityAdd(final BlockPos pos, final TileEntity tileEntityIn, final CallbackInfo ci) {
         ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(this);
         // Make sure to set creator/notifier for TE if any chunk data exists

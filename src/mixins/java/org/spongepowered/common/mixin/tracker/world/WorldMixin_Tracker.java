@@ -90,9 +90,9 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
         tileEntity.tick();
     }
 
-    @Redirect(method = "addTileEntity",
+    @Redirect(method = "addBlockEntity",
         at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false),
-        slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/World;tickableTileEntities:Ljava/util/List;"),
+        slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/World;tickableBlockEntities:Ljava/util/List;"),
             to = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isClientSide:Z")))
     private boolean tracker$onlyAddTileEntitiesToTickIfEnabled(final List<? super TileEntity> list, final Object tile) {
         if (!this.bridge$isFake() && !((TrackableBridge) tile).bridge$shouldTick()) {

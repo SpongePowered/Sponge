@@ -48,7 +48,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     //@formatter:off
     @Shadow public abstract GameType shadow$gameType();
-    @Shadow public abstract boolean shadow$getHardcoreEnabled();
+    @Shadow public abstract boolean shadow$hardcore();
     @Shadow public abstract boolean shadow$isMapFeaturesEnabled();
     @Shadow public abstract WorldType shadow$getTerrainType();
     @Shadow public abstract boolean shadow$allowCommands();
@@ -87,7 +87,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     @Override
     public boolean isHardcore() {
-        return this.shadow$getHardcoreEnabled();
+        return this.shadow$hardcore();
     }
 
     @Override

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -54,8 +53,8 @@ import java.util.stream.Stream;
 @Mixin(TrackedEntity.class)
 public abstract class TrackedEntityMixin {
 
-    @Shadow @Final private Entity trackedEntity;
-    @Shadow @Final @Mutable private Consumer<IPacket<?>> packetConsumer;
+    @Shadow @Final private Entity entity;
+    @Shadow @Final @Mutable private Consumer<IPacket<?>> broadcast;
 
     /*
      * @author gabizou
@@ -96,18 +95,18 @@ public abstract class TrackedEntityMixin {
      * do some hackery to create the player list packet first, then the spawn packet,
      * then perform the remove packet.
      */
-    @Redirect(method = "sendSpawnPackets",
+    @Redirect(method = "sendPairingData",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V",
                     ordinal = 0)
     )
     public void impl$sendHumanSpawnPacket(final Consumer<IPacket<?>> consumer, final Object spawnPacket) {
-        if (!(this.trackedEntity instanceof HumanEntity)) {
+        if (!(this.entity instanceof HumanEntity)) {
             consumer.accept((IPacket<?>) spawnPacket);
             return;
         }
-        final HumanEntity human = (HumanEntity) this.trackedEntity;
+        final HumanEntity human = (HumanEntity) this.entity;
         // Adds the GameProfile to the client
         consumer.accept(human.createPlayerListPacket(SPlayerListItemPacket.Action.ADD_PLAYER));
         // Actually spawn the human (a player)
@@ -122,14 +121,14 @@ public abstract class TrackedEntityMixin {
         }
     }
 
-    @Inject(method = "sendMetadata", at = @At("HEAD"))
+    @Inject(method = "sendDirtyEntityData", at = @At("HEAD"))
     public void impl$sendHumanMetadata(final CallbackInfo ci) {
-        if (!(this.trackedEntity instanceof HumanEntity)) {
+        if (!(this.entity instanceof HumanEntity)) {
             return;
         }
-        final HumanEntity human = (HumanEntity) this.trackedEntity;
+        final HumanEntity human = (HumanEntity) this.entity;
         Stream<IPacket<?>> packets = human.popQueuedPackets(null);
-        packets.forEach(this.packetConsumer);
+        packets.forEach(this.broadcast);
         // Note that this will further call in ChunkManager_EntityTrackerMixin
         // for any player specific packets to send.
     }

@@ -42,7 +42,7 @@ public abstract class LegacyStructureDataUtilMixin {
      * @reason Allow the platform to determine how to create the legacy structure data updater
      */
     @Overwrite
-    public static LegacyStructureDataUtil func_236992_a_(final RegistryKey<World> dimension, final @Nullable DimensionSavedDataManager savedData) {
+    public static LegacyStructureDataUtil getLegacyStructureHandler(final RegistryKey<World> dimension, final @Nullable DimensionSavedDataManager savedData) {
         return PlatformHooks.getInstance().getWorldGenerationHooks().createLegacyStructureDataUtil(dimension, savedData);
     }
 }

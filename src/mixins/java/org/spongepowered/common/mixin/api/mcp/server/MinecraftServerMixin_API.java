@@ -118,7 +118,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract boolean shadow$getForceGameType();
     @Shadow public abstract boolean shadow$isPvpAllowed();
     @Shadow public abstract boolean shadow$isCommandBlockEnabled();
-    @Shadow public abstract boolean shadow$isSpawningMonsters();
+    @Shadow protected abstract boolean shadow$isSpawningMonsters();
     @Shadow public abstract boolean shadow$isSpawningAnimals();
     @Shadow public abstract boolean shadow$isNetherEnabled();
     // @formatter:on

@@ -40,10 +40,10 @@ public abstract class SetWorldSpawnCommandMixin {
 
     @Redirect(method = "setSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
     private static void impl$sendCompassPositionPerWorld(PlayerList playerList, IPacket<?> packetIn, CommandSource source, BlockPos pos) {
-        for (final ServerPlayerEntity player : source.getWorld().getPlayers()) {
+        for (final ServerPlayerEntity player : source.getLevel().players()) {
             ((LocationTargetingBridge) player).bridge$setTargetedPosition(null);
 
-            player.connection.sendPacket(packetIn);
+            player.connection.send(packetIn);
         }
     }
 }

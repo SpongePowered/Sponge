@@ -43,14 +43,14 @@ import javax.annotation.Nullable;
 @Mixin(NextTickListEntry.class)
 public abstract class NextTickListEntryMixin implements NextTickListEntryBridge {
 
-    @Shadow @Final public BlockPos position;
+    @Shadow @Final public BlockPos pos;
 
     @Nullable @MonotonicNonNull private ServerLocation impl$location;
 
     @Override
     public void bridge$setWorld(World world) {
         checkState(this.impl$location == null, "World already known");
-        final BlockPos position = this.position;
+        final BlockPos position = this.pos;
         this.impl$location = ServerLocation.of((ServerWorld) world, position.getX(), position.getY(), position.getZ());
     }
 

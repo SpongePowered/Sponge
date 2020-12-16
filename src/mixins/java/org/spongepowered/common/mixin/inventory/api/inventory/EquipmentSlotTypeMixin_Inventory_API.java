@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 @Mixin(EquipmentSlotType.class)
 public abstract class EquipmentSlotTypeMixin_Inventory_API implements EquipmentType {
 
-    @Shadow @Final private EquipmentSlotType.Group slotType;
+    @Shadow @Final private EquipmentSlotType.Group type;
 
     @Override
     public ResourceKey getKey() {
@@ -45,6 +45,6 @@ public abstract class EquipmentSlotTypeMixin_Inventory_API implements EquipmentT
 
     @Override
     public EquipmentGroup getGroup() {
-        return (EquipmentGroup) (Object) this.slotType;
+        return (EquipmentGroup) (Object) this.type;
     }
 }

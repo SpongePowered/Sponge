@@ -42,7 +42,7 @@ import java.util.Set;
 public abstract class SignTileEntityMixin_API extends TileEntityMixin_API implements Sign {
 
     // @formatter:off
-    @Shadow @Final public ITextComponent[] messages;
+    @Shadow @Final private ITextComponent[] messages;
     // @formatter:on
 
     @Override

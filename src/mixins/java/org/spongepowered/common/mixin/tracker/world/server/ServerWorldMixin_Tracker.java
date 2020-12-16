@@ -164,15 +164,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      */
     @Redirect(method = "tick",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/server/ServerWorld;guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;)V"),
-        slice = @Slice(
-            from = @At(value = "INVOKE",
-                target = "Lnet/minecraft/world/server/ServerWorld;resetUpdateEntityTick()V"),
-            to = @At(value = "INVOKE",
-                target = "Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;int2ObjectEntrySet()Lit/unimi/dsi/fastutil/objects/ObjectSet;",
-                remap = false
-            )
-        )
+            target = "Lnet/minecraft/world/server/ServerWorld;guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;)V")
     )
     private void tracker$wrapGlobalEntityTicking(final ServerWorld serverWorld, final Consumer<Entity> consumer, final Entity entity) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();

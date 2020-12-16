@@ -35,12 +35,12 @@ import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapter
 @Mixin(Slot.class)
 public abstract class SlotMixin_Inventory_API implements org.spongepowered.api.item.inventory.Slot, DefaultImplementedAdapterInventory.WithClear {
 
-    @Shadow @Final public IInventory inventory;
+    @Shadow @Final public IInventory container;
 
     @Override
     public Inventory parent() {
-        if (this.inventory instanceof Inventory) {
-            return (Inventory) this.inventory;
+        if (this.container instanceof Inventory) {
+            return (Inventory) this.container;
         }
         // In modded the inventory could be null
         return this;

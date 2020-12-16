@@ -67,7 +67,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Shadow @Final private EntityType<?> type;
     @Shadow public World level;
     @Shadow public boolean removed;
-    @Shadow public Vector3d position;
+    @Shadow private Vector3d position;
     @Shadow public float yRot;
     @Shadow public float xRot;
     @Shadow @Final protected Random random;
@@ -80,8 +80,8 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Shadow public abstract void shadow$setDeltaMovement(double x, double y, double z);
     @Shadow public abstract float getEyeHeight();
     @Shadow public abstract UUID shadow$getUUID();
-    @Shadow protected abstract void shadow$setPose(Pose pose);
-    @Shadow protected abstract void shadow$recenterBoundingBox();
+    @Shadow public abstract void shadow$setPose(Pose pose);
+    @Shadow protected abstract void shadow$reapplyPosition();
     @Shadow public abstract double shadow$getEyeY();
     @Shadow public abstract double shadow$getX();
     @Shadow public abstract double shadow$getZ();

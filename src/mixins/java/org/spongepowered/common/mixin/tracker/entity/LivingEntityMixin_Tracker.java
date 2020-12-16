@@ -51,12 +51,12 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
     @Shadow protected abstract void shadow$tickDeath();
     @Shadow protected abstract int shadow$getExperienceReward(PlayerEntity player);
     @Shadow protected abstract boolean shadow$shouldDropExperience();
-    @Shadow protected abstract void shadow$dropLoot(DamageSource damageSourceIn, boolean p_213354_2_);
-    @Shadow protected abstract void shadow$dropInventory();
+    @Shadow protected abstract void shadow$dropFromLootTable(DamageSource damageSourceIn, boolean p_213354_2_);
+    @Shadow protected abstract void shadow$dropEquipment();
     @Shadow public abstract CombatTracker shadow$getCombatTracker();
     @Shadow @Nullable public abstract LivingEntity shadow$getKillCredit();
     @Shadow public void shadow$die(final DamageSource cause) {}
-    @Shadow protected abstract void shadow$spawnDrops(DamageSource damageSourceIn);
+    @Shadow protected abstract void shadow$dropAllDeathLoot(DamageSource damageSourceIn);
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
     @Shadow public abstract boolean shadow$isEffectiveAi();
     // @formatter:on

@@ -46,18 +46,18 @@ import java.util.Optional;
 @Mixin(DoubleSidedInventory.class)
 public abstract class DoubleSidedInventoryMixin_Carrier_Inventory_API implements MultiBlockCarrier {
 
-    @Shadow @Final private IInventory upperChest;
+    @Shadow @Final private IInventory container1;
 
-    @Shadow @Final private IInventory lowerChest;
+    @Shadow @Final private IInventory container2;
 
     @Override
     public List<ServerLocation> getLocations() {
         final List<ServerLocation> list = new ArrayList<>();
-        if (this.upperChest instanceof BlockEntity) {
-            list.add(((BlockEntity) this.upperChest).getServerLocation());
+        if (this.container1 instanceof BlockEntity) {
+            list.add(((BlockEntity) this.container1).getServerLocation());
         }
-        if (this.lowerChest instanceof BlockEntity) {
-            list.add(((BlockEntity) this.lowerChest).getServerLocation());
+        if (this.container2 instanceof BlockEntity) {
+            list.add(((BlockEntity) this.container2).getServerLocation());
         }
         return Collections.unmodifiableList(list);
     }

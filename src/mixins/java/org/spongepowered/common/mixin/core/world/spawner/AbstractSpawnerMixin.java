@@ -44,7 +44,7 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
     @Shadow private int maxSpawnDelay;
     @Shadow private int spawnCount;
     @Shadow private int maxNearbyEntities;
-    @Shadow private int activatingRangeFromPlayer;
+    @Shadow private int requiredPlayerRange;
     @Shadow private int spawnRange;
     // @formatter:on
 
@@ -85,7 +85,7 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
 
     @Override
     public int bridge$getActivatingRangeFromPlayer() {
-        return this.activatingRangeFromPlayer;
+        return this.requiredPlayerRange;
     }
 
     @Override
@@ -93,16 +93,16 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
         return this.spawnRange;
     }
 
-    @Redirect(method = "isActivated()Z",
+    @Redirect(method = "isNearPlayer()Z",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;isPlayerWithin(DDDD)Z"))
+            target = "Lnet/minecraft/world/World;hasNearbyAlivePlayer(DDDD)Z"))
     public boolean impl$checkPlayerSpawningStateForActivation(final World world, final double x, final double y, final double z, final double distance) {
         // Like vanilla but filter out players with !bridge$affectsSpawning
-        for (final PlayerEntity playerentity : world.getPlayers()) {
-            if (EntityPredicates.NOT_SPECTATING.test(playerentity)
-                  && EntityPredicates.IS_LIVING_ALIVE.test(playerentity)
+        for (final PlayerEntity playerentity : world.players()) {
+            if (EntityPredicates.NO_SPECTATORS.test(playerentity)
+                  && EntityPredicates.LIVING_ENTITY_STILL_ALIVE.test(playerentity)
                   && ((PlayerEntityBridge) playerentity).bridge$affectsSpawning()) {
-                final double d0 = playerentity.getDistanceSq(x, y, z);
+                final double d0 = playerentity.distanceToSqr(x, y, z);
                 if (distance < 0.0D || d0 < distance * distance) {
                     return true;
                 }

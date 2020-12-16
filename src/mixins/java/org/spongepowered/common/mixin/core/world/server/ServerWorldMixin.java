@@ -81,7 +81,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     // @formatter:off
     @Shadow @Final private IServerWorldInfo serverLevelData;
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
-    @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
+    @Shadow public abstract List<ServerPlayerEntity> shadow$players();
     @Shadow protected abstract void shadow$saveLevel() throws SessionLockException;
     // @formatter:on
 
@@ -112,9 +112,9 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
         final ChunkGenerator<?> chunkGenerator = this.dimension.createChunkGenerator();
         ((ServerChunkProviderAccessor) this.chunkProvider).accessor$generator(chunkGenerator);
-        ((ChunkManagerAccessor) ((ServerChunkProvider) this.chunkProvider).chunkManager).accessor$generator(chunkGenerator);
+        ((ChunkManagerAccessor) ((ServerChunkProvider) this.chunkProvider).chunkMap).accessor$generator(chunkGenerator);
 
-        for (final ServerPlayerEntity player : this.shadow$getPlayers()) {
+        for (final ServerPlayerEntity player : this.shadow$players()) {
             ((ServerPlayerEntityBridge) player).bridge$sendViewerEnvironment(dimensionType);
         }
     }
@@ -144,8 +144,8 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     public void bridge$updateRotation(final net.minecraft.entity.Entity entityIn) {
         final Vector3d rotationUpdate = this.impl$rotationUpdates.get(entityIn);
         if (rotationUpdate != null) {
-            entityIn.rotationPitch = (float) rotationUpdate.getX();
-            entityIn.rotationYaw = (float) rotationUpdate.getY();
+            entityIn.xRot = (float) rotationUpdate.getX();
+            entityIn.yRot = (float) rotationUpdate.getY();
         }
         this.impl$rotationUpdates.remove(entityIn);
     }

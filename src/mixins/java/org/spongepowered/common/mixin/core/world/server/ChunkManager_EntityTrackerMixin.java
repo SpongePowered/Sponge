@@ -54,14 +54,14 @@ public abstract class ChunkManager_EntityTrackerMixin {
      *  2) We already have the players being iterated
      *  3) This achieves the same functionality without adding new accessors etc.
      */
-    @Redirect(method = "sendToAllTracking(Lnet/minecraft/network/IPacket;)V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;sendPacket(Lnet/minecraft/network/IPacket;)V"))
+    @Redirect(method = "broadcast(Lnet/minecraft/network/IPacket;)V", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;send(Lnet/minecraft/network/IPacket;)V"))
     private void impl$sendQueuedHumanPackets(ServerPlayNetHandler serverPlayNetHandler, IPacket<?> packetIn) {
-        serverPlayNetHandler.sendPacket(packetIn);
+        serverPlayNetHandler.send(packetIn);
 
         if (this.entity instanceof HumanEntity) {
             Stream<IPacket<?>> packets = ((HumanEntity) this.entity).popQueuedPackets(serverPlayNetHandler.player);
-            packets.forEach(serverPlayNetHandler.player.connection::sendPacket);
+            packets.forEach(serverPlayNetHandler.player.connection::send);
         }
     }
 
@@ -72,7 +72,7 @@ public abstract class ChunkManager_EntityTrackerMixin {
      * entity is being "removed" from clients by way of literally being mimiced being
      * "untracked". This safeguards the players being updated erroneously.
      */
-    @Inject(method = "sendToAllTracking(Lnet/minecraft/network/IPacket;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "broadcast(Lnet/minecraft/network/IPacket;)V", at = @At("HEAD"), cancellable = true)
     private void impl$ignoreVanished(final IPacket<?> p_219391_1_, final CallbackInfo ci) {
         if (this.entity instanceof VanishableBridge) {
             if (((VanishableBridge) this.entity).bridge$isVanished()) {
@@ -81,17 +81,17 @@ public abstract class ChunkManager_EntityTrackerMixin {
         }
     }
 
-    @Redirect(method = "updateTrackingState(Lnet/minecraft/entity/player/ServerPlayerEntity;)V",
+    @Redirect(method = "updatePlayer(Lnet/minecraft/entity/player/ServerPlayerEntity;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/entity/Entity;isSpectatedByPlayer(Lnet/minecraft/entity/player/ServerPlayerEntity;)Z"))
+                    target = "Lnet/minecraft/entity/Entity;broadcastToPlayer(Lnet/minecraft/entity/player/ServerPlayerEntity;)Z"))
     private boolean impl$isSpectatedOrVanished(final Entity entity, final ServerPlayerEntity player) {
         if (entity instanceof VanishableBridge) {
             if (((VanishableBridge) entity).bridge$isVanished()) {
                 return false;
             }
         }
-        return entity.isSpectatedByPlayer(player);
+        return entity.broadcastToPlayer(player);
     }
 
 }

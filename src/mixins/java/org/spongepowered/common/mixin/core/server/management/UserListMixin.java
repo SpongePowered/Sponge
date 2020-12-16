@@ -40,7 +40,7 @@ import java.util.List;
 @Mixin(UserList.class)
 public abstract class UserListMixin {
 
-    @Shadow @Final public static Logger LOGGER;
+    @Shadow @Final protected static Logger LOGGER;
     @Shadow @Final private File file;
     @Shadow protected abstract String shadow$getKeyForUser(Object obj);
 

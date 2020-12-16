@@ -35,14 +35,14 @@ import javax.annotation.Nullable;
 @Mixin(EntityDamageSource.class)
 public abstract class EntityDamageSourceMixin extends DamageSourceMixin {
 
-    @Shadow @Final @Nullable protected net.minecraft.entity.Entity damageSourceEntity;
+    @Shadow @Final @Nullable protected net.minecraft.entity.Entity entity;
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper("EntityDamageSource")
-            .add("Name", this.damageType)
+            .add("Name", this.msgId)
             .add("Type", this.impl$damageType.get().getKey().toString())
-            .add("Source", this.damageSourceEntity)
+            .add("Source", this.entity)
             .toString();
     }
 }

@@ -42,20 +42,20 @@ import javax.annotation.Nullable;
 @Mixin(value = IndirectEntityDamageSource.class, priority = 992)
 public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSourceMixin {
 
-    @Shadow @Final @Mutable @Nullable private Entity indirectEntity;
+    @Shadow @Final @Mutable @Nullable private Entity owner;
 
-    @Shadow @Nullable public abstract Entity shadow$getImmediateSource();
+    @Shadow @Nullable public abstract Entity shadow$getDirectEntity();
 
     @Nullable private User impl$creator;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(final CallbackInfo callbackInfo) {
-        if (!(this.indirectEntity instanceof User) && this.damageSourceEntity != null) { // sources can be null
-            this.impl$creator = this.shadow$getTrueSource() instanceof CreatorTrackedBridge
-                         ? ((CreatorTrackedBridge) this.shadow$getTrueSource()).tracked$getCreatorReference().orElse(null)
+        if (!(this.owner instanceof User) && this.entity != null) { // sources can be null
+            this.impl$creator = this.shadow$getEntity() instanceof CreatorTrackedBridge
+                         ? ((CreatorTrackedBridge) this.shadow$getEntity()).tracked$getCreatorReference().orElse(null)
                          : null;
-            if (this.indirectEntity == null && this.impl$creator instanceof Entity) {
-                this.indirectEntity = (Entity) this.impl$creator;
+            if (this.owner == null && this.impl$creator instanceof Entity) {
+                this.owner = (Entity) this.impl$creator;
             }
         }
     }
@@ -63,10 +63,10 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
     @Override
     public String toString() {
         final MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper("IndirectEntityDamageSource")
-            .add("Name", this.damageType)
+            .add("Name", this.msgId)
             .add("Type", this.impl$damageType.get().getKey().toString())
-            .add("Source", this.shadow$getImmediateSource())
-            .add("IndirectSource", this.shadow$getTrueSource());
+            .add("Source", this.shadow$getDirectEntity())
+            .add("IndirectSource", this.shadow$getEntity());
         if (this.impl$creator != null) {
             helper.add("SourceOwner", this.impl$creator);
         }

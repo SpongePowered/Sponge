@@ -47,7 +47,7 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
 
     // @formatter: off
     @Shadow @Final public boolean isClientSide;
-    @Shadow @Final public Random rand;
+    @Shadow @Final public Random random;
     @Shadow @Final protected AbstractChunkProvider chunkProvider;
 
     @Shadow public abstract WorldInfo shadow$getWorldInfo();

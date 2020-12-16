@@ -54,7 +54,7 @@ public abstract class PlayerInventoryMixin_Tracker implements TrackedInventoryBr
         return ((PlayerInventory) this).getPrimary().getStorage().getSlot(index).get();
     }
 
-    @Inject(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
+    @Inject(method = "add(ILnet/minecraft/item/ItemStack;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
     private void impl$ifCaptureDoTransactions(final int index, final ItemStack stack, final CallbackInfoReturnable<Boolean> cir) {
         if (this.bridge$capturingInventory()) {
             // Capture "damaged" items picked up

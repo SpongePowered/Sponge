@@ -55,13 +55,13 @@ import javax.annotation.Nullable;
 public abstract class ContainerMixin_Inventory_API implements org.spongepowered.api.item.inventory.Container,
         DefaultImplementedAdapterInventory.WithClear {
 
-    @Final @Shadow private List<IContainerListener> listeners;
-    @Shadow @Final @Nullable private net.minecraft.inventory.container.ContainerType<?> containerType;
+    @Shadow @Final private List<IContainerListener> containerListeners;
+    @Shadow @Final @Nullable private net.minecraft.inventory.container.ContainerType<?> menuType;
 
     @Override
     public boolean isViewedSlot(final org.spongepowered.api.item.inventory.Slot slot) {
         if (slot instanceof Slot) {
-            final Set<Slot> set = ((ContainerBridge) this).bridge$getInventories().get(((Slot) slot).inventory);
+            final Set<Slot> set = ((ContainerBridge) this).bridge$getInventories().get(((Slot) slot).container);
             if (set != null) {
                 if (set.contains(slot)) {
                     if (((ContainerBridge) this).bridge$getInventories().size() == 1) {
@@ -69,7 +69,7 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
                     }
                     // TODO better detection of viewer inventory - needs tracking of who views a container
                     // For now assume that a player inventory is always the viewers inventory
-                    if (((Slot) slot).inventory.getClass() != PlayerInventory.class) {
+                    if (((Slot) slot).container.getClass() != PlayerInventory.class) {
                         return true;
                     }
                 }
@@ -95,14 +95,14 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
         }
         ItemStack nativeStack = ItemStackUtil.toNative(item);
         this.listeners().stream().findFirst()
-                .ifPresent(p -> p.inventory.setItemStack(nativeStack));
+                .ifPresent(p -> p.inventory.setCarried(nativeStack));
         return true;
     }
 
     @Override
     public Optional<org.spongepowered.api.item.inventory.ItemStack> getCursor() {
         return this.listeners().stream().findFirst()
-                .map(p -> p.inventory.getItemStack())
+                .map(p -> p.inventory.getCarried())
                 .map(ItemStackUtil::fromNative);
     }
 
@@ -124,11 +124,11 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
 
     @Override
     public ContainerType getType() {
-        return ((ContainerType) this.containerType);
+        return ((ContainerType) this.menuType);
     }
 
     private List<ServerPlayerEntity> listeners() {
-        return this.listeners.stream()
+        return this.containerListeners.stream()
                 .filter(ServerPlayerEntity.class::isInstance)
                 .map(ServerPlayerEntity.class::cast)
                 .collect(Collectors.toList());

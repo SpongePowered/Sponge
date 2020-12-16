@@ -40,13 +40,13 @@ import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 public abstract class ServerChunkProviderMixin {
 
     // @formatter:off
-    @Shadow @Final private ServerWorld world;
-    @Shadow @Final public ChunkManager chunkManager;
+    @Shadow @Final private ServerWorld level;
+    @Shadow @Final public ChunkManager chunkMap;
     // @formatter:on
     
     @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ChunkManager;save(Z)V"))
     private void impl$useSerializationBehaviorWhenSaving(final ChunkManager chunkManager, final boolean flush) {
-        final ServerWorld world = this.world;
+        final ServerWorld world = this.level;
         final SerializationBehavior serializationBehavior = ((WorldProperties) world.getWorldInfo()).getSerializationBehavior();
         if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
             ((ChunkManagerAccessor) chunkManager).invoker$saveAllChunks(flush);

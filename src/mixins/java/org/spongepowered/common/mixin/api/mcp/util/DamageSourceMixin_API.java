@@ -34,10 +34,10 @@ import org.spongepowered.common.bridge.util.DamageSourceBridge;
 public abstract class DamageSourceMixin_API implements DamageSource {
 
     // @formatter:off
-    @Shadow public abstract boolean shadow$isUnblockable();
-    @Shadow public abstract boolean shadow$canHarmInCreative();
-    @Shadow public abstract boolean shadow$isDamageAbsolute();
-    @Shadow public abstract boolean shadow$isMagicDamage();
+    @Shadow public abstract boolean shadow$isBypassArmor();
+    @Shadow public abstract boolean shadow$isBypassInvul();
+    @Shadow public abstract boolean shadow$isBypassMagic();
+    @Shadow public abstract boolean shadow$isMagic();
     @Shadow public abstract float shadow$getFoodExhaustion();
     @Shadow public abstract boolean shadow$scalesWithDifficulty();
     @Shadow public abstract boolean shadow$isExplosion();
@@ -51,22 +51,22 @@ public abstract class DamageSourceMixin_API implements DamageSource {
 
     @Override
     public boolean isMagic() {
-        return this.shadow$isMagicDamage();
+        return this.shadow$isMagic();
     }
 
     @Override
     public boolean doesAffectCreative() {
-        return this.shadow$canHarmInCreative();
+        return this.shadow$isBypassInvul();
     }
 
     @Override
     public boolean isAbsolute() {
-        return this.shadow$isDamageAbsolute();
+        return this.shadow$isBypassMagic();
     }
 
     @Override
     public boolean isBypassingArmor() {
-        return this.shadow$isUnblockable();
+        return this.shadow$isBypassArmor();
     }
 
     @Override

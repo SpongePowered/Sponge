@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
@@ -42,7 +43,7 @@ import javax.annotation.Nullable;
 @Mixin(Container.class)
 public abstract class ContainerMixin_Fabric_Inventory implements Fabric, InventoryBridge {
 
-    @Shadow public List<Slot> slots;
+    @Shadow @Final public List<Slot> slots;
     @Shadow public abstract Slot shadow$getSlot(int slotId);
     @Shadow public abstract void shadow$broadcastChanges();
 

@@ -43,14 +43,14 @@ import java.util.Set;
 @Mixin(Raid.class)
 public abstract class RaidMixin implements RaidBridge {
 
-    @Final @Shadow private Map<Integer, Set<AbstractRaiderEntity>> raiders;
+    @Final @Shadow private Map<Integer, Set<AbstractRaiderEntity>> groupRaiderMap;
 
     private final Map<Integer, RaidWave> impl$waves = new HashMap<>();
 
     // Minecraft's raids have no real concept of a wave object but instead have two maps containing raiders. We make a Wave object for the API.
     @Inject(method = "<init>*", at = @At("TAIL"))
     private void impl$createWaves(CallbackInfo ci) {
-        for (Map.Entry<Integer, Set<AbstractRaiderEntity>> entry : this.raiders.entrySet()) {
+        for (Map.Entry<Integer, Set<AbstractRaiderEntity>> entry : this.groupRaiderMap.entrySet()) {
             this.impl$waves.put(entry.getKey(), new SpongeRaidWave((Raid) (Object) this, entry.getKey()));
         }
     }

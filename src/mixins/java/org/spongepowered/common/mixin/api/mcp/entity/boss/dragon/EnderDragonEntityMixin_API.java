@@ -44,7 +44,7 @@ import java.util.Set;
 public abstract class EnderDragonEntityMixin_API extends MobEntityMixin_API implements EnderDragon {
 
     // @formatter:off
-    @Shadow private EnderDragonPartEntity[] subEntities;
+    @Shadow @Final private EnderDragonPartEntity[] subEntities;
     @Shadow @Final private PhaseManager phaseManager;
     // @formatter:on
 
