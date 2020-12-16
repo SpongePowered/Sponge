@@ -273,7 +273,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      *
      * @author gabizou - January 11th, 2020 - Minecraft 1.14.3
      */
-    @Redirect(method = "tick",
+    @Redirect(method = "tickChunk",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockState;randomTick(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
     private void tracker$wrapBlockRandomTick(final BlockState blockState, final ServerWorld worldIn, final BlockPos posIn, final Random randomIn) {
@@ -288,7 +288,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         }
     }
 
-    @Redirect(method = "tick",
+    @Redirect(method = "tickChunk",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/fluid/FluidState;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"
         )
