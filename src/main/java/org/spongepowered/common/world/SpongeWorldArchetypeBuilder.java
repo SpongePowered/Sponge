@@ -174,7 +174,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
 
         this.key = null;
         this.dimensionType(value.getDimensionType());
-        this.worldGenerationSettings = value.getWorldGeneratorSettings();
+        this.worldGenerationSettings = value.getWorldGenerationSettings();
         this.gameMode(value.getGameMode());
         this.difficulty(value.getDifficulty());
         this.serializationBehavior(value.getSerializationBehavior());
