@@ -32,15 +32,17 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 
 @Mixin(SetWorldSpawnCommand.class)
 public abstract class SetWorldSpawnCommandMixin {
 
-    @Redirect(method = "setSpawn", at = @At(value = "HEAD"))
-    private static void impl$sendCompassPositionPerWorld(PlayerList playerList, IPacket<?> packetIn, CommandSource source, BlockPos pos) {
-        for (final ServerPlayerEntity player : source.getLevel().players()) {
+    @Inject(method = "setSpawn", at = @At(value = "HEAD"))
+    private static void impl$sendCompassPositionPerWorld(CommandSource p_198701_0_, BlockPos p_198701_1_, float p_198701_2_, CallbackInfoReturnable<Integer> cir) {
+        for (final ServerPlayerEntity player : p_198701_0_.getLevel().players()) {
             // TODO player doesn't support Keys#TARGET_LOCATION
             ((LocationTargetingBridge) player).bridge$setTargetedPosition(null);
         }
