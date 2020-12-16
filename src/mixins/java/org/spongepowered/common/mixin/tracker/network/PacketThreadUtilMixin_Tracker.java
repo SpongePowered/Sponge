@@ -35,7 +35,7 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 @Mixin(PacketThreadUtil.class)
 public abstract class PacketThreadUtilMixin_Tracker {
 
-    @Redirect(method = "*",
+    @Redirect(method = "ensureRunningOnSameThread(Lnet/minecraft/network/IPacket;Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/concurrent/ThreadTaskExecutor;)V",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/IPacket;handle(Lnet/minecraft/network/INetHandler;)V"),
         expect = 1,

@@ -31,13 +31,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.ServerWorldInfo;
-import net.minecraft.world.storage.SessionLockException;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -82,7 +80,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Shadow @Final private IServerWorldInfo serverLevelData;
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract List<ServerPlayerEntity> shadow$players();
-    @Shadow protected abstract void shadow$saveLevel() throws SessionLockException;
+    @Shadow protected abstract void shadow$saveLevelData();
     // @formatter:on
 
     private CustomServerBossInfoManager impl$bossBarManager;
@@ -256,7 +254,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
      * @reason Honor our serialization behavior in performing saves
      */
     @Overwrite
-    public void save(@Nullable IProgressUpdate progress, boolean flush, boolean skipSave) throws SessionLockException {
+    public void save(@Nullable IProgressUpdate progress, boolean flush, boolean skipSave) {
         final ServerWorld this$ = (ServerWorld) (Object) this;
         final ServerWorldInfo levelData = (ServerWorldInfo) this.shadow$getLevelData();
 
@@ -267,13 +265,13 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             final SerializationBehavior behavior = ((IServerWorldInfoBridge) levelData).bridge$getSerializationBehavior();
 
             if (progress != null) {
-                progress.displaySavingString(new TranslationTextComponent("menu.savingLevel"));
+                progress.progressStartNoAbort(new TranslationTextComponent("menu.savingLevel"));
             }
 
             // We always save the metadata unless it is NONE
             if (behavior != SerializationBehavior.NONE) {
 
-                this.shadow$saveLevel();
+                this.shadow$saveLevelData();
 
                 // Sponge Start - We do per-world WorldInfo/WorldBorders/BossBars
 
@@ -287,7 +285,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                 // Sponge End
             }
             if (progress != null) {
-                progress.displayLoadingString(new TranslationTextComponent("menu.savingChunks"));
+                progress.progressStage(new TranslationTextComponent("menu.savingChunks"));
             }
 
             final boolean canAutomaticallySave = !this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC;

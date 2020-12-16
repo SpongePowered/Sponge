@@ -44,7 +44,7 @@ public abstract class ServerChunkProviderMixin {
     @Shadow @Final public ChunkManager chunkMap;
     // @formatter:on
     
-    @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ChunkManager;save(Z)V"))
+    @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ChunkManager;saveAllChunks(Z)V"))
     private void impl$useSerializationBehaviorWhenSaving(final ChunkManager chunkManager, final boolean flush) {
         final ServerWorld world = this.level;
         final SerializationBehavior serializationBehavior = ((WorldProperties) world.getWorldInfo()).getSerializationBehavior();
