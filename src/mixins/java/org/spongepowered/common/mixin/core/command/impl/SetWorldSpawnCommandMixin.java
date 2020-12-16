@@ -38,12 +38,11 @@ import org.spongepowered.common.bridge.LocationTargetingBridge;
 @Mixin(SetWorldSpawnCommand.class)
 public abstract class SetWorldSpawnCommandMixin {
 
-    @Redirect(method = "setSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+    @Redirect(method = "setSpawn", at = @At(value = "HEAD"))
     private static void impl$sendCompassPositionPerWorld(PlayerList playerList, IPacket<?> packetIn, CommandSource source, BlockPos pos) {
         for (final ServerPlayerEntity player : source.getLevel().players()) {
+            // TODO player doesn't support Keys#TARGET_LOCATION
             ((LocationTargetingBridge) player).bridge$setTargetedPosition(null);
-
-            player.connection.send(packetIn);
         }
     }
 }
