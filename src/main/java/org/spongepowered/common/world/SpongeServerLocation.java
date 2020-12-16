@@ -69,7 +69,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
-public final class SpongeServerLocation extends SpongeLocation<ServerWorld> implements ServerLocation, LocationBridge {
+public final class SpongeServerLocation extends SpongeLocation<ServerWorld, ServerLocation> implements ServerLocation, LocationBridge {
 
     private final Supplier<BlockPos> posSupplier = MemoizedSupplier.memoize(() -> {
         final Vector3i blockPosition = this.getBlockPosition();
@@ -434,7 +434,7 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        final SpongeLocation<?> that = (SpongeLocation<?>) o;
+        final SpongeLocation<?, ?> that = (SpongeLocation<?, ?>) o;
         return this.worldRef.equals(that.worldRef) &&
                    this.getPosition().equals(that.getPosition()) &&
                    this.getBlockPosition().equals(that.getBlockPosition());

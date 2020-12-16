@@ -43,7 +43,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-public class SpongeLocation<W extends World<W>> implements Location<W> {
+public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> implements Location<W, L> {
 
     final WeakReference<W> worldRef;
     private final Vector3d position;
@@ -148,69 +148,72 @@ public class SpongeLocation<W extends World<W>> implements Location<W> {
     }
 
     @Override
-    public Location<W> withWorld(final W world) {
-        return new SpongeLocation<W>(world, this.position, this.chunkPosition, this.biomePosition);
+    @SuppressWarnings("unchecked")
+    public L withWorld(final W world) {
+        return (L) new SpongeLocation<W, L>(world, this.position, this.chunkPosition, this.biomePosition);
     }
 
     @Override
-    public Location<W> withPosition(final Vector3d position) {
+    @SuppressWarnings("unchecked")
+    public L withPosition(final Vector3d position) {
         final W world = this.worldRef.get();
         if (world == null) {
             throw new IllegalStateException("World Reference is null!");
         }
         // TODO - for now, we make the assumption we always have a server object if we're creating locations
         final ChunkLayout chunkLayout = Sponge.getServer().getChunkLayout();
-        return new SpongeLocation<>(world, chunkLayout, position);
+        return (L) new SpongeLocation<>(world, chunkLayout, position);
     }
 
     @Override
-    public Location<W> withBlockPosition(final Vector3i position) {
+    @SuppressWarnings("unchecked")
+    public L withBlockPosition(final Vector3i position) {
         final W world = this.worldRef.get();
         if (world == null) {
             throw new IllegalStateException("World Reference is null!");
         }
         // TODO - for now, we make the assumption we always have a server object if we're creating locations
         final ChunkLayout chunkLayout = Sponge.getServer().getChunkLayout();
-        return new SpongeLocation<>(world, chunkLayout, position.toDouble());
+        return (L) new SpongeLocation<>(world, chunkLayout, position.toDouble());
     }
 
     @Override
-    public Location<W> sub(final Vector3d v) {
+    public L sub(final Vector3d v) {
         return this.withPosition(this.position.sub(v));
     }
 
     @Override
-    public Location<W> sub(final Vector3i v) {
+    public L sub(final Vector3i v) {
         return this.withBlockPosition(this.blockPosition.sub(v));
     }
 
     @Override
-    public Location<W> sub(final double x, final double y, final double z) {
+    public L sub(final double x, final double y, final double z) {
         return this.withPosition(this.position.sub(x, y, z));
     }
 
     @Override
-    public Location<W> add(final Vector3d v) {
+    public L add(final Vector3d v) {
         return this.withPosition(this.position.add(v));
     }
 
     @Override
-    public Location<W> add(final Vector3i v) {
+    public L add(final Vector3i v) {
         return this.withBlockPosition(this.blockPosition.add(v));
     }
 
     @Override
-    public Location<W> add(final double x, final double y, final double z) {
+    public L add(final double x, final double y, final double z) {
         return this.withPosition(this.position.add(x, y, z));
     }
 
     @Override
-    public Location<W> relativeTo(final Direction direction) {
+    public L relativeTo(final Direction direction) {
         return null;
     }
 
     @Override
-    public Location<W> relativeToBlock(final Direction direction) {
+    public L relativeToBlock(final Direction direction) {
         return null;
     }
 
@@ -272,7 +275,7 @@ public class SpongeLocation<W extends World<W>> implements Location<W> {
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        final SpongeLocation<?> that = (SpongeLocation<?>) o;
+        final SpongeLocation<?, ?> that = (SpongeLocation<?, ?>) o;
         return this.worldRef.equals(that.worldRef) &&
                    this.position.equals(that.position) &&
                    this.blockPosition.equals(that.blockPosition);
