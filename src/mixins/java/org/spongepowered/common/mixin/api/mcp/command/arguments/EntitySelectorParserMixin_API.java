@@ -132,7 +132,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     private boolean api$forceSelf;
 
     @Override
-    public Selector.@NonNull Builder applySelectorType(final Supplier<SelectorType> selectorType) {
+    public Selector.@NonNull Builder applySelectorType(final Supplier<? extends SelectorType> selectorType) {
         return this.applySelectorType(selectorType.get());
     }
 
@@ -184,7 +184,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     @Override
-    public Selector.@NonNull Builder setSortAlgorithm(@NonNull final Supplier<SelectorSortAlgorithm> algorithm) {
+    public Selector.@NonNull Builder setSortAlgorithm(@NonNull final Supplier<? extends SelectorSortAlgorithm> algorithm) {
         return this.setSortAlgorithm(algorithm.get());
     }
 
@@ -260,7 +260,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     @Override
-    public Selector.@NonNull Builder gameMode(@NonNull final Supplier<@NonNull GameMode> mode) {
+    public Selector.@NonNull Builder gameMode(@NonNull final Supplier<? extends GameMode> mode) {
         return this.gameMode(mode.get());
     }
 
@@ -271,7 +271,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     @Override
-    public Selector.@NonNull Builder notGameMode(@NonNull final Supplier<@NonNull GameMode> mode) {
+    public Selector.@NonNull Builder notGameMode(@NonNull final Supplier<? extends GameMode> mode) {
         return this.notGameMode(mode.get());
     }
 
