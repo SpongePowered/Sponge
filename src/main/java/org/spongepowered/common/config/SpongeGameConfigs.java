@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.config;
 
+import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -129,20 +130,22 @@ public final class SpongeGameConfigs {
         }
     }
 
+    @SuppressWarnings("EqualsBetweenInconvertibleTypes") // ResourceKey is ResourceLocation
     private static String getLegacyValue(final ResourceKey dimensionType) {
-        if (dimensionType.equals(DimensionTypes.THE_NETHER.get(Sponge.getServer().registries()).getKey())) {
+        if (dimensionType.equals(World.NETHER.location())) {
             return "nether";
         } else {
             return dimensionType.getValue();
         }
     }
 
+    @SuppressWarnings("EqualsBetweenInconvertibleTypes") // ResourceKey is ResourceLocation
     private static @Nullable String getLegacyWorldName(final ResourceKey world) {
-        if (world.equals(SpongeWorldManager.VANILLA_OVERWORLD)) {
+        if (world.equals(World.OVERWORLD.location())) {
             return "world";
-        } else if (world.equals(SpongeWorldManager.VANILLA_THE_END)) {
+        } else if (world.equals(World.END.location())) {
             return "DIM1";
-        } else if (world.equals(SpongeWorldManager.VANILLA_THE_NETHER)) {
+        } else if (world.equals(World.NETHER.location())) {
             return "DIM-1";
         }
         return null;
