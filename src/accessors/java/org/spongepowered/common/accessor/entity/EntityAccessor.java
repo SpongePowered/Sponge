@@ -26,7 +26,10 @@ package org.spongepowered.common.accessor.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.util.Direction;
+import net.minecraft.util.TeleportationRepositioner;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -92,5 +95,7 @@ public interface EntityAccessor {
     @Invoker("getPermissionLevel") int invoker$getPermissionLevel();
 
     @Invoker("removeAfterChangingDimensions") void invoker$removeAfterChangingDimensions();
+
+    @Invoker("getRelativePortalPosition") Vector3d invoker$getRelativePortalPosition(Direction.Axis axis, TeleportationRepositioner.Result result);
 
 }
