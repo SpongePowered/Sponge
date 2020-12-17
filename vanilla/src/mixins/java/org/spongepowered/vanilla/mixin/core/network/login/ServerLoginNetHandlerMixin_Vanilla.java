@@ -51,7 +51,7 @@ import org.spongepowered.common.network.channel.TransactionStore;
 public abstract class ServerLoginNetHandlerMixin_Vanilla implements IServerLoginNetHandler {
 
     @Shadow @Final private MinecraftServer server;
-    @Shadow private ServerLoginNetHandler.State currentLoginState;
+    @Shadow private ServerLoginNetHandler.State state;
 
     // Handshake phase:
     // 1. Sync registered plugin channels
@@ -65,7 +65,7 @@ public abstract class ServerLoginNetHandlerMixin_Vanilla implements IServerLogin
 
     private int impl$handshakeState = ServerLoginNetHandlerMixin_Vanilla.HANDSHAKE_NOT_STARTED;
 
-    @Inject(method = "processCustomPayloadLogin", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "handleCustomQueryPacket", at = @At(value = "HEAD"), cancellable = true)
     private void onResponsePayload(final CCustomPayloadLoginPacket packet, final CallbackInfo ci) {
         ci.cancel();
 
@@ -75,7 +75,7 @@ public abstract class ServerLoginNetHandlerMixin_Vanilla implements IServerLogin
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void impl$onTick(final CallbackInfo ci) {
-        if (this.currentLoginState == ServerLoginNetHandler.State.NEGOTIATING) {
+        if (this.state == ServerLoginNetHandler.State.NEGOTIATING) {
             final ServerSideConnection connection = (ServerSideConnection) this;
             if (this.impl$handshakeState == ServerLoginNetHandlerMixin_Vanilla.HANDSHAKE_NOT_STARTED) {
                 this.impl$handshakeState = ServerLoginNetHandlerMixin_Vanilla.HANDSHAKE_CLIENT_TYPE;
@@ -95,24 +95,24 @@ public abstract class ServerLoginNetHandlerMixin_Vanilla implements IServerLogin
             } else if (this.impl$handshakeState == ServerLoginNetHandlerMixin_Vanilla.HANDSHAKE_SYNC_PLUGIN_DATA) {
                 final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
                 if (store.isEmpty()) {
-                    this.currentLoginState = ServerLoginNetHandler.State.READY_TO_ACCEPT;
+                    this.state = ServerLoginNetHandler.State.READY_TO_ACCEPT;
                 }
             }
         }
     }
 
-    @Inject(method = "tryAcceptPlayer", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;initializeConnectionToPlayer(Lnet/minecraft/network/NetworkManager;Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
+    @Inject(method = "handleAcceptedLogin", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/PlayerList;placeNewPlayer(Lnet/minecraft/network/NetworkManager;Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
     private void impl$onTryAcceptPlayer_beforeInitPlayer(final CallbackInfo ci) {
         final ServerSideConnection connection = (ServerSideConnection) this;
         // Also send the channel registrations using the minecraft channel, for compatibility
         ((SpongeChannelRegistry) Sponge.getChannelRegistry()).sendChannelRegistrations(connection);
     }
 
-    @Inject(method = "processLoginStart", at = @At(value = "RETURN"))
+    @Inject(method = "handleHello", at = @At(value = "RETURN"))
     private void impl$onProcessLoginStart(final CLoginStartPacket packet, final CallbackInfo ci) {
-        if (this.currentLoginState == ServerLoginNetHandler.State.READY_TO_ACCEPT) {
-            this.currentLoginState = ServerLoginNetHandler.State.NEGOTIATING;
+        if (this.state == ServerLoginNetHandler.State.READY_TO_ACCEPT) {
+            this.state = ServerLoginNetHandler.State.NEGOTIATING;
         }
     }
 }

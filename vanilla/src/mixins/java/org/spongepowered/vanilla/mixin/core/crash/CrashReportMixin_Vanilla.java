@@ -39,11 +39,11 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 @Mixin(CrashReport.class)
 public abstract class CrashReportMixin_Vanilla {
 
-    @Shadow @Final private CrashReportCategory systemDetailsCategory;
+    @Shadow @Final private CrashReportCategory systemDetails;
 
-    @Inject(method = "populateEnvironment", at = @At("RETURN"))
+    @Inject(method = "initDetails", at = @At("RETURN"))
     private void vanilla$addPluginsToEnvironment(final CallbackInfo ci) {
-        this.systemDetailsCategory.addDetail("Plugins", () -> {
+        this.systemDetails.setDetail("Plugins", () -> {
             final StringBuilder result = new StringBuilder(64);
             for (final PluginContainer container : Sponge.getPluginManager().getPlugins()) {
                 final PluginMetadata metadata = container.getMetadata();

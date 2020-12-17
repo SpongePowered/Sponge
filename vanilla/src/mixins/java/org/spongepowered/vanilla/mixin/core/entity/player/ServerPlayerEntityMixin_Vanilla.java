@@ -47,7 +47,7 @@ import org.spongepowered.common.network.packet.SpongePacketHandler;
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin_Vanilla implements ServerPlayerEntityBridge  {
 
-    @Shadow public abstract ServerWorld shadow$getServerWorld();
+    @Shadow public abstract ServerWorld shadow$getLevel();
 
     @Override
     public void bridge$sendDimensionData(final NetworkManager manager, final RegistryKey<World> key) {
@@ -61,7 +61,7 @@ public abstract class ServerPlayerEntityMixin_Vanilla implements ServerPlayerEnt
         final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
 
         if (this.bridge$getClientType() == ClientType.SPONGE_VANILLA) {
-            player.connection.sendPacket(new SRespawnPacket(toDimensionType, seed, generator, gameType));
+            player.connection.send(new SRespawnPacket(toDimensionType, seed, generator, gameType));
         } else {
             this.vanilla$hackChangeVanillaClientDimension(((DimensionTypeBridge) toDimensionType).bridge$getSpongeDimensionType(), seed, generator,
                     gameType, true);
@@ -76,7 +76,7 @@ public abstract class ServerPlayerEntityMixin_Vanilla implements ServerPlayerEnt
             final WorldType generator = ((ServerPlayerEntity) (Object) this).getEntityWorld().getWorldInfo().getGenerator();
             final GameType gameType = ((ServerPlayerEntity) (Object) this).interactionManager.getGameType();
 
-            this.vanilla$hackChangeVanillaClientDimension(dimensionType, WorldInfo.byHashing(this.shadow$getServerWorld().getSeed()), generator,
+            this.vanilla$hackChangeVanillaClientDimension(dimensionType, WorldInfo.byHashing(this.shadow$getLevel().getSeed()), generator,
                 gameType, false);
         }
     }
@@ -92,25 +92,25 @@ public abstract class ServerPlayerEntityMixin_Vanilla implements ServerPlayerEnt
         // Trick the Vanilla client to dump it's rendered chunks as we cannot send unknown registered dimensions to the client
         if (currentLogicType == logicType) {
             if (logicType == DimensionTypes.OVERWORLD.get()) {
-                player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, seed, generator, gameType));
+                player.connection.send(new SRespawnPacket(DimensionType.THE_NETHER, seed, generator, gameType));
             } else if (logicType == DimensionTypes.THE_NETHER.get()) {
-                player.connection.sendPacket(new SRespawnPacket(DimensionType.OVERWORLD, seed, generator, gameType));
+                player.connection.send(new SRespawnPacket(DimensionType.OVERWORLD, seed, generator, gameType));
             } else {
-                player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, seed, generator, gameType));
+                player.connection.send(new SRespawnPacket(DimensionType.THE_NETHER, seed, generator, gameType));
             }
         }
 
         // Now send the fake client type
         if (logicType == DimensionTypes.OVERWORLD.get()) {
-            player.connection.sendPacket(new SRespawnPacket(DimensionType.OVERWORLD, seed, generator, gameType));
+            player.connection.send(new SRespawnPacket(DimensionType.OVERWORLD, seed, generator, gameType));
         } else if (logicType == DimensionTypes.THE_NETHER.get()) {
-            player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, seed, generator, gameType));
+            player.connection.send(new SRespawnPacket(DimensionType.THE_NETHER, seed, generator, gameType));
         } else {
-            player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_END, seed, generator, gameType));
+            player.connection.send(new SRespawnPacket(DimensionType.THE_END, seed, generator, gameType));
         }
 
         if (!actualWorldChange) {
-            player.connection.setPlayerLocation(player.getPosX(), player.getPosY(), player.getPosZ(), player.rotationYaw, player.rotationPitch);
+            player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot);
             // TODO This needs more work for Vanilla clients...
         }
     }

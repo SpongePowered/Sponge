@@ -33,6 +33,7 @@ import net.minecraft.network.play.client.CChatMessagePacket;
 import net.minecraft.network.play.client.CCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.spongepowered.api.Sponge;
@@ -58,6 +59,7 @@ import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.vanilla.chat.ChatFormatter;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Mixin(ServerPlayNetHandler.class)
 public abstract class ServerPlayNetHandlerMixin_Vanilla implements IServerPlayNetHandler {
@@ -65,7 +67,7 @@ public abstract class ServerPlayNetHandlerMixin_Vanilla implements IServerPlayNe
     @Shadow public ServerPlayerEntity player;
     @Shadow @Final private MinecraftServer server;
 
-    @Inject(method = "processCustomPayload", at = @At(value = "HEAD"))
+    @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"))
     private void onHandleCustomPayload(final CCustomPayloadPacket packet, final CallbackInfo ci) {
         // For some reason, "CCustomPayloadPacket" is released in the processPacket
         // method of its class, only applicable to this packet, so just retain here.
@@ -75,13 +77,13 @@ public abstract class ServerPlayNetHandlerMixin_Vanilla implements IServerPlayNe
         this.server.execute(() -> channelRegistry.handlePlayPayload((EngineConnection) this, packet));
     }
 
-    @Inject(method = "processChatMessage",
+    @Inject(method = "handleChat(Ljava/lang/String;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/management/PlayerList;sendMessage(Lnet/minecraft/util/text/ITextComponent;Z)V"),
+                    target = "Lnet/minecraft/server/management/PlayerList;broadcastMessage(Lnet/minecraft/util/text/ITextComponent;Lnet/minecraft/util/text/ChatType;Ljava/util/UUID;)V"),
             cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vanilla$onProcessChatMessage(CChatMessagePacket packet, CallbackInfo ci, String s, ITextComponent component) {
+    private void vanilla$onProcessChatMessage(String p_244548_1_, CallbackInfo ci, ITextComponent component) {
         ChatFormatter.formatChatComponent((TranslationTextComponent) component);
         final PlayerChatRouter chatRouter = ((ServerPlayer) this.player).getChatRouter();
         Component adventure = SpongeAdventure.asAdventure(component);
@@ -99,11 +101,11 @@ public abstract class ServerPlayNetHandlerMixin_Vanilla implements IServerPlayNe
         }
     }
 
-    @Redirect(method = "processChatMessage",
+    @Redirect(method = "handleChat(Ljava/lang/String;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/management/PlayerList;sendMessage(Lnet/minecraft/util/text/ITextComponent;Z)V") )
-    private void vanilla$cancelSendChatMsgImpl(PlayerList manager, ITextComponent component, boolean chat) {
+                    target = "Lnet/minecraft/server/management/PlayerList;broadcastMessage(Lnet/minecraft/util/text/ITextComponent;Lnet/minecraft/util/text/ChatType;Ljava/util/UUID;)V") )
+    private void vanilla$cancelSendChatMsgImpl(PlayerList playerList, ITextComponent p_232641_1_, ChatType p_232641_2_, UUID p_232641_3_) {
         // Do nothing
     }
 }

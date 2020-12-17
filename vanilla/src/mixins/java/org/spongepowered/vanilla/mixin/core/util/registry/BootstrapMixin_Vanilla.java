@@ -36,7 +36,7 @@ public abstract class BootstrapMixin_Vanilla {
      * @reason Remove STDOUT to logger redirection, already handled by SpongeVanilla.
      */
     @Overwrite
-    private static void redirectOutputToLog() {
+    private static void wrapStreams() {
         // Handled by TerminalConsoleAppender
     }
 }

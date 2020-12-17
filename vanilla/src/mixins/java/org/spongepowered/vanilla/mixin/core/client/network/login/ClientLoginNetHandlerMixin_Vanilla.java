@@ -43,18 +43,18 @@ import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 @Mixin(ClientLoginNetHandler.class)
 public abstract class ClientLoginNetHandlerMixin_Vanilla implements IClientLoginNetHandler {
 
-    @Shadow @Final private Minecraft mc;
+    @Shadow @Final private Minecraft minecraft;
 
-    @Inject(method = "handleCustomPayloadLogin", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/network/NetworkManager;sendPacket(Lnet/minecraft/network/IPacket;)V"), cancellable = true)
+    @Inject(method = "handleCustomQuery", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/network/NetworkManager;send(Lnet/minecraft/network/IPacket;)V"), cancellable = true)
     private void onRequestPayload(final SCustomPayloadLoginPacket packet, final CallbackInfo ci) {
         ci.cancel();
 
         final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.getChannelRegistry();
-        this.mc.execute(() -> {
+        this.minecraft.execute(() -> {
             final EngineConnection connection = (EngineConnection) this;
             if (!channelRegistry.handleLoginRequestPayload(connection, packet)) {
-                PacketSender.sendTo(connection, PacketUtil.createLoginPayloadResponse(null, packet.getTransaction()));
+                PacketSender.sendTo(connection, PacketUtil.createLoginPayloadResponse(null, packet.getTransactionId()));
             }
         });
     }

@@ -39,7 +39,7 @@ import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 public abstract class ClientPlayNetHandlerMixin_Vanilla implements IClientPlayNetHandler {
 
     @Inject(method = "handleCustomPayload", cancellable = true, at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/network/play/server/SCustomPayloadPlayPacket;getChannelName()Lnet/minecraft/util/ResourceLocation;"))
+            target = "Lnet/minecraft/network/play/server/SCustomPayloadPlayPacket;getIdentifier()Lnet/minecraft/util/ResourceLocation;"))
     private void onHandleCustomPayload(final SCustomPayloadPlayPacket packet, final CallbackInfo ci) {
         final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.getChannelRegistry();
         if (channelRegistry.handlePlayPayload((EngineConnection) this, packet)) {
