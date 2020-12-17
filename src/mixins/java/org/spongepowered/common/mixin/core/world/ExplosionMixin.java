@@ -36,6 +36,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.ExplosionContext;
 import net.minecraft.world.World;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -59,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -80,6 +82,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     @Shadow public abstract DamageSource shadow$getDamageSource();
     // @formatter:on
 
+    @Shadow @Final private ExplosionContext damageCalculator;
     private boolean impl$shouldBreakBlocks;
     private boolean impl$shouldDamageEntities;
     private int impl$resolution;
@@ -137,19 +140,13 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             for (final float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
                                 final BlockPos blockpos = new BlockPos(d4, d6, d8);
                                 final BlockState blockstate = this.level.getBlockState(blockpos);
-                                final FluidState ifluidstate = this.level.getFluidState(blockpos);
-                                if (!blockstate.isAir() || !ifluidstate.isEmpty()) {
-                                    float f2 = Math.max(blockstate.getBlock().getExplosionResistance(), ifluidstate.getExplosionResistance());
-                                    if (this.source != null) {
-                                        f2 = this.source.getBlockExplosionResistance((net.minecraft.world.Explosion) (Object) this, this.level,
-                                                blockpos, blockstate, ifluidstate, f2);
-                                    }
-
-                                    f -= (f2 + 0.3F) * 0.3F;
+                                final FluidState fluidstate = this.level.getFluidState(blockpos);
+                                Optional<Float> optional = this.damageCalculator.getBlockExplosionResistance((net.minecraft.world.Explosion) (Object) this, this.level, blockpos, blockstate, fluidstate);
+                                if (optional.isPresent()) {
+                                    f -= (optional.get() + 0.3F) * 0.3F;
                                 }
 
-                                if (f > 0.0F && (this.source == null || this.source.shouldBlockExplode((net.minecraft.world.Explosion)
-                                                (Object) this, this.level, blockpos, blockstate, f))) {
+                                if (f > 0.0F && this.damageCalculator.shouldBlockExplode((net.minecraft.world.Explosion) (Object) this, this.level, blockpos, blockstate, f)) {
                                     set.add(blockpos);
                                 }
 
