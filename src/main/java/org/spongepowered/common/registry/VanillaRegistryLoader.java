@@ -73,6 +73,7 @@ final class VanillaRegistryLoader {
     public static void load(final SpongeRegistryHolder registries) {
         final VanillaRegistryLoader loader = new VanillaRegistryLoader(registries);
         loader.load();
+        registries.createRegistry(Registries.CRITERION, SpongeRegistryLoaders.criteria().values());
     }
 
     private VanillaRegistryLoader(final SpongeRegistryHolder registries) {

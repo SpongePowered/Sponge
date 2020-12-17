@@ -36,7 +36,6 @@ import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
@@ -50,10 +49,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-final class BlockTransactionType extends TransactionType<ChangeBlockEvent.All> {
+public final class BlockTransactionType extends TransactionType<ChangeBlockEvent.All> {
 
-    BlockTransactionType() {
-        super(ResourceKey.sponge("block"), true, "BLOCK");
+    public BlockTransactionType() {
+        super(true, "BLOCK");
     }
 
     @Override

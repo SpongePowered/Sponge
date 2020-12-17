@@ -46,11 +46,13 @@ import net.minecraft.command.arguments.Vec2Argument;
 import net.minecraft.command.arguments.Vec3Argument;
 import net.minecraft.item.Items;
 import net.minecraft.item.MusicDiscItem;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -132,7 +134,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
-import org.spongepowered.api.item.inventory.menu.handler.InventoryCallbackHandler;
 import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.placeholder.PlaceholderParser;
@@ -140,6 +141,8 @@ import org.spongepowered.api.placeholder.PlaceholderParsers;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.scoreboard.criteria.Criteria;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.service.ban.Ban;
@@ -223,6 +226,10 @@ import org.spongepowered.common.event.cause.entity.SpongeSpawnType;
 import org.spongepowered.common.event.cause.entity.SpongeSpawnTypes;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageModifierType;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
+import org.spongepowered.common.event.tracking.context.transaction.type.BlockTransactionType;
+import org.spongepowered.common.event.tracking.context.transaction.type.NoOpTransactionType;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.inventory.menu.handler.SpongeClickType;
 import org.spongepowered.common.inventory.query.SpongeOneParamQueryType;
 import org.spongepowered.common.inventory.query.SpongeQueryTypes;
@@ -259,6 +266,7 @@ import org.spongepowered.plugin.PluginContainer;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -280,6 +288,15 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(BanTypes.IP, k -> new SpongeBanType(k, Ban.IP.class));
             l.add(BanTypes.PROFILE, k -> new SpongeBanType(k, Ban.Profile.class));
+        });
+    }
+
+    public static RegistryLoader<TransactionType<@NonNull ?>> blockTransactionTypes() {
+        return RegistryLoader.of(l -> {
+            l.add(TransactionTypes.BLOCK, k -> new BlockTransactionType());
+            l.add(TransactionTypes.ENTITY_DEATH_DROPS, k -> new NoOpTransactionType<>(false, k.getValue().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.NEIGHBOR_NOTIFICATION, k -> new NoOpTransactionType<>(false, k.getValue().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.SPAWN_ENTITY, k -> new NoOpTransactionType<>(false, k.getValue().toUpperCase(Locale.ROOT)));
         });
     }
 
@@ -378,7 +395,7 @@ public final class SpongeRegistryLoaders {
         });
     }
 
-    public static RegistryLoader<ClickType<? extends InventoryCallbackHandler>> clickType() {
+    public static RegistryLoader<ClickType<?>> clickType() {
         return RegistryLoader.of(l -> l.mapping(SpongeClickType::new, m -> m.add(
                 ClickTypes.CLICK_LEFT,
                 ClickTypes.CLICK_LEFT_OUTSIDE,
@@ -457,6 +474,27 @@ public final class SpongeRegistryLoaders {
             l.add(SpongeCommandRegistrars.MANAGED, SpongeParameterizedCommandRegistrar::new);
             l.add(SpongeCommandRegistrars.RAW, SpongeRawCommandRegistrar::new);
         });
+    }
+
+    public static RegistryLoader<Criterion> criterion() {
+        return RegistryLoader.of(l -> {
+            l.add(Criteria.AIR, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.AIR, k));
+            l.add(Criteria.ARMOR, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.ARMOR, k));
+            l.add(Criteria.DEATH_COUNT, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.DEATH_COUNT, k));
+            l.add(Criteria.DUMMY, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.DUMMY, k));
+            l.add(Criteria.EXPERIENCE, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.EXPERIENCE, k));
+            l.add(Criteria.FOOD, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.FOOD, k));
+            l.add(Criteria.HEALTH, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.HEALTH, k));
+            l.add(Criteria.LEVEL, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.LEVEL, k));
+            l.add(Criteria.PLAYER_KILL_COUNT, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.KILL_COUNT_PLAYERS, k));
+            l.add(Criteria.TOTAL_KILL_COUNT, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.KILL_COUNT_ALL, k));
+            l.add(Criteria.TRIGGER, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.TRIGGER, k));
+        });
+    }
+
+    private static Criterion newCriterion(final ScoreCriteria criteria, final ResourceKey key) {
+        ((ResourceKeyBridge) criteria).bridge$setKey(key);
+        return (Criterion) criteria;
     }
 
     public static RegistryLoader<DamageModifierType> damageModifierType() {
@@ -1183,6 +1221,15 @@ public final class SpongeRegistryLoaders {
         });
     }
 
+    public static RegistryLoader<SelectorSortAlgorithm> selectorSortAlgorithm() {
+        return RegistryLoader.of(l -> {
+            l.add(SelectorSortAlgorithms.ORDER_ARBITRARY, k -> new SpongeSelectorSortAlgorithm(k, EntitySelectorParser.ORDER_ARBITRARY));
+            l.add(SelectorSortAlgorithms.ORDER_FURTHEST, k -> new SpongeSelectorSortAlgorithm(k, EntitySelectorParser.ORDER_FURTHEST));
+            l.add(SelectorSortAlgorithms.ORDER_NEAREST, k -> new SpongeSelectorSortAlgorithm(k, EntitySelectorParser.ORDER_NEAREST));
+            l.add(SelectorSortAlgorithms.ORDER_RANDOM, k -> new SpongeSelectorSortAlgorithm(k, EntitySelectorParser.ORDER_RANDOM));
+        });
+    }
+
     public static RegistryLoader<SelectorType> selectorType() {
         return RegistryLoader.of(l -> {
             l.add(SelectorTypes.ALL_ENTITIES, k -> new SpongeSelectorType(k, "@e"));
@@ -1190,15 +1237,6 @@ public final class SpongeRegistryLoaders {
             l.add(SelectorTypes.NEAREST_PLAYER, k -> new SpongeSelectorType(k, "@p"));
             l.add(SelectorTypes.RANDOM_PLAYER, k -> new SpongeSelectorType(k, "@r"));
             l.add(SelectorTypes.SOURCE, k -> new SpongeSelectorType(k, "@s"));
-        });
-    }
-
-    public static RegistryLoader<SelectorSortAlgorithm> selectorSortAlgorithm() {
-        return RegistryLoader.of(l -> {
-            l.add(SelectorSortAlgorithms.ORDER_ARBITRARY, k -> new SpongeSelectorSortAlgorithm(k, EntitySelectorParser.ORDER_ARBITRARY));
-            l.add(SelectorSortAlgorithms.ORDER_FURTHEST, k -> new SpongeSelectorSortAlgorithm(k, EntitySelectorParser.ORDER_FURTHEST));
-            l.add(SelectorSortAlgorithms.ORDER_NEAREST, k -> new SpongeSelectorSortAlgorithm(k, EntitySelectorParser.ORDER_NEAREST));
-            l.add(SelectorSortAlgorithms.ORDER_RANDOM, k -> new SpongeSelectorSortAlgorithm(k, EntitySelectorParser.ORDER_RANDOM));
         });
     }
 
