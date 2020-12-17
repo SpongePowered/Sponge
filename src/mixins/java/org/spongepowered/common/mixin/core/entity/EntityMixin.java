@@ -488,7 +488,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     )
     private void impl$onStartRiding(final Entity vehicle, final boolean force,
         final CallbackInfoReturnable<Boolean> ci) {
-        if (!this.level.isClientSide && (ShouldFire.RIDE_ENTITY_EVENT_MOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
+        if (!this.level.isClientSide && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
             PhaseTracker.getCauseStackManager().pushCause(this);
             if (SpongeCommon.postEvent(SpongeEventFactory.createRideEntityEventMount(PhaseTracker.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
                 ci.cancel();

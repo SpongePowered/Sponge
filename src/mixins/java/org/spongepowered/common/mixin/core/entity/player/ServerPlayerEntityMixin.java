@@ -130,6 +130,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Shadow public abstract void shadow$stopRiding();
     @Shadow public abstract void shadow$closeContainer();
     @Shadow public abstract void shadow$resetStat(final Stat<?> statistic);
+    @Shadow protected abstract void shadow$tellNeutralMobsThatIDied();
     // @formatter:on
 
     private final User impl$user = this.impl$getUserObjectOnConstruction();
@@ -561,6 +562,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
 
         this.shadow$removeEntitiesOnShoulder();
+        if (this.level.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
+            this.shadow$tellNeutralMobsThatIDied();
+        }
 
         // Sponge Start - update the keep inventory flag for dropping inventory
         // during the death update ticks

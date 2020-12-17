@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.world;
 
+import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.particles.ParticleTypes;
@@ -165,7 +166,7 @@ public abstract class ExplosionMixin_Tracker {
         if (this.fire) {
             for(final BlockPos blockpos2 : this.toBlow) {
                 if (this.random.nextInt(3) == 0 && this.level.getBlockState(blockpos2).isAir() && this.level.getBlockState(blockpos2.below()).isSolidRender(this.level, blockpos2.below())) {
-                    this.level.setBlockAndUpdate(blockpos2, Blocks.FIRE.defaultBlockState());
+                    this.level.setBlockAndUpdate(blockpos2, AbstractFireBlock.getState(this.level, blockpos2));
                 }
             }
         }

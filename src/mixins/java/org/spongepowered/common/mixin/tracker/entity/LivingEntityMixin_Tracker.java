@@ -28,6 +28,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -59,6 +60,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
     @Shadow protected abstract void shadow$dropAllDeathLoot(DamageSource damageSourceIn);
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
     @Shadow public abstract boolean shadow$isEffectiveAi();
+    @Shadow public abstract void shadow$swing(Hand p_184609_1_);
     // @formatter:on
 
     /**

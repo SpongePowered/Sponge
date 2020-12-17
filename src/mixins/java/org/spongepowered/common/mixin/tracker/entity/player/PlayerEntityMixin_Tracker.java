@@ -30,6 +30,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
@@ -94,7 +95,7 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             final PlayerEntity player = (PlayerEntity) (PlayerEntityBridge) this;
 
             final double posX1 = player.getX();
-            final double posY1 = player.getY() - 0.3 + player.getEyeHeight();
+            final double posY1 = this.shadow$getEyeY() - (double)0.3F;
             final double posZ1 = player.getZ();
             // Now the real fun begins.
             final ItemStack item;
@@ -140,7 +141,8 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             }
         }
         // Sponge end
-        final double d0 = this.shadow$getEyeY() - 0.30000001192092896D;
+        this.shadow$swing(Hand.MAIN_HAND);
+        final double d0 = this.shadow$getEyeY() - 0.3F;
         final ItemEntity itemEntity = new ItemEntity(this.level, this.shadow$getX(), d0, this.shadow$getZ(), droppedItem);
         itemEntity.setPickUpDelay(40);
 

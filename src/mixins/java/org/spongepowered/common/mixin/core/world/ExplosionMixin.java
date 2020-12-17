@@ -68,6 +68,7 @@ import java.util.StringJoiner;
 public abstract class ExplosionMixin implements ExplosionBridge {
 
     // @formatter:off
+    @Shadow @Final private ExplosionContext damageCalculator;
     @Shadow @Final private List<BlockPos> toBlow;
     @Shadow @Final private Map<PlayerEntity, Vector3d> hitPlayers;
     @Shadow @Final private boolean fire;
@@ -82,7 +83,6 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     @Shadow public abstract DamageSource shadow$getDamageSource();
     // @formatter:on
 
-    @Shadow @Final private ExplosionContext damageCalculator;
     private boolean impl$shouldBreakBlocks;
     private boolean impl$shouldDamageEntities;
     private int impl$resolution;
