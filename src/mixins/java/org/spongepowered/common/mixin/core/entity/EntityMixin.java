@@ -270,7 +270,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public boolean bridge$dismountRidingEntity(final DismountType type) {
-        if (!this.level.isClientSide && (ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
+        if (!this.level.isClientSide && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
