@@ -127,7 +127,7 @@ public final class PhaseTracker implements CauseStackManager {
         if (blockIn == null) {
             // If the block is null, check with the PhaseState to see if it can perform a safe way
             final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
-            final PhaseTrackerCategory trackerConfig = SpongeConfigs.getCommon().get().getPhaseTracker();
+            final PhaseTrackerCategory trackerConfig = SpongeConfigs.getCommon().get().phaseTracker;
 
             if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
                 // Try to save ourselves
@@ -156,14 +156,14 @@ public final class PhaseTracker implements CauseStackManager {
                                       ? chunk.getBlockState(pos).getBlock()
                                       : worldServer.getBlockState(pos).getBlock();
                     }
-                    if (!contained && trackerConfig.isReportNullSourceBlocks()) {
+                    if (!contained && trackerConfig.reportNullSourceBlocksOnNeighborNotifications) {
                         PhasePrinter.printNullSourceBlockWithTile(pos, blockIn, otherPos, id, useTile, new NullPointerException("Null Source Block For TileEntity Neighbor Notification"));
                     }
                 } else {
                     blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
                                   ? chunk.getBlockState(pos).getBlock()
                                   : worldServer.getBlockState(pos).getBlock();
-                    if (trackerConfig.isReportNullSourceBlocks()) {
+                    if (trackerConfig.reportNullSourceBlocksOnNeighborNotifications) {
                         PhasePrinter.printNullSourceBlockNeighborNotificationWithNoTileSource(pos, blockIn, otherPos,
                             new NullPointerException("Null Source Block For Neighbor Notification"));
                     }
@@ -173,7 +173,7 @@ public final class PhaseTracker implements CauseStackManager {
                 blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
                               ? chunk.getBlockState(pos).getBlock()
                               : worldServer.getBlockState(pos).getBlock();
-                if (trackerConfig.isReportNullSourceBlocks()) {
+                if (trackerConfig.reportNullSourceBlocksOnNeighborNotifications) {
                     PhasePrinter.printNullSourceForBlock(worldServer, pos, blockIn, otherPos, new NullPointerException("Null Source Block For Neighbor Notification"));
                 }
             }
@@ -337,7 +337,7 @@ public final class PhaseTracker implements CauseStackManager {
         checkNotNull(state, "State cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
-        if (this == PhaseTracker.SERVER && SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
+        if (this == PhaseTracker.SERVER && SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             if (this.stack.size() > 6) {
                 if (this.stack.checkForRunaways(state, phaseContext)) {
                     PhasePrinter.printRunawayPhase(this.stack, state, phaseContext);
@@ -383,7 +383,7 @@ public final class PhaseTracker implements CauseStackManager {
             return;
         }
 
-        if (SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
+        if (SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             if (this.stack.checkForRunaways(GeneralPhase.Post.UNWINDING, null)) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
@@ -418,7 +418,7 @@ public final class PhaseTracker implements CauseStackManager {
     }
 
     private void checkPhaseContextProcessed(final IPhaseState<?> state, final PhaseContext<?> context) {
-        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose() && PhasePrinter.printedExceptionsForUnprocessedState.contains(state)) {
+        if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && PhasePrinter.printedExceptionsForUnprocessedState.contains(state)) {
             return;
         }
 

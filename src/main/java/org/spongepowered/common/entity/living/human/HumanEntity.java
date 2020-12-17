@@ -374,7 +374,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     }
 
     public void removeFromTabListDelayed(@Nullable final ServerPlayerEntity player, final SPlayerListItemPacket removePacket) {
-        final int delay = SpongeGameConfigs.getForWorld(this.level).get().getEntity().getHumanPlayerListRemoveDelay();
+        final int delay = SpongeGameConfigs.getForWorld(this.level).get().entity.human.tabListRemoveDelay;
         final Runnable removeTask = () -> this.pushPackets(player, removePacket);
         if (delay == 0) {
             removeTask.run();

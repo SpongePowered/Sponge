@@ -202,8 +202,8 @@ public final class SpongeCommandManager implements CommandManager {
         // We need to consider the configuration file - if there is an entry in there
         // then remove an alias if the command is not entitled to use it.
         SpongeConfigs.getCommon().get()
-                .getCommands()
-                .getAliases()
+                .commands
+                .aliases
                 .entrySet()
                 .stream()
                 .filter(x -> !x.getValue().equalsIgnoreCase(container.getMetadata().getId()))

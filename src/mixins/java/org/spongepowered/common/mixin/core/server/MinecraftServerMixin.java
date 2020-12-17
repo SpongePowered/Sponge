@@ -216,7 +216,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
             return this.tickCount + 1;
         }
 
-        final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().getWorld().getPlayerAutoSaveInterval();
+        final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().world.playerAutoSaveInterval;
         if (autoPlayerSaveInterval > 0 && (this.tickCount % autoPlayerSaveInterval == 0)) {
             this.shadow$getPlayerList().saveAll();
         }
@@ -240,7 +240,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
             // Not forced happens during ticks and when shutting down
             if (!isForced) {
                 final InheritableConfigHandle<WorldConfig> adapter = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
-                final int autoSaveInterval = adapter.get().getWorld().getAutoSaveInterval();
+                final int autoSaveInterval = adapter.get().world.autoSaveInterval;
                 if (log) {
                     if (this.bridge$performAutosaveChecks()) {
                         log = adapter.get().getLogging().logWorldAutomaticSaving();

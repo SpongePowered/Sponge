@@ -110,7 +110,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
         }
 
         final ServicesCategory.ServicePluginSubCategory servicePluginSubCategory =
-                SpongeConfigs.getCommon().get().getServicesCategory().getServicePlugin();
+                SpongeConfigs.getCommon().get().services.plugins;
 
         // We loop over all available services and try to discover each one.
         // This does NOT support third party service interfaces, only impls.

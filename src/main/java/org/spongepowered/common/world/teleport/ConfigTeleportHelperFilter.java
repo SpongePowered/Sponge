@@ -58,26 +58,26 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
 
     private static void updateCacheIfNecessary() {
         if (ConfigTeleportHelperFilter.floorBlockTypes == null) {
-            final TeleportHelperCategory teleportHelperCat = SpongeConfigs.getCommon().get().getTeleportHelper();
-            ConfigTeleportHelperFilter.floorBlockTypes = teleportHelperCat.getUnsafeFloorBlockIds().stream()
+            final TeleportHelperCategory teleportHelperCat = SpongeConfigs.getCommon().get().teleportHelper;
+            ConfigTeleportHelperFilter.floorBlockTypes = teleportHelperCat.unsafeFloorBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
                     .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockType.class, x).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
-            ConfigTeleportHelperFilter.floorBlockStates = teleportHelperCat.getUnsafeFloorBlockIds().stream()
+            ConfigTeleportHelperFilter.floorBlockStates = teleportHelperCat.unsafeFloorBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
                     .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockType.class, x).map(StateContainer::getDefaultState).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
-            ConfigTeleportHelperFilter.bodyBlockTypes = teleportHelperCat.getUnsafeBodyBlockIds().stream()
+            ConfigTeleportHelperFilter.bodyBlockTypes = teleportHelperCat.unsafeBlockBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
                     .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockType.class, x).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
-            ConfigTeleportHelperFilter.bodyBlockStates = teleportHelperCat.getUnsafeBodyBlockIds().stream()
+            ConfigTeleportHelperFilter.bodyBlockStates = teleportHelperCat.unsafeBlockBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
                     .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockType.class, x).map(StateContainer::getDefaultState).orElse(null))
                     .filter(Objects::nonNull)

@@ -121,8 +121,8 @@ class TimingsExport extends Thread {
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
         if (!TimingsManager.privacy) {
             builder.add("server", TimingsExport.getServerName())
-                    .add("motd", SpongeAdventure.plain(Sponge.getServer().getMotd()))
-                    .add("online-mode", Sponge.getServer().getOnlineMode())
+                    .add("motd", SpongeAdventure.plain(Sponge.getServer().getMOTD()))
+                    .add("online-mode", Sponge.getServer().isOnlineModeEnabled())
                     .add("icon", SpongeCommon.getServer().getStatus().getFavicon());
         }
 

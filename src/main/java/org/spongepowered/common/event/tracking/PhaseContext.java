@@ -191,7 +191,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
 
     public P buildAndSwitch() {
         this.isCompleted = true;
-        if (SpongeConfigs.getCommon().get().getPhaseTracker().generateStackTracePerStateEntry()) {
+        if (SpongeConfigs.getCommon().get().phaseTracker.generateStackTracePerPhase) {
             this.stackTrace = new Exception("Debug Trace").getStackTrace();
         }
         PhaseTracker.getInstance().switchToPhase(this.state, this);
@@ -432,7 +432,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
     }
 
     public void printTrace(final PrettyPrinter printer) {
-        if (SpongeConfigs.getCommon().get().getPhaseTracker().generateStackTracePerStateEntry()) {
+        if (SpongeConfigs.getCommon().get().phaseTracker.generateStackTracePerPhase) {
             printer.add("Entrypoint:")
                 .add(this.stackTrace);
         }

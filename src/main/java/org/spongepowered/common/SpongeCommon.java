@@ -116,7 +116,7 @@ public final class SpongeCommon {
     }
 
     public static Path getPluginConfigDirectory() {
-        return Paths.get(SpongeConfigs.getCommon().get().getGeneral().configDir());
+        return Paths.get(SpongeConfigs.getCommon().get().general.configDir.getParsed());
     }
 
     public static Path getSpongeConfigDirectory() {

@@ -268,7 +268,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
 
     @Override
     public Optional<String> getConnectionUrlFromAlias(final String alias) {
-        return Optional.ofNullable(SpongeConfigs.getCommon().get().getSql().getAliases().get(alias));
+        return Optional.ofNullable(SpongeConfigs.getCommon().get().sql.aliases.get(alias));
     }
 
 }

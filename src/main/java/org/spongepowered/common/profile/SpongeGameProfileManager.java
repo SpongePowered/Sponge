@@ -173,7 +173,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
             }
 
             try {
-                Thread.sleep(SpongeConfigs.getCommon().get().getWorld().getGameProfileQueryTaskInterval() * 1000);
+                Thread.sleep(SpongeConfigs.getCommon().get().world.gameProfileQueryTaskInterval * 1000L);
             } catch (final InterruptedException e) {
                 e.printStackTrace();
             }

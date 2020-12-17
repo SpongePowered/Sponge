@@ -82,7 +82,7 @@ public final class PaintingData {
                                 for (final ServerPlayerEntity player : players) {
                                     SpongeCommon.getServerScheduler().submit(Task.builder()
                                             .plugin(Launch.getInstance().getCommonPlugin())
-                                            .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.level).get().getEntity().getPaintingRespawnDelay()))
+                                            .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.level).get().entity.painting.respawnDelay))
                                             .execute(() -> {
                                                 final SSpawnPaintingPacket packet = new SSpawnPaintingPacket(h);
                                                 player.connection.send(packet);

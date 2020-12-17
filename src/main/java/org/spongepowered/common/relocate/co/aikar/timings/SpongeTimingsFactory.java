@@ -48,17 +48,17 @@ public final class SpongeTimingsFactory implements TimingsFactory {
     private final boolean moduleEnabled;
 
     public SpongeTimingsFactory() {
-        this.moduleEnabled = SpongeConfigs.getCommon().get().getModules().usePluginTimings();
+        this.moduleEnabled = SpongeConfigs.getCommon().get().modules.timings;
     }
 
     public TimingsFactory init() {
-        final TimingsCategory category = SpongeConfigs.getCommon().get().getTimings();
-        TimingsManager.privacy = category.isServerNamePrivate();
-        TimingsManager.hiddenConfigs.addAll(category.getHiddenConfigEntries());
-        this.setVerboseTimingsEnabled(category.isVerbose());
-        this.setTimingsEnabled(this.moduleEnabled && category.isEnabled());
-        this.setHistoryInterval(category.getHistoryInterval());
-        this.setHistoryLength(category.getHistoryLength());
+        final TimingsCategory category = SpongeConfigs.getCommon().get().timings;
+        TimingsManager.privacy = category.serverNamePrivacy;
+        TimingsManager.hiddenConfigs.addAll(category.hiddenConfigEntries);
+        this.setVerboseTimingsEnabled(category.verbose);
+        this.setTimingsEnabled(this.moduleEnabled && category.enabled);
+        this.setHistoryInterval(category.historyInterval);
+        this.setHistoryLength(category.historyLength);
 
         SpongeCommon.getLogger().debug("Sponge Timings: " + this.timingsEnabled +
                                     " - Verbose: " + this.verboseEnabled +
