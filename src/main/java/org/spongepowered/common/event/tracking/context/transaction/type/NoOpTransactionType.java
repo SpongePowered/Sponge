@@ -24,13 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.type;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Event;
 
-import java.util.Locale;
+public final class NoOpTransactionType<E extends Event> extends TransactionType<E> {
 
-final class NoOpTransactionType<E extends Event> extends TransactionType<E> {
-    NoOpTransactionType(final boolean isPrimary, final String name) {
-        super(ResourceKey.sponge(name.toLowerCase(Locale.ROOT)), isPrimary, name);
+    public NoOpTransactionType(final boolean isPrimary, final String name) {
+        super(isPrimary, name);
     }
 }

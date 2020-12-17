@@ -24,17 +24,39 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.type;
 
-import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.event.entity.HarvestEntityEvent;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.SpongeCommon;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryScope;
+import org.spongepowered.api.registry.RegistryScopes;
+import org.spongepowered.common.registry.SpongeRegistries;
 
-import java.util.function.Supplier;
-
+@SuppressWarnings("unused")
+@RegistryScopes(scopes = RegistryScope.GAME)
 public final class TransactionTypes {
-    public static final Supplier<TransactionType<ChangeBlockEvent.All>> BLOCK = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "block");
-    public static final Supplier<TransactionType<NotifyNeighborBlockEvent>> NEIGHBOR_NOTIFICATION = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "neighbor_notification");
-    public static final Supplier<TransactionType<SpawnEntityEvent>> SPAWN_ENTITY = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "spawn_entity");
-    public static final Supplier<TransactionType<HarvestEntityEvent>> ENTITY_DEATH_DROPS = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "entity_death_drops");
+
+    // @formatter:off
+
+    // SORTFIELDS:ON
+
+    public static final DefaultedRegistryReference<TransactionType<@NonNull ?>> BLOCK = TransactionTypes.key(ResourceKey.sponge("block"));
+
+    public static final DefaultedRegistryReference<TransactionType<@NonNull ?>> ENTITY_DEATH_DROPS = TransactionTypes.key(ResourceKey.sponge("entity_death_drops"));
+
+    public static final DefaultedRegistryReference<TransactionType<@NonNull ?>> NEIGHBOR_NOTIFICATION = TransactionTypes.key(ResourceKey.sponge("neighbor_notification"));
+
+    public static final DefaultedRegistryReference<TransactionType<@NonNull ?>> SPAWN_ENTITY = TransactionTypes.key(ResourceKey.sponge("spawn_entity"));
+
+    // SORTFIELDS:OFF
+
+    // @formatter:on
+
+    private TransactionTypes() {
+    }
+
+    private static DefaultedRegistryReference<TransactionType<@NonNull ?>> key(final ResourceKey location) {
+        return RegistryKey.of(SpongeRegistries.BLOCK_TRANSACTION_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
+    }
 }
