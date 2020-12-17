@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.config.inheritable;
 
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,36 +34,21 @@ import java.util.Map;
 @ConfigSerializable
 public final class EntityCollisionCategory {
 
-    @Setting("auto-populate")
-    @Comment("If 'true', newly discovered entities/blocks will be added to this config with a default value.")
-    private boolean autoPopulate = false;
-    @Setting("max-entities-within-aabb")
-    @Comment("Maximum amount of entities any given entity or block can collide with. This improves \n"
-             + "performance when there are more than 8 entities on top of each other such as a 1x1 \n"
-             + "spawn pen. Set to 0 to disable.")
-    private int maxEntitiesWithinAABB = 8;
     @Setting("mods")
     @Comment("Per-mod overrides. Refer to the minecraft default mod for example.")
-    private Map<String, CollisionModCategory> modList = new HashMap<>();
+    public final Map<String, CollisionModCategory> modCategories = new HashMap<>();
+
+    @Setting("auto-populate")
+    @Comment("If 'true', newly discovered entities/blocks will be added to this config with a default value.")
+    public boolean autoPopulate = false;
+
+    @Setting("max-entities-within-aabb")
+    @Comment("Maximum amount of entities any given entity or block can collide with. This improves \n"
+        + "performance when there are more than 8 entities on top of each other such as a 1x1 \n"
+        + "spawn pen. Set to 0 to disable.")
+    public int maxEntitiesWithinAABB = 8;
 
     public EntityCollisionCategory() {
-        this.modList.put("minecraft", new CollisionModCategory("minecraft"));
-        this.modList.put("botania", new CollisionModCategory("botania"));
-    }
-
-    public boolean autoPopulateData() {
-        return this.autoPopulate;
-    }
-
-    public Map<String, CollisionModCategory> getModList() {
-        return this.modList;
-    }
-
-    public int getMaxEntitiesWithinAABB() {
-        return this.maxEntitiesWithinAABB;
-    }
-
-    public void setMaxEntitiesWithinAABB(final int maxEntities) {
-        this.maxEntitiesWithinAABB = maxEntities;
+        this.modCategories.put("minecraft", new CollisionModCategory("minecraft"));
     }
 }

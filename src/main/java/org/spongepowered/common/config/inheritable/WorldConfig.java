@@ -25,4 +25,5 @@
 package org.spongepowered.common.config.inheritable;
 
 public final class WorldConfig extends BaseConfig {
+
 }

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.config.inheritable;
 
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,22 +36,10 @@ public final class PlayerBlockTracker {
 
     @Setting("enabled")
     @Comment("If 'true', adds player tracking support for block positions. \n"
-             + "Note: This should only be disabled if you do not care who caused a block to change.")
-    private boolean enabled = true;
+        + "Note: This should only be disabled if you do not care who caused a block to change.")
+    public boolean enabled = true;
 
     @Setting("block-blacklist")
-    @Comment("Block IDs that will be blacklisted for player block placement tracking.")
-    private List<String> blockBlacklist = new ArrayList<>();
-
-    public boolean isEnabled() {
-        return this.enabled;
-    }
-
-    public void setEnabled(final boolean flag) {
-        this.enabled = flag;
-    }
-
-    public List<String> getBlockBlacklist() {
-        return this.blockBlacklist;
-    }
+    @Comment("Blocks that will be blacklisted for player block placement tracking. In namespaced format, ex. 'minecraft:stone'")
+    public List<String> blockBlacklist = new ArrayList<>();
 }

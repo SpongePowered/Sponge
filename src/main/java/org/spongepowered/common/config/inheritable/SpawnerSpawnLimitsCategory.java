@@ -22,21 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity.player;
+package org.spongepowered.common.config.inheritable;
 
-public interface PlayerEntityBridge {
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-    boolean bridge$affectsSpawning();
+@ConfigSerializable
+public final class SpawnerSpawnLimitsCategory {
 
-    void bridge$setAffectsSpawning(boolean affectsSpawning);
+    @Setting()
+    @Comment("The number of ambients the spawner can potentially spawn around a player.")
+    public int ambient = 15;
 
-    boolean bridge$keepInventory();
+    @Setting()
+    @Comment("The number of creatures the spawner can potentially spawn around a player.")
+    public int creature = 10;
 
-    void bridge$shouldRestoreInventory(boolean flag);
+    @Setting("aquatic-creature")
+    @Comment("The number of aquatic creatures the spawner can potentially spawn around a player.")
+    public int aquaticCreature = 5;
 
-    boolean bridge$shouldRestoreInventory();
+    @Setting("aquatic-ambient")
+    @Comment("The number of aquatic ambients the spawner can potentially spawn around a player.")
+    public int aquaticAmbient = 20;
 
-    int bridge$getExperienceSinceLevel();
-
-    void bridge$setExperienceSinceLevel(int experience);
+    @Setting()
+    @Comment("The number of monsters the spawner can potentially spawn around a player.")
+    public int monster = 70;
 }

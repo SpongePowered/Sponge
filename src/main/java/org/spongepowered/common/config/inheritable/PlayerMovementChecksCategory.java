@@ -22,21 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity.player;
+package org.spongepowered.common.config.inheritable;
 
-public interface PlayerEntityBridge {
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-    boolean bridge$affectsSpawning();
+@ConfigSerializable
+public final class PlayerMovementChecksCategory {
 
-    void bridge$setAffectsSpawning(boolean affectsSpawning);
+    @Setting("moved-too-quickly")
+    @Comment("Controls whether the 'player moved too quickly!' check will be enforced")
+    public boolean movedTooQuickly = true;
 
-    boolean bridge$keepInventory();
-
-    void bridge$shouldRestoreInventory(boolean flag);
-
-    boolean bridge$shouldRestoreInventory();
-
-    int bridge$getExperienceSinceLevel();
-
-    void bridge$setExperienceSinceLevel(int experience);
+    @Setting("vehicle-moved-too-quickly")
+    @Comment("Controls whether the 'vehicle of player moved too quickly!' check will be enforced")
+    public boolean vehicleMovedTooQuickly = true;
 }

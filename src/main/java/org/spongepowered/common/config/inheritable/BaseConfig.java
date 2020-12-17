@@ -24,91 +24,60 @@
  */
 package org.spongepowered.common.config.inheritable;
 
+import org.spongepowered.common.applaunch.config.core.Config;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
-import org.spongepowered.common.applaunch.config.core.Config;
 import org.spongepowered.configurate.transformation.TransformAction;
 
 public abstract class BaseConfig implements Config {
 
+    @Setting("player-block-tracker")
+    public final PlayerBlockTracker playerBlockTracker = new PlayerBlockTracker();
+
     @Setting
-    protected WorldCategory world = new WorldCategory();
-    @Setting
-    private PlayerBlockTracker playerBlockTracker = new PlayerBlockTracker();
-    @Setting
-    private EntityCategory entity = new EntityCategory();
+    public final EntityCategory entity = new EntityCategory();
+
     @Setting("entity-activation-range")
-    private EntityActivationRangeCategory entityActivationRange = new EntityActivationRangeCategory();
-    @Setting("entity-collisions")
-    private EntityCollisionCategory entityCollisionCategory = new EntityCollisionCategory();
-    @Setting
-    private LoggingCategory logging = new LoggingCategory();
+    public final EntityActivationRangeCategory entityActivationRange = new EntityActivationRangeCategory();
+
+    @Setting("entity-collision")
+    public final EntityCollisionCategory entityCollision = new EntityCollisionCategory();
+
     @Setting("spawner")
     @Comment("Used to control spawn limits around players. \n"
-            + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
-    private SpawnerCategory spawner = new SpawnerCategory();
-    @Setting("tileentity-activation")
-    private BlockEntityActivationCategory blockEntityActivationCategory = new BlockEntityActivationCategory();
+        + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
+    public final SpawnerCategory spawner = new SpawnerCategory();
+
+    @Setting("blockentity-activation")
+    public final BlockEntityActivationCategory blockEntityActivation = new BlockEntityActivationCategory();
+
     @Setting("movement-checks")
-    private MovementChecksCategory movementChecks = new MovementChecksCategory();
+    public final MovementChecksCategory movementChecks = new MovementChecksCategory();
 
-    public PlayerBlockTracker getBlockTracking() {
-        return this.playerBlockTracker;
-    }
-
-    public EntityCategory getEntity() {
-        return this.entity;
-    }
-
-    public EntityActivationRangeCategory getEntityActivationRange() {
-        return this.entityActivationRange;
-    }
-
-    public EntityCollisionCategory getEntityCollisionCategory() {
-        return this.entityCollisionCategory;
-    }
-
-    public LoggingCategory getLogging() {
-        return this.logging;
-    }
-
-    public SpawnerCategory getSpawner() {
-        return this.spawner;
-    }
-
-    public WorldCategory getWorld() {
-        return this.world;
-    }
-
-    public BlockEntityActivationCategory getTileEntityActivationRange() {
-        return this.blockEntityActivationCategory;
-    }
-
-    public MovementChecksCategory getMovementChecks() {
-        return this.movementChecks;
-    }
+    @Setting
+    public final WorldCategory world = new WorldCategory();
 
     @Override
     public ConfigurationTransformation getTransformation() {
         return ConfigurationTransformation.versionedBuilder()
-                .addVersion(2, this.buildOneToTwo())
-                // move everything out of sponge subcategory
-                .addVersion(1, this.buildInitialToOne())
-                .build();
+            .addVersion(2, this.buildOneToTwo())
+            // move everything out of sponge subcategory
+            .addVersion(1, this.buildInitialToOne())
+            .build();
     }
 
     protected ConfigurationTransformation buildOneToTwo() {
         return ConfigurationTransformation.builder()
-                .addAction(NodePath.path("world", "portal-agents"), TransformAction.remove())
-                .build();
+            .addAction(NodePath.path("world", "portal-agents"), TransformAction.remove())
+            .build();
     }
 
     protected ConfigurationTransformation buildInitialToOne() {
         return ConfigurationTransformation.builder()
-                .addAction(NodePath.path("sponge"), (path, value) -> new Object[0])
-                .build();
+            .addAction(NodePath.path("sponge"), (path, value) -> new Object[0])
+            .build();
     }
 }
 

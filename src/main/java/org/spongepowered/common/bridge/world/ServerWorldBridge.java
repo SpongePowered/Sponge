@@ -68,6 +68,4 @@ public interface ServerWorldBridge {
     void bridge$triggerExplosion(Explosion explosion);
 
     void bridge$setManualSave(boolean state);
-
-    IServerWorldInfo bridge$getServerLevelData();
 }

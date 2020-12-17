@@ -60,10 +60,6 @@ public interface IServerWorldInfoBridge {
 
     void bridge$setPVPEnabled(boolean state);
 
-    boolean bridge$doesGenerateBonusChest();
-
-    void bridge$setGenerateBonusChest(boolean state);
-
     boolean bridge$doesLoadOnStartup();
 
     void bridge$setLoadOnStartup(boolean state);
@@ -79,10 +75,6 @@ public interface IServerWorldInfoBridge {
     SerializationBehavior bridge$getSerializationBehavior();
 
     void bridge$setSerializationBehavior(SerializationBehavior behavior);
-
-    boolean bridge$isModCreated();
-
-    void bridge$setModCreated(boolean state);
 
     boolean bridge$isValid();
 

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.config.inheritable;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -52,8 +52,8 @@ public final class InheritableConfigHandle<T extends BaseConfig> extends ConfigH
     }
 
     public InheritableConfigHandle(final T instance,
-            final ConfigurationLoader<? extends CommentedConfigurationNode> loader,
-            final @Nullable InheritableConfigHandle<?> parent) {
+        final ConfigurationLoader<? extends CommentedConfigurationNode> loader,
+        final @Nullable InheritableConfigHandle<?> parent) {
         super(instance, loader);
         this.parent = parent;
     }
@@ -71,7 +71,7 @@ public final class InheritableConfigHandle<T extends BaseConfig> extends ConfigH
         V ret = getter.apply(this.get());
         if (ret == null && populate) {
             setter.accept(this.get());
-            if(this.parent != null) {
+            if (this.parent != null) {
                 setter.accept(this.parent.get());
             }
             ret = getter.apply(this.get());

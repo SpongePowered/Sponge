@@ -22,21 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity.player;
+package org.spongepowered.common.config.inheritable;
 
-public interface PlayerEntityBridge {
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-    boolean bridge$affectsSpawning();
+@ConfigSerializable
+public final class ItemEntityCategory {
 
-    void bridge$setAffectsSpawning(boolean affectsSpawning);
-
-    boolean bridge$keepInventory();
-
-    void bridge$shouldRestoreInventory(boolean flag);
-
-    boolean bridge$shouldRestoreInventory();
-
-    int bridge$getExperienceSinceLevel();
-
-    void bridge$setExperienceSinceLevel(int experience);
+    @Setting("despawn-rate")
+    @Comment("Controls the time in ticks for when an item despawns.")
+    public int despawnRate = 6000;
 }

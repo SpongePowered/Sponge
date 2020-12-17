@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
+import net.minecraft.util.datafix.codec.DatapackCodec;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
-import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -48,16 +48,15 @@ public final class WorldArchetypeStreamGenerator {
         return Stream.of(
                 WorldArchetypeStreamGenerator.newArchetype(ResourceKey.sponge("overworld"), DimensionTypes.OVERWORLD),
                 WorldArchetypeStreamGenerator.newArchetype(ResourceKey.sponge("the_nether"), DimensionTypes.THE_NETHER),
-                WorldArchetypeStreamGenerator.newArchetype(ResourceKey.sponge("the_end"), DimensionTypes.THE_END),
-                WorldArchetypeStreamGenerator.newArchetype(ResourceKey.sponge("the_void"), DimensionTypes.THE_END) // TODO Minecraft 1.15 - Do a void generator
+                WorldArchetypeStreamGenerator.newArchetype(ResourceKey.sponge("the_end"), DimensionTypes.THE_END)
         );
     }
 
     private static WorldArchetype newArchetype(final ResourceKey key, final Supplier<DimensionType> dimensionType) {
-        final WorldSettings archetype = new WorldSettings(SpongeWorldArchetypeBuilder.RANDOM.nextLong(), GameType.SURVIVAL, true, false,
-                WorldType.DEFAULT);
+        final WorldSettings archetype = new WorldSettings(key.getValue(), GameType.SURVIVAL, false,
+            Difficulty.NORMAL, true, new GameRules(), DatapackCodec.DEFAULT);
         ((ResourceKeyBridge) (Object) archetype).bridge$setKey(key);
-        ((WorldSettingsBridge) (Object) archetype).bridge$setDimensionType((SpongeDimensionType) dimensionType.get());
+        ((WorldSettingsBridge) (Object) archetype).bridge$setDimensionType((net.minecraft.world.DimensionType) dimensionType.get());
         ((WorldSettingsBridge) (Object) archetype).bridge$setDifficulty(Difficulty.NORMAL);
         if (dimensionType.get() == DimensionTypes.OVERWORLD.get()) {
             ((WorldSettingsBridge) (Object) archetype).bridge$setGenerateSpawnOnLoad(true);

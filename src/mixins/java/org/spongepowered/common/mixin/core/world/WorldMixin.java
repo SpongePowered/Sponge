@@ -25,46 +25,26 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.storage.ISpawnWorldInfo;
-import net.minecraft.world.storage.IWorldInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.WorldAccessor;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-
-import java.util.Random;
 
 @Mixin(net.minecraft.world.World.class)
 public abstract class WorldMixin implements WorldBridge, IWorld {
 
     // @formatter: off
-    @Shadow @Final public boolean isClientSide;
-    @Shadow @Final public Random random;
-    @Shadow @Final protected AbstractChunkProvider chunkProvider;
-
-    @Shadow public abstract WorldInfo shadow$getWorldInfo();
     @Shadow public abstract void shadow$calculateInitialSkylight();
     @Shadow public abstract boolean shadow$isThundering();
     @Shadow public abstract boolean shadow$isRaining();
-
+    @Shadow public abstract RegistryKey<World> shadow$dimension();
+    @Shadow public abstract DimensionType shadow$dimensionType();
     // @formatter on
 
-    @Shadow @Final protected ISpawnWorldInfo levelData;
-
-    @Shadow public abstract RegistryKey<World> shadow$dimension();
-
-    @Shadow public abstract IWorldInfo shadow$getLevelData();
-
-    @Shadow public abstract DimensionType shadow$dimensionType();
-
+    @Shadow @Final private DimensionType dimensionType;
     private boolean impl$isFake = false;
     private boolean impl$hasCheckedFakeState = false;
 
@@ -73,7 +53,8 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
         if (this.impl$hasCheckedFakeState) {
             return this.impl$isFake;
         }
-        this.impl$isFake = this.isClientSide || this.shadow$getWorldInfo() == null || this.shadow$getWorldInfo().getWorldName() == null || !(this instanceof TrackedWorldBridge);
+
+        this.impl$isFake = this.isClientSide();
         this.impl$hasCheckedFakeState = true;
         return this.impl$isFake;
     }
@@ -85,7 +66,8 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
 
     @Override
     public void bridge$adjustDimensionLogic(final DimensionType dimensionType) {
-        ((DimensionTypeBridge) this.dimension.getType()).bridge$setSpongeDimensionType(dimensionType);
-        ((WorldAccessor) this).accessor$setDimension(this.dimension.getType().create((World) (Object) this));
+        this.dimensionType = dimensionType;
+
+        // TODO Minecraft 1.16.4 - Re-create the WorldBorder due to new coordinate scale, send that updated packet to players
     }
 }

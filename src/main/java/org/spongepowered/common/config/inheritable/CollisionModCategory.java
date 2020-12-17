@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.config.inheritable;
 
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,51 +34,32 @@ import java.util.Map;
 @ConfigSerializable
 public final class CollisionModCategory {
 
+    @Setting("entity-default")
+    public Integer entityDefault = 8;
+
+    @Setting("block-default")
+    public Integer blockDefault = 8;
+
+    @Setting("blocks")
+    public final Map<String, Integer> blocks = new HashMap<>();
+
+    @Setting("entities")
+    public final Map<String, Integer> entities = new HashMap<>();
+
     @Setting("enabled")
     @Comment("If 'false', entity collision rules for this mod will be ignored.")
-    private boolean enabled = true;
-    @Setting("defaults")
-    @Comment("Default maximum collisions used for all entities/blocks unless overridden.")
-    private Map<String, Integer> defaultMaxCollisions = new HashMap<>();
-    @Setting("blocks")
-    private Map<String, Integer> blockList = new HashMap<>();
-    @Setting("entities")
-    private Map<String, Integer> entityList = new HashMap<>();
+    public boolean enabled = true;
 
-    public CollisionModCategory() {
-        this.defaultMaxCollisions.put("blocks", 8);
-        this.defaultMaxCollisions.put("entities", 8);
-    }
-
-    public CollisionModCategory(final String modId) {
-        if (modId.equals("minecraft")) {
-            this.blockList.put("detector_rail", 1);
-            this.blockList.put("heavy_weighted_pressure_plate", 150);
-            this.blockList.put("light_weighted_pressure_plate", 15);
-            this.blockList.put("mob_spawner", -1);
-            this.blockList.put("stone_pressure_plate", 1);
-            this.blockList.put("wooden_button", 1);
-            this.blockList.put("wooden_pressure_plate", 1);
-            this.entityList.put("thrownpotion", -1);
-        } else if (modId.equals("botania")) {
-            this.entityList.put("spark", -1);
-            this.entityList.put("corporeaspark", -1);
+    public CollisionModCategory(final String namespace) {
+        if (namespace.equals("minecraft")) {
+            this.blocks.put("detector_rail", 1);
+            this.blocks.put("heavy_weighted_pressure_plate", 150);
+            this.blocks.put("light_weighted_pressure_plate", 15);
+            this.blocks.put("mob_spawner", -1);
+            this.blocks.put("stone_pressure_plate", 1);
+            this.blocks.put("wooden_button", 1);
+            this.blocks.put("wooden_pressure_plate", 1);
+            this.entities.put("thrownpotion", -1);
         }
-    }
-
-    public boolean isEnabled() {
-        return this.enabled;
-    }
-
-    public Map<String, Integer> getDefaultMaxCollisions() {
-        return this.defaultMaxCollisions;
-    }
-
-    public Map<String, Integer> getBlockList() {
-        return this.blockList;
-    }
-
-    public Map<String, Integer> getEntityList() {
-        return this.entityList;
     }
 }

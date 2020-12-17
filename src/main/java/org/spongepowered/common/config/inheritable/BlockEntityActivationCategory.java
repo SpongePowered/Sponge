@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.config.inheritable;
 
-
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -35,35 +34,22 @@ import java.util.Map;
 @ConfigSerializable
 public final class BlockEntityActivationCategory {
 
-    @Setting
+    @Setting("auto-populate")
     @Comment("If 'true', newly discovered block entities will be added to this config with default settings.")
-    private boolean autoPopulate = false;
-    @Setting
+    public boolean autoPopulate = false;
+
+    @Setting("range-default")
     @Comment("Default activation block range used for all block entities unless overridden.")
-    private int defaultBlockRange = 64;
-    @Setting
+    public int rangeDefault = 64;
+
+    @Setting("tick-rate-default")
     @Comment("Default tick rate used for all block entities unless overridden.")
-    private int defaultTickRate = 1;
+    public int tickRateDefault = 1;
+
     @Setting("mods")
     @Comment("Per-mod overrides. Refer to the minecraft default mod for example.")
-    private Map<String, BlockEntityActivationModCategory> modList = new HashMap<>();
+    public final Map<String, BlockEntityActivationModCategory> modCategories = new HashMap<>();
 
     public BlockEntityActivationCategory() {
-    }
-
-    public boolean autoPopulateData() {
-        return this.autoPopulate;
-    }
-
-    public int getDefaultBlockRange() {
-        return this.defaultBlockRange;
-    }
-
-    public int getDefaultTickRate() {
-        return this.defaultTickRate;
-    }
-
-    public Map<String, BlockEntityActivationModCategory> getModList() {
-        return this.modList;
     }
 }

@@ -30,31 +30,29 @@ import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.IServerWorldInfo;
+import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.ServerWorldInfo;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
-import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
-import org.spongepowered.common.accessor.world.server.ServerChunkProviderAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -63,7 +61,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nonnull;
@@ -77,7 +74,6 @@ import java.util.StringJoiner;
 public abstract class ServerWorldMixin extends WorldMixin implements ServerWorldBridge, PlatformServerWorldBridge, ResourceKeyBridge {
 
     // @formatter:off
-    @Shadow @Final private IServerWorldInfo serverLevelData;
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract List<ServerPlayerEntity> shadow$players();
     @Shadow protected abstract void shadow$saveLevelData();
@@ -92,7 +88,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             return false;
         }
 
-        final ServerWorld world = ((SpongeWorldManager) ((Server) this.shadow$getServer()).getWorldManager()).getWorld(this.shadow$getDimension().getType());
+        final ServerWorld world = SpongeCommon.getServer().getLevel(this.shadow$dimension());
         if (world == null) {
             return false;
         }
@@ -101,30 +97,24 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     @Override
-    public void bridge$adjustDimensionLogic(final SpongeDimensionType dimensionType) {
+    public void bridge$adjustDimensionLogic(final DimensionType dimensionType) {
         if (this.bridge$isFake()) {
             return;
         }
 
         super.bridge$adjustDimensionLogic(dimensionType);
 
-        final ChunkGenerator<?> chunkGenerator = this.dimension.createChunkGenerator();
-        ((ServerChunkProviderAccessor) this.chunkProvider).accessor$generator(chunkGenerator);
-        ((ChunkManagerAccessor) ((ServerChunkProvider) this.chunkProvider).chunkMap).accessor$generator(chunkGenerator);
-
-        for (final ServerPlayerEntity player : this.shadow$players()) {
-            ((ServerPlayerEntityBridge) player).bridge$sendViewerEnvironment(dimensionType);
-        }
+        // TODO Minecraft 1.16.2 - Rebuild level stems, get generator from type, set generator
+        // TODO ...or cache generator on type?
     }
 
     @Override
     public CustomServerBossInfoManager bridge$getBossBarManager() {
-
         if (this.impl$bossBarManager == null) {
-            if (this.dimension.getType() == DimensionType.OVERWORLD || this.bridge$isFake()) {
+            if (World.OVERWORLD.equals(this.shadow$dimension()) || this.bridge$isFake()) {
                 this.impl$bossBarManager = this.shadow$getServer().getCustomBossEvents();
             } else {
-                this.impl$bossBarManager = new CustomServerBossInfoManager(this.shadow$getServer());
+                this.impl$bossBarManager = new CustomServerBossInfoManager();
             }
         }
 
@@ -149,40 +139,44 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     @Override
-    public void bridge$setWeather(Weather weather, long ticks) {
+    public void bridge$setWeather(final Weather weather, final long ticks) {
+        final ServerWorldInfo levelData = (ServerWorldInfo) this.getLevelData();
+
         if (weather == Weathers.CLEAR.get()) {
-            this.serverLevelData.setClearWeatherTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.serverLevelData.setRainTime(0);
-            this.serverLevelData.setThunderTime(0);
-            this.serverLevelData.setRaining(false);
-            this.serverLevelData.setThundering(false);
+            levelData.setClearWeatherTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            levelData.setRainTime(0);
+            levelData.setThunderTime(0);
+            levelData.setRaining(false);
+            levelData.setThundering(false);
         } else if (weather == Weathers.RAIN.get()) {
-            this.serverLevelData.setClearWeatherTime(0);
-            this.serverLevelData.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.serverLevelData.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.serverLevelData.setRaining(true);
-            this.serverLevelData.setThundering(false);
+            levelData.setClearWeatherTime(0);
+            levelData.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            levelData.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            levelData.setRaining(true);
+            levelData.setThundering(false);
         } else if (weather == Weathers.THUNDER.get()) {
-            this.serverLevelData.setClearWeatherTime(0);
-            this.serverLevelData.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.serverLevelData.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            this.serverLevelData.setRaining(true);
-            this.serverLevelData.setThundering(true);
+            levelData.setClearWeatherTime(0);
+            levelData.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            levelData.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            levelData.setRaining(true);
+            levelData.setThundering(true);
         }
     }
 
     @Override
     public long bridge$getDurationInTicks() {
+        final ServerWorldInfo levelData = (ServerWorldInfo) this.getLevelData();
+
         if (this.shadow$isThundering()) {
-            return this.serverLevelData.getThunderTime();
+            return levelData.getThunderTime();
         }
         if (this.shadow$isRaining()) {
-            return this.serverLevelData.getRainTime();
+            return levelData.getRainTime();
         }
-        if (this.serverLevelData.getClearWeatherTime() > 0) {
-            return this.serverLevelData.getClearWeatherTime();
+        if (levelData.getClearWeatherTime() > 0) {
+            return levelData.getClearWeatherTime();
         }
-        return Math.min(this.serverLevelData.getThunderTime(), this.serverLevelData.getRainTime());
+        return Math.min(levelData.getThunderTime(), levelData.getRainTime());
     }
 
     @Override
@@ -235,28 +229,23 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     @Override
-    public IServerWorldInfo bridge$getServerLevelData() {
-        return this.serverLevelData;
-    }
-
-    @Override
     public ResourceKey bridge$getKey() {
-        return ((ResourceKeyBridge) this.shadow$getWorldInfo()).bridge$getKey();
+        return (ResourceKey) (Object) this.shadow$dimension().location();
     }
 
-    @Override
-    public void bridge$setKey(final ResourceKey key) {
-        ((ResourceKeyBridge) this.shadow$getWorldInfo()).bridge$setKey(key);
+    @Redirect(method = "saveLevelData", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorldData()Lnet/minecraft/world/storage/IServerConfiguration;"))
+    private IServerConfiguration impl$usePerWorldLevelDataForDragonFight(final MinecraftServer server) {
+        return (IServerConfiguration) this.getLevelData();
     }
 
     /**
-     * @author zidane - November 24th, 2020 - Minecraft 1.15.2
+     * @author zidane - December 17th, 2020 - Minecraft 1.16.4
      * @reason Honor our serialization behavior in performing saves
      */
     @Overwrite
     public void save(@Nullable IProgressUpdate progress, boolean flush, boolean skipSave) {
         final ServerWorld this$ = (ServerWorld) (Object) this;
-        final ServerWorldInfo levelData = (ServerWorldInfo) this.shadow$getLevelData();
+        final ServerWorldInfo levelData = (ServerWorldInfo) this.getLevelData();
 
         ServerChunkProvider serverchunkprovider = this$.getChunkSource();
 
@@ -275,12 +264,13 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
                 // Sponge Start - We do per-world WorldInfo/WorldBorders/BossBars
 
-                this.getWorldBorder().copyTo(this$.getWorldInfo());
+                levelData.setWorldBorder(this.getWorldBorder().createSettings());
 
                 levelData.setCustomBossEvents(((ServerWorldBridge) this$).bridge$getBossBarManager().save());
 
                 ((MinecraftServerAccessor) SpongeCommon.getServer()).accessor$storageSource().saveDataTag(SpongeCommon.getServer().registryAccess()
-                    , (ServerWorldInfo) this.levelData, this.shadow$dimension() == World.OVERWORLD ? SpongeCommon.getServer().getPlayerList().getSingleplayerData() : null);
+                    , (ServerWorldInfo) this.getLevelData(), this.shadow$dimension() == World.OVERWORLD ? SpongeCommon.getServer().getPlayerList()
+                        .getSingleplayerData() : null);
 
                 // Sponge End
             }

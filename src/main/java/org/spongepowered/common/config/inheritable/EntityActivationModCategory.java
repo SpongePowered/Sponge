@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.config.inheritable;
 
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,23 +34,22 @@ import java.util.Map;
 @ConfigSerializable
 public final class EntityActivationModCategory {
 
+    @Setting("default-ranges")
+    @Comment("Default activation ranges used for all entities unless overridden.")
+    private final Map<String, Integer> defaultRanges = new HashMap<>();
+
+    @Setting("entities")
+    public final Map<String, Integer> entities = new HashMap<>();
+
     @Setting("enabled")
     @Comment("If 'false', entity activation rules for this mod will be ignored and always tick.")
-    private boolean isEnabled = true;
-    @Setting("defaults")
-    private Map<String, Integer> defaultRanges = new HashMap<>();
-    @Setting("entities")
-    private Map<String, Integer> entityList = new HashMap<>();
+    public boolean enabled = true;
 
-    public boolean isEnabled() {
-        return this.isEnabled;
-    }
-
-    public Map<String, Integer> getDefaultRanges() {
-        return this.defaultRanges;
-    }
-
-    public Map<String, Integer> getEntityList() {
-        return this.entityList;
+    public EntityActivationModCategory() {
+        this.defaultRanges.put("ambient", 32);
+        this.defaultRanges.put("aquatic", 32);
+        this.defaultRanges.put("creature", 32);
+        this.defaultRanges.put("monster", 32);
+        this.defaultRanges.put("misc", 16);
     }
 }

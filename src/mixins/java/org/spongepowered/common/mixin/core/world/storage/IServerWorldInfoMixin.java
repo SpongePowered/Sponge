@@ -106,12 +106,12 @@ public interface IServerWorldInfoMixin extends IServerWorldInfoBridge, ResourceK
 
     @Override
     default boolean bridge$isEnabled() {
-        return this.bridge$getConfigAdapter().get().getWorld().isWorldEnabled();
+        return this.bridge$getConfigAdapter().get().getWorld().isEnabled();
     }
 
     @Override
     default void bridge$setEnabled(final boolean state) {
-        this.bridge$getConfigAdapter().get().getWorld().setWorldEnabled(state);
+        this.bridge$getConfigAdapter().get().getWorld().setEnabled(state);
     }
 
     @Override
@@ -122,16 +122,6 @@ public interface IServerWorldInfoMixin extends IServerWorldInfoBridge, ResourceK
     @Override
     default void bridge$setPVPEnabled(final boolean state) {
         this.bridge$getConfigAdapter().get().getWorld().setPVPEnabled(state);
-    }
-
-    @Override
-    default boolean bridge$doesGenerateBonusChest() {
-        return this.bridge$getConfigAdapter().get().getWorld().getGenerateBonusChest();
-    }
-
-    @Override
-    default void bridge$setGenerateBonusChest(final boolean state) {
-        this.bridge$getConfigAdapter().get().getWorld().setGenerateBonusChest(state);
     }
 
     @Override
@@ -172,16 +162,6 @@ public interface IServerWorldInfoMixin extends IServerWorldInfoBridge, ResourceK
     @Override
     default void bridge$setSerializationBehavior(final SerializationBehavior behavior) {
         this.bridge$getConfigAdapter().get().getWorld().setSerializationBehavior(behavior);
-    }
-
-    @Override
-    default boolean bridge$isModCreated() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default void bridge$setModCreated(boolean state) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
     }
 
     @Nullable

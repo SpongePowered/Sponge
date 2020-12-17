@@ -212,7 +212,6 @@ public final class Constants {
             public static final class Projectile {
 
                 public static final String PROJECTILE_DAMAGE_AMOUNT = "damageAmount";
-                public static final String PROJECTILE_SOURCE = "projectileSource";
             }
 
             public static final class EyeOfEnder {
@@ -256,8 +255,6 @@ public final class Constants {
 
             public static final String DIMENSION_TYPE = "dimensionType";
             public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
-            public static final String IS_MOD_CREATED = "isModCreated";
-            public static final DataQuery WORLD_CUSTOM_SETTINGS = DataQuery.of("customSettings");
             public static final String LEVEL_SPONGE_DAT = "level_sponge.dat";
             public static final String LEVEL_SPONGE_DAT_OLD = World.LEVEL_SPONGE_DAT + "_old";
             public static final String LEVEL_SPONGE_DAT_NEW = World.LEVEL_SPONGE_DAT + "_new";
@@ -393,8 +390,6 @@ public final class Constants {
             .of(net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN,
                 net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH);
         public static final ResourceKey INVALID_WORLD_KEY = ResourceKey.sponge("invalid_world");
-        public static final String LEVEL_DAT = "level.dat";
-        public static final String LEVEL_DAT_OLD = World.LEVEL_DAT + "_old";
     }
 
     public static final class Chunk {

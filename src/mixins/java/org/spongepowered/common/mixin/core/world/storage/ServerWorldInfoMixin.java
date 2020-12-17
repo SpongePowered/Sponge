@@ -33,7 +33,9 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
+import net.minecraft.network.rcon.IServer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DimensionType;
@@ -42,6 +44,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.ServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -73,7 +76,7 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 @Mixin(ServerWorldInfo.class)
-public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin {
+public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, IServerConfiguration {
 
     // @formatter:off
     @Shadow private WorldSettings settings;
@@ -116,7 +119,7 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin {
             return null;
         }
 
-        final IServerWorldInfo levelData = ((ServerWorldBridge) world).bridge$getServerLevelData();
+        final IServerWorldInfo levelData = (IServerWorldInfo) world.getLevelData();
         if (levelData != this) {
             return null;
         }
@@ -215,7 +218,6 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin {
         final ResourceLocation dimensionTypeKey = SpongeCommon.getServer().registryAccess().dimensionTypes().getKey(this.impl$dimensionType);
         spongeDataCompound.putString(Constants.Sponge.World.DIMENSION_TYPE, dimensionTypeKey.toString());
         spongeDataCompound.putUUID(Constants.Sponge.World.UNIQUE_ID, this.bridge$getUniqueId());
-        spongeDataCompound.putBoolean(Constants.Sponge.World.IS_MOD_CREATED, this.bridge$isModCreated());
         spongeDataCompound.putBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY, this.bridge$hasCustomDifficulty());
 
         this.bridge$writeTrackedPlayerTable(spongeDataCompound);
@@ -226,18 +228,18 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin {
     @Override
     public void bridge$readSpongeLevelData(final CompoundNBT compound) {
         if (!compound.contains(Constants.Sponge.SPONGE_DATA)) {
-            // TODO Minecraft 1.15 - Bad Sponge level data...warn/crash?
+            // TODO Minecraft 1.16 - Bad Sponge level data...warn/crash?
             return;
         }
 
-        // TODO TODO Minecraft 1.15 - Run DataFixer on the SpongeData compound
+        // TODO Minecraft 1.16 - Run DataFixer on the SpongeData compound
 
         final CompoundNBT spongeDataCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
 
         final String rawDimensionType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
         this.impl$dimensionType = SpongeCommon.getServer().registryAccess().dimensionTypes().getOptional(new ResourceLocation(rawDimensionType))
             .orElseGet(() -> {
-            SpongeCommon.getLogger().warn("WorldProperties '{}' specifies dimension type '{}' which does not exist, defaulting to '{}'",
+            SpongeCommon.getLogger().warn("Level data '{}' specifies dimension type '{}' which does not exist, defaulting to '{}'",
                 this.shadow$getLevelName(), rawDimensionType, World.OVERWORLD.location());
 
             return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.OVERWORLD_LOCATION);
@@ -250,10 +252,8 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin {
         }
 
         if (spongeDataCompound.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY)) {
-            // TODO read custom difficulty
             this.bridge$forceSetDifficulty(this.shadow$getDifficulty());
         }
-        this.bridge$setModCreated(spongeDataCompound.getBoolean(Constants.Sponge.World.IS_MOD_CREATED));
 
         this.impl$trackedUniqueIdCount = 0;
         if (spongeDataCompound.contains(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
@@ -289,6 +289,15 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin {
             return this.impl$customDifficulty;
         }
         return settings.difficulty();
+    }
+
+    @Override
+    public IServerWorldInfo overworldData() {
+        if (World.OVERWORLD.location().equals(this.impl$key)) {
+            return (IServerWorldInfo) this;
+        }
+
+        return (IServerWorldInfo) SpongeCommon.getServer().getLevel(World.OVERWORLD).getLevelData();
     }
 
     void impl$updateWorldForDifficultyChange(final ServerWorld serverWorld, final boolean isLocked) {

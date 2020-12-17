@@ -24,22 +24,15 @@
  */
 package org.spongepowered.common.world;
 
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
-import org.spongepowered.common.config.inheritable.LoggingCategory;
 
 @DefaultQualifier(NonNull.class)
 public enum BlockChange {
 
     BREAK() {
-        @Override
-        public boolean allowsLogging(final LoggingCategory category) {
-            return category.blockBreakLogging();
-        }
-
         @Override
         public Operation toOperation() {
             return Operations.BREAK.get();
@@ -53,21 +46,11 @@ public enum BlockChange {
     },
     MODIFY() {
         @Override
-        public boolean allowsLogging(final LoggingCategory category) {
-            return category.blockModifyLogging();
-        }
-
-        @Override
         public Operation toOperation() {
             return Operations.MODIFY.get();
         }
     },
     PLACE() {
-        @Override
-        public boolean allowsLogging(final LoggingCategory category) {
-            return category.blockPlaceLogging();
-        }
-
         @Override
         public Operation toOperation() {
             return Operations.PLACE.get();
@@ -80,13 +63,7 @@ public enum BlockChange {
         }
     };
 
-    BlockChange() { }
-
-
-    public boolean allowsLogging(final LoggingCategory category) {
-        return false;
-    }
+    BlockChange() {}
 
     public abstract Operation toOperation();
-
 }

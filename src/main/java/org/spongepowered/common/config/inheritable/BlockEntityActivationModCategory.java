@@ -35,50 +35,21 @@ import java.util.Map;
 public final class BlockEntityActivationModCategory {
 
     @Setting
-    @Comment("If 'false', tileentity activation rules for this mod will be ignored and always tick.")
-    private boolean enabled = true;
-    @Setting
-    private Integer defaultBlockRange;
-    @Setting
-    private Integer defaultTickRate;
-    @Setting("block-range")
-    private Map<String, Integer> tileEntityRangeList = new HashMap<>();
-    @Setting("tick-rate")
-    private Map<String, Integer> tileEntityTickRateList = new HashMap<>();
+    @Comment("If 'false', block entity activation rules for this mod will be ignored and always tick.")
+    public boolean enabled = true;
+
+    @Setting("range-default")
+    public Integer rangeDefault;
+
+    @Setting("tick-rate-default")
+    public Integer tickRateDefault;
+
+    @Setting("ranges")
+    public final Map<String, Integer> ranges = new HashMap<>();
+
+    @Setting("tick-rates")
+    public final Map<String, Integer> tickRates = new HashMap<>();
 
     public BlockEntityActivationModCategory() {
-    }
-
-    public BlockEntityActivationModCategory(final String modId) {
-        if (modId.equalsIgnoreCase("computercraft")) {
-            this.tileEntityRangeList.put("advanced_modem", 0);
-            this.tileEntityRangeList.put("ccprinter", 0);
-            this.tileEntityRangeList.put("diskdrive", 0);
-            this.tileEntityRangeList.put("turtleex", 0);
-            this.tileEntityRangeList.put("wiredmodem", 0);
-            this.tileEntityRangeList.put("wirelessmodem", 0);
-        } else if (modId.equalsIgnoreCase("plethora-core")) {
-            this.tileEntityRangeList.put("plethora:manipulator", 0);
-        }
-    }
-
-    public boolean isEnabled() {
-        return this.enabled;
-    }
-
-    public Integer getDefaultBlockRange() {
-        return this.defaultBlockRange;
-    }
-
-    public Integer getDefaultTickRate() {
-        return this.defaultTickRate;
-    }
-
-    public Map<String, Integer> getTileEntityRangeList() {
-        return this.tileEntityRangeList;
-    }
-
-    public Map<String, Integer> getTileEntityTickRateList() {
-        return this.tileEntityTickRateList;
     }
 }

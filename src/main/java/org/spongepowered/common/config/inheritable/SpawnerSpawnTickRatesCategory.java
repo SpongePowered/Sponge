@@ -22,21 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity.player;
+package org.spongepowered.common.config.inheritable;
 
-public interface PlayerEntityBridge {
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-    boolean bridge$affectsSpawning();
+@ConfigSerializable
+public final class SpawnerSpawnTickRatesCategory {
 
-    void bridge$setAffectsSpawning(boolean affectsSpawning);
+    @Setting()
+    @Comment("The ambient spawning tick rate. Default: 400")
+    public int ambient = 400;
 
-    boolean bridge$keepInventory();
+    @Setting()
+    @Comment("The creature spawning tick rate. Default: 400")
+    public int creature = 400;
 
-    void bridge$shouldRestoreInventory(boolean flag);
+    @Setting("aquatic-creature")
+    @Comment("The aquatic creature spawning tick rate. Default: 1")
+    public int aquaticCreature = 1;
 
-    boolean bridge$shouldRestoreInventory();
+    @Setting("aquatic-ambient")
+    @Comment("The aquatic ambient spawning tick rate. Default: 1")
+    public int aquaticAmbient = 1;
 
-    int bridge$getExperienceSinceLevel();
-
-    void bridge$setExperienceSinceLevel(int experience);
+    @Setting()
+    @Comment("The monster ambient spawning tick rate. Default: 1")
+    public int monster = 1;
 }

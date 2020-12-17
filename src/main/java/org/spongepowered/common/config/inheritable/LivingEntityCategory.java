@@ -22,21 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity.player;
+package org.spongepowered.common.config.inheritable;
 
-public interface PlayerEntityBridge {
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-    boolean bridge$affectsSpawning();
+@ConfigSerializable
+public final class LivingEntityCategory {
 
-    void bridge$setAffectsSpawning(boolean affectsSpawning);
+    @Setting("soft-despawn-range")
+    @Comment("The lower bounded range where living entities near a player may potentially despawn")
+    public int softDespawnRange = 32;
 
-    boolean bridge$keepInventory();
+    @Setting("hard-despawn-range")
+    @Comment("The upper bounded range where living entities farther from a player will likely despawn")
+    public int hardDespawnRange = 128;
 
-    void bridge$shouldRestoreInventory(boolean flag);
-
-    boolean bridge$shouldRestoreInventory();
-
-    int bridge$getExperienceSinceLevel();
-
-    void bridge$setExperienceSinceLevel(int experience);
+    @Setting("soft-despawn-minimum-life")
+    @Comment("The amount of seconds before a living entity between the soft and hard despawn ranges from a player to be considered for despawning")
+    public int softDespawnMinimumLife = 30;
 }
