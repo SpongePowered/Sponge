@@ -38,18 +38,35 @@ public final class BlockEntityActivationCategory {
     @Comment("If 'true', newly discovered block entities will be added to this config with default settings.")
     public boolean autoPopulate = false;
 
-    @Setting("range-default")
+    @Setting("default-range")
     @Comment("Default activation block range used for all block entities unless overridden.")
-    public int rangeDefault = 64;
+    public int defaultRange = 64;
 
-    @Setting("tick-rate-default")
+    @Setting("default-tick-rate")
     @Comment("Default tick rate used for all block entities unless overridden.")
-    public int tickRateDefault = 1;
+    public int defaultTickRate = 1;
 
-    @Setting("mods")
+    @Setting
     @Comment("Per-mod overrides. Refer to the minecraft default mod for example.")
-    public final Map<String, BlockEntityActivationModCategory> modCategories = new HashMap<>();
+    public final Map<String, MobSubCategory> mods = new HashMap<>();
 
-    public BlockEntityActivationCategory() {
+    @ConfigSerializable
+    public static final class MobSubCategory {
+
+        @Setting
+        @Comment("If 'false', block entity activation rules for this mod will be ignored and always tick.")
+        public boolean enabled = true;
+
+        @Setting("default-range")
+        public Integer defaultRange;
+
+        @Setting("default-tick-rate")
+        public Integer defaultTickRate;
+
+        @Setting()
+        public final Map<String, Integer> ranges = new HashMap<>();
+
+        @Setting("tick-rates")
+        public final Map<String, Integer> tickRates = new HashMap<>();
     }
 }

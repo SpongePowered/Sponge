@@ -34,9 +34,9 @@ import java.util.Map;
 @ConfigSerializable
 public final class EntityCollisionCategory {
 
-    @Setting("mods")
+    @Setting
     @Comment("Per-mod overrides. Refer to the minecraft default mod for example.")
-    public final Map<String, CollisionModCategory> modCategories = new HashMap<>();
+    public final Map<String, ModSubCategory> mods = new HashMap<>();
 
     @Setting("auto-populate")
     @Comment("If 'true', newly discovered entities/blocks will be added to this config with a default value.")
@@ -49,6 +49,39 @@ public final class EntityCollisionCategory {
     public int maxEntitiesWithinAABB = 8;
 
     public EntityCollisionCategory() {
-        this.modCategories.put("minecraft", new CollisionModCategory("minecraft"));
+        this.mods.put("minecraft", new ModSubCategory("minecraft"));
+    }
+
+    @ConfigSerializable
+    public static final class ModSubCategory {
+
+        @Setting("entity-default")
+        public Integer entityDefault = 8;
+
+        @Setting("block-default")
+        public Integer blockDefault = 8;
+
+        @Setting
+        public final Map<String, Integer> blocks = new HashMap<>();
+
+        @Setting
+        public final Map<String, Integer> entities = new HashMap<>();
+
+        @Setting
+        @Comment("If 'false', entity collision rules for this mod will be ignored.")
+        public boolean enabled = true;
+
+        public ModSubCategory(final String namespace) {
+            if (namespace.equals("minecraft")) {
+                this.blocks.put("detector_rail", 1);
+                this.blocks.put("heavy_weighted_pressure_plate", 150);
+                this.blocks.put("light_weighted_pressure_plate", 15);
+                this.blocks.put("mob_spawner", -1);
+                this.blocks.put("stone_pressure_plate", 1);
+                this.blocks.put("wooden_button", 1);
+                this.blocks.put("wooden_pressure_plate", 1);
+                this.entities.put("thrownpotion", -1);
+            }
+        }
     }
 }

@@ -22,34 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.inheritable;
+package org.spongepowered.common.config.metrics;
 
+import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.api.util.Tristate;
+import org.spongepowered.common.applaunch.config.core.Config;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public final class EntityActivationModCategory {
+public final class MetricsConfig implements Config {
 
-    @Setting("default-ranges")
-    @Comment("Default activation ranges used for all entities unless overridden.")
-    private final Map<String, Integer> defaultRanges = new HashMap<>();
+    public static final String FILE_NAME = SpongeConfigs.METRICS_NAME;
 
-    @Setting("entities")
-    public final Map<String, Integer> entities = new HashMap<>();
+    @Setting("global-state")
+    @Comment("The global collection state that should be respected by all plugins that have no specified "
+             + "collection state. If undefined then it is treated as disabled.")
+    public Tristate globalState = Tristate.UNDEFINED;
 
-    @Setting("enabled")
-    @Comment("If 'false', entity activation rules for this mod will be ignored and always tick.")
-    public boolean enabled = true;
+    @Setting
+    @Comment("Plugin-specific collection states that override the global collection state.")
+    public final Map<String, Tristate> plugins = new HashMap<>();
 
-    public EntityActivationModCategory() {
-        this.defaultRanges.put("ambient", 32);
-        this.defaultRanges.put("aquatic", 32);
-        this.defaultRanges.put("creature", 32);
-        this.defaultRanges.put("monster", 32);
-        this.defaultRanges.put("misc", 16);
+    public Tristate getCollectionState(final PluginContainer container) {
+        final Tristate pluginState = this.plugins.get(container.getMetadata().getId());
+        return pluginState == null ? Tristate.UNDEFINED : pluginState;
+    }
+
+    @Override
+    public ConfigurationTransformation getTransformation() {
+        return ConfigurationTransformation.versionedBuilder()
+                .makeVersion(1, b ->
+                        b.addAction(NodePath.path("metrics"), (path, value) -> new Object[0]))
+                .build();
     }
 }

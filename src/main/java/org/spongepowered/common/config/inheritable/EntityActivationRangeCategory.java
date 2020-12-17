@@ -36,15 +36,15 @@ public final class EntityActivationRangeCategory {
 
     @Setting("global-ranges")
     @Comment("Default activation ranges used for all entities unless overridden.")
-    private final Map<String, Integer> globalRanges = new HashMap<>();
+    public final Map<String, Integer> globalRanges = new HashMap<>();
 
-    @Setting("mods")
+    @Setting
     @Comment("Per-mod overrides. Refer to the minecraft default mod for example.")
-    private final Map<String, EntityActivationModCategory> modCategories = new HashMap<>();
+    public final Map<String, ModSubCategory> mods = new HashMap<>();
 
     @Setting("auto-populate")
     @Comment("If 'true', newly discovered entities will be added to this config with a default value.")
-    private final boolean autoPopulate = false;
+    public final boolean autoPopulate = false;
 
     public EntityActivationRangeCategory() {
         this.globalRanges.put("ambient", 32);
@@ -52,5 +52,28 @@ public final class EntityActivationRangeCategory {
         this.globalRanges.put("creature", 32);
         this.globalRanges.put("monster", 32);
         this.globalRanges.put("misc", 16);
+    }
+
+    @ConfigSerializable
+    public static final class ModSubCategory {
+
+        @Setting("default-ranges")
+        @Comment("Default activation ranges used for all entities unless overridden.")
+        public final Map<String, Integer> defaultRanges = new HashMap<>();
+
+        @Setting
+        public final Map<String, Integer> entities = new HashMap<>();
+
+        @Setting
+        @Comment("If 'false', entity activation rules for this mod will be ignored and always tick.")
+        public boolean enabled = true;
+
+        public ModSubCategory() {
+            this.defaultRanges.put("ambient", 32);
+            this.defaultRanges.put("aquatic", 32);
+            this.defaultRanges.put("creature", 32);
+            this.defaultRanges.put("monster", 32);
+            this.defaultRanges.put("misc", 16);
+        }
     }
 }

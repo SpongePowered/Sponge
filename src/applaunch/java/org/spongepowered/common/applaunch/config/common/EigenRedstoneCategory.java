@@ -31,31 +31,18 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 @ConfigSerializable
 public class EigenRedstoneCategory {
 
-    @Setting("enabled")
+    @Setting
     @Comment("If 'true', uses theosib's redstone implementation which improves performance. \n"
             + "See https://bugs.mojang.com/browse/MC-11193 and \n "
             + "    https://bugs.mojang.com/browse/MC-81098 for more information. \n"
             + "Note: We cannot guarantee compatibility with mods. Use at your discretion.")
-    private boolean isEnabled = false;
+    public boolean enabled = false;
+
     @Setting("vanilla-search")
     @Comment("If 'true', restores the vanilla algorithm for propagating redstone wire changes.")
-    private boolean vanillaSearch = false;
+    public boolean vanillaSearch = false;
+
     @Setting("vanilla-decrement")
     @Comment("If 'true', restores the vanilla algorithm for computing wire power levels when powering off.")
-    private boolean vanillaDecrement = false;
-
-    public EigenRedstoneCategory() {
-    }
-
-    public boolean isEnabled() {
-        return this.isEnabled;
-    }
-
-    public boolean vanillaSearch() {
-        return this.vanillaSearch;
-    }
-
-    public boolean vanillaDecrement() {
-        return this.vanillaDecrement;
-    }
+    public boolean vanillaDecrement = false;
 }

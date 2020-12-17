@@ -58,7 +58,6 @@ import java.util.stream.Stream;
  */
 public final class SpongeConfigs {
 
-
     public static final Blackboard.Key<Boolean> IS_VANILLA_PLATFORM = Blackboard.Key.of("is_vanilla", Boolean.class);
 
     public static final String GLOBAL_NAME = "global.conf";

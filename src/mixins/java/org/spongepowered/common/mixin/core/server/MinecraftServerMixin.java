@@ -216,7 +216,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
             return this.tickCount + 1;
         }
 
-        final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().getWorld().getAutoPlayerSaveInterval();
+        final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().getWorld().getPlayerAutoSaveInterval();
         if (autoPlayerSaveInterval > 0 && (this.tickCount % autoPlayerSaveInterval == 0)) {
             this.shadow$getPlayerList().saveAll();
         }

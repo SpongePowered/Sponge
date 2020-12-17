@@ -32,13 +32,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public class SqlCategory {
+public final class SqlCategory {
 
     @Setting
     @Comment("Aliases for SQL connections, in the format jdbc:protocol://[username[:password]@]host/database")
-    private Map<String, String> aliases = new HashMap<>();
-
-    public Map<String, String> getAliases() {
-        return this.aliases;
-    }
+    public final Map<String, String> aliases = new HashMap<>();
 }

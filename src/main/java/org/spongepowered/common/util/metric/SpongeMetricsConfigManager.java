@@ -31,7 +31,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.config.metrics.MetricsConfiguration;
+import org.spongepowered.common.config.metrics.MetricsConfig;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Map;
@@ -40,14 +40,14 @@ import java.util.concurrent.CompletableFuture;
 @Singleton
 public final class SpongeMetricsConfigManager implements MetricsConfigManager {
 
-    private final ConfigHandle<MetricsConfiguration> metrics;
+    private final ConfigHandle<MetricsConfig> metrics;
 
     public SpongeMetricsConfigManager() {
         // This needs to be loaded after the global-inheritable configuration
         // is loaded. That load is performed by the sponge non-inheritable
         // configuration which is loaded way earlier in the lifecycle since it
         // is used to configure mixin plugins.
-        this.metrics = SpongeConfigs.create(new MetricsConfiguration(), MetricsConfiguration.FILE_NAME);
+        this.metrics = SpongeConfigs.create(new MetricsConfig(), MetricsConfig.FILE_NAME);
     }
 
     public CompletableFuture<CommentedConfigurationNode> savePluginsInConfig(final Map<String, Tristate> entries) {

@@ -33,32 +33,11 @@ public class DebugCategory {
 
     @Setting("thread-contention-monitoring")
     @Comment("If 'true', Java's thread contention monitoring for thread dumps is enabled.")
-    private boolean enableThreadContentionMonitoring = false;
+    public boolean threadContentionMonitoring = false;
 
     @Setting("concurrent-entity-checks")
     @Comment("Detect and prevent certain attempts to use entities concurrently. \n"
                                                          + "WARNING: May drastically decrease server performance. Only set this to 'true' "
                                                          + "to debug a pre-existing issue.")
-    private boolean concurrentEntityChecks = false;
-
-    @Setting("concurrent-chunk-map-checks")
-    @Comment("Detect and prevent parts of PlayerChunkMap being called off the main thread.\n"
-            + "This may decrease sever preformance, so you should only enable it when debugging a specific issue.")
-    private boolean concurrentChunkMapChecks = false;
-
-    public boolean doConcurrentEntityChecks() {
-        return this.concurrentEntityChecks;
-    }
-
-    public boolean doConcurrentChunkMapChecks() {
-        return this.concurrentChunkMapChecks;
-    }
-
-    public boolean isEnableThreadContentionMonitoring() {
-        return this.enableThreadContentionMonitoring;
-    }
-
-    public void setEnableThreadContentionMonitoring(final boolean enableThreadContentionMonitoring) {
-        this.enableThreadContentionMonitoring = enableThreadContentionMonitoring;
-    }
+    public boolean concurrentEntityChecks = false;
 }

@@ -35,6 +35,18 @@ public final class MovementChecksCategory {
     @Comment("Controls whether the 'player/entity moved wrongly!' check will be enforced")
     public boolean movedWrongly = true;
 
-    @Setting("player")
-    public final PlayerMovementChecksCategory player = new PlayerMovementChecksCategory();
+    @Setting
+    public final PlayerSubCategory player = new PlayerSubCategory();
+
+    @ConfigSerializable
+    public static final class PlayerSubCategory {
+
+        @Setting("moved-too-quickly")
+        @Comment("Controls whether the 'player moved too quickly!' check will be enforced")
+        public boolean movedTooQuickly = true;
+
+        @Setting("vehicle-moved-too-quickly")
+        @Comment("Controls whether the 'vehicle of player moved too quickly!' check will be enforced")
+        public boolean vehicleMovedTooQuickly = true;
+    }
 }

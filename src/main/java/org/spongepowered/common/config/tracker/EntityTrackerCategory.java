@@ -32,26 +32,57 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public class EntityTrackerCategory {
+public final class EntityTrackerCategory {
 
-    @Setting
+    @Setting("auto-populate")
     @Comment("If 'true', newly discovered entities will be added to this config with default settings.")
-    private boolean autoPopulate = false;
+    public boolean autoPopulate = false;
 
-    @Setting("mods")
+    @Setting()
     @Comment("Per-mod entity id mappings for controlling tracking behavior")
-    private Map<String, EntityTrackerModCategory> modMapping = new HashMap<>();
-
-    public Map<String, EntityTrackerModCategory> getModMappings() {
-        return this.modMapping;
-    }
+    public final Map<String, EntityTrackerModCategory> mods = new HashMap<>();
 
     public EntityTrackerCategory() {
-        this.modMapping.put("minecraft", new EntityTrackerModCategory("minecraft"));
+        this.mods.put("minecraft", new EntityTrackerModCategory("minecraft"));
     }
 
-    public boolean autoPopulateData() {
-        return this.autoPopulate;
-    }
+    @ConfigSerializable
+    public static final class EntityTrackerModCategory {
 
+        @Setting
+        @Comment("If 'false', all tracking for this mod will be ignored.")
+        public boolean enabled = true;
+
+        @Setting(TrackerConfig.BLOCK_BULK_CAPTURE)
+        @Comment("Set to true to perform block bulk capturing during entity ticks. (Default: true)")
+        public final Map<String, Boolean> blockBulkCapture = new HashMap<>();
+
+        @Setting(TrackerConfig.BLOCK_EVENT_CREATION)
+        @Comment("Set to true to create and fire block events during entity ticks. (Default: true)")
+        public final Map<String, Boolean> blockEventCreation = new HashMap<>();
+
+        @Setting(TrackerConfig.ENTITY_BULK_CAPTURE)
+        @Comment("Set to true to perform entity bulk capturing during entity ticks. (Default: true)")
+        public final Map<String, Boolean> entityBulkCapture = new HashMap<>();
+
+        @Setting(TrackerConfig.ENTITY_EVENT_CREATION)
+        @Comment("Set to true to create and fire entity events during entity ticks. (Default: true)")
+        public final Map<String, Boolean> entityEventCreation = new HashMap<>();
+
+        public EntityTrackerModCategory() {
+        }
+
+        public EntityTrackerModCategory(final String name) {
+            if (name.equals("minecraft")) {
+                // These entities don't modify the world or spawn any drops
+                // Skipping bulk capturing should be transparent to plugins
+                this.blockBulkCapture.put("item", false);
+                this.blockBulkCapture.put("experience_orb", false);
+                this.blockBulkCapture.put("leash_hitch", false);
+                this.blockBulkCapture.put("painting", false);
+                this.blockBulkCapture.put("armor_stand", false);
+                this.blockBulkCapture.put("llama_spit", false);
+            }
+        }
+    }
 }

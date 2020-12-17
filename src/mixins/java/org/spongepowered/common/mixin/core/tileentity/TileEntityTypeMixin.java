@@ -64,7 +64,7 @@ public abstract class TileEntityTypeMixin implements ResourceKeyBridge, TileEnti
         final TrackableBridge trackableBridge = (TrackableBridge) tileEntityType;
 
         final ConfigHandle<TrackerConfig> trackerConfigAdapter = SpongeGameConfigs.getTracker();
-        final BlockEntityTrackerCategory blockEntityTracker = trackerConfigAdapter.get().getBlockEntityTracker();
+        final BlockEntityTrackerCategory blockEntityTracker = trackerConfigAdapter.get().getBlockEntity();
 
         BlockEntityTrackerModCategory modCapturing = blockEntityTracker.getModMappings().get(plugin.getMetadata().getId());
 

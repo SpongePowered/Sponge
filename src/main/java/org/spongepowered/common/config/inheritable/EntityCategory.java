@@ -39,15 +39,55 @@ public final class EntityCategory {
     @Comment("Square of the maximum speed of an entity before removing it. Set to 0 to disable")
     public int maxSpeed = 100;
 
-    @Setting("human")
-    public HumanEntityCategory human = new HumanEntityCategory();
+    @Setting
+    public final HumanSubCategory human = new HumanSubCategory();
 
-    @Setting("item")
-    public ItemEntityCategory item = new ItemEntityCategory();
+    @Setting
+    public final ItemSubCategory item = new ItemSubCategory();
 
-    @Setting("living")
-    public LivingEntityCategory living = new LivingEntityCategory();
+    @Setting
+    public final LivingSubCategory living = new LivingSubCategory();
 
-    @Setting("painting")
-    public PaintingEntityCategory painting = new PaintingEntityCategory();
+    @Setting
+    public final PaintingSubCategory painting = new PaintingSubCategory();
+
+    @ConfigSerializable
+    public static final class HumanSubCategory {
+
+        @Setting("tab-list-remove-delay")
+        @Comment("Number of ticks before the fake player entry of a human is removed from the tab list (range of 0 to 100 ticks).")
+        public int tabListRemoveDelay = 10;
+    }
+
+    @ConfigSerializable
+    public static final class LivingSubCategory {
+
+        @Setting("soft-despawn-range")
+        @Comment("The lower bounded range where living entities near a player may potentially despawn")
+        public int softDespawnRange = 32;
+
+        @Setting("hard-despawn-range")
+        @Comment("The upper bounded range where living entities farther from a player will likely despawn")
+        public int hardDespawnRange = 128;
+
+        @Setting("soft-despawn-minimum-life")
+        @Comment("The amount of seconds before a living entity between the soft and hard despawn ranges from a player to be considered for despawning")
+        public int softDespawnMinimumLife = 30;
+    }
+
+    @ConfigSerializable
+    public static final class PaintingSubCategory {
+
+        @Setting("respawn-delay")
+        @Comment("Number of ticks before a painting is respawned on clients when their art is changed")
+        public int respawnDelay = 2;
+    }
+
+    @ConfigSerializable
+    public static final class ItemSubCategory {
+
+        @Setting("despawn-rate")
+        @Comment("Controls the time in ticks for when an item despawns.")
+        public int despawnRate = 6000;
+    }
 }

@@ -46,11 +46,10 @@ public abstract class BaseConfig implements Config {
     public final EntityCollisionCategory entityCollision = new EntityCollisionCategory();
 
     @Setting("spawner")
-    @Comment("Used to control spawn limits around players. \n"
-        + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
+    @Comment("Used to control spawn limits around a player's view distance.")
     public final SpawnerCategory spawner = new SpawnerCategory();
 
-    @Setting("blockentity-activation")
+    @Setting("block-entity-activation")
     public final BlockEntityActivationCategory blockEntityActivation = new BlockEntityActivationCategory();
 
     @Setting("movement-checks")

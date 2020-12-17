@@ -40,7 +40,7 @@ public final class WorldCategory {
         + "Note: Increasing the radius higher will likely cause performance degradation \n"
         + "with larger amount of items as they attempt to merge and search nearby \n"
         + "areas for more items. Setting to a negative value is not supported!")
-    private final double itemMergeRadius = 2.5D;
+    public final double itemMergeRadius = 2.5D;
 
     @Setting("auto-save-interval")
     @Comment("The auto-save tick interval used to save all loaded chunks in a world. \n"
@@ -48,7 +48,7 @@ public final class WorldCategory {
         + "Note: 20 ticks is equivalent to 1 second.")
     public int autoSaveInterval = 6000;
 
-    @Setting("enabled")
+    @Setting
     @Comment("If 'true', this world will be registered.")
     public boolean enabled = true;
 
@@ -68,7 +68,7 @@ public final class WorldCategory {
     @Comment("If 'true', this worlds spawn will remain loaded with no players.")
     public Boolean keepSpawnLoaded = false;
 
-    @Setting("pvp")
+    @Setting
     @Comment("If 'true', this world will allow PVP combat.")
     public boolean pvp = true;
 
@@ -96,7 +96,7 @@ public final class WorldCategory {
         + "Note: This gets reset if the chunk becomes active again.")
     public int chunkUnloadDelay = 15;
 
-    @Setting("thunderstorms")
+    @Setting()
     @Comment("If 'true', thunderstorms will be initiated in supported biomes.")
     public boolean thunderstorms = true;
 
@@ -112,5 +112,5 @@ public final class WorldCategory {
 
     @Setting("log-auto-save")
     @Comment("Log when a world auto-saves its chunk data. Note: This may be spammy depending on the auto-save-interval configured for world.")
-    private final boolean logAutoSave = false;
+    public final boolean logAutoSave = false;
 }

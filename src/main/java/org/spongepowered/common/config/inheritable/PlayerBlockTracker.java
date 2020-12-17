@@ -34,12 +34,12 @@ import java.util.List;
 @ConfigSerializable
 public final class PlayerBlockTracker {
 
-    @Setting("enabled")
+    @Setting
     @Comment("If 'true', adds player tracking support for block positions. \n"
         + "Note: This should only be disabled if you do not care who caused a block to change.")
     public boolean enabled = true;
 
     @Setting("block-blacklist")
     @Comment("Blocks that will be blacklisted for player block placement tracking. In namespaced format, ex. 'minecraft:stone'")
-    public List<String> blockBlacklist = new ArrayList<>();
+    public final List<String> blockBlacklist = new ArrayList<>();
 }

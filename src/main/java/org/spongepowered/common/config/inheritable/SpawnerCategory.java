@@ -25,14 +25,63 @@
 package org.spongepowered.common.config.inheritable;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @ConfigSerializable
 public final class SpawnerCategory {
 
     @Setting("spawn-limits")
-    public SpawnerSpawnLimitsCategory spawnLimits = new SpawnerSpawnLimitsCategory();
+    public final SpawnLimitsSubCategory spawnLimits = new SpawnLimitsSubCategory();
 
     @Setting("tick-rates")
-    public SpawnerSpawnTickRatesCategory tickRates = new SpawnerSpawnTickRatesCategory();
+    public final TickRatesSubCategory tickRates = new TickRatesSubCategory();
+
+    @ConfigSerializable
+    public static final class SpawnLimitsSubCategory {
+
+        @Setting
+        @Comment("The number of ambients the spawner can potentially spawn around a player.")
+        public int ambient = 15;
+
+        @Setting
+        @Comment("The number of creatures the spawner can potentially spawn around a player.")
+        public int creature = 10;
+
+        @Setting("aquatic-creature")
+        @Comment("The number of aquatic creatures the spawner can potentially spawn around a player.")
+        public int aquaticCreature = 5;
+
+        @Setting("aquatic-ambient")
+        @Comment("The number of aquatic ambients the spawner can potentially spawn around a player.")
+        public int aquaticAmbient = 20;
+
+        @Setting
+        @Comment("The number of monsters the spawner can potentially spawn around a player.")
+        public int monster = 70;
+    }
+
+    @ConfigSerializable
+    public static final class TickRatesSubCategory {
+
+        @Setting
+        @Comment("The ambient spawning tick rate. Default: 400")
+        public int ambient = 400;
+
+        @Setting
+        @Comment("The creature spawning tick rate. Default: 400")
+        public int creature = 400;
+
+        @Setting("aquatic-creature")
+        @Comment("The aquatic creature spawning tick rate. Default: 1")
+        public int aquaticCreature = 1;
+
+        @Setting("aquatic-ambient")
+        @Comment("The aquatic ambient spawning tick rate. Default: 1")
+        public int aquaticAmbient = 1;
+
+        @Setting
+        @Comment("The monster ambient spawning tick rate. Default: 1")
+        public int monster = 1;
+    }
 }

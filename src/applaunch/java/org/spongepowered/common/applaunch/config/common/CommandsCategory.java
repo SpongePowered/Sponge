@@ -32,14 +32,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public class CommandsCategory {
+public final class CommandsCategory {
 
     @Setting
     @Comment("Command aliases will resolve conflicts when multiple plugins request a specific command, \n"
                      + "Correct syntax is <unqualified command>=<plugin name> e.g. \"sethome=homeplugin\"")
-    private Map<String, String> aliases = new HashMap<>();
+    public final Map<String, String> aliases = new HashMap<>();
 
-    @Setting
+    @Setting("enforce-permission-checks-on-non-sponge-commands")
     @Comment("Some mods may not trigger a permission check when running their command. Setting this to\n"
              + "true will enforce a check of the Sponge provided permission (\"<modid>.command.<commandname>\").\n"
              + "Note that setting this to true may cause some commands that are generally accessible to all to\n"
@@ -48,32 +48,10 @@ public class CommandsCategory {
              + "tab completion and Sponge's help command.\n\n"
              + "If you are not using a permissions plugin, it is highly recommended that this is set to false\n"
              + "(as it is by default).")
-    private boolean enforcePermissionChecksOnNonSpongeCommands = false;
+    public boolean enforcePermissionChecksOnNonSpongeCommands = false;
 
-    @Setting("multi-world-patches")
-    @Comment("Patches the specified commands to respect the world of the sender instead of applying the \n"
-                                                    + "changes on the all worlds.")
-    private Map<String, Boolean> multiWorldCommandPatches = new HashMap<>();
-
-    @Setting
+    @Setting("commands-hidden")
     @Comment("Defines how Sponge should act when a user tries to access a command they do not have\n"
                      + "permission for")
-    private CommandsHiddenCategory commandHiding = new CommandsHiddenCategory();
-
-    public boolean isEnforcePermissionChecksOnNonSpongeCommands() {
-        return this.enforcePermissionChecksOnNonSpongeCommands;
-    }
-
-    public Map<String, String> getAliases() {
-        return this.aliases;
-    }
-
-    public Map<String, Boolean> getMultiWorldCommandPatches() {
-        return this.multiWorldCommandPatches;
-    }
-
-    public CommandsHiddenCategory getCommandHiding() {
-        return this.commandHiding;
-    }
-
+    public final CommandsHiddenCategory commandsHidden = new CommandsHiddenCategory();
 }

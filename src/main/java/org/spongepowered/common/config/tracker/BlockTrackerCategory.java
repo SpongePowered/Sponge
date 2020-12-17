@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.config.tracker;
 
-
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -33,26 +32,41 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public class BlockTrackerCategory {
+public final class BlockTrackerCategory {
+
+    @Setting("auto-populate")
+    @Comment("If 'true', newly discovered blocks will be added to this config with default settings.")
+    public boolean autoPopulate = false;
 
     @Setting
-    @Comment("If 'true', newly discovered blocks will be added to this config with default settings.")
-    private boolean autoPopulate = false;
-
-    @Setting(value = "mods")
     @Comment("Per-mod block id mappings for controlling tracking behavior")
-    private Map<String, BlockTrackerModCategory> modMapping = new HashMap<>();
+    public final Map<String, ModSubCategory> mods = new HashMap<>();
 
     public BlockTrackerCategory() {
-        this.modMapping.put("minecraft", new BlockTrackerModCategory("minecraft"));
+        this.mods.put("minecraft", new ModSubCategory());
     }
 
-    public Map<String, BlockTrackerModCategory> getModMappings() {
-        return this.modMapping;
-    }
+    @ConfigSerializable
+    public static final class ModSubCategory {
 
-    public boolean autoPopulateData() {
-        return this.autoPopulate;
-    }
+        @Setting
+        @Comment("If 'false', all tracking for this mod will be ignored.")
+        public boolean enabled = true;
 
+        @Setting(TrackerConfig.BLOCK_BULK_CAPTURE)
+        @Comment("Set to true to perform block bulk capturing during block ticks. (Default: true)")
+        public final Map<String, Boolean> blockBulkCapture = new HashMap<>();
+
+        @Setting(TrackerConfig.ENTITY_BULK_CAPTURE)
+        @Comment("Set to true to perform entity bulk capturing during block ticks. (Default: true)")
+        public final Map<String, Boolean> entityBulkCapture = new HashMap<>();
+
+        @Setting(TrackerConfig.BLOCK_EVENT_CREATION)
+        @Comment("Set to true to create and fire block events during block ticks. (Default: true)")
+        public final Map<String, Boolean> blockEventCreation = new HashMap<>();
+
+        @Setting(TrackerConfig.ENTITY_EVENT_CREATION)
+        @Comment("Set to true to create and fire entity events during block ticks. (Default: true)")
+        public final Map<String, Boolean> entityEventCreation = new HashMap<>();
+    }
 }

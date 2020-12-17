@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 @ConfigSerializable
-public class CustomDataRegistrationCategory {
+public final class CustomDataRegistrationCategory {
 
     /**
      * This isn't so much of a config option, this is more of allowing the
@@ -59,21 +59,21 @@ public class CustomDataRegistrationCategory {
                  + "are accounted for. A warning will be emitted for any existing \n"
                  + "registrations that were not registered, and moved to the \n"
                  + "'failed-data-list'.")
-    private Set<String> registeredDataIds = new ConcurrentSkipListSet<>();
+    public final Set<String> registeredData = new ConcurrentSkipListSet<>();
 
     /**
      * Again, another auto-populated list of FAILED id's. This is never
      * read from file, except after startup, to specify which id's can
      * be "saved".
      */
-    @Setting(value = "failed-data-list")
+    @Setting(value = "failed-data")
     @Comment("An auto generated list, by Sponge, to discover and list \n"
              + "all failed custom data deserializations at runtime due \n"
              + "to a lack of the registrations being made by a plugin. \n"
              + "Not to be confused by failed deserialization due to bad data. \n"
              + "Modifying the list will result in no effect as Sponge auto \n"
              + "generates this list. This is merely for user configuration.")
-    private Set<String> discoveredFailedDatas = new ConcurrentSkipListSet<>();
+    public final Set<String> failedData = new ConcurrentSkipListSet<>();
 
     /**
      * This is a configurable list of id's that are to be "purged" on
@@ -86,25 +86,24 @@ public class CustomDataRegistrationCategory {
                  + "available through 'failed-data-list', as using any id's from \n"
                  + "'registered-data' will result in custom data being deleted at \n"
                  + "every load.")
-    private Set<String> purgeDatas = new ConcurrentSkipListSet<>();
+    public final Set<String> dataToPurge = new ConcurrentSkipListSet<>();
 
-    @Setting(value = "print-on-discovery")
+    @Setting(value = "print-failed-data")
     @Comment("In the cases where there is already previously discovered data \n"
              + "we don't want to spam the log on each discovery in certain \n"
              + "contexts. If it is required, we still can emit the log warning \n"
              + "when necessary.")
-    private boolean printFailedDataOnDiscovery = false;
-
+    public boolean printFailedData = false;
 
     public void populateRegistrations(final Collection<DataRegistration> registrations) {
-        this.registeredDataIds.clear();
+        this.registeredData.clear();
         for (final DataRegistration registration : registrations) {
-            this.registeredDataIds.add(registration.getKey().getFormatted());
+            this.registeredData.add(registration.getKey().getFormatted());
         }
     }
 
     public void addFailedData(final String dataId, final Throwable cause) {
-        if (this.discoveredFailedDatas.add(dataId) && this.printFailedDataOnDiscovery) {
+        if (this.failedData.add(dataId) && this.printFailedData) {
             new PrettyPrinter(60).add("Failed Data Discovery").centre().hr()
                 .addWrapped("Sponge found an unregistered DataRegistration id. Don't worry though!"
                             + "Sponge will attempt to persist the failed data for future attempts, unless"
@@ -116,8 +115,8 @@ public class CustomDataRegistrationCategory {
         }
     }
 
-    public void purgeOrAllow(final SerializedDataTransaction.Builder builder, final String dataId, final DataView view) {
-        if (!this.purgeDatas.contains(dataId)) {
+    public void purgeOrAllow(final SerializedDataTransaction.Builder builder, final String data, final DataView view) {
+        if (!this.dataToPurge.contains(data)) {
             builder.failedData(view);
         }
     }

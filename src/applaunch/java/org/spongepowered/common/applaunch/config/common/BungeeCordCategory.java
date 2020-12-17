@@ -29,13 +29,9 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
-public class BungeeCordCategory {
+public final class BungeeCordCategory {
 
-    @Setting(value = "ip-forwarding")
+    @Setting("ip-forwarding")
     @Comment("If 'true', allows BungeeCord to forward IP address, UUID, and Game Profile to this server.")
-    private boolean ipForwarding = false;
-
-    public boolean getIpForwarding() {
-        return this.ipForwarding;
-    }
+    public boolean ipForwarding = false;
 }
