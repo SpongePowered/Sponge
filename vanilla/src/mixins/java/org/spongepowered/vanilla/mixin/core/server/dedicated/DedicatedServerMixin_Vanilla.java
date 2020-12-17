@@ -89,6 +89,7 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
 
     @Override
     protected void loadLevel() {
+        this.detectBundledResources();
         this.getWorldManager().loadLevel();
     }
 }

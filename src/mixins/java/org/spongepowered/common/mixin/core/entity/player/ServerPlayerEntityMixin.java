@@ -630,28 +630,26 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @SuppressWarnings({"ConstantConditions", "UnstableApiUsage"})
     @Inject(method = "updateOptions", at = @At("HEAD"))
     private void impl$handleClientSettings(final CClientSettingsPacket packet, final CallbackInfo ci) {
-        if (ShouldFire.PLAYER_CHANGE_CLIENT_SETTINGS_EVENT) {
-            final CClientSettingsPacketAccessor $packet = (CClientSettingsPacketAccessor) packet;
-            final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
-            final ImmutableSet<SkinPart> skinParts = Sponge.getRegistry().getCatalogRegistry().streamAllOf(SkinPart.class)
-                    .map(part -> (SpongeSkinPart) part)
-                    .filter(part -> part.test(packet.getModelCustomisation()))
-                    .collect(ImmutableSet.toImmutableSet());
-            final int viewDistance = $packet.accessor$viewDistance();
+        final CClientSettingsPacketAccessor $packet = (CClientSettingsPacketAccessor) packet;
+        final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
+        final ImmutableSet<SkinPart> skinParts = Sponge.getRegistry().getCatalogRegistry().streamAllOf(SkinPart.class)
+                .map(part -> (SpongeSkinPart) part)
+                .filter(part -> part.test(packet.getModelCustomisation()))
+                .collect(ImmutableSet.toImmutableSet());
+        final int viewDistance = $packet.accessor$viewDistance();
 
-            // Post before the player values are updated
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                final ChatVisibility visibility = (ChatVisibility) (Object) packet.getChatVisibility();
-                final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(
-                        frame.getCurrentCause(),
-                        visibility,
-                        skinParts,
-                        newLocale,
-                        (ServerPlayer) this,
-                        packet.getChatColors(),
-                        viewDistance);
-                SpongeCommon.postEvent(event);
-            }
+        // Post before the player values are updated
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            final ChatVisibility visibility = (ChatVisibility) (Object) packet.getChatVisibility();
+            final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(
+                    frame.getCurrentCause(),
+                    visibility,
+                    skinParts,
+                    newLocale,
+                    (ServerPlayer) this,
+                    packet.getChatColors(),
+                    viewDistance);
+            SpongeCommon.postEvent(event);
         }
     }
 

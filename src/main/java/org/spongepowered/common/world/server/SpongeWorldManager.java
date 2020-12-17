@@ -28,21 +28,41 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.server.WorldManager;
+import org.spongepowered.common.SpongeCommon;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public interface SpongeWorldManager extends WorldManager {
 
     Path getDefaultWorldDirectory();
 
-    boolean registerPendingWorld(ResourceKey key, WorldArchetype archetype);
+    Path getCustomWorldsDirectory();
+
+    default boolean registerPendingWorld(final ResourceKey key, final WorldArchetype archetype) {
+        Objects.requireNonNull(key, "key");
+
+        Path directory;
+
+        if (this.isDefaultWorld(key)) {
+            return false;
+        } else if (this.isVanillaWorld(key)) {
+            directory = this.getDefaultWorldDirectory().resolve(this.getDirectoryName(key));
+        } else {
+            directory = this.getCustomWorldsDirectory().resolve(key.getNamespace()).resolve(key.getValue());
+        }
+        return this.registerPendingWorld0(key, directory, archetype);
+    }
+
+    boolean registerPendingWorld0(ResourceKey key, Path directory, WorldArchetype archetype);
 
     static RegistryKey<World> createRegistryKey(final ResourceKey key) {
         return RegistryKey.create(Registry.DIMENSION_REGISTRY, (ResourceLocation) (Object) key);
@@ -58,15 +78,48 @@ public interface SpongeWorldManager extends WorldManager {
     void loadLevel();
 
     default String getDirectoryName(final ResourceKey key) {
-        if (World.OVERWORLD.location().equals(key)) {
+        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
+        if (World.OVERWORLD.equals(registryKey)) {
             return "";
         }
-        if (World.NETHER.location().equals(key)) {
+        if (World.NETHER.equals(registryKey)) {
             return "DIM-1";
         }
-        if (World.END.location().equals(key)) {
+        if (World.END.equals(registryKey)) {
             return "DIM1";
         }
         return key.getValue();
+    }
+
+    default boolean isVanillaWorld(final ResourceKey key) {
+        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
+        return World.OVERWORLD.equals(registryKey) || World.NETHER.equals(registryKey) || World.END.equals(registryKey);
+    }
+
+    default boolean isVanillaSubWorld(final String directoryName) {
+        return "DIM-1".equals(directoryName) || "DIM1".equals(directoryName);
+    }
+
+    default boolean isDefaultWorld(final ResourceKey key) {
+        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
+        return World.OVERWORLD.equals(registryKey);
+    }
+
+    default DimensionType getVanillaDimensionType(final ResourceKey key) {
+        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
+
+        if (World.OVERWORLD.equals(registryKey)) {
+            return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.OVERWORLD_LOCATION);
+        } else if (World.NETHER.equals(registryKey)) {
+            return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.NETHER_LOCATION);
+        } else if (World.END.equals(registryKey)) {
+            return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.END_LOCATION);
+        }
+
+        throw new RuntimeException(String.format("Should be impossible, a non-Vanilla fresh world '%s' was hit!", key));
+    }
+
+    default boolean isDefaultWorld(final String directoryName) {
+        return SpongeCommon.getServer().getWorldData().getLevelName().equals(directoryName);
     }
 }

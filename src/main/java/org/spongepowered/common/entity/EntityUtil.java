@@ -346,9 +346,6 @@ public final class EntityUtil {
             return true;
         }
         // Temporary fix for https://bugs.mojang.com/browse/MC-149563
-        if (from.level != target.level) {
-            return true;
-        }
-        return false;
+        return from.level != target.level;
     }
 }

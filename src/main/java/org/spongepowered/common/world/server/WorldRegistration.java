@@ -25,23 +25,22 @@
 package org.spongepowered.common.world.server;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import net.minecraft.world.WorldSettings;
-import net.minecraft.world.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 
+import java.nio.file.Path;
 import java.util.Objects;
 
 public final class WorldRegistration {
 
     private final ResourceKey key;
-    @Nullable private DimensionType dimensionType;
+    private final Path directory;
     @Nullable private WorldSettings defaultSettings;
 
-    public WorldRegistration(final ResourceKey key, @Nullable final DimensionType dimensionType, @Nullable final WorldSettings defaultSettings) {
-        this.key = Objects.requireNonNull(key);
-        this.dimensionType = dimensionType;
+    public WorldRegistration(final ResourceKey key, final Path directory, @Nullable final WorldSettings defaultSettings) {
+        this.key = Objects.requireNonNull(key, "key");
+        this.directory = Objects.requireNonNull(directory, "directory");
         this.defaultSettings = defaultSettings;
     }
 
@@ -49,22 +48,13 @@ public final class WorldRegistration {
         return this.key;
     }
 
-    @Nullable
-    public DimensionType getDimensionType() {
-        return this.dimensionType;
+    public Path getDirectory() {
+        return this.directory;
     }
 
     @Nullable
     public WorldSettings getDefaultSettings() {
         return this.defaultSettings;
-    }
-
-    public void setDimensionType(@Nullable final DimensionType dimensionType) {
-        this.dimensionType = dimensionType;
-    }
-
-    public void setDimensionType(@Nullable final WorldSettings defaultSettings) {
-        this.defaultSettings = defaultSettings;
     }
 
     @Override
@@ -88,7 +78,7 @@ public final class WorldRegistration {
     public String toString() {
         return MoreObjects.toStringHelper(this)
             .add("key", this.key)
-            .add("dimensionType", this.dimensionType)
+            .add("directory", this.directory)
             .toString();
     }
 }
