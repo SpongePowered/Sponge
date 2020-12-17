@@ -38,7 +38,7 @@ public final class EntityTrackerCategory {
     @Comment("If 'true', newly discovered entities will be added to this config with default settings.")
     public boolean autoPopulate = false;
 
-    @Setting()
+    @Setting
     @Comment("Per-mod entity id mappings for controlling tracking behavior")
     public final Map<String, EntityTrackerModCategory> mods = new HashMap<>();
 

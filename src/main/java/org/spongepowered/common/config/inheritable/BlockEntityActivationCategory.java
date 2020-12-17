@@ -63,7 +63,7 @@ public final class BlockEntityActivationCategory {
         @Setting("default-tick-rate")
         public Integer defaultTickRate;
 
-        @Setting()
+        @Setting
         public final Map<String, Integer> ranges = new HashMap<>();
 
         @Setting("tick-rates")
