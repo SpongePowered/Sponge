@@ -141,7 +141,7 @@ public final class PhaseTracker implements CauseStackManager {
                     if (id == null) {
                         id = new ResourceLocation(source.getClass().getCanonicalName());
                     }
-                    final Map<String, Boolean> autoFixedTiles = trackerConfig.getAutoFixedTiles();
+                    final Map<String, Boolean> autoFixedTiles = trackerConfig.autoFixNullSourceBlockProvidingBlockEntities;
                     final boolean contained = autoFixedTiles.containsKey(type.toString());
                     // If we didn't map the tile entity yet, we should apply the mapping
                     // based on whether the source is the same as the TileEntity.
