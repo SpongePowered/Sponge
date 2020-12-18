@@ -90,26 +90,26 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
     public void collision$initializeCollisionState(final net.minecraft.world.World world) {
         final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
         final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
-        final CollisionModCategory worldCollMod =
-                worldConfigAdapter.getOrCreateValue(s -> s.getEntityCollisionCategory().getModList().get(this.entityCollision$key.getNamespace()),
+        final EntityCollisionCategory.ModSubCategory worldCollMod =
+                worldConfigAdapter.getOrCreateValue(s -> s.entityCollision.mods.get(this.entityCollision$key.getNamespace()),
                 c -> {
                     // TODO: save after populating?
-                    final CollisionModCategory globalCollision = new CollisionModCategory(this.entityCollision$key.getNamespace());
-                    c.getEntityCollisionCategory().getModList().put(this.entityCollision$key.getNamespace(), globalCollision);
-                    globalCollision.getEntityList().put(this.entityCollision$key.getNamespace(), this.collision$getMaxCollisions());
-                }, worldConfigAdapter.get().getEntityCollisionCategory().autoPopulateData());
-        final EntityCollisionCategory worldCollCat = worldConfigAdapter.get().getEntityCollisionCategory();
+                    final EntityCollisionCategory.ModSubCategory globalCollision = new EntityCollisionCategory.ModSubCategory(this.entityCollision$key.getNamespace());
+                    c.entityCollision.mods.put(this.entityCollision$key.getNamespace(), globalCollision);
+                    globalCollision.entities.put(this.entityCollision$key.getNamespace(), this.collision$getMaxCollisions());
+                }, worldConfigAdapter.get().entityCollision.autoPopulate);
+        final EntityCollisionCategory worldCollCat = worldConfigAdapter.get().entityCollision;
 
-        this.collision$setMaxCollisions(worldCollCat.getMaxEntitiesWithinAABB());
+        this.collision$setMaxCollisions(worldCollCat.maxEntitiesWithinAABB);
 
         boolean requiresSave = false;
         if (worldCollMod != null) {
-            if (!worldCollMod.isEnabled()) {
+            if (!worldCollMod.enabled) {
                 this.collision$setMaxCollisions(-1);
                 return;
             }
             // check mod overrides
-            final Integer modCollisionMax = worldCollMod.getDefaultMaxCollisions().get("entities");
+            final Integer modCollisionMax = worldCollMod.entityDefault;
             if (modCollisionMax != null) {
                 this.collision$setMaxCollisions(modCollisionMax);
             }
@@ -117,15 +117,15 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
             Integer entityMaxCollision = null;
             if ((net.minecraft.entity.Entity) (Object) this instanceof ItemEntity) {
                 // check if all items are overridden
-                entityMaxCollision = worldCollMod.getEntityList().get(this.entityCollision$key.getValue());
+                entityMaxCollision = worldCollMod.entities.get(this.entityCollision$key.getValue());
             }
 
             if (entityMaxCollision == null) {
-                entityMaxCollision = worldCollMod.getEntityList().get(this.entityCollision$key.getValue());
+                entityMaxCollision = worldCollMod.entities.get(this.entityCollision$key.getValue());
             }
 
             // entity overrides
-            if (entityMaxCollision == null && worldCollCat.autoPopulateData()) {
+            if (entityMaxCollision == null && worldCollCat.autoPopulate) {
                 // TODO(zml): Populate better
                 //globalCollMod.getEntityList().put(this.entityCollision$key.getValue(), this.collision$getMaxCollisions());
                 requiresSave = true;

@@ -37,7 +37,6 @@ import org.spongepowered.common.bridge.tileentity.TileEntityTypeBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.config.tracker.BlockEntityTrackerCategory;
-import org.spongepowered.common.config.tracker.BlockEntityTrackerModCategory;
 import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -64,32 +63,32 @@ public abstract class TileEntityTypeMixin implements ResourceKeyBridge, TileEnti
         final TrackableBridge trackableBridge = (TrackableBridge) tileEntityType;
 
         final ConfigHandle<TrackerConfig> trackerConfigAdapter = SpongeGameConfigs.getTracker();
-        final BlockEntityTrackerCategory blockEntityTracker = trackerConfigAdapter.get().getBlockEntity();
+        final BlockEntityTrackerCategory blockEntityTracker = trackerConfigAdapter.get().blockEntity;
 
-        BlockEntityTrackerModCategory modCapturing = blockEntityTracker.getModMappings().get(plugin.getMetadata().getId());
+        BlockEntityTrackerCategory.ModSubCategory modCapturing = blockEntityTracker.mods.get(plugin.getMetadata().getId());
 
         if (modCapturing == null) {
-            modCapturing = new BlockEntityTrackerModCategory();
-            blockEntityTracker.getModMappings().put(plugin.getMetadata().getId(), modCapturing);
+            modCapturing = new BlockEntityTrackerCategory.ModSubCategory();
+            blockEntityTracker.mods.put(plugin.getMetadata().getId(), modCapturing);
         }
 
-        if (!modCapturing.isEnabled()) {
+        if (!modCapturing.enabled) {
             trackableBridge.bridge$setAllowsBlockBulkCaptures(false);
             trackableBridge.bridge$setAllowsBlockEventCreation(false);
             trackableBridge.bridge$setAllowsEntityBulkCaptures(false);
             trackableBridge.bridge$setAllowsEntityEventCreation(false);
-            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(key, k -> false);
-            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(key, k -> false);
-            modCapturing.getBlockEventCreationMap().computeIfAbsent(key, k -> false);
-            modCapturing.getEntityEventCreationMap().computeIfAbsent(key, k -> false);
+            modCapturing.blockBulkCapture.computeIfAbsent(key, k -> false);
+            modCapturing.entityBulkCapture.computeIfAbsent(key, k -> false);
+            modCapturing.blockEventCreation.computeIfAbsent(key, k -> false);
+            modCapturing.entityEventCreation.computeIfAbsent(key, k -> false);
         } else {
-            trackableBridge.bridge$setAllowsBlockBulkCaptures(modCapturing.getBlockBulkCaptureMap().computeIfAbsent(key, k -> true));
-            trackableBridge.bridge$setAllowsBlockEventCreation(modCapturing.getBlockEventCreationMap().computeIfAbsent(key, k -> true));
-            trackableBridge.bridge$setAllowsEntityBulkCaptures(modCapturing.getEntityBulkCaptureMap().computeIfAbsent(key, k -> true));
-            trackableBridge.bridge$setAllowsEntityEventCreation(modCapturing.getEntityEventCreationMap().computeIfAbsent(key, k -> true));
+            trackableBridge.bridge$setAllowsBlockBulkCaptures(modCapturing.blockBulkCapture.computeIfAbsent(key, k -> true));
+            trackableBridge.bridge$setAllowsBlockEventCreation(modCapturing.blockEventCreation.computeIfAbsent(key, k -> true));
+            trackableBridge.bridge$setAllowsEntityBulkCaptures(modCapturing.entityBulkCapture.computeIfAbsent(key, k -> true));
+            trackableBridge.bridge$setAllowsEntityEventCreation(modCapturing.entityEventCreation.computeIfAbsent(key, k -> true));
         }
 
-        if (blockEntityTracker.autoPopulateData()) {
+        if (blockEntityTracker.autoPopulate) {
             trackerConfigAdapter.save();
         }
 

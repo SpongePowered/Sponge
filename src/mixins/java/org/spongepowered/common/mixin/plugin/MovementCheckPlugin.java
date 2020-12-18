@@ -46,7 +46,7 @@ public class MovementCheckPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeConfigs.getCommon().get().getModules().useMovementChecks();
+        return SpongeConfigs.getCommon().get().modules.movementChecks;
     }
 
     @Override

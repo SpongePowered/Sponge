@@ -65,7 +65,7 @@ public abstract class FallingBlockMixin {
             return pos.getY();
         }
         final EntityType<org.spongepowered.api.entity.FallingBlock> fallingBlock = EntityTypes.FALLING_BLOCK.get();
-        final World<@NonNull ?> spongeWorld = (World<@NonNull ?>) world;
+        final World spongeWorld = (World) world;
         final BlockSnapshot snapshot = spongeWorld.createSnapshot(pos.getX(), pos.getY(), pos.getZ());
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(snapshot);

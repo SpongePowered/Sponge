@@ -43,7 +43,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
     @Redirect(method = "handleMovePlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isChangingDimension()Z", ordinal = 0))
     private boolean movementCheck$onPlayerMovedTooQuicklyCheck(final ServerPlayerEntity player) {
-        if (SpongeGameConfigs.getForWorld(this.player.level).get().getMovementChecks().playerMovedTooQuickly()) {
+        if (SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.player.movedTooQuickly) {
             return player.isChangingDimension();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
@@ -52,7 +52,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
     @Redirect(method = "handleMovePlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isChangingDimension()Z", ordinal = 1))
     private boolean movementCheck$onMovedWronglyCheck(final ServerPlayerEntity player) {
-        if (SpongeGameConfigs.getForWorld(this.player.level).get().getMovementChecks().movedWrongly()) {
+        if (SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedWrongly) {
             return player.isChangingDimension();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
@@ -64,7 +64,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
             to = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;isSingleplayerOwner()Z", ordinal = 0))
     )
     private double movementCheck$onVehicleMovedTooQuicklyCheck(final double val) {
-        if (SpongeGameConfigs.getForWorld(this.player.level).get().getMovementChecks().playerVehicleMovedTooQuickly()) {
+        if (SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.player.vehicleMovedTooQuickly) {
             return val;
         }
         return Double.NaN; // The 'vehicle moved too quickly' check only executes if the squared difference of the motion vectors lengths is greater than 100
@@ -84,7 +84,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
                 remap = false)
     ))
     private double movementCheck$onMovedWronglySecond(final double val) {
-        if (SpongeGameConfigs.getForWorld(this.player.level).get().getMovementChecks().movedWrongly()) {
+        if (SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedWrongly) {
             return val;
         }
         return Double.NaN; // The second 'moved wrongly' check only executes if the length of the movement vector is greater than 0.0625D

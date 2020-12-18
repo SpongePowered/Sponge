@@ -37,7 +37,7 @@ public abstract class LeavesBlockMixin extends BlockMixin {
 
     @Inject(method = "isRandomlyTicking", at = @At("HEAD"), cancellable = true)
     private void impl$checkConfigForLeafTicking(BlockState state, CallbackInfoReturnable<Boolean> cir) {
-        if (!SpongeConfigs.getCommon().get().getWorld().getLeafDecay()) {
+        if (!SpongeConfigs.getCommon().get().world.leafDecay) {
             cir.setReturnValue(false);
         }
     }

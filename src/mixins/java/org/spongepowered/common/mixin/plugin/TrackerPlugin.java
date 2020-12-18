@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.plugin;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
 import java.util.List;
 import java.util.Set;
@@ -44,8 +45,7 @@ public class TrackerPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return true;
-//        return SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().useTracking();
+        return SpongeConfigs.getCommon().get().modules.tracking;
     }
 
     @Override

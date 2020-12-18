@@ -62,7 +62,7 @@ public interface TraitMixin_Viewable_Inventory_API extends ViewableInventory {
     @Override
     default boolean canInteractWith(ServerPlayer player) {
         if (this instanceof IInventory) {
-            return ((IInventory) this).isUsableByPlayer((PlayerEntity) player);
+            return ((IInventory) this).stillValid((PlayerEntity) player);
         }
         // TODO other impl possible?
         return true;

@@ -85,20 +85,20 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
         final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
         final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
-        return lens.setStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getSlotIndex(), ItemStackUtil.toNative(equipment));
+        return lens.setStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getFilterFlag(), ItemStackUtil.toNative(equipment));
     }
 
     @Override
     public ItemStack getItemInHand(HandType handType) {
         Preconditions.checkNotNull(handType);
-        final net.minecraft.item.ItemStack nmsItem = ((LivingEntity) (Object)this).getHeldItem((Hand) (Object) handType);
+        final net.minecraft.item.ItemStack nmsItem = ((LivingEntity) (Object)this).getItemInHand((Hand) (Object) handType);
         return ItemStackUtil.fromNative(nmsItem);
     }
 
     @Override
     public void setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
         Preconditions.checkNotNull(handType);
-        ((LivingEntity) (Object)this).setHeldItem((Hand) (Object) handType, ItemStackUtil.toNative(itemInHand).copy());
+        ((LivingEntity) (Object)this).setItemInHand((Hand) (Object) handType, ItemStackUtil.toNative(itemInHand).copy());
     }
 
     @Override

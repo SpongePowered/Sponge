@@ -73,37 +73,37 @@ public abstract class BlockMixin_EntityCollision implements CollisionCapabilityB
     public void collision$initializeCollisionState(final net.minecraft.world.World world) {
         final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
         final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
-        final EntityCollisionCategory worldCollCat = worldConfigAdapter.get().getEntityCollisionCategory();
+        final EntityCollisionCategory worldCollCat = worldConfigAdapter.get().entityCollision;
 
-        this.collision$setMaxCollisions(worldCollCat.getMaxEntitiesWithinAABB());
+        this.collision$setMaxCollisions(worldCollCat.maxEntitiesWithinAABB);
 
         boolean requiresSave = false;
         String[] ids = ((BlockType) this).getKey().toString().split(":");
         String modId = ids[0];
         String name = ids[1];
 
-        final CollisionModCategory worldCollMod = worldConfigAdapter.getOrCreateValue(s -> s.getEntityCollisionCategory().getModList().get(modId),
+        final EntityCollisionCategory.ModSubCategory worldCollMod = worldConfigAdapter.getOrCreateValue(s -> s.entityCollision.mods.get(modId),
                 c -> {
                 // TODO: finish after populating?
-                    final CollisionModCategory globalCollision = new CollisionModCategory(modId);
-                    c.getEntityCollisionCategory().getModList().put(modId, globalCollision);
-                    globalCollision.getBlockList().put(name, this.collision$getMaxCollisions());
-                }, worldCollCat.autoPopulateData());
+                    final EntityCollisionCategory.ModSubCategory globalCollision = new EntityCollisionCategory.ModSubCategory(modId);
+                    c.entityCollision.mods.put(modId, globalCollision);
+                    globalCollision.blocks.put(name, this.collision$getMaxCollisions());
+                }, worldCollCat.autoPopulate);
         if (worldCollMod != null) {
-            if (!worldCollMod.isEnabled()) {
+            if (!worldCollMod.enabled) {
                 this.collision$setMaxCollisions(-1);
                 return;
             }
             // check mod overrides
-            Integer modCollisionMax = worldCollMod.getDefaultMaxCollisions().get("blocks");
+            Integer modCollisionMax = worldCollMod.blockDefault;
             if (modCollisionMax != null) {
                 this.collision$setMaxCollisions(modCollisionMax);
             }
 
             // entity overrides
-            Integer blockMaxCollision = worldCollMod.getBlockList().get(name);
-            if (blockMaxCollision == null && worldCollCat.autoPopulateData()) {
-                worldCollMod.getBlockList().put(name, this.collision$getMaxCollisions());
+            Integer blockMaxCollision = worldCollMod.blocks.get(name);
+            if (blockMaxCollision == null && worldCollCat.autoPopulate) {
+                worldCollMod.blocks.put(name, this.collision$getMaxCollisions());
                 requiresSave = true;
             } else if (blockMaxCollision != null) {
                 this.collision$setMaxCollisions(blockMaxCollision);

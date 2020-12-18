@@ -54,7 +54,7 @@ public abstract class ServerHandshakeNetHandlerMixin_Bungee {
 
     @Inject(method = "handleIntention", at = @At(value = "HEAD"), cancellable = true)
     private void bungee$patchHandshake(final CHandshakePacket packet, final CallbackInfo ci) {
-        if (SpongeConfigs.getCommon().get().getBungeeCord().getIpForwarding() && packet.getIntention().equals(ProtocolType.LOGIN)) {
+        if (SpongeConfigs.getCommon().get().bungeecord.ipForwarding && packet.getIntention().equals(ProtocolType.LOGIN)) {
             final String ip = ((CHandshakePacketAccessor) packet).accessor$hostName();
             final String[] split = ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
