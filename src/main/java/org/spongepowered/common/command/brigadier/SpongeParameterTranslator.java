@@ -80,8 +80,9 @@ public final class SpongeParameterTranslator {
         final ListIterator<Parameter> parameterListIterator = command.parameters().listIterator();
 
         // If we have no parameters, or they are all optional, all literals will get an executor.
-        final boolean isTerminal = SpongeParameterTranslator.createNode(
+        final boolean terminationInferred = SpongeParameterTranslator.createNode(
                 parameterListIterator, executorWrapper, rootNode::then, null, new ArrayList<>(), true, false, true);
+        final boolean isTerminal = terminationInferred || command.isTerminal();
         if (isTerminal && executorWrapper != null) {
             rootNode.executes(executorWrapper);
         }
