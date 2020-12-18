@@ -57,7 +57,7 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     }
 
     @Override
-    public Optional<ResourceKey> findKey(final T value) {
+    public Optional<ResourceKey> findValueKey(final T value) {
         Objects.requireNonNull(value, "value");
 
         return Optional.ofNullable(this.shadow$getKey(value)).map(l -> (ResourceKey) (Object) l);

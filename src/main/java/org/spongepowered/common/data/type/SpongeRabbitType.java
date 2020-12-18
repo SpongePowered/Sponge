@@ -24,13 +24,7 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.RabbitType;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeRabbitType extends SpongeCatalogType implements RabbitType {
-
-    public SpongeRabbitType(final ResourceKey key) {
-        super(key);
-    }
+public final class SpongeRabbitType implements RabbitType {
 }

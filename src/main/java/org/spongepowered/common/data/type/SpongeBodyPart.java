@@ -24,13 +24,7 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.BodyPart;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeBodyPart extends SpongeCatalogType implements BodyPart {
-
-    public SpongeBodyPart(final ResourceKey key) {
-        super(key);
-    }
+public final class SpongeBodyPart implements BodyPart {
 }

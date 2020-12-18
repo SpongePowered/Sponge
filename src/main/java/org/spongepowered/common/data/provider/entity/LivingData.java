@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -36,9 +37,9 @@ import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.entity.LivingEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
 import org.spongepowered.common.util.PotionEffectUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -122,7 +123,7 @@ public final class LivingData {
 
                             h.setHealth(v.floatValue());
                             if (v == 0) {
-                                h.hurt(DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE, 1000F);
+                                h.hurt((DamageSource) SpongeDamageSources.IGNORED.get(), 1000F);
                             }
                             return true;
                         })

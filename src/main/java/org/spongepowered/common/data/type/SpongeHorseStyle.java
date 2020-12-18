@@ -24,16 +24,7 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.HorseStyle;
 
-public final class SpongeHorseStyle extends SpongeEntityMetadataType<Integer> implements HorseStyle {
-
-    public SpongeHorseStyle(final ResourceKey key, final int metadata) {
-        super(key, metadata);
-    }
-
-    public int getBitMask() {
-        return this.getMetadata() << 8;
-    }
+public final class SpongeHorseStyle implements HorseStyle {
 }

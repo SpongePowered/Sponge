@@ -22,51 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.event.cause.entity.damage;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryTypes;
 
-public abstract class SpongeCatalogType implements CatalogType {
+public final class SpongeDamageSources {
 
-    private final ResourceKey key;
+    // @formatter:off
 
-    public SpongeCatalogType(ResourceKey key) {
-        this.key = checkNotNull(key);
+    // SORTFIELDS:ON
+
+    public static final DefaultedRegistryReference<DamageSource> IGNORED = SpongeDamageSources.key(ResourceKey.sponge("ignored"));
+
+    // SORTFIELDS:OFF
+
+    // @formatter:on
+
+    private SpongeDamageSources() {
     }
 
-    @Override
-    public final ResourceKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public final int hashCode() {
-        return this.key.hashCode();
-    }
-
-    @Override
-    public final boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-        final CatalogType other = (CatalogType) obj;
-        return this.getKey().equals(other.getKey());
-    }
-
-    @Override
-    public final String toString() {
-        return this.toStringHelper().toString();
-    }
-
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return MoreObjects.toStringHelper(this)
-                .add("key", this.key);
+    private static DefaultedRegistryReference<DamageSource> key(final ResourceKey location) {
+        return RegistryKey.of(RegistryTypes.DAMAGE_SOURCE, location).asDefaultedReference(() -> Sponge.getGame().registries());
     }
 }

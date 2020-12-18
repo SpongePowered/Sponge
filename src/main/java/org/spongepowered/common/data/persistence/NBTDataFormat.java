@@ -26,12 +26,10 @@ package org.spongepowered.common.data.persistence;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataFormatException;
-import org.spongepowered.common.SpongeCatalogType;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -39,11 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public final class NBTDataFormat extends SpongeCatalogType implements DataFormat {
-
-    public NBTDataFormat(final ResourceKey key) {
-        super(key);
-    }
+public final class NBTDataFormat implements DataFormat {
 
     @Override
     @SuppressWarnings("resource")

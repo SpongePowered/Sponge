@@ -26,7 +26,6 @@ package org.spongepowered.common.world.volume.buffer.biome;
 
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;

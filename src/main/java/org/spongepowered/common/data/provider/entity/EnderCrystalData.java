@@ -27,7 +27,6 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.entity.item.EnderCrystalEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.util.VecHelper;
 
 public final class EnderCrystalData {

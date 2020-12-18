@@ -29,12 +29,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Preconditions;
+import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -50,16 +53,19 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.PrettyPrinter;
 
-import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> implements ItemStack.Builder {
     private ItemType type;
@@ -175,7 +181,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         final int count = container.getInt(Constants.ItemStack.COUNT).get();
         this.quantity(count);
 
-        final ItemType itemType = container.getRegistryType(Constants.ItemStack.TYPE, ItemType.class).get();
+        final ItemType itemType = container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, SpongeCommon.getGame().registries()).get();
         this.itemType(itemType);
 
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
@@ -222,8 +228,9 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         checkNotNull(blockSnapshot, "The snapshot was null!");
         this.reset();
         final BlockType blockType = blockSnapshot.getState().getType();
+        final ResourceLocation blockTypeKey = Registry.BLOCK.getKey((Block) blockType);
         final Optional<ItemType> itemType = blockType.getItem();
-        this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockType.getKey())));
+        this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockTypeKey)));
         this.quantity(1);
         if (blockSnapshot instanceof SpongeBlockSnapshot) {
             final Optional<CompoundNBT> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
@@ -238,23 +245,22 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         return this;
     }
 
+    /**
+     * Sets the data to recreate a {@link BlockState} in a held {@link ItemStack}
+     * state.
+     *
+     * @param blockState The block state to use
+     * @return This builder, for chaining
+     */
     @Override
     public ItemStack.Builder fromBlockState(final BlockState blockState) {
-        final net.minecraft.block.BlockState minecraftState = (net.minecraft.block.BlockState) blockState;
-        final Optional<ItemType> item = blockState.getType().getItem();
-        if (!item.isPresent()) {
-            new PrettyPrinter(60).add("Invalid BlockState").centre().hr()
-                .add("Someone attempted to create an ItemStack from a BlockState that does not have a valid item!")
-                .add("%s : %s", "BlockState", blockState)
-                .add("%s : %s", "BlockType", blockState.getType())
-                .add(new Exception("Stacktrace"))
-                .trace();
-            return this;
-        }
-        this.itemType(item.get());
+        Objects.requireNonNull(blockState, "blockState");
+        final BlockType blockType = blockState.getType();
+        final ResourceLocation blockTypeKey = Registry.BLOCK.getKey((Block) blockType);
+        this.itemType(blockType.getItem().orElseThrow(() -> new IllegalArgumentException("Missing valid ItemType for BlockType: " + blockTypeKey)));
+        blockState.getValues().forEach(this::add);
         return this;
     }
-
 
     @Override
     public ItemStack.Builder from(final ItemStack value) {
@@ -268,7 +274,9 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
             return Optional.empty();
         }
         final int count = container.getInt(Constants.ItemStack.COUNT).get();
-        final ItemType itemType = container.getRegistryType(Constants.ItemStack.TYPE, ItemType.class).orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
+        final ItemType itemType =
+                container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, SpongeCommon.getGame().registries()).orElseThrow(() -> new IllegalStateException(
+                        "Unable to find item with id: "));
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final CompoundNBT compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());

@@ -24,16 +24,13 @@
  */
 package org.spongepowered.common.util;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.util.orientation.Orientation;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeOrientation extends SpongeCatalogType implements Orientation {
+public final class SpongeOrientation implements Orientation {
 
     private final int angle;
 
-    public SpongeOrientation(final ResourceKey key, final int angle) {
-        super(key);
+    public SpongeOrientation(final int angle) {
         this.angle = angle;
     }
 

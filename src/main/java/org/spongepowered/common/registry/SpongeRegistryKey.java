@@ -25,12 +25,15 @@
 package org.spongepowered.common.registry;
 
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryReference;
 
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.function.Supplier;
 
 public class SpongeRegistryKey<T> implements RegistryKey<T> {
 
@@ -58,6 +61,11 @@ public class SpongeRegistryKey<T> implements RegistryKey<T> {
     @Override
     public RegistryReference<T> asReference() {
         return new SpongeRegistryReference<>(this);
+    }
+
+    @Override
+    public <V extends T> DefaultedRegistryReference<V> asDefaultedReference(final Supplier<RegistryHolder> defaultHolder) {
+        return new SpongeDefaultedRegistryReference<V>((RegistryKey<V>) this, defaultHolder);
     }
 
     @Override

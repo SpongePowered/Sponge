@@ -28,28 +28,24 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.EventContextKey;
-import org.spongepowered.common.SpongeCatalogType;
 
 import java.lang.reflect.Type;
+import java.util.Objects;
 
-public final class SpongeEventContextKey<T> extends SpongeCatalogType implements EventContextKey<T> {
+public final class SpongeEventContextKey<T> implements EventContextKey<T> {
 
     private final Type allowed;
 
     SpongeEventContextKey(final SpongeEventContextKeyBuilder<T> builder) {
-        super(builder.key);
         this.allowed = builder.typeClass;
     }
 
-    public SpongeEventContextKey(final ResourceKey key, final TypeToken<T> allowed) {
-        super(checkNotNull(key, "key"));
-        this.allowed = checkNotNull(allowed, "allowed").getType();
+    public SpongeEventContextKey(final TypeToken<T> allowed) {
+        this.allowed = Objects.requireNonNull(allowed, "allowed").getType();
     }
 
-    public SpongeEventContextKey(final ResourceKey key, final Class<T> allowed) {
-        super(checkNotNull(key, "key"));
+    public SpongeEventContextKey(final Class<T> allowed) {
         this.allowed = checkNotNull(allowed, "allowed");
     }
 

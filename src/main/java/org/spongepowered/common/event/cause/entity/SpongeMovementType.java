@@ -24,13 +24,7 @@
  */
 package org.spongepowered.common.event.cause.entity;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.MovementType;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeMovementType extends SpongeCatalogType implements MovementType {
-
-    public SpongeMovementType(ResourceKey key) {
-        super(key);
-    }
+public final class SpongeMovementType implements MovementType {
 }

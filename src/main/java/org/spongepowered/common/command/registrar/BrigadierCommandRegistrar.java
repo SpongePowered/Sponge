@@ -34,7 +34,6 @@ import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -43,7 +42,6 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
@@ -68,7 +66,7 @@ import java.util.stream.Collectors;
  * {@link #register(PluginContainer, LiteralArgumentBuilder, String...)}
  * method.</p>
  */
-public final class BrigadierCommandRegistrar extends SpongeCatalogType implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
+public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
 
     private static final TypeToken<LiteralArgumentBuilder<CommandSource>> COMMAND_TYPE = new TypeToken<LiteralArgumentBuilder<CommandSource>>() {};
 
@@ -79,8 +77,7 @@ public final class BrigadierCommandRegistrar extends SpongeCatalogType implement
 
     private SpongeCommandDispatcher dispatcher = new SpongeCommandDispatcher();
 
-    public BrigadierCommandRegistrar(final ResourceKey key) {
-        super(key);
+    public BrigadierCommandRegistrar() {
         BrigadierCommandRegistrar.INSTANCE = this;
     }
 

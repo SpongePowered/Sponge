@@ -25,18 +25,12 @@
 package org.spongepowered.common.data.type;
 
 import net.minecraft.util.registry.SimpleRegistry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeNotePitch extends SpongeCatalogType implements NotePitch {
-
-    public SpongeNotePitch(final ResourceKey key) {
-        super(key);
-    }
+public final class SpongeNotePitch implements NotePitch {
 
     @Override
     public NotePitch cycleNext() {

@@ -26,17 +26,22 @@ package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.CriterionProgress;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Mixin(AdvancementProgress.class)
@@ -76,5 +81,22 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
         final Map<String, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
         Preconditions.checkState(map != null, "progressMap isn't initialized");
         return Optional.ofNullable((ScoreCriterionProgress) map.get(criterion.getName()));
+    }
+
+    @Override
+    public CriterionProgress require(final AdvancementCriterion criterion) {
+        Objects.requireNonNull(criterion, "criterion");
+
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ADVANCEMENT_TYPE).valueKey(this.getAdvancement());
+        return this.get(criterion).orElseThrow(() -> new IllegalStateException("The criterion " + criterion.getName()
+                + " isn't present on the advancement '" + this.getAdva + "'."));
+    }
+
+    @Override
+    public ScoreCriterionProgress require(final ScoreAdvancementCriterion criterion) {
+        Objects.requireNonNull(criterion, "criterion");
+
+        return this.get(criterion).orElseThrow(() -> new IllegalStateException("The score criterion " + criterion.getName()
+                + " isn't present on the advancement '" + this.getAdvancement().getKey().toString() + "'."));
     }
 }

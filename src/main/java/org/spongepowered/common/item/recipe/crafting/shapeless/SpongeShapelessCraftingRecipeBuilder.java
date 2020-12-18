@@ -33,7 +33,6 @@ import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -43,7 +42,7 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.SpongeCatalogBuilder;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.util.List;
 import java.util.function.Function;
@@ -51,13 +50,13 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<RecipeRegistration, ShapelessCraftingRecipe.Builder>
+public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, ShapelessCraftingRecipe.Builder>
         implements ShapelessCraftingRecipe.Builder.EndStep, ShapelessCraftingRecipe.Builder.ResultStep {
 
     private org.spongepowered.api.item.inventory.ItemStack result;
     private Function<net.minecraft.inventory.CraftingInventory, net.minecraft.item.ItemStack> resultFunction;
     private Function<net.minecraft.inventory.CraftingInventory, NonNullList<net.minecraft.item.ItemStack>> remainingItemsFunction;
-    private NonNullList<Ingredient> ingredients = NonNullList.create();
+    private final NonNullList<Ingredient> ingredients = NonNullList.create();
     private String group;
 
     @Override
@@ -124,13 +123,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<R
     }
 
     @Override
-    public ShapelessCraftingRecipe.Builder.EndStep key(ResourceKey key) {
-        super.key(key);
-        return this;
-    }
-
-    @Override
-    protected RecipeRegistration build(ResourceKey key) {
+    public RecipeRegistration build0() {
         checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
 
         final ItemStack resultStack = ItemStackUtil.toNative(this.result);
@@ -144,7 +137,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<R
         super.reset();
         this.result = null;
         this.resultFunction = null;
-        this.ingredients = NonNullList.create();
+        this.ingredients.clear();
         this.group = null;
         this.remainingItemsFunction = null;
         return this;

@@ -59,6 +59,7 @@ public final class HorseData {
                         })
                         .set((h, v) -> {
                             final int color = HorseData.getHorseColor(h);
+                            // this.getMetadata() << 8
                             ((HorseEntityAccessor) h).invoker$setTypeVariant((color | ((SpongeHorseStyle) v).getBitMask()));
                         });
     }

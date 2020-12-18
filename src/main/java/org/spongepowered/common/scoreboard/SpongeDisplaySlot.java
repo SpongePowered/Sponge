@@ -24,31 +24,27 @@
  */
 package org.spongepowered.common.scoreboard;
 
-import com.google.common.base.MoreObjects;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.util.text.TextFormatting;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
-import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
 import java.util.Optional;
 import java.util.function.Function;
 
-public final class SpongeDisplaySlot extends SpongeCatalogType implements DisplaySlot {
+public final class SpongeDisplaySlot implements DisplaySlot {
 
     private final @Nullable TextFormatting formatting;
     private final @Nullable Function<TextFormatting, DisplaySlot> withColorFunction;
 
     private @Nullable NamedTextColor color;
 
-    public SpongeDisplaySlot(final ResourceKey key) {
-        this(key, null, null);
+    public SpongeDisplaySlot() {
+        this(null, null);
     }
 
-    public SpongeDisplaySlot(final ResourceKey key, @Nullable final TextFormatting color, @Nullable final Function<TextFormatting, DisplaySlot> withColorFunction) {
-        super(key);
+    public SpongeDisplaySlot(@Nullable final TextFormatting color, @Nullable final Function<TextFormatting, DisplaySlot> withColorFunction) {
         this.withColorFunction = withColorFunction;
         this.formatting = color;
     }
@@ -69,11 +65,5 @@ public final class SpongeDisplaySlot extends SpongeCatalogType implements Displa
             this.color = SpongeAdventure.asAdventureNamed(this.formatting);
         }
         return Optional.ofNullable(this.color);
-    }
-
-    @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-            .add("color", this.color);
     }
 }

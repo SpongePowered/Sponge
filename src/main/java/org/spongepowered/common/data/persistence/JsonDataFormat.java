@@ -30,16 +30,13 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.StringDataFormat;
-import org.spongepowered.common.SpongeCatalogType;
 
-import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -56,11 +53,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public final class JsonDataFormat extends SpongeCatalogType implements StringDataFormat {
+import javax.annotation.Nullable;
 
-    public JsonDataFormat(ResourceKey key) {
-        super(key);
-    }
+public final class JsonDataFormat implements StringDataFormat {
 
     public static DataContainer serialize(Gson gson, Object o) throws IOException {
         DataViewJsonWriter writer = new DataViewJsonWriter();

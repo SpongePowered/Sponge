@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundNBT;
-import org.spongepowered.api.CatalogType;
+import org.checkerframework.checker.units.qual.C;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
@@ -47,13 +47,13 @@ import org.spongepowered.common.data.provider.DataProviderLookup;
 import java.util.Collection;
 import java.util.Objects;
 
-public abstract class AbstractArchetype<C extends CatalogType, S extends LocatableSnapshot<S>, E> implements Archetype<S, E>,
+public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> implements Archetype<S, E>,
         SpongeMutableDataHolder {
 
-    protected final C type;
+    protected final T type;
     protected CompoundNBT data;
 
-    protected AbstractArchetype(final C type, final CompoundNBT data) {
+    protected AbstractArchetype(final T type, final CompoundNBT data) {
         this.type = type;
         this.data = data;
     }

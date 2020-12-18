@@ -25,14 +25,18 @@
 package org.spongepowered.common.mixin.api.mcp.entity;
 
 import com.google.common.base.Preconditions;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SPlayerPositionLookPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.Keys;
@@ -63,13 +67,15 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.UnaryOperator;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.entity.Entity.class)
 @Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$"))
@@ -280,7 +286,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 .set(Queries.POSITION_Y, transform.getScale().getY())
                 .set(Queries.POSITION_Z, transform.getScale().getZ())
                 .getContainer()
-                .set(Constants.Entity.TYPE, this.getType().getKey())
+                .set(Constants.Entity.TYPE, Registry.ENTITY_TYPE.getKey((net.minecraft.entity.EntityType<?>) this.getType()))
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
         return container;
     }
@@ -327,6 +333,12 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         return EntityArchetype.builder().from(this).build();
     }
 
+    @Override
+    public HoverEvent<HoverEvent.ShowEntity> asHoverEvent(final UnaryOperator<HoverEvent.ShowEntity> op) {
+        final ResourceLocation entityTypeKey = Registry.ENTITY_TYPE.getKey((net.minecraft.entity.EntityType<?>) this.getType());
+        return HoverEvent.showEntity(op.apply(HoverEvent.ShowEntity.of((Key) (Object) entityTypeKey, this.getUniqueId(), this.displayName().get())));
+    }
+
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = new HashSet<>();
 
@@ -346,5 +358,4 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
         return values;
     }
-
 }

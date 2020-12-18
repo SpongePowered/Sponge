@@ -36,7 +36,6 @@ import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -48,7 +47,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilder<Key<V>, Key.Builder<E, V>> implements Key.Builder<E, V> {
+public final class SpongeKeyBuilder<E, V extends Value<E>> implements Key.Builder<E, V> {
 
     private @Nullable Type valueType;
     private @Nullable Type elementType;
@@ -89,13 +88,7 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
     }
 
     @Override
-    public SpongeKeyBuilder<E, V> key(final ResourceKey key) {
-        super.key(key);
-        return this;
-    }
-
-    @Override
-    protected Key<V> build(final ResourceKey key) {
+    public Key<V> build() {
         Objects.requireNonNull(this.valueType, "The value type must be set");
         Objects.requireNonNull(this.elementType, "The element type must be set");
 
@@ -132,7 +125,7 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
             defaultValueSupplier = () -> (E) new WeightedTable();
         }
 
-        return new SpongeKey<>(key, this.valueType, this.elementType, comparator, includesTester, defaultValueSupplier);
+        return new SpongeKey<>(this.valueType, this.elementType, comparator, includesTester, defaultValueSupplier);
     }
 
     @Override
@@ -140,6 +133,6 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
         this.valueType = null;
         this.includesTester = null;
         this.comparator = null;
-        return super.reset();
+        return this;
     }
 }

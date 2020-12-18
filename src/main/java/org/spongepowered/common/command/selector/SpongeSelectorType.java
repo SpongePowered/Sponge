@@ -28,19 +28,16 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.arguments.EntitySelectorParser;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorType;
-import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.accessor.command.arguments.EntitySelectorParserAccessor;
 
-public final class SpongeSelectorType extends SpongeCatalogType implements SelectorType {
+public final class SpongeSelectorType implements SelectorType {
 
     private final String selectorToken;
     private final Selector selector;
 
-    public SpongeSelectorType(final ResourceKey key, final String selectorToken) {
-        super(key);
+    public SpongeSelectorType(final String selectorToken) {
         this.selectorToken = selectorToken;
         try {
             this.selector = (Selector) new EntitySelectorParser(new StringReader(this.selectorToken)).parse();

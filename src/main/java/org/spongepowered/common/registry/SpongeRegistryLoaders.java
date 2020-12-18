@@ -1255,7 +1255,7 @@ public final class SpongeRegistryLoaders {
 
     public static RegistryLoader<SpawnType> spawnType() {
         return RegistryLoader.<SpawnType>of(l -> {
-            l.add(SpongeSpawnTypes.FORCED, k -> new SpongeSpawnType(k).forced());
+            l.add(SpongeSpawnTypes.FORCED, k -> new SpongeSpawnType(k).toggleForced());
         }).mapping(SpongeSpawnType::new, m -> m.add(
                 SpawnTypes.BLOCK_SPAWNING,
                 SpawnTypes.BREEDING,

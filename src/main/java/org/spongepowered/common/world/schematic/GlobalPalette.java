@@ -32,7 +32,6 @@ import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;

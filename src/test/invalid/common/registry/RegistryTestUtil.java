@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.registry;
 
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.util.annotation.CatalogedBy;
 
 import java.lang.reflect.Field;

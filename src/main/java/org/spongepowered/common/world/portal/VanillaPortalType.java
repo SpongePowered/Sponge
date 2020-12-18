@@ -24,13 +24,7 @@
  */
 package org.spongepowered.common.world.portal;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.common.SpongeCatalogType;
 
-public abstract class VanillaPortalType extends SpongeCatalogType implements PortalType {
-
-    public VanillaPortalType(final ResourceKey key) {
-        super(key);
-    }
+public abstract class VanillaPortalType implements PortalType {
 }

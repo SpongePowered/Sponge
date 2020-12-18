@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.cooking;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -35,7 +32,6 @@ import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -45,13 +41,14 @@ import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.SpongeCatalogBuilder;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
-public class SpongeCookingRecipeBuilder extends SpongeCatalogBuilder<RecipeRegistration, CookingRecipe.Builder>
+public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, CookingRecipe.Builder>
         implements CookingRecipe.Builder.ResultStep, CookingRecipe.Builder.IngredientStep, CookingRecipe.Builder.EndStep {
 
     private IRecipeType type;
@@ -110,7 +107,9 @@ public class SpongeCookingRecipeBuilder extends SpongeCatalogBuilder<RecipeRegis
 
     @Override
     public EndStep experience(final double experience) {
-        checkState(experience >= 0, "The experience must be non-negative.");
+        if (experience < 0) {
+            throw new IllegalStateException("The experience must be non-negative");
+        }
         this.experience = (float) experience;
         return this;
     }
@@ -134,12 +133,10 @@ public class SpongeCookingRecipeBuilder extends SpongeCatalogBuilder<RecipeRegis
     }
 
     @Override
-    protected RecipeRegistration build(final ResourceKey key) {
-        checkNotNull(this.type);
-        checkNotNull(this.ingredient);
-        checkNotNull(this.result);
-        checkNotNull(key);
-        this.key = key;
+    protected RecipeRegistration build0() {
+        Objects.requireNonNull(this.type, "type");
+        Objects.requireNonNull(this.ingredient, "ingredient");
+        Objects.requireNonNull(this.result, "result");
 
         if (this.experience == null) {
             this.experience = 0f;

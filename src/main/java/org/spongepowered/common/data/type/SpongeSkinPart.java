@@ -26,19 +26,16 @@ package org.spongepowered.common.data.type;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.util.registry.SimpleRegistry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart {
+public final class SpongeSkinPart implements SkinPart {
 
     private final Component component;
 
-    public SpongeSkinPart(final ResourceKey key) {
-        super(key);
-        this.component = Component.translatable("options.modelPart." + key);
+    public SpongeSkinPart(String part) {
+        this.component = Component.translatable("options.modelPart." + part);
     }
 
     @Override

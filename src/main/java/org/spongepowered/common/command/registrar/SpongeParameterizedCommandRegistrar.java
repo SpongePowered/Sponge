@@ -32,7 +32,6 @@ import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
@@ -41,7 +40,6 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
-import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.SpongeParameterizedCommand;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
@@ -58,14 +56,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class SpongeParameterizedCommandRegistrar extends SpongeCatalogType implements BrigadierBasedRegistrar, CommandRegistrar<Command.Parameterized> {
+public final class SpongeParameterizedCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<Command.Parameterized> {
 
     private final Map<CommandMapping, Command.Parameterized> commandMap = new HashMap<>();
     private static final TypeToken<Command.Parameterized> COMMAND_TYPE = TypeToken.get(Command.Parameterized.class);
     public static SpongeParameterizedCommandRegistrar INSTANCE;
 
-    public SpongeParameterizedCommandRegistrar(final ResourceKey key) {
-        super(key);
+    public SpongeParameterizedCommandRegistrar() {
         SpongeParameterizedCommandRegistrar.INSTANCE = this;
     }
 

@@ -22,36 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.util;
 
-import static org.spongepowered.api.data.persistence.DataQuery.of;
-
-import com.google.common.base.MoreObjects;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.ResourceKeyed;
+import org.spongepowered.api.util.ResourceKeyedBuilder;
 
-public abstract class SpongeEntityMetadataType<T> extends SpongeCatalogType {
+import java.util.Objects;
 
-    private final T metadata;
+public abstract class AbstractResourceKeyedBuilder<T extends ResourceKeyed, B extends ResourceKeyedBuilder<T, B>> implements
+        ResourceKeyedBuilder<T, B> {
 
-    public SpongeEntityMetadataType(final ResourceKey key, final T metadata) {
-        super(key);
-        this.metadata = metadata;
-    }
+    protected ResourceKey key;
 
-    public T getMetadata() {
-        return this.metadata;
-    }
-
-    public DataContainer toContainer() {
-        // TODO 1.14.4 - This needs to be version 2
-        return DataContainer.createNew().set(of("id"), this.getKey()).set(of("metadata"), this.metadata);
+    @Override
+    public final B key(final ResourceKey key) {
+        this.key = Objects.requireNonNull(key, "key");
+        return (B) this;
     }
 
     @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .add("metadata", this.metadata);
+    public @NonNull final T build() {
+        Objects.requireNonNull(this.key, "key");
+        return this.build0();
     }
+
+    protected abstract T build0();
 }

@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -85,7 +84,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
         } else if (DataSerializable.class.isAssignableFrom(rawType)) {
             deserializer = (view, dataQuery)  -> (Optional<T>) view.getSerializable(dataQuery, (Class<? extends DataSerializable>) rawType);
         } else if (CatalogType.class.isAssignableFrom(rawType)) {
-            deserializer = (view, dataQuery)  -> (Optional<T>) view.getRegistryType(dataQuery, ((Class<? extends CatalogType>) rawType));
+            deserializer = (view, dataQuery)  -> (Optional<T>) view.getRegistryValue(dataQuery, ((Class<? extends CatalogType>) rawType));
         } else if (Sponge.getGame().getDataManager().getTranslator(rawType).isPresent()) {
             deserializer = (view, dataQuery)  -> (Optional<T>) view.getObject(dataQuery, rawType);
         } else if (Set.class.isAssignableFrom(rawType)) {
@@ -146,7 +145,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
             return (Optional) view.getSerializableList(dataQuery, (Class<? extends DataSerializable>) listType);
         }
         if (CatalogType.class.isAssignableFrom(listType)) {
-            return (Optional) view.getRegistryTypeList(dataQuery, (Class<? extends CatalogType>) listType);
+            return (Optional) view.getRegistryValueList(dataQuery, (Class<? extends CatalogType>) listType);
         }
         if (Sponge.getGame().getDataManager().getTranslator(listType).isPresent()) {
             return view.getObjectList(dataQuery, listType);

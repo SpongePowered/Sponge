@@ -26,8 +26,6 @@ package org.spongepowered.common.config;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Singleton;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.config.ConfigRoot;
@@ -51,14 +49,13 @@ public final class PluginConfigManager implements ConfigManager {
     private final WatchServiceListener listener;
 
     @Inject
-    PluginConfigManager(final CatalogTypeTypeSerializer catalogSerializer, final DataSerializableTypeSerializer dataSerializableSerializer) throws IOException {
+    PluginConfigManager(final DataSerializableTypeSerializer dataSerializableSerializer) throws IOException {
         // TODO: Move this onto the async scheduler, rather than shared FJ pool?
         this.listener = WatchServiceListener.builder()
                 .threadFactory(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Sponge-WatchService-%d").build())
                 .build();
 
         this.serializers = TypeSerializerCollection.defaults().childBuilder()
-                .register(CatalogType.class, catalogSerializer)
                 // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
                 // See https://github.com/SpongePowered/SpongeCommon/issues/1348
                 .register(DataSerializableTypeSerializer::accepts, dataSerializableSerializer)

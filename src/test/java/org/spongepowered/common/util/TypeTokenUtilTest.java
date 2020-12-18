@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.leangen.geantyref.TypeToken;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;

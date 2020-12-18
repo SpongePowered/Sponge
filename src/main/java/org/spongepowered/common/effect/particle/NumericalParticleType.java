@@ -26,31 +26,27 @@ package org.spongepowered.common.effect.particle;
 
 import com.google.common.collect.ImmutableMap;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleType;
-import org.spongepowered.common.SpongeCatalogType;
 
 import java.util.Map;
 import java.util.Optional;
 
-public final class NumericalParticleType extends SpongeCatalogType implements ParticleType {
+public final class NumericalParticleType implements ParticleType {
 
     private final int id;
     private final Map<ParticleOption<?>, Object> defaultOptions;
     @Nullable
     private final DataCalculator dataCalculator;
 
-    public NumericalParticleType(int id, ResourceKey key, Map<ParticleOption<?>, Object> defaultOptions, @Nullable DataCalculator dataCalculator) {
-        super(key);
+    public NumericalParticleType(final int id, final Map<ParticleOption<?>, Object> defaultOptions, @Nullable final DataCalculator dataCalculator) {
         this.id = id;
         this.defaultOptions = ImmutableMap.copyOf(defaultOptions);
         this.dataCalculator = dataCalculator;
     }
 
-    public NumericalParticleType(int id, ResourceKey key) {
-        super(key);
+    public NumericalParticleType(final int id) {
         this.id = id;
         this.defaultOptions = ImmutableMap.of();
         this.dataCalculator = null;

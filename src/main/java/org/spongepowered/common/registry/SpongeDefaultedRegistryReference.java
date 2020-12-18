@@ -22,49 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.biome;
+package org.spongepowered.common.registry;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryKey;
 
-import com.google.common.base.MoreObjects;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.VirtualBiomeType;
-import org.spongepowered.common.SpongeCatalogType;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-public class SpongeVirtualBiomeType extends SpongeCatalogType implements VirtualBiomeType {
+public final class SpongeDefaultedRegistryReference<T> extends SpongeRegistryReference<T> implements DefaultedRegistryReference<T> {
 
-    private final double temperature;
-    private final double humidity;
-    private final BiomeType persisted;
+    private final Supplier<RegistryHolder> defaultHolder;
 
-    public SpongeVirtualBiomeType(ResourceKey key, double temperature, double humidity, BiomeType persistedType) {
+    public SpongeDefaultedRegistryReference(final RegistryKey<T> key, final Supplier<RegistryHolder> defaultHolder) {
         super(key);
-        this.temperature = temperature;
-        this.humidity = humidity;
-        this.persisted = checkNotNull(persistedType);
+        this.defaultHolder = defaultHolder;
+    }
+
+
+    @Override
+    public T get() {
+        return this.defaultHolder.get().registry(this.registry()).value(this.location());
     }
 
     @Override
-    public double getTemperature() {
-        return this.temperature;
-    }
-
-    @Override
-    public double getHumidity() {
-        return this.humidity;
-    }
-
-    @Override
-    public BiomeType getPersistedType() {
-        return this.persisted;
-    }
-
-    @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .add("temperature", this.temperature)
-                .add("humidity", this.humidity)
-                .add("persistedBiome", this.persisted);
+    public Optional<T> find() {
+        final Optional<Registry<T>> registry = this.defaultHolder.get().findRegistry(this.registry());
+        return registry.flatMap(r -> r.findValue(this.location()));
     }
 }

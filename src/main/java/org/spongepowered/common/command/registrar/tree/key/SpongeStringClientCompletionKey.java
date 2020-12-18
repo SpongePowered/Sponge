@@ -25,17 +25,11 @@
 package org.spongepowered.common.command.registrar.tree.key;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
-import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.command.registrar.tree.builder.StringCommandTreeNode;
 
-public final class SpongeStringClientCompletionKey extends SpongeCatalogType implements ClientCompletionKey<CommandTreeNode.@NonNull StringParser> {
-
-    public SpongeStringClientCompletionKey(final ResourceKey key) {
-        super(key);
-    }
+public final class SpongeStringClientCompletionKey implements ClientCompletionKey<CommandTreeNode.@NonNull StringParser> {
 
     @Override
     public CommandTreeNode.@NonNull StringParser createNode() {

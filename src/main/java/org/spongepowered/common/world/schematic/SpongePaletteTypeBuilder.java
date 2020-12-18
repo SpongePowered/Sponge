@@ -28,13 +28,13 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class SpongePaletteTypeBuilder<T> extends SpongeCatalogBuilder<PaletteType<T>, PaletteType.Builder<T>> implements PaletteType.Builder<T> {
+public class SpongePaletteTypeBuilder<T> implements PaletteType.Builder<T> {
+
     private @MonotonicNonNull Function<T, String> encoder;
     private @MonotonicNonNull Function<String, Optional<T>> decoder;
 

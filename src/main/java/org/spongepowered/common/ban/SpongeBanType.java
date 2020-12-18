@@ -24,17 +24,14 @@
  */
 package org.spongepowered.common.ban;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanType;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeBanType extends SpongeCatalogType implements BanType {
+public final class SpongeBanType implements BanType {
 
     private Class<? extends Ban> banClass;
 
-    public SpongeBanType(final ResourceKey key, final Class<? extends Ban> banClass) {
-        super(key);
+    public SpongeBanType(final Class<? extends Ban> banClass) {
         this.banClass = banClass;
     }
 

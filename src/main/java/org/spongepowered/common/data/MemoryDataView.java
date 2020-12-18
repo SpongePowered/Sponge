@@ -34,7 +34,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ArrayUtils;
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManager;
@@ -755,14 +754,14 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public <T> Optional<T> getRegistryType(final DataQuery path, final RegistryType<T> registryType, final RegistryHolder holder) {
+    public <T> Optional<T> getRegistryValue(final DataQuery path, final RegistryType<T> registryType, final RegistryHolder holder) {
         Objects.requireNonNull(path, "path");
         Objects.requireNonNull(registryType, "registry type");
         return this.getString(path).flatMap(string -> holder.findRegistry(registryType).flatMap(r -> r.findValue(ResourceKey.resolve(string))));
     }
 
     @Override
-    public <T> Optional<List<T>> getRegistryTypeList(final DataQuery path, final RegistryType<T> registryType, final RegistryHolder holder) {
+    public <T> Optional<List<T>> getRegistryValueList(final DataQuery path, final RegistryType<T> registryType, final RegistryHolder holder) {
         Objects.requireNonNull(path, "path");
         Objects.requireNonNull(registryType, "registry type");
         return this.getStringList(path).map(list ->

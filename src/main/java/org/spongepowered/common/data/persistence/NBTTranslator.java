@@ -43,31 +43,26 @@ import net.minecraft.nbt.LongArrayNBT;
 import net.minecraft.nbt.LongNBT;
 import net.minecraft.nbt.ShortNBT;
 import net.minecraft.nbt.StringNBT;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Map;
 
-public final class NBTTranslator extends SpongeCatalogType implements DataTranslator<CompoundNBT> {
+public final class NBTTranslator implements DataTranslator<CompoundNBT> {
 
-    private static final NBTTranslator instance = new NBTTranslator();
+    public static NBTTranslator INSTANCE;
+
     private static final TypeToken<CompoundNBT> TOKEN = TypeToken.get(CompoundNBT.class);
     public static final String BOOLEAN_IDENTIFIER = "$Boolean";
 
-    public static NBTTranslator getInstance() {
-        return NBTTranslator.instance;
-    }
-
-    private NBTTranslator() {
-        super(ResourceKey.sponge("nbt"));
+    public NBTTranslator() {
+        NBTTranslator.INSTANCE = this;
     }
 
     private static CompoundNBT containerToCompound(final DataView container) {
@@ -180,7 +175,7 @@ public final class NBTTranslator extends SpongeCatalogType implements DataTransl
     private static DataContainer getViewFromCompound(CompoundNBT compound) {
         checkNotNull(compound);
         DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
-        NBTTranslator.getInstance().addTo(compound, container);
+        NBTTranslator.INSTANCE.addTo(compound, container);
         return container;
     }
 

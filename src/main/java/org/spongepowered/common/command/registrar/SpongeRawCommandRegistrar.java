@@ -27,7 +27,6 @@ package org.spongepowered.common.command.registrar;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
@@ -37,7 +36,6 @@ import org.spongepowered.api.command.exception.CommandPermissionException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
-import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collections;
@@ -48,15 +46,14 @@ import java.util.Optional;
 /**
  * For use with {@link org.spongepowered.api.command.Command.Raw}
  */
-public final class SpongeRawCommandRegistrar extends SpongeCatalogType implements CommandRegistrar<Command.Raw> {
+public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command.Raw> {
 
     private static final TypeToken<Command.Raw> COMMAND_TYPE = TypeToken.get(Command.Raw.class);
     public static SpongeRawCommandRegistrar INSTANCE;
 
     private final HashMap<CommandMapping, Command.Raw> commands = new HashMap<>();
 
-    public SpongeRawCommandRegistrar(final ResourceKey key) {
-        super(key);
+    public SpongeRawCommandRegistrar() {
         SpongeRawCommandRegistrar.INSTANCE = this;
     }
 

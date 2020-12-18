@@ -24,32 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
-import net.minecraft.advancements.FrameType;
-import net.minecraft.entity.passive.fish.TropicalFishEntity;
-import net.minecraft.tileentity.BannerPattern;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.advancement.AdvancementType;
-import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.persistence.DataFormat;
-import org.spongepowered.api.data.persistence.StringDataFormat;
-import org.spongepowered.api.data.type.BannerPatternShape;
-import org.spongepowered.api.data.type.TropicalFishShape;
-import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.SpongeDataRegistration;
-import org.spongepowered.common.data.persistence.HoconDataFormat;
-import org.spongepowered.common.data.persistence.JsonDataFormat;
-import org.spongepowered.common.data.persistence.NBTDataFormat;
-import org.spongepowered.common.registry.builtin.sponge.PaletteTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.vanilla.EquipmentGroupStreamGenerator;
-import org.spongepowered.common.registry.builtin.vanilla.EquipmentTypeStreamGenerator;
-
-import java.util.Arrays;
-import java.util.stream.Stream;
 
 public final class SpongeRegistries {
 
@@ -95,17 +70,17 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.WEATHER, SpongeRegistryLoaders.weather().values());
 
         // ----------------------------------------------------------------------------------------------------
-        this
-                .generateRegistry(AdvancementType.class, ResourceKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true, false)
-                .generateRegistry(BannerPatternShape.class, ResourceKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true, false)
-                .generateCallbackRegistry(DataRegistration.class, ResourceKey.sponge("data_registration"), Stream.empty(), (key, value) -> ((SpongeDataManager) Sponge.getGame().getDataManager()).registerCustomDataRegistration((SpongeDataRegistration) value), false, true)
-                .generateRegistry(EquipmentGroup.class, ResourceKey.minecraft("equipment_group"), EquipmentGroupStreamGenerator.stream(), true, false)
-                .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), EquipmentTypeStreamGenerator.stream(), true, false)
-                .generateRegistry(PaletteType.class, ResourceKey.sponge("palette"), PaletteTypeStreamGenerator.stream(), true, true)
-                .generateRegistry(TropicalFishShape.class, ResourceKey.minecraft("tropical_fish_shape"), Arrays.stream(TropicalFishEntity.Type.values()), true, false)
-                .generateRegistry(StringDataFormat.class, ResourceKey.sponge("string_data_format"), Stream.of(new JsonDataFormat(ResourceKey.sponge("json")), new HoconDataFormat(ResourceKey.sponge("hocon"))), true, false)
-                .generateRegistry(DataFormat.class, ResourceKey.sponge("data_format"), Stream.of(new NBTDataFormat(ResourceKey.sponge("nbt"))), true, false)
-        ;
+//        this
+//                .generateRegistry(AdvancementType.class, ResourceKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true, false)
+//                .generateRegistry(BannerPatternShape.class, ResourceKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true, false)
+//                .generateCallbackRegistry(DataRegistration.class, ResourceKey.sponge("data_registration"), Stream.empty(), (key, value) -> ((SpongeDataManager) Sponge.getGame().getDataManager()).registerCustomDataRegistration((SpongeDataRegistration) value), false, true)
+//                .generateRegistry(EquipmentGroup.class, ResourceKey.minecraft("equipment_group"), EquipmentGroupStreamGenerator.stream(), true, false)
+//                .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), EquipmentTypeStreamGenerator.stream(), true, false)
+//                .generateRegistry(PaletteType.class, ResourceKey.sponge("palette"), PaletteTypeStreamGenerator.stream(), true, true)
+//                .generateRegistry(TropicalFishShape.class, ResourceKey.minecraft("tropical_fish_shape"), Arrays.stream(TropicalFishEntity.Type.values()), true, false)
+//                .generateRegistry(StringDataFormat.class, ResourceKey.sponge("string_data_format"), Stream.of(new JsonDataFormat(ResourceKey.sponge("json")), new HoconDataFormat(ResourceKey.sponge("hocon"))), true, false)
+//                .generateRegistry(DataFormat.class, ResourceKey.sponge("data_format"), Stream.of(new NBTDataFormat(ResourceKey.sponge("nbt"))), true, false)
+//        ;
     }
 
     public static void registerEngineRegistries(final SpongeRegistryHolder holder) {

@@ -24,12 +24,7 @@
  */
 package org.spongepowered.common.block.transaction;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.transaction.Operation;
-import org.spongepowered.common.SpongeCatalogType;
 
-public class BlockOperation extends SpongeCatalogType implements Operation {
-    public BlockOperation(ResourceKey key) {
-        super(key);
-    }
+public final class BlockOperation implements Operation {
 }

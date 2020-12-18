@@ -30,16 +30,14 @@ import net.minecraft.item.MusicDiscItem;
 import net.minecraft.network.play.server.SPlaySoundEventPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
-import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.accessor.item.MusicDiscItemAccessor;
 import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;
 
-public final class SpongeMusicDisc extends SpongeCatalogType implements MusicDisc {
+public final class SpongeMusicDisc implements MusicDisc {
 
     /**
      * This is the effect ID that is used by the Effect packet to play a record effect.
@@ -50,8 +48,7 @@ public final class SpongeMusicDisc extends SpongeCatalogType implements MusicDis
     private final MusicDiscItem item;
     private final int id;
 
-    public SpongeMusicDisc(final ResourceKey key, final MusicDiscItem item) {
-        super(key);
+    public SpongeMusicDisc(final MusicDiscItem item) {
         this.item = item;
         this.id = Registry.ITEM.getId(item);
     }

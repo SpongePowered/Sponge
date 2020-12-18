@@ -40,7 +40,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public final class SpongeRegistryReference<T> extends SpongeRegistryKey<T> implements RegistryReference<T> {
+public class SpongeRegistryReference<T> extends SpongeRegistryKey<T> implements RegistryReference<T> {
 
     public SpongeRegistryReference(final RegistryKey<T> key) {
         super(key.registry(), key.location());
@@ -94,7 +94,7 @@ public final class SpongeRegistryReference<T> extends SpongeRegistryKey<T> imple
 
     @Nullable
     private T getFromHolder(final RegistryHolder holder) {
-        final Optional<Registry<T>> regOpt = holder.findRegistry(this);
+        final Optional<Registry<T>> regOpt = holder.findRegistry(this.registry());
         return regOpt.flatMap(entries -> entries.findValue(this.location())).orElse(null);
     }
 }

@@ -30,7 +30,6 @@ import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.common.block.BlockStateSerializerDeserializer;

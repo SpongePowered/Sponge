@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.data.nbt.validation;
 
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.util.annotation.CatalogedBy;
 
 @CatalogedBy(Validations.class)
-public interface ValidationType extends CatalogType {
+public interface ValidationType {
 
 }

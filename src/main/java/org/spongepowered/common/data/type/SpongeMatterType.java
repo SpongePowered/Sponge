@@ -24,13 +24,7 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.MatterType;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeMatterType extends SpongeCatalogType implements MatterType {
-
-    public SpongeMatterType(final ResourceKey key) {
-        super(key);
-    }
+public final class SpongeMatterType implements MatterType {
 }
