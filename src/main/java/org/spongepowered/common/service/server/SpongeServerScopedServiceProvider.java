@@ -65,19 +65,19 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
         return ImmutableList.<Service<?>>builder()
                 .add(new Service<>(
                         BanService.class,
-                        ServicesCategory.ServicePluginSubCategory::getBanService,
+                        servicePluginSubCategory -> servicePluginSubCategory.banService,
                         SpongeBanService.class))
                 .add(new Service<>(
                         EconomyService.class,
-                        ServicesCategory.ServicePluginSubCategory::getEconomyService,
+                        servicePluginSubCategory -> servicePluginSubCategory.economyService,
                         null))
                 .add(new Service<>(
                         PermissionService.class,
-                        ServicesCategory.ServicePluginSubCategory::getPermissionService,
+                        servicePluginSubCategory -> servicePluginSubCategory.permissionService,
                         SpongePermissionService.class))
                 .add(new Service<>(
                         WhitelistService.class,
-                        ServicesCategory.ServicePluginSubCategory::getWhitelistService,
+                        servicePluginSubCategory -> servicePluginSubCategory.whitelistService,
                         SpongeWhitelistService.class))
                 .build();
     }

@@ -59,7 +59,7 @@ public final class SpongeTeleportHelper implements TeleportHelper {
         final Set<TeleportHelperFilter> filters = Sets.newHashSet(additionalFilters);
         filters.add(filter);
 
-        if (SpongeConfigs.getCommon().get().getTeleportHelper().isForceBlacklistOn()) {
+        if (SpongeConfigs.getCommon().get().teleportHelper.forceBlacklist) {
             // Always force this into the set if the user has requested it.
             filters.add(TeleportHelperFilters.CONFIG.get());
         }

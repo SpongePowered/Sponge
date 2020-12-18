@@ -55,7 +55,7 @@ public final class SpongeGameScopedServiceProvider extends SpongeServiceProvider
     protected List<Service<?>> servicesToSelect() {
         return Collections.singletonList(new Service<>(
                 PaginationService.class,
-                ServicesCategory.ServicePluginSubCategory::getPaginationService,
+                servicePluginSubCategory -> servicePluginSubCategory.paginationService,
                 SpongePaginationService.class));
     }
 
