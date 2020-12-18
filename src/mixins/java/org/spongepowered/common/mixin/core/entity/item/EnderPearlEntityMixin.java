@@ -46,6 +46,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.projectile.ThrowableEntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.portal.PlatformTeleporter;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
@@ -109,8 +110,8 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
 
     @Override
     @Nullable
-    public Entity changeDimension(final ServerWorld dimensionIn) {
-        final Entity entity = super.changeDimension(dimensionIn);
+    public Entity bridge$changeDimension(final ServerWorld dimensionIn, final PlatformTeleporter teleporter) {
+        final Entity entity = super.bridge$changeDimension(dimensionIn, teleporter);
 
         if (entity instanceof EnderPearlEntity) {
             // We actually teleported so...
@@ -119,4 +120,5 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
 
         return entity;
     }
+
 }

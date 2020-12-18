@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.accessor.entity;
 
+import net.minecraft.block.PortalInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.Direction;
 import net.minecraft.util.TeleportationRepositioner;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -82,6 +84,8 @@ public interface EntityAccessor {
 
     @Accessor("portalTime") void accessor$portalTime(final int portalTime);
 
+    @Accessor("portalEntrancePos") BlockPos accessor$portalEntrancePos();
+
     @Accessor("portalEntrancePos") void accessor$portalEntrancePos(final BlockPos portalEntrancePos);
 
     @Invoker("setRot") void invoker$setRot(final float yRot, final float xRot);
@@ -99,5 +103,7 @@ public interface EntityAccessor {
     @Invoker("removeAfterChangingDimensions") void invoker$removeAfterChangingDimensions();
 
     @Invoker("getRelativePortalPosition") Vector3d invoker$getRelativePortalPosition(Direction.Axis axis, TeleportationRepositioner.Result result);
+
+    @Invoker("findDimensionEntryPoint") PortalInfo invoker$findDimensionEntryPoint(ServerWorld targetWorld);
 
 }

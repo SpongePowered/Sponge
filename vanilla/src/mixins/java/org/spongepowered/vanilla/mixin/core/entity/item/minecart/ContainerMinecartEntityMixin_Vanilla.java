@@ -22,40 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.item.minecart;
+package org.spongepowered.vanilla.mixin.core.entity.item.minecart;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.world.portal.PlatformTeleporter;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
 
 import javax.annotation.Nullable;
 
 @Mixin(ContainerMinecartEntity.class)
-public abstract class ContainerMinecartEntityMixin extends AbstractMinecartEntityMixin {
-
-    @Shadow private boolean dropEquipment;
+public abstract class ContainerMinecartEntityMixin_Vanilla implements EntityBridge {
 
     /**
-     * @author Zidane - June 2019 - 1.12.2
-     * @author i509VCB - Feb 2020 - 1.14.4
-     * @author dualspiral - 21 December 2020 - 1.16.4
-     * @reason Only have this Minecart not drop contents if we actually changed dimension
+     * @author dualspiral - 21 December 2020
+     * @reason Redirect to our platform teleporter method
      */
-    @Override
+    @Overwrite
     @Nullable
-    public Entity bridge$changeDimension(final ServerWorld world, final PlatformTeleporter platformTeleporter) {
-        final Entity entity = super.bridge$changeDimension(world, platformTeleporter);
-
-        if (entity instanceof ContainerMinecartEntity) {
-            // We actually teleported so...
-            this.dropEquipment = false;
-        }
-
-        return entity;
+    public Entity changeDimension(final ServerWorld serverWorld) {
+        return this.bridge$changeDimension(serverWorld, VanillaPortalPlatformTeleporter.getNetherInstance());
     }
 
 }

@@ -22,7 +22,7 @@
     "adventure.text.AbstractComponentMixin",
     "adventure.text.format.StyleImplMixin",
     "authlib.properties.PropertyMixin",
-      "block.AbstractBlock_PropertiesMixin",
+    "block.AbstractBlock_PropertiesMixin",
     "block.BlockMixin",
     "block.BlockStateMixin",
     "block.CarvedPumpkinBlockMixin",
@@ -194,7 +194,8 @@
     "entity.passive.AnimalEntityMixin",
     "world.storage.ServerWorldInfoMixin",
     "world.gen.settings.DimensionGeneratorSettingsMixin",
-    "util.math.Vector3iMixin"
+    "util.math.Vector3iMixin",
+    "block.EndPortalBlockMixin"
   ],
   "client": [
     "client.MinecraftMixin",

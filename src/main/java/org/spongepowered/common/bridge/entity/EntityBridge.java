@@ -24,13 +24,21 @@
  */
 package org.spongepowered.common.bridge.entity;
 
+import net.minecraft.block.PortalInfo;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.TeleportationRepositioner;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.DismountType;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
+import org.spongepowered.common.world.portal.PlatformTeleporter;
 import org.spongepowered.math.vector.Vector3d;
+
+import java.util.Optional;
 
 public interface EntityBridge {
 
@@ -63,11 +71,35 @@ public interface EntityBridge {
      *
      * @param phaseContext The context, for whatever reason in the future
      */
-    default void bridge$onCancelledBlockChange(EntityTickContext phaseContext) {
-
+    default void bridge$onCancelledBlockChange(final EntityTickContext phaseContext) {
     }
 
     void bridge$setTransient(boolean value);
 
     boolean bridge$dismountRidingEntity(DismountType type);
+
+    Optional<TeleportationRepositioner.Result> bridge$determineExitPortal(ServerWorld targetWorld, BlockPos targetPosition, boolean targetIsNether,
+            boolean shouldFireEvent);
+
+    Entity bridge$changeDimension(ServerWorld targetWorld, PlatformTeleporter teleporter);
+
+    default void bridge$setPlayerChangingDimensions() {
+    }
+
+    default void bridge$playerPrepareForPortalTeleport(final ServerWorld currentWorld, final ServerWorld targetWorld) {
+    }
+
+    default void bridge$validateEntityAfterTeleport(final Entity e, final PlatformTeleporter teleporter) {
+    }
+
+    Entity bridge$portalRepositioning(final boolean createEndPlatform,
+            final ServerWorld serverworld,
+            final ServerWorld targetWorld,
+            final PortalInfo portalinfo);
+
+    void bridge$postPortalForceChangeTasks(Entity entity, ServerWorld targetWorld, boolean isVanilla);
+
+    ChangeEntityWorldEvent.Reposition bridge$fireRepositionEvent(org.spongepowered.api.world.server.ServerWorld originalDestinationWorld,
+            org.spongepowered.api.world.server.ServerWorld targetWorld,
+            Vector3d destinationPosition);
 }

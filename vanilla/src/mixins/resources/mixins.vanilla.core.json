@@ -19,6 +19,7 @@
     ],
     "mixins": [
         "crash.CrashReportMixin_Vanilla",
+        "entity.player.EntityMixin_Vanilla",
         "entity.player.ServerPlayerEntityMixin_Vanilla",
         "network.login.ServerLoginNetHandler_1Mixin_Vanilla",
         "network.login.ServerLoginNetHandlerMixin_Vanilla",
@@ -27,7 +28,9 @@
         "util.registry.BootstrapMixin_Vanilla",
         "util.registry.RegistryMixin_Vanilla",
         "util.registry.SimpleRegistryMixin_Vanilla",
-        "util.registry.MutableRegistryMixin_Vanilla"
+        "util.registry.MutableRegistryMixin_Vanilla",
+        "entity.item.minecart.ContainerMinecartEntityMixin_Vanilla",
+        "entity.item.minecart.EnderPearlEntityMixin_Vanilla"
     ],
     "injectors": {
         "defaultRequire": 1

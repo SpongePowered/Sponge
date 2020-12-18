@@ -36,6 +36,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.CombatTracker;
@@ -87,6 +88,7 @@ import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -155,6 +157,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected abstract void shadow$dropAllDeathLoot(DamageSource damageSourceIn);
     @Shadow @Nullable public abstract LivingEntity shadow$getKillCredit();
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
+    @Shadow  public abstract Collection<EffectInstance> shadow$getActiveEffects();
     // @formatter:on
 
     @Nullable private ItemStack impl$activeItemStackCopy;

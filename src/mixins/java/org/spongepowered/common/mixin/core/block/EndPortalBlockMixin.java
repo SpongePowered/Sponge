@@ -22,40 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.item.minecart;
+package org.spongepowered.common.mixin.core.block;
 
+import net.minecraft.block.EndPortalBlock;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.world.portal.PlatformTeleporter;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
 
-import javax.annotation.Nullable;
+@Mixin(EndPortalBlock.class)
+public abstract class EndPortalBlockMixin {
 
-@Mixin(ContainerMinecartEntity.class)
-public abstract class ContainerMinecartEntityMixin extends AbstractMinecartEntityMixin {
-
-    @Shadow private boolean dropEquipment;
-
-    /**
-     * @author Zidane - June 2019 - 1.12.2
-     * @author i509VCB - Feb 2020 - 1.14.4
-     * @author dualspiral - 21 December 2020 - 1.16.4
-     * @reason Only have this Minecart not drop contents if we actually changed dimension
-     */
-    @Override
-    @Nullable
-    public Entity bridge$changeDimension(final ServerWorld world, final PlatformTeleporter platformTeleporter) {
-        final Entity entity = super.bridge$changeDimension(world, platformTeleporter);
-
-        if (entity instanceof ContainerMinecartEntity) {
-            // We actually teleported so...
-            this.dropEquipment = false;
-        }
-
-        return entity;
+    @Redirect(method = "entityInside", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;changeDimension"
+            + "(Lnet/minecraft/world/server/ServerWorld;)Lnet/minecraft/entity/Entity;"))
+    private Entity impl$useEndPortalTeleporterWhenTeleporting(final Entity entity, final ServerWorld p_241206_1_) {
+        return ((EntityBridge) entity).bridge$changeDimension(p_241206_1_, VanillaPortalPlatformTeleporter.getEndInstance());
     }
 
 }

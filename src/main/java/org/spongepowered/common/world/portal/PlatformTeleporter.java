@@ -22,40 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.item.minecart;
+package org.spongepowered.common.world.portal;
 
+import net.minecraft.block.PortalInfo;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.world.portal.PlatformTeleporter;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.cause.entity.MovementType;
+import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
+import java.util.function.Function;
 
-@Mixin(ContainerMinecartEntity.class)
-public abstract class ContainerMinecartEntityMixin extends AbstractMinecartEntityMixin {
+/**
+ * For wrapping around Forge's ITeleporter
+ */
+public interface PlatformTeleporter {
 
-    @Shadow private boolean dropEquipment;
-
-    /**
-     * @author Zidane - June 2019 - 1.12.2
-     * @author i509VCB - Feb 2020 - 1.14.4
-     * @author dualspiral - 21 December 2020 - 1.16.4
-     * @reason Only have this Minecart not drop contents if we actually changed dimension
-     */
-    @Override
     @Nullable
-    public Entity bridge$changeDimension(final ServerWorld world, final PlatformTeleporter platformTeleporter) {
-        final Entity entity = super.bridge$changeDimension(world, platformTeleporter);
+    PortalInfo getPortalInfo(Entity entity, ServerWorld currentWorld, ServerWorld targetWorld, Vector3d currentPosition);
 
-        if (entity instanceof ContainerMinecartEntity) {
-            // We actually teleported so...
-            this.dropEquipment = false;
-        }
+    // Implementor note: the final function Boolean is true if a portal exists
+    @Nullable
+    Entity performTeleport(Entity entity, ServerWorld currentWorld, ServerWorld targetWorld, float xRot, Function<Boolean, Entity> teleportLogic);
 
-        return entity;
-    }
+    // This isn't if it's a vanilla portal - it's if it's vanilla(ish) logic.
+    boolean isVanilla();
+
+    MovementType getMovementType();
+
+    PortalType getPortalType();
 
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge.entity.player;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -38,6 +39,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.User;
@@ -45,6 +47,7 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
+import org.spongepowered.common.world.portal.PlatformTeleporter;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -130,4 +133,7 @@ public interface ServerPlayerEntityBridge {
     }
 
     boolean bridge$kick(final Component message);
+
+    Entity bridge$performGameWinLogic();
+
 }
