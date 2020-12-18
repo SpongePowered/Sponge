@@ -62,7 +62,7 @@ public final class CriteriaTriggersRegistrar {
                 .registerCatalogAndSupplier(Trigger.class, "location", () -> (Trigger) CriteriaTriggers.LOCATION)
                 .registerCatalogAndSupplier(Trigger.class, "slept_in_bed", () -> (Trigger) CriteriaTriggers.SLEPT_IN_BED)
                 .registerCatalogAndSupplier(Trigger.class, "cured_zombie_villager", () -> (Trigger) CriteriaTriggers.CURED_ZOMBIE_VILLAGER)
-                .registerCatalogAndSupplier(Trigger.class, "villager_trade", () -> (Trigger) CriteriaTriggers.VILLAGER_TRADE)
+                .registerCatalogAndSupplier(Trigger.class, "villager_trade", () -> (Trigger) CriteriaTriggers.TRADE)
                 .registerCatalogAndSupplier(Trigger.class, "item_durability_changed", () -> (Trigger) CriteriaTriggers.ITEM_DURABILITY_CHANGED)
                 .registerCatalogAndSupplier(Trigger.class, "levitation", () -> (Trigger) CriteriaTriggers.LEVITATION)
                 .registerCatalogAndSupplier(Trigger.class, "changed_dimension", () -> (Trigger) CriteriaTriggers.CHANGED_DIMENSION)
@@ -77,9 +77,9 @@ public final class CriteriaTriggersRegistrar {
                 .registerCatalogAndSupplier(Trigger.class, "channeled_lightning", () -> (Trigger) CriteriaTriggers.CHANNELED_LIGHTNING)
                 .registerCatalogAndSupplier(Trigger.class, "shot_crossbow", () -> (Trigger) CriteriaTriggers.SHOT_CROSSBOW)
                 .registerCatalogAndSupplier(Trigger.class, "killed_by_crossbow", () -> (Trigger) CriteriaTriggers.KILLED_BY_CROSSBOW)
-                .registerCatalogAndSupplier(Trigger.class, "hero_of_the_village", () -> (Trigger) CriteriaTriggers.HERO_OF_THE_VILLAGE)
-                .registerCatalogAndSupplier(Trigger.class, "voluntary_exile", () -> (Trigger) CriteriaTriggers.VOLUNTARY_EXILE)
-                .registerCatalogAndSupplier(Trigger.class, "slide_down_block", () -> (Trigger) CriteriaTriggers.SLIDE_DOWN_BLOCK)
+                .registerCatalogAndSupplier(Trigger.class, "hero_of_the_village", () -> (Trigger) CriteriaTriggers.RAID_WIN)
+                .registerCatalogAndSupplier(Trigger.class, "voluntary_exile", () -> (Trigger) CriteriaTriggers.BAD_OMEN)
+                .registerCatalogAndSupplier(Trigger.class, "slide_down_block", () -> (Trigger) CriteriaTriggers.HONEY_BLOCK_SLIDE)
         ;
     }
 }
