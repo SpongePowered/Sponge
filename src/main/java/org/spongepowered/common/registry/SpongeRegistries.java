@@ -30,25 +30,20 @@ import net.minecraft.tileentity.BannerPattern;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementType;
-import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.StringDataFormat;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.TropicalFishShape;
-import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.api.registry.Registries;
-import org.spongepowered.api.registry.RegistryRoots;
-import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.persistence.HoconDataFormat;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.persistence.NBTDataFormat;
-import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.registry.builtin.sponge.PaletteTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.EquipmentGroupStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.EquipmentTypeStreamGenerator;
@@ -58,57 +53,46 @@ import java.util.stream.Stream;
 
 public final class SpongeRegistries {
 
-    public static final RegistryType<TransactionType<?>> BLOCK_TRANSACTION_TYPE = SpongeRegistries.spongeKey("block_transaction_type");
-
-    public static final RegistryType<CommandRegistrar<?>> COMMAND_REGISTRAR = SpongeRegistries.spongeKey("command_registrar");
-
-    public static final RegistryType<SpawnType> SPAWN_TYPE = SpongeRegistries.spongeKey("spawn_type");
-
-    private static <V> RegistryType<V> spongeKey(final String key) {
-        return RegistryType.of(RegistryRoots.SPONGE, ResourceKey.sponge(key));
-    }
-
-    public static void registerGlobalRegistries(final SpongeRegistryHolder registries) {
-        VanillaRegistryLoader.load(registries);
-        registries.createRegistry(Registries.ACCOUNT_DELETION_RESULT_TYPE, SpongeRegistryLoaders.accountDeletionResultType().values());
-        registries.createRegistry(Registries.BAN_TYPE, SpongeRegistryLoaders.banType().values());
-        registries.createRegistry(SpongeRegistries.BLOCK_TRANSACTION_TYPE, SpongeRegistryLoaders.blockTransactionTypes().values());
-        registries.createRegistry(Registries.BODY_PART, SpongeRegistryLoaders.bodyPart().values());
-        registries.createRegistry(Registries.CATALOGED_VALUE_PARAMETER, SpongeRegistryLoaders.catalogedValueParameter().values());
-        registries.createRegistry(Registries.CLICK_TYPE, SpongeRegistryLoaders.clickType().values());
-        registries.createRegistry(Registries.CLIENT_COMPLETION_KEY, SpongeRegistryLoaders.clientCompletionKey().values());
-        registries.createRegistry(Registries.CLIENT_COMPLETION_TYPE, SpongeRegistryLoaders.clientCompletionType().values());
-        registries.createRegistry(SpongeRegistries.COMMAND_REGISTRAR, SpongeRegistryLoaders.commandRegistrar().values());
-        registries.createRegistry(Registries.CURRENCY, null, true);
-        registries.createRegistry(Registries.DAMAGE_TYPE, SpongeRegistryLoaders.damageType().values());
-        registries.createRegistry(Registries.DAMAGE_MODIFIER_TYPE, SpongeRegistryLoaders.damageModifierType().values());
-        registries.createRegistry(Registries.DISMOUNT_TYPE, SpongeRegistryLoaders.dismountType().values());
-        registries.createRegistry(Registries.DISPLAY_SLOT, SpongeRegistryLoaders.displaySlot().values());
-        registries.createRegistry(Registries.EVENT_CONTEXT_KEY, SpongeRegistryLoaders.eventContextKey().values());
-        registries.createRegistry(Registries.GOAL_EXECUTOR_TYPE, SpongeRegistryLoaders.goalExecutorType().values());
-        registries.createRegistry(Registries.GOAL_TYPE, SpongeRegistryLoaders.goalType().values());
-        registries.createRegistry(Registries.HORSE_COLOR, SpongeRegistryLoaders.horseColor().values());
-        registries.createRegistry(Registries.HORSE_STYLE, SpongeRegistryLoaders.horseStyle().values());
-        registries.createRegistry(Registries.KEY, SpongeRegistryLoaders.key().values());
-        registries.createRegistry(Registries.LLAMA_TYPE, SpongeRegistryLoaders.llamaType().values());
-        registries.createRegistry(Registries.MATTER_TYPE, SpongeRegistryLoaders.matterType().values());
-        registries.createRegistry(Registries.MOVEMENT_TYPE, SpongeRegistryLoaders.movementType().values());
-        registries.createRegistry(Registries.MUSIC_DISC, SpongeRegistryLoaders.musicDisc().values());
-        registries.createRegistry(Registries.NOTE_PITCH, SpongeRegistryLoaders.notePitch().values());
-        registries.createRegistry(Registries.OPERATION, SpongeRegistryLoaders.operation().values());
-        registries.createRegistry(Registries.PARROT_TYPE, SpongeRegistryLoaders.parrotType().values());
-        registries.createRegistry(Registries.PARTICLE_OPTION, SpongeRegistryLoaders.particleOption().values());
-        registries.createRegistry(Registries.PLACEHOLDER_PARSER, SpongeRegistryLoaders.placeholderParser().values());
-        registries.createRegistry(Registries.PORTAL_TYPE, SpongeRegistryLoaders.portalType().values());
-        registries.createRegistry(Registries.QUERY_TYPE, SpongeRegistryLoaders.queryType().values());
-        registries.createRegistry(Registries.RABBIT_TYPE, SpongeRegistryLoaders.rabbitType().values());
-        registries.createRegistry(Registries.SELECTOR_TYPE, SpongeRegistryLoaders.selectorType().values());
-        registries.createRegistry(Registries.SELECTOR_SORT_ALGORITHM, SpongeRegistryLoaders.selectorSortAlgorithm().values());
-        registries.createRegistry(Registries.SKIN_PART, SpongeRegistryLoaders.skinPart().values());
-        registries.createRegistry(Registries.SPAWN_TYPE, SpongeRegistryLoaders.spawnType().values());
-        registries.createRegistry(Registries.TELEPORT_HELPER_FILTER, SpongeRegistryLoaders.teleportHelperFilter().values());
-        registries.createRegistry(Registries.WEATHER, SpongeRegistryLoaders.weather().values());
-        registries.createRegistry(Registries.WORLD_ARCHETYPE, SpongeRegistryLoaders.worldArchetype().values());
+    public static void registerGlobalRegistries(final SpongeRegistryHolder holder) {
+        VanillaRegistryLoader.load(holder);
+        holder.createRegistry(RegistryTypes.ACCOUNT_DELETION_RESULT_TYPE, SpongeRegistryLoaders.accountDeletionResultType().values());
+        holder.createRegistry(RegistryTypes.BAN_TYPE, SpongeRegistryLoaders.banType().values());
+        holder.createRegistry(SpongeRegistryTypes.BLOCK_TRANSACTION_TYPE, SpongeRegistryLoaders.blockTransactionTypes().values());
+        holder.createRegistry(RegistryTypes.BODY_PART, SpongeRegistryLoaders.bodyPart().values());
+        holder.createRegistry(RegistryTypes.CATALOGED_VALUE_PARAMETER, SpongeRegistryLoaders.catalogedValueParameter().values());
+        holder.createRegistry(RegistryTypes.CLICK_TYPE, SpongeRegistryLoaders.clickType().values());
+        holder.createRegistry(RegistryTypes.CLIENT_COMPLETION_KEY, SpongeRegistryLoaders.clientCompletionKey().values());
+        holder.createRegistry(RegistryTypes.CLIENT_COMPLETION_TYPE, SpongeRegistryLoaders.clientCompletionType().values());
+        holder.createRegistry(SpongeRegistryTypes.COMMAND_REGISTRAR, SpongeRegistryLoaders.commandRegistrar().values());
+        holder.createRegistry(RegistryTypes.CURRENCY, null, true);
+        holder.createRegistry(RegistryTypes.DAMAGE_TYPE, SpongeRegistryLoaders.damageType().values());
+        holder.createRegistry(RegistryTypes.DAMAGE_MODIFIER_TYPE, SpongeRegistryLoaders.damageModifierType().values());
+        holder.createRegistry(RegistryTypes.DISMOUNT_TYPE, SpongeRegistryLoaders.dismountType().values());
+        holder.createRegistry(RegistryTypes.DISPLAY_SLOT, SpongeRegistryLoaders.displaySlot().values());
+        holder.createRegistry(RegistryTypes.EVENT_CONTEXT_KEY, SpongeRegistryLoaders.eventContextKey().values());
+        holder.createRegistry(RegistryTypes.GOAL_EXECUTOR_TYPE, SpongeRegistryLoaders.goalExecutorType().values());
+        holder.createRegistry(RegistryTypes.GOAL_TYPE, SpongeRegistryLoaders.goalType().values());
+        holder.createRegistry(RegistryTypes.HORSE_COLOR, SpongeRegistryLoaders.horseColor().values());
+        holder.createRegistry(RegistryTypes.HORSE_STYLE, SpongeRegistryLoaders.horseStyle().values());
+        holder.createRegistry(RegistryTypes.KEY, SpongeRegistryLoaders.key().values());
+        holder.createRegistry(RegistryTypes.LLAMA_TYPE, SpongeRegistryLoaders.llamaType().values());
+        holder.createRegistry(RegistryTypes.MATTER_TYPE, SpongeRegistryLoaders.matterType().values());
+        holder.createRegistry(RegistryTypes.MOVEMENT_TYPE, SpongeRegistryLoaders.movementType().values());
+        holder.createRegistry(RegistryTypes.MUSIC_DISC, SpongeRegistryLoaders.musicDisc().values());
+        holder.createRegistry(RegistryTypes.NOTE_PITCH, SpongeRegistryLoaders.notePitch().values());
+        holder.createRegistry(RegistryTypes.OPERATION, SpongeRegistryLoaders.operation().values());
+        holder.createRegistry(RegistryTypes.PARROT_TYPE, SpongeRegistryLoaders.parrotType().values());
+        holder.createRegistry(RegistryTypes.PARTICLE_OPTION, SpongeRegistryLoaders.particleOption().values());
+        holder.createRegistry(RegistryTypes.PLACEHOLDER_PARSER, SpongeRegistryLoaders.placeholderParser().values());
+        holder.createRegistry(RegistryTypes.PORTAL_TYPE, SpongeRegistryLoaders.portalType().values());
+        holder.createRegistry(RegistryTypes.QUERY_TYPE, SpongeRegistryLoaders.queryType().values());
+        holder.createRegistry(RegistryTypes.RABBIT_TYPE, SpongeRegistryLoaders.rabbitType().values());
+        holder.createRegistry(RegistryTypes.SELECTOR_TYPE, SpongeRegistryLoaders.selectorType().values());
+        holder.createRegistry(RegistryTypes.SELECTOR_SORT_ALGORITHM, SpongeRegistryLoaders.selectorSortAlgorithm().values());
+        holder.createRegistry(RegistryTypes.SKIN_PART, SpongeRegistryLoaders.skinPart().values());
+        holder.createRegistry(RegistryTypes.SPAWN_TYPE, SpongeRegistryLoaders.spawnType().values());
+        holder.createRegistry(RegistryTypes.TELEPORT_HELPER_FILTER, SpongeRegistryLoaders.teleportHelperFilter().values());
+        holder.createRegistry(RegistryTypes.WEATHER, SpongeRegistryLoaders.weather().values());
 
         // ----------------------------------------------------------------------------------------------------
         this
@@ -122,5 +106,9 @@ public final class SpongeRegistries {
                 .generateRegistry(StringDataFormat.class, ResourceKey.sponge("string_data_format"), Stream.of(new JsonDataFormat(ResourceKey.sponge("json")), new HoconDataFormat(ResourceKey.sponge("hocon"))), true, false)
                 .generateRegistry(DataFormat.class, ResourceKey.sponge("data_format"), Stream.of(new NBTDataFormat(ResourceKey.sponge("nbt"))), true, false)
         ;
+    }
+
+    public static void registerEngineRegistries(final SpongeRegistryHolder holder) {
+        holder.createRegistry(RegistryTypes.WORLD_ARCHETYPE, SpongeRegistryLoaders.worldArchetype().values());
     }
 }

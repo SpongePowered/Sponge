@@ -43,7 +43,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.registry.Registries;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -93,7 +93,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         if (objective != null && !objective.getScoreboards().contains(this)) {
             throw new IllegalStateException("Attempting to set an objective's display slot that does not exist on this scoreboard!");
         }
-        final SimpleRegistry<DisplaySlot> registry = (SimpleRegistry<DisplaySlot>) Sponge.getGame().registries().registry(Registries.DISPLAY_SLOT);
+        final SimpleRegistry<DisplaySlot> registry = (SimpleRegistry<DisplaySlot>) Sponge.getGame().registries().registry(RegistryTypes.DISPLAY_SLOT);
         final int index = registry.getId(displaySlot);
         ((ScoreboardAccessor) this).accessor$displayObjectives()[index] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
         ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SDisplayObjectivePacket(index, ((ScoreboardAccessor) this).accessor$displayObjectives()[index]));
@@ -130,7 +130,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public Optional<Objective> bridge$getObjective(final DisplaySlot slot) {
-        final SimpleRegistry<DisplaySlot> registry = (SimpleRegistry<DisplaySlot>) Sponge.getGame().registries().registry(Registries.DISPLAY_SLOT);
+        final SimpleRegistry<DisplaySlot> registry = (SimpleRegistry<DisplaySlot>) Sponge.getGame().registries().registry(RegistryTypes.DISPLAY_SLOT);
         final ScoreObjective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[registry.getId(slot)];
         if (objective != null) {
             return Optional.of(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
@@ -332,7 +332,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Overwrite
     public void setDisplayObjective(final int slot, @Nullable final ScoreObjective objective) {
         final Objective apiObjective = objective == null ? null : ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
-        final DisplaySlot displaySlot = (DisplaySlot) ((Registry) Sponge.getGame().registries().registry(Registries.DISPLAY_SLOT)).byId(slot);
+        final DisplaySlot displaySlot = (DisplaySlot) ((Registry) Sponge.getGame().registries().registry(RegistryTypes.DISPLAY_SLOT)).byId(slot);
         this.bridge$updateDisplaySlot(apiObjective, displaySlot);
     }
 

@@ -22,32 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.registry;
 
-import net.kyori.adventure.text.Component;
-import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.registry.RegistryRoots;
+import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 
-public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart {
+public final class SpongeRegistryTypes {
 
-    private final Component component;
+    public static final RegistryType<TransactionType<?>> BLOCK_TRANSACTION_TYPE = SpongeRegistryTypes.spongeKey("block_transaction_type");
 
-    public SpongeSkinPart(final ResourceKey key) {
-        super(key);
-        this.component = Component.translatable("options.modelPart." + key);
+    public static final RegistryType<CommandRegistrar<?>> COMMAND_REGISTRAR = SpongeRegistryTypes.spongeKey("command_registrar");
+
+    public static final RegistryType<SpawnType> SPAWN_TYPE = SpongeRegistryTypes.spongeKey("spawn_type");
+
+    private SpongeRegistryTypes() {
     }
 
-    @Override
-    public Component asComponent() {
-        return this.component;
-    }
-
-    public int getMask() {
-        final SimpleRegistry<SkinPart> registry = (SimpleRegistry<SkinPart>) Sponge.getGame().registries().registry(RegistryTypes.SKIN_PART);
-        return 1 << registry.getId(this);
+    private static <V> RegistryType<V> spongeKey(final String key) {
+        return RegistryType.of(RegistryRoots.SPONGE, ResourceKey.sponge(key));
     }
 }

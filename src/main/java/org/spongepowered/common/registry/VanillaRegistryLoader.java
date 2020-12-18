@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.registry;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import net.minecraft.entity.item.BoatEntity;
@@ -61,42 +56,52 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.raid.Raid;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.registry.Registries;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.accessor.entity.passive.MooshroomEntity_TypeAccessor;
 import org.spongepowered.common.accessor.item.ArmorMaterialAccessor;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 final class VanillaRegistryLoader {
-    private final SpongeRegistryHolder registries;
+    private final SpongeRegistryHolder holder;
 
-    public static void load(final SpongeRegistryHolder registries) {
-        final VanillaRegistryLoader loader = new VanillaRegistryLoader(registries);
-        loader.load();
-        registries.createRegistry(Registries.CRITERION, SpongeRegistryLoaders.criteria().values());
+    public static void load(final SpongeRegistryHolder holder) {
+        final VanillaRegistryLoader loader = new VanillaRegistryLoader(holder);
+        loader.loadEnumRegistries();
+        loader.loadInstanceRegistries();
     }
 
-    private VanillaRegistryLoader(final SpongeRegistryHolder registries) {
-        this.registries = registries;
+    private VanillaRegistryLoader(final SpongeRegistryHolder holder) {
+        this.holder = holder;
     }
 
-    private void load() {
-        this.knownName(Registries.ARMOR_MATERIAL, ArmorMaterial.values(), am -> ((ArmorMaterialAccessor) (Object) am).accessor$name());
-        this.knownName(Registries.ATTACHMENT_SURFACE, AttachFace.values(), AttachFace::getSerializedName);
-        this.manualName(Registries.ATTRIBUTE_OPERATION, AttributeModifier.Operation.values(), map -> {
+    private void loadInstanceRegistries() {
+        this.holder.createRegistry(RegistryTypes.CRITERION, SpongeRegistryLoaders.criterion().values());
+    }
+
+    private void loadEnumRegistries() {
+        this.knownName(RegistryTypes.ARMOR_MATERIAL, ArmorMaterial.values(), am -> ((ArmorMaterialAccessor) (Object) am).accessor$name());
+        this.knownName(RegistryTypes.ATTACHMENT_SURFACE, AttachFace.values(), AttachFace::getSerializedName);
+        this.manualName(RegistryTypes.ATTRIBUTE_OPERATION, AttributeModifier.Operation.values(), map -> {
             // names come from net.minecraft.world.level.storage.loot.functions.SetAttributesFunction.Modifier#operationFromString
             map.put(AttributeModifier.Operation.ADDITION, "addition");
             map.put(AttributeModifier.Operation.MULTIPLY_BASE, "multiply_base");
             map.put(AttributeModifier.Operation.MULTIPLY_TOTAL, "multiply_total");
         });
-        this.knownName(Registries.BOAT_TYPE, BoatEntity.Type.values(), BoatEntity.Type::getName);
-        this.knownName(Registries.CHEST_ATTACHMENT_TYPE, ChestType.values(), ChestType::getSerializedName);
-        this.knownName(Registries.COLLISION_RULE, Team.CollisionRule.values(), cr -> cr.name);
-        this.knownName(Registries.COMPARATOR_MODE, ComparatorMode.values(), ComparatorMode::getSerializedName);
-        this.knownName(Registries.DIFFICULTY, Difficulty.values(), Difficulty::getKey);
-        this.knownName(Registries.DYE_COLOR, DyeColor.values(), DyeColor::getSerializedName);
-        this.knownName(Registries.DOOR_HINGE, DoorHingeSide.values(), DoorHingeSide::getSerializedName);
-        this.manualName(Registries.DRAGON_PHASE_TYPE, PhaseType.getCount(), map -> {
+        this.knownName(RegistryTypes.BOAT_TYPE, BoatEntity.Type.values(), BoatEntity.Type::getName);
+        this.knownName(RegistryTypes.CHEST_ATTACHMENT_TYPE, ChestType.values(), ChestType::getSerializedName);
+        this.knownName(RegistryTypes.COLLISION_RULE, Team.CollisionRule.values(), cr -> cr.name);
+        this.knownName(RegistryTypes.COMPARATOR_MODE, ComparatorMode.values(), ComparatorMode::getSerializedName);
+        this.knownName(RegistryTypes.DIFFICULTY, Difficulty.values(), Difficulty::getKey);
+        this.knownName(RegistryTypes.DYE_COLOR, DyeColor.values(), DyeColor::getSerializedName);
+        this.knownName(RegistryTypes.DOOR_HINGE, DoorHingeSide.values(), DoorHingeSide::getSerializedName);
+        this.manualName(RegistryTypes.DRAGON_PHASE_TYPE, PhaseType.getCount(), map -> {
             map.put(PhaseType.HOLDING_PATTERN, "holding_pattern");
             map.put(PhaseType.STRAFE_PLAYER, "strafe_player");
             map.put(PhaseType.LANDING_APPROACH, "landing_approach");
@@ -109,27 +114,27 @@ final class VanillaRegistryLoader {
             map.put(PhaseType.DYING, "dying");
             map.put(PhaseType.HOVERING, "hover");
         });
-        this.knownName(Registries.FOX_TYPE, FoxEntity.Type.values(), FoxEntity.Type::getName);
-        this.knownName(Registries.GAME_MODE, GameType.values(), GameType::getName);
-        this.automaticName(Registries.HAND_PREFERENCE, HandSide.values());
-        this.automaticName(Registries.HAND_TYPE, Hand.values());
-        this.knownName(Registries.INSTRUMENT_TYPE, NoteBlockInstrument.values(), NoteBlockInstrument::getSerializedName);
-        this.automaticName(Registries.ITEM_TIER, ItemTier.values());
-        this.knownName(Registries.MOOSHROOM_TYPE, MooshroomEntity.Type.values(), type -> ((MooshroomEntity_TypeAccessor) (Object) type).accessor$type());
-        this.knownName(Registries.OBJECTIVE_DISPLAY_MODE, ScoreCriteria.RenderType.values(), ScoreCriteria.RenderType::getId);
-        this.knownName(Registries.PANDA_GENE, PandaEntity.Gene.values(), PandaEntity.Gene::getName);
-        this.automaticName(Registries.PHANTOM_PHASE, PhantomEntity.AttackPhase.values());
-        this.automaticName(Registries.PICKUP_RULE, AbstractArrowEntity.PickupStatus.values());
-        this.knownName(Registries.PISTON_TYPE, PistonType.values(), PistonType::getSerializedName);
-        this.knownName(Registries.PORTION_TYPE, Half.values(), Half::getSerializedName);
-        this.automaticName(Registries.RAID_STATUS, Raid.Status.values());
-        this.knownName(Registries.RAIL_DIRECTION, RailShape.values(), RailShape::getSerializedName);
-        this.knownName(Registries.WIRE_ATTACHMENT_TYPE, RedstoneSide.values(), RedstoneSide::getSerializedName);
-        this.knownName(Registries.SLAB_PORTION, SlabType.values(), SlabType::getSerializedName);
-        this.automaticName(Registries.SPELL_TYPE, SpellcastingIllagerEntity.SpellType.values());
-        this.knownName(Registries.STAIR_SHAPE, StairsShape.values(), StairsShape::getSerializedName);
-        this.knownName(Registries.STRUCTURE_MODE, StructureMode.values(), StructureMode::getSerializedName);
-        this.automaticName(Registries.VISIBILITY, Team.Visible.values());
+        this.knownName(RegistryTypes.FOX_TYPE, FoxEntity.Type.values(), FoxEntity.Type::getName);
+        this.knownName(RegistryTypes.GAME_MODE, GameType.values(), GameType::getName);
+        this.automaticName(RegistryTypes.HAND_PREFERENCE, HandSide.values());
+        this.automaticName(RegistryTypes.HAND_TYPE, Hand.values());
+        this.knownName(RegistryTypes.INSTRUMENT_TYPE, NoteBlockInstrument.values(), NoteBlockInstrument::getSerializedName);
+        this.automaticName(RegistryTypes.ITEM_TIER, ItemTier.values());
+        this.knownName(RegistryTypes.MOOSHROOM_TYPE, MooshroomEntity.Type.values(), type -> ((MooshroomEntity_TypeAccessor) (Object) type).accessor$type());
+        this.knownName(RegistryTypes.OBJECTIVE_DISPLAY_MODE, ScoreCriteria.RenderType.values(), ScoreCriteria.RenderType::getId);
+        this.knownName(RegistryTypes.PANDA_GENE, PandaEntity.Gene.values(), PandaEntity.Gene::getName);
+        this.automaticName(RegistryTypes.PHANTOM_PHASE, PhantomEntity.AttackPhase.values());
+        this.automaticName(RegistryTypes.PICKUP_RULE, AbstractArrowEntity.PickupStatus.values());
+        this.knownName(RegistryTypes.PISTON_TYPE, PistonType.values(), PistonType::getSerializedName);
+        this.knownName(RegistryTypes.PORTION_TYPE, Half.values(), Half::getSerializedName);
+        this.automaticName(RegistryTypes.RAID_STATUS, Raid.Status.values());
+        this.knownName(RegistryTypes.RAIL_DIRECTION, RailShape.values(), RailShape::getSerializedName);
+        this.knownName(RegistryTypes.WIRE_ATTACHMENT_TYPE, RedstoneSide.values(), RedstoneSide::getSerializedName);
+        this.knownName(RegistryTypes.SLAB_PORTION, SlabType.values(), SlabType::getSerializedName);
+        this.automaticName(RegistryTypes.SPELL_TYPE, SpellcastingIllagerEntity.SpellType.values());
+        this.knownName(RegistryTypes.STAIR_SHAPE, StairsShape.values(), StairsShape::getSerializedName);
+        this.knownName(RegistryTypes.STRUCTURE_MODE, StructureMode.values(), StructureMode::getSerializedName);
+        this.automaticName(RegistryTypes.VISIBILITY, Team.Visible.values());
     }
 
     // The following methods are named for clarity above.
@@ -177,7 +182,7 @@ final class VanillaRegistryLoader {
         if (values != byName.size()) {
             throw new IllegalStateException(type.location() + " in " + type.root() + " is has value mismatch: " + values + " / " + byName.size());
         }
-        return this.registries.createRegistry(type, () -> {
+        return this.holder.createRegistry(type, () -> {
             final Map<ResourceKey, A> map = new HashMap<>();
             for (final Map.Entry<I, String> value : byName.entrySet()) {
                 map.put(ResourceKey.minecraft(value.getValue()), (A) value.getKey());

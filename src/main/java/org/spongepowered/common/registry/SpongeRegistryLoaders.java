@@ -47,9 +47,11 @@ import net.minecraft.command.arguments.Vec3Argument;
 import net.minecraft.item.Items;
 import net.minecraft.item.MusicDiscItem;
 import net.minecraft.scoreboard.ScoreCriteria;
+import net.minecraft.util.datafix.codec.DatapackCodec;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -251,7 +253,6 @@ import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 import org.spongepowered.common.world.portal.EndPortalType;
 import org.spongepowered.common.world.portal.NetherPortalType;
 import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
@@ -1172,7 +1173,7 @@ public final class SpongeRegistryLoaders {
                     .key(ResourceKey.sponge("current_world"))
                     .parser(placeholderText -> Component.text(placeholderText.getAssociatedObject().filter(x -> x instanceof Locatable)
                             .map(x -> ((Locatable) x).getServerLocation().getWorldKey())
-                            .orElseGet(() -> Sponge.getServer().getWorldManager().getDefaultPropertiesKey()).toString()))
+                            .orElseGet(() -> Sponge.getServer().getDefaultWorldKey()).toString()))
                     .build());
             l.add(PlaceholderParsers.NAME, k -> new SpongePlaceholderParserBuilder()
                     .key(k)
@@ -1306,11 +1307,12 @@ public final class SpongeRegistryLoaders {
     }
 
     private static WorldArchetype newWorldArchetype(final ResourceKey key, final RegistryReference<DimensionType> dimensionType) {
-        final WorldSettings archetype = new WorldSettings(SpongeWorldArchetypeBuilder.RANDOM.nextLong(), GameType.SURVIVAL, true, false, WorldType.DEFAULT);
+        final WorldSettings archetype = new WorldSettings("", GameType.SURVIVAL, false, Difficulty.NORMAL, true, new GameRules(), DatapackCodec.DEFAULT);
         ((ResourceKeyBridge) (Object) archetype).bridge$setKey(key);
-        ((WorldSettingsBridge) (Object) archetype).bridge$setLogicType((SpongeDimensionType) dimensionType.get());
+        final net.minecraft.world.DimensionType mcType = (net.minecraft.world.DimensionType) dimensionType.get(Sponge.getServer().registries());
+        ((WorldSettingsBridge) (Object) archetype).bridge$setDimensionType(mcType);
         ((WorldSettingsBridge) (Object) archetype).bridge$setDifficulty(Difficulty.NORMAL);
-        if (dimensionType.get() == DimensionTypes.OVERWORLD.get()) {
+        if (mcType == DimensionTypes.OVERWORLD.get(Sponge.getServer().registries())) {
             ((WorldSettingsBridge) (Object) archetype).bridge$setGenerateSpawnOnLoad(true);
         }
         return (WorldArchetype) (Object)  archetype;

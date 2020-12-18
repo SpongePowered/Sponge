@@ -30,7 +30,7 @@ import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.util.registry.SimpleRegistry;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.registry.Registries;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
@@ -44,7 +44,6 @@ import org.spongepowered.common.accessor.scoreboard.ScoreboardAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
-import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
 import java.util.Collection;
@@ -68,7 +67,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
 
     @Override
     public Optional<Objective> getObjective(final DisplaySlot slot) {
-        final SimpleRegistry<DisplaySlot> registry = (SimpleRegistry<DisplaySlot>) Sponge.getGame().registries().registry(Registries.DISPLAY_SLOT);
+        final SimpleRegistry<DisplaySlot> registry = (SimpleRegistry<DisplaySlot>) Sponge.getGame().registries().registry(RegistryTypes.DISPLAY_SLOT);
         final ScoreObjective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[registry.getId(slot)];
         if (objective != null) {
             return Optional.of(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());

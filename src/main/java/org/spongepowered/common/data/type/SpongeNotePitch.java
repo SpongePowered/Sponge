@@ -29,7 +29,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
-import org.spongepowered.api.registry.Registries;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeNotePitch extends SpongeCatalogType implements NotePitch {
@@ -40,7 +40,7 @@ public final class SpongeNotePitch extends SpongeCatalogType implements NotePitc
 
     @Override
     public NotePitch cycleNext() {
-        final SimpleRegistry<NotePitch> registry = (SimpleRegistry<NotePitch>) Sponge.getGame().registries().registry(Registries.NOTE_PITCH);
+        final SimpleRegistry<NotePitch> registry = (SimpleRegistry<NotePitch>) Sponge.getGame().registries().registry(RegistryTypes.NOTE_PITCH);
         final int value = registry.getId(this) + 1;
         NotePitch next = registry.byId(value);
         if (next == null) {
