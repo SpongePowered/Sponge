@@ -40,6 +40,7 @@ import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.storage.FolderName;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -390,6 +391,7 @@ public final class Constants {
             .of(net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN,
                 net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH);
         public static final ResourceKey INVALID_WORLD_KEY = ResourceKey.sponge("invalid_world");
+        public static final String LEVEL_DAT_OLD = FolderName.LEVEL_DATA_FILE.getId() + "_old";
     }
 
     public static final class Chunk {

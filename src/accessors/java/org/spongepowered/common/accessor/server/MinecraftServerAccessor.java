@@ -27,12 +27,15 @@ package org.spongepowered.common.accessor.server;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
+import net.minecraft.resources.DataPackRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.CommandStorage;
+import net.minecraft.world.storage.IServerConfiguration;
+import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.SaveFormat;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,8 +43,10 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedAccessorError;
+import org.spongepowered.common.UntransformedInvokerError;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor {
@@ -63,9 +68,20 @@ public interface MinecraftServerAccessor {
 
     @Accessor("commandStorage") void accessor$commandStorage(final CommandStorage commandStorage);
 
-    @Invoker("isSpawningMonsters") boolean invoker$isSpawningMonsters();
-
     @Accessor("storageSource") SaveFormat.LevelSave accessor$storageSource();
 
     @Accessor("levels") Map<RegistryKey<World>, ServerWorld> accessor$levels();
+
+    @Accessor("resources") DataPackRegistries accessor$dataPackRegistries();
+
+    @Accessor("executor") Executor accessor$executor();
+
+    @Invoker("isSpawningMonsters") boolean invoker$isSpawningMonsters();
+
+    @Invoker("setInitialSpawn") static void invoker$setInitialSpawn(ServerWorld serverWorld, IServerWorldInfo levelData, boolean generateBonusChest,
+            boolean isDebugGeneration, boolean nonDebugSpawn) {
+        throw new UntransformedInvokerError();
+    }
+
+    @Invoker("setupDebugLevel") void invoker$setDebugLevel(IServerConfiguration serverConfiguration);
 }

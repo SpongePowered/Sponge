@@ -199,7 +199,8 @@
     "world.storage.IServerWorldInfoMixin",
     "world.storage.ServerWorldInfoMixin",
     "entity.passive.AnimalEntityMixin",
-    "world.storage.ServerWorldInfoMixin"
+    "world.storage.ServerWorldInfoMixin",
+      "world.gen.settings.DimensionGeneratorSettingsMixin"
   ],
   "client": [
     "client.MinecraftMixin",
