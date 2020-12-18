@@ -34,6 +34,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.SaveFormat;
@@ -104,7 +105,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     private final GameProfile profile;
     private final Map<ResourceKey, RespawnLocation> spawnLocations = Maps.newHashMap();
 
-    private ResourceKey worldKey = SpongeWorldManager.VANILLA_OVERWORLD;
+    private ResourceKey worldKey = (ResourceKey) (Object) World.OVERWORLD.location();
     private double x;
     private double y;
     private double z;

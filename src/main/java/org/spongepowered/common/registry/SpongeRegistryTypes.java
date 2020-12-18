@@ -29,6 +29,7 @@ import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 
 public final class SpongeRegistryTypes {
@@ -38,6 +39,8 @@ public final class SpongeRegistryTypes {
     public static final RegistryType<CommandRegistrar<?>> COMMAND_REGISTRAR = SpongeRegistryTypes.spongeKey("command_registrar");
 
     public static final RegistryType<SpawnType> SPAWN_TYPE = SpongeRegistryTypes.spongeKey("spawn_type");
+
+    public static final RegistryType<ValidationType> VALIDATION_TYPE = SpongeRegistryTypes.spongeKey("validation_type");
 
     private SpongeRegistryTypes() {
     }

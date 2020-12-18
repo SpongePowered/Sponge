@@ -81,6 +81,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.registry.SpongeRegistryTypes;
 import org.spongepowered.common.service.game.pagination.SpongePaginationService;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -514,7 +515,8 @@ public final class SpongeCommandManager implements CommandManager {
             throw new RuntimeException("Failed to create pagination command!", ex);
         }
         final Set<TypeToken<?>> usedTokens = new HashSet<>();
-        for (final CommandRegistrar<?> registrar : this.game.getRegistry().getCatalogRegistry().getAllOf(CommandRegistrar.class)) {
+        Sponge.getGame().registries().registry(SpongeRegistryTypes.COMMAND_REGISTRAR).stream().forEach(entry -> {
+            final CommandRegistrar<?> registrar = entry.value();
             // someone's gonna do it, let's not let them take us down.
             final TypeToken<?> handledType = registrar.handledType();
             if (handledType == null) {
@@ -527,7 +529,7 @@ public final class SpongeCommandManager implements CommandManager {
                                 handledType.toString(),
                                 registrar.getClass());
             }
-        }
+        });
         SpongeParameterizedCommandRegistrar.INSTANCE.register(
                 Launch.getInstance().getCommonPlugin(),
                 SpongeAdventure.CALLBACK_COMMAND.createCommand(),
@@ -563,9 +565,7 @@ public final class SpongeCommandManager implements CommandManager {
     public void reset() {
         if (this.hasStarted) {
             this.isResetting = true;
-            for (final CommandRegistrar<?> registrar : this.game.getRegistry().getCatalogRegistry().getAllOf(CommandRegistrar.class)) {
-                registrar.reset();
-            }
+            Sponge.getGame().registries().registry(SpongeRegistryTypes.COMMAND_REGISTRAR).stream().forEach(entry -> entry.value().reset());
             this.commandMappings.clear();
             this.inverseCommandMappings.clear();
             this.pluginToCommandMap.clear();

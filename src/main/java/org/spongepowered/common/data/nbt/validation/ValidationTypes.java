@@ -25,13 +25,29 @@
 package org.spongepowered.common.data.nbt.validation;
 
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.common.registry.SpongeRegistryTypes;
 
-public final class Validations {
+public final class ValidationTypes {
 
-    public static final ValidationType ENTITY = new SpongeValidationType(ResourceKey.sponge("entity"));
+    // @formatter:off
 
-    public static final ValidationType BLOCK_ENTITY = new SpongeValidationType(ResourceKey.sponge("block_entity"));
+    // SORTFIELDS:ON
 
-    private Validations() {
+    public static final DefaultedRegistryReference<ValidationType> ENTITY = ValidationTypes.key(ResourceKey.sponge("entity"));
+
+    public static final DefaultedRegistryReference<ValidationType> BLOCK_ENTITY = ValidationTypes.key(ResourceKey.sponge("block_entity"));
+
+    // SORTFIELDS:OFF
+
+    // @formatter:on
+
+    private ValidationTypes() {
+    }
+
+    private static DefaultedRegistryReference<ValidationType> key(final ResourceKey location) {
+        return RegistryKey.of(SpongeRegistryTypes.VALIDATION_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
     }
 }

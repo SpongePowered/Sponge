@@ -29,10 +29,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.dimension.DimensionTypes;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
@@ -41,7 +37,6 @@ import org.spongepowered.common.config.inheritable.GlobalConfig;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.config.tracker.TrackerConfig;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -93,15 +88,15 @@ public final class SpongeGameConfigs {
         return Files.exists(configPath);
     }
 
-    public static InheritableConfigHandle<WorldConfig> createWorld(final @Nullable DimensionType legacyType, final ResourceKey world) {
+    public static InheritableConfigHandle<WorldConfig> createWorld(final @Nullable ResourceKey dimensionTypeKey, final ResourceKey world) {
         // Path format: config/sponge/worlds/<world-namespace>/<world-value>.conf
         final Path configPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", world.getNamespace(), world.getValue() + ".conf"));
-        if (legacyType != null) {
+        if (dimensionTypeKey != null) {
             // Legacy config path: config/sponge/worlds/<dim-namespace>/<dim-value>/<world-name>/world.conf
             final String legacyName = SpongeGameConfigs.getLegacyWorldName(world);
             if (legacyName != null) {
-                final Path legacyPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", legacyType.getKey().getNamespace(),
-                        SpongeGameConfigs.getLegacyValue(legacyType.getKey()), legacyName, "world.conf"));
+                final Path legacyPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", dimensionTypeKey.getNamespace(),
+                        SpongeGameConfigs.getLegacyValue(dimensionTypeKey), legacyName, "world.conf"));
                 if (legacyPath.toFile().isFile() && !configPath.toFile().isFile()) {
                     try {
                         Files.createDirectories(configPath.getParent());

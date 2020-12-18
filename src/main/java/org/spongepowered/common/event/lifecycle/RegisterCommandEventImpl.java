@@ -51,7 +51,7 @@ public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> ex
     }
 
     @Override
-    public TypeToken<C> getGenericType() {
+    public TypeToken<C> getParamType() {
         return this.token;
     }
 

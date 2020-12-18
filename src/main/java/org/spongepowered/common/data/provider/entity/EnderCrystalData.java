@@ -25,8 +25,10 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.item.EnderCrystalEntity;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
 import org.spongepowered.common.util.VecHelper;
 
 public final class EnderCrystalData {
@@ -47,7 +49,7 @@ public final class EnderCrystalData {
                                 return false;
                             }
                             if (v == 0) {
-                                h.hurt(DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE, 1000F);
+                                h.hurt((DamageSource) SpongeDamageSources.IGNORED.get(), 1000F);
                             } else {
                                 h.removed = false;
                             }

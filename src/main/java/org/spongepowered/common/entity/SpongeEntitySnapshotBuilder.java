@@ -26,6 +26,7 @@ package org.spongepowered.common.entity;
 
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -36,15 +37,15 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.holder.SimpleNBTDataHolder;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
-import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.lang.ref.WeakReference;
@@ -72,7 +73,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder world(final WorldProperties worldProperties) {
+    public SpongeEntitySnapshotBuilder world(final ServerWorldProperties worldProperties) {
         this.worldKey = Objects.requireNonNull(worldProperties).getKey();
         return this;
     }
@@ -229,10 +230,10 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         this.rotation = DataUtil.getPosition3d(container, Constants.Entity.ROTATION);
         this.scale = DataUtil.getPosition3d(container, Constants.Entity.SCALE);
         final String entityTypeId = container.getString(Constants.Entity.TYPE).get();
-        this.entityType = SpongeCommon.getRegistry().getCatalogRegistry().get(EntityType.class, net.kyori.adventure.key.Key.key(entityTypeId)).get();
+        this.entityType = Sponge.getGame().registries().registry(RegistryTypes.ENTITY_TYPE).value(ResourceKey.resolve(entityTypeId));
         this.manipulator = null; // lazy read from nbt
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            this.compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            this.compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
         }
         if (container.contains(Constants.Entity.UUID)) {
             this.uniqueId = UUID.fromString(container.getString(Constants.Entity.UUID).get());

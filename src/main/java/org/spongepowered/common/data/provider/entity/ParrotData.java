@@ -25,11 +25,12 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.passive.ParrotEntity;
+import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ParrotType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.type.SpongeParrotType;
 
 public final class ParrotData {
 
@@ -43,11 +44,13 @@ public final class ParrotData {
                     .create(Keys.PARROT_TYPE)
                         .get(h -> {
                             final int type = h.getVariant();
-                            return Sponge.getRegistry().getCatalogRegistry().streamAllOf(ParrotType.class)
-                                    .filter(t -> ((SpongeParrotType)t).getMetadata() == type)
-                                    .findFirst().orElse(null);
+                            final SimpleRegistry<ParrotType> registry = (SimpleRegistry<ParrotType>)Sponge.getGame().registries().registry(RegistryTypes.PARROT_TYPE);
+                            return registry.byId(type);
                         })
-                        .set((h, v) -> h.setVariant(((SpongeParrotType) v).getMetadata()));
+                        .set((h, v) -> {
+                            final SimpleRegistry<ParrotType> registry = (SimpleRegistry<ParrotType>)Sponge.getGame().registries().registry(RegistryTypes.PARROT_TYPE);
+                            h.setVariant(registry.getId(v));
+                        });
     }
     // @formatter:on
 }

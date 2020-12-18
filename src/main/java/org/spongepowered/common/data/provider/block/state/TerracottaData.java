@@ -26,10 +26,12 @@ package org.spongepowered.common.data.provider.block.state;
 
 import net.minecraft.block.BlockState;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.DyeColorUtil;
 
@@ -45,7 +47,7 @@ public final class TerracottaData {
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_TERRACOTTA.get(h.getBlock()))
                         .supports(h -> {
-                            final ResourceKey key = ((BlockType) h.getBlock()).getKey();
+                            final ResourceKey key = Sponge.getGame().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey(((BlockType)h.getBlock()));
                             if (!key.getNamespace().equals(PluginManager.MINECRAFT_PLUGIN_ID)) {
                                 return false;
                             }

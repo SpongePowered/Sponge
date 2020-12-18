@@ -32,8 +32,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
@@ -88,10 +89,11 @@ public final class ArmorStandData {
                         .get(h -> VecHelper.toVector3d(h.getHeadPose()))
                         .set((h, v) -> h.setHeadPose(VecHelper.toRotation(v)))
                     .create(Keys.IS_PLACING_DISABLED)
-                        .get(h -> Sponge.getRegistry().getCatalogRegistry()
-                            .streamAllOf(EquipmentType.class)
-                            .filter(t -> (Object) t instanceof EquipmentSlotType)
-                            .collect(Collectors.toMap(t -> t, t -> ((ArmorStandEntityAccessor) h).invoker$isDisabled((EquipmentSlotType) (Object) t))))
+                        .get(h -> Sponge.getGame().registries().registry(RegistryTypes.EQUIPMENT_TYPE)
+                                .stream()
+                                .map(RegistryEntry::value)
+                                .collect(Collectors.toMap(k -> k, v -> ((ArmorStandEntityAccessor) h).invoker$isDisabled((EquipmentSlotType) (Object) v)))
+                        )
                         .set((h, v) -> {
                             int chunk = 0;
 

@@ -33,6 +33,7 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
@@ -58,7 +59,7 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
         return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties()
                 .stream()
                 .filter(x -> this.selectAll || x.getWorld().isPresent())
-                .map(WorldProperties::getKey)
+                .map(ServerWorldProperties::getKey)
                 .map(ResourceKey::getFormatted)
                 .filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());
@@ -72,7 +73,7 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
 
         final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
-        final Optional<WorldProperties> worldProperties = SpongeWorldPropertiesValueParameter.getWorldProperties(resourceLocation);
+        final Optional<ServerWorldProperties> worldProperties = SpongeWorldPropertiesValueParameter.getWorldProperties(resourceLocation);
 
         if (worldProperties.isPresent()) {
             if (this.selectAll || worldProperties.get().getWorld().isPresent()) {
@@ -89,7 +90,7 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
         return ImmutableList.of(Constants.Command.RESOURCE_LOCATION_TYPE);
     }
 
-    static Optional<WorldProperties> getWorldProperties(final ResourceKey name) {
+    static Optional<ServerWorldProperties> getWorldProperties(final ResourceKey name) {
         try {
             return SpongeCommon.getGame().getServer().getWorldManager().getProperties(name);
         } catch (final Exception ignored) {

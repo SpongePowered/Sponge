@@ -43,7 +43,7 @@ public final class RegisterFactoryEventImpl extends AbstractLifecycleEvent imple
     public <T> T register(Class<T> factoryClass, T factory) throws DuplicateRegistrationException {
         Preconditions.checkNotNull(factory);
 
-        return (T) ((SpongeFactoryProvider) Sponge.getRegistry().getFactoryRegistry()).registerFactory(factoryClass, factory);
+        return (T) ((SpongeFactoryProvider) Sponge.getGame().getFactoryProvider()).registerFactory(factoryClass, factory);
     }
 
     @Override

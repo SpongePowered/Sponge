@@ -31,7 +31,7 @@ import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.registry.RegistryScopes;
-import org.spongepowered.common.registry.SpongeRegistries;
+import org.spongepowered.common.registry.SpongeRegistryTypes;
 
 @SuppressWarnings("unused")
 @RegistryScopes(scopes = RegistryScope.GAME)
@@ -57,6 +57,6 @@ public final class TransactionTypes {
     }
 
     private static DefaultedRegistryReference<TransactionType<@NonNull ?>> key(final ResourceKey location) {
-        return RegistryKey.of(SpongeRegistries.BLOCK_TRANSACTION_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
+        return RegistryKey.of(SpongeRegistryTypes.BLOCK_TRANSACTION_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
     }
 }

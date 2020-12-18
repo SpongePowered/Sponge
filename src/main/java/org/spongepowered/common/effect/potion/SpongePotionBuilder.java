@@ -36,6 +36,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -74,8 +75,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
             return Optional.empty();
         }
         String effectName = container.getString(Constants.Item.Potions.POTION_TYPE).get();
-        Optional<PotionEffectType> optional = Sponge.getRegistry().getCatalogRegistry()
-                .get(PotionEffectType.class, ResourceKey.resolve(effectName));
+        Optional<PotionEffectType> optional = Sponge.getGame().registries().registry(RegistryTypes.POTION_EFFECT_TYPE).findValue(ResourceKey.resolve(effectName));
         if (!optional.isPresent()) {
             throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
         }

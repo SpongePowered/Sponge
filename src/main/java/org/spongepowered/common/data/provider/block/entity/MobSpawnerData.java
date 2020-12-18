@@ -100,14 +100,14 @@ public final class MobSpawnerData {
 
         final EntityArchetype archetype = EntityArchetype.builder()
                 .type(type)
-                .entityData(NBTTranslator.getInstance().translateFrom(data))
+                .entityData(NBTTranslator.INSTANCE.translateFrom(data))
                 .build();
 
         return new WeightedSerializableObject<>(archetype, weight);
     }
 
     private static void setNextEntity(final AbstractSpawner logic, final WeightedSerializableObject<EntityArchetype> value) {
-        final CompoundNBT compound = NBTTranslator.getInstance().translate(value.get().getEntityData());
+        final CompoundNBT compound = NBTTranslator.INSTANCE.translate(value.get().getEntityData());
         if (!compound.contains(Constants.Entity.ENTITY_TYPE_ID)) {
             final ResourceKey key = value.get().getType().getKey();
             compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
@@ -128,7 +128,7 @@ public final class MobSpawnerData {
 
             final EntityArchetype archetype = EntityArchetype.builder()
                     .type(type)
-                    .entityData(NBTTranslator.getInstance().translateFrom(nbt))
+                    .entityData(NBTTranslator.INSTANCE.translateFrom(nbt))
                     .build();
 
             possibleEntities
@@ -146,7 +146,7 @@ public final class MobSpawnerData {
             }
             final WeightedObject<EntityArchetype> object = (WeightedObject<EntityArchetype>) entry;
 
-            final CompoundNBT compound = NBTTranslator.getInstance().translate(object.get().getEntityData());
+            final CompoundNBT compound = NBTTranslator.INSTANCE.translate(object.get().getEntityData());
             if (!compound.contains(Constants.Entity.ENTITY_TYPE_ID)) {
                 final ResourceKey key = object.get().getType().getKey();
                 compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());

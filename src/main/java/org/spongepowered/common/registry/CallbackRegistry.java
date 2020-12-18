@@ -41,8 +41,8 @@ public final class CallbackRegistry<T> extends SimpleRegistry<T> {
     }
 
     @Override
-    public <V extends T> V register(final int id, final RegistryKey<T> key, final V instance, final Lifecycle lifecycle) {
-        V value = super.register(id, key, instance, lifecycle);
+    public <V extends T> V register(final RegistryKey<T> key, final V instance, final Lifecycle lifecycle) {
+        V value = super.register(key, instance, lifecycle);
         this.callback.accept(key, instance);
         return value;
     }

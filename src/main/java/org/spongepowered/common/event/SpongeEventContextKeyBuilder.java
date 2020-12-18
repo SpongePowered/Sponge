@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.common.util.TypeTokenUtil;
 
@@ -36,11 +35,9 @@ import java.lang.reflect.Type;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("UnstableApiUsage")
 public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Builder<T> {
 
     @Nullable Type typeClass;
-    @Nullable ResourceKey key;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -59,25 +56,14 @@ public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Bu
     }
 
     @Override
-    public EventContextKey.Builder<T> key(ResourceKey key) {
-        checkArgument(key != null, "CatalogKey cannot be null!");
-        this.key = key;
-        return this;
-    }
-
-    @Override
     public EventContextKey<T> build() {
         checkState(this.typeClass != null, "Allowed type cannot be null!");
-        checkState(this.key != null, "ID cannot be null!");
-        checkState(!this.key.toString().isEmpty(), "ID cannot be empty!");
-        final SpongeEventContextKey<T> key = new SpongeEventContextKey<>(this);
-        return key;
+        return new SpongeEventContextKey<>(this);
     }
 
     @Override
     public SpongeEventContextKeyBuilder<T> reset() {
         this.typeClass = null;
-        this.key = null;
         return this;
     }
 }

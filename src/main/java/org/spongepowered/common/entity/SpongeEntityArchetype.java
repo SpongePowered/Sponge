@@ -45,7 +45,7 @@ import org.spongepowered.common.data.AbstractArchetype;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.nbt.validation.RawDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
-import org.spongepowered.common.data.nbt.validation.Validations;
+import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -53,12 +53,13 @@ import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity> implements EntityArchetype,
         DataContainerHolder.Mutable {
@@ -72,7 +73,8 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     private Vector3d position;
 
     SpongeEntityArchetype(final SpongeEntityArchetypeBuilder builder) {
-        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundNBT() : NBTTranslator.getInstance().translate(builder.entityData));
+        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundNBT() :
+                NBTTranslator.INSTANCE.translate(builder.entityData));
     }
 
     @Override
@@ -116,12 +118,12 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @Override
     public void data$setDataContainer(final DataContainer container) {
-        this.data = NBTTranslator.getInstance().translate(container);
+        this.data = NBTTranslator.INSTANCE.translate(container);
     }
 
     @Override
     public DataContainer getEntityData() {
-        return NBTTranslator.getInstance().translateFrom(this.data);
+        return NBTTranslator.INSTANCE.translateFrom(this.data);
     }
 
     @Override
@@ -219,14 +221,14 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @Override
     protected ValidationType getValidationType() {
-        return Validations.ENTITY;
+        return ValidationTypes.ENTITY.get();
     }
 
     @Override
     public EntityArchetype copy() {
         final SpongeEntityArchetypeBuilder builder = new SpongeEntityArchetypeBuilder();
         builder.entityType = this.type;
-        builder.entityData = NBTTranslator.getInstance().translate(this.data);
+        builder.entityData = NBTTranslator.INSTANCE.translate(this.data);
         return builder.build();
     }
 

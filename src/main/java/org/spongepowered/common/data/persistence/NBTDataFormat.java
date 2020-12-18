@@ -50,7 +50,7 @@ public final class NBTDataFormat implements DataFormat {
         }
         try {
             CompoundNBT tag = CompressedStreamTools.read(dis);
-            return NBTTranslator.getInstance().translateFrom(tag);
+            return NBTTranslator.INSTANCE.translateFrom(tag);
         } finally {
             dis.close();
         }
@@ -59,7 +59,7 @@ public final class NBTDataFormat implements DataFormat {
     @Override
     @SuppressWarnings("resource")
     public void writeTo(OutputStream output, DataView data) throws IOException {
-        CompoundNBT tag = NBTTranslator.getInstance().translate(data);
+        CompoundNBT tag = NBTTranslator.INSTANCE.translate(data);
         DataOutputStream dos;
         if (output instanceof DataOutputStream) {
             dos = (DataOutputStream) output;

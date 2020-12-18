@@ -26,11 +26,13 @@ package org.spongepowered.common.data;
 
 import io.leangen.geantyref.GenericTypeReflector;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
@@ -93,7 +95,7 @@ public final class SpongeKeyValueMatcherBuilder<V> implements KeyValueMatcher.Bu
     @Override
     public Optional<KeyValueMatcher<V>> build(final DataView container) throws InvalidDataException {
         Objects.requireNonNull(container, "container");
-        final Optional<Key> key = container.getRegistryValue(Constants.KeyValueMatcher.KEY, Key.class);
+        final Optional<Key<?>> key = container.getRegistryValue(Constants.KeyValueMatcher.KEY, RegistryTypes.KEY, Sponge.getGame().registries());
         if (!key.isPresent()) {
             return Optional.empty();
         }

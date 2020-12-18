@@ -50,7 +50,6 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     private final byte[] biomes;
     private final Palette.Mutable<BiomeType> palette;
 
-
     public ByteArrayMutableBiomeBuffer(final Palette<BiomeType> palette, final Vector3i start, final Vector3i size) {
         this(palette, new byte[size.getX() * size.getZ()], start, size);
     }

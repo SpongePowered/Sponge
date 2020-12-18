@@ -44,7 +44,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeEventManager;
@@ -55,7 +55,6 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginContributor;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
-import javax.management.MBeanServer;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
@@ -70,6 +69,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.management.MBeanServer;
+
 public class SpongeCommand {
 
     protected static final String INDENT = "    ";
@@ -80,7 +81,7 @@ public class SpongeCommand {
 
     private final Parameter.Key<PluginContainer> pluginContainerKey = Parameter.key("plugin", PluginContainer.class);
     private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", CommandMapping.class);
-    private final Parameter.Key<WorldProperties> worldPropertiesKey = Parameter.key("world", WorldProperties.class);
+    private final Parameter.Key<ServerWorldProperties> worldPropertiesKey = Parameter.key("world", ServerWorldProperties.class);
 
     @Nullable private Component versionText = null;
 
@@ -236,7 +237,7 @@ public class SpongeCommand {
         final Command.Parameterized worldCommand = Command.builder()
                 .parameter(Parameter.worldProperties().setKey(this.worldPropertiesKey).build())
                 .setExecutor(context -> {
-                    final WorldProperties properties = context.requireOne(this.worldPropertiesKey);
+                    final ServerWorldProperties properties = context.requireOne(this.worldPropertiesKey);
                     final ServerWorld world = properties.getWorld()
                             .orElseThrow(() -> new CommandException(Component.text("The world " + properties.getKey().toString() + " is not loaded!")));
                     context.sendMessage(Identity.nil(), Component.text().content("World ")

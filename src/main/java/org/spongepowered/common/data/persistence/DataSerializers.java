@@ -26,7 +26,6 @@ package org.spongepowered.common.data.persistence;
 
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataTranslator;
@@ -97,13 +96,7 @@ public final class DataSerializers {
 
     static {
         COMPONENT_DATA_SERIALIZER = new DataTranslator<Component>() {
-            final ResourceKey key = ResourceKey.sponge("component");
             final TypeToken<Component> token = TypeToken.get(Component.class);
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
 
             @Override
             public TypeToken<Component> getToken() {
@@ -130,7 +123,6 @@ public final class DataSerializers {
         };
         UUID_DATA_SERIALIZER = new DataTranslator<UUID>() {
 
-            final ResourceKey key = ResourceKey.sponge("uuid");
             final TypeToken<UUID> token = TypeToken.get(UUID.class);
 
             @Override
@@ -158,15 +150,8 @@ public final class DataSerializers {
                     .set(Queries.UUID_LEAST, obj.getLeastSignificantBits())
                     .set(Queries.UUID_MOST, obj.getMostSignificantBits());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_2_D_DATA_SERIALIZER = new DataTranslator<Vector2d>() {
-
-            final ResourceKey key = ResourceKey.sponge("vector_2_d");
             final TypeToken<Vector2d> token = TypeToken.get(Vector2d.class);
 
             @Override
@@ -193,15 +178,8 @@ public final class DataSerializers {
                 return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
                     .set(Constants.DataSerializers.Y_POS, obj.getY());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_2_F_DATA_SERIALIZER = new DataTranslator<Vector2f>() {
-
-            final ResourceKey key = ResourceKey.sponge("vector_2_f");
             final TypeToken<Vector2f> token = TypeToken.get(Vector2f.class);
 
             @Override
@@ -228,15 +206,8 @@ public final class DataSerializers {
                 return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
                     .set(Constants.DataSerializers.Y_POS, obj.getY());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_2_I_DATA_SERIALIZER = new DataTranslator<Vector2i>() {
-
-            final ResourceKey key = ResourceKey.sponge("vector_2_i");
             final TypeToken<Vector2i> token = TypeToken.get(Vector2i.class);
 
             @Override
@@ -264,14 +235,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Y_POS, obj.getY())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_2_L_DATA_SERIALIZER = new DataTranslator<Vector2l>() {
-            final ResourceKey key = ResourceKey.sponge("vector_2_l");
             final TypeToken<Vector2l> token = TypeToken.get(Vector2l.class);
 
             @Override
@@ -298,14 +263,8 @@ public final class DataSerializers {
                 return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
                     .set(Constants.DataSerializers.Y_POS, obj.getY());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_3_D_DATA_SERIALIZER = new DataTranslator<Vector3d>() {
-            final ResourceKey key = ResourceKey.sponge("vector_3_d");
             final TypeToken<Vector3d> token = TypeToken.get(Vector3d.class);
 
             @Override
@@ -336,14 +295,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_3_F_DATA_SERIALIZER = new DataTranslator<Vector3f>() {
-            final ResourceKey key = ResourceKey.sponge("vector_3_f");
             final TypeToken<Vector3f> token = TypeToken.get(Vector3f.class);
 
             @Override
@@ -374,14 +327,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_3_I_DATA_SERIALIZER = new DataTranslator<Vector3i>() {
-            final ResourceKey key = ResourceKey.sponge("vector_3_i");
             final TypeToken<Vector3i> token = TypeToken.get(Vector3i.class);
 
             @Override
@@ -412,14 +359,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_3_L_DATA_SERIALIZER = new DataTranslator<Vector3l>() {
-            final ResourceKey key = ResourceKey.sponge("vector_3_l");
             final TypeToken<Vector3l> token = TypeToken.get(Vector3l.class);
 
             @Override
@@ -450,14 +391,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_4_F_DATA_SERIALIZER = new DataTranslator<Vector4f>() {
-            final ResourceKey key = ResourceKey.sponge("vector_4_f");
             final TypeToken<Vector4f> token = TypeToken.get(Vector4f.class);
 
             @Override
@@ -491,14 +426,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.W_POS, obj.getW())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_4_I_DATA_SERIALIZER = new DataTranslator<Vector4i>() {
-            final ResourceKey key = ResourceKey.sponge("vector_4_i");
             final TypeToken<Vector4i> token = TypeToken.get(Vector4i.class);
 
             @Override
@@ -532,14 +461,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.W_POS, obj.getW())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_4_L_DATA_SERIALIZER = new DataTranslator<Vector4l>() {
-            final ResourceKey key = ResourceKey.sponge("vector_4_l");
             final TypeToken<Vector4l> token = TypeToken.get(Vector4l.class);
 
             @Override
@@ -573,14 +496,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.W_POS, obj.getW())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_4_D_DATA_SERIALIZER = new DataTranslator<Vector4d>() {
-            final ResourceKey key = ResourceKey.sponge("vector_4_d");
             final TypeToken<Vector4d> token = TypeToken.get(Vector4d.class);
 
             @Override
@@ -614,14 +531,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.W_POS, obj.getW())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         COMPLEXD_DATA_SERIALIZER = new DataTranslator<Complexd>() {
-            final ResourceKey key = ResourceKey.sponge("complexd");
             final TypeToken<Complexd> token = TypeToken.get(Complexd.class);
 
             @Override
@@ -649,14 +560,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Y_POS, obj.getY())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         COMPLEXF_DATA_SERIALIZER = new DataTranslator<Complexf>() {
-            final ResourceKey key = ResourceKey.sponge("complexf");
             final TypeToken<Complexf> token = TypeToken.get(Complexf.class);
 
             @Override
@@ -683,14 +588,8 @@ public final class DataSerializers {
                 return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
                     .set(Constants.DataSerializers.Y_POS, obj.getY());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         QUATERNIOND_DATA_SERIALIZER = new DataTranslator<Quaterniond>() {
-            final ResourceKey key = ResourceKey.sponge("quaterniond");
             final TypeToken<Quaterniond> token = TypeToken.get(Quaterniond.class);
 
             @Override
@@ -723,14 +622,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     .set(Constants.DataSerializers.W_POS, obj.getW());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         QUATERNIONF_DATA_SERIALIZER = new DataTranslator<Quaternionf>() {
-            final ResourceKey key = ResourceKey.sponge("quaternionf");
             final TypeToken<Quaternionf> token = TypeToken.get(Quaternionf.class);
 
             @Override
@@ -763,14 +656,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     .set(Constants.DataSerializers.W_POS, obj.getW());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         LOCAL_TIME_DATA_SERIALIZER = new DataTranslator<LocalTime>() {
-            final ResourceKey key = ResourceKey.sponge("local_time");
             final TypeToken<LocalTime> token = TypeToken.get(LocalTime.class);
 
             @Override
@@ -817,14 +704,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.LOCAL_TIME_SECOND, obj.getSecond())
                     .set(Constants.DataSerializers.LOCAL_TIME_NANO, obj.getNano());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         LOCAL_DATE_DATA_SERIALIZER = new DataTranslator<LocalDate>() {
-            final ResourceKey key = ResourceKey.sponge("local_date");
             final TypeToken<LocalDate> token = TypeToken.get(LocalDate.class);
 
             @Override
@@ -863,14 +744,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.LOCAL_DATE_MONTH, obj.getMonthValue())
                     .set(Constants.DataSerializers.LOCAL_DATE_DAY, obj.getDayOfMonth());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         LOCAL_DATE_TIME_DATA_SERIALIZER = new DataTranslator<LocalDateTime>() {
-            final ResourceKey key = ResourceKey.sponge("local_date_time");
             final TypeToken<LocalDateTime> token = TypeToken.get(LocalDateTime.class);
 
             @Override
@@ -935,14 +810,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.LOCAL_TIME_SECOND, obj.getSecond())
                     .set(Constants.DataSerializers.LOCAL_TIME_NANO, obj.getNano());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         ZONED_DATE_TIME_DATA_SERIALIZER = new DataTranslator<ZonedDateTime>() {
-            final ResourceKey key = ResourceKey.sponge("zoned_date_time");
             final TypeToken<ZonedDateTime> token = TypeToken.get(ZonedDateTime.class);
 
             @Override
@@ -1014,14 +883,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.LOCAL_TIME_NANO, obj.getNano())
                     .set(Constants.DataSerializers.ZONE_TIME_ID, obj.getZone().getId());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         INSTANT_DATA_SERIALIZER = new DataTranslator<Instant>() {
-            final ResourceKey key = ResourceKey.sponge("instant");
             final TypeToken<Instant> token = TypeToken.get(Instant.class);
 
             @Override
@@ -1088,14 +951,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.LOCAL_TIME_SECOND, local.getSecond())
                     .set(Constants.DataSerializers.LOCAL_TIME_NANO, local.getNano());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         MONTH_DATA_SERIALIZER = new DataTranslator<Month>() {
-            final ResourceKey key = ResourceKey.sponge("month");
             final TypeToken<Month> token = TypeToken.get(Month.class);
 
             @Override
@@ -1120,11 +977,6 @@ public final class DataSerializers {
             @Override
             public DataView addTo(Month obj, DataView dataView) {
                 return dataView.set(Constants.DataSerializers.LOCAL_DATE_MONTH, obj.getValue());
-            }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
             }
         };
 

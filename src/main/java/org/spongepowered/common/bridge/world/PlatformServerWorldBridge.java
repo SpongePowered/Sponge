@@ -31,7 +31,7 @@ import net.minecraft.world.server.ServerWorld;
 public interface PlatformServerWorldBridge {
     default void bridge$removeEntity(Entity entity, boolean keepData) {
         if (entity instanceof ServerPlayerEntity) {
-            ((ServerWorld) this).removePlayer((ServerPlayerEntity) entity);
+            ((ServerWorld) this).removePlayerImmediately((ServerPlayerEntity) entity);
         } else {
             ((ServerWorld) this).removeEntity(entity);
         }

@@ -32,6 +32,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.util.Constants;
 
@@ -51,7 +52,7 @@ public final class SpongeFireworkEffectDataBuilder extends AbstractDataBuilder<F
         if (container.contains(Constants.Item.Fireworks.FIREWORK_SHAPE, Constants.Item.Fireworks.FIREWORK_COLORS, Constants.Item.Fireworks.FIREWORK_FADE_COLORS,
                 Constants.Item.Fireworks.FIREWORK_FLICKERS, Constants.Item.Fireworks.FIREWORK_TRAILS)) {
             final ResourceKey key = container.getKey(Constants.Item.Fireworks.FIREWORK_SHAPE).get();
-            final Optional<FireworkShape> shapeOptional = Sponge.getRegistry().getCatalogRegistry().get(FireworkShape.class, key);
+            final Optional<FireworkShape> shapeOptional = Sponge.getGame().registries().registry(RegistryTypes.FIREWORK_SHAPE).findValue(key);
             if (!shapeOptional.isPresent()) {
                 throw new InvalidDataException("Could not find the FireworkShape for the provided id: " + key);
             }

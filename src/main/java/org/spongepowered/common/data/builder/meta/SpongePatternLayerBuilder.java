@@ -27,6 +27,7 @@ package org.spongepowered.common.data.builder.meta;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
@@ -34,6 +35,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.util.Constants;
 
@@ -58,12 +60,13 @@ public final class SpongePatternLayerBuilder extends AbstractDataBuilder<BannerP
         if (!container.contains(Constants.TileEntity.Banner.SHAPE) || !container.contains(Constants.TileEntity.Banner.COLOR)) {
             return Optional.empty();
         }
-        final BannerPatternShape shape = container.getRegistryValue(Constants.TileEntity.Banner.SHAPE, BannerPatternShape.class)
+        final BannerPatternShape shape = container.getRegistryValue(Constants.TileEntity.Banner.SHAPE, RegistryTypes.BANNER_PATTERN_SHAPE,
+                Sponge.getGame().registries())
                 .orElseThrow(() -> new InvalidDataException("The provided container has an invalid banner pattern shape entry!"));
 
 
         // Now we need to validate the dye color of course...
-        final DyeColor color = container.getRegistryValue(Constants.TileEntity.Banner.COLOR, DyeColor.class)
+        final DyeColor color = container.getRegistryValue(Constants.TileEntity.Banner.COLOR, RegistryTypes.DYE_COLOR, Sponge.getGame().registries())
                 .orElseThrow(() -> new InvalidDataException("The provided container has an invalid dye color entry!"));
 
         return Optional.of(new SpongePatternLayer(shape, color));

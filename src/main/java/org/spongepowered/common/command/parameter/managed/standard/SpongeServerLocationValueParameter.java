@@ -44,7 +44,7 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
@@ -78,7 +78,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
         return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties()
                 .stream()
                 .filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
-                .map(WorldProperties::getKey)
+                .map(ServerWorldProperties::getKey)
                 .map(ResourceKey::getFormatted)
                 .filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());
@@ -91,7 +91,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
         final ArgumentReader.Immutable state = reader.getImmutable();
-        WorldProperties worldProperties;
+        ServerWorldProperties worldProperties;
         try {
             final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
             worldProperties = SpongeCommon.getGame().getServer().getWorldManager()

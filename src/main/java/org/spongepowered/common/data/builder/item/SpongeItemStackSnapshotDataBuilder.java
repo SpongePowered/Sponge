@@ -26,6 +26,7 @@ package org.spongepowered.common.data.builder.item;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundNBT;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
@@ -34,6 +35,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
@@ -53,7 +55,7 @@ public final class SpongeItemStackSnapshotDataBuilder extends AbstractDataBuilde
     @Override
     protected Optional<ItemStackSnapshot> buildContent(DataView container) throws InvalidDataException {
         if (container.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
-            final ItemType itemType = container.getRegistryValue(Constants.ItemStack.TYPE, ItemType.class).get();
+            final ItemType itemType = container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, Sponge.getGame().registries()).get();
             if (itemType == ItemTypes.AIR.get()) {
                 return Optional.of(ItemStackSnapshot.empty());
             }
@@ -61,7 +63,7 @@ public final class SpongeItemStackSnapshotDataBuilder extends AbstractDataBuilde
 
             @Nullable final CompoundNBT compound;
             if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-                compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+                compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
                 SpongeItemStackBuilder.fixEnchantmentData(itemType, compound);
             } else {
                 compound = null;
