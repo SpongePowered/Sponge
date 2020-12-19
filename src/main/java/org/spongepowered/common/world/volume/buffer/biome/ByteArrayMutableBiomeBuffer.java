@@ -30,7 +30,7 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.BiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -47,7 +47,7 @@ import java.util.stream.Stream;
 /**
  * Mutable biome volume backed by a byte array.
  */
-public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeVolume<ByteArrayMutableBiomeBuffer> {
+public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements BiomeVolume.Mutable<ByteArrayMutableBiomeBuffer> {
 
     private final byte[] biomes;
     private final Palette.Mutable<BiomeType, BiomeType> palette;
@@ -134,5 +134,9 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);
+    }
+
+    public Palette.Mutable<BiomeType, BiomeType> getPalette() {
+        return this.palette;
     }
 }

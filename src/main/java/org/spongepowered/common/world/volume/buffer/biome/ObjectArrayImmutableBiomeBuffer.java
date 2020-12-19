@@ -27,7 +27,7 @@ package org.spongepowered.common.world.volume.buffer.biome;
 import net.minecraft.world.biome.Biome;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.BiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -48,7 +48,7 @@ import java.util.stream.Stream;
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
-public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeVolume {
+public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements BiomeVolume.Immutable {
 
     private final BiomeType[] biomes;
 
@@ -110,13 +110,13 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     }
 
     @Override
-    public VolumeStream<ImmutableBiomeVolume, BiomeType> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<Immutable, BiomeType> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(min, max, options);
-        final Stream<VolumeElement<ImmutableBiomeVolume, BiomeType>> stateStream = IntStream.range(this.getBlockMin().getX(), this.getBlockMax().getX() + 1)
+        final Stream<VolumeElement<Immutable, BiomeType>> stateStream = IntStream.range(this.getBlockMin().getX(), this.getBlockMax().getX() + 1)
             .mapToObj(x -> IntStream.range(this.getBlockMin().getZ(), this.getBlockMax().getZ() + 1)
                 .mapToObj(z -> IntStream.range(this.getBlockMin().getY(), this.getBlockMax().getY() + 1)
-                    .mapToObj(y -> VolumeElement.<ImmutableBiomeVolume, BiomeType>of(this, () -> this.biomes[this.getIndex(x, y, z)], new Vector3i(x, y, z)))
+                    .mapToObj(y -> VolumeElement.<Immutable, BiomeType>of(this, () -> this.biomes[this.getIndex(x, y, z)], new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);

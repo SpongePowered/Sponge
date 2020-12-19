@@ -34,7 +34,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.volume.entity.MutableEntityVolume;
+import org.spongepowered.api.world.volume.entity.EntityVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -58,14 +58,22 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class ObjectArrayMutableEntityVolume extends AbstractBlockBuffer implements MutableEntityVolume<ObjectArrayMutableEntityVolume> {
+public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implements EntityVolume.Mutable<ObjectArrayMutableEntityBuffer> {
     // This is our backing block buffer
     private final ArrayMutableBlockBuffer blockBuffer;
     private final List<Entity> entities;
 
-    public ObjectArrayMutableEntityVolume(final Vector3i start, final Vector3i size) {
+    public ObjectArrayMutableEntityBuffer(final Vector3i start, final Vector3i size) {
         super(start, size);
         this.blockBuffer = new ArrayMutableBlockBuffer(start, size);
+        this.entities = new ArrayList<>();
+    }
+
+    public ObjectArrayMutableEntityBuffer(final Vector3i start, final Vector3i size,
+        final ArrayMutableBlockBuffer blockBuffer
+    ) {
+        super(start, size);
+        this.blockBuffer = blockBuffer;
         this.entities = new ArrayList<>();
     }
 
@@ -90,23 +98,23 @@ public class ObjectArrayMutableEntityVolume extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public VolumeStream<ObjectArrayMutableEntityVolume, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max,
+    public VolumeStream<ObjectArrayMutableEntityBuffer, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max,
         final StreamOptions options
     ) {
-        final Stream<VolumeElement<ObjectArrayMutableEntityVolume, BlockState>> stateStream = IntStream.range(
+        final Stream<VolumeElement<ObjectArrayMutableEntityBuffer, BlockState>> stateStream = IntStream.range(
             this.getBlockMin().getX(),
             this.getBlockMax().getX() + 1
         )
             .mapToObj(x -> IntStream.range(this.getBlockMin().getZ(), this.getBlockMax().getZ() + 1)
                 .mapToObj(z -> IntStream.range(this.getBlockMin().getY(), this.getBlockMax().getY() + 1)
                     .mapToObj(y -> VolumeElement.of(
-                        (ObjectArrayMutableEntityVolume) this,
+                        this,
                         () -> this.blockBuffer.getBlock(x, y, z),
                         new Vector3i(x, y, z)
                     ))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
-        return new SpongeVolumeStream<>(stateStream, () -> (ObjectArrayMutableEntityVolume) this);
+        return new SpongeVolumeStream<>(stateStream, () -> this);
     }
 
     @Override
@@ -217,11 +225,11 @@ public class ObjectArrayMutableEntityVolume extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public VolumeStream<ObjectArrayMutableEntityVolume, Entity> getEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<ObjectArrayMutableEntityBuffer, Entity> getEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(min, max, this.getBlockMin(), this.getBlockMax(), options);
         // Normally, we'd be able to shadow-copy, but we can't copy entities, and we're only using a list, so we can iterate only on the list.
-        final Stream<VolumeElement<ObjectArrayMutableEntityVolume, Entity>> backingStream = this.entities.stream()
+        final Stream<VolumeElement<ObjectArrayMutableEntityBuffer, Entity>> backingStream = this.entities.stream()
             .map(entity -> VolumeElement.of(this, entity, entity.getBlockPosition()));
         return new SpongeVolumeStream<>(backingStream, () -> this);
     }

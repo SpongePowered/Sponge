@@ -22,13 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.volume.buffer.blockentity;
+package org.spongepowered.common.world.volume.buffer.archetype.blockentity;
 
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.volume.block.entity.BlockEntityVolume;
+import org.spongepowered.api.world.volume.archetype.block.entity.BlockEntityArchetypeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -43,14 +43,19 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public abstract class AbstractMutableBlockEntityBuffer<M extends AbstractMutableBlockEntityBuffer<M>> extends AbstractBlockBuffer implements BlockEntityVolume.Mutable<M> {
+public abstract class AbstractMutableBlockEntityArchetypeBuffer<M extends AbstractMutableBlockEntityArchetypeBuffer<M>> extends AbstractBlockBuffer implements BlockEntityArchetypeVolume.Mutable<M> {
 
     // This is our backing block buffer
     private final ArrayMutableBlockBuffer blockBuffer;
 
-    protected AbstractMutableBlockEntityBuffer(final Vector3i start, final Vector3i size) {
+    protected AbstractMutableBlockEntityArchetypeBuffer(final Vector3i start, final Vector3i size) {
         super(start, size);
         this.blockBuffer = new ArrayMutableBlockBuffer(start, size);
+    }
+
+    protected AbstractMutableBlockEntityArchetypeBuffer(final ArrayMutableBlockBuffer buffer) {
+        super(buffer.getBlockMin(), buffer.getBlockSize());
+        this.blockBuffer = buffer;
     }
 
     @Override

@@ -54,7 +54,7 @@ import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.volume.game.ReadableRegion;
+import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.asm.mixin.Implements;
@@ -67,7 +67,7 @@ import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.biome.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
 import org.spongepowered.common.world.volume.buffer.blockentity.ObjectArrayMutableBlockEntityBuffer;
-import org.spongepowered.common.world.volume.buffer.entity.ObjectArrayMutableEntityVolume;
+import org.spongepowered.common.world.volume.buffer.entity.ObjectArrayMutableEntityBuffer;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -83,8 +83,8 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"RedundantTypeArguments", "unchecked", "RedundantCast"})
 @Mixin(IWorldReader.class)
-@Implements(@Interface(iface = ReadableRegion.class, prefix = "readable$"))
-public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends ReadableRegion<R> {
+@Implements(@Interface(iface = Region.class, prefix = "readable$"))
+public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     // @formatter:off
     @Nullable @Shadow IChunk shadow$getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus p_217353_3_, boolean p_217353_4_);
@@ -99,7 +99,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
     @Shadow Biome shadow$getBiome(BlockPos p_226691_1_);
     // @formatter:on
 
-    // ReadableRegion
+    // Region
 
     @Override
     default DimensionType getDimensionType() {
@@ -162,7 +162,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         return new Random();
     }
 
-    // ReadableEntityVolume
+    // EntityVolume
 
     @Override
     default Optional<Entity> getEntity(final UUID uuid) {
@@ -221,7 +221,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         VolumeStreamUtils.validateStreamArgs(min, max, options);
 
         final boolean shouldCarbonCopy = options.carbonCopy();
-        final Vector3i size = max.min(min);
+        final Vector3i size = max.sub(min).add(1, 1 ,1);
         final @MonotonicNonNull ObjectArrayMutableBiomeBuffer backingVolume;
         if (shouldCarbonCopy) {
             backingVolume = new ObjectArrayMutableBiomeBuffer(min, size);
@@ -262,7 +262,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         VolumeStreamUtils.validateStreamArgs(min, max, options);
 
         final boolean shouldCarbonCopy = options.carbonCopy();
-        final Vector3i size = max.min(min);
+        final Vector3i size = max.sub(min).add(1, 1 ,1);
         final @MonotonicNonNull ArrayMutableBlockBuffer backingVolume;
         if (shouldCarbonCopy) {
             backingVolume = new ArrayMutableBlockBuffer(min, size);
@@ -302,7 +302,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         VolumeStreamUtils.validateStreamArgs(min, max, options);
 
         final boolean shouldCarbonCopy = options.carbonCopy();
-        final Vector3i size = max.min(min);
+        final Vector3i size = max.sub(min).add(1, 1 ,1);
         final @MonotonicNonNull ObjectArrayMutableBlockEntityBuffer backingVolume;
         if (shouldCarbonCopy) {
             backingVolume = new ObjectArrayMutableBlockEntityBuffer(min, size);
@@ -351,10 +351,10 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         VolumeStreamUtils.validateStreamArgs(min, max, options);
 
         final boolean shouldCarbonCopy = options.carbonCopy();
-        final Vector3i size = max.min(min);
-        final @MonotonicNonNull ObjectArrayMutableEntityVolume backingVolume;
+        final Vector3i size = max.sub(min).add(1, 1 ,1);
+        final @MonotonicNonNull ObjectArrayMutableEntityBuffer backingVolume;
         if (shouldCarbonCopy) {
-            backingVolume = new ObjectArrayMutableEntityVolume(min, size);
+            backingVolume = new ObjectArrayMutableEntityBuffer(min, size);
         } else {
             backingVolume = null;
         }

@@ -30,7 +30,7 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.BiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -48,7 +48,7 @@ import java.util.stream.Stream;
  * Immutable biome volume, backed by a byte array. The array passed to the
  * constructor is copied to ensure that the instance is immutable.
  */
-public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeVolume {
+public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements BiomeVolume.Immutable {
 
     private final byte[] biomes;
     private final Palette<BiomeType, BiomeType> palette;
@@ -84,7 +84,7 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
      * @param size The size of the volume
      * @return A new buffer using the same array reference
      */
-    public static ImmutableBiomeVolume newWithoutArrayClone(final Palette<BiomeType, BiomeType> palette, final byte[] biomes, final Vector3i start, final Vector3i size) {
+    public static Immutable newWithoutArrayClone(final Palette<BiomeType, BiomeType> palette, final byte[] biomes, final Vector3i start, final Vector3i size) {
         return new ByteArrayImmutableBiomeBuffer(palette, start, size, biomes);
     }
 
@@ -112,16 +112,16 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     }
 
     @Override
-    public VolumeStream<ImmutableBiomeVolume, BiomeType> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<Immutable, BiomeType> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         final Vector3i blockMin = this.getBlockMin();
         final Vector3i blockMax = this.getBlockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
 
-        final Stream<VolumeElement<ImmutableBiomeVolume, BiomeType>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
+        final Stream<VolumeElement<Immutable, BiomeType>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
             .mapToObj(x -> IntStream.range(blockMin.getZ(), blockMax.getZ() + 1)
                 .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
-                    .mapToObj(y -> VolumeElement.<ImmutableBiomeVolume, BiomeType>of(this, () -> {
+                    .mapToObj(y -> VolumeElement.<Immutable, BiomeType>of(this, () -> {
                         final byte biomeId = this.biomes[this.getIndex(x, y, z)];
                         return this.palette.get(biomeId & 255, Sponge.getGame().registries())
                             .orElseGet(Sponge.getGame().registries()

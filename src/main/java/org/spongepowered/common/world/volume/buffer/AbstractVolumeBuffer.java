@@ -33,7 +33,7 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class AbstractObjectArrayBuffer implements Volume {
+public class AbstractVolumeBuffer implements Volume {
 
     protected final Vector3i start;
     protected final Vector3i size;
@@ -41,7 +41,7 @@ public class AbstractObjectArrayBuffer implements Volume {
     private final int yLine;
     private final int yzSlice;
 
-    public AbstractObjectArrayBuffer(final Vector3i start, final Vector3i size) {
+    public AbstractVolumeBuffer(final Vector3i start, final Vector3i size) {
         this.start = start;
         this.size = size;
         this.end = this.start.add(this.size).sub(Vector3i.ONE);
@@ -93,7 +93,7 @@ public class AbstractObjectArrayBuffer implements Volume {
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        final AbstractObjectArrayBuffer that = (AbstractObjectArrayBuffer) o;
+        final AbstractVolumeBuffer that = (AbstractVolumeBuffer) o;
         return this.yLine == that.yLine &&
             this.yzSlice == that.yzSlice &&
             this.start.equals(that.start) &&
@@ -108,7 +108,7 @@ public class AbstractObjectArrayBuffer implements Volume {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", AbstractObjectArrayBuffer.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", AbstractVolumeBuffer.class.getSimpleName() + "[", "]")
             .add("start=" + this.start)
             .add("end=" + this.end)
             .toString();

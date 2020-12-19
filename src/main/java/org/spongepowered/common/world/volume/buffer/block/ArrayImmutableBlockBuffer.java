@@ -31,7 +31,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.volume.block.ImmutableBlockVolume;
+import org.spongepowered.api.world.volume.block.BlockVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -44,12 +44,12 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements ImmutableBlockVolume {
+public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements BlockVolume.Immutable {
 
     private static final BlockState AIR = BlockTypes.AIR.get().getDefaultState();
 
     private final Palette<BlockState, BlockType> palette;
-    private final ArrayMutableBlockBuffer.BackingData data;
+    private final BlockBackingData data;
 
     /**
      * Does not clone!
@@ -59,7 +59,7 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
      * @param size The block size
      */
     ArrayImmutableBlockBuffer(
-        final Palette<BlockState, BlockType> palette, final ArrayMutableBlockBuffer.BackingData data, final Vector3i start, final Vector3i size) {
+        final Palette<BlockState, BlockType> palette, final BlockBackingData data, final Vector3i start, final Vector3i size) {
         super(start, size);
         this.data = data;
         this.palette = palette.asImmutable();
@@ -67,8 +67,14 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
 
     public ArrayImmutableBlockBuffer(final Palette<BlockState, BlockType> palette, final Vector3i start, final Vector3i size, final char[] blocks) {
         super(start, size);
-        this.data = new ArrayMutableBlockBuffer.CharBackingData(blocks.clone());
+        this.data = new BlockBackingData.CharBackingData(blocks.clone());
         this.palette = palette.asImmutable();
+    }
+
+    public ArrayImmutableBlockBuffer(final Palette.Immutable<BlockState, BlockType> palette, final Vector3i blockMin, final Vector3i blockSize, final BlockBackingData data) {
+        super(blockMin, blockSize);
+        this.data = data;
+        this.palette = palette;
     }
 
     @Override
@@ -101,8 +107,8 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
      * @param size The size of the volume
      * @return A new buffer using the same array reference
      */
-    public static ImmutableBlockVolume newWithoutArrayClone(final Palette<BlockState, BlockType> palette, final Vector3i start, final Vector3i size, final char[] blocks) {
-        return new ArrayImmutableBlockBuffer(palette, new ArrayMutableBlockBuffer.CharBackingData(blocks), start, size);
+    public static Immutable newWithoutArrayClone(final Palette<BlockState, BlockType> palette, final Vector3i start, final Vector3i size, final char[] blocks) {
+        return new ArrayImmutableBlockBuffer(palette, new BlockBackingData.CharBackingData(blocks), start, size);
     }
 
     @Override
@@ -127,14 +133,14 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
     }
 
     @Override
-    public VolumeStream<ImmutableBlockVolume, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<Immutable, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(min, max, this.getBlockMin(), this.getBlockMax(), options);
         // We don't need to copy since this is immutable.
-        final Stream<VolumeElement<ImmutableBlockVolume, BlockState>> stateStream = IntStream.range(this.getBlockMin().getX(), this.getBlockMax().getX() + 1)
+        final Stream<VolumeElement<Immutable, BlockState>> stateStream = IntStream.range(this.getBlockMin().getX(), this.getBlockMax().getX() + 1)
             .mapToObj(x -> IntStream.range(this.getBlockMin().getZ(), this.getBlockMax().getZ() + 1)
                 .mapToObj(z -> IntStream.range(this.getBlockMin().getY(), this.getBlockMax().getY() + 1)
-                    .mapToObj(y -> VolumeElement.<ImmutableBlockVolume, BlockState>of(this, () -> this.getBlock(x, y, z), new Vector3i(x, y, z)))
+                    .mapToObj(y -> VolumeElement.<Immutable, BlockState>of(this, () -> this.getBlock(x, y, z), new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);

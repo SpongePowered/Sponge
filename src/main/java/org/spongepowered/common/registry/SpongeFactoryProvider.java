@@ -60,6 +60,7 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.volume.block.BlockVolumeFactory;
 import org.spongepowered.common.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeOrCriterion;
@@ -89,6 +90,7 @@ import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransform;
 import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
 import org.spongepowered.common.world.SpongeServerLocation;
+import org.spongepowered.common.world.volume.block.SpongeBlockVolumeFactory;
 
 import java.util.Map;
 import java.util.Objects;
@@ -158,6 +160,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
             .registerFactory(RegistryKey.Factory.class, new SpongeRegistryKey.FactoryImpl())
             .registerFactory(RegistryType.Factory.class, new SpongeRegistryType.FactoryImpl())
             .registerFactory(DataPackType.Factory.class, new SpongeDataPackType.FactoryImpl())
+            .registerFactory(BlockVolumeFactory.class, new SpongeBlockVolumeFactory())
         ;
     }
 

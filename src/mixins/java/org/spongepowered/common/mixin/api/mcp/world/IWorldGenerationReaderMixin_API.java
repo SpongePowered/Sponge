@@ -29,6 +29,6 @@ import org.spongepowered.api.world.volume.game.GenerationVolume;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(IWorldGenerationReader.class)
-public interface IWorldGenerationReaderMixin_API extends GenerationVolume {
+public interface IWorldGenerationReaderMixin_API extends GenerationVolume.Mutable {
 
 }

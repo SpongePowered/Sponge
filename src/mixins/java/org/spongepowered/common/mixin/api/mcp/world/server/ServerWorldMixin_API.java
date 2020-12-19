@@ -78,6 +78,8 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -86,9 +88,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerWorld.class)
@@ -253,7 +252,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
         return Optional.ofNullable(raid);
     }
 
-    // ReadableEntityVolume
+    // EntityVolume
 
     @Override
     public Optional<org.spongepowered.api.entity.Entity> getEntity(final UUID uniqueId) {

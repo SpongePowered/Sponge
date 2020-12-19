@@ -35,12 +35,15 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.world.volume.Volume;
-import org.spongepowered.api.world.volume.game.ReadableRegion;
+import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.lang.ref.WeakReference;
@@ -53,6 +56,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -80,7 +84,24 @@ public final class VolumeStreamUtils {
         };
     }
 
-    public static <R extends ReadableRegion<R>> BiFunction<R, ChunkPos, @Nullable IChunk> getChunkAccessorByStatus(
+    public static Predicate<org.spongepowered.api.util.Tuple<Vector3d, EntityArchetype>> entityArchetypePositionFilter(final Vector3i min, final Vector3i max) {
+        return VolumeStreamUtils.filterPositions(tuple -> tuple.getFirst().toInt(), min, max);
+    }
+
+    public static Predicate<Map.Entry<Vector3i, BlockEntityArchetype>> blockEntityArchetypePositionFilter(final Vector3i min, final Vector3i max) {
+        return VolumeStreamUtils.filterPositions(Map.Entry::getKey, min, max);
+    }
+
+    public static <T> Predicate<T> filterPositions(final Function<T, Vector3i> pos, final Vector3i min, final Vector3i max) {
+        return (entity) -> {
+            final Vector3i apply = pos.apply(entity);
+            return apply.getX() >= min.getX() && apply.getX() <= max.getX()
+                && apply.getY() >= min.getY() && apply.getY() <= max.getY()
+                && apply.getZ() >= min.getZ() && apply.getZ() <= max.getZ();
+        };
+    }
+
+    public static <R extends Region<R>> BiFunction<R, ChunkPos, @Nullable IChunk> getChunkAccessorByStatus(
         final IWorldReader worldReader,
         final boolean shouldGenerate
     ) {
