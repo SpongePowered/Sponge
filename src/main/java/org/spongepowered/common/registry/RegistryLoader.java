@@ -25,6 +25,7 @@
 package org.spongepowered.common.registry;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -48,17 +49,44 @@ public final class RegistryLoader<T> {
         return loader;
     }
 
+    public RegistryLoader<T> add(final RegistryKey<? extends T> key, final Supplier<? extends T> function) {
+        this.values.put(key.location(), function.get());
+        return this;
+    }
+
     public RegistryLoader<T> add(final RegistryKey<? extends T> key, final Function<ResourceKey, ? extends T> function) {
         this.values.put(key.location(), function.apply(key.location()));
         return this;
     }
 
+    public RegistryLoader<T> add(final int id, final RegistryKey<? extends T> key, final Supplier<? extends T> supplier) {
+        return this.add0(id, key, supplier.get());
+    }
+
     public RegistryLoader<T> add(final int id, final RegistryKey<? extends T> key, final Function<ResourceKey, ? extends T> function) {
-        this.values.put(key.location(), function.apply(key.location()));
+        return this.add0(id, key, function.apply(key.location()));
+    }
+
+    private RegistryLoader<T> add0(final int id, final RegistryKey<? extends T> key, final T value) {
+        this.values.put(key.location(), value);
         if (this.ids == null) {
             this.ids = new HashMap<>();
         }
         this.ids.put(key.location(), id);
+        return this;
+    }
+
+    public RegistryLoader<T> mapping(final Supplier<? extends T> supplier, final Consumer<Mapping<T>> consumer) {
+        consumer.accept(new Mapping<T>() {
+            @Override
+            public Mapping<T> add(final RegistryKey<? extends T>... keys) {
+                for (final RegistryKey<? extends T> key : keys) {
+                    RegistryLoader.this.add(key, supplier);
+                }
+                return this;
+            }
+        });
+
         return this;
     }
 

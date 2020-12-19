@@ -30,7 +30,7 @@ public final class SpongeSpawnType implements SpawnType {
 
     private boolean isForced = false;
 
-    public SpongeSpawnType toggleForced() {
+    public SpongeSpawnType setForced() {
         this.isForced = true;
         return this;
     }
