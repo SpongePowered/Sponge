@@ -53,7 +53,7 @@ public class GlobalPalette<T> implements Palette.Immutable<T> {
         () -> new GlobalPalette<>(
             PaletteTypes.GLOBAL_BLOCK_PALETTE.get(),
             () -> (Stream<BlockState>) (Stream) Registry.BLOCK.stream()
-                .flatMap(block -> block.getStateContainer().getValidStates().stream()),
+                .flatMap(block -> block.getStateDefinition().getPossibleStates().stream()),
             (type) -> Block.BLOCK_STATE_REGISTRY.getId((net.minecraft.block.BlockState) type),
             (id) -> (BlockState) Block.BLOCK_STATE_REGISTRY.byId(id),
             BlockState.class
@@ -64,7 +64,7 @@ public class GlobalPalette<T> implements Palette.Immutable<T> {
     static final Supplier<GlobalPalette<BiomeType>> GLOBAL_BIOME_PALETTE = MemoizedSupplier.memoize(() -> new GlobalPalette<>(
         PaletteTypes.GLOBAL_BIOME_PALETTE.get(),
         () -> (Stream<BiomeType>) (Stream) Registry.BIOME.stream(),
-        (type) -> Registry.BIOME.getId((Biome) (type instanceof VirtualBiomeType ? ((VirtualBiomeType) type).getPersistedType() : type)),
+        (type) -> Registry.BIOME.getId((Biome) (Object) type),
         (id) -> (BiomeType) Registry.BIOME.getByValue(id),
         BiomeType.class
     ));

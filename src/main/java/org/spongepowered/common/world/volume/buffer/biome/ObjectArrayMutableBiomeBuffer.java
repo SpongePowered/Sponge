@@ -94,10 +94,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     public Biome getNativeBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
         BiomeType type = this.biomes[this.getIndex(x, y, z)];
-        if (type instanceof VirtualBiomeType) {
-            type = ((VirtualBiomeType) type).getPersistedType();
-        }
-        return (Biome) type;
+        return (Biome) (Object) type;
     }
 
     @Override
@@ -112,7 +109,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         Objects.requireNonNull(biome, "biome");
         Objects.requireNonNull(pos, "pos");
         this.checkRange(pos.getX(), pos.getY(), pos.getZ());
-        this.biomes[this.getIndex(pos.getX(), pos.getY(), pos.getZ())] = (BiomeType) biome;
+        this.biomes[this.getIndex(pos.getX(), pos.getY(), pos.getZ())] = (BiomeType) (Object) biome;
         return true;
     }
 
@@ -120,10 +117,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         for (int x = 0; x < this.size.getX(); x++) {
             for (int z = 0; z < this.size.getZ(); z++) {
                 BiomeType type = this.biomes[x + z * this.size.getX()];
-                if (type instanceof VirtualBiomeType) {
-                    type = ((VirtualBiomeType) type).getPersistedType();
-                }
-                biomes[x + z * this.size.getX()] = Registry.BIOME.getId((Biome) type);
+                biomes[x + z * this.size.getX()] = Registry.BIOME.getId((Biome) (Object) type);
             }
         }
     }
@@ -132,10 +126,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         for (int x = 0; x < this.size.getX(); x++) {
             for (int z = 0; z < this.size.getZ(); z++) {
                 BiomeType type = this.biomes[x + z * this.size.getX()];
-                if (type instanceof VirtualBiomeType) {
-                    type = ((VirtualBiomeType) type).getPersistedType();
-                }
-                biomes[x + z * this.size.getX()] = (Biome) type;
+                biomes[x + z * this.size.getX()] = (Biome) (Object) type;
             }
         }
     }

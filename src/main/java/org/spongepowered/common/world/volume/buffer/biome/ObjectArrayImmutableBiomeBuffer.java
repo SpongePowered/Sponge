@@ -82,10 +82,7 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     public Biome getNativeBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
         BiomeType type = this.biomes[this.getIndex(x, y, z)];
-        if (type instanceof VirtualBiomeType) {
-            type = ((VirtualBiomeType) type).getPersistedType();
-        }
-        return (Biome) type;
+        return (Biome) (Object) type;
     }
 
     @Override

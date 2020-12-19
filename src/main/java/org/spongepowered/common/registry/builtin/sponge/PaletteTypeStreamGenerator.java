@@ -66,11 +66,7 @@ public final class PaletteTypeStreamGenerator {
             ResourceKey.sponge("global_biome_palette"),
             GlobalPalette::getBiomePalette,
             (type) -> {
-                final ResourceLocation key = Registry.BIOME.getKey((Biome) (
-                    type instanceof VirtualBiomeType
-                        ? ((VirtualBiomeType) type).getPersistedType()
-                        : type
-                ));
+                final ResourceLocation key = Registry.BIOME.getKey((Biome) (type));
                 if (key == null) {
                     return "minecraft:plains";
                 }
@@ -82,11 +78,7 @@ public final class PaletteTypeStreamGenerator {
             ResourceKey.sponge("biome_palette"),
             () -> new MutableBimapPalette<>(PaletteTypes.BIOME_PALETTE.get()),
             (type) -> {
-                final ResourceLocation key = Registry.BIOME.getKey((Biome) (
-                    type instanceof VirtualBiomeType
-                        ? ((VirtualBiomeType) type).getPersistedType()
-                        : type
-                ));
+                final ResourceLocation key = Registry.BIOME.getKey((Biome) (type));
                 if (key == null) {
                     return "minecraft:plains";
                 }

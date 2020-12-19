@@ -102,6 +102,7 @@ public final class SpongeLifecycle {
     }
 
     public void establishDataPackRegistries() {
+        // TODO call event for plugin datapacks (recipes and advancements)
         final SpongeCatalogRegistry spongeCatalogRegistry = (SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry();
         spongeCatalogRegistry.callDataPackRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
 
