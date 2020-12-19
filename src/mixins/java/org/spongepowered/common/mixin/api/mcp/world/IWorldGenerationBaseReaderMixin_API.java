@@ -29,14 +29,14 @@ import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.gen.IWorldGenerationBaseReader;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.HeightType;
-import org.spongepowered.api.world.volume.game.ReadableGenerationVolume;
+import org.spongepowered.api.world.volume.game.GenerationVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.function.Predicate;
 
 @Mixin(IWorldGenerationBaseReader.class)
-public interface IWorldGenerationBaseReaderMixin_API extends ReadableGenerationVolume {
+public interface IWorldGenerationBaseReaderMixin_API extends GenerationVolume {
 
     //@formatter:off
     @Shadow boolean shadow$isStateAtPosition(BlockPos p_217375_1_, Predicate<net.minecraft.block.BlockState> p_217375_2_);

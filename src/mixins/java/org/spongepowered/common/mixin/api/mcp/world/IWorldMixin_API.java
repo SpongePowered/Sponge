@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.AbstractChunkProvider;
@@ -109,7 +108,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
         return this.shadow$hasChunk(x >> 4, z >> 4);
     }
 
-    // ReadableEntityVolume
+    // EntityVolume
 
     @Override
     default Optional<Entity> getEntity(final UUID uuid) {

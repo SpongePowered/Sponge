@@ -30,7 +30,7 @@ import net.minecraft.world.IEntityReader;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.world.volume.entity.ReadableEntityVolume;
+import org.spongepowered.api.world.volume.entity.EntityVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
@@ -45,7 +45,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 @Mixin(IEntityReader.class)
-public interface IEntityReaderMixin_API extends ReadableEntityVolume {
+public interface IEntityReaderMixin_API extends EntityVolume {
 
     //@formatter:off
     @Shadow List<net.minecraft.entity.Entity> shadow$getEntities(@Nullable net.minecraft.entity.Entity p_175674_1_, AxisAlignedBB p_175674_2_, @Nullable Predicate<? super net.minecraft.entity.Entity> p_175674_3_);

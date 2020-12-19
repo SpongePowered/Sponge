@@ -30,7 +30,7 @@ import net.minecraft.world.biome.Biome;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
-import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.BiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -52,7 +52,7 @@ import java.util.stream.Stream;
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
-public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeVolume<ObjectArrayMutableBiomeBuffer> {
+public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements BiomeVolume.Mutable<ObjectArrayMutableBiomeBuffer> {
 
     private final BiomeType[] biomes;
 

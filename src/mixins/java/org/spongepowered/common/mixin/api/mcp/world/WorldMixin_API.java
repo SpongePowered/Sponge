@@ -72,6 +72,11 @@ import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
+import org.spongepowered.api.world.volume.stream.StreamOptions;
+import org.spongepowered.api.world.volume.stream.VolumeApplicators;
+import org.spongepowered.api.world.volume.stream.VolumeCollectors;
+import org.spongepowered.api.world.volume.stream.VolumePositionTranslators;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -84,6 +89,7 @@ import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
+import org.spongepowered.common.world.volume.buffer.archetype.SpongeArchetypeVolume;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -159,7 +165,7 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
         return Collections.emptyList();
     }
 
-    // ReadableBlockVolume
+    // BlockVolume
 
     @Override
     public int getHighestYAt(final int x, final int z) {
@@ -306,6 +312,7 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
         throw new UnsupportedOperationException("Implement me"); // TODO implement me
     }
 
+    @SuppressWarnings("unchecked")
     public <E extends org.spongepowered.api.entity.Entity> E impl$createEntity(final EntityType<E> type, final Vector3d position, final boolean naturally) throws IllegalArgumentException,
             IllegalStateException {
         checkNotNull(type, "The entity type cannot be null!");
@@ -379,5 +386,36 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
         }
 
         return (E) entity;
+    }
+
+    @Override
+    public ArchetypeVolume createArchetypeVolume(final Vector3i min, final Vector3i max, final Vector3i origin) {
+        Objects.requireNonNull(min, "Min position cannot be null");
+        Objects.requireNonNull(max, "Max position cannot be null");
+        Objects.requireNonNull(origin, "Origin cannot be null");
+        final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(min.sub(origin), max.sub(min).add(1, 1, 1), this.registries());
+
+        this.getBlockStateStream(min, max, StreamOptions.lazily())
+            .apply(VolumeCollectors.of(volume, VolumePositionTranslators.offsetPosition(min, origin), VolumeApplicators.applyBlocks()));
+
+        this.getBlockEntityStream(min, max, StreamOptions.lazily())
+            .map((world, blockEntity, x, y, z) -> blockEntity.get().createArchetype())
+            .apply(VolumeCollectors.of(
+                volume,
+                VolumePositionTranslators.offsetPosition(min, origin),
+                VolumeApplicators.applyBlockEntityArchetypes()
+            ));
+
+        this.getBiomeStream(min, max, StreamOptions.lazily())
+            .apply(VolumeCollectors.of(volume, VolumePositionTranslators.offsetPosition(min, origin), VolumeApplicators.applyBiomes()));
+
+        this.getEntityStream(min, max, StreamOptions.lazily())
+            .map((world, entity, x, y, z) -> entity.get().createArchetype())
+            .apply(VolumeCollectors.of(
+                volume,
+                VolumePositionTranslators.offsetPosition(min, origin),
+                VolumeApplicators.applyEntityArchetypes()
+            ));
+        return volume;
     }
 }
