@@ -24,42 +24,41 @@
  */
 package org.spongepowered.common.world.schematic;
 
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
 
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
 
-public class SpongePaletteType<T> implements PaletteType<T> {
+public class SpongePaletteType<T, R> implements PaletteType<T, R> {
 
-    private final Supplier<? extends Palette<T>> builder;
-    private final Function<T, String> encoder;
-    private final Function<String, Optional<T>> decoder;
+    private final BiFunction<String, Registry<R>, Optional<T>> resolver;
+    private final BiFunction<Registry<R>, T, String> stringifier;
 
     public SpongePaletteType(
-        final Supplier<? extends Palette<T>> builder,
-        final Function<T, String> encoder,
-        final Function<String, Optional<T>> decoder
+        final BiFunction<String, Registry<R>, Optional<T>> resolver,
+        final BiFunction<Registry<R>, T, String> stringifier
     ) {
-        this.builder = builder;
-        this.encoder = encoder;
-        this.decoder = decoder;
+        this.resolver = resolver;
+        this.stringifier = stringifier;
     }
 
     @Override
-    public Palette<T> create() {
-        return this.builder.get();
+    public Palette<T, R> create(final RegistryHolder holder, final RegistryType<R> registryType) {
+        return new MutableBimapPalette<>(this, holder.registry(registryType), registryType);
     }
 
     @Override
-    public Function<T, String> getEncoder() {
-        return this.encoder;
+    public BiFunction<String, Registry<R>, Optional<T>> getResolver() {
+        return this.resolver;
     }
 
     @Override
-    public Function<String, Optional<T>> getDecoder() {
-        return this.decoder;
+    public BiFunction<Registry<R>, T, String> getStringifier() {
+        return this.stringifier;
     }
 
 }

@@ -26,7 +26,6 @@ package org.spongepowered.common.world.volume.buffer.biome;
 
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -91,9 +90,10 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
      * @param z The X position
      * @return The native biome
      */
+    @SuppressWarnings("ConstantConditions")
     public Biome getNativeBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        BiomeType type = this.biomes[this.getIndex(x, y, z)];
+        final BiomeType type = this.biomes[this.getIndex(x, y, z)];
         return (Biome) (Object) type;
     }
 
@@ -105,30 +105,13 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         return true;
     }
 
+    @SuppressWarnings("ConstantConditions")
     public boolean setBiome(final BlockPos pos, final Biome biome) {
         Objects.requireNonNull(biome, "biome");
         Objects.requireNonNull(pos, "pos");
         this.checkRange(pos.getX(), pos.getY(), pos.getZ());
         this.biomes[this.getIndex(pos.getX(), pos.getY(), pos.getZ())] = (BiomeType) (Object) biome;
         return true;
-    }
-
-    public void fill(final int[] biomes) {
-        for (int x = 0; x < this.size.getX(); x++) {
-            for (int z = 0; z < this.size.getZ(); z++) {
-                BiomeType type = this.biomes[x + z * this.size.getX()];
-                biomes[x + z * this.size.getX()] = Registry.BIOME.getId((Biome) (Object) type);
-            }
-        }
-    }
-
-    public void fill(final Biome[] biomes) {
-        for (int x = 0; x < this.size.getX(); x++) {
-            for (int z = 0; z < this.size.getZ(); z++) {
-                BiomeType type = this.biomes[x + z * this.size.getX()];
-                biomes[x + z * this.size.getX()] = (Biome) (Object) type;
-            }
-        }
     }
 
     @Override

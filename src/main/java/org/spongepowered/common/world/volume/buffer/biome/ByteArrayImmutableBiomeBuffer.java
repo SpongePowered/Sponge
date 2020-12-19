@@ -25,6 +25,8 @@
 package org.spongepowered.common.world.volume.buffer.biome;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.schematic.Palette;
@@ -32,7 +34,6 @@ import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
-import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3i;
@@ -50,15 +51,15 @@ import java.util.stream.Stream;
 public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeVolume {
 
     private final byte[] biomes;
-    private final Palette<BiomeType> palette;
+    private final Palette<BiomeType, BiomeType> palette;
 
-    public ByteArrayImmutableBiomeBuffer(final Palette<BiomeType> palette, final byte[] biomes, final Vector3i start, final Vector3i size) {
+    public ByteArrayImmutableBiomeBuffer(final Palette<BiomeType, BiomeType> palette, final byte[] biomes, final Vector3i start, final Vector3i size) {
         super(start, size);
         this.biomes = biomes.clone();
         this.palette = palette;
     }
 
-    private ByteArrayImmutableBiomeBuffer(final Palette<BiomeType> palette, final Vector3i start, final Vector3i size, final byte[] biomes) {
+    private ByteArrayImmutableBiomeBuffer(final Palette<BiomeType, BiomeType> palette, final Vector3i start, final Vector3i size, final byte[] biomes) {
         super(start, size);
         this.biomes = biomes;
         this.palette = palette;
@@ -67,7 +68,11 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     @Override
     public BiomeType getBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        return this.palette.get(this.biomes[this.getIndex(x, y, z)]).orElseGet(BiomeTypes.OCEAN);
+        return this.palette.get(this.biomes[this.getIndex(x, y, z)], Sponge.getGame().registries())
+            .orElseGet(Sponge.getGame().registries()
+                .registry(RegistryTypes.BIOME_TYPE)
+                .value(BiomeTypes.OCEAN)
+            );
     }
 
     /**
@@ -79,8 +84,8 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
      * @param size The size of the volume
      * @return A new buffer using the same array reference
      */
-    public static ImmutableBiomeVolume newWithoutArrayClone(final byte[] biomes, final Vector3i start, final Vector3i size) {
-        return new ByteArrayImmutableBiomeBuffer(GlobalPalette.getBiomePalette(), start, size, biomes);
+    public static ImmutableBiomeVolume newWithoutArrayClone(final Palette<BiomeType, BiomeType> palette, final byte[] biomes, final Vector3i start, final Vector3i size) {
+        return new ByteArrayImmutableBiomeBuffer(palette, start, size, biomes);
     }
 
     @Override
@@ -118,7 +123,11 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
                 .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
                     .mapToObj(y -> VolumeElement.<ImmutableBiomeVolume, BiomeType>of(this, () -> {
                         final byte biomeId = this.biomes[this.getIndex(x, y, z)];
-                        return this.palette.get(biomeId & 255).orElseGet(BiomeTypes.OCEAN);
+                        return this.palette.get(biomeId & 255, Sponge.getGame().registries())
+                            .orElseGet(Sponge.getGame().registries()
+                                .registry(RegistryTypes.BIOME_TYPE)
+                                .value(BiomeTypes.OCEAN)
+                            );
                     }, new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());

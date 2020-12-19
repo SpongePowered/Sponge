@@ -26,6 +26,7 @@ package org.spongepowered.common.world.volume.buffer.entity;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -69,7 +70,7 @@ public class ObjectArrayMutableEntityVolume extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public Palette<BlockState> getPalette() {
+    public Palette<BlockState, BlockType> getPalette() {
         return this.blockBuffer.getPalette();
     }
 

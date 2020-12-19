@@ -25,6 +25,8 @@
 package org.spongepowered.common.world.volume.buffer.biome;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.schematic.Palette;
@@ -48,16 +50,16 @@ import java.util.stream.Stream;
 public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeVolume<ByteArrayMutableBiomeBuffer> {
 
     private final byte[] biomes;
-    private final Palette.Mutable<BiomeType> palette;
+    private final Palette.Mutable<BiomeType, BiomeType> palette;
 
-    public ByteArrayMutableBiomeBuffer(final Palette<BiomeType> palette, final Vector3i start, final Vector3i size) {
+    public ByteArrayMutableBiomeBuffer(final Palette<BiomeType, BiomeType> palette, final Vector3i start, final Vector3i size) {
         this(palette, new byte[size.getX() * size.getZ()], start, size);
     }
 
-    public ByteArrayMutableBiomeBuffer(final Palette<BiomeType> palette, final byte[] biomes, final Vector3i start, final Vector3i size) {
+    public ByteArrayMutableBiomeBuffer(final Palette<BiomeType, BiomeType> palette, final byte[] biomes, final Vector3i start, final Vector3i size) {
         super(start, size);
         this.biomes = biomes;
-        this.palette = palette.asMutable();
+        this.palette = palette.asMutable(Sponge.getGame().registries());
     }
 
     @Override
@@ -73,7 +75,11 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         this.checkRange(x, y, z);
 
         final byte biomeId = this.biomes[this.getIndex(x, y, z)];
-        return this.palette.get(biomeId & 255).orElseGet(BiomeTypes.OCEAN);
+        return this.palette.get(biomeId & 255, Sponge.getGame().registries())
+            .orElseGet(Sponge.getGame().registries()
+                .registry(RegistryTypes.BIOME_TYPE)
+                .value(BiomeTypes.OCEAN)
+            );
     }
 
     @Override
@@ -119,7 +125,11 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
                 .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
                     .mapToObj(y -> VolumeElement.of(this, () -> {
                         final byte biomeId = biomes[this.getIndex(x, y, z)];
-                        return this.palette.get(biomeId & 255).orElseGet(BiomeTypes.OCEAN);
+                        return this.palette.get(biomeId & 255, Sponge.getGame().registries())
+                            .orElseGet(Sponge.getGame().registries()
+                                .registry(RegistryTypes.BIOME_TYPE)
+                                .value(BiomeTypes.OCEAN)
+                            );
                     }, new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());

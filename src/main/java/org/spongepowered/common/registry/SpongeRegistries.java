@@ -55,6 +55,7 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.MUSIC_DISC, SpongeRegistryLoaders.musicDisc().values());
         holder.createRegistry(RegistryTypes.NOTE_PITCH, SpongeRegistryLoaders.notePitch().values());
         holder.createRegistry(RegistryTypes.OPERATION, SpongeRegistryLoaders.operation().values());
+        holder.createRegistry(RegistryTypes.PALETTE_TYPE, SpongeRegistryLoaders.paletteType().values());
         holder.createRegistry(RegistryTypes.PARROT_TYPE, SpongeRegistryLoaders.parrotType().values());
         holder.createRegistry(RegistryTypes.PARTICLE_OPTION, SpongeRegistryLoaders.particleOption().values());
         holder.createRegistry(RegistryTypes.PLACEHOLDER_PARSER, SpongeRegistryLoaders.placeholderParser().values());
@@ -76,7 +77,6 @@ public final class SpongeRegistries {
 //                .generateCallbackRegistry(DataRegistration.class, ResourceKey.sponge("data_registration"), Stream.empty(), (key, value) -> ((SpongeDataManager) Sponge.getGame().getDataManager()).registerCustomDataRegistration((SpongeDataRegistration) value), false, true)
 //                .generateRegistry(EquipmentGroup.class, ResourceKey.minecraft("equipment_group"), EquipmentGroupStreamGenerator.stream(), true, false)
 //                .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), EquipmentTypeStreamGenerator.stream(), true, false)
-//                .generateRegistry(PaletteType.class, ResourceKey.sponge("palette"), PaletteTypeStreamGenerator.stream(), true, true)
 //                .generateRegistry(TropicalFishShape.class, ResourceKey.minecraft("tropical_fish_shape"), Arrays.stream(TropicalFishEntity.Type.values()), true, false)
 //                .generateRegistry(StringDataFormat.class, ResourceKey.sponge("string_data_format"), Stream.of(new JsonDataFormat(ResourceKey.sponge("json")), new HoconDataFormat(ResourceKey.sponge("hocon"))), true, false)
 //                .generateRegistry(DataFormat.class, ResourceKey.sponge("data_format"), Stream.of(new NBTDataFormat(ResourceKey.sponge("nbt"))), true, false)

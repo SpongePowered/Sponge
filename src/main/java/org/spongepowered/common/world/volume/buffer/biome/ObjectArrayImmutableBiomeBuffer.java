@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.buffer.biome;
 
 import net.minecraft.world.biome.Biome;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
@@ -79,14 +80,15 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
      * @param z The X position
      * @return The native biome
      */
+    @SuppressWarnings("ConstantConditions")
     public Biome getNativeBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        BiomeType type = this.biomes[this.getIndex(x, y, z)];
+        final BiomeType type = this.biomes[this.getIndex(x, y, z)];
         return (Biome) (Object) type;
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (this == o) {
             return true;
         }

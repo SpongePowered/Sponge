@@ -27,16 +27,18 @@ package org.spongepowered.common.world.volume.buffer.block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.fluid.FluidState;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
-import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.MutableBimapPalette;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
@@ -50,28 +52,26 @@ import java.util.stream.Stream;
 
 public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume<ArrayMutableBlockBuffer> {
 
-    /**
-     * If the area is lower than this amount, a global palette will be used.
-     * <p>
-     * Example: If its only a 4 block area why allocate a local palette that
-     * by its self will take up more space in memory than it saves.
-     */
-    private static final int SMALL_AREA_THRESHOLD = 256;
-
     private static final BlockState AIR = BlockTypes.AIR.get().getDefaultState();
 
-    private Palette.Mutable<BlockState> palette;
+    private Palette.Mutable<BlockState, BlockType> palette;
     private BackingData data;
 
     public ArrayMutableBlockBuffer(final Vector3i start, final Vector3i size) {
-        this(size.getX() * size.getY() * size.getZ() > ArrayMutableBlockBuffer.SMALL_AREA_THRESHOLD
-            ?
-             new MutableBimapPalette<>(PaletteTypes.BLOCK_STATE_PALETTE.get()) : GlobalPalette.getBlockPalette(), start, size);
+        this(
+            new MutableBimapPalette<>(
+                PaletteTypes.BLOCK_STATE_PALETTE.get(),
+                Sponge.getGame().registries().registry(RegistryTypes.BLOCK_TYPE),
+                RegistryTypes.BLOCK_TYPE
+            ),
+            start,
+            size
+        );
     }
 
-    public ArrayMutableBlockBuffer(final Palette<BlockState> palette, final Vector3i start, final Vector3i size) {
+    public ArrayMutableBlockBuffer(final Palette<BlockState, BlockType> palette, final Vector3i start, final Vector3i size) {
         super(start, size);
-        final Palette.Mutable<BlockState> mutablePalette = palette.asMutable();
+        final Palette.Mutable<BlockState, BlockType> mutablePalette = palette.asMutable(Sponge.getGame().registries());
         this.palette = mutablePalette;
         final int airId = mutablePalette.getOrAssign(ArrayMutableBlockBuffer.AIR);
 
@@ -86,9 +86,9 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         }
     }
 
-    public ArrayMutableBlockBuffer(final Palette<BlockState> palette, final Vector3i start, final Vector3i size, final char[] blocks) {
+    public ArrayMutableBlockBuffer(final Palette<BlockState, BlockType> palette, final Vector3i start, final Vector3i size, final char[] blocks) {
         super(start, size);
-        this.palette = palette.asMutable();
+        this.palette = palette.asMutable(Sponge.getGame().registries());
         this.data = new CharBackingData(blocks);
     }
 
@@ -100,43 +100,28 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
      * @param start The start block position
      * @param size The block size
      */
-    ArrayMutableBlockBuffer(final Palette<BlockState> palette, final BackingData blocks, final Vector3i start, final Vector3i size) {
+    ArrayMutableBlockBuffer(final Palette<BlockState, BlockType> palette, final BackingData blocks, final Vector3i start, final Vector3i size) {
         super(start, size);
-        this.palette = palette.asMutable();
+        this.palette = palette.asMutable(Sponge.getGame().registries());
         this.data = blocks;
     }
 
     @Override
-    public Palette<BlockState> getPalette() {
+    public Palette<BlockState, BlockType> getPalette() {
         return this.palette;
     }
 
     @Override
     public boolean setBlock(final int x, final int y, final int z, final BlockState block) {
         this.checkRange(x, y, z);
-        int id = this.palette.getOrAssign(block);
+        final int id = this.palette.getOrAssign(block);
         if (id > this.data.getMax()) {
 
-            int highId = this.palette.getHighestId();
+            final int highId = this.palette.getHighestId();
             final int dataSize = this.area();
-            final BackingData newdata;
-            if (highId * 2 > GlobalPalette.getBlockPalette().getHighestId()) {
-                // we are only saving about 1 bit at this point, so transition to a global palette
-                final Palette.Mutable<BlockState> newpalette = GlobalPalette.getBlockPalette().asMutable();
-                id = newpalette.getOrAssign(block);
-                highId = newpalette.getHighestId();
-
-                newdata = new PackedBackingData(dataSize, highId);
-                for (int i = 0; i < dataSize; i++) {
-                    newdata.set(i, newpalette.getOrAssign(this.palette.get(this.data.get(i)).orElse(ArrayMutableBlockBuffer.AIR)));
-                }
-                this.palette = newpalette;
-            } else {
-
-                newdata = new PackedBackingData(dataSize, highId);
-                for (int i = 0; i < dataSize; i++) {
-                    newdata.set(i, this.data.get(i));
-                }
+            final BackingData newdata = new PackedBackingData(dataSize, highId);
+            for (int i = 0; i < dataSize; i++) {
+                newdata.set(i, this.data.get(i));
             }
             this.data = newdata;
         }
@@ -153,7 +138,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     @Override
     public BlockState getBlock(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        return this.palette.get(this.data.get(this.getIndex(x, y, z))).orElse(ArrayMutableBlockBuffer.AIR);
+        return this.palette.get(this.data.get(this.getIndex(x, y, z)), Sponge.getGame().registries()).orElse(ArrayMutableBlockBuffer.AIR);
     }
 
     @Override

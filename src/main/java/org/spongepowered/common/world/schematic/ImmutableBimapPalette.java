@@ -26,7 +26,12 @@ package org.spongepowered.common.world.schematic;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.schematic.PaletteType;
 
 import java.util.Objects;
@@ -34,19 +39,28 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
 
-public class ImmutableBimapPalette<T> implements Palette.Immutable<T> {
+public class ImmutableBimapPalette<T, R> implements Palette.Immutable<T, R> {
 
-    private final ImmutableBiMap<Integer, T> ids;
-    private final ImmutableBiMap<T, Integer> idsr;
-    private final PaletteType<T> paletteType;
+    private final ImmutableBiMap<Integer, PaletteReference<T, R>> ids;
+    private final ImmutableBiMap<PaletteReference<T, R>, Integer> idsr;
+    private final PaletteType<T, R> paletteType;
     private final int maxId;
+    private final Registry<R> registry;
+    private final RegistryType<R> registryType;
 
-    public ImmutableBimapPalette(final PaletteType<T> paletteType, final BiMap<Integer, T> reference) {
-        final ImmutableBiMap.Builder<Integer, T> builder = ImmutableBiMap.builder();
+    public ImmutableBimapPalette(
+        final PaletteType<T, R> paletteType,
+        final Registry<R> registry,
+        final RegistryType<R> registryType,
+        final BiMap<Integer, PaletteReference<T, R>> reference
+    ) {
+        final ImmutableBiMap.Builder<Integer, PaletteReference<T, R>> builder = ImmutableBiMap.builder();
         reference.forEach(builder::put);
         this.ids = builder.build();
         this.idsr = this.ids.inverse();
         this.paletteType = paletteType;
+        this.registry = registry;
+        this.registryType = registryType;
         int maxId = 0;
         for (final Integer id : this.ids.keySet()) {
             if (maxId < id) {
@@ -57,7 +71,7 @@ public class ImmutableBimapPalette<T> implements Palette.Immutable<T> {
     }
 
     @Override
-    public PaletteType<T> getType() {
+    public PaletteType<T, R> getType() {
         return this.paletteType;
     }
 
@@ -68,7 +82,8 @@ public class ImmutableBimapPalette<T> implements Palette.Immutable<T> {
 
     @Override
     public OptionalInt get(final T state) {
-        final Integer value = this.idsr.get(state);
+        final PaletteReference<T, R> ref = MutableBimapPalette.createPaletteReference(state, this.paletteType, this.registry, this.registryType);
+        final Integer value = this.idsr.get(ref);
         if (value == null) {
             return OptionalInt.empty();
         }
@@ -76,29 +91,32 @@ public class ImmutableBimapPalette<T> implements Palette.Immutable<T> {
     }
 
     @Override
-    public Optional<T> get(final int id) {
+    public Optional<PaletteReference<T, R>> get(final int id) {
         return Optional.ofNullable(this.ids.get(id));
     }
 
     @Override
     public Stream<T> stream() {
-        return this.idsr.keySet().stream();
+        return this.idsr.keySet().stream()
+            .map(ref -> this.paletteType.getResolver().apply(ref.value(), this.registry))
+            .filter(Optional::isPresent)
+            .map(Optional::get);
     }
 
     @Override
-    public Mutable<T> asMutable() {
-        return new MutableBimapPalette<>(this.paletteType, this.idsr);
+    public Mutable<T, R> asMutable(final RegistryHolder holder) {
+        return new MutableBimapPalette<>(this.paletteType, holder.registry(this.registryType), this.registryType, this.idsr);
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        final ImmutableBimapPalette<?> that = (ImmutableBimapPalette<?>) o;
+        final ImmutableBimapPalette<?, ?> that = (ImmutableBimapPalette<?, ?>) o;
         return this.maxId == that.maxId &&
                this.ids.equals(that.ids) &&
                this.paletteType.equals(that.paletteType);

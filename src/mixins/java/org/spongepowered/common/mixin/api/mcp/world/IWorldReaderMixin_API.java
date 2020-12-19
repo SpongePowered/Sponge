@@ -245,7 +245,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
             // Biome by key
             (key, biome) -> key,
             // Entity Accessor
-            VolumeStreamUtils.getBiomesForChunkByPos(min, max)
+            VolumeStreamUtils.getBiomesForChunkByPos((IWorldReader) (Object) this, min, max)
             ,
             // Filtered Position Entity Accessor
             (blockPos, world) -> {
@@ -320,6 +320,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
             shouldCarbonCopy ? (pos, tile) -> {
                 final CompoundNBT nbt = tile.save(new CompoundNBT());
                 final @Nullable TileEntity cloned = tile.getType().create();
+                final net.minecraft.block.BlockState state = tile.getBlockState();
                 Objects.requireNonNull(
                     cloned,
                     () -> String.format("TileEntityType[%s] creates a null TileEntity!", TileEntityType.getKey(tile.getType()))

@@ -163,6 +163,8 @@ import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
+import org.spongepowered.api.world.schematic.PaletteType;
+import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
@@ -171,6 +173,7 @@ import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.accessor.command.arguments.ArgumentSerializerAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.ban.SpongeBanType;
+import org.spongepowered.common.block.BlockStateSerializerDeserializer;
 import org.spongepowered.common.block.transaction.BlockOperation;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
@@ -255,6 +258,7 @@ import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.EndPortalType;
 import org.spongepowered.common.world.portal.NetherPortalType;
+import org.spongepowered.common.world.schematic.SpongePaletteType;
 import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
 import org.spongepowered.common.world.teleport.DefaultTeleportHelperFilter;
 import org.spongepowered.common.world.teleport.FlyingTeleportHelperFilter;
@@ -929,6 +933,19 @@ public final class SpongeRegistryLoaders {
             ((WorldSettingsBridge) (Object) archetype).bridge$setGenerateSpawnOnLoad(true);
         }
         return (WorldArchetype) (Object)  archetype;
+    }
+
+    public static RegistryLoader<PaletteType<?, ?>> paletteType() {
+        return RegistryLoader.of(l -> {
+            l.add(PaletteTypes.BIOME_PALETTE, k -> new SpongePaletteType<>(
+                (string, registry) -> registry.value(ResourceKey.resolve(string)),
+                (registry, biome) -> registry.valueKey(biome).toString()
+                ));
+            l.add(PaletteTypes.BLOCK_STATE_PALETTE, k -> new SpongePaletteType<>(
+                (string, registry) -> BlockStateSerializerDeserializer.deserialize(string),
+                (registry, blockState) -> BlockStateSerializerDeserializer.serialize(blockState)
+            ));
+        });
     }
 
     // @formatter:on

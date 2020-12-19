@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.buffer.block;
 
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.volume.block.ReadableBlockVolume;
 import org.spongepowered.common.world.volume.buffer.AbstractObjectArrayBuffer;
@@ -39,7 +40,7 @@ public abstract class AbstractBlockBuffer extends AbstractObjectArrayBuffer impl
         super(start, size);
     }
     
-    public abstract Palette<BlockState> getPalette();
+    public abstract Palette<BlockState, BlockType> getPalette();
 
 
 }

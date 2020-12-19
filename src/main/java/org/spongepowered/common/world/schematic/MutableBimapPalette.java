@@ -26,7 +26,11 @@ package org.spongepowered.common.world.schematic;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.schematic.PaletteType;
 
 import java.util.BitSet;
@@ -35,37 +39,45 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
 
-public class MutableBimapPalette<T> implements Palette.Mutable<T> {
+public class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
 
     private static final int DEFAULT_ALLOCATION_SIZE = 64;
 
-    private final BiMap<Integer, T> ids;
-    private final BiMap<T, Integer> idsr;
+    private final BiMap<Integer, PaletteReference<T, R>> ids;
+    private final BiMap<PaletteReference<T, R>, Integer> idsr;
     private final BitSet allocation = new BitSet(MutableBimapPalette.DEFAULT_ALLOCATION_SIZE);
-    private final PaletteType<T> paletteType;
+    private final PaletteType<T, R> paletteType;
+    private final Registry<R> registry;
+    private final RegistryType<R> registryType;
     private int maxId = 0;
 
-    public MutableBimapPalette(final PaletteType<T> paletteType) {
+    public MutableBimapPalette(final PaletteType<T, R> paletteType, final Registry<R> registry, final RegistryType<R> registryType) {
         this.ids = HashBiMap.create();
         this.idsr = this.ids.inverse();
         this.paletteType = paletteType;
+        this.registry = registry;
+        this.registryType = registryType;
     }
 
-    public MutableBimapPalette(final PaletteType<T> paletteType, final BiMap<T, Integer> reference) {
+    public MutableBimapPalette(final PaletteType<T, R> paletteType, final Registry<R> registry, final RegistryType<R> registryType, final BiMap<PaletteReference<T, R>, Integer> reference) {
         this.ids = HashBiMap.create(reference.size());
         this.idsr = this.ids.inverse();
         this.paletteType = paletteType;
-        reference.forEach((key, id) -> this.getOrAssign(key));
+        this.registry = registry;
+        this.registryType = registryType;
+        reference.forEach((key, id) -> this.getOrAssignInternal(key));
     }
 
-    public MutableBimapPalette(final PaletteType<T> paletteType, final int expectedSize) {
+    public MutableBimapPalette(final PaletteType<T, R> paletteType, final Registry<R> registry, final RegistryType<R> registryType, final int expectedSize) {
         this.ids = HashBiMap.create(expectedSize);
         this.idsr = this.ids.inverse();
         this.paletteType = paletteType;
+        this.registry = registry;
+        this.registryType = registryType;
     }
 
     @Override
-    public PaletteType<T> getType() {
+    public PaletteType<T, R> getType() {
         return this.paletteType;
     }
 
@@ -76,39 +88,58 @@ public class MutableBimapPalette<T> implements Palette.Mutable<T> {
 
     @Override
     public OptionalInt get(final T state) {
-        final Integer value = this.idsr.get(state);
+        final PaletteReference<T, R> ref = MutableBimapPalette.createPaletteReference(state, this.paletteType, this.registry, this.registryType);
+        final Integer value = this.idsr.get(ref);
         if (value == null) {
             return OptionalInt.empty();
         }
         return OptionalInt.of(value);
     }
 
-    @Override
-    public int getOrAssign(final T state) {
-        final Integer id = this.idsr.get(state);
+    private int getOrAssignInternal(final PaletteReference<T, R> ref) {
+        final Integer id = this.idsr.get(ref);
         if (id == null) {
             final int next = this.allocation.nextClearBit(0);
             if (this.maxId < next) {
                 this.maxId = next;
             }
             this.allocation.set(next);
-            this.ids.put(next, state);
+            this.ids.put(next, ref);
             return next;
         }
         return id;
     }
 
     @Override
-    public Optional<T> get(final int id) {
+    public int getOrAssign(final T state) {
+        final PaletteReference<T, R> ref = MutableBimapPalette.createPaletteReference(state, this.paletteType, this.registry, this.registryType);
+        return this.getOrAssignInternal(ref);
+    }
+
+    @Override
+    public Optional<PaletteReference<T, R>> get(final int id) {
         return Optional.ofNullable(this.ids.get(id));
     }
 
-    public void assign(final T state, final int id) {
+    public int assign(final T state, final int id) {
         if (this.maxId < id) {
             this.maxId = id;
         }
         this.allocation.set(id);
-        this.ids.put(id, state);
+        final PaletteReference<T, R> ref = MutableBimapPalette.createPaletteReference(state, this.paletteType, this.registry, this.registryType);
+        this.ids.put(id, ref);
+        return id;
+    }
+
+    @NonNull
+    static <T, R> PaletteReference<T, R> createPaletteReference(
+        final T state,
+        final PaletteType<T, R> paletteType,
+        final Registry<R> registry,
+        final RegistryType<R> registryType
+    ) {
+        final String string = paletteType.getStringifier().apply(registry, state);
+        return PaletteReference.byString(registryType, string);
     }
 
     @Override
@@ -127,12 +158,15 @@ public class MutableBimapPalette<T> implements Palette.Mutable<T> {
 
     @Override
     public Stream<T> stream() {
-        return this.idsr.keySet().stream();
+        return this.idsr.keySet().stream()
+            .map(ref -> this.paletteType.getResolver().apply(ref.value(), this.registry))
+            .filter(Optional::isPresent)
+            .map(Optional::get);
     }
 
     @Override
-    public Immutable<T> asImmutable() {
-        return new ImmutableBimapPalette<>(this.paletteType, this.ids);
+    public Immutable<T, R> asImmutable() {
+        return new ImmutableBimapPalette<>(this.paletteType, this.registry, this.registryType, this.ids);
     }
 
     @Override
@@ -143,7 +177,7 @@ public class MutableBimapPalette<T> implements Palette.Mutable<T> {
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        final MutableBimapPalette<?> that = (MutableBimapPalette<?>) o;
+        final MutableBimapPalette<?, ?> that = (MutableBimapPalette<?, ?>) o;
         return this.maxId == that.maxId &&
                this.ids.equals(that.ids) &&
                this.allocation.equals(that.allocation) &&

@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.buffer.blockentity;
 
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.volume.block.entity.MutableBlockEntityVolume;
@@ -72,7 +73,7 @@ public abstract class AbstractMutableBlockEntityBuffer<M extends AbstractMutable
 
 
     @Override
-    public Palette<BlockState> getPalette() {
+    public Palette<BlockState, BlockType> getPalette() {
         return this.blockBuffer.getPalette();
     }
 

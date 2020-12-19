@@ -30,7 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -85,11 +84,12 @@ public final class VolumeStreamUtils {
         final IWorldReader worldReader,
         final boolean shouldGenerate
     ) {
+        final Supplier<IWorldReader> readerSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier(worldReader, "IWorldReader");
         return (world, chunkPos) -> {
             final ChunkStatus chunkStatus = shouldGenerate
                 ? ChunkStatus.FULL
                 : ChunkStatus.EMPTY;
-            final @Nullable IChunk ichunk = worldReader.getChunk(chunkPos.x, chunkPos.z, chunkStatus, shouldGenerate);
+            final @Nullable IChunk ichunk = readerSupplier.get().getChunk(chunkPos.x, chunkPos.z, chunkStatus, shouldGenerate);
             if (shouldGenerate) {
                 Objects.requireNonNull(ichunk, "Chunk was expected to load fully and generate, but somehow got a null chunk!");
             }
@@ -97,10 +97,10 @@ public final class VolumeStreamUtils {
         };
     }
 
-    public static Function<IChunk, Stream<Map.Entry<BlockPos, Biome>>> getBiomesForChunkByPos(final Vector3i min,
+    public static Function<IChunk, Stream<Map.Entry<BlockPos, Biome>>> getBiomesForChunkByPos(final IWorldReader reader, final Vector3i min,
         final Vector3i max
     ) {
-        return VolumeStreamUtils.getElementByPosition(VolumeStreamUtils.chunkSectionBiomeGetter(), min, max);
+        return VolumeStreamUtils.getElementByPosition(VolumeStreamUtils.chunkSectionBiomeGetter().asTri(reader), min, max);
     }
 
     public static Function<IChunk, Stream<Map.Entry<BlockPos, BlockState>>> getBlockStatesForSections(
@@ -140,13 +140,24 @@ public final class VolumeStreamUtils {
         Out apply(A a, B b, C c);
     }
 
-    private static TriFunction<IChunk, ChunkSection, BlockPos, Biome> chunkSectionBiomeGetter() {
-        return ((chunk, chunkSection, pos) -> {
+    private interface QuadFunction<A, B, C, D, Out> {
+
+        Out apply(A a, B b, C c, D d);
+
+        default TriFunction<A, B, C, Out> asTri(final D d) {
+            final Supplier<D> dSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier(d, "D");
+            return (a, b, c) -> this.apply(a, b, c, dSupplier.get());
+        }
+    }
+
+    private static QuadFunction<IChunk, ChunkSection, BlockPos, IWorldReader, Biome> chunkSectionBiomeGetter() {
+        return ((chunk, chunkSection, pos, world) -> {
             if (chunk.getBiomes() == null) {
                 if (chunk instanceof Chunk) {
                     return ((Chunk) chunk).getLevel().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
                 } else {
-                    return Biomes.OCEAN;
+                    // Failover to use the World
+                    return world.getUncachedNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
                 }
             }
             return chunk.getBiomes().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
@@ -189,6 +200,9 @@ public final class VolumeStreamUtils {
             final int zStart = pos.z == minChunkZ ? minZOffset : 0;
             final int zEnd = pos.z == maxChunkZ ? maxZOffset + 1 : 16; // 16 because IntStream.range is upper range exclusive
 
+            final int chunkMinX = pos.x << 4;
+            final int chunkMinZ = pos.z << 4;
+
             return Arrays.stream(chunk.getSections())
                 .filter(Objects::nonNull)
                 .filter(chunkSection -> chunkSection.bottomBlockY() >= minYSection && chunkSection.bottomBlockY() <= maxYSection)
@@ -202,8 +216,13 @@ public final class VolumeStreamUtils {
                             return IntStream.range(yStart, yEnd)
                                 .mapToObj(y ->
                                     {
-                                        final BlockPos blockPos = new BlockPos(x + (pos.x << 4), y + sectionY, z + (pos.z << 4));
-                                        return new AbstractMap.SimpleEntry<>(blockPos, elementAccessor.apply(chunk, chunkSection, blockPos));
+                                        final int adjustedX = x + chunkMinX;
+                                        final int adjustedY = y + sectionY;
+                                        final int adjustedZ = z + chunkMinZ;
+
+                                        final BlockPos blockPos = new BlockPos(adjustedX, adjustedY, adjustedZ);
+                                        final T apply = Objects.requireNonNull(elementAccessor.apply(chunk, chunkSection, blockPos), "Element cannot be null");
+                                        return new AbstractMap.SimpleEntry<>(blockPos, apply);
                                     }
                                 );
                         }))
