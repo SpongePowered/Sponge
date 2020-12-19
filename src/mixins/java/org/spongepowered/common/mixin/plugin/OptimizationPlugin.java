@@ -60,7 +60,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                         .trace();
                 return false;
             }
-            return optimizationCategoryBooleanFunction.apply(globalConfig.optimizations;
+            return optimizationCategoryBooleanFunction.apply(globalConfig.optimizations);
         }
         return false;
     }
@@ -90,8 +90,6 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
             .put("org.spongepowered.common.accessor.block.BlockRedstoneWireAccessor_Eigen", optimizationCategory -> optimizationCategory.eigenRedstone.enabled)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.EntityMixinTameable_Cached_Owner",
                     optimizationCategory -> optimizationCategory.cacheTameableOwners)
-            .put("org.spongepowered.common.mixin.invalid.optimization.world.gen.structure.MapGenStructureMixin_Structure_Saving",
-                    optimizationCategory -> optimizationCategory.useStructureSave)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.item.EntityItemFrameMixin_MapOptimization",
                     optimizationCategory -> optimizationCategory.optimizeMaps)
             .put("org.spongepowered.common.mixin.invalid.optimization.entity.EntityTrackerEntryMixin_MapOptimization",

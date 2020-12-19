@@ -351,7 +351,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Overwrite
     public void attack(final Entity targetEntity) {
         // Sponge Start - Add SpongeImpl hook to override in forge as necessary
-        if (!PlatformHooks.getInstance().getEntityHooks().checkAttackEntity((PlayerEntity) (Object) this, targetEntity)) {
+        if (!PlatformHooks.INSTANCE.getEntityHooks().checkAttackEntity((PlayerEntity) (Object) this, targetEntity)) {
             return;
         }
         // Sponge End
@@ -522,7 +522,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                                             sweapingFunctions, 1, 1.0D);
                                         SpongeCommon.postEvent(sweepingAttackEvent);
                                         if (!sweepingAttackEvent.isCancelled()) {
-                                            livingEntity.knockback((sweepingAttackEvent.getKnockbackModifier() * 0.4F,
+                                            livingEntity.knockback(sweepingAttackEvent.getKnockbackModifier() * 0.4F,
                                                     (double) MathHelper.sin(this.yRot * ((float)Math.PI / 180F)),
                                                     (double) -MathHelper.cos(this.yRot * ((float)Math.PI / 180F)));
 

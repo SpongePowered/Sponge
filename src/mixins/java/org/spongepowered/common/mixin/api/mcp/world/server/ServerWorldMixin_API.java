@@ -42,8 +42,6 @@ import net.minecraft.world.raid.RaidManager;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerTickList;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.SaveHandler;
-import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockType;
@@ -57,6 +55,7 @@ import org.spongepowered.api.scheduler.ScheduledUpdateList;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
@@ -143,8 +142,8 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     // ServerWorld
 
     @Override
-    public WorldProperties getProperties() {
-        return (WorldProperties) this.shadow$getWorldInfo();
+    public ServerWorldProperties getProperties() {
+        return (ServerWorldProperties) this.shadow$getLevelData();
     }
 
     @Override
@@ -181,12 +180,8 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public boolean save() throws IOException {
-        try {
-            ((ServerWorldBridge) this).bridge$setManualSave(true);
-            this.shadow$save((IProgressUpdate) null, false, true);
-        } catch (final SessionLockException e) {
-            throw new IOException(e);
-        }
+        ((ServerWorldBridge) this).bridge$setManualSave(true);
+        this.shadow$save((IProgressUpdate) null, false, true);
         return true;
     }
 
@@ -300,7 +295,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public Ticks getRunningWeatherDuration() {
-        return new SpongeTicks(this.worldInfo.getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime());
+        return new SpongeTicks(this.shadow$getLevelData().getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime());
     }
 
     @Override

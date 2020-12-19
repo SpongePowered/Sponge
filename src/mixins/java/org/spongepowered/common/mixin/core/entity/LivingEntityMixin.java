@@ -79,9 +79,9 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.math.vector.Vector3d;
@@ -241,7 +241,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     .createDamageEntityEvent(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this, originalFunctions,
                             originalDamage);
             if (damageSource
-                    != DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
+                    != SpongeDamageSources.IGNORED.get()) { // Basically, don't throw an event if it's our own damage source
                 SpongeCommon.postEvent(event);
             }
             if (event.isCancelled()) {
@@ -425,7 +425,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         } else if (this.level.isClientSide) {
             return false;
             // Sponge - Also ignore our customary damage source
-        } else if (this.shadow$getHealth() <= 0.0F && source != DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE) {
+        } else if (this.shadow$getHealth() <= 0.0F && source != SpongeDamageSources.IGNORED.get()) {
             return false;
         } else if (source.isFire() && this.shadow$hasEffect(Effects.FIRE_RESISTANCE)) {
             return false;

@@ -57,6 +57,8 @@ import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.ISpawnWorldInfo;
+import net.minecraft.world.storage.IWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -108,14 +110,14 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
 
     // @formatter:off
     @Shadow public @Final Random random;
-    @Shadow protected @Final WorldInfo worldInfo;
+    @Shadow protected @Final ISpawnWorldInfo levelData;
     @Shadow @Final public List<TileEntity> blockEntityList;
 
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract net.minecraft.world.chunk.Chunk shadow$getChunkAt(BlockPos p_175726_1_);
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos p_180495_1_);
     @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable PlayerEntity p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
-    @Shadow public abstract WorldInfo shadow$getWorldInfo();
+    @Shadow public abstract IWorldInfo shadow$getLevelData();
     @Shadow public abstract boolean shadow$isThundering();
     @Shadow public abstract boolean shadow$isRaining();
     @Shadow public abstract void shadow$setBlockEntity(BlockPos pos, @javax.annotation.Nullable TileEntity tileEntityIn);
@@ -198,7 +200,7 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
         if (chunkProvider instanceof ServerChunkProvider) {
             final ChunkManagerAccessor chunkManager = (ChunkManagerAccessor) ((ServerChunkProvider) chunkProvider).chunkMap;
             final List<Chunk> chunks = new ArrayList<>();
-            chunkManager.invoker$getChunks().forEach(holder -> chunks.add((Chunk) holder.getChunkIfComplete()));
+            chunkManager.invoker$getChunks().forEach(holder -> chunks.add((Chunk) holder.getTickingChunk()));
             return chunks;
         }
         return Collections.emptyList();
@@ -318,30 +320,6 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
     @Override
     public Collection<? extends BlockEntity> getBlockEntities() {
         return (Collection) this.blockEntityList;
-    }
-
-    public boolean allowsPlayerRespawns() {
-        return this.shadow$getDimension().canRespawnHere();
-    }
-
-    @Override
-    public boolean doesWaterEvaporate() {
-        return this.shadow$getDimension().doesWaterVaporize();
-    }
-
-    @Override
-    public boolean hasSkylight() {
-        return this.shadow$getDimension().hasSkyLight();
-    }
-
-    @Override
-    public boolean isCaveWorld() {
-        return this.shadow$getDimension().isNether();
-    }
-
-    @Override
-    public boolean isSurfaceWorld() {
-        return this.shadow$getDimension().isSurfaceWorld();
     }
 
     @Override
