@@ -435,7 +435,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 ChunkPos chunkpos = new ChunkPos(new BlockPos(actualX, actualY, actualZ));
                 world.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, player.getId());
             } else {
-                final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre(player, world);
+                final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(player, world);
                 if (SpongeCommon.postEvent(preEvent)) {
                     return;
                 }

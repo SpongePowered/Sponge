@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.block.state;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.WallBlock;
+import net.minecraft.block.WallHeight;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.DirectionalUtil;
@@ -46,15 +47,15 @@ public final class WallData {
                                 WallBlock.UP))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_EAST)
-                        .get(h -> h.get(WallBlock.EAST_WALL))
+                        .get(h -> h.getValue(WallBlock.EAST_WALL) != WallHeight.NONE)
                         .set((h, v) -> h.with(WallBlock.EAST_WALL, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_NORTH)
-                        .get(h -> h.get(WallBlock.NORTH_WALL))
+                        .get(h -> h.getValue(WallBlock.NORTH_WALL) != WallHeight.NONE)
                         .set((h, v) -> h.with(WallBlock.NORTH_WALL, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_SOUTH)
-                        .get(h -> h.get(WallBlock.SOUTH_WALL))
+                        .get(h -> h.getValue(WallBlock.SOUTH_WALL) != WallHeight.NONE)
                         .set((h, v) -> h.with(WallBlock.SOUTH_WALL, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_UP)
@@ -62,7 +63,7 @@ public final class WallData {
                         .set((h, v) -> h.with(WallBlock.UP, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_WEST)
-                        .get(h -> h.get(WallBlock.WEST_WALL))
+                        .get(h -> h.getValue(WallBlock.WEST_WALL) != WallHeight.NONE)
                         .set((h, v) -> h.with(WallBlock.WEST_WALL, v))
                         .supports(h -> h.getBlock() instanceof WallBlock);
     }
