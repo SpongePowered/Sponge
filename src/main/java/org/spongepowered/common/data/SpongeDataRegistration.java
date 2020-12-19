@@ -96,12 +96,7 @@ public final class SpongeDataRegistration implements DataRegistration {
     }
 
     @Override
-    public ResourceKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public PluginContainer getPluginContainer() {
+    public PluginContainer getPlugin() {
         return this.plugin;
     }
 

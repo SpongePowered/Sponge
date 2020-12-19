@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.data.persistence.datastore;
 
-import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.util.Tuple;
 
@@ -37,39 +36,17 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class SpongeDataStore implements DataStore {
+public final class SpongeCustomDataStore extends SpongeDataStore {
 
-    private Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>>  queriesByKey;
-    private Collection<Type> tokens;
+    private ResourceKey key;
 
-    public SpongeDataStore(final Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> queriesByKey,
+    public SpongeCustomDataStore(ResourceKey key, final Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> queriesByKey,
             final Collection<Type> tokens) {
-        this.queriesByKey = queriesByKey;
-        this.tokens = tokens;
+        super(queriesByKey, tokens);
+        this.key = key;
     }
 
-    @Override
-    public Collection<Type> getSupportedTypes() {
-        return this.tokens;
+    public ResourceKey getCustomDataKey() {
+        return this.key;
     }
-
-    @Override
-    @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public DataView serialize(DataManipulator dataManipulator, DataView view) {
-        for (Map.Entry<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> entry : this.queriesByKey.entrySet()) {
-            final BiConsumer serializer = entry.getValue().getFirst();
-            dataManipulator.get((Key) entry.getKey()).ifPresent(value -> serializer.accept(view, value));
-        }
-        return view;
-    }
-
-    @Override
-    @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public void deserialize(DataManipulator.Mutable dataManipulator, DataView view) {
-        for (Map.Entry<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> entry : this.queriesByKey.entrySet()) {
-            final Function<DataView, Optional<?>> deserializer = entry.getValue().getSecond();
-            deserializer.apply(view).ifPresent(value -> dataManipulator.set((Key) entry.getKey(), value));
-        }
-    }
-
 }

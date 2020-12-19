@@ -28,6 +28,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataStore;
@@ -38,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -46,22 +48,40 @@ public final class DataStoreRegistry {
     private final DataStore NO_OP_DATASTORE = new SpongeDataStore(Collections.emptyMap(), Collections.emptyList());
     private final Multimap<Key<?>, DataStore> dataStores = HashMultimap.create();
     private final Map<LookupKey, DataStore> dataStoreCache = new ConcurrentHashMap<>();
+    private final Map<ResourceKey, DataStore> dataStoreByCustomDataKey = new ConcurrentHashMap<>();
 
     public void register(final DataStore dataStore, Iterable<Key<?>> keys) {
         keys.forEach(k -> this.dataStores.put(k, dataStore));
+        if (dataStore instanceof SpongeCustomDataStore) {
+            final ResourceKey customDataKey = ((SpongeCustomDataStore) dataStore).getCustomDataKey();
+            if (this.dataStoreByCustomDataKey.containsKey(customDataKey)) {
+                throw new IllegalStateException();
+            }
+            this.dataStoreByCustomDataKey.put(customDataKey, dataStore);
+        }
         this.dataStoreCache.clear();
     }
 
-    public Collection<DataStore> getDataStores(Key<?> key) {
-        return this.dataStores.get(key);
+    public Collection<DataStore> getDataStores(Key<?> dataKey) {
+        return this.dataStores.get(dataKey);
     }
 
-    public DataStore getDataStore(final Key<?> key, final TypeToken<? extends DataHolder> typeToken) {
-        return this.getDataStore(key, typeToken.getType());
+    public DataStore getDataStore(final Key<?> dataKey, final TypeToken<? extends DataHolder> typeToken) {
+        return this.getDataStore(dataKey, typeToken.getType());
     }
 
-    public DataStore getDataStore(final Key<?> key, final Type typeToken) {
-        return this.dataStoreCache.computeIfAbsent(new LookupKey(typeToken, key), this::loadDataStore);
+    public DataStore getDataStore(final Key<?> dataKey, final Type typeToken) {
+        return this.dataStoreCache.computeIfAbsent(new LookupKey(typeToken, dataKey), this::loadDataStore);
+    }
+
+    public Optional<DataStore> getDataStore(final ResourceKey key, final Type typeToken) {
+        final DataStore dataStore = this.dataStoreByCustomDataKey.get(key);
+        if (dataStore != null) {
+            if (dataStore.getSupportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, typeToken))) {
+                return Optional.of(dataStore);
+            }
+        }
+        return Optional.empty();
     }
 
     private DataStore loadDataStore(final LookupKey lookupKey) {

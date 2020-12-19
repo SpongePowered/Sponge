@@ -86,7 +86,6 @@ public final class SpongeDataManager implements DataManager {
 
     private final DataStoreRegistry dataStoreRegistry;
     private final DataProviderRegistry dataProviderRegistry;
-    private final Map<ResourceKey, SpongeDataRegistration> registrations;
     private final Map<Class<?>, DataBuilder<?>> builders;
     private final Map<Class<? extends DataHolder.Immutable<?>>, DataHolderBuilder.Immutable<?, ?>> immutableDataBuilderMap;
     private final Map<Class<? extends DataSerializable>, List<DataContentUpdater>> updatersMap;
@@ -101,7 +100,6 @@ public final class SpongeDataManager implements DataManager {
 
         this.dataStoreRegistry = new DataStoreRegistry();
         this.dataProviderRegistry = new DataProviderRegistry();
-        this.registrations = new HashMap<>();
         this.builders = new HashMap<>();
         this.immutableDataBuilderMap = new MapMaker()
                 .concurrencyLevel(4)
@@ -276,8 +274,7 @@ public final class SpongeDataManager implements DataManager {
             throw new IllegalStateException(String.format("Registration namespace (%s) is not matching plugin id (%s)", registration.key, registration.plugin.getMetadata().getId()));
         }
 
-        this.registrations.put(registration.getKey(), registration);
-        this.registrationByPluginId.computeIfAbsent(registration.getPluginContainer().getMetadata().getId(), k -> new ArrayList<>()).add(registration);
+        this.registrationByPluginId.computeIfAbsent(registration.getPlugin().getMetadata().getId(), k -> new ArrayList<>()).add(registration);
 
         for (final DataStore dataStore : registration.getDataStores()) {
             this.dataStoreRegistry.register(dataStore, registration.getKeys());
@@ -307,8 +304,7 @@ public final class SpongeDataManager implements DataManager {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void registerDataRegistration(final SpongeDataRegistration registration) {
-        this.registrations.put(registration.getKey(), registration);
-        this.registrationByPluginId.computeIfAbsent(registration.getPluginContainer().getMetadata().getId(), k -> new ArrayList<>()).add(registration);
+        this.registrationByPluginId.computeIfAbsent(registration.getPlugin().getMetadata().getId(), k -> new ArrayList<>()).add(registration);
         for (final DataStore dataStore : registration.getDataStores()) {
             this.dataStoreRegistry.register(dataStore, registration.getKeys());
         }
@@ -332,15 +328,15 @@ public final class SpongeDataManager implements DataManager {
         return SpongeDataManager.INSTANCE.dataProviderRegistry;
     }
 
-    public Optional<DataRegistration> getRegistration(final ResourceKey key) {
-        return Optional.ofNullable(this.registrations.get(key));
-    }
-
     public void registerDefaultBuilders() {
         this.registerBuilder(ItemStack.class, new SpongeItemStackBuilder());
         this.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotDataBuilder());
         this.registerBuilder(EntitySnapshot.class, new SpongeEntitySnapshotBuilder());
         this.registerBuilder(EntityArchetype.class, new SpongeEntityArchetypeBuilder());
         this.registerBuilder(SpongePlayerData.class, new SpongePlayerDataBuilder());
+    }
+
+    public Optional<DataStore> getDataStore(ResourceKey key, Class<? extends DataHolder> typeToken) {
+        return this.dataStoreRegistry.getDataStore(key, typeToken);
     }
 }

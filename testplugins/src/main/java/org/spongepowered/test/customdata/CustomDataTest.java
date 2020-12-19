@@ -46,8 +46,8 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.RegisterDataEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
@@ -155,7 +155,7 @@ public final class CustomDataTest {
     }
 
     @Listener
-    public void onRegisterData(final RegisterCatalogEvent<DataRegistration> event) {
+    public void onRegisterData(final RegisterDataEvent event) {
         final ResourceKey key = ResourceKey.of(this.plugin, "mydata");
         this.myDataKey = Key.builder().key(key).elementType(Integer.class).build();
 
@@ -170,12 +170,12 @@ public final class CustomDataTest {
                 .dataKey(this.myDataKey)
                 .store(dataStore)
                 .provider(blockDataProvider)
-                .key(key)
                 .build();
 
         event.register(myRegistration);
 
         // Or if it is super simple data
+
         this.mySimpleDataKey = Key.of(this.plugin, "mysimpledata", TypeTokens.STRING_VALUE_TOKEN);
         event.register(DataRegistration.of(this.mySimpleDataKey, ItemStack.class));
 

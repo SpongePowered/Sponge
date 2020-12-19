@@ -116,8 +116,7 @@ public interface CustomDataHolderBridge {
         final ImmutableList.Builder<DataView> failed = ImmutableList.builder();
         for (DataView dataView : updatedDataViews) {
             final Optional<DataStore> dataStore = dataView.getString(Constants.Sponge.DATA_ID)
-                    .flatMap(id -> ((SpongeDataManager) Sponge.getGame().getDataManager()).getRegistration(ResourceKey.resolve(id)))
-                    .flatMap(r -> r.getDataStore(typeToken));
+                    .flatMap(id -> ((SpongeDataManager) Sponge.getGame().getDataManager()).getDataStore(ResourceKey.resolve(id), typeToken));
             if (dataStore.isPresent()) {
                 dataStores.add(dataStore.get());
             } else {

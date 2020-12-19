@@ -215,7 +215,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
 
     @Override
     public DataStore build() {
-        return new SpongeDataStore(ImmutableMap.copyOf(this.serializers), ImmutableList.copyOf(this.dataHolderTypes));
+        return new SpongeCustomDataStore(this.key, ImmutableMap.copyOf(this.serializers), ImmutableList.copyOf(this.dataHolderTypes));
     }
 
     public DataStore buildVanillaDataStore() {
