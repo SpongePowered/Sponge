@@ -29,7 +29,6 @@ import net.minecraft.state.Property;
 import net.minecraft.state.StateHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.registry.DefaultedRegistryReference;
 
 import java.util.function.Supplier;
 
@@ -73,7 +72,7 @@ public final class BoundedUtil {
      * @param property The property
      * @return The immutable value
      */
-    public static Value<Integer> constructImmutableValueInteger(final Integer value, final Supplier<? extends Key<? extends Value<Integer>>> key,
+    public static Value<Integer> constructImmutableValueInteger(final Integer value, Key<? extends Value<Integer>> key,
             final IntegerProperty property) {
         final int min = DataUtil.mini(property);
         final int max = DataUtil.maxi(property);

@@ -27,4 +27,15 @@ package org.spongepowered.common.event.cause.entity.damage;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 
 public final class SpongeDamageType implements DamageType {
+
+    private final String languageKey;
+
+    public SpongeDamageType(final String languageKey) {
+        this.languageKey = languageKey;
+    }
+
+    @Override
+    public String getName() {
+        return this.languageKey;
+    }
 }

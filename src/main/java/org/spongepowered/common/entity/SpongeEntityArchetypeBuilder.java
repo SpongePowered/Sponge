@@ -37,6 +37,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.util.Constants;
@@ -105,8 +106,8 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         this.entityType = Objects.requireNonNull(entity.getType(), "Entity is returning a null EntityType!");
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final CompoundNBT compound = new CompoundNBT();
-        minecraftEntity.saveWithoutId(compound);
-        compound.putString(Constants.Sponge.EntityArchetype.ENTITY_ID, entity.getType().getKey().toString());
+        minecraftEntity.saveAsPassenger(compound);
+        compound.putString(Constants.Sponge.EntityArchetype.ENTITY_ID, ((EntityAccessor) minecraftEntity).invoker$getEncodeId());
         compound.remove(Constants.UUID);
         compound.remove(Constants.UUID_MOST);
         compound.remove(Constants.UUID_LEAST);
@@ -119,7 +120,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     public EntityArchetype.Builder entityData(final DataView view) {
         Objects.requireNonNull(view, "Provided DataView cannot be null!");
         final DataContainer copy = view.copy();
-        new DelegateDataValidator(SpongeEntityArchetype.VALIDATORS, ValidationTypes.ENTITY).validate(copy);
+        new DelegateDataValidator(SpongeEntityArchetype.VALIDATORS, ValidationTypes.ENTITY.get()).validate(copy);
         this.entityData = copy;
         this.compound = null;
         return this;

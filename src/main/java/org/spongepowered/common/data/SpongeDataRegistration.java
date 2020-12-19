@@ -27,7 +27,6 @@ package org.spongepowered.common.data;
 import com.google.common.collect.Multimap;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
@@ -35,7 +34,6 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.UnregisteredKeyException;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -45,18 +43,14 @@ import java.util.Optional;
 
 public final class SpongeDataRegistration implements DataRegistration {
 
-    final ResourceKey key;
     final List<Key<?>> keys;
     final Map<Type, DataStore> dataStoreMap;
     final Multimap<Key, DataProvider> dataProviderMap;
-    final PluginContainer plugin;
 
-    SpongeDataRegistration(ResourceKey key, PluginContainer plugin, SpongeDataRegistrationBuilder builder) {
-        this.key = key;
+    SpongeDataRegistration(final SpongeDataRegistrationBuilder builder) {
         this.keys = builder.keys;
         this.dataStoreMap = builder.dataStoreMap;
         this.dataProviderMap = builder.dataProviderMap;
-        this.plugin = plugin;
     }
 
     @Override
@@ -93,11 +87,6 @@ public final class SpongeDataRegistration implements DataRegistration {
     @Override
     public Iterable<Key<?>> getKeys() {
         return this.keys;
-    }
-
-    @Override
-    public PluginContainer getPlugin() {
-        return this.plugin;
     }
 
     public Collection<DataStore> getDataStores() {

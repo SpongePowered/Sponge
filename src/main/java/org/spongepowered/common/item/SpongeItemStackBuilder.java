@@ -185,7 +185,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         this.itemType(itemType);
 
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            final CompoundNBT compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            final CompoundNBT compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (compound.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
                 compound.remove(Constants.Sponge.SPONGE_DATA);
             }
@@ -279,7 +279,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
                         "Unable to find item with id: "));
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            final CompoundNBT compound = NBTTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            final CompoundNBT compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (!compound.isEmpty()) {
                 SpongeItemStackBuilder.fixEnchantmentData(itemType, compound);
                 itemStack.setTag(compound);
@@ -331,7 +331,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         if (this.compound != null && this.compound.contains(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
             final CompoundNBT compoundTag = this.compound.getCompound(Constants.Forge.FORGE_CAPS);
             if (compoundTag != null) {
-                PlatformHooks.getInstance().getItemHooks().setCapabilitiesFromSpongeBuilder((net.minecraft.item.ItemStack) (Object) stack, compoundTag);
+                PlatformHooks.INSTANCE.getItemHooks().setCapabilitiesFromSpongeBuilder((net.minecraft.item.ItemStack) (Object) stack, compoundTag);
             }
         }
 

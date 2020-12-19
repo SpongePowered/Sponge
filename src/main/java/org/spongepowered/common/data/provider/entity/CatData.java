@@ -46,10 +46,10 @@ public final class CatData {
                     .create(Keys.CAT_TYPE)
                         .get(h -> {
                             final int type = h.getCatType();
-                            return ((SimpleRegistry<CatType>) Sponge.getGame().registries().registry(RegistryTypes.CAT_TYPE))
+                            return ((SimpleRegistry<CatType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.CAT_TYPE))
                                     .byId(type);
                         })
-                        .set((h, v) -> h.setCatType(((SimpleRegistry<CatType>) Sponge.getGame().registries().registry(RegistryTypes.CAT_TYPE)).getId(v)))
+                        .set((h, v) -> h.setCatType(((SimpleRegistry<CatType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.CAT_TYPE)).getId(v)))
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) h.getCollarColor())
                         .set((h, v) -> h.setCollarColor((net.minecraft.item.DyeColor) (Object) v))

@@ -25,13 +25,8 @@
 package org.spongepowered.common.data.provider.block.location;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
-import org.spongepowered.common.util.Constants;
 
 public final class LocationDataProviders extends DataProviderRegistratorBuilder {
-
-    public LocationDataProviders() {
-        super(Constants.Sponge.Entity.DataRegistration.LOCATION);
-    }
 
     @Override
     public void registerProviders() {

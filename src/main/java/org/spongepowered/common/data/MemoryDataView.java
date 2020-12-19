@@ -265,8 +265,8 @@ public class MemoryDataView implements DataView {
             checkArgument(!(valueContainer).equals(this), "Cannot insert self-referencing DataSerializable");
             // see above for why this is copied
             this.copyDataView(path, valueContainer);
-        } else if (value instanceof CatalogType) {
-            return this.set(path, ((CatalogType) value).getKey().getFormatted());
+        } else if (value instanceof ResourceKey) {
+            return this.set(path, value.toString());
         } else if (manager != null && manager.getTranslator(value.getClass()).isPresent()) {
             final DataTranslator serializer = manager.getTranslator(value.getClass()).get();
             final DataContainer container = serializer.translate(value);
@@ -330,8 +330,8 @@ public class MemoryDataView implements DataView {
                 } else {
                     builder.add(object);
                 }
-            } else if (object instanceof CatalogType) {
-                builder.add(((CatalogType) object).getKey());
+            } else if (object instanceof ResourceKey) {
+                builder.add(object.toString());
             } else if (object instanceof Map) {
                 builder.add(this.ensureSerialization((Map) object));
             } else if (object instanceof Collection) {
@@ -714,12 +714,6 @@ public class MemoryDataView implements DataView {
     public <T extends DataSerializable> Optional<T> getSerializable(final DataQuery path, final Class<T> clazz) {
         Objects.requireNonNull(path, "path");
         Objects.requireNonNull(clazz, "clazz");
-        if (clazz.isAssignableFrom(CatalogType.class)) {
-            final Optional<T> catalog = (Optional<T>) this.getCatalogType(path, ((Class<? extends CatalogType>) clazz));
-            if (catalog.isPresent()) {
-                return catalog;
-            }
-        }
 
         return this.getUnsafeView(path).flatMap(view -> Sponge.getDataManager().getBuilder(clazz).flatMap(builder -> builder.build(view)));
     }
@@ -730,13 +724,6 @@ public class MemoryDataView implements DataView {
         Objects.requireNonNull(path, "path");
         Objects.requireNonNull(clazz, "clazz");
         return Stream.<Supplier<Optional<List<T>>>>of(
-            () -> {
-                if (clazz.isAssignableFrom(CatalogType.class)) {
-                    return (Optional<List<T>>) (Optional<?>) this.getCatalogTypeList(path,
-                        (Class<? extends CatalogType>) clazz);
-                }
-                return Optional.empty();
-            },
             () -> this.getViewList(path).flatMap(list ->
                 Sponge.getDataManager().getBuilder(clazz).map(builder ->
                     list.stream()

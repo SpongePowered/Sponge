@@ -34,9 +34,11 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
+import org.spongepowered.api.registry.RegistryTypes;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantment> implements Enchantment.Builder {
 
@@ -89,7 +91,7 @@ public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantm
         if (!container.contains(Queries.ENCHANTMENT_ID, Queries.LEVEL)) {
             return Optional.empty();
         }
-        final Optional<EnchantmentType> enchantmentType = container.getRegistryValue(Queries.ENCHANTMENT_ID, EnchantmentType.class);
+        final Optional<EnchantmentType> enchantmentType = container.getRegistryValue(Queries.ENCHANTMENT_ID, RegistryTypes.ENCHANTMENT_TYPE);
         final Optional<Integer> level = container.getInt(Queries.LEVEL);
         final Enchantment.Builder builder = Enchantment.builder();
         level.map(builder::level);

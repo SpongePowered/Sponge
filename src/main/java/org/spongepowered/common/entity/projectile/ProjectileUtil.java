@@ -49,7 +49,6 @@ import net.minecraft.item.Items;
 import net.minecraft.tileentity.DispenserTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.MathHelper;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -84,7 +83,7 @@ import javax.annotation.Nullable;
 
 public final class ProjectileUtil {
 
-    private static final Map<ResourceKey, ProjectileLogic<?>> projectileLogic = Maps.newHashMap();
+    private static final Map<EntityType<? extends Projectile>, ProjectileLogic<?>> projectileLogic = Maps.newHashMap();
     private static final Map<Class<? extends ProjectileSource>, ProjectileSourceLogic<?>> projectileSourceLogic = Maps.newHashMap();
 
     public static <T extends Projectile> Optional<T> launch(final EntityType<T> projectileType, final ProjectileSource source,
@@ -141,7 +140,7 @@ public final class ProjectileUtil {
     }
 
     public static <T extends Projectile> void registerProjectileLogic(final Supplier<EntityType<T>> projectileType, final ProjectileLogic<T> logic) {
-        ProjectileUtil.projectileLogic.put(projectileType.get().key(), logic);
+        ProjectileUtil.projectileLogic.put(projectileType.get(), logic);
     }
 
     public static <T extends ProjectileSource> void registerProjectileSourceLogic(final Class<T> projectileSourceClass,
@@ -156,7 +155,7 @@ public final class ProjectileUtil {
 
     @SuppressWarnings("unchecked")
     private static <T extends Projectile> ProjectileLogic<T> getLogic(final EntityType<T> projectileType) {
-        return (ProjectileLogic<T>) ProjectileUtil.projectileLogic.get(projectileType.key());
+        return (ProjectileLogic<T>) ProjectileUtil.projectileLogic.get(projectileType);
     }
 
     @SuppressWarnings("unchecked")

@@ -25,14 +25,14 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.passive.horse.HorseEntity;
+import net.minecraft.util.registry.SimpleRegistry;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.accessor.entity.passive.horse.HorseEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.type.SpongeHorseColor;
-import org.spongepowered.common.data.type.SpongeHorseStyle;
 
 public final class HorseData {
 
@@ -45,22 +45,25 @@ public final class HorseData {
                 .asMutable(HorseEntity.class)
                     .create(Keys.HORSE_COLOR)
                         .get(h -> {
-                            final MappedRegistry<HorseColor, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(HorseColor.class);
-                            return registry.getReverseMapping(HorseData.getHorseColor(h));
+                            final SimpleRegistry<HorseColor> registry = (SimpleRegistry<HorseColor>) (Object) Sponge.getGame().registries().registry(RegistryTypes.HORSE_COLOR);
+                            return registry.byId(HorseData.getHorseColor(h));
                         })
                         .set((h, v) -> {
                             final int style = HorseData.getHorseStyle(h);
-                            ((HorseEntityAccessor) h).invoker$setTypeVariant(((SpongeHorseColor) v).getMetadata() | style);
+                            final SimpleRegistry<HorseColor> registry = (SimpleRegistry<HorseColor>) (Object) Sponge.getGame().registries().registry(RegistryTypes.HORSE_COLOR);
+                            final int metadata = registry.getId(v);
+                            ((HorseEntityAccessor) h).invoker$setTypeVariant(metadata | style);
                         })
                     .create(Keys.HORSE_STYLE)
                         .get(h -> {
-                            final MappedRegistry<HorseStyle, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(HorseStyle.class);
-                            return registry.getReverseMapping(HorseData.getHorseStyle(h));
+                            final SimpleRegistry<HorseStyle> registry = (SimpleRegistry<HorseStyle>) (Object) Sponge.getGame().registries().registry(RegistryTypes.HORSE_STYLE);
+                            return registry.byId(HorseData.getHorseStyle(h));
                         })
                         .set((h, v) -> {
                             final int color = HorseData.getHorseColor(h);
-                            // this.getMetadata() << 8
-                            ((HorseEntityAccessor) h).invoker$setTypeVariant((color | ((SpongeHorseStyle) v).getBitMask()));
+                            final SimpleRegistry<HorseStyle> registry = (SimpleRegistry<HorseStyle>) (Object) Sponge.getGame().registries().registry(RegistryTypes.HORSE_STYLE);
+                            final int metadata = registry.getId(v);
+                            ((HorseEntityAccessor) h).invoker$setTypeVariant((color | (metadata << 8)));
                         });
     }
     // @formatter:on

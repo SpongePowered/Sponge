@@ -43,7 +43,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class SpongeDataRegistrationBuilder implements DataRegistration.Builder{
+public final class SpongeDataRegistrationBuilder implements DataRegistration.Builder {
 
     Multimap<Key, DataProvider> dataProviderMap = HashMultimap.create();
     Map<Type, DataStore> dataStoreMap = new HashMap<>();
@@ -58,33 +58,33 @@ public final class SpongeDataRegistrationBuilder implements DataRegistration.Bui
     }
 
     @Override
-    public DataRegistration.Builder provider(DataProvider<?, ?> provider) throws DuplicateProviderException {
+    public DataRegistration.Builder provider(final DataProvider<?, ?> provider) throws DuplicateProviderException {
         this.dataProviderMap.put(provider.getKey(), provider);
         return this;
     }
 
     @Override
-    public DataRegistration.Builder dataKey(Key<?> key) {
+    public DataRegistration.Builder dataKey(final Key<?> key) {
         this.keys.add(key);
         return this;
     }
 
     @Override
-    public DataRegistration.Builder dataKey(Key<?> key, Key<?>... others) {
+    public DataRegistration.Builder dataKey(final Key<?> key, final Key<?>... others) {
         this.keys.add(key);
         Collections.addAll(this.keys, others);
         return this;
     }
 
     @Override
-    public DataRegistration.Builder dataKey(Iterable<Key<?>> keys) {
+    public DataRegistration.Builder dataKey(final Iterable<Key<?>> keys) {
         keys.forEach(this.keys::add);
         return this;
     }
 
     @Override
     public DataRegistration build() {
-        return new SpongeDataRegistration(SpongeCommon.getActivePlugin(), this);
+        return new SpongeDataRegistration(this);
     }
 
     @Override

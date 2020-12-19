@@ -44,11 +44,11 @@ public final class RabbitData {
                     .create(Keys.RABBIT_TYPE)
                         .get(h -> {
                             final int type = h.getRabbitType();
-                            final SimpleRegistry<RabbitType> registry = (SimpleRegistry<RabbitType>)Sponge.getGame().registries().registry(RegistryTypes.RABBIT_TYPE);
+                            final SimpleRegistry<RabbitType> registry = (SimpleRegistry<RabbitType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.RABBIT_TYPE);
                             return registry.byId(type);
                         })
                         .set((h, v) -> {
-                            final SimpleRegistry<RabbitType> registry = (SimpleRegistry<RabbitType>)Sponge.getGame().registries().registry(RegistryTypes.RABBIT_TYPE);
+                            final SimpleRegistry<RabbitType> registry = (SimpleRegistry<RabbitType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.RABBIT_TYPE);
                             h.setRabbitType(registry.getId(v));
                         });
     }

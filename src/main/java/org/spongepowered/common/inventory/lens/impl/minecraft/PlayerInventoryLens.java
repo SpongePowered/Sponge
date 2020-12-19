@@ -122,7 +122,7 @@ public class PlayerInventoryLens extends AbstractLens {
         this.addSpanningChild(this.offhand);
 
         for (Map.Entry<EquipmentType, SlotLens> entry : equipmentLenses.entrySet()) {
-            this.addChild(entry.getValue(), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), entry.getKey()));
+            this.addChild(entry.getValue(), KeyValuePair.of(Keys.EQUIPMENT_TYPE, entry.getKey()));
         }
         this.addChild(this.equipment);
         this.addMissingSpanningSlots(base, slots);

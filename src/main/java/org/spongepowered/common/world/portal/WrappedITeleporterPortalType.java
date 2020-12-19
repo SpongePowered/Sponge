@@ -27,7 +27,6 @@ package org.spongepowered.common.world.portal;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.Axis;
@@ -44,18 +43,12 @@ import javax.annotation.Nullable;
 
 public final class WrappedITeleporterPortalType implements PortalType {
 
-    private final ResourceKey key = ResourceKey.sponge("unknown");
     private final PlatformITeleporterBridge teleporter;
     private final PortalType logicType;
 
     public WrappedITeleporterPortalType(final PlatformITeleporterBridge teleporter, @Nullable final PortalType logicType) {
         this.teleporter = teleporter;
         this.logicType = logicType;
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
     }
 
     @Override

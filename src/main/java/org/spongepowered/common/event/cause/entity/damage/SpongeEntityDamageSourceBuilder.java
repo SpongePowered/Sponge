@@ -49,8 +49,8 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
     public EntityDamageSource build() throws IllegalStateException {
         checkState(this.damageType != null, "Damage type cannot be null!");
         checkState(this.reference.get() != null);
-        final net.minecraft.util.EntityDamageSource damageSource = // TODO damageType String is used for the translation key!
-            new net.minecraft.util.EntityDamageSource(this.damageType.getKey().getValue(), (net.minecraft.entity.Entity) this.reference.get());
+        final net.minecraft.util.EntityDamageSource damageSource = new net.minecraft.util.EntityDamageSource(this.damageType.getName(),
+                (net.minecraft.entity.Entity) this.reference.get());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
         if (this.creative) {
             accessor.invoker$bypassInvul();

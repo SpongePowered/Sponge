@@ -29,7 +29,7 @@ import org.spongepowered.api.registry.RegistryType;
 
 import java.util.Objects;
 
-public final class SpongeRegistryType implements RegistryType {
+public final class SpongeRegistryType<T> implements RegistryType<T> {
 
     private final ResourceKey root;
     private final ResourceKey location;
@@ -55,11 +55,11 @@ public final class SpongeRegistryType implements RegistryType {
     public static final class FactoryImpl implements Factory {
 
         @Override
-        public RegistryType create(final ResourceKey root, final ResourceKey location) {
+        public <T> RegistryType<T> create(final ResourceKey root, final ResourceKey location) {
             Objects.requireNonNull(root, "root");
             Objects.requireNonNull(location, "location");
 
-            return new SpongeRegistryType(root, location);
+            return new SpongeRegistryType<T>(root, location);
         }
     }
 }

@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundNBT;
-import org.checkerframework.checker.units.qual.C;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
@@ -88,12 +87,12 @@ public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> im
     @Override
     public void setRawData(final DataView container) throws InvalidDataException {
         checkNotNull(container, "Raw data cannot be null!");
-        final CompoundNBT copy = NBTTranslator.getInstance().translate(container);
+        final CompoundNBT copy = NBTTranslator.INSTANCE.translate(container);
         final boolean valid = this.getValidator().validate(copy);
         if (valid) {
             this.data = copy;
         } else {
-            throw new InvalidDataException("Invalid data for " + this.getValidationType().getKey());
+            throw new InvalidDataException("Invalid data for " + this.getValidationType());
         }
     }
 

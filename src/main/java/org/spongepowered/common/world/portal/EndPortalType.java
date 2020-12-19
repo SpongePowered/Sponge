@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.portal;
 
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.ServerLocation;
@@ -35,10 +34,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class EndPortalType extends VanillaPortalType {
-
-    public EndPortalType(final ResourceKey key) {
-        super(key);
-    }
 
     @Override
     public void generatePortal(final ServerLocation location, final Axis axis) {

@@ -128,7 +128,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @Override
     public Optional<org.spongepowered.api.entity.Entity> apply(final ServerLocation location) {
-        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) {
+        if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
             return Optional.empty();
         }
         final org.spongepowered.api.world.server.ServerWorld spongeWorld = location.getWorld();

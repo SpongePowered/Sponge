@@ -25,14 +25,9 @@
 package org.spongepowered.common.world.teleport;
 
 import net.minecraft.block.material.Material;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 
-public class NoPortalTeleportHelperFilter extends DefaultTeleportHelperFilter {
-
-    public NoPortalTeleportHelperFilter() {
-        super(ResourceKey.sponge("no_portal"));
-    }
+public final class NoPortalTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {

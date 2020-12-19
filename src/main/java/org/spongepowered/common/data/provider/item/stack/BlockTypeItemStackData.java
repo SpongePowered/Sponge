@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -84,14 +84,7 @@ public final class BlockTypeItemStackData {
 
         final CompoundNBT tag = stack.getOrCreateTag();
         final ListNBT list = value.stream()
-                .map(type -> {
-                    final ResourceKey key = type.getKey();
-                    if (key.getNamespace().equals("minecraft")) {
-                        return key.getValue();
-                    } else {
-                        return key.getFormatted();
-                    }
-                })
+                .map(type -> Registry.BLOCK.getKey((Block) type).toString())
                 .collect(NBTCollectors.toStringTagList());
         tag.put(nbtKey, list);
         return true;

@@ -53,7 +53,7 @@ public final class EntitySilentConverter extends DataParameterConverter<Boolean>
     @Override
     public Boolean getValueFromEvent(final Boolean originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.IS_SILENT.get()) {
+            if (immutableValue.getKey() == Keys.IS_SILENT) {
                 return (Boolean) immutableValue.get();
             }
         }

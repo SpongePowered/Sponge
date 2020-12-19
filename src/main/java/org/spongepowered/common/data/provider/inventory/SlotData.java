@@ -28,13 +28,11 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.inventory.lens.Lens;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public final class SlotData {
@@ -61,10 +59,10 @@ public final class SlotData {
     }
     // @formatter:on
 
-    private static <D> D getter(final Slot holder, final Supplier<? extends Key<Value<D>>> suppliedKey) {
+    private static <D> D getter(final Slot holder, final Key<Value<D>> key) {
         final Lens parentLens = ((InventoryBridge) holder.parent()).bridge$getAdapter().inventoryAdapter$getRootLens();
         final Lens childLens = ((InventoryBridge) holder).bridge$getAdapter().inventoryAdapter$getRootLens();
         final Map<Key<?>, Object> dataMap = parentLens.getDataFor(childLens);
-        return (D) dataMap.get(suppliedKey.get());
+        return (D) dataMap.get(key);
     }
 }

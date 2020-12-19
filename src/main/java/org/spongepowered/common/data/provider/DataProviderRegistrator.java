@@ -26,7 +26,6 @@ package org.spongepowered.common.data.provider;
 
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
@@ -68,12 +67,12 @@ public class DataProviderRegistrator {
     SpongeDataRegistrationBuilder registrationBuilder;
     SpongeDataStoreBuilder dataStoreBuilder;
 
-    public DataProviderRegistrator(final String name) {
-        this.registrationBuilder = (SpongeDataRegistrationBuilder) DataRegistration.builder().key(ResourceKey.minecraft(name));
+    public DataProviderRegistrator() {
+        this.registrationBuilder = (SpongeDataRegistrationBuilder) DataRegistration.builder();
         this.dataStoreBuilder = (SpongeDataStoreBuilder) DataStore.builder().vanillaData();
     }
 
-    public DataProviderRegistrator(SpongeDataRegistrationBuilder registrationBuilder) {
+    public DataProviderRegistrator(final SpongeDataRegistrationBuilder registrationBuilder) {
         this.registrationBuilder = registrationBuilder;
     }
 
@@ -87,28 +86,27 @@ public class DataProviderRegistrator {
         return this;
     }
 
-    public <K, V extends Value<K>> DataProviderRegistrator dataStore(final DefaultedRegistryReference<? extends Key<V>> key, final BiConsumer<DataView, K> serializer,
+    public <K, V extends Value<K>> DataProviderRegistrator dataStore(final Key<V> key, final BiConsumer<DataView, K> serializer,
             final Function<DataView, Optional<K>> deserializer) {
-        this.dataStoreBuilder.key(key.get(), serializer, deserializer);
+        this.dataStoreBuilder.key(key, serializer, deserializer);
         this.dataStoreBuilder.getDataHolderTypes().forEach(typeToken -> this.registerDataStoreDelegatingProvider(key, typeToken));
         return this;
     }
 
-    public <H extends DataHolder, K, V extends Value<K>> void registerDataStoreDelegatingProvider(final DefaultedRegistryReference<? extends Key<V>> key,
-            final Type typeToken) {
+    public <H extends DataHolder, K, V extends Value<K>> void registerDataStoreDelegatingProvider(final Key<V> key, final Type typeToken) {
         // Create dataprovider for mutable and immutable DataContainerHolders
         if (GenericTypeReflector.isSuperType(DataProviderRegistrator.MUTABLE, typeToken)) {
             this.asMutable(GenericTypeReflector.erase(typeToken))
                     .create(key)
                     .get(holder -> {
                         final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
-                        return SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).deserialize(dataContainer).get(key).orElse(null);
+                        return SpongeDataManager.getDatastoreRegistry().getDataStore(key, typeToken).deserialize(dataContainer).get(key).orElse(null);
                     })
                     .set((holder, v) -> {
                         final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
                         final DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
-                        manipulator.set(key.get(), v);
-                        SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).serialize(manipulator, dataContainer);
+                        manipulator.set(key, v);
+                        SpongeDataManager.getDatastoreRegistry().getDataStore(key, typeToken).serialize(manipulator, dataContainer);
                         ((DataContainerHolder.Mutable) holder).data$setDataContainer(dataContainer);
                     });
         } else if (GenericTypeReflector.isSuperType(DataProviderRegistrator.IMMUTABLE, typeToken)) {
@@ -116,13 +114,13 @@ public class DataProviderRegistrator {
                     .create(key)
                     .get(holder -> {
                         final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
-                        return SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).deserialize(dataContainer).get(key).orElse(null);
+                        return SpongeDataManager.getDatastoreRegistry().getDataStore(key, typeToken).deserialize(dataContainer).get(key).orElse(null);
                     })
                     .set((holder, v) -> {
                         final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
                         final DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
-                        manipulator.set(key.get(), v);
-                        SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).serialize(manipulator, dataContainer);
+                        manipulator.set(key, v);
+                        SpongeDataManager.getDatastoreRegistry().getDataStore(key, typeToken).serialize(manipulator, dataContainer);
                         return (H) ((DataContainerHolder.Immutable) holder).data$withDataContainer(dataContainer);
                     });
         }

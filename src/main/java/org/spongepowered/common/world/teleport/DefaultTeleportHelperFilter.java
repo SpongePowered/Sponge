@@ -34,7 +34,6 @@ import net.minecraft.block.SnowBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EmptyBlockReader;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 
@@ -44,21 +43,6 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
 
     // Materials it is NOT safe to put players on top of.
     private static final Set<Material> NOT_SAFE_FLOOR = ImmutableSet.of(Material.AIR, Material.CACTUS, Material.FIRE, Material.LAVA);
-
-    private final ResourceKey key;
-
-    public DefaultTeleportHelperFilter() {
-        this.key = ResourceKey.sponge("default");
-    }
-
-    public DefaultTeleportHelperFilter(ResourceKey key) {
-        this.key = key;
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
-    }
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {

@@ -29,6 +29,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -96,8 +97,7 @@ public final class SpongePacketHandler {
                         return;
                     }
 
-                    final SpongeDimensionType dimensionType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.
-                            spongepowered.api.world.dimension.DimensionType.class, (ResourceKey) (Object) packet.dimensionLogic).orElse(null);
+                    final DimensionType dimensionType = SpongeCommon.getServer().registryAccess().dimensionTypes().get(packet.dimensionLogic);
                     ((WorldBridge) world).bridge$adjustDimensionLogic(dimensionType);
                 }
         );

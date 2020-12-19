@@ -25,13 +25,13 @@
 package org.spongepowered.common.command.brigadier.argument;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
+import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedValueParameter;
 
-public abstract class CatalogedArgumentParser<T> extends AbstractArgumentParser<T> implements CatalogedValueParameter<T> {
+public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgumentParser<T> implements ResourceKeyedValueParameter<T> {
 
     private final ResourceKey key;
 
-    public CatalogedArgumentParser(final ResourceKey key) {
+    public ResourceKeyedArgumentValueParser(final ResourceKey key) {
         this.key = key;
     }
 

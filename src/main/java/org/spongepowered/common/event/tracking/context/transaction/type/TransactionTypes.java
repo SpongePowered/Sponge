@@ -24,9 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.type;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
+import org.spongepowered.api.event.entity.HarvestEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryScope;
@@ -41,13 +46,13 @@ public final class TransactionTypes {
 
     // SORTFIELDS:ON
 
-    public static final DefaultedRegistryReference<TransactionType<@NonNull ?>> BLOCK = TransactionTypes.key(ResourceKey.sponge("block"));
+    public static final DefaultedRegistryReference<TransactionType<ChangeBlockEvent.All>> BLOCK = TransactionTypes.key(ResourceKey.sponge("block"));
 
-    public static final DefaultedRegistryReference<TransactionType<@NonNull ?>> ENTITY_DEATH_DROPS = TransactionTypes.key(ResourceKey.sponge("entity_death_drops"));
+    public static final DefaultedRegistryReference<TransactionType<HarvestEntityEvent>> ENTITY_DEATH_DROPS = TransactionTypes.key(ResourceKey.sponge("entity_death_drops"));
 
-    public static final DefaultedRegistryReference<TransactionType<@NonNull ?>> NEIGHBOR_NOTIFICATION = TransactionTypes.key(ResourceKey.sponge("neighbor_notification"));
+    public static final DefaultedRegistryReference<TransactionType<NotifyNeighborBlockEvent>> NEIGHBOR_NOTIFICATION = TransactionTypes.key(ResourceKey.sponge("neighbor_notification"));
 
-    public static final DefaultedRegistryReference<TransactionType<@NonNull ?>> SPAWN_ENTITY = TransactionTypes.key(ResourceKey.sponge("spawn_entity"));
+    public static final DefaultedRegistryReference<TransactionType<SpawnEntityEvent>> SPAWN_ENTITY = TransactionTypes.key(ResourceKey.sponge("spawn_entity"));
 
     // SORTFIELDS:OFF
 
@@ -56,7 +61,7 @@ public final class TransactionTypes {
     private TransactionTypes() {
     }
 
-    private static DefaultedRegistryReference<TransactionType<@NonNull ?>> key(final ResourceKey location) {
-        return RegistryKey.of(SpongeRegistryTypes.BLOCK_TRANSACTION_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
+    private static <T extends Event & Cancellable> DefaultedRegistryReference<TransactionType<T>> key(final ResourceKey location) {
+        return RegistryKey.of(SpongeRegistryTypes.TRANSACTION_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
     }
 }

@@ -35,11 +35,11 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.util.blockray.RayTraceResult;
-import org.spongepowered.common.command.brigadier.argument.CatalogedZeroAdvanceValueParameter;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedZeroAdvanceValueParameter;
 
 import java.util.Optional;
 
-public final class SpongeTargetEntityValueParameter extends CatalogedZeroAdvanceValueParameter<Entity> {
+public final class SpongeTargetEntityValueParameter extends ResourceKeyedZeroAdvanceValueParameter<Entity> {
 
     private final boolean isPlayerOnly;
 

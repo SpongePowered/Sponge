@@ -46,7 +46,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
 import org.spongepowered.common.util.Constants;
 
@@ -57,7 +57,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public final class SpongeServerLocationValueParameter extends CatalogedArgumentParser<ServerLocation> implements ComplexSuggestionNodeProvider {
+public final class SpongeServerLocationValueParameter extends ResourceKeyedArgumentValueParser<ServerLocation> implements ComplexSuggestionNodeProvider {
 
     private static final Vec3Argument VEC_3_ARGUMENT = Vec3Argument.vec3(false);
     private static final Pattern STARTS_WITH_NUMBER = Pattern.compile("^\\s*((-)?[0-9]|~|\\^)");

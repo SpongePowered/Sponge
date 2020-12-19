@@ -28,7 +28,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -40,7 +39,6 @@ import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -53,10 +51,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public final class NetherPortalType extends VanillaPortalType {
-
-    public NetherPortalType(final ResourceKey key) {
-        super(key);
-    }
 
     @Override
     public void generatePortal(final ServerLocation location, final Axis axis) {
@@ -98,7 +92,7 @@ public final class NetherPortalType extends VanillaPortalType {
 
             if (worldChange) {
                 // Call platform event hook before changing dimensions
-                final ChangeEntityWorldEvent.Pre event = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre((net.minecraft.entity.Entity)
+                final ChangeEntityWorldEvent.Pre event = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre((net.minecraft.entity.Entity)
                         entity, (ServerWorld) destination.getWorld());
                 if (event == null || event.isCancelled() || ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
                     return false;

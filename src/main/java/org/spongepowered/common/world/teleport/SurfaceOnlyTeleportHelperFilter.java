@@ -24,16 +24,11 @@
  */
 package org.spongepowered.common.world.teleport;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
-public class SurfaceOnlyTeleportHelperFilter extends DefaultTeleportHelperFilter {
-
-    public SurfaceOnlyTeleportHelperFilter() {
-        super(ResourceKey.sponge("surface_only"));
-    }
+public final class SurfaceOnlyTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
     @Override
     public Tristate isValidLocation(ServerWorld world, Vector3i position) {

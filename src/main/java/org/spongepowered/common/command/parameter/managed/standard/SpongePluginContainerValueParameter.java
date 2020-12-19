@@ -31,7 +31,7 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class SpongePluginContainerValueParameter extends CatalogedArgumentParser<PluginContainer> {
+public final class SpongePluginContainerValueParameter extends ResourceKeyedArgumentValueParser<PluginContainer> {
 
     public SpongePluginContainerValueParameter(final ResourceKey key) {
         super(key);

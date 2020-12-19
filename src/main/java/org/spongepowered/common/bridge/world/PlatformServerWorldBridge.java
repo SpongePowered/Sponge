@@ -33,7 +33,7 @@ public interface PlatformServerWorldBridge {
         if (entity instanceof ServerPlayerEntity) {
             ((ServerWorld) this).removePlayerImmediately((ServerPlayerEntity) entity);
         } else {
-            ((ServerWorld) this).removeEntity(entity);
+            ((ServerWorld) this).despawn(entity);
         }
     }
 }

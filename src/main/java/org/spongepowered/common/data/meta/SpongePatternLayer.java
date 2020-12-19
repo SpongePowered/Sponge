@@ -24,11 +24,14 @@
  */
 package org.spongepowered.common.data.meta;
 
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.util.Constants;
 
 public final class SpongePatternLayer implements BannerPatternLayer {
@@ -58,10 +61,12 @@ public final class SpongePatternLayer implements BannerPatternLayer {
 
     @Override
     public DataContainer toContainer() {
+        final ResourceKey idKey = Sponge.getGame().registries().registry(RegistryTypes.BANNER_PATTERN_SHAPE).valueKey(this.id);
+        final ResourceKey colorKey = Sponge.getGame().registries().registry(RegistryTypes.DYE_COLOR).valueKey(this.color);
         return DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.TileEntity.Banner.SHAPE, this.id.getKey())
-            .set(Constants.TileEntity.Banner.COLOR, this.color.getKey());
+            .set(Constants.TileEntity.Banner.SHAPE, idKey)
+            .set(Constants.TileEntity.Banner.COLOR, colorKey);
     }
 
 }

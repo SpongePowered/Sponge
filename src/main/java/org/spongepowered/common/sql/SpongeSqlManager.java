@@ -38,8 +38,6 @@ import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
-import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -56,6 +54,9 @@ import java.util.concurrent.CompletionException;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
+import javax.sql.DataSource;
 
 /**
  * Implementation of a SQL-using service.
@@ -87,7 +88,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
         PATH_CANONICALIZERS = ImmutableMap.of("h2", (plugin, orig) -> {
             // Bleh if only h2 had a better way of supplying a base directory... oh well...
             final org.h2.engine.ConnectionInfo h2Info = new org.h2.engine.ConnectionInfo(orig);
-            if (!h2Info.isPersistent() || h2Info.isClientSide()) {
+            if (!h2Info.isPersistent() || h2Info.isRemote()) {
                 return orig;
             }
             if (orig.startsWith("file:")) {

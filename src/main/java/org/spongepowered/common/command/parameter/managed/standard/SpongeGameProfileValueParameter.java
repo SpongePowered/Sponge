@@ -39,7 +39,7 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.Collection;
@@ -48,7 +48,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public final class SpongeGameProfileValueParameter extends CatalogedArgumentParser<GameProfile> {
+public final class SpongeGameProfileValueParameter extends ResourceKeyedArgumentValueParser<GameProfile> {
 
     private final GameProfileArgument argument = GameProfileArgument.gameProfile();
 

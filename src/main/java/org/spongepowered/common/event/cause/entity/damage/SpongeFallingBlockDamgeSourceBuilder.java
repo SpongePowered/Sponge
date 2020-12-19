@@ -59,8 +59,7 @@ public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSo
         checkState(this.reference.get() != null);
         checkState(this.damageType != null);
         final MinecraftFallingBlockDamageSource damageSource =
-            new MinecraftFallingBlockDamageSource(this.damageType.getKey().getFormatted(),
-                (FallingBlockEntity) this.reference.get());
+            new MinecraftFallingBlockDamageSource(this.damageType.getName(), (FallingBlockEntity) this.reference.get());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) (Object) damageSource;
         if (this.creative) {
             accessor.invoker$bypassInvul();

@@ -40,11 +40,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class CatalogedZeroAdvanceValueParameter<T> extends CatalogedArgumentParser<T> {
+public abstract class ResourceKeyedZeroAdvanceValueParameter<T> extends ResourceKeyedArgumentValueParser<T> {
 
     private static final List<ClientCompletionType> NONE_KEY = Collections.singletonList(ClientCompletionTypes.NONE.get());
 
-    public CatalogedZeroAdvanceValueParameter(final ResourceKey key) {
+    public ResourceKeyedZeroAdvanceValueParameter(final ResourceKey key) {
         super(key);
     }
 
@@ -70,7 +70,7 @@ public abstract class CatalogedZeroAdvanceValueParameter<T> extends CatalogedArg
     @Override
     @NonNull
     public final List<ClientCompletionType> getClientCompletionType() {
-        return CatalogedZeroAdvanceValueParameter.NONE_KEY;
+        return ResourceKeyedZeroAdvanceValueParameter.NONE_KEY;
     }
 
     @Override

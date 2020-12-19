@@ -68,12 +68,13 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.establishServerServices();
 
-        lifecycle.establishRegistries();
+        lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
 
         lifecycle.establishServerFeatures();
         lifecycle.establishCommands();
 
+        lifecycle.establishEngineRegistries(this);
         lifecycle.callStartingEngineEvent(this);
 
         lifecycle.establishDataPackRegistries();

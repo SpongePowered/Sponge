@@ -102,19 +102,19 @@ public final class EntityFlagsConverter extends DataParameterConverter<Byte> {
         boolean newGlowing = this.getFlag(originalValue, EntityFlagsConverter.GLOWING_MASK);
         boolean newElytra = this.getFlag(originalValue, EntityFlagsConverter.FLYING_ELYTRA_MASK);
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.IS_SNEAKING.get()) {
+            if (immutableValue.getKey() == Keys.IS_SNEAKING) {
                 newIsSneaking = ((Boolean) immutableValue.get());
             }
-            if (immutableValue.getKey() == Keys.IS_SPRINTING.get()) {
+            if (immutableValue.getKey() == Keys.IS_SPRINTING) {
                 newSprinting = ((Boolean) immutableValue.get());
             }
-            if (immutableValue.getKey() == Keys.IS_INVISIBLE.get()) {
+            if (immutableValue.getKey() == Keys.IS_INVISIBLE) {
                 newInvisible = (Boolean) immutableValue.get();
             }
-            if (immutableValue.getKey() == Keys.IS_GLOWING.get()) {
+            if (immutableValue.getKey() == Keys.IS_GLOWING) {
                 newGlowing = (Boolean) immutableValue.get();
             }
-            if (immutableValue.getKey() == Keys.IS_ELYTRA_FLYING.get()) {
+            if (immutableValue.getKey() == Keys.IS_ELYTRA_FLYING) {
                 newElytra = (Boolean) immutableValue.get();
             }
         }

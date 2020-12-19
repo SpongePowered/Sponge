@@ -35,7 +35,6 @@ import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
-import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.DirectoryIteratorException;
@@ -51,6 +50,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.Nullable;
 
 public final class SpongePlayerDataManager {
 
@@ -92,7 +93,7 @@ public final class SpongePlayerDataManager {
                         throw new RuntimeException("Failed to decompress player data within [" + playerFile + "]!");
                     }
 
-                    final DataContainer container = NBTTranslator.getInstance().translateFrom(compound);
+                    final DataContainer container = NBTTranslator.INSTANCE.translateFrom(compound);
                     final SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
                     this.playerDataByUniqueId.put(data.getUniqueId(), data);
                 }
@@ -153,7 +154,7 @@ public final class SpongePlayerDataManager {
     }
 
     private CompoundNBT createCompoundFor(final SpongePlayerData data) {
-        return NBTTranslator.getInstance().translate(data.toContainer());
+        return NBTTranslator.INSTANCE.translate(data.toContainer());
     }
 
     private void saveFile(final String id, final CompoundNBT compound) {

@@ -36,27 +36,29 @@ import net.minecraft.command.arguments.serializers.IntArgumentSerializer;
 import net.minecraft.command.arguments.serializers.LongArgumentSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.command.registrar.tree.builder.RangeCommandTreeNode;
 
 import java.util.function.BiFunction;
 
-public final class SpongeRangeClientCompletionKey<N extends Number> implements ClientCompletionKey<CommandTreeNode.@NonNull Range<@NonNull N>> {
+public final class SpongeRangeClientCompletionKey<N extends Number> extends AbstractResourceKeyed implements ClientCompletionKey<CommandTreeNode.@NonNull Range<@NonNull N>> {
 
     @Nullable
-    public static SpongeRangeClientCompletionKey<?> createFrom(final IArgumentSerializer<?> serializer) {
+    public static SpongeRangeClientCompletionKey<?> createFrom(final ResourceKey key, final IArgumentSerializer<?> serializer) {
         if (serializer instanceof FloatArgumentSerializer) {
-            return new SpongeRangeClientCompletionKey<>(FloatArgumentType::floatArg, Float.MIN_VALUE, Float.MAX_VALUE);
+            return new SpongeRangeClientCompletionKey<>(key, FloatArgumentType::floatArg, Float.MIN_VALUE, Float.MAX_VALUE);
         }
         if (serializer instanceof DoubleArgumentSerializer) {
-            return new SpongeRangeClientCompletionKey<>(DoubleArgumentType::doubleArg, Double.MIN_VALUE, Double.MAX_VALUE);
+            return new SpongeRangeClientCompletionKey<>(key, DoubleArgumentType::doubleArg, Double.MIN_VALUE, Double.MAX_VALUE);
         }
         if (serializer instanceof IntArgumentSerializer) {
-            return new SpongeRangeClientCompletionKey<>(IntegerArgumentType::integer, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            return new SpongeRangeClientCompletionKey<>(key, IntegerArgumentType::integer, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
         if (serializer instanceof LongArgumentSerializer) {
-            return new SpongeRangeClientCompletionKey<>(LongArgumentType::longArg, Long.MIN_VALUE, Long.MAX_VALUE);
+            return new SpongeRangeClientCompletionKey<>(key, LongArgumentType::longArg, Long.MIN_VALUE, Long.MAX_VALUE);
         }
         return null;
     }
@@ -65,7 +67,9 @@ public final class SpongeRangeClientCompletionKey<N extends Number> implements C
     private final N min;
     private final N max;
 
-    private SpongeRangeClientCompletionKey(final BiFunction<N, N, ArgumentType<?>> typeCreator, final N min, final N max) {
+    private SpongeRangeClientCompletionKey(final ResourceKey key, final BiFunction<N, N, ArgumentType<?>> typeCreator, final N min, final N max) {
+        super(key);
+
         this.typeCreator = typeCreator;
         this.min = min;
         this.max = max;

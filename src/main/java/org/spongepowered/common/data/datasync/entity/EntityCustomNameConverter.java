@@ -58,7 +58,7 @@ public final class EntityCustomNameConverter extends DataParameterConverter<Stri
     @Override
     public String getValueFromEvent(final String originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> value : immutableValues) {
-            if (value.getKey() == Keys.DISPLAY_NAME.get()) {
+            if (value.getKey() == Keys.DISPLAY_NAME) {
                 try {
                     return SpongeAdventure.legacySection((Component) value.get());
                 } catch (Exception e) {

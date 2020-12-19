@@ -32,7 +32,7 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,7 +41,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
-public final class SpongeDateTimeValueParameter extends CatalogedArgumentParser<LocalDateTime> {
+public final class SpongeDateTimeValueParameter extends ResourceKeyedArgumentValueParser<LocalDateTime> {
 
     public SpongeDateTimeValueParameter(final ResourceKey key) {
         super(key);

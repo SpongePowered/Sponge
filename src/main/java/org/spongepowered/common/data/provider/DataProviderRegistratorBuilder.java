@@ -28,8 +28,8 @@ public abstract class DataProviderRegistratorBuilder {
 
     protected final DataProviderRegistrator registrator;
 
-    public DataProviderRegistratorBuilder(String name) {
-        this.registrator = new DataProviderRegistrator(name);
+    public DataProviderRegistratorBuilder() {
+        this.registrator = new DataProviderRegistrator();
     }
 
     public void register() {

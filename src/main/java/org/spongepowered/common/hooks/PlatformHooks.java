@@ -46,7 +46,7 @@ import java.util.Objects;
  */
 public final class PlatformHooks {
 
-    private static final PlatformHooks instance = new PlatformHooks();
+    public static final PlatformHooks INSTANCE = new PlatformHooks();
 
     private DimensionHooks dimensionHooks = new DimensionHooks() {};
     private EventHooks eventHooks = new EventHooks() {};
@@ -57,10 +57,6 @@ public final class PlatformHooks {
     private WorldHooks worldHooks = new WorldHooks() {};
     private ItemHooks itemHooks = new ItemHooks() {};
     private EntityHooks entityHooks = new EntityHooks() {};
-
-    public static PlatformHooks getInstance() {
-        return PlatformHooks.instance;
-    }
 
     public DimensionHooks getDimensionHooks() {
         return this.dimensionHooks;

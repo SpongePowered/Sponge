@@ -53,7 +53,7 @@ public final class EntityBabyConverter extends DataParameterConverter<Boolean> {
     @Override
     public Boolean getValueFromEvent(final Boolean originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> value : immutableValues) {
-            if (value.getKey() == Keys.IS_ADULT.get()) {
+            if (value.getKey() == Keys.IS_ADULT) {
                 return !(Boolean) value.get();
             }
         }

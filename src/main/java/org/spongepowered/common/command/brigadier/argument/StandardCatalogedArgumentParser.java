@@ -27,12 +27,12 @@ package org.spongepowered.common.command.brigadier.argument;
 import com.mojang.brigadier.arguments.ArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
+import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedValueParameter;
 
 /**
  * For use with ArgumentTypes in the base game
  */
-public final class StandardCatalogedArgumentParser<S, T> extends StandardArgumentParser<S, T> implements CatalogedValueParameter<T> {
+public final class StandardCatalogedArgumentParser<S, T> extends StandardArgumentParser<S, T> implements ResourceKeyedValueParameter<T> {
 
     public static <T> StandardCatalogedArgumentParser<T, T> createIdentity(final ResourceKey key, final ArgumentType<T> type) {
         return new StandardCatalogedArgumentParser<>(key, type, (reader, c, x) -> x);

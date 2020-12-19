@@ -36,11 +36,14 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.network.RconConnection;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
@@ -142,20 +145,20 @@ class TimingsExport extends Thread {
                     return JSONUtil.singleObjectPair(input.getName(), JSONUtil.arrayOf(input.getCollectionCount(), input.getCollectionTime()));
                 })));
 
-        Set<BlockEntityType> tileEntityTypeSet = Sets.newHashSet();
+        Set<BlockEntityType> blockEntityTypeSet = Sets.newHashSet();
         Set<EntityType<?>> entityTypeSet = Sets.newHashSet();
 
         int size = TimingsManager.HISTORY.size();
         TimingHistory[] history = new TimingHistory[size + 1];
         int i = 0;
         for (TimingHistory timingHistory : TimingsManager.HISTORY) {
-            tileEntityTypeSet.addAll(timingHistory.tileEntityTypeSet);
+            blockEntityTypeSet.addAll(timingHistory.tileEntityTypeSet);
             entityTypeSet.addAll(timingHistory.entityTypeSet);
             history[i++] = timingHistory;
         }
 
         history[i] = new TimingHistory(); // Current snapshot
-        tileEntityTypeSet.addAll(history[i].tileEntityTypeSet);
+        blockEntityTypeSet.addAll(history[i].tileEntityTypeSet);
         entityTypeSet.addAll(history[i].entityTypeSet);
 
         JsonObjectBuilder handlersBuilder = JSONUtil.objectBuilder();
@@ -176,10 +179,20 @@ class TimingsExport extends Thread {
                 .add("handlers", handlersBuilder)
                 .add("worlds", JSONUtil.mapArrayToObject(TimingHistory.worldMap.entrySet(), (entry) ->
                         JSONUtil.singleObjectPair(entry.getValue(), entry.getKey())))
-                .add("tileentity", JSONUtil.mapArrayToObject(tileEntityTypeSet, (tileEntityType) ->
-                        JSONUtil.singleObjectPair(TimingsPls.getTileEntityId(tileEntityType), tileEntityType.getKey().toString())))
+                .add("blockentity", JSONUtil.mapArrayToObject(blockEntityTypeSet, (blockEntityType) ->
+                    {
+                        final ResourceKey resourceKey =
+                                Sponge.getGame().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(blockEntityType);
+                        return JSONUtil.singleObjectPair(TimingsPls.getBlockEntityId(blockEntityType), resourceKey);
+                    })
+                )
                 .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) ->
-                        JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), entityType.getKey().toString()))));
+                        {
+                            final ResourceKey resourceKey = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.entity.EntityType<?>) entityType);
+                            return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), resourceKey);
+                        })
+                )
+        );
 
         // Information about loaded plugins
 

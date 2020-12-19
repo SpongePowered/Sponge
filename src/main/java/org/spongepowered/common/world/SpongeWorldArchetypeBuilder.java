@@ -28,7 +28,6 @@ import net.minecraft.util.datafix.codec.DatapackCodec;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -40,18 +39,13 @@ import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.gen.WorldGenerationSettings;
 import org.spongepowered.api.world.server.ServerWorldProperties;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.hooks.PlatformHooks;
 
 import java.util.Objects;
-import java.util.Random;
 
 public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
 
-    public static final Random RANDOM = new Random();
-
-    private ResourceKey key;
     private DimensionType dimensionType = DimensionTypes.OVERWORLD.get(Sponge.getServer().registries());
     private Difficulty difficulty = Difficulties.NORMAL.get();
     private GameMode gameMode = GameModes.SURVIVAL.get();
@@ -68,12 +62,6 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
 
     public SpongeWorldArchetypeBuilder() {
         this.reset();
-    }
-
-    @Override
-    public WorldArchetype.Builder key(final ResourceKey key) {
-        this.key = Objects.requireNonNull(key, "key");
-        return this;
     }
 
     @Override
@@ -152,7 +140,6 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     public SpongeWorldArchetypeBuilder from(final WorldArchetype value) {
         Objects.requireNonNull(value);
 
-        this.key = null;
         this.dimensionType = value.getDimensionType();
         this.worldGenerationSettings = value.getWorldGeneratorSettings();
         this.gameMode = value.getGameMode();
@@ -172,7 +159,6 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     public SpongeWorldArchetypeBuilder from(final ServerWorldProperties value) {
         Objects.requireNonNull(value, "value");
 
-        this.key = null;
         this.dimensionType(value.getDimensionType());
         this.worldGenerationSettings = value.getWorldGenerationSettings();
         this.gameMode(value.getGameMode());
@@ -190,7 +176,6 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
 
     @Override
     public SpongeWorldArchetypeBuilder reset() {
-        this.key = null;
         this.dimensionType = DimensionTypes.OVERWORLD.get(Sponge.getServer().registries());
         this.worldGenerationSettings = null;
         this.gameMode = GameModes.SURVIVAL.get();
@@ -200,7 +185,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         this.enabled = true;
         this.loadOnStartup = true;
         this.keepSpawnLoaded = false;
-        this.generateSpawnOnLoad = PlatformHooks.getInstance().getDimensionHooks().doesGenerateSpawnOnLoad((net.minecraft.world.DimensionType) this.dimensionType);
+        this.generateSpawnOnLoad = PlatformHooks.INSTANCE.getDimensionHooks().doesGenerateSpawnOnLoad((net.minecraft.world.DimensionType) this.dimensionType);
         this.pvpEnabled = true;
         this.commandsEnabled = true;
         return this;
@@ -208,14 +193,12 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
 
     @Override
     public WorldArchetype build() throws IllegalArgumentException {
-        Objects.requireNonNull(this.key, "key");
         Objects.requireNonNull(this.worldGenerationSettings, "world generation settings");
 
-        final WorldSettings settings = new WorldSettings(this.key.getValue(), (GameType) (Object) this.gameMode, this.hardcore,
+        final WorldSettings settings = new WorldSettings("", (GameType) (Object) this.gameMode, this.hardcore,
             (net.minecraft.world.Difficulty) (Object) this.difficulty, this.commandsEnabled, new GameRules(), DatapackCodec.DEFAULT);
 
         final WorldSettingsBridge settingsBridge = (WorldSettingsBridge) (Object) settings;
-        ((ResourceKeyBridge) (Object) settings).bridge$setKey(this.key);
         settingsBridge.bridge$setDimensionType((net.minecraft.world.DimensionType) this.dimensionType);
         settingsBridge.bridge$setWorldGenerationSettings(this.worldGenerationSettings);
         settingsBridge.bridge$setSerializationBehavior(this.serializationBehavior);

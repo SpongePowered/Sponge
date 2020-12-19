@@ -34,7 +34,7 @@ import org.spongepowered.common.event.tracking.context.transaction.type.Transact
 
 public final class SpongeRegistryTypes {
 
-    public static final RegistryType<TransactionType<?>> BLOCK_TRANSACTION_TYPE = SpongeRegistryTypes.spongeKey("block_transaction_type");
+    public static final RegistryType<TransactionType<?>> TRANSACTION_TYPE = SpongeRegistryTypes.spongeKey("transaction_type");
 
     public static final RegistryType<CommandRegistrar<?>> COMMAND_REGISTRAR = SpongeRegistryTypes.spongeKey("command_registrar");
 

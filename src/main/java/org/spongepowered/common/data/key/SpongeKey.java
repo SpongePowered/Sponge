@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.data.key;
 
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.EmptyDataProvider;
 import org.spongepowered.common.data.value.ValueConstructor;
@@ -41,7 +43,7 @@ import java.util.Comparator;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
-public final class SpongeKey<V extends Value<E>, E> implements Key<V> {
+public final class SpongeKey<V extends Value<E>, E> extends AbstractResourceKeyed implements Key<V> {
 
     private final Type valueType;
     private final Type elementType;
@@ -51,9 +53,11 @@ public final class SpongeKey<V extends Value<E>, E> implements Key<V> {
     private final Supplier<E> defaultValueSupplier;
     private final EmptyDataProvider<V, E> emptyDataProvider;
 
-    public SpongeKey(final Type valueType, final Type elementType,
+    public SpongeKey(final ResourceKey key, final Type valueType, final Type elementType,
             final Comparator<? super E> elementComparator,
             final BiPredicate<? super E, ? super E> elementIncludesTester, final Supplier<E> defaultValueSupplier) {
+        super(key);
+
         this.valueType = valueType;
         this.elementType = elementType;
         this.elementComparator = elementComparator;

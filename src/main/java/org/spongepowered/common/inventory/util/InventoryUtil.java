@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.util;
 
 import net.minecraft.block.ChestBlock;
+import net.minecraft.entity.EntityType;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.inventory.IInventory;
@@ -39,6 +40,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
@@ -53,8 +55,9 @@ import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public final class InventoryUtil {
 
@@ -121,14 +124,14 @@ public final class InventoryUtil {
         if (forgeItemHandler instanceof Inventory) {
             return ((Inventory) forgeItemHandler);
         }
-        return PlatformHooks.getInstance().getInventoryHooks().toInventory(inventory, forgeItemHandler);
+        return PlatformHooks.INSTANCE.getInventoryHooks().toInventory(inventory, forgeItemHandler);
     }
 
     public static InventoryAdapter findAdapter(final Object inventory) {
         if (inventory instanceof InventoryAdapter) {
             return ((InventoryAdapter) inventory);
         }
-        return PlatformHooks.getInstance().getInventoryHooks().findInventoryAdapter(inventory);
+        return PlatformHooks.INSTANCE.getInventoryHooks().findInventoryAdapter(inventory);
     }
 
     public static TrackedInventoryBridge forCapture(final Object toCapture) {
@@ -156,12 +159,12 @@ public final class InventoryUtil {
         final Object base = inventory;
 
         if (base instanceof BlockEntity) {
-            final ResourceKey key = ((BlockEntity) base).getBlock().getType().getKey();
+            final ResourceKey key = Sponge.getGame().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(((BlockEntity) base).getType());
             final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId)
                     .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + key.getNamespace() + ":" + key.getValue()));
         } else if (base instanceof Entity) {
-            final ResourceKey key = ((Entity) base).getType().getKey();
+            final ResourceKey key = (ResourceKey) (Object) EntityType.getKey((EntityType<?>) ((Entity) base).getType());
             final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId).orElseGet(() -> {
                 SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
@@ -170,7 +173,7 @@ public final class InventoryUtil {
         } else if (base instanceof SpongeUser) {
             container = Launch.getInstance().getMinecraftPlugin();
         } else {
-            container = Sponge.getPluginManager().getPlugin(PlatformHooks.getInstance()
+            container = Sponge.getPluginManager().getPlugin(PlatformHooks.INSTANCE
                 .getInventoryHooks()
                 .getModIdFromInventory(base.getClass()))
                 .orElseGet(() -> {

@@ -90,7 +90,6 @@ public final class SpongeDataManager implements DataManager {
     private final Map<Class<? extends DataHolder.Immutable<?>>, DataHolderBuilder.Immutable<?, ?>> immutableDataBuilderMap;
     private final Map<Class<? extends DataSerializable>, List<DataContentUpdater>> updatersMap;
     private final List<DataContentUpdater> customDataUpdaters;
-    private final Map<String, List<SpongeDataRegistration>> registrationByPluginId;
     private final Map<String, SpongeDataRegistration> legacyRegistrations;
     private final List<KeyBasedDataListener<?>> keyListeners;
 
@@ -106,7 +105,6 @@ public final class SpongeDataManager implements DataManager {
                 .makeMap();
         this.updatersMap = new IdentityHashMap<>();
         this.customDataUpdaters = new ArrayList<>();
-        this.registrationByPluginId = new IdentityHashMap<>();
         this.legacyRegistrations = new HashMap<>();
         this.keyListeners = new ArrayList<>();
     }
@@ -248,11 +246,6 @@ public final class SpongeDataManager implements DataManager {
     }
 
     @Override
-    public Collection<DataRegistration> getAllRegistrationsFor(final PluginContainer container) {
-        return Collections.unmodifiableCollection(this.registrationByPluginId.getOrDefault(container.getMetadata().getId(), Collections.emptyList()));
-    }
-
-    @Override
     public DataContainer createContainer() {
         return new MemoryDataContainer();
     }
@@ -270,12 +263,6 @@ public final class SpongeDataManager implements DataManager {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void registerCustomDataRegistration(final SpongeDataRegistration registration) {
-        if (!registration.key.getNamespace().equals(registration.plugin.getMetadata().getId())) {
-            throw new IllegalStateException(String.format("Registration namespace (%s) is not matching plugin id (%s)", registration.key, registration.plugin.getMetadata().getId()));
-        }
-
-        this.registrationByPluginId.computeIfAbsent(registration.getPlugin().getMetadata().getId(), k -> new ArrayList<>()).add(registration);
-
         for (final DataStore dataStore : registration.getDataStores()) {
             this.dataStoreRegistry.register(dataStore, registration.getKeys());
         }
@@ -304,7 +291,6 @@ public final class SpongeDataManager implements DataManager {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void registerDataRegistration(final SpongeDataRegistration registration) {
-        this.registrationByPluginId.computeIfAbsent(registration.getPlugin().getMetadata().getId(), k -> new ArrayList<>()).add(registration);
         for (final DataStore dataStore : registration.getDataStores()) {
             this.dataStoreRegistry.register(dataStore, registration.getKeys());
         }

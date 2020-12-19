@@ -40,7 +40,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.accessor.util.text.TextFormattingAccessor;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +48,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public final class SpongeColorValueParameter extends CatalogedArgumentParser<Color> {
+public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueParser<Color> {
 
     private final static Pattern HEX_CODE = Pattern.compile("#[0-9A-Fa-f]{6}");
     private final ColorArgument colorArgumentType = ColorArgument.color();

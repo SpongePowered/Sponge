@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.fluid;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -37,6 +35,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.fluid.FluidStack;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.util.Constants;
 
@@ -105,11 +104,11 @@ public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
             if (contentVersion != this.getContentVersion()) {
                 throw new InvalidDataException("Older content found! Cannot set raw data of older content!");
             }
-            final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
+            final String rawFluid = container.getString(Constants.Fluids.FLUID_TYPE).get();
             final int volume = container.getInt(Constants.Fluids.FLUID_VOLUME).get();
-            final Optional<FluidType> fluidType = Sponge.getRegistry().getCatalogRegistry().get(FluidType.class, ResourceKey.resolve(fluidId));
+            final Optional<FluidType> fluidType = Sponge.getGame().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
             if (!fluidType.isPresent()) {
-                throw new InvalidDataException("Unknown FluidType found! Requested: " + fluidId + "but got none.");
+                throw new InvalidDataException("Unknown FluidType found! Requested: " + rawFluid + "but got none.");
             }
             this.fluidType = fluidType.get();
             this.volume = volume;
@@ -129,9 +128,10 @@ public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
     @Override
     @NonNull
     public DataContainer toContainer() {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.FLUID_TYPE).valueKey(this.fluidType);
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.Fluids.FLUID_TYPE, this.fluidType.getKey().toString())
+            .set(Constants.Fluids.FLUID_TYPE, resourceKey)
             .set(Constants.Fluids.FLUID_VOLUME, this.volume);
         if (this.extraData != null) {
             container.set(Constants.Sponge.UNSAFE_NBT, this.extraData);

@@ -32,9 +32,9 @@ public final class SpongeRegistries {
         VanillaRegistryLoader.load(holder);
         holder.createRegistry(RegistryTypes.ACCOUNT_DELETION_RESULT_TYPE, SpongeRegistryLoaders.accountDeletionResultType().values());
         holder.createRegistry(RegistryTypes.BAN_TYPE, SpongeRegistryLoaders.banType().values());
-        holder.createRegistry(SpongeRegistryTypes.BLOCK_TRANSACTION_TYPE, SpongeRegistryLoaders.blockTransactionTypes().values());
+        holder.createRegistry(SpongeRegistryTypes.TRANSACTION_TYPE, SpongeRegistryLoaders.blockTransactionTypes().values());
         holder.createRegistry(RegistryTypes.BODY_PART, SpongeRegistryLoaders.bodyPart().values());
-        holder.createRegistry(RegistryTypes.CATALOGED_VALUE_PARAMETER, SpongeRegistryLoaders.catalogedValueParameter().values());
+        holder.createRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, SpongeRegistryLoaders.valueParameter().values());
         holder.createRegistry(RegistryTypes.CLICK_TYPE, SpongeRegistryLoaders.clickType().values());
         holder.createRegistry(RegistryTypes.CLIENT_COMPLETION_KEY, SpongeRegistryLoaders.clientCompletionKey().values());
         holder.createRegistry(RegistryTypes.CLIENT_COMPLETION_TYPE, SpongeRegistryLoaders.clientCompletionType().values());
@@ -49,7 +49,6 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.GOAL_TYPE, SpongeRegistryLoaders.goalType().values());
         holder.createRegistry(RegistryTypes.HORSE_COLOR, SpongeRegistryLoaders.horseColor().values());
         holder.createRegistry(RegistryTypes.HORSE_STYLE, SpongeRegistryLoaders.horseStyle().values());
-        holder.createRegistry(RegistryTypes.KEY, SpongeRegistryLoaders.key().values());
         holder.createRegistry(RegistryTypes.LLAMA_TYPE, SpongeRegistryLoaders.llamaType().values());
         holder.createRegistry(RegistryTypes.MATTER_TYPE, SpongeRegistryLoaders.matterType().values());
         holder.createRegistry(RegistryTypes.MOVEMENT_TYPE, SpongeRegistryLoaders.movementType().values());
@@ -67,6 +66,7 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.SKIN_PART, SpongeRegistryLoaders.skinPart().values());
         holder.createRegistry(RegistryTypes.SPAWN_TYPE, SpongeRegistryLoaders.spawnType().values());
         holder.createRegistry(RegistryTypes.TELEPORT_HELPER_FILTER, SpongeRegistryLoaders.teleportHelperFilter().values());
+        holder.createRegistry(SpongeRegistryTypes.VALIDATION_TYPE, SpongeRegistryLoaders.validationType().values());
         holder.createRegistry(RegistryTypes.WEATHER, SpongeRegistryLoaders.weather().values());
 
         // ----------------------------------------------------------------------------------------------------

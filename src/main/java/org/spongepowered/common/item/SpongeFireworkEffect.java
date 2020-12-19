@@ -26,10 +26,13 @@ package org.spongepowered.common.item;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.util.Constants;
 
@@ -106,9 +109,11 @@ public class SpongeFireworkEffect implements FireworkEffect {
 
     @Override
     public DataContainer toContainer() {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.FIREWORK_SHAPE).valueKey(this.shape);
+
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Constants.Item.Fireworks.FIREWORK_SHAPE, this.shape.getKey())
+                .set(Constants.Item.Fireworks.FIREWORK_SHAPE, resourceKey)
                 .set(Constants.Item.Fireworks.FIREWORK_COLORS, this.colors)
                 .set(Constants.Item.Fireworks.FIREWORK_FADE_COLORS, this.fades)
                 .set(Constants.Item.Fireworks.FIREWORK_TRAILS, this.trails)

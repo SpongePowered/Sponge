@@ -34,7 +34,7 @@ public final class SpongeNotePitch implements NotePitch {
 
     @Override
     public NotePitch cycleNext() {
-        final SimpleRegistry<NotePitch> registry = (SimpleRegistry<NotePitch>) Sponge.getGame().registries().registry(RegistryTypes.NOTE_PITCH);
+        final SimpleRegistry<NotePitch> registry = (SimpleRegistry<NotePitch>) (Object) Sponge.getGame().registries().registry(RegistryTypes.NOTE_PITCH);
         final int value = registry.getId(this) + 1;
         NotePitch next = registry.byId(value);
         if (next == null) {

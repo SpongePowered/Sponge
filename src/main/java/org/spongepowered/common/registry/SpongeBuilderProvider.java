@@ -100,12 +100,12 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.service.ban.Ban;
-import org.spongepowered.api.util.Builder;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.gen.WorldGenerationSettings;
+import org.spongepowered.api.world.gen.MutableWorldGenerationSettings;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
@@ -185,7 +185,7 @@ import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
-import org.spongepowered.common.world.gen.SpongeWorldGenerationSettingsBuilder;
+import org.spongepowered.common.world.gen.SpongeMutableWorldGenerationSettingsBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.volume.stream.SpongeStreamOptionsBuilder;
 
@@ -204,7 +204,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
     }
 
     @Override
-    public <T extends Builder<?, ? super T>> T provide(final Class<T> builderClass) {
+    public <T extends ResettableBuilder<?, ? super T>> T provide(final Class<T> builderClass) {
         final Supplier<?> supplier = this.builders.get(builderClass);
         if (supplier == null) {
             throw new TypeNotFoundException(String.format("Type '%s' has no builder registered!", builderClass));
@@ -265,7 +265,6 @@ public final class SpongeBuilderProvider implements BuilderProvider {
             .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
 //            .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
 //            .register(Schematic.Builder.class, SpongeSchematicBuilder::new)
-            .register(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
             .register(Inventory.Builder.class, SpongeInventoryBuilder::new)
             .register(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)
             .register(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
@@ -310,7 +309,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
             .register(PaletteType.Builder.class, SpongePaletteTypeBuilder::new)
             .register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new)
             .register(FluidState.Builder.class, SpongeFluidStateBuilder::new)
-            .register(WorldGenerationSettings.Builder.class, SpongeWorldGenerationSettingsBuilder::new)
+            .register(MutableWorldGenerationSettings.Builder.class, SpongeMutableWorldGenerationSettingsBuilder::new)
         ;
     }
 }

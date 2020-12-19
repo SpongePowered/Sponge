@@ -22,40 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.util;
+package org.spongepowered.common;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.ResourceKeyed;
 
-import java.util.Optional;
+public abstract class AbstractResourceKeyed implements ResourceKeyed {
 
-public final class LegacyCustomDataClassContentUpdater implements DataContentUpdater {
+    private final ResourceKey key;
 
-    @Override
-    public int getInputVersion() {
-        return Constants.Sponge.CLASS_BASED_CUSTOM_DATA;
+    public AbstractResourceKeyed(final ResourceKey key) {
+        this.key = key;
     }
 
     @Override
-    public int getOutputVersion() {
-        return Constants.Sponge.CUSTOM_DATA_WITH_DATA_IDS;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public DataView update(final DataView content) {
-        final String className = content.getString(Constants.Sponge.DATA_CLASS).get();
-
-        final Optional<DataRegistration> registration = ((SpongeDataManager) Sponge.getGame().getDataManager()).getRegistrationForLegacyId(className);
-        if (!registration.isPresent()) {
-            return content;
-        }
-        content.set(Constants.Sponge.DATA_ID, registration.get().getKey().toString());
-        content.remove(Constants.Sponge.DATA_CLASS);
-        return content;
+    public final ResourceKey getKey() {
+        return this.key;
     }
 }

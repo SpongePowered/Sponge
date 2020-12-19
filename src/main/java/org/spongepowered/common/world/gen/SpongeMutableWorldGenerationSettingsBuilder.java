@@ -33,7 +33,7 @@ import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAcc
 
 import java.util.Optional;
 
-public final class SpongeWorldGenerationSettingsBuilder implements MutableWorldGenerationSettings.Builder {
+public final class SpongeMutableWorldGenerationSettingsBuilder implements MutableWorldGenerationSettings.Builder {
 
     private long seed;
     private boolean generateFeatures, generateBonusChest;

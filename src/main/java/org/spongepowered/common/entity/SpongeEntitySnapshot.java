@@ -147,7 +147,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
                 .set(Queries.POSITION_Y, this.scale.getY())
                 .set(Queries.POSITION_Z, this.scale.getZ())
                 .getContainer()
-                .set(Constants.Entity.TYPE, this.entityType.getKey())
+                .set(Constants.Entity.TYPE, net.minecraft.entity.EntityType.getKey((net.minecraft.entity.EntityType<?>) this.entityType))
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
 
         if (this.uniqueId != null) {

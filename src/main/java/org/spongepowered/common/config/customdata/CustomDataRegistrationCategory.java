@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.config.customdata;
 
-import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
+import org.spongepowered.common.data.persistence.datastore.SpongeCustomDataStore;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -95,10 +95,10 @@ public final class CustomDataRegistrationCategory {
              + "when necessary.")
     public boolean printFailedData = false;
 
-    public void populateRegistrations(final Collection<DataRegistration> registrations) {
+    public void populateRegistrations(final Collection<SpongeCustomDataStore> stores) {
         this.registeredData.clear();
-        for (final DataRegistration registration : registrations) {
-            this.registeredData.add(registration.getKey().getFormatted());
+        for (final SpongeCustomDataStore store : stores) {
+            this.registeredData.add(store.getCustomDataKey().getFormatted());
         }
     }
 

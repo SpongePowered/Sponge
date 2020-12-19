@@ -35,14 +35,14 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-public final class SpongeDataContainerValueParameter extends CatalogedArgumentParser<DataContainer> {
+public final class SpongeDataContainerValueParameter extends ResourceKeyedArgumentValueParser<DataContainer> {
 
     public SpongeDataContainerValueParameter(final ResourceKey key) {
         super(key);

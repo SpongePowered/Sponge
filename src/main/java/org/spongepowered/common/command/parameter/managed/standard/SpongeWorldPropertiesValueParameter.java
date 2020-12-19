@@ -36,14 +36,14 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class SpongeWorldPropertiesValueParameter extends CatalogedArgumentParser<WorldProperties> {
+public final class SpongeWorldPropertiesValueParameter extends ResourceKeyedArgumentValueParser<WorldProperties> {
 
     private final boolean selectAll;
 

@@ -25,13 +25,8 @@
 package org.spongepowered.common.data.provider.inventory;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
-import org.spongepowered.common.util.Constants;
 
 public final class InventoryDataProviders extends DataProviderRegistratorBuilder {
-
-    public InventoryDataProviders() {
-        super(Constants.Sponge.Entity.DataRegistration.INVENTORY);
-    }
 
     @Override
     public void registerProviders() {

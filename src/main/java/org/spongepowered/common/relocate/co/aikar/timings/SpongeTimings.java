@@ -25,11 +25,12 @@
 package org.spongepowered.common.relocate.co.aikar.timings;
 
 import co.aikar.timings.Timing;
-import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.scheduler.AsyncScheduler;
@@ -105,26 +106,20 @@ public final class SpongeTimings {
      * @return The timing
      */
     public static Timing getEntityTiming(EntityType<?> entity) {
-        return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + ((ResourceKeyBridge) entity).bridge$getKey().getFormatted());
+        return SpongeTimingsFactory.ofSafe("Minecraft", "## blockEntity - " + ((ResourceKeyBridge) entity).bridge$getKey().getFormatted());
     }
 
-    /**
-     * Get a named timer for the specified tile entity type to track type specific timings.
-     * @param entity
-     * @return
-     */
-    public static Timing getTileEntityTiming(BlockEntity entity) {
-        BlockEntityType type = entity.getType();
-        String entityType = type != null ? type.getKey().toString() : entity.getClass().getName();
-        return SpongeTimingsFactory.ofSafe("Minecraft", "## tickTileEntity - " + entityType);
+    public static Timing getTileEntityTiming(final BlockEntity entity) {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(entity.getType());
+        return SpongeTimingsFactory.ofSafe("Minecraft", "## tickBlockEntity - " + resourceKey);
     }
 
     public static Timing getModTimings(PluginContainer plugin, String context) {
-        return SpongeTimingsFactory.ofSafe(plugin.getMetadata().getName().orElse(plugin.getMetadata().getId()), context, TimingsManager.MOD_EVENT_HANDLER);
+        return SpongeTimingsFactory.ofSafe(plugin.getMetadata().getId(), context, TimingsManager.MOD_EVENT_HANDLER);
     }
 
     public static Timing getPluginTimings(PluginContainer plugin, String context) {
-        return SpongeTimingsFactory.ofSafe(plugin.getMetadata().getName().orElse(plugin.getMetadata().getId()), context, TimingsManager.PLUGIN_EVENT_HANDLER);
+        return SpongeTimingsFactory.ofSafe(plugin.getMetadata().getId(), context, TimingsManager.PLUGIN_EVENT_HANDLER);
     }
 
     public static Timing getPluginSchedulerTimings(PluginContainer plugin) {
@@ -143,8 +138,8 @@ public final class SpongeTimings {
         TimingsManager.stopServer();
     }
 
-    public static Timing getBlockTiming(Block block) {
-        BlockType type = (BlockType) block;
-        return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + type != null ? type.getKey().toString() : block.getDescriptionId());
+    public static Timing getBlockTiming(BlockType block) {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey(block);
+        return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + resourceKey);
     }
 }

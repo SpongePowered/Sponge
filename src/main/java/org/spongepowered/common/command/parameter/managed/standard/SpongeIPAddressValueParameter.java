@@ -32,14 +32,14 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Optional;
 
-public final class SpongeIPAddressValueParameter extends CatalogedArgumentParser<InetAddress> {
+public final class SpongeIPAddressValueParameter extends ResourceKeyedArgumentValueParser<InetAddress> {
 
     public SpongeIPAddressValueParameter(final ResourceKey key) {
         super(key);

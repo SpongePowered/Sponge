@@ -32,13 +32,13 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-public final class SpongeBigDecimalValueParameter extends CatalogedArgumentParser<BigDecimal> {
+public final class SpongeBigDecimalValueParameter extends ResourceKeyedArgumentValueParser<BigDecimal> {
 
     public SpongeBigDecimalValueParameter(final ResourceKey key) {
         super(key);

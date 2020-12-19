@@ -32,9 +32,9 @@ import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.accessor.world.border.WorldBorderAccessor;
 
-public class PlayerOwnBorderListener implements IBorderListener {
+public final class PlayerOwnBorderListener implements IBorderListener {
 
-    private ServerPlayerEntity player;
+    private final ServerPlayerEntity player;
 
     public PlayerOwnBorderListener(final ServerPlayerEntity player) {
         this.player = player;

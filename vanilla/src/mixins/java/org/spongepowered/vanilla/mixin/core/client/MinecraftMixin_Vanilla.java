@@ -62,8 +62,9 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
     @Inject(method = "run", at = @At("HEAD"))
     private void vanilla$establishRegistriesAndStartingEngine(CallbackInfo ci) {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
-        lifecycle.establishRegistries();
+        lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
+        lifecycle.establishEngineRegistries(this);
 
         lifecycle.callStartingEngineEvent(this);
 

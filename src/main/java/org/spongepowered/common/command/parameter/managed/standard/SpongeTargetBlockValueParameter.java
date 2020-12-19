@@ -35,11 +35,11 @@ import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.common.command.brigadier.argument.CatalogedZeroAdvanceValueParameter;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedZeroAdvanceValueParameter;
 
 import java.util.Optional;
 
-public final class SpongeTargetBlockValueParameter extends CatalogedZeroAdvanceValueParameter<ServerLocation> {
+public final class SpongeTargetBlockValueParameter extends ResourceKeyedZeroAdvanceValueParameter<ServerLocation> {
 
     public SpongeTargetBlockValueParameter(final ResourceKey key) {
         super(key);

@@ -41,7 +41,6 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.fluid.FluidType;
-import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.scheduler.TaskPriority;
 import org.spongepowered.api.util.Direction;
@@ -408,11 +407,6 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
 
     @Override
     public boolean supports(final Key<?> key) {
-        return this.getWorld().supports(this.getBlockPosition(), key);
-    }
-
-    @Override
-    public boolean supports(final Supplier<? extends Key<?>> key) {
         return this.getWorld().supports(this.getBlockPosition(), key);
     }
 

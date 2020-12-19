@@ -42,7 +42,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.user.UserManager;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
 import java.util.List;
@@ -51,7 +51,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public final class SpongeUserValueParameter extends CatalogedArgumentParser<User> {
+public final class SpongeUserValueParameter extends ResourceKeyedArgumentValueParser<User> {
 
     private final EntityArgument selectorArgumentType = EntityArgument.player();
 

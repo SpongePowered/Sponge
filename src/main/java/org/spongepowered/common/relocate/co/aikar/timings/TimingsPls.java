@@ -26,24 +26,15 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.EntityType;
 
 final class TimingsPls {
     private static final Object2IntMap<EntityType<?>> ENTITY_IDS = new Object2IntOpenHashMap<>();
-    private static final Object2IntMap<BlockEntityType> TILE_ENTITY_IDS = new Object2IntOpenHashMap<>();
+    private static final Object2IntMap<BlockEntityType> BLOCK_ENTITY_IDS = new Object2IntOpenHashMap<>();
     private static final int NOT_FOUND = Integer.MIN_VALUE;
     private static int nextEntityId = 56991891; // Some random number
-    private static int nextTileEntityId = 13221456; // Some random number
-
-    static {
-        TimingsPls.ENTITY_IDS.defaultReturnValue(TimingsPls.NOT_FOUND);
-        int count = -1;
-        for (BlockEntityType tileEntityType : Sponge.getGame().getRegistry().getCatalogRegistry().getAllOf(CatalogTypes.BLOCK_ENTITY_TYPE)) {
-            TimingsPls.TILE_ENTITY_IDS.put(tileEntityType, count++);
-        }
-    }
+    private static int nextBlockEntityId = 13221456; // Some random number
 
     public static int getEntityId(final EntityType<?> type) {
         int fake;
@@ -54,11 +45,11 @@ final class TimingsPls {
         return fake;
     }
 
-    public static int getTileEntityId(final BlockEntityType type) {
+    public static int getBlockEntityId(final BlockEntityType type) {
         int fake;
-        if ((fake = TimingsPls.TILE_ENTITY_IDS.getInt(type)) == TimingsPls.NOT_FOUND) {
-            fake = TimingsPls.nextTileEntityId++;
-            TimingsPls.TILE_ENTITY_IDS.put(type, fake);
+        if ((fake = TimingsPls.BLOCK_ENTITY_IDS.getInt(type)) == TimingsPls.NOT_FOUND) {
+            fake = TimingsPls.nextBlockEntityId++;
+            TimingsPls.BLOCK_ENTITY_IDS.put(type, fake);
         }
         return fake;
     }

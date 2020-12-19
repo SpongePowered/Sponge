@@ -93,7 +93,7 @@ public final class EntityUtil {
 
         ServerWorld toWorld = originalToWorld;
 
-        final ChangeEntityWorldEvent.Pre event = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre(entity, toWorld);
+        final ChangeEntityWorldEvent.Pre event = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(entity, toWorld);
         if (event == null || event.isCancelled() || ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
             return new DimensionChangeResult<>(entity, false, false);
         }
@@ -123,7 +123,7 @@ public final class EntityUtil {
         }
 
         // Sponge Start - Call platform event hook after changing dimensions
-        PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(result, fromWorld, originalToWorld);
+        PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost(result, fromWorld, originalToWorld);
         // Sponge End
 
         return new DimensionChangeResult<>(result, true, false);
@@ -134,7 +134,7 @@ public final class EntityUtil {
 
         ServerWorld toWorld = originalToWorld;
 
-        final ChangeEntityWorldEvent.Pre event = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre(player, toWorld);
+        final ChangeEntityWorldEvent.Pre event = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(player, toWorld);
         if (event == null || event.isCancelled()) {
             return new DimensionChangeResult<>(player, false, false);
         }
@@ -241,7 +241,7 @@ public final class EntityUtil {
         }
 
         // Sponge Start - Call platform event hook after changing dimensions
-        PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(player, fromWorld, originalToWorld);
+        PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost(player, fromWorld, originalToWorld);
         // Sponge End
     }
 
@@ -272,7 +272,7 @@ public final class EntityUtil {
         if (minecraftEntity instanceof ItemEntity) {
             final ItemStack item = ((ItemEntity) minecraftEntity).getItem();
             if (!item.isEmpty()) {
-                final Optional<Entity> customEntityItem = Optional.ofNullable(PlatformHooks.getInstance().getWorldHooks().getCustomEntityIfItem(minecraftEntity));
+                final Optional<Entity> customEntityItem = Optional.ofNullable(PlatformHooks.INSTANCE.getWorldHooks().getCustomEntityIfItem(minecraftEntity));
                 if (customEntityItem.isPresent()) {
                     // Bypass spawning the entity item, since it is established that the custom entity is spawned.
                     final Entity entityToSpawn = customEntityItem.get();

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.entity.passive;
 
+import net.minecraft.entity.BoostHelper;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,4 +39,5 @@ public interface PigEntityAccessor {
         throw new UntransformedAccessorError();
     }
 
+    @Accessor("steering") BoostHelper accessor$steering();
 }

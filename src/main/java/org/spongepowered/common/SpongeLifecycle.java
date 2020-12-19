@@ -53,6 +53,7 @@ import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
+import org.spongepowered.common.registry.SpongeRegistries;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.service.SpongeServiceProvider;
@@ -90,14 +91,11 @@ public final class SpongeLifecycle {
         this.game.getEventManager().post(new RegisterBuilderEventImpl(Cause.of(EventContext.empty(), this.game), this.game));
     }
 
-    public void establishRegistries() {
+    public void establishGlobalRegistries() {
         // Need to do this here to prevent classloading Registry too early...
         ((SpongeRegistryHolder) this.game.registries()).setRootMinecraftRegistry((Registry<Registry<?>>) Registry.REGISTRY);
 
-        final SpongeCatalogRegistry spongeCatalogRegistry = (SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry();
-
-        spongeCatalogRegistry.registerDefaultRegistries();
-        spongeCatalogRegistry.registerDefaultSuppliers();
+        SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) Sponge.getGame().registries());
 
         this.game.getEventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
         spongeCatalogRegistry.callRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
@@ -150,6 +148,12 @@ public final class SpongeLifecycle {
             ((SpongeEventManager) this.game.getEventManager()).post(SpongeEventFactory.createConstructPluginEvent(Cause.of(EventContext.empty(),
                     this.game), this.game, plugin), plugin);
         }
+    }
+
+    public void establishEngineRegistries(final Engine engine) {
+        SpongeRegistries.registerEngineRegistries((SpongeRegistryHolder) engine.registries());
+        this.game.getEventManager().post(new AbstractRegisterRegistryEvent.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.game), this.game,
+         engine));
     }
 
     public void callStartingEngineEvent(final Engine engine) {
