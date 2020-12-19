@@ -39,7 +39,9 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.configurate.util.Types;
 
@@ -78,28 +80,36 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
     @SuppressWarnings({"rawtypes", "unchecked"})
     public <T> BiFunction<DataView, DataQuery, Optional<T>> getDeserializer(final Type elementType) {
         final Class<?> rawType = GenericTypeReflector.erase(elementType);
-        final BiFunction<DataView, DataQuery, Optional<T>> deserializer;
         if (DataView.class.isAssignableFrom(rawType)) {
-            deserializer = (view, dataQuery) -> (Optional<T>) view.getView(dataQuery);
-        } else if (DataSerializable.class.isAssignableFrom(rawType)) {
-            deserializer = (view, dataQuery)  -> (Optional<T>) view.getSerializable(dataQuery, (Class<? extends DataSerializable>) rawType);
-        } else if (CatalogType.class.isAssignableFrom(rawType)) {
-            deserializer = (view, dataQuery)  -> (Optional<T>) view.getRegistryValue(dataQuery, ((Class<? extends CatalogType>) rawType));
-        } else if (Sponge.getGame().getDataManager().getTranslator(rawType).isPresent()) {
-            deserializer = (view, dataQuery)  -> (Optional<T>) view.getObject(dataQuery, rawType);
-        } else if (Set.class.isAssignableFrom(rawType)) {
+            return (view, dataQuery) -> (Optional<T>) view.getView(dataQuery);
+        }
+        if (DataSerializable.class.isAssignableFrom(rawType)) {
+            return (view, dataQuery)  -> (Optional<T>) view.getSerializable(dataQuery, (Class<? extends DataSerializable>) rawType);
+        }
+        final Optional<RegistryType<Object>> registryTypeForValue = SpongeDataManager.INSTANCE.findRegistryTypeFor(rawType);
+        if (registryTypeForValue.isPresent()) {
+            return (view, dataQuery)  -> (Optional<T>) registryTypeForValue.flatMap(regType -> view.getRegistryValue(dataQuery, regType));
+        }
+        if (Sponge.getGame().getDataManager().getTranslator(rawType).isPresent()) {
+            return (view, dataQuery)  -> (Optional<T>) view.getObject(dataQuery, rawType);
+        }
+        if (Set.class.isAssignableFrom(rawType)) {
             final Type listType = ((ParameterizedType) elementType).getActualTypeArguments()[0];
-            deserializer = (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) listType, view, dataQuery).map(list -> new HashSet(list));
-        } else if (List.class.isAssignableFrom(rawType)) {
+            return (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) listType, view, dataQuery).map(list -> new HashSet(list));
+        }
+        if (List.class.isAssignableFrom(rawType)) {
             final Type listType = ((ParameterizedType) elementType).getActualTypeArguments()[0];
-            deserializer = (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) listType, view, dataQuery);
-        } else if (Collection.class.isAssignableFrom(rawType)) {
+            return (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) listType, view, dataQuery);
+        }
+        if (Collection.class.isAssignableFrom(rawType)) {
             throw new UnsupportedOperationException("Collection deserialization is not supported. Provide the deserializer for it.");
-        } else if (Types.isArray(elementType)) {
+        }
+        if (Types.isArray(elementType)) {
             final Class arrayType = GenericTypeReflector.erase(GenericTypeReflector.getArrayComponentType(elementType));
-            deserializer = (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) arrayType, view, dataQuery).map(list -> this
-                .listToArray(arrayType, list));
-        } else if (Map.class.isAssignableFrom(rawType)) {
+            return (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) arrayType, view, dataQuery).map(list -> this
+                    .listToArray(arrayType, list));
+        }
+        if (Map.class.isAssignableFrom(rawType)) {
             final Type[] parameterTypes = ((ParameterizedType) elementType).getActualTypeArguments();
             final Type keyType = parameterTypes[0];
             final Type valueType = parameterTypes[1];
@@ -107,9 +117,10 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
                 throw new UnsupportedOperationException("Unsupported map-key type " + keyType);
             }
             final Function<DataQuery, Optional<?>> keyDeserializer;
-            if (((Class<?>) keyType).isAssignableFrom(CatalogType.class)) {
-                keyDeserializer = key -> Sponge.getRegistry().getCatalogRegistry()
-                        .get(((Class<? extends CatalogType>) keyType), ResourceKey.resolve(key.toString()));
+            final Optional<RegistryType<Object>> registryTypeForKey = SpongeDataManager.INSTANCE.findRegistryTypeFor((Class) keyType);
+            if (registryTypeForKey.isPresent()) {
+                keyDeserializer = key -> registryTypeForKey.flatMap(regType -> Sponge.getGame().registries().findRegistry(regType))
+                                                           .flatMap(r -> r.findValue(ResourceKey.resolve(key.toString())));
             } else if (((Class<?>) keyType).isEnum()) {
                 keyDeserializer = key -> Optional.ofNullable(Enum.valueOf(((Class<? extends Enum>) keyType), key.toString()));
             } else if (keyType == String.class) {
@@ -120,20 +131,18 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
                 throw new UnsupportedOperationException("Unsupported map-key type " + keyType);
             }
             final BiFunction<DataView, DataQuery, Optional<Object>> valueDeserializer = this.getDeserializer(valueType);
-            deserializer = (view, dataQuery) -> (Optional<T>) view.getView(dataQuery).map(mapView -> {
-                final Map<Object, Object> resultMap = new HashMap<>();
-                for (final DataQuery key : mapView.getKeys(false)) {
-                    final Object mapKey = keyDeserializer.apply(key)
-                                    .orElseThrow(() -> new UnsupportedOperationException("Key not found " + key + " as " + keyType));
-                    final Optional<?> mapValue = valueDeserializer.apply(mapView, key);
-                    resultMap.put(mapKey, mapValue.get());
-                }
-                return resultMap;
-            });
-        } else {
-            deserializer = (view, dataQuery) -> (Optional<T>) view.get(dataQuery);
+            return (view, dataQuery) -> (Optional<T>) view.getView(dataQuery).map(mapView -> {
+                    final Map<Object, Object> resultMap = new HashMap<>();
+                    for (final DataQuery key : mapView.getKeys(false)) {
+                        final Object mapKey = keyDeserializer.apply(key)
+                                        .orElseThrow(() -> new UnsupportedOperationException("Key not found " + key + " as " + keyType));
+                        final Optional<?> mapValue = valueDeserializer.apply(mapView, key);
+                        resultMap.put(mapKey, mapValue.get());
+                    }
+                    return resultMap;
+                });
         }
-        return deserializer;
+        return (view, dataQuery) -> (Optional<T>) view.get(dataQuery);
     }
 
     @SuppressWarnings("unchecked")
@@ -144,8 +153,10 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
         if (DataSerializable.class.isAssignableFrom(listType)) {
             return (Optional) view.getSerializableList(dataQuery, (Class<? extends DataSerializable>) listType);
         }
-        if (CatalogType.class.isAssignableFrom(listType)) {
-            return (Optional) view.getRegistryValueList(dataQuery, (Class<? extends CatalogType>) listType);
+        final Optional<List<Object>> fromRegistry = SpongeDataManager.INSTANCE.findRegistryTypeFor(listType)
+                .flatMap(regType -> view.getRegistryValueList(dataQuery, regType));
+        if (fromRegistry.isPresent()) {
+            return (Optional) fromRegistry;
         }
         if (Sponge.getGame().getDataManager().getTranslator(listType).isPresent()) {
             return view.getObjectList(dataQuery, listType);

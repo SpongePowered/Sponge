@@ -265,7 +265,18 @@ public class MemoryDataView implements DataView {
             checkArgument(!(valueContainer).equals(this), "Cannot insert self-referencing DataSerializable");
             // see above for why this is copied
             this.copyDataView(path, valueContainer);
-        } else if (value instanceof ResourceKey) {
+        } else if (SpongeDataManager.INSTANCE.findRegistryTypeFor(value.getClass()).isPresent()) {
+            final RegistryType<Object> registry = SpongeDataManager.INSTANCE.findRegistryTypeFor(value.getClass()).get();
+            final ResourceKey valueKey = Sponge.getGame().registries().registry(registry).valueKey(value);
+            // TODO if we serialize into a DataView - deserialize needs to do it too
+//            final DataView view = this.createView(path);
+//            view.set(DataQuery.of("registryroot"), registry.root());
+//            view.set(DataQuery.of("registrylocation"), registry.location());
+//            view.set(DataQuery.of("valuekey"), valueKey);
+//            view.set(DataQuery.of("scope"), scope);
+            return this.set(path, valueKey);
+        }
+        else if (value instanceof ResourceKey) {
             return this.set(path, value.toString());
         } else if (manager != null && manager.getTranslator(value.getClass()).isPresent()) {
             final DataTranslator serializer = manager.getTranslator(value.getClass()).get();

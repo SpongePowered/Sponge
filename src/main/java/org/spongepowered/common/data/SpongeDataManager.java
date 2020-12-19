@@ -50,8 +50,11 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotDataBuilder;
 import org.spongepowered.common.data.key.KeyBasedDataListener;
@@ -64,12 +67,10 @@ import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 import org.spongepowered.common.world.storage.SpongePlayerDataBuilder;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -324,5 +325,29 @@ public final class SpongeDataManager implements DataManager {
 
     public Optional<DataStore> getDataStore(ResourceKey key, Class<? extends DataHolder> typeToken) {
         return this.dataStoreRegistry.getDataStore(key, typeToken);
+    }
+
+    private Map<Class<?>, RegistryType<?>> registryTypeMap;
+
+    @SuppressWarnings("rawtypes")
+    public <T> Optional<RegistryType<T>> findRegistryTypeFor(Class type) {
+        if (this.registryTypeMap == null) {
+            this.registryTypeMap = new HashMap<>();
+            this.registryTypeMap.put(ItemType.class, RegistryTypes.ITEM_TYPE);
+            // TODO add all RegistryTypes that we have global registries for
+            // there needs to be a better way to do this
+        }
+
+        final RegistryType<?> directMatch = this.registryTypeMap.get(type);
+        if (directMatch != null) {
+            return Optional.of((RegistryType<T>) directMatch);
+        }
+        for (Map.Entry<Class<?>, RegistryType<?>> entry : this.registryTypeMap.entrySet()) {
+            if (entry.getKey().isAssignableFrom(type)) {
+                this.registryTypeMap.put(type, entry.getValue());
+                return Optional.of((RegistryType<T>) entry.getValue());
+            }
+        }
+        return Optional.empty();
     }
 }
