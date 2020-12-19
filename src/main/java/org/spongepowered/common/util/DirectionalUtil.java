@@ -26,7 +26,9 @@ package org.spongepowered.common.util;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.WallHeight;
 import net.minecraft.state.BooleanProperty;
+import net.minecraft.state.EnumProperty;
 import org.spongepowered.api.util.Direction;
 
 import java.util.HashSet;
@@ -56,6 +58,28 @@ public final class DirectionalUtil {
                 .put(Direction.UP, up)
                 .build();
         return DirectionalUtil.getFrom(holder, sides);
+    }
+
+    public static Set<Direction> getHorizontalUpFrom(final BlockState holder,
+            final EnumProperty<WallHeight> east, final EnumProperty<WallHeight> west, final EnumProperty<WallHeight> north, final EnumProperty<WallHeight> south,
+            final BooleanProperty up) {
+        final Map<Direction, EnumProperty<WallHeight>> sides = ImmutableMap.<Direction, EnumProperty<WallHeight>>builder()
+                .put(Direction.EAST, east)
+                .put(Direction.WEST, west)
+                .put(Direction.NORTH, north)
+                .put(Direction.SOUTH, south)
+                .build();
+        final Set<Direction> directions = new HashSet<>();
+
+        if (holder.getValue(up)) {
+            directions.add(Direction.UP);
+        }
+        for (final Map.Entry<Direction, EnumProperty<WallHeight>> entry : sides.entrySet()) {
+            if (holder.getValue(entry.getValue()) != WallHeight.NONE) {
+                directions.add(entry.getKey());
+            }
+        }
+        return directions;
     }
 
     public static Set<Direction> getHorizontalUpDownFrom(final BlockState holder,
@@ -105,6 +129,22 @@ public final class DirectionalUtil {
                 .put(Direction.UP, up)
                 .build();
         return DirectionalUtil.set(holder, value, sides);
+    }
+
+    public static BlockState setHorizontalUpFor(BlockState holder, final Set<Direction> value,
+            final EnumProperty<WallHeight> east, final EnumProperty<WallHeight> west, final EnumProperty<WallHeight> north, final EnumProperty<WallHeight> south,
+            final BooleanProperty up) {
+        final Map<Direction, EnumProperty<WallHeight>> sides = ImmutableMap.<Direction, EnumProperty<WallHeight>>builder()
+                .put(Direction.EAST, east)
+                .put(Direction.WEST, west)
+                .put(Direction.NORTH, north)
+                .put(Direction.SOUTH, south)
+                .build();
+        for (final Map.Entry<Direction, EnumProperty<WallHeight>> entry : sides.entrySet()) {
+            holder = holder.setValue(entry.getValue(), value.contains(entry.getKey()) ? WallHeight.TALL : WallHeight.NONE);
+        }
+        holder.setValue(up, value.contains(Direction.UP));
+        return holder;
     }
 
     public static BlockState setHorizontalUpDownFor(final BlockState holder, final Set<Direction> value,

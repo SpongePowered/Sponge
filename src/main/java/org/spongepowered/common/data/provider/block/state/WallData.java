@@ -38,6 +38,7 @@ public final class WallData {
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
+        // TODO Keys#IS_CONNECTED_X takes a boolean. API needs something to support WallHeight.
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
@@ -48,23 +49,23 @@ public final class WallData {
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_EAST)
                         .get(h -> h.getValue(WallBlock.EAST_WALL) != WallHeight.NONE)
-                        .set((h, v) -> h.with(WallBlock.EAST_WALL, v))
+                        .set((h, v) -> h.setValue(WallBlock.EAST_WALL, v ? WallHeight.TALL : WallHeight.NONE))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_NORTH)
                         .get(h -> h.getValue(WallBlock.NORTH_WALL) != WallHeight.NONE)
-                        .set((h, v) -> h.with(WallBlock.NORTH_WALL, v))
+                        .set((h, v) -> h.setValue(WallBlock.NORTH_WALL, v ? WallHeight.TALL : WallHeight.NONE))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_SOUTH)
                         .get(h -> h.getValue(WallBlock.SOUTH_WALL) != WallHeight.NONE)
-                        .set((h, v) -> h.with(WallBlock.SOUTH_WALL, v))
+                        .set((h, v) -> h.setValue(WallBlock.SOUTH_WALL, v ? WallHeight.TALL : WallHeight.NONE))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_UP)
-                        .get(h -> h.get(WallBlock.UP))
-                        .set((h, v) -> h.with(WallBlock.UP, v))
+                        .get(h -> h.getValue(WallBlock.UP))
+                        .set((h, v) -> h.setValue(WallBlock.UP, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_WEST)
                         .get(h -> h.getValue(WallBlock.WEST_WALL) != WallHeight.NONE)
-                        .set((h, v) -> h.with(WallBlock.WEST_WALL, v))
+                        .set((h, v) -> h.setValue(WallBlock.WEST_WALL, v ? WallHeight.TALL : WallHeight.NONE))
                         .supports(h -> h.getBlock() instanceof WallBlock);
     }
     // @formatter:on
