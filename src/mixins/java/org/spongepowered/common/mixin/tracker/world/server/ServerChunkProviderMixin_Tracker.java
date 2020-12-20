@@ -40,7 +40,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 public abstract class ServerChunkProviderMixin_Tracker {
     
     @Redirect(
-        method = "tickChunks",
+        method = "*",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/spawner/WorldEntitySpawner;spawnForChunk(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/spawner/WorldEntitySpawner$EntityDensityManager;ZZZ)V"

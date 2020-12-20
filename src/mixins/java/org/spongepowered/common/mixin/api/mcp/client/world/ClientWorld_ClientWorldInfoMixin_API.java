@@ -30,5 +30,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.world.storage.ISpawnWorldInfoMixin_API;
 
 @Mixin(ClientWorld.ClientWorldInfo.class)
-public abstract class ClientWorld_ClientWorldInfoMixin_API implements ISpawnWorldInfoMixin_API, ClientWorldProperties {
+public abstract class ClientWorld_ClientWorldInfoMixin_API implements ClientWorldProperties {
+
 }

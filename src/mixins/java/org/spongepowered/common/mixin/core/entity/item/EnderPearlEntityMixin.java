@@ -78,17 +78,17 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
 
     @Inject(
             method = "onHit",
-            at = @At(value = "RETURN", ordinal = 2, shift = At.Shift.BY, by = 2),
-            locals = LocalCapture.CAPTURE_FAILHARD,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;teleportTo(DDD)V"),
             cancellable = true
     )
-    private void impl$callMoveEntityEventForThrower(RayTraceResult result, CallbackInfo ci, LivingEntity entity) {
+    private void impl$callMoveEntityEventForThrower(final RayTraceResult result, final CallbackInfo ci) {
         if (this.shadow$getCommandSenderWorld().isClientSide) {
             return;
         }
-        
+        final Entity entity = this.shadow$getOwner();
+
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(this.shadow$getOwner());
+            frame.pushCause(entity);
             frame.pushCause(this);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENDER_PEARL);
 
