@@ -47,7 +47,7 @@ public abstract class ClientLoginNetHandlerMixin_Vanilla implements IClientLogin
 
     @Inject(method = "handleCustomQuery", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetworkManager;send(Lnet/minecraft/network/IPacket;)V"), cancellable = true)
-    private void onRequestPayload(final SCustomPayloadLoginPacket packet, final CallbackInfo ci) {
+    private void vanilla$handleRequestPayload(final SCustomPayloadLoginPacket packet, final CallbackInfo ci) {
         ci.cancel();
 
         final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.getChannelRegistry();

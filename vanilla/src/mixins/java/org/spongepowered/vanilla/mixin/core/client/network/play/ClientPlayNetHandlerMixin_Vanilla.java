@@ -40,7 +40,7 @@ public abstract class ClientPlayNetHandlerMixin_Vanilla implements IClientPlayNe
 
     @Inject(method = "handleCustomPayload", cancellable = true, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/play/server/SCustomPayloadPlayPacket;getIdentifier()Lnet/minecraft/util/ResourceLocation;"))
-    private void onHandleCustomPayload(final SCustomPayloadPlayPacket packet, final CallbackInfo ci) {
+    private void vanilla$handleCustomPayload(final SCustomPayloadPlayPacket packet, final CallbackInfo ci) {
         final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.getChannelRegistry();
         if (channelRegistry.handlePlayPayload((EngineConnection) this, packet)) {
             ci.cancel();

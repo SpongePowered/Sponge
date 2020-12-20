@@ -51,7 +51,9 @@ import java.net.Proxy;
 @Mixin(IntegratedServer.class)
 public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer implements MinecraftServerBridge, VanillaServer  {
 
+    // @formatter:off
     @Shadow private boolean paused;
+    // @formatter:on
 
     public IntegratedServerMixin_Vanilla(Thread p_i232576_1_, DynamicRegistries.Impl p_i232576_2_,
             SaveFormat.LevelSave p_i232576_3_, IServerConfiguration p_i232576_4_,

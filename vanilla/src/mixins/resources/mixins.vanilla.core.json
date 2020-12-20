@@ -27,7 +27,6 @@
         "util.registry.BootstrapMixin_Vanilla",
         "util.registry.RegistryMixin_Vanilla",
         "util.registry.SimpleRegistryMixin_Vanilla",
-        "world.server.ServerChunkProviderMixin_Vanilla",
         "util.registry.MutableRegistryMixin_Vanilla"
     ],
     "injectors": {
