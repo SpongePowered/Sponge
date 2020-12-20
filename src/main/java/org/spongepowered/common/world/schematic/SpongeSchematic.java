@@ -253,18 +253,19 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
             .orElseGet(DataTransactionResult::failNoData);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public DataTransactionResult remove(final int x, final int y, final int z, final Key<?> key) {
+    public DataTransactionResult remove(final int x, final int y, final int z, final Key<@NonNull ?> key) {
         final Stream<Supplier<DataTransactionResult>> dataRetrievalStream = Stream.of(
             () -> this.getBlock(x, y, z).without(key)
                 .map(newState -> {
-                    final Value.Immutable<?> newValue = this.getBlock(x, y, z).requireValue(key).asImmutable();
+                    final Value.Immutable newValue = this.getBlock(x, y, z).requireValue((Key) key).asImmutable();
                     this.setBlock(x, y, z, newState);
                     return DataTransactionResult.successResult(newValue);
                 }).orElseGet(DataTransactionResult::failNoData),
             () -> this.getFluid(x, y, z).without(key)
                 .map(newState -> {
-                    final Value.Immutable<?> newValue = this.getFluid(x, y, z).requireValue(key).asImmutable();
+                    final Value.Immutable newValue = this.getFluid(x, y, z).requireValue((Key) key).asImmutable();
                     this.setBlock(x, y, z, newState.getBlock());
                     return DataTransactionResult.successResult(newValue);
                 }).orElseGet(DataTransactionResult::failNoData),
@@ -297,7 +298,7 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
         return from.getValues().stream()
             .map(value -> {
                 final Value<?> merged = this.get(xTo, yTo, zTo, value.getKey())
-                    .map(existing -> function.merge((Value) existing, value))
+                    .map(existing -> function.merge((Value) existing, value).asImmutable())
                     .orElse(value);
 
                 return this.offer(xTo, yTo, zTo, merged);
@@ -312,8 +313,8 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
         return this.getValues(xFrom, yFrom, zFrom).stream()
             .map(value -> {
                 final Value<?> merged = this.get(xTo, yTo, zTo, value.getKey())
-                    .map(existing -> function.merge((Value) existing, value))
-                    .orElse(value);
+                    .map(existing -> function.merge((Value) existing, value).asImmutable())
+                    .orElse(value.asImmutable());
 
                 return this.offer(xTo, yTo, zTo, merged);
             })

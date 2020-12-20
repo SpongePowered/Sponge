@@ -144,35 +144,6 @@ public final class TrackingUtil {
         }
     }
 
-    public static void tickGlobalEntity(final Consumer<net.minecraft.entity.Entity> consumer, final net.minecraft.entity.Entity entity) {
-        checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
-        checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        // Forge has an override for whether an entity can update, and this is explicitly provided within the lambda
-        // consumer, so we can have our own check whether the entity should tick as defined by configs/activation range/etc.
-        if (!((TrackableBridge) entity).bridge$shouldTick()) {
-            return;
-        }
-
-        final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
-        try (final EntityTickContext context = tickContext;
-            final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
-        ) {
-            if (entity instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
-                    .ifPresent(context::notifier);
-                ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
-                    .ifPresent(context::creator);
-            }
-            context.buildAndSwitch();
-            entityTiming.startTiming();
-            consumer.accept(entity);
-            SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
-            SpongeCommonEventFactory.callNaturalRotateEntityEvent(entity);
-        } catch (final Exception e) {
-            PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
-        }
-    }
-
     public static void tickRidingEntity(final net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");

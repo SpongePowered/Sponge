@@ -83,7 +83,7 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
     }
 
     @Override
-    public VolumeStream<V, T> map(final VolumeMapper<V, T> mapper) {
+    public <Out> VolumeStream<V, Out> map(final VolumeMapper<V, T, Out> mapper) {
         return new SpongeVolumeStream<>(this.stream.map(element ->
             VolumeElement.of(this.volumeSupplier.get(), mapper.map(
                 this.volumeSupplier.get(),
@@ -116,7 +116,7 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
     }
 
     @Override
-    public VolumeStream<V, T> map(final Function<VolumeElement<V, T>, ? extends T> mapper) {
+    public <Out> VolumeStream<V, Out> map(final Function<VolumeElement<V, T>, ? extends Out> mapper) {
         return new SpongeVolumeStream<>(this.stream.map(element -> VolumeElement.of(
             this.getVolume(),
             mapper.apply(element),
