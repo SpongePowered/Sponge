@@ -63,6 +63,8 @@ import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -92,6 +94,7 @@ import java.util.UUID;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerWorld.class)
+@Implements(@Interface(iface = org.spongepowered.api.world.server.ServerWorld.class, prefix = "api$"))
 public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowered.api.world.server.ServerWorld, ServerLocation> implements org.spongepowered.api.world.server.ServerWorld {
 
     // @formatter:off
@@ -114,8 +117,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     // @formatter:on
 
     @Intrinsic
-    @Override
-    public long getSeed() {
+    public long api$getSeed() {
         return this.shadow$getSeed();
     }
 

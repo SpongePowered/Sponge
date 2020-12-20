@@ -52,6 +52,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -104,7 +105,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @Mixin(net.minecraft.world.World.class)
-public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W, L>> implements IWorldMixin_API<W>, World<W, L>, AutoCloseable {
+public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W, L>> implements World<W, L>, AutoCloseable {
 
     // @formatter:off
     @Shadow public @Final Random random;
@@ -143,7 +144,7 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
         if (!SpongeChunkLayout.instance.isValidChunk(cx, cy, cz)) {
             return Optional.empty();
         }
-        final AbstractChunkProvider chunkProvider = this.shadow$getChunkSource();
+        final AbstractChunkProvider chunkProvider = ((IWorld) this).getChunkSource();
         // If we aren't generating, return the chunk
         if (!shouldGenerate) {
             // TODO correct ChunkStatus?
@@ -155,7 +156,7 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        final AbstractChunkProvider chunkProvider = this.shadow$getChunkSource();
+        final AbstractChunkProvider chunkProvider = ((IWorld) this).getChunkSource();
         if (chunkProvider instanceof ServerChunkProvider) {
             final ChunkManagerAccessor chunkManager = (ChunkManagerAccessor) ((ServerChunkProvider) chunkProvider).chunkMap;
             final List<Chunk> chunks = new ArrayList<>();
