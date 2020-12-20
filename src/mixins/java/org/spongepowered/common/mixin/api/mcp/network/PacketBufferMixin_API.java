@@ -616,7 +616,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     public ChannelBuf cbuf$writeDataView(final DataView data) {
-        final CompoundNBT compound = NBTTranslator.getInstance().translate(checkNotNull(data, "data"));
+        final CompoundNBT compound = NBTTranslator.INSTANCE.translate(checkNotNull(data, "data"));
         this.shadow$writeNbt(compound);
         return (ChannelBuf) this;
     }
@@ -632,7 +632,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
 
     public DataView cbuf$readDataView() {
         try {
-            return NBTTranslator.getInstance().translateFrom(this.shadow$readNbt());
+            return NBTTranslator.INSTANCE.translateFrom(this.shadow$readNbt());
         } catch (final IOException e) {
             throw new DecoderException(e);
         }

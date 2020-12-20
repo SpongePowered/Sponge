@@ -111,7 +111,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         try {
             final int integer = container.getInt(Constants.ItemStack.DAMAGE_VALUE).orElse(this.shadow$getDamageValue());
             this.shadow$setDamageValue(integer);
-            final CompoundNBT stackCompound = NBTTranslator.getInstance().translate(nbtData);
+            final CompoundNBT stackCompound = NBTTranslator.INSTANCE.translate(nbtData);
             this.shadow$setTag(stackCompound);
         } catch (final Exception e) {
             throw new InvalidDataException("Unable to set raw data or translate raw data for ItemStack setting", e);
@@ -180,7 +180,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
             }
             Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
             if (!compound.isEmpty()) {
-                final DataContainer unsafeNbt = NBTTranslator.getInstance().translateFrom(compound);
+                final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(compound);
                 container.set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
             }
         }
@@ -190,7 +190,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 //            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
 //        }
         try {
-            PlatformHooks.getInstance().getItemHooks().writeItemStackCapabilitiesToDataView(container, (net.minecraft.item.ItemStack) (Object) this);
+            PlatformHooks.INSTANCE.getItemHooks().writeItemStackCapabilitiesToDataView(container, (net.minecraft.item.ItemStack) (Object) this);
         } catch (final Exception e) {
             e.printStackTrace();
         }

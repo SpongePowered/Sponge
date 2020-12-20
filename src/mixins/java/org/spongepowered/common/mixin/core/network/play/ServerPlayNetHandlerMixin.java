@@ -202,7 +202,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     private double impl$getPlatformReach(final double thirtySix) {
         final Entity targeted = this.impl$targetedEntity;
         this.impl$targetedEntity = null;
-        return PlatformHooks.getInstance().getGeneralHooks().getEntityReachDistanceSq(this.player, targeted);
+        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, targeted);
     }
 
     /**

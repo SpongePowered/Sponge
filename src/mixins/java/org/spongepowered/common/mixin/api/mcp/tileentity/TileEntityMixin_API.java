@@ -110,7 +110,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
         final CompoundNBT compound = new CompoundNBT();
         this.shadow$save(compound);
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
-        container.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.getInstance().translateFrom(compound));
+        container.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.INSTANCE.translateFrom(compound));
 //        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
 //        if (!manipulators.isEmpty()) {
 //            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));

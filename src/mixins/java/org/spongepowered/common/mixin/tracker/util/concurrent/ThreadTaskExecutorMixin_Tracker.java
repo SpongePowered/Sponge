@@ -46,7 +46,7 @@ public abstract class ThreadTaskExecutorMixin_Tracker<R extends Runnable> {
                     remap = false))
     private void tracker$callOnMainThreadWithPhaseState(final Runnable runnable) {
         // This method can be called async while server is stopping
-        if (this.tracker$isServerAndIsServerStopped() && !PlatformHooks.getInstance().getGeneralHooks().onServerThread()) {
+        if (this.tracker$isServerAndIsServerStopped() && !PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
             runnable.run();
             return;
         }

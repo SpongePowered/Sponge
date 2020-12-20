@@ -83,7 +83,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
     @Override
     public Advancement bridge$getAdvancement() {
-        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
 
         final net.minecraft.advancements.Advancement advancement = SpongeCommon.getServer().getAdvancements().getAdvancement(this.impl$advancementKey);
@@ -95,26 +95,26 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
     @Override
     public PlayerAdvancements bridge$getPlayerAdvancements() {
-        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         checkState(this.impl$playerAdvancements != null, "The playerAdvancements is not yet initialized");
         return this.impl$playerAdvancements;
     }
 
     @Override
     public void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements) {
-        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         this.impl$playerAdvancements = playerAdvancements;
     }
 
     @Override
     public void bridge$setAdvancementId(ResourceLocation key) {
-        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         this.impl$advancementKey = key;
     }
 
     @Override
     public void bridge$invalidateAchievedState() {
-        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) { // Ignore on the client
+        if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) { // Ignore on the client
             return;
         }
         for (final ImplementationBackedCriterionProgress progress : this.impl$getProgressMap().values()) {
@@ -124,7 +124,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
     @Override
     public void bridge$updateProgressMap() {
-        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) {
+        if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
             return;
         }
         final Optional<Advancement> advancement = this.getOptionalAdvancement();
@@ -198,7 +198,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      */
     @Inject(method = "isDone", at = @At("HEAD"), cancellable = true)
     private void impl$supportComplexCriteria(final CallbackInfoReturnable<Boolean> ci) {
-        if (this.impl$advancementKey == null || !PlatformHooks.getInstance().getGeneralHooks().onServerThread()) { // Use vanilla behavior on the client
+        if (this.impl$advancementKey == null || !PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) { // Use vanilla behavior on the client
             return;
         }
 
@@ -216,7 +216,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      */
     @Inject(method = "grantProgress", at = @At("HEAD"), cancellable = true)
     private void impl$grantScoreCriteriaAndCallEvents(String criterion, CallbackInfoReturnable<Boolean> ci) {
-        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) { // Use vanilla behavior on the client
+        if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) { // Use vanilla behavior on the client
             return;
         }
         ci.setReturnValue(this.impl$grantCriterion(criterion));
@@ -271,7 +271,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      */
     @Inject(method = "revokeProgress", at = @At("HEAD"), cancellable = true)
     private void impl$removeScoreCriteriaAndCallEvents(String rawCriterion, CallbackInfoReturnable<Boolean> ci) {
-        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) { // Use vanilla behavior on the client
+        if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) { // Use vanilla behavior on the client
             return;
         }
         ci.setReturnValue(this.impl$revokeCriterion(rawCriterion));
@@ -330,7 +330,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      * @return The advancement
      */
     private Optional<Advancement> getOptionalAdvancement() {
-        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
         final net.minecraft.advancements.Advancement advancement = SpongeCommon.getServer().getAdvancements().getAdvancement(this.impl$advancementKey);
         return Optional.ofNullable((Advancement)advancement);

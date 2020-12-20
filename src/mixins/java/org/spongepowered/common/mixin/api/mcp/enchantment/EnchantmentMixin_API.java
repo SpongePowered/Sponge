@@ -86,7 +86,7 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public boolean canBeAppliedToStack(final ItemStack stack) {
-        return PlatformHooks.getInstance().getItemHooks().canEnchantmentBeAppliedToItem((Enchantment) (Object) this, ItemStackUtil.toNative(stack));
+        return PlatformHooks.INSTANCE.getItemHooks().canEnchantmentBeAppliedToItem((Enchantment) (Object) this, ItemStackUtil.toNative(stack));
     }
 
     @Override

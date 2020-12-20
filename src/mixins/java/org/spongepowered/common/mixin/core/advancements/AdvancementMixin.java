@@ -86,7 +86,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
     private void impl$setUpSpongeFields(ResourceLocation location, @Nullable Advancement parent, @Nullable DisplayInfo displayInfo,
             AdvancementRewards rewards, Map<String, Criterion> criteria, String[][] requirements, CallbackInfo ci) {
         // Don't do anything on the client, unless we're performing registry initialization
-        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) {
+        if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
             return;
         }
         if (displayInfo != null) {
@@ -143,31 +143,31 @@ public abstract class AdvancementMixin implements AdvancementBridge {
 
     @Override
     public Optional<Advancement> bridge$getParent() {
-        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         return Optional.ofNullable(this.parent);
     }
 
     @Override
     public void bridge$setParent(@Nullable final Advancement advancement) {
-        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         this.parent = advancement;
     }
 
     @Override
     public AdvancementCriterion bridge$getCriterion() {
-        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         return this.impl$criterion;
     }
 
     @Override
     public void bridge$setCriterion(final AdvancementCriterion criterion) {
-        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         this.impl$criterion = criterion;
     }
 
     @Override
     public List<Component> bridge$getToastText() {
-        checkState(PlatformHooks.getInstance().getGeneralHooks().onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         return this.impl$toastText;
     }
 

@@ -70,7 +70,7 @@ public abstract class ICriterionTrigger_ListenerMixin {
         if (criterionBridge.bridge$getScoreCriterion() != null) {
             advancementCriterion = criterionBridge.bridge$getScoreCriterion();
         }
-        if (!PlatformHooks.getInstance().getGeneralHooks().onServerThread()) {
+        if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
             // Some mods do advancement granting on async threads, and we can't allow for the spam to be thrown.
             return;
         }

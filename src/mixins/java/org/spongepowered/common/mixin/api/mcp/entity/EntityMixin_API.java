@@ -266,7 +266,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         final Transform transform = this.getTransform();
         final CompoundNBT compound = new CompoundNBT();
         this.shadow$saveAsPassenger(compound);
-        final DataContainer unsafeNbt = NBTTranslator.getInstance().translateFrom(compound);
+        final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.Entity.CLASS, this.getClass().getName())

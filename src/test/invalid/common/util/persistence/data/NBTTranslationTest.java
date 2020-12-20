@@ -50,16 +50,16 @@ public class NBTTranslationTest {
         container.set(DataQuery.of("foo"), "bar");
         FakeSerializable temp = new FakeSerializable("bar", 7, 10.0D, "nested");
         container.set(DataQuery.of("myFake"), temp);
-        NBTTagCompound compound = NbtTranslator.getInstance().translateData(container);
-        DataView translatedContainer = NbtTranslator.getInstance().translateFrom(compound);
+        NBTTagCompound compound = NBTTranslator.INSTANCE.translateData(container);
+        DataView translatedContainer = NBTTranslator.INSTANCE.translateFrom(compound);
         assertEquals(container, translatedContainer);
     }
 
     @Test
     public void testDotContainerKeys() {
         final DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED).set(DataQuery.of("my.key.to.data"), 1);
-        NBTTagCompound compound = NbtTranslator.getInstance().translateData(container);
-        DataView translatedContainer = NbtTranslator.getInstance().translateFrom(compound);
+        NBTTagCompound compound = NBTTranslator.INSTANCE.translateData(container);
+        DataView translatedContainer = NBTTranslator.INSTANCE.translateFrom(compound);
         assertEquals(container, translatedContainer);
     }
 

@@ -43,6 +43,6 @@ public abstract class LegacyStructureDataUtilMixin {
      */
     @Overwrite
     public static LegacyStructureDataUtil getLegacyStructureHandler(final RegistryKey<World> dimension, final @Nullable DimensionSavedDataManager savedData) {
-        return PlatformHooks.getInstance().getWorldGenerationHooks().createLegacyStructureDataUtil(dimension, savedData);
+        return PlatformHooks.INSTANCE.getWorldGenerationHooks().createLegacyStructureDataUtil(dimension, savedData);
     }
 }

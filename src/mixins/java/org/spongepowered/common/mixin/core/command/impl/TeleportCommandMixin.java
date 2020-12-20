@@ -136,7 +136,7 @@ public abstract class TeleportCommandMixin {
 
                     final ServerWorld fromWorld = (ServerWorld) entityIn.getCommandSenderWorld();
 
-                    final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre(entityIn,
+                    final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(entityIn,
                             worldIn);
                     if (SpongeCommon.postEvent(preEvent)) {
                         return;
@@ -179,7 +179,7 @@ public abstract class TeleportCommandMixin {
                     worldIn.addFromAnotherDimension(result);
                     entityIn.removed = true;
 
-                    PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(result, fromWorld,
+                    PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost(result, fromWorld,
                             (ServerWorld) preEvent.getOriginalDestinationWorld());
                 }
             }

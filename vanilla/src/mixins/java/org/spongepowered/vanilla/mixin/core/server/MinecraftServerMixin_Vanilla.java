@@ -58,7 +58,7 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
             IServerConfiguration p_i232576_4_, ResourcePackList p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
             DataPackRegistries p_i232576_8_, MinecraftSessionService p_i232576_9_, GameProfileRepository p_i232576_10_,
             PlayerProfileCache p_i232576_11_, IChunkStatusListenerFactory p_i232576_12_, CallbackInfo ci) {
-        PlatformHooks.getInstance().setPacketHooks(new VanillaPacketHooks());
+        PlatformHooks.INSTANCE.setPacketHooks(new VanillaPacketHooks());
     }
 
     @Redirect(method = "createLevels",

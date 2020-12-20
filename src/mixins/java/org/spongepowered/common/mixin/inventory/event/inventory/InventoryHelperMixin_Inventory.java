@@ -45,7 +45,7 @@ public abstract class InventoryHelperMixin_Inventory {
     private static void impl$dropItemsAndThrowEvents(final World world, final double x, final double y, final double z, final IInventory inventory) {
         if (world instanceof ServerWorld) {
             // Don't drop items if we are restoring blocks
-            if (PlatformHooks.getInstance().getWorldHooks().isRestoringBlocks(world)) {
+            if (PlatformHooks.INSTANCE.getWorldHooks().isRestoringBlocks(world)) {
                 return;
             }
             ContainerUtil.performBlockInventoryDrops((ServerWorld) world, x, y, z, inventory);
