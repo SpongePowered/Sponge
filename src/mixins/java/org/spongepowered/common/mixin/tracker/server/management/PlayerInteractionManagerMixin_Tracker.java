@@ -108,7 +108,7 @@ public abstract class PlayerInteractionManagerMixin_Tracker {
         // Sponge start
         final BlockSnapshot snapshot = ((ServerWorld) (worldIn)).createSnapshot(VecHelper.toVector3i(blockpos));
         final Vector3d hitVec = Vector3d.from(blockRaytraceResultIn.getBlockPos().getX(), blockRaytraceResultIn.getBlockPos().getY(), blockRaytraceResultIn.getBlockPos().getZ());
-        final org.spongepowered.api.util.Direction direction = DirectionFacingProvider.getInstance().getKey(blockRaytraceResultIn.getDirection()).get();
+        final org.spongepowered.api.util.Direction direction = DirectionFacingProvider.INSTANCE.getKey(blockRaytraceResultIn.getDirection()).get();
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(playerIn, stackIn, hitVec, snapshot, direction, handIn);
         if (event.isCancelled()) {
             return ActionResultType.FAIL;

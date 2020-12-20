@@ -529,7 +529,7 @@ public final class SpongeCommonEventFactory {
             final Map<Direction, BlockState> neighbors = new EnumMap<>(Direction.class);
             for (final net.minecraft.util.Direction notificationSide : notifiedSides) {
                 final BlockPos offset = sourcePos.relative(notificationSide);
-                final Direction direction = DirectionFacingProvider.getInstance().getKey(notificationSide).get();
+                final Direction direction = DirectionFacingProvider.INSTANCE.getKey(notificationSide).get();
                 final net.minecraft.block.BlockState notificationState = ((ServerWorld) world).getBlockState(offset);
                 neighbors.put(direction, (BlockState) notificationState);
             }
@@ -661,7 +661,7 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.USED_HAND, handType);
             final Direction direction;
             if (side != null) {
-                direction = DirectionFacingProvider.getInstance().getKey(side).get();
+                direction = DirectionFacingProvider.INSTANCE.getKey(side).get();
             } else {
                 direction = Direction.NONE;
             }
@@ -863,7 +863,7 @@ public final class SpongeCommonEventFactory {
                 }
 
                 final BlockSnapshot targetBlock = ((World) projectile.level).createSnapshot(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-                final Direction side = DirectionFacingProvider.getInstance().getKey(blockMovingObjectPosition.getDirection()).get();
+                final Direction side = DirectionFacingProvider.INSTANCE.getKey(blockMovingObjectPosition.getDirection()).get();
 
                 final CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.getCurrentCause(),
                         impactPoint, targetBlock.getState(),
