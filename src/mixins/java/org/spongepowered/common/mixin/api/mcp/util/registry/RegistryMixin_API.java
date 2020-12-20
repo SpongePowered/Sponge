@@ -24,17 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.mcp.util.registry;
 
+import com.mojang.serialization.Lifecycle;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.util.RegistryKeyAccessor;
 import org.spongepowered.common.bridge.util.registry.RegistryBridge;
+import org.spongepowered.common.registry.SpongeRegistryType;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -43,7 +48,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.util.registry.Registry.class)
-@Implements(@Interface(iface = Registry.class, prefix = "registry$"))
 public abstract class RegistryMixin_API<T> implements Registry<T> {
 
     // @formatter:off
@@ -52,8 +56,17 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     @Shadow @Nullable public abstract T get(@org.checkerframework.checker.nullness.qual.Nullable ResourceLocation p_82594_1_);
     // @formatter:on
 
-    public ResourceKey registry$key() {
-        return (ResourceKey) (Object) this.shadow$key().location();
+    private RegistryType<T> api$type;
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void api$setType(RegistryKey<? extends net.minecraft.util.registry.Registry<T>> key, Lifecycle p_i232510_2_, CallbackInfo ci) {
+        this.api$type = new SpongeRegistryType<T>((ResourceKey) (Object) ((RegistryKeyAccessor) key).accessor$registryName(),
+                (ResourceKey) (Object) key.location());
+    }
+
+    @Override
+    public RegistryType<T> type() {
+        return this.api$type;
     }
 
     @Override

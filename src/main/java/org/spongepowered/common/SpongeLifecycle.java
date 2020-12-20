@@ -25,10 +25,10 @@
 package org.spongepowered.common;
 
 import co.aikar.timings.TimingsFactory;
-import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import io.leangen.geantyref.TypeToken;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
@@ -38,12 +38,14 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.common.advancement.SpongeAdvancementProvider;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryEvent;
+import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryValueEvent;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -92,13 +94,14 @@ public final class SpongeLifecycle {
     }
 
     public void establishGlobalRegistries() {
+        final SpongeRegistryHolder holder = (SpongeRegistryHolder) this.game.registries();
         // Need to do this here to prevent classloading Registry too early...
-        ((SpongeRegistryHolder) this.game.registries()).setRootMinecraftRegistry((Registry<Registry<?>>) Registry.REGISTRY);
+        holder.setRootMinecraftRegistry((Registry<Registry<?>>) Registry.REGISTRY);
 
         SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) Sponge.getGame().registries());
 
         this.game.getEventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
-        spongeCatalogRegistry.callRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
+        this.game.getEventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
     }
 
     public void establishDataPackRegistries() {

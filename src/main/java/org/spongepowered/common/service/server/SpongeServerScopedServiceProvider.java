@@ -38,7 +38,6 @@ import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
-import org.spongepowered.common.applaunch.config.common.ServicesCategory;
 import org.spongepowered.common.event.lifecycle.ProvideEngineServiceEventImpl;
 import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;
 import org.spongepowered.common.service.SpongeServiceProvider;

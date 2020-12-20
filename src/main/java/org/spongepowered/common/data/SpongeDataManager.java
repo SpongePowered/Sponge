@@ -237,15 +237,6 @@ public final class SpongeDataManager implements DataManager {
         return Optional.ofNullable(this.legacyRegistrations.get(id));
     }
 
-    @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    @Override
-    public <T> Optional<DataTranslator<T>> getTranslator(final Class<T> objectClass) {
-        final Registry<DataTranslator> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(DataTranslator.class);
-        final DataTranslator reverseMapping = ((MappedRegistry<DataTranslator, Class>) registry).getReverseMapping(objectClass);
-
-        return Optional.ofNullable(reverseMapping);
-    }
-
     @Override
     public DataContainer createContainer() {
         return new MemoryDataContainer();

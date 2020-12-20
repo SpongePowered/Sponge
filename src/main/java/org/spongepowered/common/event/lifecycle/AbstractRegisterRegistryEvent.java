@@ -31,8 +31,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryEvent;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
-import org.spongepowered.api.registry.Registry;
-import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
@@ -47,21 +46,25 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
     }
 
     @Override
-    public <T> Registry<T> register(final RegistryType<T> key, final boolean isDynamic) throws DuplicateRegistrationException {
+    public <T> RegistryType<T> register(final ResourceKey key, final boolean isDynamic) throws DuplicateRegistrationException {
         Objects.requireNonNull(key, "key");
 
         final SpongeRegistryHolder holder = this.getHolder();
-        return holder.createRegistry(key, null, isDynamic);
+        final RegistryType<T> type = RegistryType.of(RegistryRoots.SPONGE, key);
+        holder.createRegistry(type, null, isDynamic);
+        return type;
     }
 
     @Override
-    public <T> Registry<T> register(final RegistryType<T> key, final boolean isDynamic, final Supplier<Map<ResourceKey, T>> defaultValues)
+    public <T> RegistryType<T> register(final ResourceKey key, final boolean isDynamic, final Supplier<Map<ResourceKey, T>> defaultValues)
             throws DuplicateRegistrationException {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(defaultValues, "defaultValues");
 
         final SpongeRegistryHolder holder = this.getHolder();
-        return holder.createRegistry(key, defaultValues, isDynamic);
+        final RegistryType<T> type = RegistryType.of(RegistryRoots.SPONGE, key);
+        holder.createRegistry(type, defaultValues, isDynamic);
+        return type;
     }
 
     protected abstract SpongeRegistryHolder getHolder();
