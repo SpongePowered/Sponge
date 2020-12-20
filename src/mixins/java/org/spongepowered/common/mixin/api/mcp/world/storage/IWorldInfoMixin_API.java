@@ -109,8 +109,8 @@ public interface IWorldInfoMixin_API extends WorldProperties {
         ((GameRules_RuleValueAccessor) mValue).invoker$deserialize(value.toString());
     }
 
-    @Override
-    default Map<GameRule<?>, ?> getGameRules() {
+    @Intrinsic
+    default Map<GameRule<?>, ?> worldProperties$getGameRules() {
         final Map<GameRules.RuleKey<?>, GameRules.RuleValue<?>> rules =
                 ((GameRulesAccessor) this.shadow$getGameRules()).accessor$rules();
 
