@@ -48,16 +48,16 @@ public abstract class AbstractFireBlockMixin extends BlockMixin {
                     target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"
             )
     )
-    private boolean impl$spongeRedirectForFireDamage(final Entity entity, final DamageSource source, final float damage,
-            final BlockState blockState, final World world, final BlockPos blockPos) {
-        if (entity.level.isClientSide) { // Short Circuit
-            return entity.hurt(source, damage);
+    private boolean impl$spongeRedirectForFireDamage(final Entity self, final DamageSource source, final float damage,
+            final BlockState blockState, final World world, final BlockPos blockPos, final Entity entity) {
+        if (self.level.isClientSide) { // Short Circuit
+            return self.hurt(source, damage);
         }
         try {
             final ServerLocation location = ServerLocation.of((ServerWorld) world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
             final MinecraftBlockDamageSource fire = new MinecraftBlockDamageSource("inFire", location);
             ((DamageSourceBridge) (Object) fire).bridge$setFireSource();
-            return entity.hurt(DamageSource.IN_FIRE, damage);
+            return self.hurt(DamageSource.IN_FIRE, damage);
         } finally {
             // Since "source" is already the DamageSource.IN_FIRE object, we can re-use it to re-assign.
             ((DamageSourceBridge) source).bridge$setFireSource();

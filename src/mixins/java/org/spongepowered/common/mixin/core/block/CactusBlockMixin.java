@@ -41,8 +41,8 @@ public abstract class CactusBlockMixin extends BlockMixin {
 
     @Redirect(method = "entityInside",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"))
-    private boolean impl$reAssignForBlockDamageSource(Entity this$, DamageSource source, float damage,
-        net.minecraft.world.World world, BlockPos pos, net.minecraft.block.BlockState state, Entity entity) {
+    private boolean impl$reAssignForBlockDamageSource(final Entity self, final DamageSource source, float damage,
+        final net.minecraft.block.BlockState state, final net.minecraft.world.World world, final BlockPos pos, final Entity entity) {
         if (world.isClientSide()) {
             return entity.hurt(source, damage);
         }

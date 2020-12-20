@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.CampfireBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;
 
-@Mixin(AbstractFireBlock.class)
+@Mixin(CampfireBlock.class)
 public abstract class CampfireBlockMixin extends BlockMixin {
 
 
@@ -48,16 +48,16 @@ public abstract class CampfireBlockMixin extends BlockMixin {
                     target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"
             )
     )
-    private boolean impl$spongeRedirectForFireDamage(final Entity entity, final DamageSource source, final float damage,
-            final BlockState blockState, final World world, final BlockPos blockPos) {
-        if (entity.level.isClientSide) { // Short Circuit
-            return entity.hurt(source, damage);
+    private boolean impl$spongeRedirectForFireDamage(final Entity self, final DamageSource source, final float damage,
+            final BlockState blockState, final World world, final BlockPos blockPos, final Entity entity) {
+        if (self.level.isClientSide) { // Short Circuit
+            return self.hurt(source, damage);
         }
         try {
             final ServerLocation location = ServerLocation.of((ServerWorld) world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
             final MinecraftBlockDamageSource fire = new MinecraftBlockDamageSource("inFire", location);
             ((DamageSourceBridge) (Object) fire).bridge$setFireSource();
-            return entity.hurt(DamageSource.IN_FIRE, damage);
+            return self.hurt(DamageSource.IN_FIRE, damage);
         } finally {
             // Since "source" is already the DamageSource.IN_FIRE object, we can re-use it to re-assign.
             ((DamageSourceBridge) source).bridge$setFireSource();
