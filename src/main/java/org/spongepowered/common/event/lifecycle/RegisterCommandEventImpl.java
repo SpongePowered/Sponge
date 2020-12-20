@@ -34,7 +34,7 @@ import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Objects;
 
-public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> extends AbstractLifecycleGenericEvent<C> implements RegisterCommandEvent<C> {
+public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> extends AbstractLifecycleEvent.GenericImpl<C> implements RegisterCommandEvent<C> {
 
     private final R registrar;
 

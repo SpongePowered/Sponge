@@ -67,8 +67,6 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
         lifecycle.establishEngineRegistries(this);
 
         lifecycle.callStartingEngineEvent(this);
-
-        lifecycle.establishDataPackRegistries();
     }
 
     @Inject(method = "destroy", at = @At("HEAD"))

@@ -24,22 +24,35 @@
  */
 package org.spongepowered.common.event.lifecycle;
 
-import io.leangen.geantyref.TypeToken;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.GenericEvent;
+import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.common.datapack.SpongeDataPackType;
 
-public abstract class AbstractLifecycleGenericEvent<T> extends AbstractLifecycleEvent implements GenericEvent<T> {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-    protected final TypeToken<T> token;
+public final class RegisterDataPackValueEventImpl extends AbstractLifecycleEvent implements RegisterDataPackValueEvent {
 
-    public AbstractLifecycleGenericEvent(final Cause cause, final Game game, final TypeToken<T> token) {
+    private final Map<SpongeDataPackType, List<DataPackSerializable>> serializables;
+
+    public RegisterDataPackValueEventImpl(final Cause cause, final Game game) {
         super(cause, game);
-        this.token = token;
+        this.serializables = new Object2ObjectOpenHashMap<>();
     }
 
     @Override
-    public final TypeToken<T> getParamType() {
-        return this.token;
+    public RegisterDataPackValueEvent register(final DataPackSerializable serializable) {
+        Objects.requireNonNull(serializable, "serializable");
+        this.serializables.computeIfAbsent((SpongeDataPackType) serializable.type(), k -> new ArrayList<>()).add(serializable);
+        return this;
+    }
+
+    public Map<SpongeDataPackType, List<DataPackSerializable>> getSerializables() {
+        return serializables;
     }
 }

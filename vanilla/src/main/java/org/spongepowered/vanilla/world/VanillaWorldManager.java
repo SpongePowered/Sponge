@@ -839,7 +839,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             final boolean configExists = SpongeGameConfigs.doesWorldConfigExist(key);
 
-            final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld((org.spongepowered.api.world.dimension.DimensionType) dimensionType, key);
+            final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld((ResourceKey) (Object) dimensionTypeKey, key);
             if (!isDefaultWorld) {
                 if (!configAdapter.get().world.enabled) {
                     SpongeCommon.getLogger().warn("World '{}' ({}) has been disabled in the configuration. World will not be loaded...", key,

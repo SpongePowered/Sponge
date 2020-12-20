@@ -35,11 +35,11 @@ import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 
-public abstract class ProvideServiceEventImpl<T> extends AbstractLifecycleGenericEvent<T> implements ProvideServiceEvent<T> {
+public abstract class AbstractProvideServiceEventImpl<T> extends AbstractLifecycleEvent.GenericImpl<T> implements ProvideServiceEvent<T> {
 
     @Nullable private Supplier<T> serviceFactory;
 
-    public ProvideServiceEventImpl(final Cause cause, final Game game, final TypeToken<T> token) {
+    public AbstractProvideServiceEventImpl(final Cause cause, final Game game, final TypeToken<T> token) {
         super(cause, game, token);
     }
 
@@ -58,7 +58,7 @@ public abstract class ProvideServiceEventImpl<T> extends AbstractLifecycleGeneri
         this.serviceFactory = null;
     }
 
-    public static final class GameScopedImpl<T> extends ProvideServiceEventImpl<T> implements GameScoped<T> {
+    public static final class GameScopedImpl<T> extends AbstractProvideServiceEventImpl<T> implements GameScoped<T> {
 
         public GameScopedImpl(final Cause cause, final Game game, final TypeToken<T> token) {
             super(cause, game, token);
@@ -74,7 +74,7 @@ public abstract class ProvideServiceEventImpl<T> extends AbstractLifecycleGeneri
         }
     }
 
-    public static final class EngineScopedImpl<T> extends ProvideServiceEventImpl<T> implements ProvideServiceEvent.EngineScoped<T>{
+    public static final class EngineScopedImpl<T> extends AbstractProvideServiceEventImpl<T> implements ProvideServiceEvent.EngineScoped<T>{
 
         private final Engine engine;
 

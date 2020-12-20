@@ -34,7 +34,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;
+import org.spongepowered.common.event.lifecycle.AbstractProvideServiceEventImpl;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.game.pagination.SpongePaginationService;
 import org.spongepowered.plugin.PluginContainer;
@@ -59,8 +59,8 @@ public final class SpongeGameScopedServiceProvider extends SpongeServiceProvider
     }
 
     @Override
-    protected final <T> ProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service) {
-        return new ProvideServiceEventImpl.GameScopedImpl<>(Cause.of(EventContext.empty(), this.getGame()),
+    protected final <T> AbstractProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service) {
+        return new AbstractProvideServiceEventImpl.GameScopedImpl<>(Cause.of(EventContext.empty(), this.getGame()),
                 this.getGame(), TypeToken.get(service.getServiceClass()));
     }
 

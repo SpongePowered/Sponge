@@ -33,13 +33,9 @@ import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
-import org.spongepowered.api.registry.RegistryRoots;
-import org.spongepowered.common.advancement.SpongeAdvancementProvider;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -49,11 +45,9 @@ import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryValueEve
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.item.recipe.SpongeRecipeProvider;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.registry.SpongeRegistries;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
@@ -102,16 +96,6 @@ public final class SpongeLifecycle {
 
         this.game.getEventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
         this.game.getEventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
-    }
-
-    public void establishDataPackRegistries() {
-        // TODO call event for plugin datapacks (recipes and advancements)
-        final SpongeCatalogRegistry spongeCatalogRegistry = (SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry();
-        spongeCatalogRegistry.callDataPackRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
-
-        // After all plugins registered their recipes we serialize them
-        SpongeRecipeProvider.registerRecipes(spongeCatalogRegistry.getRegistry(RecipeRegistration.class));
-        SpongeAdvancementProvider.registerAdvancements(spongeCatalogRegistry.getRegistry(Advancement.class));
     }
 
     public void callRegisterChannelEvent() {

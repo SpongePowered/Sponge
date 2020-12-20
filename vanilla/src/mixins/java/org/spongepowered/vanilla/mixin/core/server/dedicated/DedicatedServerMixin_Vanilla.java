@@ -76,8 +76,6 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
 
         lifecycle.establishEngineRegistries(this);
         lifecycle.callStartingEngineEvent(this);
-
-        lifecycle.establishDataPackRegistries();
     }
 
     @Inject(method = "initServer", at = @At("RETURN"))

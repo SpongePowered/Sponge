@@ -22,46 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.lifecycle;
+package org.spongepowered.common.datapack.recipe;
 
-import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.GenericEvent;
-import org.spongepowered.api.event.lifecycle.LifecycleEvent;
+import com.google.gson.JsonObject;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.common.datapack.DataPackSerializedObject;
 
-public abstract class AbstractLifecycleEvent implements LifecycleEvent {
+import javax.annotation.Nullable;
 
-    protected final Cause cause;
-    protected final Game game;
+public final class RecipeSerializedObject extends DataPackSerializedObject {
 
-    public AbstractLifecycleEvent(final Cause cause, final Game game) {
-        this.cause = cause;
-        this.game = game;
+    @Nullable private final DataPackSerializedObject advancementObject;
+
+    public RecipeSerializedObject(final ResourceKey key, final JsonObject object, @Nullable DataPackSerializedObject advancementObject) {
+        super(key, object);
+        this.advancementObject = advancementObject;
     }
 
-    @Override
-    public final Cause getCause() {
-        return this.cause;
-    }
-
-    @Override
-    public final Game getGame() {
-        return this.game;
-    }
-
-    public abstract static class GenericImpl<T> extends AbstractLifecycleEvent implements GenericEvent<T> {
-
-        protected final TypeToken<T> token;
-
-        public GenericImpl(final Cause cause, final Game game, final TypeToken<T> token) {
-            super(cause, game);
-            this.token = token;
-        }
-
-        @Override
-        public final TypeToken<T> getParamType() {
-            return this.token;
-        }
+    @Nullable
+    public DataPackSerializedObject getAdvancementObject() {
+        return this.advancementObject;
     }
 }

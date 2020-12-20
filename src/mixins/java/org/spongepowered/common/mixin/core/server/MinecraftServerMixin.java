@@ -36,15 +36,14 @@ import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.SaveFormat;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectProxy;
@@ -63,7 +62,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.advancement.SpongeAdvancementProvider;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
@@ -73,17 +71,17 @@ import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridg
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.item.recipe.SpongeRecipeProvider;
 import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
-import javax.annotation.Nullable;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -91,6 +89,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer, MinecraftServerBridge,
@@ -111,6 +111,8 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract ResourcePackList shadow$getPackRepository();
     // @formatter:on
+
+    @Shadow public abstract Path getWorldPath(FolderName p_240776_1_);
 
     @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
     @Nullable private ResourcePack impl$resourcePack;
@@ -243,7 +245,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
                 final int autoSaveInterval = adapter.get().world.autoSaveInterval;
                 if (log) {
                     if (this.bridge$performAutosaveChecks()) {
-                        log = adapter.get().getLogging().logWorldAutomaticSaving();
+                        log = adapter.get().world.logAutoSave;
                     }
                 }
 
@@ -338,13 +340,14 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
     @Inject(method = "reloadResources", at = @At(value = "HEAD"))
     public void impl$reloadPluginRecipes(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        final SpongeCatalogRegistry catalogRegistry = SpongeCommon.getRegistry().getCatalogRegistry();
-        catalogRegistry.registerDatapackCatalogues();
         SpongeIngredient.clearCache();
         ResultUtil.clearCache();
-        catalogRegistry.callDataPackRegisterCatalogEvents(Sponge.getServer().getCauseStackManager().getCurrentCause(), Sponge.getGame());
-        SpongeRecipeProvider.registerRecipes(catalogRegistry.getRegistry(RecipeRegistration.class));
-        SpongeAdvancementProvider.registerAdvancements(catalogRegistry.getRegistry(Advancement.class));
+        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
+        try {
+            SpongeDataPackManager.INSTANCE.serialize(this.storageSource.getLevelPath(FolderName.DATAPACK_DIR));
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
 
         this.shadow$getPackRepository().reload();
         final List<String> disabledPacks = this.worldData.getDataPackConfig().getDisabled();
