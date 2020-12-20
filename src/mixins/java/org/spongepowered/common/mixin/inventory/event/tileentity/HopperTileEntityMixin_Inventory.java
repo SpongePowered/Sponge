@@ -138,7 +138,7 @@ public abstract class HopperTileEntityMixin_Inventory {
     @Redirect(method = "addItem(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/entity/item/ItemEntity;)Z",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/tileentity/HopperTileEntity;addItem(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/inventory/IInventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Direction;)Lnet/minecraft/item/ItemStack;"))
-    private static ItemStack impl$onPutStackInInventoryAllSlots( final IInventory source, final IInventory destination, final ItemStack stack, final Direction direction, final boolean flag, final IInventory d2, final ItemEntity entity) {
+    private static ItemStack impl$onPutStackInInventoryAllSlots(final IInventory source, final IInventory destination, final ItemStack stack, final Direction direction, final IInventory d2, final ItemEntity entity) {
         return InventoryEventFactory.callInventoryPickupEvent(destination, entity, stack);
     }
 
