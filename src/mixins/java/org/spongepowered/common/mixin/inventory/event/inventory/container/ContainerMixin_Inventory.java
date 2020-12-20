@@ -288,7 +288,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
     // Called when setting the cursor item (pickup with empty cursor)
     // Captures the previous cursor for later use
     @Inject(method = "doClick",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;setItem(ILnet/minecraft/item/ItemStack;)V", ordinal = 3))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;setCarried(Lnet/minecraft/item/ItemStack;)V", ordinal = 3))
     private void beforeOnTakeClick(
             final int slotId, final int dragType, final ClickType clickTypeIn, final PlayerEntity player, final CallbackInfoReturnable<Integer> cir) {
         this.bridge$setPreviousCursor(player.inventory.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
