@@ -32,8 +32,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.ai.GoalBridge;
+import org.spongepowered.common.registry.provider.GoalTypeProvider;
 
 import java.util.Optional;
 
@@ -47,8 +47,7 @@ public abstract class GoalMixin implements GoalBridge {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     private void assignAITaskType(final CallbackInfo ci) {
-        final MappedRegistry<GoalType, Class<? extends Goal>> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(GoalType.class);
-        this.impl$type = registry.getReverseMapping((Class<Goal>) (Object) this.getClass());
+        this.impl$type = GoalTypeProvider.INSTANCE.get((Class<Goal>) (Object) this.getClass()).orElse(null);
     }
 
     @Override
