@@ -38,7 +38,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 public abstract class WorldMixin implements WorldBridge, IWorld {
 
     // @formatter: off
-    @Shadow public abstract void shadow$calculateInitialSkylight();
+    @Shadow public abstract void shadow$updateSkyBrightness();
     @Shadow public abstract boolean shadow$isThundering();
     @Shadow public abstract boolean shadow$isRaining();
     @Shadow public abstract RegistryKey<World> shadow$dimension();

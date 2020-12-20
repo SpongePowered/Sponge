@@ -37,6 +37,6 @@ public abstract class ClientWorldMixin extends WorldMixin implements WorldBridge
     public void bridge$adjustDimensionLogic(final DimensionType dimensionType) {
         super.bridge$adjustDimensionLogic(dimensionType);
 
-        this.shadow$calculateInitialSkylight();
+        this.shadow$updateSkyBrightness();
     }
 }
