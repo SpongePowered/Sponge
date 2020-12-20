@@ -42,6 +42,8 @@ import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
@@ -152,4 +154,8 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, IF
         }
     }
 
+    @Override
+    public DataPackType type() {
+        return DataPackTypes.RECIPE;
+    }
 }

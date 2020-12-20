@@ -1287,70 +1287,70 @@ public final class DataTest  {
         world.setBlock(blockPos, oldState);
     }
 
-    private <T> void checkOfferSetData(final DataHolder.Mutable holder, final Supplier<Key<SetValue<T>>> key, final Set<T> value) {
+    private <T> void checkOfferSetData(final DataHolder.Mutable holder, final Key<SetValue<T>> key, final Set<T> value) {
         final DataTransactionResult result = holder.offer(key, value);
         if (this.checkResult(holder, key, value, result)) {
             this.checkGetSetData(holder, key, value);
         }
     }
 
-    private <T> void checkOfferListData(final DataHolder.Mutable holder, final Supplier<Key<ListValue<T>>> key, final List<T> value) {
+    private <T> void checkOfferListData(final DataHolder.Mutable holder, final Key<ListValue<T>> key, final List<T> value) {
         final DataTransactionResult result = holder.offer(key, value);
         if (this.checkResult(holder, key, value, result)) {
             this.checkGetListData(holder, key, value);
         }
     }
 
-    private <T> void checkWithData(final DataHolder.Immutable<?> holder, final Supplier<Key<Value<T>>> key, final T value) {
+    private <T> void checkWithData(final DataHolder.Immutable<?> holder, final Key<Value<T>> key, final T value) {
         final DataHolder.Immutable<?> newHolder = holder.with(key, value).get();
         this.checkGetData(newHolder, key, value);
     }
 
 
-    private <T> void checkOfferData(final DataHolder.Mutable holder, final Supplier<Key<Value<T>>> key, final T value) {
+    private <T> void checkOfferData(final DataHolder.Mutable holder, final Key<Value<T>> key, final T value) {
         final DataTransactionResult result = holder.offer(key, value);
         if (this.checkResult(holder, key, value, result)) {
             this.checkGetData(holder, key, value);
         }
     }
 
-    private <V extends Value<?>> boolean checkResult(final DataHolder.Mutable holder, final Supplier<Key<V>> key, final Object value, final DataTransactionResult result) {
+    private <V extends Value<?>> boolean checkResult(final DataHolder.Mutable holder, final Key<V> key, final Object value, final DataTransactionResult result) {
         if (!result.isSuccessful()) {
-            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.get().getKey()
+            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.getKey()
                     .asString(), value);
             return true;
         }
         return false;
     }
 
-    private <T> void checkGetWeightedData(final DataHolder holder, final Supplier<Key<WeightedCollectionValue<T>>> key, final List<T> expected) {
+    private <T> void checkGetWeightedData(final DataHolder holder, final Key<WeightedCollectionValue<T>> key, final List<T> expected) {
         final Optional<WeightedTable<T>> gotValue = holder.get(key);
         if (gotValue.isPresent()) {
             final List<T> actual = gotValue.get().get(new Random());
             if (!Objects.deepEquals(actual.toArray(), expected.toArray())) {
                 this.plugin.getLogger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
-                        key.get().getKey().asString(), expected, actual);
+                        key.getKey().asString(), expected, actual);
             }
         } else {
             this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder),
-                    key.get().getKey().asString(), expected);
+                    key.getKey().asString(), expected);
         }
     }
 
-    private <T> void checkGetListData(final DataHolder holder, final Supplier<Key<ListValue<T>>> key, final List<T> expected) {
-        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
+    private <T> void checkGetListData(final DataHolder holder, final Key<ListValue<T>> key, final List<T> expected) {
+        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
-    private <T> void checkGetSetData(final DataHolder holder, final Supplier<Key<SetValue<T>>> key, final Set<T> expected) {
-        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
+    private <T> void checkGetSetData(final DataHolder holder, final Key<SetValue<T>> key, final Set<T> expected) {
+        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
-    private <K, V> void checkGetMapData(final DataHolder holder, final Supplier<Key<MapValue<K, V>>> key, final Map<K, V> expected) {
-        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
+    private <K, V> void checkGetMapData(final DataHolder holder, final Key<MapValue<K, V>> key, final Map<K, V> expected) {
+        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
-    private <T> void checkGetData(final DataHolder holder, final Supplier<Key<Value<T>>> key, final T expected) {
-        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
+    private <T> void checkGetData(final DataHolder holder, final Key<Value<T>> key, final T expected) {
+        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
     private <T> void checkData(final DataHolder holder, final String key, final T expectedValue, @Nullable final T actualValue) {

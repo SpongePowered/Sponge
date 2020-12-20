@@ -58,7 +58,7 @@ import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
-import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
+import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -152,7 +152,7 @@ public final class AdvancementTest implements LoadableModule {
 
     @Listener
     @SuppressWarnings("unchecked")
-    public void onAdvancementRegistry(RegisterCatalogEvent<Advancement> event) {
+    public void onAdvancementRegistry(RegisterDataPackValueEvent event) {
 
         if (!this.enabled) {
             return;

@@ -38,7 +38,7 @@ import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
+import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -97,7 +97,7 @@ public final class RecipeTest implements LoadableModule {
 
     @Listener
     @SuppressWarnings("unchecked")
-    public void onRecipeRegistry(RegisterCatalogEvent<RecipeRegistration> event) {
+    public void onRecipeRegistry(RegisterDataPackValueEvent event) {
 
         if (!this.enabled) {
             return;

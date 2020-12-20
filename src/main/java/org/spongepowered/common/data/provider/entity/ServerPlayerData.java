@@ -77,11 +77,12 @@ public final class ServerPlayerData {
                     .create(Keys.HAS_VIEWED_CREDITS)
                         .get(ServerPlayerEntityAccessor::accessor$seenCredits)
                         .set(ServerPlayerEntityAccessor::accessor$seenCredits)
-                    .create(Keys.LOCALE)
-                        .get(h -> LocaleCache.getLocale(h.accessor$getLanguage()))
+
                    .create(Keys.CHAT_COLORS_ENABLED)
                         .get(ServerPlayerEntityAccessor::accessor$canChatColor)
                 .asMutable(ServerPlayerEntityBridge.class)
+                    .create(Keys.LOCALE)
+                        .get(ServerPlayerEntityBridge::bridge$getLanguage)
                     .create(Keys.HEALTH_SCALE)
                         .get(h -> h.bridge$isHealthScaled() ? h.bridge$getHealthScale() : null)
                         .setAnd((h, v) -> {
