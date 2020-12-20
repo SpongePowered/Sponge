@@ -24,6 +24,7 @@
  */
 package org.spongepowered.vanilla.chat;
 
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -52,39 +53,38 @@ public final class ChatFormatter {
     private ChatFormatter() {
     }
 
-    public static void formatChatComponent(TranslationTextComponent component) {
-        String message = (String) component.getFormatArgs()[1];
-        ITextComponent formatted = ChatFormatter.format(message);
+    public static void formatChatComponent(final TranslationTextComponent component) {
+        final String message = (String) component.getArgs()[1];
+        final ITextComponent formatted = ChatFormatter.format(message);
         if (formatted == null) {
             return;
         }
 
-        formatted.getStyle().setParentStyle(component.getStyle());
-        component.getFormatArgs()[1] = formatted;
+        component.getArgs()[1] = formatted;
     }
 
     @Nullable
-    public static ITextComponent format(String s) {
-        Matcher matcher = ChatFormatter.URL_PATTERN.matcher(s);
+    public static ITextComponent format(final String s) {
+        final Matcher matcher = ChatFormatter.URL_PATTERN.matcher(s);
         if (!matcher.find()) {
             return null;
         }
 
-        ITextComponent result = null;
+        IFormattableTextComponent result = null;
 
         int pos = 0;
         do {
-            int start = matcher.start();
-            int end = matcher.end();
+            final int start = matcher.start();
+            final int end = matcher.end();
 
-            String displayUrl = s.substring(start, end);
+            final String displayUrl = s.substring(start, end);
             String url = displayUrl;
 
             try {
                 if (new URI(url).getScheme() == null) {
                     url = ChatFormatter.DEFAULT_SCHEME + url;
                 }
-            } catch (URISyntaxException e) {
+            } catch (final URISyntaxException e) {
                 continue; // Invalid URL so just ignore it
             }
 
@@ -92,20 +92,20 @@ public final class ChatFormatter {
                 if (result == null) {
                     result = new StringTextComponent(s.substring(pos, start));
                 } else {
-                    result.appendText(s.substring(pos, start));
+                    result.append(s.substring(pos, start));
                 }
             }
 
             pos = end;
 
-            ITextComponent link = new StringTextComponent(displayUrl);
-            link.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url));
+            final IFormattableTextComponent link = new StringTextComponent(displayUrl);
+            link.setStyle(link.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url)));
 
             if (result == null) {
                 result = new StringTextComponent("");
             }
 
-            result.appendSibling(link);
+            result.append(link);
 
         } while (matcher.find());
 
@@ -114,7 +114,7 @@ public final class ChatFormatter {
             if (result == null) {
                 result = new StringTextComponent(s.substring(pos));
             } else {
-                result.appendText(s.substring(pos));
+                result.append(s.substring(pos));
             }
         }
 
