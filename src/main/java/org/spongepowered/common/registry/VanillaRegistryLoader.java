@@ -96,7 +96,12 @@ final class VanillaRegistryLoader {
         });
         this.knownName(RegistryTypes.BOAT_TYPE, BoatEntity.Type.values(), BoatEntity.Type::getName);
         this.knownName(RegistryTypes.CHEST_ATTACHMENT_TYPE, ChestType.values(), ChestType::getSerializedName);
-        this.knownName(RegistryTypes.COLLISION_RULE, Team.CollisionRule.values(), cr -> cr.name);
+        this.manualName(RegistryTypes.COLLISION_RULE, Team.CollisionRule.values(), map -> {
+            map.put(Team.CollisionRule.ALWAYS, "always");
+            map.put(Team.CollisionRule.NEVER, "never");
+            map.put(Team.CollisionRule.PUSH_OTHER_TEAMS, "push_other_teams");
+            map.put(Team.CollisionRule.PUSH_OWN_TEAM, "push_own_team");
+        });
         this.knownName(RegistryTypes.COMPARATOR_MODE, ComparatorMode.values(), ComparatorMode::getSerializedName);
         this.knownName(RegistryTypes.DIFFICULTY, Difficulty.values(), Difficulty::getKey);
         this.knownName(RegistryTypes.DYE_COLOR, DyeColor.values(), DyeColor::getSerializedName);
@@ -115,7 +120,13 @@ final class VanillaRegistryLoader {
             map.put(PhaseType.HOVERING, "hover");
         });
         this.knownName(RegistryTypes.FOX_TYPE, FoxEntity.Type.values(), FoxEntity.Type::getName);
-        this.knownName(RegistryTypes.GAME_MODE, GameType.values(), GameType::getName);
+        this.manualName(RegistryTypes.GAME_MODE, GameType.values(), map -> {
+            map.put(GameType.NOT_SET, "not_set"); // getName returns "" (empty string) // TODO(kashike): 1.17
+            map.put(GameType.SURVIVAL, GameType.SURVIVAL.getName());
+            map.put(GameType.CREATIVE, GameType.CREATIVE.getName());
+            map.put(GameType.ADVENTURE, GameType.ADVENTURE.getName());
+            map.put(GameType.SPECTATOR, GameType.SPECTATOR.getName());
+        });
         this.automaticName(RegistryTypes.HAND_PREFERENCE, HandSide.values());
         this.automaticName(RegistryTypes.HAND_TYPE, Hand.values());
         this.knownName(RegistryTypes.INSTRUMENT_TYPE, NoteBlockInstrument.values(), NoteBlockInstrument::getSerializedName);
@@ -134,7 +145,12 @@ final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.SPELL_TYPE, SpellcastingIllagerEntity.SpellType.values());
         this.knownName(RegistryTypes.STAIR_SHAPE, StairsShape.values(), StairsShape::getSerializedName);
         this.knownName(RegistryTypes.STRUCTURE_MODE, StructureMode.values(), StructureMode::getSerializedName);
-        this.automaticName(RegistryTypes.VISIBILITY, Team.Visible.values());
+        this.manualName(RegistryTypes.VISIBILITY, Team.Visible.values(), map -> {
+            map.put(Team.Visible.ALWAYS, "always");
+            map.put(Team.Visible.NEVER, "never");
+            map.put(Team.Visible.HIDE_FOR_OTHER_TEAMS, "hide_for_other_teams");
+            map.put(Team.Visible.HIDE_FOR_OWN_TEAM, "hide_for_own_team");
+        });
     }
 
     // The following methods are named for clarity above.
