@@ -57,13 +57,13 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotDataBuilder;
 import org.spongepowered.common.data.key.KeyBasedDataListener;
-import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.data.persistence.datastore.DataStoreRegistry;
 import org.spongepowered.common.data.provider.CustomDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
+import org.spongepowered.common.registry.provider.DataTranslatorProvider;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 import org.spongepowered.common.world.storage.SpongePlayerDataBuilder;
@@ -214,8 +214,8 @@ public final class SpongeDataManager implements DataManager {
     }
 
     @Override
-    public <T> Optional<DataTranslator<T>> getTranslator(Class<T> objectClass) {
-        return DataSerializers.getSerializer(objectClass);
+    public <T> Optional<DataTranslator<T>> getTranslator(final Class<T> objectClass) {
+        return DataTranslatorProvider.INSTANCE.getSerializer(objectClass);
     }
 
     public void registerKeyListeners() {

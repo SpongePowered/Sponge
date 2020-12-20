@@ -62,9 +62,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -95,7 +92,6 @@ public final class DataSerializers {
     public static final DataTranslator<ZonedDateTime> ZONED_DATE_TIME_DATA_SERIALIZER;
     public static final DataTranslator<Month> MONTH_DATA_SERIALIZER;
 
-    private static final Map<Class, DataTranslator> translators = new IdentityHashMap<>();
 
     static {
         COMPONENT_DATA_SERIALIZER = new DataTranslator<Component>() {
@@ -982,41 +978,12 @@ public final class DataSerializers {
                 return dataView.set(Constants.DataSerializers.LOCAL_DATE_MONTH, obj.getValue());
             }
         };
-        DataSerializers.translators.put(Component.class, DataSerializers.COMPONENT_DATA_SERIALIZER);
-        DataSerializers.translators.put(UUID.class, DataSerializers.UUID_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector2d.class, DataSerializers.VECTOR_2_D_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector2f.class, DataSerializers.VECTOR_2_F_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector2i.class, DataSerializers.VECTOR_2_I_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector2l.class, DataSerializers.VECTOR_2_L_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector3d.class, DataSerializers.VECTOR_3_D_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector3f.class, DataSerializers.VECTOR_3_F_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector3i.class, DataSerializers.VECTOR_3_I_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector3l.class, DataSerializers.VECTOR_3_L_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector4d.class, DataSerializers.VECTOR_4_D_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector4f.class, DataSerializers.VECTOR_4_F_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector4i.class, DataSerializers.VECTOR_4_I_DATA_SERIALIZER);
-        DataSerializers.translators.put(Vector4l.class, DataSerializers.VECTOR_4_L_DATA_SERIALIZER);
-        DataSerializers.translators.put(Complexd.class, DataSerializers.COMPLEXD_DATA_SERIALIZER);
-        DataSerializers.translators.put(Complexf.class, DataSerializers.COMPLEXF_DATA_SERIALIZER);
-        DataSerializers.translators.put(Quaterniond.class, DataSerializers.QUATERNIOND_DATA_SERIALIZER);
-        DataSerializers.translators.put(Quaternionf.class, DataSerializers.QUATERNIONF_DATA_SERIALIZER);
-        DataSerializers.translators.put(LocalTime.class, DataSerializers.LOCAL_TIME_DATA_SERIALIZER);
-        DataSerializers.translators.put(LocalDate.class, DataSerializers.LOCAL_DATE_DATA_SERIALIZER);
-        DataSerializers.translators.put(LocalDateTime.class, DataSerializers.LOCAL_DATE_TIME_DATA_SERIALIZER);
-        DataSerializers.translators.put(Instant.class, DataSerializers.INSTANT_DATA_SERIALIZER);
-        DataSerializers.translators.put(ZonedDateTime.class, DataSerializers.ZONED_DATE_TIME_DATA_SERIALIZER);
-        DataSerializers.translators.put(Month.class, DataSerializers.MONTH_DATA_SERIALIZER);
+
     }
 
     static Supplier<InvalidDataException> invalidDataQuery(final DataQuery query) {
         return () -> {
             throw new InvalidDataException("Invalid data located at: " + query.toString());
         };
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Optional<DataTranslator<T>> getSerializer(Class clazz) {
-        final DataTranslator dataTranslator = DataSerializers.translators.get(clazz);
-        return Optional.ofNullable((DataTranslator<T>) dataTranslator);
     }
 }

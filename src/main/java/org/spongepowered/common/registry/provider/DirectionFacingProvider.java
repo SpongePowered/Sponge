@@ -33,31 +33,28 @@ import java.util.Optional;
 
 public final class DirectionFacingProvider {
 
-    public static DirectionFacingProvider getInstance() {
-        return Holder.INSTANCE;
+    public static DirectionFacingProvider INSTANCE;
+
+    private final ImmutableBiMap<Direction, net.minecraft.util.Direction> mappings;
+
+    DirectionFacingProvider() {
+        DirectionFacingProvider.INSTANCE = this;
+
+        this.mappings = ImmutableBiMap.<Direction, net.minecraft.util.Direction>builder()
+                .put(Direction.NORTH, net.minecraft.util.Direction.NORTH)
+                .put(Direction.EAST, net.minecraft.util.Direction.EAST)
+                .put(Direction.SOUTH, net.minecraft.util.Direction.SOUTH)
+                .put(Direction.WEST, net.minecraft.util.Direction.WEST)
+                .put(Direction.UP, net.minecraft.util.Direction.UP)
+                .put(Direction.DOWN, net.minecraft.util.Direction.DOWN)
+                .build();
     }
 
-    public static final ImmutableBiMap<Direction, net.minecraft.util.Direction> directionMap = ImmutableBiMap.<Direction, net.minecraft.util.Direction>builder()
-        .put(Direction.NORTH, net.minecraft.util.Direction.NORTH)
-        .put(Direction.EAST, net.minecraft.util.Direction.EAST)
-        .put(Direction.SOUTH, net.minecraft.util.Direction.SOUTH)
-        .put(Direction.WEST, net.minecraft.util.Direction.WEST)
-        .put(Direction.UP, net.minecraft.util.Direction.UP)
-        .put(Direction.DOWN, net.minecraft.util.Direction.DOWN)
-        .build();
-
     public Optional<net.minecraft.util.Direction> get(Direction key) {
-        return Optional.ofNullable(DirectionFacingProvider.directionMap.get(checkNotNull(key)));
+        return Optional.ofNullable(this.mappings.get(checkNotNull(key)));
     }
 
     public Optional<Direction> getKey(net.minecraft.util.Direction value) {
-        return Optional.ofNullable(DirectionFacingProvider.directionMap.inverse().get(checkNotNull(value)));
-    }
-
-    DirectionFacingProvider() { }
-
-    private static final class Holder {
-        static final DirectionFacingProvider INSTANCE = new DirectionFacingProvider();
-
+        return Optional.ofNullable(this.mappings.inverse().get(checkNotNull(value)));
     }
 }

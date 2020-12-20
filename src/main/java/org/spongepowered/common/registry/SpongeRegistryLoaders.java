@@ -30,7 +30,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.arguments.BlockStateArgument;
@@ -46,7 +45,6 @@ import net.minecraft.command.arguments.Vec2Argument;
 import net.minecraft.command.arguments.Vec3Argument;
 import net.minecraft.item.Items;
 import net.minecraft.item.MusicDiscItem;
-import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.util.datafix.codec.DatapackCodec;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -94,7 +92,6 @@ import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.data.type.SkinParts;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.potion.PotionEffectType;
@@ -141,8 +138,6 @@ import org.spongepowered.api.placeholder.PlaceholderParsers;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.scoreboard.criteria.Criteria;
-import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.service.ban.Ban;
@@ -204,8 +199,6 @@ import org.spongepowered.common.command.registrar.tree.key.SpongeEntityClientCom
 import org.spongepowered.common.command.registrar.tree.key.SpongeStringClientCompletionKey;
 import org.spongepowered.common.command.selector.SpongeSelectorSortAlgorithm;
 import org.spongepowered.common.command.selector.SpongeSelectorType;
-import org.spongepowered.common.data.key.SpongeKey;
-import org.spongepowered.common.data.key.SpongeKeyBuilder;
 import org.spongepowered.common.data.nbt.validation.SpongeValidationType;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
@@ -482,27 +475,6 @@ public final class SpongeRegistryLoaders {
         });
     }
 
-    public static RegistryLoader<Criterion> criterion() {
-        return RegistryLoader.of(l -> {
-            l.add(Criteria.AIR, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.AIR, k));
-            l.add(Criteria.ARMOR, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.ARMOR, k));
-            l.add(Criteria.DEATH_COUNT, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.DEATH_COUNT, k));
-            l.add(Criteria.DUMMY, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.DUMMY, k));
-            l.add(Criteria.EXPERIENCE, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.EXPERIENCE, k));
-            l.add(Criteria.FOOD, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.FOOD, k));
-            l.add(Criteria.HEALTH, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.HEALTH, k));
-            l.add(Criteria.LEVEL, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.LEVEL, k));
-            l.add(Criteria.PLAYER_KILL_COUNT, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.KILL_COUNT_PLAYERS, k));
-            l.add(Criteria.TOTAL_KILL_COUNT, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.KILL_COUNT_ALL, k));
-            l.add(Criteria.TRIGGER, k -> SpongeRegistryLoaders.newCriterion(ScoreCriteria.TRIGGER, k));
-        });
-    }
-
-    private static Criterion newCriterion(final ScoreCriteria criteria, final ResourceKey key) {
-        ((ResourceKeyBridge) criteria).bridge$setKey(key);
-        return (Criterion) criteria;
-    }
-
     public static RegistryLoader<DamageModifierType> damageModifierType() {
         return RegistryLoader.of(l -> l.mapping(SpongeDamageModifierType::new, m -> m.add(
                 DamageModifierTypes.ABSORPTION,
@@ -661,10 +633,6 @@ public final class SpongeRegistryLoaders {
         });
     }
 
-    private static <E, V extends Value<E>> SpongeKey<V, E> newKey(final ResourceKey key, final TypeToken<V> type) {
-        return (SpongeKey<V, E>) new SpongeKeyBuilder<>().key(key).type(type).build();
-    }
-
     public static RegistryLoader<LlamaType> llamaType() {
         return RegistryLoader.of(l -> {
             l.add(2, LlamaTypes.BROWN, SpongeLlamaType::new);
@@ -753,6 +721,19 @@ public final class SpongeRegistryLoaders {
                 Operations.MODIFY,
                 Operations.PLACE
         )));
+    }
+
+    public static RegistryLoader<PaletteType<?, ?>> paletteType() {
+        return RegistryLoader.of(l -> {
+            l.add(PaletteTypes.BIOME_PALETTE, k -> new SpongePaletteType<>(
+                    (string, registry) -> registry.value(ResourceKey.resolve(string)),
+                    (registry, biome) -> registry.valueKey(biome).toString()
+            ));
+            l.add(PaletteTypes.BLOCK_STATE_PALETTE, k -> new SpongePaletteType<>(
+                    (string, registry) -> BlockStateSerializerDeserializer.deserialize(string),
+                    (registry, blockState) -> BlockStateSerializerDeserializer.serialize(blockState)
+            ));
+        });
     }
 
     public static RegistryLoader<ParrotType> parrotType() {
@@ -932,19 +913,6 @@ public final class SpongeRegistryLoaders {
             ((WorldSettingsBridge) (Object) archetype).bridge$setGenerateSpawnOnLoad(true);
         }
         return (WorldArchetype) (Object)  archetype;
-    }
-
-    public static RegistryLoader<PaletteType<?, ?>> paletteType() {
-        return RegistryLoader.of(l -> {
-            l.add(PaletteTypes.BIOME_PALETTE, k -> new SpongePaletteType<>(
-                (string, registry) -> registry.value(ResourceKey.resolve(string)),
-                (registry, biome) -> registry.valueKey(biome).toString()
-                ));
-            l.add(PaletteTypes.BLOCK_STATE_PALETTE, k -> new SpongePaletteType<>(
-                (string, registry) -> BlockStateSerializerDeserializer.deserialize(string),
-                (registry, blockState) -> BlockStateSerializerDeserializer.serialize(blockState)
-            ));
-        });
     }
 
     // @formatter:on

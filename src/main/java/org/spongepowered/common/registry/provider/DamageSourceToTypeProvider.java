@@ -35,51 +35,47 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class DamageSourceToTypeProvider {
+public final class DamageSourceToTypeProvider {
 
-    public static DamageSourceToTypeProvider getInstance() {
-        return Holder.INSTANCE;
-    }
-
-    private final Map<String, Supplier<? extends DamageType>> damageSourceToTypeMappings = new HashMap<>();
+    private final Map<String, Supplier<? extends DamageType>> mappings = new HashMap<>();
 
     DamageSourceToTypeProvider() {
 
-        this.damageSourceToTypeMappings.put("anvil", DamageTypes.CONTACT);
-        this.damageSourceToTypeMappings.put("arrow", DamageTypes.PROJECTILE);
-        this.damageSourceToTypeMappings.put("cactus", DamageTypes.CONTACT);
-        this.damageSourceToTypeMappings.put("cramming", DamageTypes.CONTACT);
-        this.damageSourceToTypeMappings.put("dragonbreath", DamageTypes.MAGIC);
-        this.damageSourceToTypeMappings.put("drown", DamageTypes.DROWN);
-        this.damageSourceToTypeMappings.put("explosion.player", DamageTypes.EXPLOSIVE);
-        this.damageSourceToTypeMappings.put("fall", DamageTypes.FALL);
-        this.damageSourceToTypeMappings.put("fallingblock", DamageTypes.CONTACT);
-        this.damageSourceToTypeMappings.put("fireworks", DamageTypes.EXPLOSIVE);
-        this.damageSourceToTypeMappings.put("flyintowall", DamageTypes.CONTACT);
-        this.damageSourceToTypeMappings.put("generic", DamageTypes.GENERIC);
-        this.damageSourceToTypeMappings.put("hotfloor", DamageTypes.MAGMA);
-        this.damageSourceToTypeMappings.put("indirectmagic", DamageTypes.MAGIC);
-        this.damageSourceToTypeMappings.put("infire", DamageTypes.FIRE);
-        this.damageSourceToTypeMappings.put("inwall", DamageTypes.SUFFOCATE);
-        this.damageSourceToTypeMappings.put("lava", DamageTypes.FIRE);
-        this.damageSourceToTypeMappings.put("lightningbolt", DamageTypes.PROJECTILE);
-        this.damageSourceToTypeMappings.put("magic", DamageTypes.MAGIC);
-        this.damageSourceToTypeMappings.put("mob", DamageTypes.ATTACK);
-        this.damageSourceToTypeMappings.put("onfire", DamageTypes.FIRE);
-        this.damageSourceToTypeMappings.put("outofworld", DamageTypes.VOID);
-        this.damageSourceToTypeMappings.put("player", DamageTypes.ATTACK);
-        this.damageSourceToTypeMappings.put("starve", DamageTypes.HUNGER);
-        this.damageSourceToTypeMappings.put("thorns", DamageTypes.MAGIC);
-        this.damageSourceToTypeMappings.put("thrown", DamageTypes.PROJECTILE);
-        this.damageSourceToTypeMappings.put("wither", DamageTypes.MAGIC);
+        this.mappings.put("anvil", DamageTypes.CONTACT);
+        this.mappings.put("arrow", DamageTypes.PROJECTILE);
+        this.mappings.put("cactus", DamageTypes.CONTACT);
+        this.mappings.put("cramming", DamageTypes.CONTACT);
+        this.mappings.put("dragonbreath", DamageTypes.MAGIC);
+        this.mappings.put("drown", DamageTypes.DROWN);
+        this.mappings.put("explosion.player", DamageTypes.EXPLOSIVE);
+        this.mappings.put("fall", DamageTypes.FALL);
+        this.mappings.put("fallingblock", DamageTypes.CONTACT);
+        this.mappings.put("fireworks", DamageTypes.EXPLOSIVE);
+        this.mappings.put("flyintowall", DamageTypes.CONTACT);
+        this.mappings.put("generic", DamageTypes.GENERIC);
+        this.mappings.put("hotfloor", DamageTypes.MAGMA);
+        this.mappings.put("indirectmagic", DamageTypes.MAGIC);
+        this.mappings.put("infire", DamageTypes.FIRE);
+        this.mappings.put("inwall", DamageTypes.SUFFOCATE);
+        this.mappings.put("lava", DamageTypes.FIRE);
+        this.mappings.put("lightningbolt", DamageTypes.PROJECTILE);
+        this.mappings.put("magic", DamageTypes.MAGIC);
+        this.mappings.put("mob", DamageTypes.ATTACK);
+        this.mappings.put("onfire", DamageTypes.FIRE);
+        this.mappings.put("outofworld", DamageTypes.VOID);
+        this.mappings.put("player", DamageTypes.ATTACK);
+        this.mappings.put("starve", DamageTypes.HUNGER);
+        this.mappings.put("thorns", DamageTypes.MAGIC);
+        this.mappings.put("thrown", DamageTypes.PROJECTILE);
+        this.mappings.put("wither", DamageTypes.MAGIC);
     }
 
-    public Optional<Supplier<? extends DamageType>> get(String key) {
-        return Optional.ofNullable(this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH)));
+    public Optional<Supplier<? extends DamageType>> get(final String key) {
+        return Optional.ofNullable(this.mappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH)));
     }
 
     public Supplier<? extends DamageType> getOrCustom(String key) {
-        final Supplier<? extends DamageType> damageType = this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH));
+        final Supplier<? extends DamageType> damageType = this.mappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH));
         if (damageType == null) {
             this.addCustom(key);
             return DamageTypes.CUSTOM;
@@ -92,10 +88,6 @@ public class DamageSourceToTypeProvider {
     }
 
     public void addCustom(String in) {
-        this.damageSourceToTypeMappings.put(in.toLowerCase(Locale.ENGLISH), DamageTypes.CUSTOM);
-    }
-
-    private static final class Holder {
-        static final DamageSourceToTypeProvider INSTANCE = new DamageSourceToTypeProvider();
+        this.mappings.put(in.toLowerCase(Locale.ENGLISH), DamageTypes.CUSTOM);
     }
 }
