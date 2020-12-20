@@ -74,7 +74,7 @@ public final class SpongeGame implements Game {
     private final ServiceProvider.GameScoped serviceProvider;
 
     private final AsyncScheduler asyncScheduler;
-    private final RegistryHolder registryHolder;
+    private RegistryHolder registryHolder;
 
     private Client client;
     private Server server;
@@ -104,7 +104,7 @@ public final class SpongeGame implements Game {
         this.serviceProvider = serviceProvider;
 
         this.asyncScheduler = new AsyncScheduler();
-        this.registryHolder = new SpongeRegistryHolder();
+        //this.registryHolder = new SpongeRegistryHolder();
     }
 
     @Override
@@ -245,6 +245,10 @@ public final class SpongeGame implements Game {
 
     @Override
     public RegistryHolder registries() {
+        if (this.registryHolder == null) {
+            this.registryHolder = new SpongeRegistryHolder();
+        }
+
         return this.registryHolder;
     }
 

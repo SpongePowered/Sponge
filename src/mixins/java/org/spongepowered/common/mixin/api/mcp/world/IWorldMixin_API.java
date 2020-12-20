@@ -44,6 +44,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ProtoWorld;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.ProtoChunk;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.EntityUtil;
@@ -117,7 +118,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
 
     // RandomProvider
 
-    @Override
+    @Intrinsic
     default Random getRandom() {
         return this.shadow$getRandom();
     }
@@ -146,7 +147,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
 
     @Override
     default boolean spawnEntity(final Entity entity) {
-        Objects.requireNonNull(entity);
+        Objects.requireNonNull(entity, "entity");
 
         return ((IWorld) this).addFreshEntity((net.minecraft.entity.Entity) entity);
     }

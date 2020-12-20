@@ -50,16 +50,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -262,31 +259,6 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         }
 
         return attackSucceeded;
-    }
-
-    @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 16384.0D))
-    private double getHardDespawnRange(final double value) {
-        if (!this.level.isClientSide) {
-            return Math.pow(((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().entity.living.hardDespawnRange, 2);
-        }
-        return value;
-    }
-
-    // Note that this should inject twice.
-    @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 1024.0D), expect = 2)
-    private double getSoftDespawnRange(final double value) {
-        if (!this.level.isClientSide) {
-            return Math.pow(((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().entity.living.softDespawnRange, 2);
-        }
-        return value;
-    }
-
-    @ModifyConstant(method = "checkDespawn", constant = @Constant(intValue = 600))
-    private int getMinimumLifetime(final int value) {
-        if (!this.level.isClientSide) {
-            return ((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().entity.living.softDespawnMinimumLife * 20;
-        }
-        return value;
     }
 
     @Nullable
