@@ -38,12 +38,12 @@ import org.spongepowered.common.bridge.entity.GrieferBridge;
 public abstract class GhastEntity_FireballAttackGoalMixin extends Goal {
 
     // @formatter:off
-    @Shadow(aliases = "this$0") @Final private GhastEntity parentEntity;
+    @Shadow(aliases = "this$0") @Final private GhastEntity ghast;
     // @formatter:on
 
     @ModifyArg(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addFreshEntity(Lnet/minecraft/entity/Entity;)Z"))
     private Entity impl$onSpawnFireball(final Entity entity) {
-        ((GrieferBridge) entity).bridge$setCanGrief(((GrieferBridge) this.parentEntity).bridge$canGrief());
+        ((GrieferBridge) entity).bridge$setCanGrief(((GrieferBridge) this.ghast).bridge$canGrief());
         return entity;
     }
 }
