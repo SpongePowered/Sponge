@@ -82,7 +82,7 @@ public abstract class FishingRodItemMixin {
     }
 
     @Redirect(method = "use", at = @At(value = "NEW", target = "net/minecraft/entity/projectile/FishingBobberEntity"))
-    private FishingBobberEntity onNewEntityFishHook(World world, PlayerEntity player) {
+    private FishingBobberEntity onNewEntityFishHook(PlayerEntity p_i50220_1_, World p_i50220_2_, int p_i50220_3_, int p_i50220_4_) {
         // Use the fish hook we created for the event
         FishingBobberEntity fishHook = this.impl$fishHook;
         this.impl$fishHook = null;
