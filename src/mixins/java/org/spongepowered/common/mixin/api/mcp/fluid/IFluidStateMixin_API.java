@@ -36,26 +36,26 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(net.minecraft.fluid.FluidState.class)
 @Implements(@Interface(iface = FluidState.class, prefix = "fluidState$"))
-public interface IFluidStateMixin_API extends FluidState {
+public abstract class IFluidStateMixin_API implements FluidState {
 
     // @formatter:off
-    @Shadow Fluid shadow$getType();
-    @Shadow net.minecraft.block.BlockState shadow$createLegacyBlock();
-    @Shadow boolean shadow$isEmpty();
+    @Shadow public abstract Fluid shadow$getType();
+    @Shadow public abstract net.minecraft.block.BlockState shadow$createLegacyBlock();
+    @Shadow public abstract boolean shadow$isEmpty();
     // @formatter:on
 
     @Override
-    default BlockState getBlock() {
+    public BlockState getBlock() {
         return (BlockState) this.shadow$createLegacyBlock();
     }
 
     @Intrinsic
-    default FluidType fluidState$getType() {
+    public FluidType fluidState$getType() {
         return (FluidType) this.shadow$getType();
     }
 
     @Intrinsic
-    default boolean fluidState$isEmpty() {
+    public boolean fluidState$isEmpty() {
         return this.shadow$isEmpty();
     }
 }
