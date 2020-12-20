@@ -25,11 +25,14 @@
 package org.spongepowered.common.mixin.api.common.util;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 import org.spongepowered.common.mixin.api.mcp.util.EntityDamageSourceMixin_API;
+import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 
 @Mixin(value = MinecraftFallingBlockDamageSource.class, priority = 992)
 public abstract class MinecraftFallingBlockDamageSourceMixin_API extends EntityDamageSourceMixin_API implements FallingBlockDamageSource {
@@ -41,9 +44,11 @@ public abstract class MinecraftFallingBlockDamageSourceMixin_API extends EntityD
 
     @Override
     public String toString() {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.getType());
+
         return MoreObjects.toStringHelper(this)
             .add("Name", this.shadow$getMsgId())
-            .add("Key", this.getType().getKey())
+            .add("Key", resourceKey)
             .add("FallingBlock", this.getSource().toString())
             .toString();
     }

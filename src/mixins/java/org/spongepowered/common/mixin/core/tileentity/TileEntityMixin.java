@@ -30,8 +30,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -134,19 +135,23 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
 
     @Override
     public String toString() {
+        final ResourceKey key = (ResourceKey) (Object) Registry.BLOCK_ENTITY_TYPE.getKey(this.type);
+
         return MoreObjects.toStringHelper(this)
                 // Double check some mods are registering their tile entities and doing some "interesting"
                 // things with doing a to string on a tile entity not actually functionally valid in the game "yet".
-            .add("tileType", ((BlockEntityType) this.type).getKey())
+            .add("type", key)
             .add("world", this.level)
             .add("pos", this.worldPosition)
-            .add("blockMetadata", this.blockState)
+            .add("blockstate", this.blockState)
             .toString();
     }
 
     protected MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
+        final ResourceKey key = (ResourceKey) (Object) Registry.BLOCK_ENTITY_TYPE.getKey(this.type);
+
         return MoreObjects.toStringHelper(this)
-            .add("type", ((BlockEntityType) this.type).getKey())
+            .add("type", key)
             .add("world", ((ServerWorld) this.level).getKey())
             .add("pos", this.worldPosition);
     }

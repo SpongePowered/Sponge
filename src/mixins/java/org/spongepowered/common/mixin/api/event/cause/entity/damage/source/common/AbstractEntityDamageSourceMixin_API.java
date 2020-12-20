@@ -25,9 +25,11 @@
 package org.spongepowered.common.mixin.api.event.cause.entity.damage.source.common;
 
 import net.minecraft.entity.Entity;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -45,11 +47,13 @@ import org.spongepowered.common.event.cause.entity.damage.SpongeCommonEntityDama
 @Mixin(AbstractEntityDamageSource.class)
 public abstract class AbstractEntityDamageSourceMixin_API implements EntityDamageSource {
 
+    @Shadow public abstract DamageType getType();
+
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$bridgeApiToImplConstruction(final CallbackInfo callbackInfo) {
         final SpongeCommonEntityDamageSource commonSource = (SpongeCommonEntityDamageSource) (Object) this;
-        commonSource.setDamageType(this.getType().getKey().getFormatted());
+        commonSource.setDamageType(this.getType().getName());
         commonSource.setEntitySource((Entity) this.getSource());
         if (this.isAbsolute()) {
             commonSource.bridge$setDamageIsAbsolute();

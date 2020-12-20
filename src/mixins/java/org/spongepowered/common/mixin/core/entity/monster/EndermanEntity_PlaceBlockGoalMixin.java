@@ -44,9 +44,10 @@ import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 @Mixin(targets = "net/minecraft/entity/monster/EndermanEntity$PlaceBlockGoal")
 public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
@@ -80,7 +81,7 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
     }
 
     /**
-     * @reason Makes enderman check for block changes before they can place their blocks.
+     * @reason Makes Endermen check for block changes before they can place their blocks.
      * This allows plugins to cancel the event regardless without issue.
      */
     @Redirect(method = "canPlaceBlock",

@@ -26,26 +26,33 @@ package org.spongepowered.common.mixin.optimization.mcp.world;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.gen.WorldGenRegion;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.stream.Stream;
 
 @Mixin(value = IWorldReader.class, priority = 1500)
-public interface IWorldReaderMixin_Optimization_Collision {
+public interface IWorldReaderMixin_Optimization_Collision extends IBlockReader {
 
-    @Shadow default Stream<BlockState> getBlockStatesIfLoaded(final AxisAlignedBB aabb) { throw new AssertionError(); }
+    @Shadow @Deprecated boolean shadow$hasChunksAt(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
 
-    // TODO: Mixin probably doesn't support this yet......... so may have to become an overwrite
-    @SuppressWarnings("deprecation")
-    @Redirect(method = "getBlockStatesIfLoaded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IWorldReader;hasChunksAt(IIIIII)Z"))
-    default boolean activeCollision$ignoreHasChunksAt(final IWorldReader world, final int xStart, final int yStart, final int zStart,
-        final int xEnd, final int yEnd, final int zEnd) {
-        return !(world instanceof WorldGenRegion) || world.hasChunksAt(xStart, yStart, zStart, xEnd, yEnd, zEnd);
+    /**
+     * @author zidane - December 20th, 2020 - Minecraft 1.16.4
+     */
+    @Overwrite
+    default Stream<BlockState> getBlockStatesIfLoaded(AxisAlignedBB p_234939_1_) {
+        int i = MathHelper.floor(p_234939_1_.minX);
+        int j = MathHelper.floor(p_234939_1_.maxX);
+        int k = MathHelper.floor(p_234939_1_.minY);
+        int l = MathHelper.floor(p_234939_1_.maxY);
+        int i1 = MathHelper.floor(p_234939_1_.minZ);
+        int j1 = MathHelper.floor(p_234939_1_.maxZ);
+        return (!(this instanceof WorldGenRegion) || this.shadow$hasChunksAt(i, k, i1, j, l, j1)) ? this.getBlockStates(p_234939_1_) :
+                Stream.empty();
     }
-
 }

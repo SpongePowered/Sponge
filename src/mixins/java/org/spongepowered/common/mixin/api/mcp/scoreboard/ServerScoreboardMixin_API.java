@@ -67,7 +67,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
 
     @Override
     public Optional<Objective> getObjective(final DisplaySlot slot) {
-        final SimpleRegistry<DisplaySlot> registry = (SimpleRegistry<DisplaySlot>) Sponge.getGame().registries().registry(RegistryTypes.DISPLAY_SLOT);
+        final SimpleRegistry<DisplaySlot> registry = (SimpleRegistry<DisplaySlot>) (Object) Sponge.getGame().registries().registry(RegistryTypes.DISPLAY_SLOT);
         final ScoreObjective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[registry.getId(slot)];
         if (objective != null) {
             return Optional.of(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());

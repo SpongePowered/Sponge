@@ -27,14 +27,9 @@ package org.spongepowered.common.mixin.api.mcp.entity.player;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.ChatVisibility;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.player.ChatVisibilityBridge;
 
 @Mixin(ChatVisibility.class)
@@ -43,18 +38,6 @@ public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.e
     // @formatter:off
     @Shadow @Final private String key;
     // @formatter:on
-
-    private ResourceKey api$key;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKeyAndTranslation(String enumName, int ordinal, int p_i50176_3_, String p_i50176_4_, CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), enumName.toLowerCase());
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
 
     @Override
     public Component asComponent() {

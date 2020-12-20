@@ -25,15 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.entity.villager;
 
 import net.minecraft.entity.villager.VillagerType;
-import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(VillagerType.class)
 public abstract class VillagerTypeMixin_API implements org.spongepowered.api.data.type.VillagerType {
-
-    @Override
-    public ResourceKey getKey() {
-        return (ResourceKey) (Object) Registry.VILLAGER_TYPE.getKey((VillagerType) (Object) this);
-    }
 }

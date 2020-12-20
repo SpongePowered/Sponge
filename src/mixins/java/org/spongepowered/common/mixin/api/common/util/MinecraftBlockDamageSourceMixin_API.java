@@ -25,8 +25,11 @@
 package org.spongepowered.common.mixin.api.common.util;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,9 +56,10 @@ public abstract class MinecraftBlockDamageSourceMixin_API extends DamageSourceMi
 
     @Override
     public String toString() {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.getType());
         return MoreObjects.toStringHelper("BlockDamageSource")
             .add("Name", this.shadow$getMsgId())
-            .add("Key", this.getType().getKey())
+            .add("Key", resourceKey)
             .add("BlockSnapshot", this.getBlockSnapshot())
             .add("Location", this.location)
             .toString();

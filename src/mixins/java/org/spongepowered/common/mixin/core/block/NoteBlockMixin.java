@@ -29,19 +29,19 @@ import net.minecraft.block.NoteBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.state.properties.NoteBlockInstrument;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.NotePitch;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -71,16 +71,13 @@ public abstract class NoteBlockMixin extends BlockMixin {
 
         float pitch = (float) Math.pow(2.0D, (double) (param - 12) / 12.0D);
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(
-                    frame.getCurrentCause(), (ServerWorld) worldIn, pos,
-                    NoteBlockInstrument.byState(state).getSoundEvent(), instrumentType,
-                    SpongeCommon.getRegistry().getCatalogRegistry().requireRegistry(NotePitch.class).getByValue(param), pitch);
-            if (event.isCancelled()) {
-                callbackInfo.setReturnValue(true);
-            }
+        final SimpleRegistry<NotePitch> registry =
+                (SimpleRegistry<NotePitch>) (Object) Sponge.getGame().registries().registry(RegistryTypes.NOTE_PITCH);
+        final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(
+                PhaseTracker.getCauseStackManager().getCurrentCause(), (ServerWorld) worldIn, pos,
+                NoteBlockInstrument.byState(state).getSoundEvent(), instrumentType, registry.byId(param), pitch);
+        if (event.isCancelled()) {
+            callbackInfo.setReturnValue(true);
         }
     }
-
-
 }

@@ -81,6 +81,6 @@ public abstract class NearestAttackableTargetGoalMixin_API extends TargetGoalMix
     @Override
     public Predicate<Living> getFilter() {
         final Predicate<LivingEntity> predicate = ((EntityPredicateAccessor) this.targetConditions).accessor$selector();
-        return (Predicate<Living>) (predicate == null ? NearestAttackableTargetGoalMixin_API.ALWAYS_TRUE : predicate);
+        return (Predicate<Living>) (Object) (predicate == null ? NearestAttackableTargetGoalMixin_API.ALWAYS_TRUE : predicate);
     }
 }

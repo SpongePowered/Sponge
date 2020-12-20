@@ -25,26 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.state.properties;
 
 import net.minecraft.state.properties.ChestType;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 
 @Mixin(ChestType.class)
 public abstract class ChestTypeMixin_API implements ChestAttachmentType {
-
-    private ResourceKey api$key;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, String name, int opposite, CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name.toLowerCase());
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.api$key;
-    }
 }

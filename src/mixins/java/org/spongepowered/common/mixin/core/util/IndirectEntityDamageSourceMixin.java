@@ -27,7 +27,10 @@ package org.spongepowered.common.mixin.core.util;
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.IndirectEntityDamageSource;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -62,9 +65,10 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
 
     @Override
     public String toString() {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.impl$damageType.get());
         final MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper("IndirectEntityDamageSource")
             .add("Name", this.msgId)
-            .add("Type", this.impl$damageType.get().getKey().toString())
+            .add("Type", resourceKey)
             .add("Source", this.shadow$getDirectEntity())
             .add("IndirectSource", this.shadow$getEntity());
         if (this.impl$creator != null) {

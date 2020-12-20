@@ -39,6 +39,6 @@ public abstract class BlockItemMixin_API extends ItemMixin_API {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     private void api$setBlockType(Block block, Item.Properties builder, CallbackInfo ci) {
-        this.blockType = (BlockType) block;
+        this.api$blockType = (BlockType) block;
     }
 }

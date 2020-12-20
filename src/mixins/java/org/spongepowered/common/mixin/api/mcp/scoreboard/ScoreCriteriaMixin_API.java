@@ -25,12 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.scoreboard;
 
 import net.minecraft.scoreboard.ScoreCriteria;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 
 @Mixin(ScoreCriteria.class)
 public abstract class ScoreCriteriaMixin_API implements Criterion {
@@ -38,11 +36,6 @@ public abstract class ScoreCriteriaMixin_API implements Criterion {
     // @formatter:off
     @Shadow public abstract ScoreCriteria.RenderType shadow$getDefaultRenderType();
     // @formatter:on
-
-    @Override
-    public ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
-    }
 
     @Override
     public ObjectiveDisplayMode getDisplayMode() {

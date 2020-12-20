@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
@@ -47,9 +49,10 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 public abstract class TileEntityMixin_API implements BlockEntity {
@@ -100,13 +103,15 @@ public abstract class TileEntityMixin_API implements BlockEntity {
 
     @Override
     public DataContainer toContainer() {
+        final ResourceKey key = (ResourceKey) (Object) Registry.BLOCK_ENTITY_TYPE.getKey(this.type);
+
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Queries.WORLD_KEY, ((ServerWorld) this.level).getKey())
             .set(Queries.POSITION_X, this.shadow$getBlockPos().getX())
             .set(Queries.POSITION_Y, this.shadow$getBlockPos().getY())
             .set(Queries.POSITION_Z, this.shadow$getBlockPos().getZ())
-            .set(Constants.TileEntity.TILE_TYPE, ((BlockEntityType) this.type).getKey());
+            .set(Constants.TileEntity.TILE_TYPE, key);
         final CompoundNBT compound = new CompoundNBT();
         this.shadow$save(compound);
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice

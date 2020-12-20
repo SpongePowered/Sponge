@@ -267,7 +267,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(final double value) {
         if (!this.level.isClientSide) {
-            return Math.pow(((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().getEntity().getHardDespawnRange(), 2);
+            return Math.pow(((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().entity.living.hardDespawnRange, 2);
         }
         return value;
     }
@@ -276,7 +276,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(final double value) {
         if (!this.level.isClientSide) {
-            return Math.pow(((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().getEntity().getSoftDespawnRange(), 2);
+            return Math.pow(((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().entity.living.softDespawnRange, 2);
         }
         return value;
     }
@@ -284,7 +284,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @ModifyConstant(method = "checkDespawn", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(final int value) {
         if (!this.level.isClientSide) {
-            return ((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().getEntity().getMinimumLife() * 20;
+            return ((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().entity.living.softDespawnMinimumLife * 20;
         }
         return value;
     }

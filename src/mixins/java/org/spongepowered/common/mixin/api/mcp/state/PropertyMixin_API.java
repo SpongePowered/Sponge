@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.state;
 
 import net.minecraft.state.Property;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Implements;
@@ -38,8 +36,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
 
 /**
  * This is retained solely for simplification not having to perform any
@@ -56,18 +52,6 @@ public abstract class PropertyMixin_API<T extends Comparable<T>> implements Stat
     @Shadow public abstract Collection<T> shadow$getPossibleValues();
     @Shadow public abstract String shadow$getName();
     // @formatter:on
-
-    @Nullable private ResourceKey api$resourceKey = null;
-
-    @Override
-    public ResourceKey getKey() {
-        if (this.api$resourceKey == null) {
-            final String id = BlockPropertyIdProvider.getIdFor((Property<T>) (Object) this);
-            final String id = this.shadow$getName();
-            this.api$resourceKey = (ResourceKey) (Object) new ResourceLocation(id);
-        }
-        return this.api$resourceKey;
-    }
 
     @Intrinsic
     public String stateProperty$getName() {

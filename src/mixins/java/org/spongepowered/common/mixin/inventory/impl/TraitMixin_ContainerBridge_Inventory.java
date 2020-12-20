@@ -29,6 +29,8 @@ import net.minecraft.inventory.container.AbstractFurnaceContainer;
 import net.minecraft.inventory.container.BeaconContainer;
 import net.minecraft.inventory.container.BrewingStandContainer;
 import net.minecraft.inventory.container.ChestContainer;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.DispenserContainer;
 import net.minecraft.inventory.container.EnchantmentContainer;
 import net.minecraft.inventory.container.HopperContainer;
@@ -37,6 +39,7 @@ import net.minecraft.inventory.container.MerchantContainer;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.RepairContainer;
 import net.minecraft.inventory.container.WorkbenchContainer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -62,15 +65,18 @@ import java.util.function.Predicate;
         PlayerContainer.class,
         WorkbenchContainer.class
 })
-public abstract class TraitMixin_ContainerBridge_Inventory implements ContainerBridge {
+public abstract class TraitMixin_ContainerBridge_Inventory extends Container implements ContainerBridge {
+
+    protected TraitMixin_ContainerBridge_Inventory(@Nullable ContainerType<?> p_i50105_1_, int p_i50105_2_) {
+        super(p_i50105_1_, p_i50105_2_);
+    }
 
     // Container#canInteractWith is abstract so we have to target the Containers individually
-    @Inject(method = "stillValid", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "stillValid(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void impl$canInteractWith(final PlayerEntity playerIn, final CallbackInfoReturnable<Boolean> cir) {
         Predicate<PlayerEntity> predicate = this.bridge$getCanInteractWith();
         if (predicate != null) {
             cir.setReturnValue(predicate.test(playerIn));
         }
     }
-
 }

@@ -43,13 +43,13 @@ public abstract class LlamaEntityMixin implements LlamaEntityBridge {
 
     @Override
     public LlamaType bridge$getLlamaType() {
-        final SimpleRegistry<LlamaType> registry = (SimpleRegistry<LlamaType>) Sponge.getGame().registries().registry(RegistryTypes.LLAMA_TYPE);
+        final SimpleRegistry<LlamaType> registry = (SimpleRegistry<LlamaType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.LLAMA_TYPE);
         return registry.byId(this.shadow$getVariant());
     }
 
     @Override
     public void bridge$setLlamaType(final LlamaType type) {
-        final SimpleRegistry<LlamaType> registry = (SimpleRegistry<LlamaType>) Sponge.getGame().registries().registry(RegistryTypes.LLAMA_TYPE);
+        final SimpleRegistry<LlamaType> registry = (SimpleRegistry<LlamaType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.LLAMA_TYPE);
         this.shadow$setVariant(registry.getId(type));
     }
 }

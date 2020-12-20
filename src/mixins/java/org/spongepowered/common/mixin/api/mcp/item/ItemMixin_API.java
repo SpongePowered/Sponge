@@ -26,18 +26,16 @@ package org.spongepowered.common.mixin.api.mcp.item;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.item.Item;
-import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
-
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 @Mixin(Item.class)
 public abstract class ItemMixin_API implements ItemType {
@@ -47,17 +45,7 @@ public abstract class ItemMixin_API implements ItemType {
     @Shadow public abstract String shadow$getDescriptionId();
     // @formatter:on
 
-    @Nullable protected BlockType blockType = null;
-
-    private ResourceKey api$key;
-
-    @Override
-    public final ResourceKey getKey() {
-        if (this.api$key == null) {
-            this.api$key = (ResourceKey) (Object) Registry.ITEM.getKey((Item) (Object) this);
-        }
-        return this.api$key;
-    }
+    @Nullable protected BlockType api$blockType = null;
 
     @Override
     public Component asComponent() {
@@ -71,11 +59,11 @@ public abstract class ItemMixin_API implements ItemType {
 
     @Override
     public Optional<BlockType> getBlock() {
-        return Optional.ofNullable(this.blockType);
+        return Optional.ofNullable(this.api$blockType);
     }
 
     @Override
-    public boolean isAnyOf(Supplier<ItemType>... types) {
+    public boolean isAnyOf(Supplier<? extends ItemType>... types) {
         return Arrays.stream(types).map(Supplier::get).anyMatch(type -> type == this);
     }
 

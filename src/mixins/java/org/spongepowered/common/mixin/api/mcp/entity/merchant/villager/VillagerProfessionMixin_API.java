@@ -25,16 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 
 import net.minecraft.entity.merchant.villager.VillagerProfession;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 
 @Mixin(VillagerProfession.class)
 public abstract class VillagerProfessionMixin_API implements ProfessionType {
-
-    @Override
-    public ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
-    }
 }

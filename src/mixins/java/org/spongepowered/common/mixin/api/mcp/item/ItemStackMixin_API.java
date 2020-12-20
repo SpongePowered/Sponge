@@ -31,7 +31,9 @@ import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.registry.Registry;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.SerializableDataHolder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
@@ -165,9 +167,10 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
     @Override
     public DataContainer toContainer() {
+        final ResourceKey key = (ResourceKey) (Object) Registry.ITEM.getKey((Item) this.itemStack$getType());
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Constants.ItemStack.TYPE, this.itemStack$getType().getKey().toString())
+                .set(Constants.ItemStack.TYPE, key)
                 .set(Constants.ItemStack.COUNT, this.itemStack$getQuantity())
                 .set(Constants.ItemStack.DAMAGE_VALUE, this.shadow$getDamageValue());
         if (this.shadow$hasTag()) { // no tag? no data, simple as that.

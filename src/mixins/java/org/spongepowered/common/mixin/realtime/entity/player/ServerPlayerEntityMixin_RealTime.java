@@ -25,52 +25,44 @@
 package org.spongepowered.common.mixin.realtime.entity.player;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.bridge.RealTimeTrackingBridge;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin_RealTime extends PlayerEntityMixin_RealTime {
 
-    // TODO: this logic has changed in 1.16
-    @Redirect(
-        method = "processPortalCooldown",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/entity/player/ServerPlayerEntity;timeUntilPortal:I",
-            opcode = Opcodes.PUTFIELD
-        ),
-        slice = @Slice(
-            from = @At(
-                value = "FIELD",
-                target = "Lnet/minecraft/entity/player/ServerPlayerEntity;invulnerableDimensionChange:Z",
-                opcode = Opcodes.GETFIELD
-            ),
-            to = @At("RETURN")
-        )
-    )
-    private void realTimeImpl$adjustForRealTimePortalCooldown(final ServerPlayerEntity self, final int modifier) {
-        if (((PlatformEntityBridge) (ServerPlayerEntity) (Object) this).bridge$isFakePlayer() || ((WorldBridge) this.level).bridge$isFake()) {
-            this.portalCooldown = modifier;
-            return;
-        }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.level).realTimeBridge$getRealTimeTicks();
-        // The initially apparent function of timeUntilPortal is a cooldown for
-        // nether portals. However, there is a much more important use:
-        // preventing players from being immediately sent back to the other end
-        // of the portal. Since it only checks timeUntilPortal to determine
-        // whether the player was just in a portal, if timeUntilPortal gets set
-        // to 0, it assumes the player left and reentered the portal (see
-        // Entity.setPortal()). To prevent this, "snag" the value of
-        // timeUntilPortal at 1. If setPortal() does not reset it (the player
-        // exits the portal), modifier will become 0, indicating that it is
-        // OK to teleport the player.
-        this.portalCooldown = Math.max(modifier > 0 ? 1 : 0, this.portalCooldown - ticks);
-    }
-
+    // TODO: Minecraft 1.16 - Logic now occurs in Entity
+//    @Redirect(
+//        method = "processPortalCooldown",
+//        at = @At(
+//            value = "FIELD",
+//            target = "portalCooldown",
+//            opcode = Opcodes.PUTFIELD
+//        ),
+//        slice = @Slice(
+//            from = @At(
+//                value = "FIELD",
+//                target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isChangingDimension:Z",
+//                opcode = Opcodes.GETFIELD
+//            ),
+//            to = @At("RETURN")
+//        )
+//    )
+//    private void realTimeImpl$adjustForRealTimePortalCooldown(final ServerPlayerEntity self, final int modifier) {
+//        if (((PlatformEntityBridge) (ServerPlayerEntity) (Object) this).bridge$isFakePlayer() || ((WorldBridge) this.level).bridge$isFake()) {
+//            ((EntityAccessor) this).accessor$portalTime(modifier);
+//            return;
+//        }
+//        final int ticks = (int) ((RealTimeTrackingBridge) this.level).realTimeBridge$getRealTimeTicks();
+//        // The initially apparent function of timeUntilPortal is a cooldown for
+//        // nether portals. However, there is a much more important use:
+//        // preventing players from being immediately sent back to the other end
+//        // of the portal. Since it only checks timeUntilPortal to determine
+//        // whether the player was just in a portal, if timeUntilPortal gets set
+//        // to 0, it assumes the player left and reentered the portal (see
+//        // Entity.setPortal()). To prevent this, "snag" the value of
+//        // timeUntilPortal at 1. If setPortal() does not reset it (the player
+//        // exits the portal), modifier will become 0, indicating that it is
+//        // OK to teleport the player.
+//        ((EntityAccessor) this).accessor$portalTime(Math.max(modifier > 0 ? 1 : 0, ((EntityAccessor) this).accessor$portalTime() - ticks));
+//    }
 }

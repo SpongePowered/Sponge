@@ -26,10 +26,8 @@ package org.spongepowered.common.mixin.api.mcp.particles;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.particles.ParticleType;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.util.ParticleOptionUtil;
 
 import java.util.Map;
@@ -55,10 +53,5 @@ public abstract class ParticleTypeMixin_API implements org.spongepowered.api.eff
             this.api$defaultOptions = ParticleOptionUtil.generateDefaultsForNamed((ParticleType<?>) (Object) this);
         }
         return this.api$defaultOptions;
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
     }
 }

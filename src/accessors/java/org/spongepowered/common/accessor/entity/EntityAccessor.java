@@ -33,9 +33,9 @@ import net.minecraft.util.math.vector.Vector3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Random;
-import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(Entity.class)
 public interface EntityAccessor {
@@ -77,6 +77,8 @@ public interface EntityAccessor {
     @Accessor("random") Random accessor$random();
 
     @Accessor("isInsidePortal") void accessor$isInsidePortal(final boolean isInsidePortal);
+
+    @Accessor("portalTime") int accessor$portalTime();
 
     @Accessor("portalTime") void accessor$portalTime(final int portalTime);
 
