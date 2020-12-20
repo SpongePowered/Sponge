@@ -66,6 +66,7 @@ import org.spongepowered.common.hooks.PlatformHooks;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -141,6 +142,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
         return this.impl$progressMap;
     }
 
+    // TODO kashike - Minecraft 1.16.4 - Review the toString() on the map
     @Inject(method = "update", at = @At("RETURN"))
     private void impl$updateCriterionsAndMap(Map<String, Criterion> criteria, String[][] requirements, CallbackInfo ci) {
         // Validate the requirements to check whether their
@@ -151,7 +153,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             for (final String req : reqs) {
                 if (!criteria.containsKey(req)) {
                     final String advName = this.getOptionalAdvancement()
-                            .map(CatalogType::toString)
+                            .map(Objects::toString)
                             .orElse("unknown");
                     throw new IllegalStateException("Found a requirement which does not exist in the criteria, "
                             + req + " could not be found for the advancement: " + advName);

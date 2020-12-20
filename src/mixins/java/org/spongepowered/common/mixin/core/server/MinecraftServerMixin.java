@@ -81,7 +81,6 @@ import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -111,8 +110,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract ResourcePackList shadow$getPackRepository();
     // @formatter:on
-
-    @Shadow public abstract Path getWorldPath(FolderName p_240776_1_);
 
     @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
     @Nullable private ResourcePack impl$resourcePack;

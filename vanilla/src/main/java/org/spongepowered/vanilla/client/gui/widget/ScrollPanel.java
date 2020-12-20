@@ -28,6 +28,7 @@
  */
 package org.spongepowered.vanilla.client.gui.widget;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
@@ -81,7 +82,7 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
      * @param mouseX
      * @param mouseY
      */
-    protected abstract void drawPanel(int entryRight, int relativeY, Tessellator tess, int mouseX, int mouseY);
+    protected abstract void drawPanel(final MatrixStack stack, int entryRight, int relativeY, Tessellator tess, int mouseX, int mouseY);
 
     protected boolean clickPanel(final double mouseX, final double mouseY, final int button) {
         return false;
@@ -176,37 +177,37 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
     }
 
     @Override
-    public void render(final int mouseX, final int mouseY, final float partialTicks) {
+    public void render(final MatrixStack stack, final int mouseX, final int mouseY, final float partialTicks) {
         this.drawBackground();
 
         final Tessellator tess = Tessellator.getInstance();
-        final BufferBuilder worldr = tess.getBuffer();
+        final BufferBuilder worldr = tess.getBuilder();
 
-        final double scale = this.client.getMainWindow().getGuiScaleFactor();
+        final double scale = this.client.getWindow().getGuiScale();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor((int) (this.left * scale), (int) (this.client.getMainWindow().getFramebufferHeight() - (this.bottom * scale)), (int) (this.width * scale),
+        GL11.glScissor((int) (this.left * scale), (int) (this.client.getWindow().getHeight() - (this.bottom * scale)), (int) (this.width * scale),
             (int) (this.height * scale));
 
-        GlStateManager.disableLighting();
-        GlStateManager.disableFog();
-        this.client.getTextureManager().bindTexture(AbstractGui.BACKGROUND_LOCATION);
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager._disableLighting();
+        GlStateManager._disableFog();
+        this.client.getTextureManager().bind(AbstractGui.BACKGROUND_LOCATION);
+        GlStateManager._color4f(1.0F, 1.0F, 1.0F, 1.0F);
         final float texScale = 32.0F;
         worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-        worldr.pos(this.left, this.bottom, 0.0f).tex(this.left / texScale, (this.bottom + (int) this.scrollDistance) / texScale)
+        worldr.vertex(this.left, this.bottom, 0.0f).uv(this.left / texScale, (this.bottom + (int) this.scrollDistance) / texScale)
             .color(0x20, 0x20, 0x20, 0xFF).endVertex();
-        worldr.pos(this.right, this.bottom, 0.0f).tex(this.right / texScale, (this.bottom + (int) this.scrollDistance) / texScale)
+        worldr.vertex(this.right, this.bottom, 0.0f).uv(this.right / texScale, (this.bottom + (int) this.scrollDistance) / texScale)
             .color(0x20, 0x20, 0x20, 0xFF).endVertex();
-        worldr.pos(this.right, this.top, 0.0f).tex(this.right / texScale, (this.top + (int) this.scrollDistance) / texScale)
+        worldr.vertex(this.right, this.top, 0.0f).uv(this.right / texScale, (this.top + (int) this.scrollDistance) / texScale)
             .color(0x20, 0x20, 0x20, 0xFF).endVertex();
-        worldr.pos(this.left, this.top, 0.0f).tex(this.left / texScale, (this.top + (int) this.scrollDistance) / texScale)
+        worldr.vertex(this.left, this.top, 0.0f).uv(this.left / texScale, (this.top + (int) this.scrollDistance) / texScale)
             .color(0x20, 0x20, 0x20, 0xFF).endVertex();
-        tess.draw();
+        tess.end();
 
         final int baseY = this.top + this.border - (int) this.scrollDistance;
-        this.drawPanel(this.right, baseY, tess, mouseX, mouseY);
+        this.drawPanel(stack, this.right, baseY, tess, mouseX, mouseY);
 
-        GlStateManager.disableDepthTest();
+        GlStateManager._disableDepthTest();
 
         final int extraHeight = (this.getContentHeight() + this.border) - this.height;
         if (extraHeight > 0) {
@@ -217,31 +218,31 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
                 barTop = this.top;
             }
 
-            GlStateManager.disableTexture();
+            GlStateManager._disableTexture();
             worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-            worldr.pos(this.barLeft, this.bottom, 0.0f).tex(0.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
-            worldr.pos(this.barLeft + this.barWidth, this.bottom, 0.0f).tex(1.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
-            worldr.pos(this.barLeft + this.barWidth, this.top, 0.0f).tex(1.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
-            worldr.pos(this.barLeft, this.top, 0.0f).tex(0.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
-            tess.draw();
+            worldr.vertex(this.barLeft, this.bottom, 0.0f).uv(0.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth, this.bottom, 0.0f).uv(1.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth, this.top, 0.0f).uv(1.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            worldr.vertex(this.barLeft, this.top, 0.0f).uv(0.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            tess.end();
             worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-            worldr.pos(this.barLeft, barTop + barHeight, 0.0f).tex(0.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-            worldr.pos(this.barLeft + this.barWidth, barTop + barHeight, 0.0f).tex(1.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-            worldr.pos(this.barLeft + this.barWidth, barTop, 0.0f).tex(1.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-            worldr.pos(this.barLeft, barTop, 0.0f).tex(0.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-            tess.draw();
+            worldr.vertex(this.barLeft, barTop + barHeight, 0.0f).uv(0.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth, barTop + barHeight, 0.0f).uv(1.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth, barTop, 0.0f).uv(1.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.vertex(this.barLeft, barTop, 0.0f).uv(0.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            tess.end();
             worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-            worldr.pos(this.barLeft, barTop + barHeight - 1, 0.0f).tex(0.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
-            worldr.pos(this.barLeft + this.barWidth - 1, barTop + barHeight - 1, 0.0f).tex(1.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
-            worldr.pos(this.barLeft + this.barWidth - 1, barTop, 0.0f).tex(1.0f, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
-            worldr.pos(this.barLeft, barTop, 0.0f).tex(0.0f, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
-            tess.draw();
+            worldr.vertex(this.barLeft, barTop + barHeight - 1, 0.0f).uv(0.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth - 1, barTop + barHeight - 1, 0.0f).uv(1.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth - 1, barTop, 0.0f).uv(1.0f, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.vertex(this.barLeft, barTop, 0.0f).uv(0.0f, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            tess.end();
         }
 
-        GlStateManager.enableTexture();
-        GlStateManager.shadeModel(GL11.GL_FLAT);
-        GlStateManager.enableAlphaTest();
-        GlStateManager.disableBlend();
+        GlStateManager._enableTexture();
+        GlStateManager._shadeModel(GL11.GL_FLAT);
+        GlStateManager._enableAlphaTest();
+        GlStateManager._disableBlend();
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 

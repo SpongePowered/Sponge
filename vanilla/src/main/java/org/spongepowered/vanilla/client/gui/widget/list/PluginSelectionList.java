@@ -24,6 +24,7 @@
  */
 package org.spongepowered.vanilla.client.gui.widget.list;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.util.Bounds;
@@ -51,15 +52,15 @@ public final class PluginSelectionList extends FilterableList<PluginSelectionLis
         }
 
         @Override
-        public void render(final int p_render_1_, final int renderY, final int renderX, final int p_render_4_, final int p_render_5_,
-            final int mouseX, final int mouseY, final boolean p_render_8_, final float p_render_9_) {
-            final Screen screen = this.getParentList().getScreen();
+        public void render(final MatrixStack stack, final int p_render_1_, final int renderY, final int renderX, final int p_render_4_,
+                final int p_render_5_, final int mouseX, final int mouseY, final boolean p_render_8_, final float p_render_9_) {
             // Draw the name, or ID if name is not present
-            screen.drawString(this.list.fontRenderer, this.metadata.getName().orElse(this.metadata.getId()), renderX + 2, renderY + 1, 16777215);
+            Screen.drawString(stack, this.list.fontRenderer, this.metadata.getName().orElse(this.metadata.getId()), renderX + 2, renderY + 1,
+                    16777215);
 
             // Draw the ID if the name is present
             if (this.metadata.getName().isPresent()) {
-                screen.drawString(this.list.fontRenderer, this.metadata.getId(), renderX + 2, renderY + 12, 8421504);
+                Screen.drawString(stack, this.list.fontRenderer, this.metadata.getId(), renderX + 2, renderY + 12, 8421504);
             }
         }
 

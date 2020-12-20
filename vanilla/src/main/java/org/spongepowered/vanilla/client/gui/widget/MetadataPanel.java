@@ -25,6 +25,7 @@
 package org.spongepowered.vanilla.client.gui.widget;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -68,7 +69,7 @@ public final class MetadataPanel extends ScrollPanel {
         super(minecraft, width, height, top, left);
         this.minecraft = minecraft;
         this.screen = screen;
-        this.lineHeight = this.minecraft.fontRenderer.FONT_HEIGHT + 1;
+        this.lineHeight = this.minecraft.font.lineHeight + 1;
     }
 
     public void setMetadata(@Nullable final PluginMetadata metadata) {
@@ -112,7 +113,7 @@ public final class MetadataPanel extends ScrollPanel {
             metadata.getExtraMetadata().entrySet().stream().map(e -> new Entry(e.getKey(), e.getValue().toString())).collect(Collectors.toList())));
 
         this.categories.stream().flatMap(c -> c.getEntries().stream()).forEach(e -> {
-            final int width = e.key == null ? 0 : this.minecraft.fontRenderer.getStringWidth(e.key.getFormattedText());
+            final int width = e.key == null ? 0 : this.minecraft.font.width(e.key);
             this.maxKeyWidth = Math.max(this.maxKeyWidth, width + (e.level * MetadataPanel.INDENT_SIZE));
         });
 
@@ -134,7 +135,7 @@ public final class MetadataPanel extends ScrollPanel {
                 final int baseX = 4;
                 final int keyX = baseX + MetadataPanel.INDENT_SIZE + levelOffset;
                 final int separatorX = keyX + this.maxKeyWidth + 4 - levelOffset;
-                final int valueX = separatorX + this.minecraft.fontRenderer.getStringWidth(":") + 4;
+                final int valueX = separatorX + this.minecraft.font.width(":") + 4;
                 final int maxWidth = this.width - valueX - 8;
                 if (maxWidth >= 0) {
                     final List<String> lines = Arrays.asList(this.efficientWrapper(entry.rawValue, maxWidth).split("\n"));
@@ -171,7 +172,7 @@ public final class MetadataPanel extends ScrollPanel {
             final char c = value.charAt(i);
 
             final String lineCandidate = builder.toString() + c;
-            if (this.minecraft.fontRenderer.getStringWidth(lineCandidate) > width) {
+            if (this.minecraft.font.width(lineCandidate) > width) {
                 // Add the line with a trailing new line
                 lines.add(builder.append("\n").toString());
                 // Clear the builder for a new line
@@ -203,15 +204,16 @@ public final class MetadataPanel extends ScrollPanel {
     }
 
     @Override
-    protected void drawPanel(final int entryRight, int relativeY, final Tessellator tess, final int mouseX, final int mouseY) {
+    protected void drawPanel(final MatrixStack stack, final int entryRight, int relativeY, final Tessellator tess, final int mouseX,
+            final int mouseY) {
         final int baseX = this.left + 4;
 
         if (this.resizedCategories.isEmpty()) {
-            final FontRenderer font = this.minecraft.fontRenderer;
+            final FontRenderer font = this.minecraft.font;
             final String noResults = "No data...";
-            final int noResultsWidth = font.getStringWidth(noResults);
+            final int noResultsWidth = font.width(noResults);
 
-            font.drawString(noResults, ((float) this.width / 2) + this.left - ((float) noResultsWidth / 2), this.top + 10,
+            font.draw(stack, noResults, ((float) this.width / 2) + this.left - ((float) noResultsWidth / 2), this.top + 10,
                     TextFormatting.GRAY.getColor());
 
             return;
@@ -225,7 +227,7 @@ public final class MetadataPanel extends ScrollPanel {
             }
 
             // Draw category name
-            this.minecraft.fontRenderer.drawString(category.name.getFormattedText(), baseX, relativeY, 0xFFFFFF);
+            this.minecraft.font.draw(stack, category.name, baseX, relativeY, 0xFFFFFF);
             relativeY += this.lineHeight;
 
             // Iterate and draw entries
@@ -237,22 +239,22 @@ public final class MetadataPanel extends ScrollPanel {
                 final int levelOffset = entry.level * MetadataPanel.INDENT_SIZE;
                 final int keyX = baseX + MetadataPanel.INDENT_SIZE + levelOffset;
                 final int separatorX = keyX + this.maxKeyWidth + 4 - levelOffset;
-                final int valueX = separatorX + this.minecraft.fontRenderer.getStringWidth(":") + 4;
+                final int valueX = separatorX + this.minecraft.font.width(":") + 4;
 
                 // Only draw key and separator if there is any key present
                 if (entry.key != null) {
-                    this.minecraft.fontRenderer.drawString(entry.key.getFormattedText(), keyX, relativeY, 0xFFFFFF);
+                    this.minecraft.font.draw(stack, entry.key, keyX, relativeY, 0xFFFFFF);
 
                     if (entry.rawValue != null && !entry.rawValue.isEmpty()) {
-                        this.minecraft.fontRenderer.drawString(":", separatorX, relativeY, 0xFFFFFF);
+                        this.minecraft.font.draw(stack, ":", separatorX, relativeY, 0xFFFFFF);
                     }
                 }
 
                 // Draw the value, and update the value bounds if needed
-                this.minecraft.fontRenderer.drawString(entry.value.getFormattedText(), valueX, relativeY, 0xFFFFFF);
+                this.minecraft.font.draw(stack, entry.value, valueX, relativeY, 0xFFFFFF);
                 if (entry.value.getStyle().getClickEvent() != null) {
                     entry.valueBounds =
-                        new Bounds(valueX, relativeY + 1, valueX + this.minecraft.fontRenderer.getStringWidth(entry.value.getFormattedText()),
+                        new Bounds(valueX, relativeY + 1, valueX + this.minecraft.font.width(entry.value),
                             relativeY + this.lineHeight);
                 }
                 relativeY += this.lineHeight;
@@ -341,9 +343,10 @@ public final class MetadataPanel extends ScrollPanel {
 
             // Set the click event and append the link.
             final ClickEvent click = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
-            link.getStyle().setClickEvent(click);
-            link.getStyle().setUnderlined(true);
-            link.getStyle().setColor(TextFormatting.BLUE);
+            link.getStyle()
+                    .withClickEvent(click)
+                    .withUnderlined(true)
+                    .withColor(TextFormatting.BLUE);
             ichat = ichat == null ? link : ichat.appendSibling(link);
         }
 
@@ -364,7 +367,7 @@ public final class MetadataPanel extends ScrollPanel {
         private final List<Entry> entries = new ArrayList<>();
 
         public Category(final String name) {
-            this.name = new StringTextComponent(name)
+            this.name = new StringTextComponent(name).copy()
                 .applyTextStyle(TextFormatting.BOLD)
                 .applyTextStyle(TextFormatting.UNDERLINE);
             this.rawName = name;
