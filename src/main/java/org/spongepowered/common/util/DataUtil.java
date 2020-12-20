@@ -72,7 +72,7 @@ public final class DataUtil {
     }
 
     public static ServerLocation getLocation(final DataView view, final boolean castToInt) {
-        final ResourceKey world = view.getKey(Queries.WORLD_KEY).orElseThrow(DataUtil.dataNotFound());
+        final ResourceKey world = view.getResourceKey(Queries.WORLD_KEY).orElseThrow(DataUtil.dataNotFound());
         final Vector3d pos = DataUtil.getPosition3d(view, null);
         if (castToInt) {
             return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().getWorld(world).orElseThrow(DataUtil.dataNotFound()), pos.toInt());

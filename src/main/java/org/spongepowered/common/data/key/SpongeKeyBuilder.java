@@ -35,6 +35,7 @@ import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.registry.provider.KeyProvider;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.lang.reflect.ParameterizedType;
@@ -124,8 +125,9 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends AbstractResou
         } else if (WeightedCollectionValue.class.isAssignableFrom(rawType)) {
             defaultValueSupplier = () -> (E) new WeightedTable();
         }
-
-        return new SpongeKey<>(this.key, this.valueType, this.elementType, comparator, includesTester, defaultValueSupplier);
+        final SpongeKey<Value<E>, E> key = new SpongeKey<>(this.key, this.valueType, this.elementType, comparator, includesTester, defaultValueSupplier);
+        KeyProvider.INSTANCE.register(this.key, (Key<Value<?>>) (Object) key);
+        return (Key<V>) key;
     }
 
     @Override

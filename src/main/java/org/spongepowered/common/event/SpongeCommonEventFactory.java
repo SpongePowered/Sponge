@@ -104,7 +104,6 @@ import org.spongepowered.api.event.item.inventory.container.InteractContainerEve
 import org.spongepowered.api.event.sound.PlaySoundEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.LocatableBlock;

@@ -37,14 +37,17 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManager;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.util.Coerce;
+import org.spongepowered.common.registry.provider.KeyProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -769,6 +772,30 @@ public class MemoryDataView implements DataView {
                 .map(Optional::get)
                 .collect(Collectors.toList())
         );
+    }
+
+    @Override
+    public <E, V extends Value<E>> Optional<Key<V>> getDataKey(final DataQuery path) {
+        Objects.requireNonNull(path, "path");
+        return this.getResourceKey(path).flatMap(r -> KeyProvider.INSTANCE.get(r));
+    }
+
+    @Override
+    public Optional<List<Key<? extends Value<?>>>> getDataKeyList(final DataQuery path) {
+        Objects.requireNonNull(path, "path");
+        final Optional<List<ResourceKey>> resourceKeys = this.getResourceKeyList(path);
+        if (!resourceKeys.isPresent()) {
+            return Optional.empty();
+        }
+
+        final List<Key<? extends Value<?>>> keys = new ArrayList<>();
+        for (final ResourceKey resourceKey : resourceKeys.get()) {
+            KeyProvider.INSTANCE.get(resourceKey).ifPresent(keys::add);
+        }
+        if (keys.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(keys);
     }
 
     @Override

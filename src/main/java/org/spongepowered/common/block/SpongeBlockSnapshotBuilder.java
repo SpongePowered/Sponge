@@ -240,7 +240,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
         DataUtil.checkDataExists(container, Constants.Block.BLOCK_STATE);
         DataUtil.checkDataExists(container, Queries.WORLD_KEY);
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
-        final ResourceKey worldKey = container.getKey(Queries.WORLD_KEY).get();
+        final ResourceKey worldKey = container.getResourceKey(Queries.WORLD_KEY).get();
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         final Optional<String> creatorUuid = container.getString(Queries.CREATOR_ID);
         final Optional<String> notifierUuid = container.getString(Queries.NOTIFIER_ID);

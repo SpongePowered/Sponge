@@ -132,7 +132,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
 
     @Override
     protected Optional<LocatableBlock> buildContent(final DataView container) throws InvalidDataException {
-        final ResourceKey worldKey = container.getKey(Queries.WORLD_KEY)
+        final ResourceKey worldKey = container.getResourceKey(Queries.WORLD_KEY)
             .orElseThrow(() -> new InvalidDataException("Could not locate a world key"));
         final int x = container.getInt(Queries.POSITION_X)
                 .orElseThrow(() -> new InvalidDataException("Could not locate an \"x\" coordinate in the container!"));
