@@ -44,6 +44,7 @@ import net.minecraft.world.server.ServerTickList;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.FolderName;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -53,6 +54,8 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorldProperties;
@@ -63,8 +66,11 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.raid.RaidManagerAccessor;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.mixin.api.mcp.world.WorldMixin_API;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.SpongeTicks;
@@ -151,6 +157,44 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     public Optional<org.spongepowered.api.world.chunk.Chunk> regenerateChunk(final int cx, final int cy, final int cz,
             final ChunkRegenerateFlag flag) {
         throw new MissingImplementationException("ServerWorld", "regenerateChunk");
+    }
+
+    @Override
+    public BlockSnapshot createSnapshot(final int x, final int y, final int z) {
+        if (!this.containsBlock(x, y, z)) {
+            return BlockSnapshot.empty();
+        }
+
+        if (!this.isChunkLoaded(x, y, z, false)) { // TODO bitshift in old impl?
+            return BlockSnapshot.empty();
+        }
+        final BlockPos pos = new BlockPos(x, y, z);
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
+        builder.world((ServerWorld) (Object) this)
+                .position(new Vector3i(x, y, z));
+        final net.minecraft.world.chunk.Chunk chunk = this.shadow$getChunkAt(pos);
+        final net.minecraft.block.BlockState state = chunk.getBlockState(pos);
+        builder.blockState(state);
+        final net.minecraft.tileentity.TileEntity tile = chunk.getBlockEntity(pos, net.minecraft.world.chunk.Chunk.CreateEntityType.CHECK);
+        if (tile != null) {
+            TrackingUtil.addTileEntityToBuilder(tile, builder);
+        }
+        ((ChunkBridge) chunk).bridge$getBlockCreatorUUID(pos).ifPresent(builder::creator);
+        ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos).ifPresent(builder::notifier);
+
+        builder.flag(BlockChangeFlags.NONE);
+        return builder.build();
+    }
+
+    @Override
+    public boolean restoreSnapshot(final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
+        return snapshot.restore(force, flag);
+    }
+
+    @Override
+    public boolean restoreSnapshot(
+            final int x, final int y, final int z, final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
+        return snapshot.withLocation(this.getLocation(x, y, z)).restore(force, flag);
     }
 
     @Override

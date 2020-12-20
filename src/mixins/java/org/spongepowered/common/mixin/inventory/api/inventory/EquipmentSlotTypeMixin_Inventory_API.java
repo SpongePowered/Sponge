@@ -25,23 +25,16 @@
 package org.spongepowered.common.mixin.inventory.api.inventory;
 
 import net.minecraft.inventory.EquipmentSlotType;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 
 @Mixin(EquipmentSlotType.class)
 public abstract class EquipmentSlotTypeMixin_Inventory_API implements EquipmentType {
 
     @Shadow @Final private EquipmentSlotType.Group type;
-
-    @Override
-    public ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
-    }
 
     @Override
     public EquipmentGroup getGroup() {

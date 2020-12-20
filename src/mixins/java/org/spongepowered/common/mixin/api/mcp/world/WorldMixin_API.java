@@ -56,11 +56,9 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.ISpawnWorldInfo;
 import net.minecraft.world.storage.IWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -69,10 +67,7 @@ import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
-import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -84,12 +79,9 @@ import org.spongepowered.common.accessor.entity.MobEntityAccessor;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
@@ -110,7 +102,6 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
 
     // @formatter:off
     @Shadow public @Final Random random;
-    @Shadow protected @Final ISpawnWorldInfo levelData;
     @Shadow @Final public List<TileEntity> blockEntityList;
 
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
@@ -134,44 +125,6 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
     public Optional<? extends Player> getClosestPlayer(final int x, final int y, final int z, final double distance, final Predicate<? super Player> predicate) {
         final PlayerEntity player = ((net.minecraft.world.World) (Object) this).getNearestPlayer(x, y, z, distance, (Predicate) predicate);
         return Optional.ofNullable((Player) player);
-    }
-
-    @Override
-    public BlockSnapshot createSnapshot(final int x, final int y, final int z) {
-        if (!this.containsBlock(x, y, z)) {
-            return BlockSnapshot.empty();
-        }
-
-        if (!this.isChunkLoaded(x, y, z, false)) { // TODO bitshift in old impl?
-            return BlockSnapshot.empty();
-        }
-        final BlockPos pos = new BlockPos(x, y, z);
-        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
-        builder.world((ServerWorld) (Object) this)
-               .position(new Vector3i(x, y, z));
-        final net.minecraft.world.chunk.Chunk chunk = this.shadow$getChunkAt(pos);
-        final net.minecraft.block.BlockState state = chunk.getBlockState(pos);
-        builder.blockState(state);
-        final net.minecraft.tileentity.TileEntity tile = chunk.getBlockEntity(pos, net.minecraft.world.chunk.Chunk.CreateEntityType.CHECK);
-        if (tile != null) {
-            TrackingUtil.addTileEntityToBuilder(tile, builder);
-        }
-        ((ChunkBridge) chunk).bridge$getBlockCreatorUUID(pos).ifPresent(builder::creator);
-        ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos).ifPresent(builder::notifier);
-
-        builder.flag(BlockChangeFlags.NONE);
-        return builder.build();
-    }
-
-    @Override
-    public boolean restoreSnapshot(final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
-        return snapshot.restore(force, flag);
-    }
-
-    @Override
-    public boolean restoreSnapshot(
-        final int x, final int y, final int z, final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
-        return snapshot.withLocation(this.getLocation(x, y, z)).restore(force, flag);
     }
 
     @Override
@@ -360,7 +313,7 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
 
         if (type == net.minecraft.entity.EntityType.PLAYER) {
             // Unable to construct these
-            throw new IllegalArgumentException("Cannot construct " + type.getKey() + " please look to using entity types correctly!");
+            throw new IllegalArgumentException("A Player cannot be created by the API!");
         }
 
         net.minecraft.entity.Entity entity = null;
@@ -391,11 +344,12 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
         }
 
         if (entity == null) {
+            final ResourceKey key = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.entity.EntityType<?>) type);
             try {
                 entity = ((net.minecraft.entity.EntityType) type).create(thisWorld);
                 entity.moveTo(x, y, z);
             } catch (final Exception e) {
-                throw new RuntimeException("There was an issue attempting to construct " + type.getKey(), e);
+                throw new RuntimeException("There was an issue attempting to construct " + key, e);
             }
         }
 

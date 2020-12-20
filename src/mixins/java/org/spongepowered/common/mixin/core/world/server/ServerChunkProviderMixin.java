@@ -28,7 +28,7 @@ import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -47,7 +47,7 @@ public abstract class ServerChunkProviderMixin {
     @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ChunkManager;saveAllChunks(Z)V"))
     private void impl$useSerializationBehaviorWhenSaving(final ChunkManager chunkManager, final boolean flush) {
         final ServerWorld world = this.level;
-        final SerializationBehavior serializationBehavior = ((WorldProperties) world.getWorldInfo()).getSerializationBehavior();
+        final SerializationBehavior serializationBehavior = ((ServerWorldProperties) world.getLevelData()).getSerializationBehavior();
         if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
             ((ChunkManagerAccessor) chunkManager).invoker$saveAllChunks(flush);
         }

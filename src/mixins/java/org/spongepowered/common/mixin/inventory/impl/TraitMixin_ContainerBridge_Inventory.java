@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.inventory.impl;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.AbstractFurnaceContainer;
+import net.minecraft.inventory.container.AbstractRepairContainer;
 import net.minecraft.inventory.container.BeaconContainer;
 import net.minecraft.inventory.container.BrewingStandContainer;
 import net.minecraft.inventory.container.ChestContainer;
@@ -37,7 +38,6 @@ import net.minecraft.inventory.container.HopperContainer;
 import net.minecraft.inventory.container.HorseInventoryContainer;
 import net.minecraft.inventory.container.MerchantContainer;
 import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.inventory.container.RepairContainer;
 import net.minecraft.inventory.container.WorkbenchContainer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -57,7 +57,7 @@ import java.util.function.Predicate;
         DispenserContainer.class,
         AbstractFurnaceContainer.class,
         EnchantmentContainer.class,
-        RepairContainer.class,
+        AbstractRepairContainer.class,
         BrewingStandContainer.class,
         BeaconContainer.class,
         HorseInventoryContainer.class,

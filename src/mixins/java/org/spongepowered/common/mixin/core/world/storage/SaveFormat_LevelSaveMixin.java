@@ -113,7 +113,6 @@ public abstract class SaveFormat_LevelSaveMixin {
                         .add("The following information may be useful in debugging:")
                         .add()
                         .add("World: %s", ((ResourceKeyBridge) info).bridge$getKey())
-                        .add("Is Mod Created: ", ((IServerWorldInfoBridge) info).bridge$isModCreated())
                         .add("Valid flag: ", ((IServerWorldInfoBridge) info).bridge$isValid())
                         .add()
                         .add("Stack trace:")
