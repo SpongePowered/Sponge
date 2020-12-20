@@ -861,7 +861,7 @@ public final class SpongeCommonEventFactory {
                     return false;
                 }
 
-                final BlockSnapshot targetBlock = ((World) projectile.level).createSnapshot(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                final BlockSnapshot targetBlock = ((org.spongepowered.api.world.server.ServerWorld) projectile.level).createSnapshot(blockPos.getX(), blockPos.getY(), blockPos.getZ());
                 final Direction side = DirectionFacingProvider.INSTANCE.getKey(blockMovingObjectPosition.getDirection()).get();
 
                 final CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.getCurrentCause(),
