@@ -63,6 +63,7 @@ import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.raid.RaidManagerAccessor;
@@ -112,6 +113,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     // @formatter:on
 
+    @Intrinsic
     @Override
     public long getSeed() {
         return this.shadow$getSeed();
