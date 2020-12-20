@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(PandaEntity.Gene.class)
-@Implements(@Interface(iface = PandaGene.class, prefix = "gene$"))
+@Implements(@Interface(iface = PandaGene.class, prefix = "pandaGene$"))
 public abstract class PandaEntity_GeneMixin_API implements PandaGene {
 
     // @formatter:off
@@ -42,7 +42,7 @@ public abstract class PandaEntity_GeneMixin_API implements PandaGene {
     // @formatter:on
 
     @Intrinsic
-    public boolean gene$isRecessive() {
+    public boolean pandaGene$isRecessive() {
         return this.shadow$isRecessive();
     }
 }
