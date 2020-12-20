@@ -73,7 +73,6 @@ import org.spongepowered.api.data.type.TropicalFishShapes;
 import org.spongepowered.api.data.type.VillagerTypes;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WireAttachmentTypes;
-import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.data.value.MapValue;
 import org.spongepowered.api.data.value.SetValue;
@@ -102,6 +101,7 @@ import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
@@ -1274,8 +1274,6 @@ public final class DataTest  {
         this.checkOfferData(evoker, Keys.WOLOLO_TARGET, (Sheep) sheep);
 
         this.checkOfferData(boat, Keys.BOAT_TYPE, BoatTypes.ACACIA.get());
-        final BlockState woodState = BlockTypes.ACACIA_WOOD.get().getDefaultState();
-        this.checkGetData(woodState, Keys.WOOD_TYPE, WoodTypes.ACACIA.get());
 
         // And now test nbt data
         final EntitySnapshot snapshot = sheep.createSnapshot();
@@ -1367,9 +1365,9 @@ public final class DataTest  {
     private static String getHolderName(final DataHolder holder) {
         String value = "";
         if (holder instanceof BlockState) {
-            value = ((BlockState) holder).getType().getKey().getValue();
+            value = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.getGame().registries(), ((BlockState) holder).getType()).getValue();
         } else if (holder instanceof ItemStack) {
-            value = ((ItemStack) holder).getType().getKey().getValue();
+            value = RegistryTypes.ITEM_TYPE.keyFor(Sponge.getGame().registries(), ((ItemStack) holder).getType()).getValue();
         }
         return String.format("%s[%s]", holder.getClass().getSimpleName(), value);
     }

@@ -32,6 +32,7 @@ import io.leangen.geantyref.TypeToken;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Living;
@@ -55,11 +56,11 @@ public final class TypeTokenUtilTest {
 
         assertFalse(TypeTokenUtil.isAssignable(
                 new TypeToken<Key<SpongeValue<?>>>() {},
-                new TypeToken<Key<SpongeValue<CatalogType>>>() {}));
+                new TypeToken<Key<SpongeValue<BlockType>>>() {}));
 
         assertFalse(TypeTokenUtil.isAssignable(
                 new TypeToken<Key<SpongeValue<?>>>() {},
-                new TypeToken<Key<SpongeValue<? extends CatalogType>>>() {}));
+                new TypeToken<Key<SpongeValue<? extends BlockType>>>() {}));
 
         assertFalse(TypeTokenUtil.isAssignable(
                 new TypeToken<Key<SpongeValue<?>>>() {},

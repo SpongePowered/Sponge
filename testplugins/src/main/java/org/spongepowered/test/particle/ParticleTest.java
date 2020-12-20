@@ -40,7 +40,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.registry.Registries;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.math.vector.Vector3d;
@@ -61,7 +61,8 @@ public final class ParticleTest {
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ParticleType> particleType =
                 Parameter.registryElement(TypeToken.get(ParticleType.class),
-                        Registries.PARTICLE_TYPE.asDefaultedReference(Sponge.getGame()::registries),
+                        (ctx) -> Sponge.getGame().registries(),
+                        RegistryTypes.PARTICLE_TYPE,
                         "minecraft",
                         "sponge")
                         .setKey("particletype").build();

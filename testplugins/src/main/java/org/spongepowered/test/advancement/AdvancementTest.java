@@ -59,11 +59,14 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryEvent;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
@@ -86,30 +89,30 @@ public final class AdvancementTest implements LoadableModule {
     private Advancement counterAdvancement2;
 
     @Override
-    public void enable(CommandContext ctx) {
+    public void enable(final CommandContext ctx) {
         this.enabled = true;
         Sponge.getEventManager().registerListeners(this.plugin, this.listeners);
         try {
             Sponge.getCommandManager().process("reload");
-        } catch (CommandException e) {
+        } catch (final CommandException e) {
             e.printStackTrace();
         }
         ctx.getCause().first(ServerPlayer.class).map(player -> player.getProgress(this.rootAdvancement).grant());
     }
 
     @Override
-    public void disable(CommandContext ctx) {
+    public void disable(final CommandContext ctx) {
         this.enabled = false;
         Sponge.getEventManager().unregisterListeners(this.listeners);
         try {
             Sponge.getCommandManager().process("reload");
-        } catch (CommandException e) {
+        } catch (final CommandException e) {
             e.printStackTrace();
         }
     }
 
     @Listener
-    public void onTreeAdjust(AdvancementTreeEvent.GenerateLayout event) {
+    public void onTreeAdjust(final AdvancementTreeEvent.GenerateLayout event) {
         final AdvancementTree tree = event.getTree();
         if (tree.equals(this.rootAdvancement)) {
             final TreeLayoutElement layoutElement1 = event.getLayout().getElement(this.counterAdvancement1).get();
@@ -120,22 +123,22 @@ public final class AdvancementTest implements LoadableModule {
     }
 
     @Listener
-    public void onGranted(AdvancementEvent.Grant event) {
+    public void onGranted(final AdvancementEvent.Grant event) {
         this.logger.info("{} was granted", event.getAdvancement().getKey());
     }
 
     @Listener
-    public void onGranted(AdvancementEvent.Revoke event) {
+    public void onGranted(final AdvancementEvent.Revoke event) {
         this.logger.info("{} was revoked", event.getAdvancement().getKey());
     }
 
     @Listener
-    public void onTrigger(CriterionEvent.Trigger<?> event) {
+    public void onTrigger(final CriterionEvent.Trigger<?> event) {
         this.logger.info("{} for {} was triggered", event.getTrigger().getType().getKey(), event.getAdvancement().getKey());
     }
 
     @Listener
-    public void onTriggerRegistry(RegisterCatalogEvent<Trigger> event) {
+    public void onTriggerRegistry(final RegisterRegistryValueEvent event) {
         Sponge.getDataManager().registerBuilder(InventoryChangeTriggerConfig.class, new InventoryChangeTriggerConfig.Builder());
         this.inventoryChangeTrigger = Trigger.builder()
                 .dataSerializableConfig(InventoryChangeTriggerConfig.class)
@@ -144,15 +147,14 @@ public final class AdvancementTest implements LoadableModule {
                     final int found = triggerEvent.getPlayer().getInventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY, stack).totalQuantity();
                     triggerEvent.setResult(stack.getQuantity() <= found);
                 })
-                .id("my_inventory_trigger")
                 .build();
-        event.register(this.inventoryChangeTrigger);
+        event.registry(RegistryTypes.TRIGGER).register(ResourceKey.of(this.plugin, "my_inventory_trigger"), this.inventoryChangeTrigger);
     }
 
 
     @Listener
     @SuppressWarnings("unchecked")
-    public void onAdvancementRegistry(RegisterDataPackValueEvent event) {
+    public void onAdvancementRegistry(final RegisterDataPackValueEvent event) {
 
         if (!this.enabled) {
             return;
@@ -279,12 +281,12 @@ public final class AdvancementTest implements LoadableModule {
     public class TriggerListeners {
 
         @Listener
-        public void onContainerEvent(ChangeInventoryEvent event, @First ServerPlayer player) {
+        public void onContainerEvent(final ChangeInventoryEvent event, @First final ServerPlayer player) {
             AdvancementTest.this.inventoryChangeTrigger.trigger(player);
         }
 
         @Listener
-        public void onConainterEvent(InteractContainerEvent.Open event, @First ServerPlayer player) {
+        public void onConainterEvent(final InteractContainerEvent.Open event, @First final ServerPlayer player) {
 
             final AdvancementProgress progress1 = player.getProgress(AdvancementTest.this.counterAdvancement1);
             if (progress1.achieved()) {
@@ -307,11 +309,11 @@ public final class AdvancementTest implements LoadableModule {
     public static class InventoryChangeTriggerConfig implements FilteredTriggerConfiguration, DataSerializable {
         private ItemStack stack;
 
-        public InventoryChangeTriggerConfig(ItemStack stack) {
+        public InventoryChangeTriggerConfig(final ItemStack stack) {
             this.stack = stack;
         }
 
-        public InventoryChangeTriggerConfig(DataView stack) {
+        public InventoryChangeTriggerConfig(final DataView stack) {
             this.stack = ItemStack.builder().fromContainer(stack).build();
         }
 
@@ -332,7 +334,7 @@ public final class AdvancementTest implements LoadableModule {
             }
 
             @Override
-            protected Optional<InventoryChangeTriggerConfig> buildContent(DataView container) throws InvalidDataException {
+            protected Optional<InventoryChangeTriggerConfig> buildContent(final DataView container) throws InvalidDataException {
                 return Optional.of(new InventoryChangeTriggerConfig(container));
             }
         }

@@ -34,20 +34,18 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.registry.Registries;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
@@ -68,29 +66,29 @@ public final class WorldTest {
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ServerPlayer> playerParameter = Parameter.playerOrSource().setKey("player").build();
-        final Parameter.Value<WorldProperties> worldParameter = Parameter.worldProperties().setKey("world").build();
-        final Parameter.Value<WorldProperties> optWorldParameter = Parameter.worldProperties().optional().setKey("world").build();
+        final Parameter.Value<ServerWorldProperties> worldParameter = Parameter.worldProperties().setKey("world").build();
+        final Parameter.Value<ServerWorldProperties> optWorldParameter = Parameter.worldProperties().optional().setKey("world").build();
         final Parameter.Value<ServerLocation> locationParameter = Parameter.location().setKey("location").build();
         final Parameter.Value<Vector3d> optVector3Parameter = Parameter.vector3d().optional().setKey("position").build();
         final Parameter.Value<PortalType> portalTypeParameter =
                 Parameter.registryElement(
                         TypeToken.get(PortalType.class),
-                        Registries.PORTAL_TYPE.asDefaultedReference(Sponge.getGame()::registries),
+                        RegistryTypes.PORTAL_TYPE,
                         "minecraft",
                         "sponge")
                     .setKey("portal_type").build();
         final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.registryElement(
                 TypeToken.get(DimensionType.class),
-                Registries.DIMENSION_TYPE.asDefaultedReference(Sponge.getGame()::registries),
+                RegistryTypes.DIMENSION_TYPE,
                 "minecraft",
                 "sponge").setKey("dimension_type").build();
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
         final Parameter.Value<ResourceKey> copyWorldKeyParameter = Parameter.resourceKey().setKey("copy_world").build();
-        final Parameter.Value<String> renameWorldKeyParameter = Parameter.string().setKey("new_world_name").build();
+        final Parameter.Value<ResourceKey> renameWorldKeyParameter = Parameter.resourceKey().setKey("new_world_name").build();
         final Parameter.Value<BiomeType> biomeListTypeParameter =
                 Parameter.registryElement(
                         TypeToken.get(BiomeType.class),
-                        Registries.BIOME_TYPE.asDefaultedReference(Sponge.getGame()::registries),
+                        RegistryTypes.BIOME_TYPE,
                         "minecraft",
                         "sponge"
                 ).setKey("biome_types").consumeAllRemaining().optional().build();
@@ -153,7 +151,7 @@ public final class WorldTest {
                         .parameters(worldParameter, dimensionTypeParameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.dimension.change")
                         .setExecutor(context -> {
-                            final WorldProperties world = context.requireOne(worldParameter);
+                            final ServerWorldProperties world = context.requireOne(worldParameter);
                             final DimensionType dimensionType = context.requireOne(dimensionTypeParameter);
                             world.setDimensionType(dimensionType);
                             return CommandResult.success();
@@ -168,10 +166,10 @@ public final class WorldTest {
                         .setPermission(this.plugin.getMetadata().getId() + ".command.position.change")
                         .setExecutor(context -> {
                             final ServerPlayer player = context.requireOne(playerParameter);
-                            final WorldProperties properties = context.getOne(optWorldParameter).orElse(player.getWorld().getProperties());
+                            final ServerWorldProperties properties = context.getOne(optWorldParameter).orElse(player.getWorld().getProperties());
                             final Vector3d position =
                                     context.getOne(optVector3Parameter).orElse(properties.getSpawnPosition().toDouble());
-                            return player.setLocation(ServerLocation.of(properties.getKey(), position)) ? CommandResult.success() :
+                            return player.setLocation(ServerLocation.of(properties.getWorld().get(), position)) ? CommandResult.success() :
                                     CommandResult.error(Component.text("Could not teleport!"));
                         })
                         .build()
@@ -203,28 +201,24 @@ public final class WorldTest {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
                             final DimensionType dimensionType = context.requireOne(dimensionTypeParameter);
                             final Collection<? extends BiomeType> biomes = context.getAll(biomeListTypeParameter);
-                            DataContainer settings = DataContainer.createNew();
-                            GeneratorModifierType modifierType = GeneratorModifierTypes.NONE.get();
-                            if (!biomes.isEmpty()) {
-                                if (biomes.size() == 1) {
-                                    settings.set(DataQuery.of("biome_source", "type"), "minecraft:fixed");
-                                } else {
-                                    settings.set(DataQuery.of("biome_source", "type"), "minecraft:checkerboard");
-                                }
-                                settings.set(DataQuery.of("biome_source", "options", "biomes"), biomes.stream().map(BiomeType::getKey).map(ResourceKey::asString).collect(Collectors.toList()));
-                                modifierType = Registries.GENERATOR_MODIFIER_TYPE
-                                        .asReference()
-                                        .get(Sponge.getGame().registries())
-                                        .findEntry(ResourceKey.resolve("buffet"))
-                                        .get()
-                                        .value();
-                            }
+//                            GeneratorModifierType modifierType = GeneratorModifierTypes.NONE.get();
+//                            if (!biomes.isEmpty()) {
+//                                if (biomes.size() == 1) {
+//                                    settings.set(DataQuery.of("biome_source", "type"), "minecraft:fixed");
+//                                } else {
+//                                    settings.set(DataQuery.of("biome_source", "type"), "minecraft:checkerboard");
+//                                }
+//                                settings.set(DataQuery.of("biome_source", "options", "biomes"), biomes.stream().map(BiomeType::getKey).map(ResourceKey::asString).collect(Collectors.toList()));
+//                                modifierType = Registries.GENERATOR_MODIFIER_TYPE
+//                                        .asReference()
+//                                        .get(Sponge.getGame().registries())
+//                                        .findEntry(ResourceKey.resolve("buffet"))
+//                                        .get()
+//                                        .value();
+//                            }
                             final WorldArchetype archetype = WorldArchetype.builder()
-                                    .key(ResourceKey.of(this.plugin, "nether_style"))
                                     .dimensionType(dimensionType)
                                     .generateSpawnOnLoad(true)
-                                    .generatorModifierType(modifierType)
-                                    .generatorSettings(settings)
                                     .build();
                             Sponge.getServer().getWorldManager().createProperties(key, archetype).whenComplete(((worldProperties, throwable) -> {
                                 if (throwable != null) {
@@ -249,7 +243,7 @@ public final class WorldTest {
                         .builder()
                         .parameter(worldParameter)
                         .setExecutor(context -> {
-                            final WorldProperties properties = context.requireOne(worldParameter);
+                            final ServerWorldProperties properties = context.requireOne(worldParameter);
                             Sponge.getServer().getWorldManager().unloadWorld(properties.getKey()).whenComplete((aBoolean, throwable) -> {
                                 if (throwable != null) {
                                     context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
@@ -286,7 +280,7 @@ public final class WorldTest {
                         .parameters(worldKeyParameter, renameWorldKeyParameter)
                         .setExecutor(context -> {
                             final ResourceKey worldKey = context.requireOne(worldKeyParameter);
-                            final String renameWorld = context.requireOne(renameWorldKeyParameter);
+                            final ResourceKey renameWorld = context.requireOne(renameWorldKeyParameter);
 
                             Sponge.getServer().getWorldManager().moveWorld(worldKey, renameWorld).whenComplete((aBoolean, throwable) -> {
                                 if (throwable != null) {

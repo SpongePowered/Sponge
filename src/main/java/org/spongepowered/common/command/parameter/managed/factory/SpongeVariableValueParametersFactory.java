@@ -29,13 +29,13 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.util.text.StringTextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
-import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.command.brigadier.argument.StandardArgumentParser;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeCatalogedElementParameterBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeDynamicChoicesBuilder;
@@ -77,11 +77,11 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     @Override
     public <T> VariableValueParameters.@NonNull CatalogedTypeBuilder<T> createRegistryEntryBuilder(
             @NonNull final Function<CommandContext, @Nullable RegistryHolder> holderProvider,
-            @NonNull final RegistryKey<? extends Registry<? extends T>> registryKey) {
+            final RegistryType<T> registryKey) {
         return new SpongeCatalogedElementParameterBuilder<>(in -> {
             final RegistryHolder holder = holderProvider.apply(in);
             if (holder != null) {
-                return registryKey.asReference().find(holder).orElse(null);
+                return holder.registry(registryKey);
             }
             return null;
         });
@@ -94,9 +94,8 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public <T> VariableValueParameters.CatalogedTypeBuilder<T> createRegistryEntryBuilder(@NonNull final DefaultedRegistryReference<?
-            extends Registry<? extends T>> reference) {
-        return new SpongeCatalogedElementParameterBuilder<>(in -> reference.find().orElse(null));
+    public <T> VariableValueParameters.CatalogedTypeBuilder<T> createRegistryEntryBuilder(final RegistryType<T> reference) {
+        return new SpongeCatalogedElementParameterBuilder<>(in -> Sponge.getGame().registries().registry(reference));
     }
 
     @Override

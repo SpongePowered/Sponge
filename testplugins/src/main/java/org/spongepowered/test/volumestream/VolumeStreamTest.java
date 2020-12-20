@@ -131,7 +131,7 @@ public final class VolumeStreamTest implements LoadableModule {
                         .apply(VolumeCollectors.of(
                             player.getWorld(),
                             VolumePositionTranslators.offsetPosition(
-                                player.getBlockPosition(),
+                                volume.getBlockMin(),
                                 data.getOrigin()
                             ),
                             VolumeApplicators.applyBlocks(BlockChangeFlags.ALL)

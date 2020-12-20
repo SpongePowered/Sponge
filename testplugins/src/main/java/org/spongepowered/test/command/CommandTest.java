@@ -43,7 +43,7 @@ import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
-import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
+import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorTypes;
@@ -55,7 +55,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.registry.Registries;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
@@ -189,9 +189,9 @@ public final class CommandTest {
                 "testlocation"
         );
 
-        final Parameter.Key<CatalogedValueParameter<?>> commandParameterKey =
-                Parameter.key("valueParameter", new TypeToken<CatalogedValueParameter<?>>() {});
-        final TypeToken<CatalogedValueParameter<?>> typeToken = new TypeToken<CatalogedValueParameter<?>>() {};
+        final Parameter.Key<ValueParameter<?>> commandParameterKey =
+                Parameter.key("valueParameter", new TypeToken<ValueParameter<?>>() {});
+        final TypeToken<ValueParameter<?>> typeToken = new TypeToken<ValueParameter<?>>() {};
         event.register(
                 this.plugin,
                 Command.builder()
@@ -199,13 +199,13 @@ public final class CommandTest {
                         .parameter(
                                 Parameter.registryElement(
                                         typeToken,
-                                        commandContext -> null,
-                                        Registries.CATALOGED_VALUE_PARAMETER,
+                                        commandContext -> Sponge.getGame().registries(),
+                                        RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER,
                                         "sponge"
                                 ).setKey(commandParameterKey).build())
                         .setExecutor(x -> {
                             x.sendMessage(Identity.nil(), Component.text(x.requireOne(serverLocationKey).toString()));
-                            x.sendMessage(Identity.nil(), Component.text(x.requireOne(commandParameterKey).getKey().toString()));
+                            x.sendMessage(Identity.nil(), Component.text(x.requireOne(commandParameterKey).toString()));
                             return CommandResult.success();
                         })
                         .build(),

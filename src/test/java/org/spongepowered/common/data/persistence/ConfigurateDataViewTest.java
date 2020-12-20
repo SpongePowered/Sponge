@@ -56,7 +56,7 @@ import java.util.Map;
 
 @Disabled("Can't run these tests without access to a ResourceKey implementation")
 public class ConfigurateDataViewTest {
-    private static final HoconDataFormat HOCON = new HoconDataFormat(null);
+    private static final HoconDataFormat HOCON = new HoconDataFormat();
 
     @Test
     void testNodeToData() {
@@ -172,7 +172,7 @@ public class ConfigurateDataViewTest {
 
     @Test
     void testMapInsideList() throws IOException {
-        final JsonDataFormat json = new JsonDataFormat(ResourceKey.sponge("json"));
+        final JsonDataFormat json = new JsonDataFormat();
 
         final ConfigurationNode node = CommentedConfigurationNode.root();
         final Map<String, String> map = Collections.singletonMap("mkey", "mvalue");
