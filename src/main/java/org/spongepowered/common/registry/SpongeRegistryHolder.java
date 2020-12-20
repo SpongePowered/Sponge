@@ -52,18 +52,19 @@ public final class SpongeRegistryHolder implements RegistryHolder {
 
     public SpongeRegistryHolder() {
         this.roots.put(
-            RegistryRoots.MINECRAFT,
+            (ResourceKey) (Object) new ResourceLocation("minecraft", "root"),
             new SimpleRegistry<>(
                 net.minecraft.util.RegistryKey.createRegistryKey((ResourceLocation) (Object) RegistryRoots.MINECRAFT),
                 Lifecycle.experimental()
             )
         );
+        final ResourceLocation sponge = new ResourceLocation("sponge", "root");
         this.roots.put(
-            RegistryRoots.SPONGE,
+            (ResourceKey) (Object) sponge,
             new SimpleRegistry<>(
                 RegistryKeyAccessor.invoker$create(
-                    (ResourceLocation) (Object) RegistryRoots.SPONGE,
-                    (ResourceLocation) (Object) RegistryRoots.SPONGE
+                    sponge,
+                    sponge
                 ),
                 Lifecycle.stable()
             )
