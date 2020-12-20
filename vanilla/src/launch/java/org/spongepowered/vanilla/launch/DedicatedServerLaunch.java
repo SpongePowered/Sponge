@@ -25,6 +25,7 @@
 package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Stage;
+import net.minecraft.server.Main;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.launch.Launch;
@@ -52,6 +53,6 @@ public final class DedicatedServerLaunch extends VanillaLaunch {
         super.onLaunch();
         this.getLogger().info("Loading Sponge, please wait...");
 
-        SpongeBootstrap.perform("Server", () -> MinecraftServer.main(args));
+        SpongeBootstrap.perform("Server", () -> Main.main(args));
     }
 }
