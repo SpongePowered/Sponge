@@ -27,25 +27,20 @@ package org.spongepowered.common.event.lifecycle;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 
-public class ProvideServiceEventImpl<T> extends AbstractLifecycleEvent implements ProvideServiceEvent<T> {
+public abstract class ProvideServiceEventImpl<T> extends AbstractLifecycleGenericEvent<T> implements ProvideServiceEvent<T> {
 
-    protected final TypeToken<T> token;
     @Nullable private Supplier<T> serviceFactory;
 
     public ProvideServiceEventImpl(final Cause cause, final Game game, final TypeToken<T> token) {
-        super(cause, game);
-        this.token = token;
-    }
-
-    @Override
-    public TypeToken<T> getParamType() {
-        return this.token;
+        super(cause, game, token);
     }
 
     @Override
@@ -63,8 +58,43 @@ public class ProvideServiceEventImpl<T> extends AbstractLifecycleEvent implement
         this.serviceFactory = null;
     }
 
-    @Override
-    public String toString() {
-        return "ProvideServiceEvent{cause=" + this.cause + ", type=" + this.token + "}";
+    public static final class GameScopedImpl<T> extends ProvideServiceEventImpl<T> implements GameScoped<T> {
+
+        public GameScopedImpl(final Cause cause, final Game game, final TypeToken<T> token) {
+            super(cause, game, token);
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", GameScopedImpl.class.getSimpleName() + "[", "]")
+                    .add("cause=" + this.cause)
+                    .add("token=" + this.token)
+                    .add("game=" + this.game)
+                    .toString();
+        }
+    }
+
+    public static final class EngineScopedImpl<T> extends ProvideServiceEventImpl<T> implements ProvideServiceEvent.EngineScoped<T>{
+
+        private final Engine engine;
+
+        public EngineScopedImpl(final Cause cause, final Game game, final TypeToken<T> token, final Engine engine) {
+            super(cause, game, token);
+            this.engine = engine;
+        }
+
+        @Override
+        public Engine getEngine() {
+            return this.engine;
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", EngineScopedImpl.class.getSimpleName() + "[", "]")
+                    .add("cause=" + this.cause)
+                    .add("token=" + this.token)
+                    .add("engine=" + this.token)
+                    .toString();
+        }
     }
 }

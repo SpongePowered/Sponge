@@ -156,8 +156,12 @@ public final class SpongeLifecycle {
 
     public void establishEngineRegistries(final Engine engine) {
         SpongeRegistries.registerEngineRegistries((SpongeRegistryHolder) engine.registries());
+
         this.game.getEventManager().post(new AbstractRegisterRegistryEvent.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.game), this.game,
          engine));
+
+        this.game.getEventManager().post(new AbstractRegisterRegistryValueEvent.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.game),
+                this.game, engine));
     }
 
     public void callStartingEngineEvent(final Engine engine) {

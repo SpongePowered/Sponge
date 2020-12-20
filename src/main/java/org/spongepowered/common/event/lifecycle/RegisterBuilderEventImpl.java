@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.lifecycle;
 
-import com.google.common.base.Preconditions;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
@@ -33,6 +33,7 @@ import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.util.Builder;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public final class RegisterBuilderEventImpl extends AbstractLifecycleEvent implements RegisterBuilderEvent {
@@ -42,10 +43,9 @@ public final class RegisterBuilderEventImpl extends AbstractLifecycleEvent imple
     }
 
     @Override
-    public <T extends Builder<?, ? super T>> void register(Class<T> builderClass, Supplier<? super T> supplier) throws DuplicateRegistrationException {
-        Preconditions.checkNotNull(supplier);
-
-        ((SpongeBuilderProvider) Sponge.getGame().getBuilderProvider()).register(builderClass, (Supplier<T>) supplier);
+    public <T extends Builder<?, @NonNull ? super T>> void register(Class<T> builderClass, Supplier<? super T> supplier) throws DuplicateRegistrationException {
+        ((SpongeBuilderProvider) Sponge.getGame().getBuilderProvider()).register(builderClass, Objects.requireNonNull((Supplier < T >) supplier,
+                "supplier"));
     }
 
     @Override

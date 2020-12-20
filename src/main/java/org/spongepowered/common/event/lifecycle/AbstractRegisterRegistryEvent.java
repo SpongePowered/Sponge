@@ -83,14 +83,14 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
 
     public static final class EngineScopedImpl<E extends Engine> extends AbstractRegisterRegistryEvent implements RegisterRegistryEvent.EngineScoped<E> {
 
-        private final E engine;
         private final TypeToken<E> token;
+        private final E engine;
 
         public EngineScopedImpl(final Cause cause, final Game game, final E engine) {
             super(cause, game);
 
-            this.engine = engine;
             this.token = TypeToken.get((Class<E>) engine.getClass());
+            this.engine = engine;
         }
 
         @Override

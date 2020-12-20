@@ -45,9 +45,6 @@ public final class RegisterWorldEventImpl extends AbstractLifecycleEvent impleme
 
     @Override
     public boolean register(final ResourceKey key, final WorldArchetype archetype) {
-        Objects.requireNonNull(key);
-        Objects.requireNonNull(archetype);
-
-        return this.worldManager.registerPendingWorld(key, archetype);
+        return this.worldManager.registerPendingWorld(Objects.requireNonNull(key, "key"), Objects.requireNonNull(archetype, "archetype"));
     }
 }
