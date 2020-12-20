@@ -47,8 +47,6 @@ import org.spongepowered.common.event.cause.entity.damage.SpongeCommonEntityDama
 @Mixin(AbstractEntityDamageSource.class)
 public abstract class AbstractEntityDamageSourceMixin_API implements EntityDamageSource {
 
-    @Shadow public abstract DamageType getType();
-
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$bridgeApiToImplConstruction(final CallbackInfo callbackInfo) {

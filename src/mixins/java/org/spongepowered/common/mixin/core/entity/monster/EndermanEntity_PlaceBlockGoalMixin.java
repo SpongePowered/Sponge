@@ -68,7 +68,7 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
      * @return The block state that can be placed, or null if the enderman can't grief
      */
     @Redirect(
-        method = "canUse",
+        method = "canUse()Z",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/entity/monster/EndermanEntity;getCarriedBlock()Lnet/minecraft/block/BlockState;"
@@ -84,7 +84,7 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
      * @reason Makes Endermen check for block changes before they can place their blocks.
      * This allows plugins to cancel the event regardless without issue.
      */
-    @Redirect(method = "canPlaceBlock",
+    @Redirect(method = "canPlaceBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)Z",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockState;isCollisionShapeFullBlock(Lnet/minecraft/world/IBlockReader;Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean impl$onPlaceBlockCancel(BlockState blockState, IBlockReader blockReaderIn, BlockPos blockPosIn) {
