@@ -30,6 +30,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -51,6 +52,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public final class MetadataPanel extends ScrollPanel {
+
+    private static final ITextComponent NO_RESULTS = new StringTextComponent("No data...")
+            .withStyle(TextFormatting.GRAY);
 
     static final Pattern URL_PATTERN = Pattern.compile(
         //         schema                          ipv4            OR        namespace                 port     path         ends
@@ -210,11 +214,14 @@ public final class MetadataPanel extends ScrollPanel {
 
         if (this.resizedCategories.isEmpty()) {
             final FontRenderer font = this.minecraft.font;
-            final String noResults = "No data...";
-            final int noResultsWidth = font.width(noResults);
+            final int noResultsWidth = font.width(NO_RESULTS);
 
-            font.draw(stack, noResults, ((float) this.width / 2) + this.left - ((float) noResultsWidth / 2), this.top + 10,
-                    TextFormatting.GRAY.getColor());
+            font.draw(
+                    stack,
+                    NO_RESULTS,
+                    ((float) this.width / 2) + this.left - ((float) noResultsWidth / 2),
+                    this.top + 10,
+                    0xFFFFFF);
 
             return;
         }
@@ -278,7 +285,7 @@ public final class MetadataPanel extends ScrollPanel {
 
         final ITextComponent component = entry.value;
         if (component != null) {
-            this.screen.handleComponentClicked(component);
+            this.screen.handleComponentClicked(component.getStyle());
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
@@ -296,7 +303,7 @@ public final class MetadataPanel extends ScrollPanel {
         // Includes ipv4 and domain pattern
         // Matches an ip (xx.xxx.xx.xxx) or a domain (something.com) with or
         // without a protocol or path.
-        ITextComponent ichat = null;
+        IFormattableTextComponent ichat = null;
         final Matcher matcher = MetadataPanel.URL_PATTERN.matcher(string);
         int lastEnd = 0;
 
@@ -311,12 +318,12 @@ public final class MetadataPanel extends ScrollPanel {
                 if (ichat == null) {
                     ichat = new StringTextComponent(part);
                 } else {
-                    ichat.appendText(part);
+                    ichat.append(part);
                 }
             }
             lastEnd = end;
             String url = string.substring(start, end);
-            final ITextComponent link = new StringTextComponent(url);
+            final IFormattableTextComponent link = new StringTextComponent(url);
 
             try {
                 // Add schema so client doesn't crash.
@@ -325,7 +332,7 @@ public final class MetadataPanel extends ScrollPanel {
                         if (ichat == null) {
                             ichat = new StringTextComponent(url);
                         } else {
-                            ichat.appendText(url);
+                            ichat.append(url);
                         }
                         continue;
                     }
@@ -336,18 +343,17 @@ public final class MetadataPanel extends ScrollPanel {
                 if (ichat == null) {
                     ichat = new StringTextComponent(url);
                 } else {
-                    ichat.appendText(url);
+                    ichat.append(url);
                 }
                 continue;
             }
 
             // Set the click event and append the link.
             final ClickEvent click = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
-            link.getStyle()
-                    .withClickEvent(click)
-                    .withUnderlined(true)
-                    .withColor(TextFormatting.BLUE);
-            ichat = ichat == null ? link : ichat.appendSibling(link);
+            link.withStyle(style -> style.withClickEvent(click)
+                        .withUnderlined(true)
+                        .withColor(TextFormatting.BLUE));
+            ichat = ichat == null ? link : ichat.append(link);
         }
 
         // Append the rest of the message.
@@ -355,7 +361,7 @@ public final class MetadataPanel extends ScrollPanel {
         if (ichat == null) {
             ichat = new StringTextComponent(end);
         } else if (end.length() > 0) {
-            ichat.appendText(string.substring(lastEnd));
+            ichat.append(string.substring(lastEnd));
         }
         return ichat;
     }
@@ -367,9 +373,8 @@ public final class MetadataPanel extends ScrollPanel {
         private final List<Entry> entries = new ArrayList<>();
 
         public Category(final String name) {
-            this.name = new StringTextComponent(name).copy()
-                .applyTextStyle(TextFormatting.BOLD)
-                .applyTextStyle(TextFormatting.UNDERLINE);
+            this.name = new StringTextComponent(name)
+                    .withStyle(s -> s.withBold(true).withUnderlined(true));
             this.rawName = name;
         }
 
@@ -423,15 +428,16 @@ public final class MetadataPanel extends ScrollPanel {
             this.rawKey = key;
 
             if (value != null) {
-                this.value = new StringTextComponent(value).applyTextStyle(TextFormatting.GRAY);
+                final IFormattableTextComponent newValue = new StringTextComponent(value).withStyle(TextFormatting.GRAY);
 
                 // Account for text components that were split to new lines
                 if (originalValue != null) {
                     final ITextComponent linkComponent = MetadataPanel.newChatWithLinks(originalValue, false);
                     if (linkComponent.getStyle().getClickEvent() != null) {
-                        this.value.setStyle(linkComponent.getStyle());
+                        newValue.withStyle(s -> linkComponent.getStyle().applyTo(s));
                     }
                 }
+                this.value = newValue;
             }
             this.rawValue = value;
 
