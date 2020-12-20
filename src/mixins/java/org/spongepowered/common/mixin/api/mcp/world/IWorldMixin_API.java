@@ -66,7 +66,7 @@ import java.util.Random;
 import java.util.UUID;
 
 @Mixin(IWorld.class)
-@Implements(@Interface(iface = ProtoWorld.class, prefix = "api$"))
+@Implements(@Interface(iface = ProtoWorld.class, prefix = "protoWorld$"))
 public interface IWorldMixin_API {
 
     //@formatter:off
@@ -78,7 +78,7 @@ public interface IWorldMixin_API {
     // MutableBiomeVolume
 
     @SuppressWarnings({"rawtypes", "ConstantConditions"})
-    default boolean api$setBiome(final int x, final int y, final int z, final BiomeType biome) {
+    default boolean protoWorld$setBiome(final int x, final int y, final int z, final BiomeType biome) {
         final IChunk iChunk = ((IWorldReader) (Object) this).getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
         if (iChunk == null) {
             return false;
@@ -88,42 +88,42 @@ public interface IWorldMixin_API {
 
     // Volume
 
-    default Vector3i api$getBlockMin() {
+    default Vector3i protoWorld$getBlockMin() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
-    default Vector3i api$getBlockMax() {
+    default Vector3i protoWorld$getBlockMax() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
-    default Vector3i api$getBlockSize() {
+    default Vector3i protoWorld$getBlockSize() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
-    default boolean api$containsBlock(final int x, final int y, final int z) {
+    default boolean protoWorld$containsBlock(final int x, final int y, final int z) {
         return this.shadow$hasChunk(x >> 4, z >> 4);
     }
 
-    default boolean api$isAreaAvailable(final int x, final int y, final int z) {
+    default boolean protoWorld$isAreaAvailable(final int x, final int y, final int z) {
         return this.shadow$hasChunk(x >> 4, z >> 4);
     }
 
     // EntityVolume
 
-    default Optional<Entity> api$getEntity(final UUID uuid) {
+    default Optional<Entity> protoWorld$getEntity(final UUID uuid) {
         return Optional.empty();
     }
 
     // RandomProvider
 
     @Intrinsic
-    default Random api$getRandom() {
+    default Random protoWorld$getRandom() {
         return this.shadow$getRandom();
     }
 
     // ProtoWorld
 
-    default Collection<Entity> api$spawnEntities(final Iterable<? extends Entity> entities) {
+    default Collection<Entity> protoWorld$spawnEntities(final Iterable<? extends Entity> entities) {
         final List<Entity> entitiesToSpawn = NonNullList.create();
         entities.forEach(entitiesToSpawn::add);
         final SpawnEntityEvent.Custom event = SpongeEventFactory
@@ -142,7 +142,7 @@ public interface IWorldMixin_API {
         return builder.build();
     }
 
-    default boolean api$spawnEntity(final Entity entity) {
+    default boolean protoWorld$spawnEntity(final Entity entity) {
         Objects.requireNonNull(entity, "entity");
 
         return ((IWorld) this).addFreshEntity((net.minecraft.entity.Entity) entity);
@@ -150,7 +150,7 @@ public interface IWorldMixin_API {
 
     // MutableBlockVolume
 
-    default boolean api$setBlock(
+    default boolean protoWorld$setBlock(
         final int x, final int y, final int z, final org.spongepowered.api.block.BlockState blockState, final BlockChangeFlag flag) {
 
         if (!World.isInWorldBounds(new BlockPos(x, y, z))) {
