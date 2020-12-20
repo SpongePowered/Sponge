@@ -43,6 +43,7 @@ public interface IWorldReaderMixin_Optimization_Collision extends IBlockReader {
 
     /**
      * @author zidane - December 20th, 2020 - Minecraft 1.16.4
+     * @reason Do not check for chunks if we are dealing with a live world
      */
     @Overwrite
     default Stream<BlockState> getBlockStatesIfLoaded(AxisAlignedBB p_234939_1_) {

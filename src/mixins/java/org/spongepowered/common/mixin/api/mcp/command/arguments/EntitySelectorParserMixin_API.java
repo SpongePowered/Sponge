@@ -37,8 +37,11 @@ import net.minecraft.command.arguments.EntitySelectorParser;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.registry.Registry;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.command.selector.Selector;
@@ -48,6 +51,7 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.util.Range;
@@ -235,7 +239,8 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Override
     public Selector.@NonNull Builder notEntityType(@NonNull final EntityType<@NonNull ?> type) {
-        this.api$handle("type", "!" + type.getKey().asString());
+        final ResourceKey key = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.entity.EntityType<?>) type);
+        this.api$handle("type", "!" + key.asString());
         return this;
     }
 
@@ -246,7 +251,8 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Override
     public Selector.@NonNull Builder entityType(@NonNull final EntityType<@NonNull ?> type, final boolean inherit) {
-        this.api$handle("type", String.format("%s%s", inherit ? "#" : "", type.getKey().asString()));
+        final ResourceKey key = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.entity.EntityType<?>) type);
+        this.api$handle("type", String.format("%s%s", inherit ? "#" : "", key.asString()));
         return this;
     }
 
@@ -266,7 +272,8 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Override
     public Selector.@NonNull Builder gameMode(@NonNull final GameMode mode) {
-        this.api$handle("gamemode", mode.getKey().getValue(), Tristate.FALSE);
+        final ResourceKey key = Sponge.getGame().registries().registry(RegistryTypes.GAME_MODE).valueKey(mode);
+        this.api$handle("gamemode", key.asString(), Tristate.FALSE);
         return this;
     }
 
@@ -277,7 +284,8 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Override
     public Selector.@NonNull Builder notGameMode(@NonNull final GameMode mode) {
-        this.api$handle("gamemode", mode.getKey().getValue(), Tristate.TRUE);
+        final ResourceKey key = Sponge.getGame().registries().registry(RegistryTypes.GAME_MODE).valueKey(mode);
+        this.api$handle("gamemode", key.asString(), Tristate.TRUE);
         return this;
     }
 
