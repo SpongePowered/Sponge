@@ -106,62 +106,62 @@ public interface IServerWorldInfoMixin extends IServerWorldInfoBridge, ResourceK
 
     @Override
     default boolean bridge$isEnabled() {
-        return this.bridge$getConfigAdapter().get().getWorld().isEnabled();
+        return this.bridge$getConfigAdapter().get().world.enabled;
     }
 
     @Override
     default void bridge$setEnabled(final boolean state) {
-        this.bridge$getConfigAdapter().get().getWorld().setEnabled(state);
+        this.bridge$getConfigAdapter().get().world.enabled = state;
     }
 
     @Override
     default boolean bridge$isPVPEnabled() {
-        return this.bridge$getConfigAdapter().get().getWorld().getPVPEnabled();
+        return this.bridge$getConfigAdapter().get().world.pvp;
     }
 
     @Override
     default void bridge$setPVPEnabled(final boolean state) {
-        this.bridge$getConfigAdapter().get().getWorld().setPVPEnabled(state);
+        this.bridge$getConfigAdapter().get().world.pvp = state;
     }
 
     @Override
     default boolean bridge$doesLoadOnStartup() {
-        return this.bridge$getConfigAdapter().get().getWorld().getLoadOnStartup();
+        return this.bridge$getConfigAdapter().get().world.loadOnStartup;
     }
 
     @Override
     default void bridge$setLoadOnStartup(final boolean state) {
-        this.bridge$getConfigAdapter().get().getWorld().setLoadOnStartup(state);
+        this.bridge$getConfigAdapter().get().world.loadOnStartup = state;
     }
 
     @Override
     default boolean bridge$doesKeepSpawnLoaded() {
-        return this.bridge$getConfigAdapter().get().getWorld().getKeepSpawnLoaded();
+        return this.bridge$getConfigAdapter().get().world.keepSpawnLoaded;
     }
 
     @Override
     default void bridge$setKeepSpawnLoaded(final boolean state) {
-        this.bridge$getConfigAdapter().get().getWorld().setKeepSpawnLoaded(state);
+        this.bridge$getConfigAdapter().get().world.keepSpawnLoaded = state;
     }
 
     @Override
     default boolean bridge$doesGenerateSpawnOnLoad() {
-        return this.bridge$getConfigAdapter().get().getWorld().getGenerateSpawnOnLoad();
+        return this.bridge$getConfigAdapter().get().world.generateSpawnOnLoad;
     }
 
     @Override
     default void bridge$setGenerateSpawnOnLoad(final boolean state) {
-        this.bridge$getConfigAdapter().get().getWorld().setGenerateSpawnOnLoad(state);
+        this.bridge$getConfigAdapter().get().world.generateSpawnOnLoad = state;
     }
 
     @Override
     default SerializationBehavior bridge$getSerializationBehavior() {
-        return this.bridge$getConfigAdapter().get().getWorld().getSerializationBehavior();
+        return this.bridge$getConfigAdapter().get().world.serializationBehavior;
     }
 
     @Override
     default void bridge$setSerializationBehavior(final SerializationBehavior behavior) {
-        this.bridge$getConfigAdapter().get().getWorld().setSerializationBehavior(behavior);
+        this.bridge$getConfigAdapter().get().world.serializationBehavior = behavior;
     }
 
     @Nullable
