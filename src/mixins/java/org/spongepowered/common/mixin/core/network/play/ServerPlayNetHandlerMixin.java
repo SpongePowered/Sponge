@@ -458,14 +458,14 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             return new String[] {};
         }
         final ListValue<Component> originalLinesValue = ((Sign) sign).getValue(Keys.SIGN_LINES)
-            .orElseGet(() -> new ImmutableSpongeListValue<>(Keys.SIGN_LINES.get(), ImmutableList.of()));
+            .orElseGet(() -> new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.of()));
 
         final List<Component> newLines = new ArrayList<>();
         for (final String line : packet.getLines()) {
             newLines.add(Component.text(SharedConstants.filterText(line)));
         }
 
-        final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES.get(), newLines);
+        final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES, newLines);
         final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 originalLinesValue.asImmutable(), newLinesValue,
                 (Sign) sign);

@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.block;
 import co.aikar.timings.Timing;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -112,7 +113,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @Override
     public Timing bridge$getTimingsHandler() {
         if (this.impl$timing == null) {
-            this.impl$timing = SpongeTimings.getBlockTiming((net.minecraft.block.Block) (Object) this);
+            this.impl$timing = SpongeTimings.getBlockTiming((BlockType) this);
         }
         return this.impl$timing;
     }

@@ -164,7 +164,7 @@ public class ProjectileTest implements LoadableModule {
                     final EntityType<?> entityType = context.requireOne(entityTypeParameter);
                     final Optional<? extends Projectile> launched = ((Dispenser) dispenser).launchProjectile((EntityType<Projectile>) entityType);
                     if (launched.isPresent()) {
-                        launched.get().offer(Keys.SHOOTER.get(), player);
+                        launched.get().offer(Keys.SHOOTER, player);
                         player.sendMessage(Identity.nil(), Component.text()
                                 .append(Component.text("The dispenser launched a ")).append(Component.text(launched.get().getType().key().asString()))
                                 .build()

@@ -155,7 +155,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }
-        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER.get(), (ProjectileSource) playerIn);
+        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER, (ProjectileSource) playerIn);
     }
 
     /**
@@ -171,7 +171,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }
-        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER.get(), (ProjectileSource) playerIn);
+        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER, (ProjectileSource) playerIn);
     }
 
 }

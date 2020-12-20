@@ -501,7 +501,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             method = {"openMenu", "openHorseInventory"},
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/ServerPlayerEntity;closeContainer()V()V"
+                    target = "Lnet/minecraft/entity/player/ServerPlayerEntity;closeContainer()V"
             )
     )
     private void impl$closePreviousContainer(final ServerPlayerEntity self) {

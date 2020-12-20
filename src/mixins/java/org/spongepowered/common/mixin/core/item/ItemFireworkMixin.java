@@ -180,7 +180,7 @@ public abstract class ItemFireworkMixin {
         if (((WorldBridge) world).bridge$isFake() ) {
             return false;
         }
-        ((FireworkRocket) rocket).offer(Keys.SHOOTER.get(), (Player) player);
+        ((FireworkRocket) rocket).offer(Keys.SHOOTER, (Player) player);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM.get(), ItemStackUtil.snapshotOf(usedItem));
