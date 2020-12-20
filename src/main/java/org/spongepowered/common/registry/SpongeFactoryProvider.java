@@ -36,10 +36,11 @@ import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
 import org.spongepowered.api.profile.GameProfile;
@@ -59,6 +60,7 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.common.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeOrCriterion;
 import org.spongepowered.common.adventure.AudiencesFactory;
@@ -71,12 +73,12 @@ import org.spongepowered.common.command.selector.SpongeSelectorFactory;
 import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory;
 import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.datapack.SpongeDataPackType;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlerFactory;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
-import org.spongepowered.common.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.state.SpongeStateMatcherFactory;
@@ -154,7 +156,8 @@ public final class SpongeFactoryProvider implements FactoryProvider {
             .registerFactory(RayTrace.Factory.class, new SpongeRayTraceFactory())
             .registerFactory(StateMatcher.Factory.class, new SpongeStateMatcherFactory())
             .registerFactory(RegistryKey.Factory.class, new SpongeRegistryKey.FactoryImpl())
-            .registerFactory(RegistryType.Factory.class, new SpongeRegistryType.FactoryImpl());
+            .registerFactory(RegistryType.Factory.class, new SpongeRegistryType.FactoryImpl())
+            .registerFactory(DataPackType.Factory.class, new SpongeDataPackType.FactoryImpl())
         ;
     }
 
