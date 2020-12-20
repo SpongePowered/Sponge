@@ -73,6 +73,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
 import org.spongepowered.api.event.entity.living.player.PlayerChangeClientSettingsEvent;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
@@ -350,7 +351,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     public Set<SkinPart> bridge$getSkinParts() {
         final int mask = this.shadow$getEntityData().get(DATA_PLAYER_MODE_CUSTOMISATION);
         if (this.impl$skinPartMask != mask) {
-            this.impl$skinParts = Sponge.getRegistry().getCatalogRegistry().streamAllOf(SkinPart.class)
+            this.impl$skinParts = Sponge.getGame().registries().registry(RegistryTypes.SKIN_PART).streamValues()
                     .map(part -> (SpongeSkinPart) part)
                     .filter(part -> part.test(mask))
                     .collect(ImmutableSet.toImmutableSet());
@@ -636,7 +637,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     private void impl$handleClientSettings(final CClientSettingsPacket packet, final CallbackInfo ci) {
         final CClientSettingsPacketAccessor $packet = (CClientSettingsPacketAccessor) packet;
         final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
-        final ImmutableSet<SkinPart> skinParts = Sponge.getRegistry().getCatalogRegistry().streamAllOf(SkinPart.class)
+
+        final ImmutableSet<SkinPart> skinParts = Sponge.getGame().registries().registry(RegistryTypes.SKIN_PART).streamValues()
                 .map(part -> (SpongeSkinPart) part)
                 .filter(part -> part.test(packet.getModelCustomisation()))
                 .collect(ImmutableSet.toImmutableSet());

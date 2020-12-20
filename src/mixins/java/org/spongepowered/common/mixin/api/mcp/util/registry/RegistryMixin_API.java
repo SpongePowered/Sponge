@@ -108,6 +108,11 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     }
 
     @Override
+    public Stream<T> streamValues() {
+        return ((RegistryBridge<T>) this).bridge$getEntries().values().stream().map(RegistryEntry::value);
+    }
+
+    @Override
     public boolean isDynamic() {
         return false;
     }
