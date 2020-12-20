@@ -38,6 +38,8 @@ import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.network.channel.ChannelRegistry;
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.api.registry.BuilderProvider;
+import org.spongepowered.api.registry.FactoryProvider;
 import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
@@ -53,6 +55,8 @@ import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.network.channel.ChannelBufferAllocator;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.registry.SpongeBuilderProvider;
+import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.game.SpongeGameScopedServiceProvider;
 import org.spongepowered.common.sql.SpongeSqlManager;
@@ -80,6 +84,8 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(SqlManager.class).to(SpongeSqlManager.class);
         this.bindAndExpose(ServiceProvider.GameScoped.class).to(SpongeGameScopedServiceProvider.class);
         this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
+        this.bindAndExpose(FactoryProvider.class).to(SpongeFactoryProvider.class);
+        this.bindAndExpose(BuilderProvider.class).to(SpongeBuilderProvider.class);
 
         this.requestStaticInjection(SpongeCommon.class);
         this.requestStaticInjection(Sponge.class);
