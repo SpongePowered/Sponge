@@ -28,6 +28,7 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.ISpawnWorldInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,6 +46,7 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
     // @formatter on
 
     @Shadow @Final private DimensionType dimensionType;
+    @Shadow @Final protected ISpawnWorldInfo levelData;
     private boolean impl$isFake = false;
     private boolean impl$hasCheckedFakeState = false;
 

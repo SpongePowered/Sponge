@@ -42,7 +42,7 @@ import net.minecraft.world.raid.RaidManager;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerTickList;
 import net.minecraft.world.server.ServerWorld;
-import org.apache.logging.log4j.Level;
+import net.minecraft.world.storage.FolderName;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataProvider;
@@ -56,25 +56,22 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorldProperties;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.raid.RaidManagerAccessor;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.mixin.api.mcp.world.WorldMixin_API;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -103,7 +100,6 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Shadow public abstract ServerChunkProvider shadow$getChunkSource();
     @Nonnull @Shadow public abstract MinecraftServer shadow$getServer();
     @Nullable @Shadow public abstract Entity shadow$getEntity(UUID p_217461_1_);
-    @Shadow public abstract SaveHandler shadow$getSaveHandler();
     @Shadow public abstract List<ServerPlayerEntity> shadow$players();
     @Shadow public abstract RaidManager shadow$getRaids();
     @Nullable @Shadow public abstract Raid shadow$getRaidAt(BlockPos p_217475_1_);
@@ -154,23 +150,12 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Override
     public Optional<org.spongepowered.api.world.chunk.Chunk> regenerateChunk(final int cx, final int cy, final int cz,
             final ChunkRegenerateFlag flag) {
-        Objects.requireNonNull(flag);
-
-        return ChunkUtil.regenerateChunk(this, cx, cy, cz, flag);
+        throw new MissingImplementationException("ServerWorld", "regenerateChunk");
     }
 
     @Override
     public Path getDirectory() {
-        final File worldDirectory = this.shadow$getSaveHandler().getWorldDirectory();
-        if (worldDirectory == null) {
-            new PrettyPrinter(60).add("A Server World has a null save directory!").centre().hr()
-                    .add("%s : %s", "World Name", ((SaveHandlerAccessor) this.shadow$getSaveHandler()).accessor$getWorldId())
-                    .add("%s : %s", "Dimension", this.getProperties().getDimensionType())
-                    .add("Please report this to sponge developers so they may potentially fix this")
-                    .trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
-            return null;
-        }
-        return worldDirectory.toPath();
+        return ((ServerWorldBridge) this).bridge$getLevelSave().getLevelPath(FolderName.ROOT);
     }
 
     @Override

@@ -27,22 +27,23 @@ package org.spongepowered.common.mixin.entitycollision.entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.applaunch.config.common.CommonConfig;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
-import org.spongepowered.common.applaunch.config.core.ConfigHandle;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.applaunch.config.common.CommonConfig;
-import org.spongepowered.common.config.inheritable.CollisionModCategory;
 import org.spongepowered.common.config.inheritable.EntityCollisionCategory;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
-import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
 public abstract class EntityMixin_EntityCollision implements CollisionCapabilityBridge {
@@ -60,10 +61,11 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
                 final ItemEntity item = (ItemEntity) (Object) this;
                 final ItemStack itemstack = item.getItem();
                 if (!itemstack.isEmpty()) {
-                    this.entityCollision$key = ((org.spongepowered.api.item.inventory.ItemStack) (Object) itemstack).getType().getKey();
+                    this.entityCollision$key =
+                            Sponge.getGame().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(((org.spongepowered.api.item.inventory.ItemStack) (Object) itemstack).getType());
                 }
             } else {
-                this.entityCollision$key = ((Entity) this).getType().getKey();
+                this.entityCollision$key = Sponge.getGame().registries().registry(RegistryTypes.ENTITY_TYPE).valueKey(((Entity) this).getType());
             }
             if (!this.shadow$getCommandSenderWorld().isClientSide()) {
                 this.collision$initializeCollisionState(this.shadow$getCommandSenderWorld());

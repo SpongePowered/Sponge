@@ -22,44 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.dimension;
+package org.spongepowered.common.mixin.core.util.math;
 
-import net.minecraft.world.World;
-import net.minecraft.world.dimension.Dimension;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.util.math.vector.Vector3i;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
+import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 
-import net.minecraft.world.dimension.DimensionType;
+@Mixin(Vector3i.class)
+public abstract class Vector3iMixin implements BlockPosBridge {
 
-import java.util.function.BiFunction;
-
-import javax.annotation.Nullable;
-
-@Mixin(DimensionType.class)
-public abstract class DimensionTypeMixin implements DimensionTypeBridge, ResourceKeyBridge {
-
-    @Mutable @Shadow @Final private BiFunction<World, DimensionType, ? extends Dimension> factory;
-    @Mutable @Shadow @Final private boolean hasSkyLight;
-    @Nullable private SpongeDimensionType impl$spongeDimensionType;
+    @Shadow private int x;
+    @Shadow private int y;
+    @Shadow private int z;
 
     @Override
-    public SpongeDimensionType bridge$getSpongeDimensionType() {
-        return this.impl$spongeDimensionType;
+    public boolean bridge$isValidPosition() {
+        return this.x >= -30000000 && this.z >= -30000000 && this.x < 30000000 && this.z < 30000000 && this.y >= 0 && this.y < 256;
     }
 
     @Override
-    public void bridge$setSpongeDimensionType(final SpongeDimensionType dimensionType) {
-        this.impl$spongeDimensionType = dimensionType;
-        this.factory = dimensionType.getDimensionFactory();
-        this.hasSkyLight = dimensionType.hasSkylight();
+    public boolean bridge$isValidXZPosition() {
+        return this.x >= -30000000 && this.z >= -30000000 && this.x < 30000000 && this.z < 30000000;
     }
 
     @Override
-    public ResourceKey bridge$getKey() {
-        return this.bridge$getSpongeDimensionType().getKey();
+    public boolean bridge$isInvalidYPosition() {
+        return this.y < 0 || this.y >= 256;
     }
 }

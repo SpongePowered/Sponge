@@ -26,18 +26,15 @@ package org.spongepowered.common.bridge.world;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.CustomServerBossInfoManager;
-import net.minecraft.util.IProgressUpdate;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.storage.IServerWorldInfo;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.SerializationBehavior;
+import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.math.vector.Vector3d;
 
 public interface ServerWorldBridge {
+
+    SaveFormat.LevelSave bridge$getLevelSave();
 
     boolean bridge$isLoaded();
 

@@ -157,8 +157,6 @@
     "world.biome.BiomeMixin",
     "world.biome.BiomesMixin",
     "world.chunk.ChunkMixin",
-    "world.dimension.DimensionMixin",
-    "world.dimension.DimensionTypeMixin",
     "world.gen.feature.structure.LegacyStructureDataUtilMixin",
     "world.server.ChunkManager_EntityTrackerMixin",
     "world.server.ChunkManagerMixin",
@@ -200,7 +198,8 @@
     "world.storage.ServerWorldInfoMixin",
     "entity.passive.AnimalEntityMixin",
     "world.storage.ServerWorldInfoMixin",
-      "world.gen.settings.DimensionGeneratorSettingsMixin"
+    "world.gen.settings.DimensionGeneratorSettingsMixin",
+    "util.math.Vector3iMixin"
   ],
   "client": [
     "client.MinecraftMixin",

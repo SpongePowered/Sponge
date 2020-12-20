@@ -25,12 +25,13 @@
 package org.spongepowered.common.mixin.core.entity.passive.horse;
 
 import net.minecraft.entity.passive.horse.LlamaEntity;
+import net.minecraft.util.registry.SimpleRegistry;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.LlamaType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.passive.horse.LlamaEntityBridge;
-import org.spongepowered.common.data.type.SpongeLlamaType;
 
 @Mixin(LlamaEntity.class)
 public abstract class LlamaEntityMixin implements LlamaEntityBridge {
@@ -40,15 +41,15 @@ public abstract class LlamaEntityMixin implements LlamaEntityBridge {
     @Shadow public abstract void shadow$setVariant(final int p_190710_1_);
     // @formatter:on
 
-    private static final MappedRegistry<LlamaType, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(LlamaType.class);
-
     @Override
     public LlamaType bridge$getLlamaType() {
-        return LlamaEntityMixin.registry.getReverseMapping(this.shadow$getVariant());
+        final SimpleRegistry<LlamaType> registry = (SimpleRegistry<LlamaType>) Sponge.getGame().registries().registry(RegistryTypes.LLAMA_TYPE);
+        return registry.byId(this.shadow$getVariant());
     }
 
     @Override
     public void bridge$setLlamaType(final LlamaType type) {
-        this.shadow$setVariant(((SpongeLlamaType) type).getMetadata());
+        final SimpleRegistry<LlamaType> registry = (SimpleRegistry<LlamaType>) Sponge.getGame().registries().registry(RegistryTypes.LLAMA_TYPE);
+        this.shadow$setVariant(registry.getId(type));
     }
 }

@@ -26,63 +26,28 @@ package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.api.world.gen.WorldGenerationSettings;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 
 @Mixin(WorldSettings.class)
-@Implements(value = @Interface(iface = WorldArchetype.class, prefix = "archetype$"))
 public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     //@formatter:off
     @Shadow public abstract GameType shadow$gameType();
     @Shadow public abstract boolean shadow$hardcore();
-    @Shadow public abstract boolean shadow$isMapFeaturesEnabled();
-    @Shadow public abstract WorldType shadow$getTerrainType();
     @Shadow public abstract boolean shadow$allowCommands();
-    @Shadow private boolean bonusChestEnabled;
     //@formatter:on
-
-    @Override
-    public ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
-    }
-
-    @Intrinsic
-    public long archetype$getSeed() {
-        return this.shadow$getSeed();
-    }
-
-    @Override
-    public boolean isSeedRandomized() {
-        return ((WorldSettingsBridge) this).bridge$isSeedRandomized();
-    }
 
     @Override
     public GameMode getGameMode() {
         return (GameMode) (Object) this.shadow$gameType();
-    }
-
-    @Override
-    public GeneratorModifierType getGeneratorModifier() {
-        return (GeneratorModifierType) this.shadow$getTerrainType();
-    }
-
-    @Override
-    public boolean areStructuresEnabled() {
-        return this.shadow$isMapFeaturesEnabled();
     }
 
     @Override
@@ -96,23 +61,13 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
     }
 
     @Override
-    public boolean doesGenerateBonusChest() {
-        return this.bonusChestEnabled;
-    }
-
-    @Override
     public DimensionType getDimensionType() {
-        return ((WorldSettingsBridge) this).bridge$getDimensionType();
+        return (DimensionType) ((WorldSettingsBridge) this).bridge$getDimensionType();
     }
 
     @Override
     public Difficulty getDifficulty() {
         return (Difficulty) (Object) ((WorldSettingsBridge) this).bridge$getDifficulty();
-    }
-
-    @Override
-    public DataContainer getGeneratorSettings() {
-        return ((WorldSettingsBridge) this).bridge$getGeneratorSettings();
     }
 
     @Override
@@ -138,6 +93,11 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
     @Override
     public boolean doesGenerateSpawnOnLoad() {
         return ((WorldSettingsBridge) this).bridge$generateSpawnOnLoad();
+    }
+
+    @Override
+    public WorldGenerationSettings getWorldGeneratorSettings() {
+        return ((WorldSettingsBridge) this).bridge$getWorldGenerationSettings();
     }
 
     @Override

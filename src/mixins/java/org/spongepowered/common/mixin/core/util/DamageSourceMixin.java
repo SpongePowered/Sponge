@@ -37,6 +37,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -52,8 +53,9 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 import org.spongepowered.common.util.MemoizedSupplier;
 
-import javax.annotation.Nullable;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 @Mixin(DamageSource.class)
 public abstract class DamageSourceMixin implements DamageSourceBridge {
@@ -63,7 +65,6 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Shadow @Final @Mutable public static DamageSource IN_FIRE;
     @Shadow @Final @Mutable public static DamageSource LIGHTNING_BOLT;
     @Shadow @Final @Mutable public static DamageSource HOT_FLOOR;
-    @Shadow @Final @Mutable public static DamageSource FIREWORKS;
     @Shadow @Final @Mutable public static DamageSource ANVIL;
     @Shadow @Final @Mutable public static DamageSource FALLING_BLOCK;
     @Shadow @Final @Mutable public static DamageSource CACTUS;
@@ -120,9 +121,9 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Override
     public void bridge$resetDamageType() {
         if (!this.msgId.contains(":")) {
-            this.impl$damageType = MemoizedSupplier.memoize(() -> DamageSourceToTypeProvider.getInstance().getOrCustom(this.msgId).get());
+            this.impl$damageType = MemoizedSupplier.memoize(() -> DamageSourceToTypeProvider.INSTANCE.getOrCustom(this.msgId).get());
         } else {
-            this.impl$damageType = MemoizedSupplier.memoize(() -> Sponge.getRegistry().getCatalogRegistry().get(DamageType.class, ResourceKey.resolve(this.msgId)).orElseGet(DamageTypes.CUSTOM));
+            this.impl$damageType = MemoizedSupplier.memoize(() -> Sponge.getGame().registries().registry(RegistryTypes.DAMAGE_TYPE).findValue(ResourceKey.resolve(this.msgId)).orElseGet(DamageTypes.CUSTOM));
         }
     }
 
@@ -147,11 +148,6 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     }
 
     @Override
-    public void bridge$setFireworksSource() {
-        DamageSourceMixin.FIREWORKS = (DamageSource) (Object) this;
-    }
-
-    @Override
     public void bridge$setFallingBlockSource() {
         DamageSourceMixin.FALLING_BLOCK = (DamageSource) (Object) this;
     }
@@ -168,9 +164,10 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
 
     @Override
     public String toString() {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.impl$damageType.get());
         return MoreObjects.toStringHelper("DamageSource")
                 .add("Name", this.msgId)
-                .add("Key", this.impl$damageType.get().getKey().toString())
+                .add("Key", resourceKey)
                 .toString();
     }
 }

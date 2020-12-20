@@ -37,9 +37,12 @@ import java.util.function.Supplier;
 
 public final class DamageSourceToTypeProvider {
 
+    public static DamageSourceToTypeProvider INSTANCE;
+
     private final Map<String, Supplier<? extends DamageType>> mappings = new HashMap<>();
 
     DamageSourceToTypeProvider() {
+        DamageSourceToTypeProvider.INSTANCE = this;
 
         this.mappings.put("anvil", DamageTypes.CONTACT);
         this.mappings.put("arrow", DamageTypes.PROJECTILE);
