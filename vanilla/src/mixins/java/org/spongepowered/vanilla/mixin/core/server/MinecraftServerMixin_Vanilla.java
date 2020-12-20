@@ -38,6 +38,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -52,6 +53,14 @@ import java.net.Proxy;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
+
+    // @formatter:off
+    @Shadow protected abstract void loadLevel();
+    @Shadow public abstract boolean shadow$isRunning();
+    // @formatter:on
+
+
+    @Shadow protected abstract void shadow$detectBundledResources();
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void vanilla$setPacketHooks(Thread p_i232576_1_, DynamicRegistries.Impl p_i232576_2_, SaveFormat.LevelSave p_i232576_3_,

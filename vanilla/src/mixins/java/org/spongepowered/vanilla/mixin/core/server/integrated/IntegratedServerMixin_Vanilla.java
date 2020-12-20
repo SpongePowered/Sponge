@@ -24,18 +24,7 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.integrated;
 
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.datafixers.DataFixer;
-import net.minecraft.resources.DataPackRegistries;
-import net.minecraft.resources.ResourcePackList;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
-import net.minecraft.world.storage.IServerConfiguration;
-import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,26 +34,14 @@ import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.vanilla.VanillaServer;
-
-import java.net.Proxy;
+import org.spongepowered.vanilla.mixin.core.server.MinecraftServerMixin_Vanilla;
 
 @Mixin(IntegratedServer.class)
-public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer implements MinecraftServerBridge, VanillaServer  {
+public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin_Vanilla implements MinecraftServerBridge, VanillaServer  {
 
     // @formatter:off
     @Shadow private boolean paused;
     // @formatter:on
-
-    public IntegratedServerMixin_Vanilla(Thread p_i232576_1_, DynamicRegistries.Impl p_i232576_2_,
-            SaveFormat.LevelSave p_i232576_3_, IServerConfiguration p_i232576_4_,
-            ResourcePackList p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
-            DataPackRegistries p_i232576_8_, MinecraftSessionService p_i232576_9_,
-            GameProfileRepository p_i232576_10_, PlayerProfileCache p_i232576_11_,
-            IChunkStatusListenerFactory p_i232576_12_) {
-        super(p_i232576_1_, p_i232576_2_, p_i232576_3_, p_i232576_4_, p_i232576_5_, p_i232576_6_, p_i232576_7_, p_i232576_8_, p_i232576_9_,
-                p_i232576_10_,
-                p_i232576_11_, p_i232576_12_);
-    }
 
     @Inject(method = "initServer", at = @At("HEAD"))
     private void vanilla$runEngineStartLifecycle(final CallbackInfoReturnable<Boolean> cir) {
@@ -91,7 +68,7 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer impl
 
     @Override
     public boolean bridge$performAutosaveChecks() {
-        if (!this.isRunning()) {
+        if (!this.shadow$isRunning()) {
             return false;
         }
 
