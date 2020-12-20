@@ -71,7 +71,7 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
             final Optional<? extends T> result = registry.findValue(resourceKey);
             if (!result.isPresent()) {
                 throw reader.createException(
-                        Component.text("Registry " + registry.key().asString() + " does not contain the ID " + resourceKey.asString()));
+                        Component.text("Registry " + registry.type().location().asString() + " does not contain the ID " + resourceKey.asString()));
             }
             return result;
         } catch (final ArgumentParseException ex) {
@@ -90,7 +90,7 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
 
             final String ids = this.prefixes.stream().map(x -> x + ":" + check).collect(Collectors.joining(", "));
             throw reader.createException(
-                    Component.text("Registry " + registry.key().asString() + " does not contain any of the following IDs: " + ids));
+                    Component.text("Registry " + registry.type().location().asString() + " does not contain any of the following IDs: " + ids));
         }
     }
 
