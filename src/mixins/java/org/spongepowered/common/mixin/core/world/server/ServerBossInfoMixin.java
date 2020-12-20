@@ -99,7 +99,7 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
     // Convert to using BossBar.Listener
 
     @Redirect(method = {"setPercent", "setColor", "setOverlay", "setDarkenScreen", "setPlayBossMusic", "setCreateWorldFog", "setName"},
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerBossInfo;sendUpdate(Lnet/minecraft/network/play/server/SUpdateBossInfoPacket$Operation;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerBossInfo;broadcast(Lnet/minecraft/network/play/server/SUpdateBossInfoPacket$Operation;)V"))
     private void redirectUpdatePacket(final ServerBossInfo $this, final SUpdateBossInfoPacket.Operation op) {
         // This becomes a no-op, the Adventure BossBar's listener calls this update operation
     }

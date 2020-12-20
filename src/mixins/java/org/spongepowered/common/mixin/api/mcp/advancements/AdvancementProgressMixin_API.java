@@ -26,15 +26,11 @@ package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.CriterionProgress;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
@@ -87,9 +83,8 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
     public CriterionProgress require(final AdvancementCriterion criterion) {
         Objects.requireNonNull(criterion, "criterion");
 
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ADVANCEMENT_TYPE).valueKey(this.getAdvancement());
         return this.get(criterion).orElseThrow(() -> new IllegalStateException("The criterion " + criterion.getName()
-                + " isn't present on the advancement '" + this.getAdva + "'."));
+                + " isn't present on the advancement '" + this.getAdvancement() + "'."));
     }
 
     @Override
