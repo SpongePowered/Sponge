@@ -522,25 +522,26 @@ public final class SpongeRegistryLoaders {
         )));
     }
 
+    // TODO Minecraft 1.16.4 - These are not right, someone needs to look into this...
     public static RegistryLoader<DamageType> damageType() {
-        return RegistryLoader.of(l -> l.mapping(SpongeDamageType::new, m -> m.add(
-                DamageTypes.ATTACK,
-                DamageTypes.CONTACT,
-                DamageTypes.CUSTOM,
-                DamageTypes.DROWN,
-                DamageTypes.DRYOUT,
-                DamageTypes.EXPLOSIVE,
-                DamageTypes.FALL,
-                DamageTypes.FIRE,
-                DamageTypes.GENERIC,
-                DamageTypes.HUNGER,
-                DamageTypes.MAGIC,
-                DamageTypes.MAGMA,
-                DamageTypes.PROJECTILE,
-                DamageTypes.SUFFOCATE,
-                DamageTypes.SWEEPING_ATTACK,
-                DamageTypes.VOID
-        )));
+        return RegistryLoader.of(l -> {
+            l.add(DamageTypes.ATTACK, k -> new SpongeDamageType("attack"));
+            l.add(DamageTypes.CONTACT, k -> new SpongeDamageType("contact"));
+            l.add(DamageTypes.CUSTOM, k -> new SpongeDamageType("custom"));
+            l.add(DamageTypes.DROWN, k -> new SpongeDamageType("drown"));
+            l.add(DamageTypes.DRYOUT, k -> new SpongeDamageType("dryout"));
+            l.add(DamageTypes.EXPLOSIVE, k -> new SpongeDamageType("explosive"));
+            l.add(DamageTypes.FALL, k -> new SpongeDamageType("fall"));
+            l.add(DamageTypes.FIRE, k -> new SpongeDamageType("inFire"));
+            l.add(DamageTypes.GENERIC, k -> new SpongeDamageType("generic"));
+            l.add(DamageTypes.HUNGER, k -> new SpongeDamageType("starve"));
+            l.add(DamageTypes.MAGIC, k -> new SpongeDamageType("magic"));
+            l.add(DamageTypes.MAGMA, k -> new SpongeDamageType("magma"));
+            l.add(DamageTypes.PROJECTILE, k -> new SpongeDamageType("projectile"));
+            l.add(DamageTypes.SUFFOCATE, k -> new SpongeDamageType("inWall"));
+            l.add(DamageTypes.SWEEPING_ATTACK, k -> new SpongeDamageType("sweeping_attack"));
+            l.add(DamageTypes.VOID, k -> new SpongeDamageType("outOfWorld"));
+        });
     }
 
     public static RegistryLoader<DismountType> dismountType() {
@@ -780,13 +781,11 @@ public final class SpongeRegistryLoaders {
     public static RegistryLoader<PlaceholderParser> placeholderParser() {
         return RegistryLoader.of(l -> {
             l.add(PlaceholderParsers.CURRENT_WORLD, k -> new SpongePlaceholderParserBuilder()
-                    .key(ResourceKey.sponge("current_world"))
                     .parser(placeholderText -> Component.text(placeholderText.getAssociatedObject().filter(x -> x instanceof Locatable)
                             .map(x -> ((Locatable) x).getServerLocation().getWorldKey())
                             .orElseGet(() -> Sponge.getServer().getDefaultWorldKey()).toString()))
                     .build());
             l.add(PlaceholderParsers.NAME, k -> new SpongePlaceholderParserBuilder()
-                    .key(k)
                     .parser(placeholderText -> placeholderText.getAssociatedObject()
                             .filter(x -> x instanceof Nameable)
                             .map(x -> Component.text(((Nameable) x).getName()))

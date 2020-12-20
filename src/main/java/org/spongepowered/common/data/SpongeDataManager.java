@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -58,6 +57,7 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotDataBuilder;
 import org.spongepowered.common.data.key.KeyBasedDataListener;
+import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.data.persistence.datastore.DataStoreRegistry;
 import org.spongepowered.common.data.provider.CustomDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
@@ -211,6 +211,11 @@ public final class SpongeDataManager implements DataManager {
     @Override
     public <T extends DataHolder.Immutable<T>, B extends DataHolderBuilder.Immutable<T, B>> Optional<B> getImmutableBuilder(final Class<T> holderClass) {
         return Optional.ofNullable((B) this.immutableDataBuilderMap.get(Objects.requireNonNull(holderClass)));
+    }
+
+    @Override
+    public <T> Optional<DataTranslator<T>> getTranslator(Class<T> objectClass) {
+        return DataSerializers.getSerializer(objectClass);
     }
 
     public void registerKeyListeners() {
