@@ -72,13 +72,13 @@ public interface IWorldInfoMixin_API extends WorldProperties {
         throw new UnsupportedOperationException("Only vanilla implemented mutable spawn world properties are supported!");
     }
 
-    @Override
-    default MinecraftDayTime getGameTime() {
+    @Intrinsic
+    default MinecraftDayTime worldProperties$getGameTime() {
         return new SpongeMinecraftDayTime(this.shadow$getGameTime());
     }
 
-    @Override
-    default MinecraftDayTime getDayTime() {
+    @Intrinsic
+    default MinecraftDayTime worldProperties$getDayTime() {
         return new SpongeMinecraftDayTime(this.shadow$getDayTime());
     }
 
@@ -87,8 +87,8 @@ public interface IWorldInfoMixin_API extends WorldProperties {
         return this.shadow$isHardcore();
     }
 
-    @Override
-    default org.spongepowered.api.world.difficulty.Difficulty getDifficulty() {
+    @Intrinsic
+    default org.spongepowered.api.world.difficulty.Difficulty worldProperties$getDifficulty() {
         return (org.spongepowered.api.world.difficulty.Difficulty) (Object) this.shadow$getDifficulty();
     }
 
