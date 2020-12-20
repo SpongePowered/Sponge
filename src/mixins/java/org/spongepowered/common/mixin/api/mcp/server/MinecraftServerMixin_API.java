@@ -335,8 +335,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         return this.api$profileManager;
     }
 
-    @Override
-    public Optional<ResourcePack> getResourcePack() {
+    public Optional<ResourcePack> server$getResourcePack() {
         return Optional.ofNullable(((MinecraftServerBridge) this).bridge$getResourcePack());
     }
 
