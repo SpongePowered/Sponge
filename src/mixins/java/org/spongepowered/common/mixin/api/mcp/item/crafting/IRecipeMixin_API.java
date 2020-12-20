@@ -32,7 +32,6 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.Recipe;
@@ -86,10 +85,6 @@ public interface IRecipeMixin_API<C extends IInventory> {
         return this.shadow$getRemainingItems(toNativeInventory(inv)).stream()
                 .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());
-    }
-
-    default ResourceKey recipe$getKey() {
-        return (ResourceKey) (Object) this.shadow$getId();
     }
 
     @Intrinsic

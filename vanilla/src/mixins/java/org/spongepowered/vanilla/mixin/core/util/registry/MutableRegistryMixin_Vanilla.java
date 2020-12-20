@@ -28,16 +28,11 @@ import com.mojang.serialization.Lifecycle;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.registry.MutableRegistry;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.util.registry.MutableRegistryBridge;
 import org.spongepowered.common.bridge.util.registry.RegistryBridge;
-import org.spongepowered.common.registry.SpongeRegistryEntry;
 
 @Mixin(MutableRegistry.class)
 public abstract class MutableRegistryMixin_Vanilla<T> extends RegistryMixin_Vanilla<T> implements MutableRegistryBridge<T> {
@@ -64,13 +59,5 @@ public abstract class MutableRegistryMixin_Vanilla<T> extends RegistryMixin_Vani
         this.shadow$register(key, value, lifecycle);
 
         return ((RegistryBridge<T>) this).bridge$getEntries().get(key.location());
-    }
-
-    @Inject(method = "registerMapping", at = @At("TAIL"))
-    private void vanilla$cacheRegistryEntry(int p_218382_1_, RegistryKey<T> p_218382_2_, T p_218382_3_, Lifecycle p_218382_4_,
-            CallbackInfoReturnable<T> cir) {
-
-        this.bridge$getEntries().put((ResourceKey) (Object) p_218382_2_.location(),
-                new SpongeRegistryEntry<>((ResourceKey) (Object) p_218382_2_.location(), p_218382_3_));
     }
 }
