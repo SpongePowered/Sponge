@@ -52,6 +52,8 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -345,5 +347,15 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
         ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
         ((ServerWorldBridge) this).bridge$setWeather(weather, ticks.getTicks());
+    }
+
+    @Override
+    public RegistryScope registryScope() {
+        return RegistryScope.WORLD;
+    }
+
+    @Override
+    public RegistryHolder registries() {
+        return ((ServerWorldBridge) this).bridge$registries();
     }
 }

@@ -44,6 +44,7 @@ import net.minecraft.world.storage.ServerWorldInfo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
@@ -67,6 +68,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashMap;
@@ -89,7 +91,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     private SaveFormat.LevelSave impl$levelSave;
     private CustomServerBossInfoManager impl$bossBarManager;
     private boolean impl$isManualSave = false;
-
+    private SpongeRegistryHolder impl$registerHolder;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$cacheLevelSave(MinecraftServer p_i241885_1_, Executor p_i241885_2_, SaveFormat.LevelSave p_i241885_3_,
@@ -97,6 +99,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             ChunkGenerator p_i241885_8_, boolean p_i241885_9_, long p_i241885_10_, List<ISpecialSpawner> p_i241885_12_, boolean p_i241885_13_,
             CallbackInfo ci) {
         this.impl$levelSave = p_i241885_3_;
+        this.impl$registerHolder = new SpongeRegistryHolder();
     }
 
     @Override
@@ -248,6 +251,11 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Override
     public void bridge$setManualSave(boolean state) {
         this.impl$isManualSave = state;
+    }
+
+    @Override
+    public RegistryHolder bridge$registries() {
+        return this.impl$registerHolder;
     }
 
     @Override

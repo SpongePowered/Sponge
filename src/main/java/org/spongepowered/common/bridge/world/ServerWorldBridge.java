@@ -27,6 +27,7 @@ package org.spongepowered.common.bridge.world;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.world.storage.SaveFormat;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
@@ -65,4 +66,6 @@ public interface ServerWorldBridge {
     void bridge$triggerExplosion(Explosion explosion);
 
     void bridge$setManualSave(boolean state);
+
+    RegistryHolder bridge$registries();
 }
