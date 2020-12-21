@@ -30,11 +30,9 @@ import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.datapack.SpongeDataPackManager;
+import org.spongepowered.common.SpongeBootstrap;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 
 @Mixin(Main.class)
 public abstract class MainMixin {
@@ -43,12 +41,7 @@ public abstract class MainMixin {
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveFormat$LevelSave;getLevelPath(Lnet/minecraft/world/storage/FolderName;)Ljava/nio/file/Path;"))
     private static Path impl$configurePackRepository(SaveFormat.LevelSave levelSave, FolderName folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
-        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
-        try {
-            SpongeDataPackManager.INSTANCE.serialize(datapackDir, new ArrayList<>());
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+        SpongeBootstrap.getLifecycle().earlyInit(datapackDir);
         return datapackDir;
     }
 }

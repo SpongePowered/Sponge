@@ -27,16 +27,22 @@ package org.spongepowered.common.mixin.core.client;
 import net.minecraft.client.GameConfiguration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.world.storage.FolderName;
+import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import java.nio.file.Path;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
@@ -85,4 +91,13 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
         SpongeCommon.getGame().getAsyncScheduler().close();
     }
+
+    // Before loading datapacks on startup call events so that plugins can register theirs
+    @Redirect(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveFormat$LevelSave;getLevelPath(Lnet/minecraft/world/storage/FolderName;)Ljava/nio/file/Path;"))
+    private Path impl$configurePackRepository(SaveFormat.LevelSave levelSave, FolderName folderName) {
+        final Path datapackDir = levelSave.getLevelPath(folderName);
+        SpongeBootstrap.getLifecycle().earlyInit(datapackDir);
+        return datapackDir;
+    }
+
 }
