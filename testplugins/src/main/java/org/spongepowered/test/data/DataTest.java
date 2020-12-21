@@ -567,9 +567,9 @@ public final class DataTest  {
         this.checkWithData(cactusState, Keys.GROWTH_STAGE, 4);
 
 
-        this.checkGetData(obisidanState, Keys.HARDNESS, 50.0);
-        this.checkGetData(dirtState, Keys.HARDNESS, 0.5);
-        this.checkGetData(bricksState, Keys.HARDNESS, 2.0);
+        this.checkGetData(obisidanState, Keys.DESTROY_SPEED, 50.0);
+        this.checkGetData(dirtState, Keys.DESTROY_SPEED, 0.5);
+        this.checkGetData(bricksState, Keys.DESTROY_SPEED, 2.0);
 
         this.checkOfferData(armorStand, Keys.HAS_ARMS, false);
         this.checkOfferData(armorStand, Keys.HAS_ARMS, true);
