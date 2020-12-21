@@ -599,7 +599,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         //
         // In this case, we just force it to return the empty optional by
         // claiming the optional is "present".
-        return this.impl$dontCreateExitPortal && optional.isPresent();
+        return this.impl$dontCreateExitPortal || optional.isPresent();
     }
 
     @Inject(method = "sendRemoveEntity", at = @At("RETURN"))
