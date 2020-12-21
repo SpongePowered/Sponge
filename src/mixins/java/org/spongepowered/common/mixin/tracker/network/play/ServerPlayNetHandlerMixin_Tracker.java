@@ -64,14 +64,14 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;doTick()V"))
     private void tracker$wrapPlayerTickWithPhase(final ServerPlayerEntity player) {
         if (((PlatformEntityBridge) player).bridge$isFakePlayer() || ((WorldBridge) player.level).bridge$isFake()) {
-            player.tick();
+            player.doTick();
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
              final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.SERVER).source(player)) {
             context.buildAndSwitch();
             frame.pushCause(player);
-            player.tick();
+            player.doTick();
         }
     }
 
