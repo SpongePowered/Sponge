@@ -31,7 +31,7 @@ import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.registry.RegistryScopes;
-import org.spongepowered.common.registry.SpongeRegistryTypes;
+import org.spongepowered.api.registry.RegistryTypes;
 
 @SuppressWarnings("unused")
 @RegistryScopes(scopes = RegistryScope.GAME)
@@ -55,6 +55,6 @@ public final class SpongeCommandRegistrars {
     }
 
     private static DefaultedRegistryReference<CommandRegistrar<?>> key(final ResourceKey location) {
-        return RegistryKey.of(SpongeRegistryTypes.COMMAND_REGISTRAR, location).asDefaultedReference(() -> Sponge.getGame().registries());
+        return RegistryKey.of(RegistryTypes.COMMAND_REGISTRAR, location).asDefaultedReference(() -> Sponge.getGame().registries());
     }
 }

@@ -67,6 +67,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.command.ExecuteCommandEvent;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.util.ComponentMessageException;
@@ -81,7 +82,6 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.registry.SpongeRegistryTypes;
 import org.spongepowered.common.service.game.pagination.SpongePaginationService;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -515,7 +515,7 @@ public final class SpongeCommandManager implements CommandManager {
             throw new RuntimeException("Failed to create pagination command!", ex);
         }
         final Set<TypeToken<?>> usedTokens = new HashSet<>();
-        Sponge.getGame().registries().registry(SpongeRegistryTypes.COMMAND_REGISTRAR).streamEntries().forEach(entry -> {
+        Sponge.getGame().registries().registry(RegistryTypes.COMMAND_REGISTRAR).streamEntries().forEach(entry -> {
             final CommandRegistrar<?> registrar = entry.value();
             // someone's gonna do it, let's not let them take us down.
             final TypeToken<?> handledType = registrar.handledType();
@@ -565,7 +565,7 @@ public final class SpongeCommandManager implements CommandManager {
     public void reset() {
         if (this.hasStarted) {
             this.isResetting = true;
-            Sponge.getGame().registries().registry(SpongeRegistryTypes.COMMAND_REGISTRAR).streamEntries().forEach(entry -> entry.value().reset());
+            Sponge.getGame().registries().registry(RegistryTypes.COMMAND_REGISTRAR).streamEntries().forEach(entry -> entry.value().reset());
             this.commandMappings.clear();
             this.inverseCommandMappings.clear();
             this.pluginToCommandMap.clear();
