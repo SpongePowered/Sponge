@@ -6,6 +6,7 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
+        "mcp.block.LeavesBlockMixin_DisablePersistentScheduledUpdate",
         "mcp.entity.EntityMixin_Optimization_Collision",
         "mcp.entity.item.ItemFrameEntityMixin_Optimization_Map",
         "mcp.entity.passive.TameableEntity_Optimization_Owner",
