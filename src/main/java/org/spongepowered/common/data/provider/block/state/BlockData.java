@@ -34,13 +34,11 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.state.properties.ChestType;
 import net.minecraft.state.properties.NoteBlockInstrument;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.MatterTypes;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.common.accessor.block.AbstractBlockAccessor;
 import org.spongepowered.common.accessor.block.AbstractBlock_PropertiesAccessor;
 import org.spongepowered.common.accessor.block.AbstractFireBlockAccessor;
 import org.spongepowered.common.bridge.block.BlockBridge;
@@ -72,8 +70,8 @@ public final class BlockData {
                     .create(Keys.DYE_COLOR)
                         .get(h -> ((DyeColorBlockBridge) h.getBlock()).bridge$getDyeColor().orElse(null))
                         .supports(h -> h.getBlock() instanceof DyeColorBlockBridge)
-                    .create(Keys.HARDNESS)
-                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$destroyTime())
+                    .create(Keys.DESTROY_SPEED)
+                        .get(state -> (double) ((AbstractBlock_PropertiesAccessor) ((AbstractBlockAccessor) state.getBlock()).accessor$properties()).accessor$destroyTime())
                     .create(Keys.HELD_ITEM)
                         .get(h -> {
                             final Item item = h.getBlock().asItem();
