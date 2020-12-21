@@ -31,10 +31,6 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 @ConfigSerializable
 public class DebugCategory {
 
-    @Setting("thread-contention-monitoring")
-    @Comment("If 'true', Java's thread contention monitoring for thread dumps is enabled.")
-    public boolean threadContentionMonitoring = false;
-
     @Setting("concurrent-entity-checks")
     @Comment("Detect and prevent certain attempts to use entities concurrently. \n"
                                                          + "WARNING: May drastically decrease server performance. Only set this to 'true' "

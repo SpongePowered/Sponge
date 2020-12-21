@@ -46,7 +46,7 @@ public final class ConcurrentCheckPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if ("org.spongepowered.common.mixin.concurrentchecks.ClassInheritanceMultiMapMixin".equals(mixinClassName)) {
+        if ("org.spongepowered.common.mixin.concurrentcheck.util.ClassInheritanceMultiMapMixin_ConcurrentCheck".equals(mixinClassName)) {
             return SpongeConfigs.getCommon().get().debug.concurrentEntityChecks;
         }
         return true;
