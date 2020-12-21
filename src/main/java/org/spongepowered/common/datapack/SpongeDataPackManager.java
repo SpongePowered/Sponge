@@ -32,6 +32,8 @@ import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.common.event.lifecycle.RegisterDataPackValueEventImpl;
+import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -57,7 +59,11 @@ public final class SpongeDataPackManager {
         this.serializables = new Object2ObjectOpenHashMap<>();
     }
 
+    // TODO also call for client on startup
     public void callRegisterDataPackValueEvent() {
+        SpongeIngredient.clearCache();
+        ResultUtil.clearCache();
+
         final RegisterDataPackValueEventImpl event =
                 new RegisterDataPackValueEventImpl(Cause.of(EventContext.empty(), this.game), this.game);
         this.game.getEventManager().post(event);
@@ -78,9 +84,7 @@ public final class SpongeDataPackManager {
                 serialized.add((DataPackSerializedObject) key.getObjectFunction().apply(serializable, o));
             }
 
-            if (!serialized.isEmpty()) {
-                key.getPackSerializer().serialize(dataPacksDirectory, serialized);
-            }
+            key.getPackSerializer().serialize(dataPacksDirectory, serialized); // Deletes the datapack if nothing was serialized
         }
         this.serializables.clear();
     }

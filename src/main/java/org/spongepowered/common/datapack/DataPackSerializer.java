@@ -48,6 +48,10 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
         final Path datapackDir = dataPackDirectory.resolve("plugin-" + this.typeDirectoryName);
         FileUtils.deleteDirectory(datapackDir.toFile());
 
+        if (objects.isEmpty()) {
+            return;
+        }
+
         // Write our objects
         for (final T object : objects) {
             final Path namespacedDataDirectory = datapackDir.resolve("data").resolve(object.getKey().getNamespace());

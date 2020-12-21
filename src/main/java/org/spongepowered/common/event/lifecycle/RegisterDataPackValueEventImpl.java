@@ -27,8 +27,11 @@ package org.spongepowered.common.event.lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.datapack.DataPackSerializable;
+import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.datapack.SpongeDataPackType;
 
 import java.util.ArrayList;
@@ -43,6 +46,8 @@ public final class RegisterDataPackValueEventImpl extends AbstractLifecycleEvent
     public RegisterDataPackValueEventImpl(final Cause cause, final Game game) {
         super(cause, game);
         this.serializables = new Object2ObjectOpenHashMap<>();
+        this.serializables.computeIfAbsent((SpongeDataPackType) DataPackTypes.RECIPE, k -> new ArrayList<>());
+        this.serializables.computeIfAbsent((SpongeDataPackType) DataPackTypes.ADVANCEMENT, k -> new ArrayList<>());
     }
 
     @Override

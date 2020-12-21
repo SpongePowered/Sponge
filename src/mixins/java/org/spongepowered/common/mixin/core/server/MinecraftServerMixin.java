@@ -76,8 +76,6 @@ import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
-import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
@@ -356,8 +354,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
     @Inject(method = "reloadResources", at = @At(value = "HEAD"))
     public void impl$reloadPluginRecipes(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        SpongeIngredient.clearCache();
-        ResultUtil.clearCache();
+
         SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
         try {
             SpongeDataPackManager.INSTANCE.serialize(this.storageSource.getLevelPath(FolderName.DATAPACK_DIR));

@@ -155,7 +155,6 @@ public final class AdvancementTest implements LoadableModule {
 
 
     @Listener
-    @SuppressWarnings("unchecked")
     public void onAdvancementRegistry(final RegisterDataPackValueEvent event) {
 
         if (!this.enabled) {
