@@ -191,7 +191,7 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
     }
 
     @Inject(method = "checkCollision", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/ProjectileHelper;getHitResult(Lnet/minecraft/entity/Entity;Ljava/util/function/Predicate;)Lnet/minecraft/util/math/RayTraceResult;"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/FishingBobberEntity;onHit(Lnet/minecraft/util/math/RayTraceResult;)V"))
     private void impl$callCollideImpactEvent(final CallbackInfo ci, final RayTraceResult hitResult) {
         if (hitResult.getType() == RayTraceResult.Type.MISS || ((WorldBridge) this.level).bridge$isFake()) {
             return;
