@@ -41,6 +41,7 @@ import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
 import org.spongepowered.api.profile.GameProfile;
@@ -84,6 +85,7 @@ import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.state.SpongeStateMatcherFactory;
 import org.spongepowered.common.util.SpongeAABB;
+import org.spongepowered.common.util.SpongeDamageSourceFactory;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTicks;
@@ -161,6 +163,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
             .registerFactory(RegistryType.Factory.class, new SpongeRegistryType.FactoryImpl())
             .registerFactory(DataPackType.Factory.class, new SpongeDataPackType.FactoryImpl())
             .registerFactory(BlockVolumeFactory.class, new SpongeBlockVolumeFactory())
+            .registerFactory(DamageSource.Factory.class, new SpongeDamageSourceFactory())
         ;
     }
 

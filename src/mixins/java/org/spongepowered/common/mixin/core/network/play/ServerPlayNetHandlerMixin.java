@@ -132,8 +132,6 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch);
     // @formatter:on
 
-    @Nullable private Entity impl$targetedEntity = null;
-
     @Override
     public NetworkManager bridge$getConnection() {
         return this.connection;
@@ -199,10 +197,8 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         method = "handleInteract",
         constant = @Constant(doubleValue = 36.0D)
     )
-    private double impl$getPlatformReach(final double thirtySix) {
-        final Entity targeted = this.impl$targetedEntity;
-        this.impl$targetedEntity = null;
-        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, targeted);
+    private double impl$getPlatformReach(final double thirtySix, CUseEntityPacket p_147340_1_) {
+        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, p_147340_1_.getTarget(this.player.level));
     }
 
     /**

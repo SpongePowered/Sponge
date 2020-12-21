@@ -86,10 +86,11 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(LivingEntity.class)
@@ -241,7 +242,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     .createDamageEntityEvent(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this, originalFunctions,
                             originalDamage);
             if (damageSource
-                    != SpongeDamageSources.IGNORED.get()) { // Basically, don't throw an event if it's our own damage source
+                    != SpongeDamageSources.IGNORED) { // Basically, don't throw an event if it's our own damage source
                 SpongeCommon.postEvent(event);
             }
             if (event.isCancelled()) {
@@ -425,7 +426,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         } else if (this.level.isClientSide) {
             return false;
             // Sponge - Also ignore our customary damage source
-        } else if (this.shadow$getHealth() <= 0.0F && source != SpongeDamageSources.IGNORED.get()) {
+        } else if (this.shadow$getHealth() <= 0.0F && source != SpongeDamageSources.IGNORED) {
             return false;
         } else if (source.isFire() && this.shadow$hasEffect(Effects.FIRE_RESISTANCE)) {
             return false;

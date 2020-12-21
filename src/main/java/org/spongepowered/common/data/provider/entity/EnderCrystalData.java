@@ -49,7 +49,7 @@ public final class EnderCrystalData {
                                 return false;
                             }
                             if (v == 0) {
-                                h.hurt((DamageSource) SpongeDamageSources.IGNORED.get(), 1000F);
+                                h.hurt((DamageSource) SpongeDamageSources.IGNORED, 1000F);
                             } else {
                                 h.removed = false;
                             }

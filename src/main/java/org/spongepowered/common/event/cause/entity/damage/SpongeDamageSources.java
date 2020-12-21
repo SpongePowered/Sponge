@@ -24,12 +24,8 @@
  */
 package org.spongepowered.common.event.cause.entity.damage;
 
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.registry.DefaultedRegistryReference;
-import org.spongepowered.api.registry.RegistryKey;
-import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 
 public final class SpongeDamageSources {
 
@@ -37,16 +33,12 @@ public final class SpongeDamageSources {
 
     // SORTFIELDS:ON
 
-    public static final DefaultedRegistryReference<DamageSource> IGNORED = SpongeDamageSources.key(ResourceKey.sponge("ignored"));
+    public static final DamageSource IGNORED = (DamageSource) DamageSourceAccessor.invoker$new("ignored");
 
     // SORTFIELDS:OFF
 
     // @formatter:on
 
     private SpongeDamageSources() {
-    }
-
-    private static DefaultedRegistryReference<DamageSource> key(final ResourceKey location) {
-        return RegistryKey.of(RegistryTypes.DAMAGE_SOURCE, location).asDefaultedReference(() -> Sponge.getGame().registries());
     }
 }

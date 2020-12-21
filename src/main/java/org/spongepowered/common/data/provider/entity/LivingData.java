@@ -123,7 +123,7 @@ public final class LivingData {
 
                             h.setHealth(v.floatValue());
                             if (v == 0) {
-                                h.hurt((DamageSource) SpongeDamageSources.IGNORED.get(), 1000F);
+                                h.hurt((DamageSource) SpongeDamageSources.IGNORED, 1000F);
                             }
                             return true;
                         })

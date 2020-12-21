@@ -297,7 +297,7 @@ final class VanillaRegistryLoader {
         return this.holder.createRegistry(type, () -> {
             final Map<ResourceKey, A> map = new HashMap<>();
             for (final Map.Entry<I, String> value : byName.entrySet()) {
-                map.put(ResourceKey.minecraft(value.getValue()), (A) value.getKey());
+                map.put(ResourceKey.sponge(value.getValue()), (A) value.getKey());
             }
             return map;
         }, false);
