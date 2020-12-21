@@ -29,6 +29,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.datapack.DataPackSerializable;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.common.event.lifecycle.RegisterDataPackValueEventImpl;
@@ -39,11 +40,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 public final class SpongeDataPackManager {
 
@@ -57,13 +56,11 @@ public final class SpongeDataPackManager {
         this.serializables = new Object2ObjectOpenHashMap<>();
     }
 
-    // TODO also call for client on startup
     public void callRegisterDataPackValueEvent() {
         SpongeIngredient.clearCache();
         ResultUtil.clearCache();
 
-        final RegisterDataPackValueEventImpl event =
-                new RegisterDataPackValueEventImpl(Cause.of(EventContext.empty(), this.game), this.game);
+        final RegisterDataPackValueEventImpl event = new RegisterDataPackValueEventImpl(Cause.of(EventContext.empty(), this.game), this.game);
         this.game.getEventManager().post(event);
 
         this.serializables.putAll(event.getSerializables());
@@ -71,6 +68,10 @@ public final class SpongeDataPackManager {
 
     @SuppressWarnings("unchecked")
     public void serialize(final Path dataPacksDirectory, Collection<String> dataPacksToLoad) throws IOException {
+        // If there are no plugin Recipes/Advancements - delete its datapack
+        this.serializables.putIfAbsent((SpongeDataPackType) DataPackTypes.RECIPE, Collections.EMPTY_LIST);
+        this.serializables.putIfAbsent((SpongeDataPackType) DataPackTypes.ADVANCEMENT, Collections.EMPTY_LIST);
+
         for (final Map.Entry<SpongeDataPackType, List<DataPackSerializable>> entry : this.serializables.entrySet()) {
             final SpongeDataPackType key = entry.getKey();
             final List<DataPackSerializable> value = entry.getValue();

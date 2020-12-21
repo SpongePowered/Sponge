@@ -46,8 +46,6 @@ public final class RegisterDataPackValueEventImpl extends AbstractLifecycleEvent
     public RegisterDataPackValueEventImpl(final Cause cause, final Game game) {
         super(cause, game);
         this.serializables = new Object2ObjectOpenHashMap<>();
-        this.serializables.computeIfAbsent((SpongeDataPackType) DataPackTypes.RECIPE, k -> new ArrayList<>());
-        this.serializables.computeIfAbsent((SpongeDataPackType) DataPackTypes.ADVANCEMENT, k -> new ArrayList<>());
     }
 
     @Override
