@@ -106,13 +106,13 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
         return value;
     }
 
-    @Intrinsic
-    public Stream<RegistryEntry<T>> registry$stream() {
+    @Override
+    public Stream<RegistryEntry<T>> streamEntries() {
         return ((RegistryBridge<T>) this).bridge$getEntries().values().stream();
     }
 
-    @Override
-    public Stream<T> streamValues() {
+    @Intrinsic
+    public Stream<T> registry$stream() {
         return ((RegistryBridge<T>) this).bridge$getEntries().values().stream().map(RegistryEntry::value);
     }
 
