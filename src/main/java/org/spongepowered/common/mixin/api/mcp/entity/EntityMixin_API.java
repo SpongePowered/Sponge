@@ -163,6 +163,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow public abstract boolean hasNoGravity();
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow public abstract boolean shadow$addTag(String tag);
+    @Shadow public abstract boolean shadow$removeTag(String tag);
 
     // @formatter:on
 
@@ -685,25 +687,18 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public Set<String> getTags() {
+    public Collection<String> getTags() {
         return Collections.unmodifiableSet(this.tags);
     }
 
-    @Override
-    public boolean addTag(final String tag) {
-        checkNotNull(tag);
-
-        if (this.tags.size() >= 1024) {
-            return false;
-        }
-
-        return this.tags.add(tag);
+    @Intrinsic
+    public boolean entity$addTag(final String tag) {
+        return this.shadow$addTag(tag);
     }
 
-    @Override
-    public boolean removeTag(final String tag) {
-        checkNotNull(tag);
-        return this.tags.remove(tag);
+    @Intrinsic
+    public boolean entity$removeTag(final String tag) {
+        return this.shadow$removeTag(tag);
     }
 
     @Override
