@@ -24,19 +24,24 @@
  */
 package org.spongepowered.common.registry;
 
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import java.util.function.Function;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.BlockStateArgument;
 import net.minecraft.command.arguments.ComponentArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.EntitySelectorParser;
 import net.minecraft.command.arguments.GameProfileArgument;
+import net.minecraft.command.arguments.IArgumentSerializer;
 import net.minecraft.command.arguments.ItemArgument;
 import net.minecraft.command.arguments.NBTCompoundTagArgument;
 import net.minecraft.command.arguments.ResourceLocationArgument;
@@ -417,43 +422,44 @@ public final class SpongeRegistryLoaders {
     }
 
     public static RegistryLoader<ClientCompletionKey<?>> clientCompletionKey() {
+        final Function<ResourceKey, ArgumentType<?>> fn = key -> ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(key).accessor$serializer()).accessor$constructor().get();
         return RegistryLoader.of(l -> {
-            l.add(ClientCompletionKeys.BLOCK_PREDICATE, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.BLOCK_STATE, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.BOOL, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.COLOR, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.COMPONENT, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.DIMENSION, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.DOUBLE, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
+            l.add(ClientCompletionKeys.BLOCK_PREDICATE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.BLOCK_STATE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.BOOL, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.COLOR, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.COMPONENT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.DIMENSION, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.DOUBLE, k -> new SpongeBasicClientCompletionKey(k, DoubleArgumentType.doubleArg()));
             l.add(ClientCompletionKeys.ENTITY, SpongeEntityClientCompletionKey::new);
-            l.add(ClientCompletionKeys.ENTITY_ANCHOR, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.ENTITY_SUMMON, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.FLOAT, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.FUNCTION, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.GAME_PROFILE, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.INTEGER, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.ITEM_ENCHANTMENT, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.ITEM_SLOT, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.LONG, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.MESSAGE, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.MOB_EFFECT, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.NBT_COMPOUND_TAG, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.NBT_PATH, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.NBT_TAG, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.OBJECTIVE, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.OBJECTIVE_CRITERIA, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.OPERATION, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.PARTICLE, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.RESOURCE_LOCATION, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.ROTATION, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
+            l.add(ClientCompletionKeys.ENTITY_ANCHOR, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.ENTITY_SUMMON, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.FLOAT, k -> new SpongeBasicClientCompletionKey(k, FloatArgumentType.floatArg()));
+            l.add(ClientCompletionKeys.FUNCTION, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.GAME_PROFILE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.INTEGER, k -> new SpongeBasicClientCompletionKey(k, IntegerArgumentType.integer()));
+            l.add(ClientCompletionKeys.ITEM_ENCHANTMENT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.ITEM_SLOT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.LONG, k -> new SpongeBasicClientCompletionKey(k, LongArgumentType.longArg()));
+            l.add(ClientCompletionKeys.MESSAGE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.MOB_EFFECT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.NBT_COMPOUND_TAG, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.NBT_PATH, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.NBT_TAG, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.OBJECTIVE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.OBJECTIVE_CRITERIA, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.OPERATION, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.PARTICLE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.RESOURCE_LOCATION, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.ROTATION, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.SCORE_HOLDER, k -> new SpongeAmountClientCompletionKey(k, ScoreHolderArgument.scoreHolder(), ScoreHolderArgument.scoreHolders()));
-            l.add(ClientCompletionKeys.SCOREBOARD_SLOT, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
+            l.add(ClientCompletionKeys.SCOREBOARD_SLOT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.STRING, SpongeStringClientCompletionKey::new);
-            l.add(ClientCompletionKeys.SWIZZLE, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.TEAM, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.TIME, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.VEC2, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
-            l.add(ClientCompletionKeys.VEC3, k -> new SpongeBasicClientCompletionKey(k, ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(k)).accessor$constructor().get()));
+            l.add(ClientCompletionKeys.SWIZZLE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.TEAM, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.TIME, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.VEC2, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.VEC3, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
         });
     }
 

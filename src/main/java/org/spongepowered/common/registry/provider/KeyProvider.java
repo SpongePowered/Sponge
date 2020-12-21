@@ -35,7 +35,7 @@ import java.util.Optional;
 
 public final class KeyProvider {
 
-    public static KeyProvider INSTANCE;
+    public static final KeyProvider INSTANCE = new KeyProvider();
 
     private final Map<ResourceKey, Key<Value<?>>> mappings;
 
