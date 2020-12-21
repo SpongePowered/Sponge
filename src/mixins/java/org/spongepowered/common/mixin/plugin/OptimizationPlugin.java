@@ -88,7 +88,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     optimizationCategory -> optimizationCategory.dropsPreMerge)
             .put("org.spongepowered.common.mixin.optimization.mcp.block.BlockRedstoneWireMixin_Eigen", optimizationCategory -> optimizationCategory.eigenRedstone.enabled)
             .put("org.spongepowered.common.accessor.block.BlockRedstoneWireAccessor_Eigen", optimizationCategory -> optimizationCategory.eigenRedstone.enabled)
-            .put("org.spongepowered.common.mixin.optimization.mcp.entity.EntityMixinTameable_Cached_Owner",
+            .put("org.spongepowered.common.mixin.optimization.mcp.entity.passive.TameableEntity_Optimization_Owner",
                     optimizationCategory -> optimizationCategory.cacheTameableOwners)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.item.EntityItemFrameMixin_MapOptimization",
                     optimizationCategory -> optimizationCategory.optimizeMaps)
