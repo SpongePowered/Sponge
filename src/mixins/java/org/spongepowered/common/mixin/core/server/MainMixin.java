@@ -34,6 +34,7 @@ import org.spongepowered.common.datapack.SpongeDataPackManager;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 @Mixin(Main.class)
 public abstract class MainMixin {
@@ -44,8 +45,7 @@ public abstract class MainMixin {
         final Path datapackDir = levelSave.getLevelPath(folderName);
         SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
         try {
-
-            SpongeDataPackManager.INSTANCE.serialize(datapackDir);
+            SpongeDataPackManager.INSTANCE.serialize(datapackDir, new ArrayList<>());
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

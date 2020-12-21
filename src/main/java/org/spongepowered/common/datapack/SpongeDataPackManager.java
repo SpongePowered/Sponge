@@ -38,6 +38,7 @@ import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +73,7 @@ public final class SpongeDataPackManager {
     }
 
     @SuppressWarnings("unchecked")
-    public void serialize(final Path dataPacksDirectory) throws IOException {
+    public void serialize(final Path dataPacksDirectory, Collection<String> dataPacksToLoad) throws IOException {
         for (final Map.Entry<SpongeDataPackType, List<DataPackSerializable>> entry : this.serializables.entrySet()) {
             final SpongeDataPackType key = entry.getKey();
             final List<DataPackSerializable> value = entry.getValue();
@@ -84,8 +85,14 @@ public final class SpongeDataPackManager {
                 serialized.add((DataPackSerializedObject) key.getObjectFunction().apply(serializable, o));
             }
 
-            key.getPackSerializer().serialize(dataPacksDirectory, serialized); // Deletes the datapack if nothing was serialized
+            // When reloading we must update the dataPacksToLoad
+            if (key.getPackSerializer().serialize(dataPacksDirectory, serialized)) {
+                dataPacksToLoad.add("file/" + key.getPackSerializer().getPackName());
+            } else {
+                dataPacksToLoad.remove("file/" + key.getPackSerializer().getPackName());
+            }
         }
         this.serializables.clear();
     }
+
 }

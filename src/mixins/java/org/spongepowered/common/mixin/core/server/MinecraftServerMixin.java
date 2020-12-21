@@ -357,17 +357,10 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
         SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
         try {
-            SpongeDataPackManager.INSTANCE.serialize(this.storageSource.getLevelPath(FolderName.DATAPACK_DIR));
+            SpongeDataPackManager.INSTANCE.serialize(this.storageSource.getLevelPath(FolderName.DATAPACK_DIR), datapacksToLoad);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-
         this.shadow$getPackRepository().reload();
-        final List<String> disabledPacks = this.worldData.getDataPackConfig().getDisabled();
-        for (String selectedPack : this.shadow$getPackRepository().getSelectedIds()) {
-            if (!disabledPacks.contains(selectedPack) && !datapacksToLoad.contains(selectedPack)) {
-                datapacksToLoad.add(selectedPack);
-            }
-        }
     }
 }
