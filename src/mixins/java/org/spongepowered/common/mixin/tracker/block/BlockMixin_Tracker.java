@@ -35,7 +35,6 @@ import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -43,17 +42,11 @@ import org.spongepowered.common.bridge.block.TrackedBlockBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
-import org.spongepowered.common.mixin.IncompatibleClassTransformationError;
 import org.spongepowered.common.util.ReflectionUtil;
 
 @Mixin(Block.class)
 public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
 
-    // @formatter:off
-    @Shadow public static void shadow$dropResources(final BlockState state, final World worldIn, final BlockPos pos) {
-        throw new IncompatibleClassTransformationError("untransformed shadow");
-    }
-    // @formatter:on
     private final boolean tracker$hasNeighborLogicOverridden = ReflectionUtil.isNeighborChangedDeclared(this.getClass());
 
     @Nullable private static EffectTransactor tracker$effectTransactorForDrops = null;

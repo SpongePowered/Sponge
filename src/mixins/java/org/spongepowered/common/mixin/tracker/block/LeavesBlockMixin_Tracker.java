@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.block;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.IntegerProperty;
@@ -98,13 +99,13 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
                     if (context != null) {
                         context.buildAndSwitch();
                     }
-                    BlockMixin_Tracker.shadow$dropResources(state, worldIn, pos);
+                    Block.dropResources(state, worldIn, pos);
                     worldIn.removeBlock(pos, false);
                 }
                 return;
             }
             // Sponge End
-            BlockMixin_Tracker.shadow$dropResources(state, worldIn, pos);
+            Block.dropResources(state, worldIn, pos);
             worldIn.removeBlock(pos, false);
         }
 
