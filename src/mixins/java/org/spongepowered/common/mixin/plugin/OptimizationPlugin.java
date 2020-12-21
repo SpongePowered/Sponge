@@ -90,7 +90,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
             .put("org.spongepowered.common.accessor.block.BlockRedstoneWireAccessor_Eigen", optimizationCategory -> optimizationCategory.eigenRedstone.enabled)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.passive.TameableEntity_Optimization_Owner",
                     optimizationCategory -> optimizationCategory.cacheTameableOwners)
-            .put("org.spongepowered.common.mixin.optimization.mcp.entity.item.EntityItemFrameMixin_MapOptimization",
+            .put("org.spongepowered.common.mixin.optimization.mcp.entity.item.ItemFrameEntityMixin_Optimization_Map",
                     optimizationCategory -> optimizationCategory.optimizeMaps)
             .put("org.spongepowered.common.mixin.invalid.optimization.entity.EntityTrackerEntryMixin_MapOptimization",
                     optimizationCategory -> optimizationCategory.optimizeMaps)
@@ -102,9 +102,9 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     optimizationCategory -> optimizationCategory.optimizeMaps)
             .put("org.spongepowered.common.mixin.optimization.mcp.server.MinecraftServerMixin_MapOptimization",
                     optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.TileEntityMixin_HopperOptimization",
+            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.TileEntityMixin_Optimization_Hopper",
                     optimizationCategory -> optimizationCategory.optimizeHoppers)
-            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.TileEntityHopperMixin_HopperOptimization",
+            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.HopperTileEntityMixin_Optimization_Hopper",
                     optimizationCategory -> optimizationCategory.optimizeHoppers)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.EntityMixin_UseActiveChunkForCollisions",
                     optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
