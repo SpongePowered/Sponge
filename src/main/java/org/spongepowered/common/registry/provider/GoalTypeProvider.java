@@ -43,13 +43,11 @@ import java.util.Optional;
 
 public final class GoalTypeProvider {
 
-    public static GoalTypeProvider INSTANCE;
+    public static final GoalTypeProvider INSTANCE = new GoalTypeProvider();
 
     private final Map<Class<? extends Goal>, GoalType> mappings;
 
     GoalTypeProvider() {
-        GoalTypeProvider.INSTANCE = this;
-
         this.mappings = new IdentityHashMap<>();
 
         this.mappings.put(AvoidEntityGoal.class, GoalTypes.AVOID_LIVING.get());

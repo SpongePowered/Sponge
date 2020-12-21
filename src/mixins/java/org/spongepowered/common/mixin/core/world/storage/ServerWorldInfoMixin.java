@@ -46,10 +46,10 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.accessor.world.WorldSettingsAccessor;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
@@ -66,17 +66,17 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 @Mixin(ServerWorldInfo.class)
-public abstract class ServerWorldInfoMixin implements IServerConfiguration {
+public abstract class ServerWorldInfoMixin implements IServerConfiguration, IServerWorldInfoBridge, ResourceKeyBridge {
 
     // @formatter:off
     @Shadow public abstract boolean shadow$isDifficultyLocked();
     // @formatter:on
 
+    @Shadow private WorldSettings settings;
     @Nullable private ResourceKey impl$key;
     private DimensionType impl$dimensionType;
     private UUID impl$uniqueId = UUID.randomUUID();
     private boolean impl$hasCustomDifficulty = false;
-    @Nullable private Difficulty impl$customDifficulty;
 
     private InheritableConfigHandle<WorldConfig> impl$configAdapter = SpongeGameConfigs.createDetached();
     private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
@@ -112,6 +112,11 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration {
         return world;
     }
 
+    @Override
+    public void bridge$setDimensionType(final DimensionType type, boolean updatePlayers) {
+        this.impl$dimensionType = type;
+    }
+
     // WorldInfoBridge
 
     public UUID bridge$getUniqueId() {
@@ -128,13 +133,13 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration {
 
     public void bridge$forceSetDifficulty(final Difficulty difficulty) {
         this.impl$hasCustomDifficulty = true;
-        this.impl$customDifficulty = difficulty;
+        ((WorldSettingsAccessor) (Object) this.settings).accessor$difficulty(difficulty);
         this.impl$updateWorldForDifficultyChange(this.bridge$getWorld(), this.shadow$isDifficultyLocked());
     }
 
     public InheritableConfigHandle<WorldConfig> bridge$getConfigAdapter() {
         if (this.impl$configAdapter == null) {
-            if (((IServerWorldInfoBridge) this).bridge$isValid()) {
+            if (this.bridge$isValid()) {
                 this.impl$configAdapter = SpongeGameConfigs.createWorld(null, this.bridge$getKey());
             } else {
                 this.impl$configAdapter = SpongeGameConfigs.createDetached();
@@ -174,7 +179,7 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration {
     }
 
     public void bridge$writeSpongeLevelData(final CompoundNBT compound) {
-        if (!((IServerWorldInfoBridge) this).bridge$isValid()) {
+        if (!this.bridge$isValid()) {
             return;
         }
 
@@ -234,14 +239,6 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration {
                 }
             }
         }
-    }
-
-    @Redirect(method = "getDifficulty", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldSettings;difficulty()Lnet/minecraft/world/Difficulty;"))
-    public Difficulty impl$onGetDifficulty(WorldSettings settings) {
-        if (this.impl$hasCustomDifficulty) {
-            return this.impl$customDifficulty;
-        }
-        return settings.difficulty();
     }
 
     @Override

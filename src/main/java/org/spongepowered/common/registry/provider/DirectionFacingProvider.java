@@ -33,13 +33,11 @@ import java.util.Optional;
 
 public final class DirectionFacingProvider {
 
-    public static DirectionFacingProvider INSTANCE;
+    public static final DirectionFacingProvider INSTANCE = new DirectionFacingProvider();
 
     private final ImmutableBiMap<Direction, net.minecraft.util.Direction> mappings;
 
     DirectionFacingProvider() {
-        DirectionFacingProvider.INSTANCE = this;
-
         this.mappings = ImmutableBiMap.<Direction, net.minecraft.util.Direction>builder()
                 .put(Direction.NORTH, net.minecraft.util.Direction.NORTH)
                 .put(Direction.EAST, net.minecraft.util.Direction.EAST)

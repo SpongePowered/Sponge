@@ -37,47 +37,27 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
-
-import java.io.IOException;
-
-import javax.annotation.Nullable;
 
 @Mixin(ChunkManager.class)
 public abstract class ChunkManagerMixin {
 
     // @formatter:off
     @Shadow @Final private ServerWorld level;
-    @Shadow protected abstract boolean shadow$save(IChunk chunkIn);
-    @Shadow @Nullable protected abstract CompoundNBT shadow$readChunk(ChunkPos pos) throws IOException;
     // @formatter:on
 
     @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/village/PointOfInterestManager;flush(Lnet/minecraft/util/math/ChunkPos;)V"))
     private void impl$useSerializationBehaviorForPOI(PointOfInterestManager pointOfInterestManager, ChunkPos p_219112_1_) {
-        final IServerWorldInfoBridge infoBridge = (IServerWorldInfoBridge) ((ServerWorldBridge) this.level).bridge$getLevelSave();
+        final IServerWorldInfoBridge infoBridge = (IServerWorldInfoBridge) this.level.getLevelData();
         final SerializationBehavior serializationBehavior = infoBridge.bridge$getSerializationBehavior();
         if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
             pointOfInterestManager.flush(p_219112_1_);
         }
     }
 
-    @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ChunkManager;readChunk(Lnet/minecraft/util/math/ChunkPos;)Lnet/minecraft/nbt/CompoundNBT;"))
-    private CompoundNBT impl$useSerializationBehaviorForChunkSave(ChunkManager chunkManager, ChunkPos pos) throws IOException {
-        final IServerWorldInfoBridge infoBridge = (IServerWorldInfoBridge) ((ServerWorldBridge) this.level).bridge$getLevelSave();
-        final SerializationBehavior serializationBehavior = infoBridge.bridge$getSerializationBehavior();
-        if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
-            return this.shadow$readChunk(pos);
-        }
-
-        // Returning null will cause the saveChunk to return false whose return value is ignored in Vanilla but is ultimately the truth...we do not
-        // save
-        return null;
-    }
-
     @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/storage/ChunkSerializer;write(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/world/chunk/IChunk;)Lnet/minecraft/nbt/CompoundNBT;"))
     private CompoundNBT impl$useSerializationBehaviorForChunkSave(ServerWorld worldIn, IChunk chunkIn) {
-        final IServerWorldInfoBridge infoBridge = (IServerWorldInfoBridge) ((ServerWorldBridge) this.level).bridge$getLevelSave();
+        final IServerWorldInfoBridge infoBridge = (IServerWorldInfoBridge) this.level.getLevelData();
         final SerializationBehavior serializationBehavior = infoBridge.bridge$getSerializationBehavior();
         if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
             return ChunkSerializer.write(worldIn, chunkIn);

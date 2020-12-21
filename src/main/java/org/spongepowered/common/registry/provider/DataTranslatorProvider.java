@@ -57,12 +57,10 @@ import java.util.UUID;
 
 public final class DataTranslatorProvider {
 
-    public static DataTranslatorProvider INSTANCE;
+    public static final DataTranslatorProvider INSTANCE = new DataTranslatorProvider();
     private final Map<Class, DataTranslator> mappings = new IdentityHashMap<>();
 
     DataTranslatorProvider() {
-        DataTranslatorProvider.INSTANCE = this;
-
         this.mappings.put(Component.class, DataSerializers.COMPONENT_DATA_SERIALIZER);
         this.mappings.put(UUID.class, DataSerializers.UUID_DATA_SERIALIZER);
         this.mappings.put(Vector2d.class, DataSerializers.VECTOR_2_D_DATA_SERIALIZER);

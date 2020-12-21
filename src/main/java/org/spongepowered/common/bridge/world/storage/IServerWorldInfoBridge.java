@@ -42,8 +42,6 @@ public interface IServerWorldInfoBridge {
     @Nullable
     ServerWorld bridge$getWorld();
 
-    boolean bridge$isSinglePlayerProperties();
-
     DimensionType bridge$getDimensionType();
 
     void bridge$setDimensionType(DimensionType type, boolean updatePlayers);

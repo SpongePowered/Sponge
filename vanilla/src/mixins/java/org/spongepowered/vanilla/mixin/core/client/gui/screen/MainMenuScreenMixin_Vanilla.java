@@ -28,9 +28,9 @@ import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -49,7 +49,7 @@ public abstract class MainMenuScreenMixin_Vanilla extends Screen {
     @Inject(method = "init", at = @At("TAIL"))
     private void vanilla$addPluginsButton(final CallbackInfo ci) {
         final Optional<Widget> realmsButton = this.buttons.stream()
-            .filter(b -> b.getMessage().equals(I18n.get("menu.online")))
+            .filter(b -> b.getMessage().equals(new TranslationTextComponent("menu.online")))
             .findFirst();
         realmsButton.ifPresent(b -> {
             b.setWidth(98);

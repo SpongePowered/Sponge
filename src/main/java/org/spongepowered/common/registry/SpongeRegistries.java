@@ -83,7 +83,7 @@ public final class SpongeRegistries {
 //        ;
     }
 
-    public static void registerEngineRegistries(final SpongeRegistryHolder holder) {
+    public static void registerServerRegistries(final SpongeRegistryHolder holder) {
         holder.createRegistry(RegistryTypes.WORLD_ARCHETYPE, SpongeRegistryLoaders.worldArchetype().values());
     }
 }

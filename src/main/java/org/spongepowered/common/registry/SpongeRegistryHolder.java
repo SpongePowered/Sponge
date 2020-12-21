@@ -26,7 +26,9 @@ package org.spongepowered.common.registry;
 
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.MutableRegistry;
 import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.ResourceKey;
@@ -37,6 +39,7 @@ import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
 import org.spongepowered.common.accessor.util.RegistryKeyAccessor;
+import org.spongepowered.common.accessor.util.registry.DynamicRegistriesAccessor;
 import org.spongepowered.common.bridge.util.registry.MutableRegistryBridge;
 
 import java.util.Map;
@@ -50,6 +53,7 @@ import javax.annotation.Nullable;
 public final class SpongeRegistryHolder implements RegistryHolder {
 
     private final Map<ResourceKey, net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>>> roots = new Object2ObjectOpenHashMap<>();
+    private DynamicRegistries.Impl dynamicAccess;
 
     public SpongeRegistryHolder() {
         this.roots.put(
@@ -70,6 +74,18 @@ public final class SpongeRegistryHolder implements RegistryHolder {
                 Lifecycle.stable()
             )
         );
+    }
+
+    // TODO: Minecraft 1.17 - Is this still fine to do?
+    public SpongeRegistryHolder(final DynamicRegistries.Impl dynamicAccess) {
+        this();
+
+        final MutableRegistry root = (MutableRegistry) this.roots.get(new ResourceLocation("minecraft", "root"));
+        for (final RegistryKey<? extends net.minecraft.util.registry.Registry<?>> entry : DynamicRegistriesAccessor.accessor$REGISTRIES()
+                .keySet()) {
+            final MutableRegistry<?> registry = dynamicAccess.registryOrThrow((RegistryKey) (Object) entry);
+            root.register(entry, registry, Lifecycle.stable());
+        }
     }
 
     public void setRootMinecraftRegistry(final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> rootRegistry) {

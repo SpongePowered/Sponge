@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.advancements;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementTreeNode;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.TreeLayout;
 import org.spongepowered.api.event.Cause;
@@ -38,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.advancement.SpongeTreeLayout;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(AdvancementTreeNode.class)
 public abstract class AdvancementTreeNodeMixin {
@@ -46,7 +46,7 @@ public abstract class AdvancementTreeNodeMixin {
     private static void impl$onLayout(Advancement root, CallbackInfo ci) {
         final AdvancementTree advancementTree = ((org.spongepowered.api.advancement.Advancement) root).getTree().get();
         final TreeLayout layout = new SpongeTreeLayout(advancementTree);
-        final Cause cause = Sponge.getServer().getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
         final AdvancementTreeEvent.GenerateLayout event = SpongeEventFactory.createAdvancementTreeEventGenerateLayout(cause, layout, advancementTree);
         SpongeCommon.postEvent(event);
     }

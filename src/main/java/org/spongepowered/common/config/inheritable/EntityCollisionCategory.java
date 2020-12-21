@@ -71,6 +71,9 @@ public final class EntityCollisionCategory {
         @Comment("If 'false', entity collision rules for this mod will be ignored.")
         public boolean enabled = true;
 
+        public ModSubCategory() {
+        }
+
         public ModSubCategory(final String namespace) {
             if (namespace.equals("minecraft")) {
                 this.blocks.put("detector_rail", 1);

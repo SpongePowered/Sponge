@@ -36,6 +36,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -85,32 +86,32 @@ public abstract class ModifiableAttributeInstanceMixin_API implements Attribute 
 
     @Override
     public Collection<AttributeModifier> getModifiers(final AttributeOperation operation) {
-        return (Collection) this.shadow$getModifiers((net.minecraft.entity.ai.attributes.AttributeModifier.Operation) (Object) operation);
+        return (Collection) this.shadow$getModifiers((net.minecraft.entity.ai.attributes.AttributeModifier.Operation) (Object) Objects.requireNonNull(operation, "operation"));
     }
 
     @Override
     public boolean hasModifier(final AttributeModifier modifier) {
-        return this.shadow$hasModifier((net.minecraft.entity.ai.attributes.AttributeModifier) modifier);
+        return this.shadow$hasModifier((net.minecraft.entity.ai.attributes.AttributeModifier) Objects.requireNonNull(modifier, "modifier"));
     }
 
     @Override
     public Optional<AttributeModifier> getModifier(final UUID uniqueId) {
-        return Optional.ofNullable((AttributeModifier) this.shadow$getModifier(uniqueId));
+        return Optional.ofNullable((AttributeModifier) this.shadow$getModifier(Objects.requireNonNull(uniqueId, "uniqueId")));
     }
 
     @Override
     public void addModifier(final AttributeModifier modifier) {
-        this.shadow$addModifier((net.minecraft.entity.ai.attributes.AttributeModifier) modifier);
+        this.shadow$addModifier((net.minecraft.entity.ai.attributes.AttributeModifier) Objects.requireNonNull(modifier, "modifier"));
     }
 
     @Override
     public void removeModifier(final AttributeModifier modifier) {
-        this.shadow$removeModifier((net.minecraft.entity.ai.attributes.AttributeModifier) modifier);
+        this.shadow$removeModifier((net.minecraft.entity.ai.attributes.AttributeModifier) Objects.requireNonNull(modifier, "modifier"));
     }
 
-    @Override
-    public void removeModifier(final UUID uniqueId) {
-        this.shadow$removeModifier(uniqueId);
+    @Intrinsic
+    public void attribute$removeModifier(final UUID uniqueId) {
+        this.shadow$removeModifier(Objects.requireNonNull(uniqueId, "uniqueId"));
     }
 
 }

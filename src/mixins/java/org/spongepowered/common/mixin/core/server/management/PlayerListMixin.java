@@ -37,11 +37,11 @@ import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
@@ -72,7 +72,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.network.play.server.SRespawnPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
@@ -83,11 +82,12 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.net.SocketAddress;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin implements PlayerListBridge {
@@ -182,9 +182,11 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             target = "Lnet/minecraft/server/MinecraftServer;getLevel(Lnet/minecraft/util/RegistryKey;)Lnet/minecraft/world/server/ServerWorld;",
             shift = At.Shift.AFTER
         ),
-        locals = LocalCapture.PRINT // TODO - Get the local captures for the redirected world level to cut out
+        locals = LocalCapture.CAPTURE_FAILHARD
     )
-    private void impl$onInitPlayer_BeforeSetWorld(final NetworkManager networkManager, final ServerPlayerEntity mcPlayer, final CallbackInfo ci) {
+    private void impl$onInitPlayer_BeforeSetWorld(final NetworkManager networkManager, final ServerPlayerEntity mcPlayer, final CallbackInfo ci,
+            com.mojang.authlib.GameProfile gameprofile, PlayerProfileCache playerprofilecache, com.mojang.authlib.GameProfile gameprofile1, String s,
+            CompoundNBT compoundnbt, RegistryKey registrykey, MinecraftServer var23, RegistryKey var24) {
         if (mcPlayer.level == null) {
             ci.cancel();
         }
@@ -331,8 +333,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         )
     )
     private void impl$callRespawnPlayerRecreateEvent(
-        final ServerPlayNetHandler serverPlayNetHandler, final IPacket<?> packetIn, final ServerPlayerEntity originalPlayer,
-            final DimensionType dimension, final boolean conqueredEnd) {
+        final ServerPlayNetHandler serverPlayNetHandler, final IPacket<?> packetIn, final ServerPlayerEntity originalPlayer, final boolean keepAllPlayerData) {
         final ServerPlayerEntity recreatedPlayer = serverPlayNetHandler.player;
 
         final Vector3d originalPosition = VecHelper.toVector3d(originalPlayer.position());
@@ -345,7 +346,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final RespawnPlayerEvent.Recreate event =
                 SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().getCurrentCause(), destinationPosition,
                         originalWorld, originalPosition, destinationWorld, originalDestinationWorld, destinationPosition, (ServerPlayer) originalPlayer,
-                        (ServerPlayer) recreatedPlayer, this.impl$isGameMechanicRespawn, !conqueredEnd);
+                        (ServerPlayer) recreatedPlayer, this.impl$isGameMechanicRespawn, !keepAllPlayerData);
         SpongeCommon.postEvent(event);
         recreatedPlayer.setPos(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(), event.getDestinationPosition().getZ());
         this.impl$isGameMechanicRespawn = false;
@@ -360,7 +361,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             recreatedPlayer.gameMode.getPreviousGameModeForPlayer(),
             targetWorld.isDebug(),
             targetWorld.isFlat(),
-            conqueredEnd
+            keepAllPlayerData
         );
     }
 
@@ -368,12 +369,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private ServerWorld impl$usePerWorldWorldBorder(final MinecraftServer minecraftServer, final ServerPlayerEntity playerIn,
             final ServerWorld worldIn) {
         return worldIn;
-    }
-
-    @Redirect(method = "sendLevelInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;getSharedSpawnPos()Lnet/minecraft/util/math/BlockPos;"))
-    private BlockPos impl$resetTargetedLocationData(final ServerWorld serverWorld, final ServerPlayerEntity playerIn) {
-        ((LocationTargetingBridge) playerIn).bridge$setTargetedPosition(null);
-        return serverWorld.getSharedSpawnPos();
     }
 
     private void impl$disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {

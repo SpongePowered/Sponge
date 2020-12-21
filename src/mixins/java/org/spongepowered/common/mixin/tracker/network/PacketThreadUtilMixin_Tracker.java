@@ -27,7 +27,11 @@ package org.spongepowered.common.mixin.tracker.network;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketThreadUtil;
+import net.minecraft.util.concurrent.ThreadTaskExecutor;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -35,13 +39,20 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 @Mixin(PacketThreadUtil.class)
 public abstract class PacketThreadUtilMixin_Tracker {
 
+    // @formatter:off
+    @Shadow @Final private static Logger LOGGER;
+    // @formatter:on
+
     @Redirect(method = "ensureRunningOnSameThread(Lnet/minecraft/network/IPacket;Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/concurrent/ThreadTaskExecutor;)V",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/network/IPacket;handle(Lnet/minecraft/network/INetHandler;)V"),
-        expect = 1,
-        require = 1
-    )
-    private static void tracker$redirectProcessPacket(final IPacket<?> packetIn, final INetHandler netHandler) {
-        PacketPhaseUtil.onProcessPacket(packetIn, netHandler);
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/concurrent/ThreadTaskExecutor;execute(Ljava/lang/Runnable;)V"))
+    private static <T extends INetHandler> void tracker$redirectProcessPacket(ThreadTaskExecutor threadTaskExecutor, Runnable p_execute_1_,
+            IPacket<T> p_218797_0_, T p_218797_1_, ThreadTaskExecutor<?> p_218797_2_) {
+        threadTaskExecutor.execute(() -> {
+            if (p_218797_1_.getConnection().isConnected()) {
+                PacketPhaseUtil.onProcessPacket(p_218797_0_, p_218797_1_);
+            } else {
+                LOGGER.debug("Ignoring packet due to disconnection: " + p_218797_0_);
+            }
+        });
     }
 }

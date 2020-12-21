@@ -165,7 +165,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     public Optional<org.spongepowered.api.world.server.ServerWorld> getWorld(final ResourceKey key) {
         Objects.requireNonNull(key, "key");
 
-        return (Optional<org.spongepowered.api.world.server.ServerWorld>) (Object) Optional.ofNullable(SpongeWorldManager.createRegistryKey(key));
+        return (Optional<org.spongepowered.api.world.server.ServerWorld>) (Object) Optional.ofNullable(this.worlds.get(SpongeWorldManager.createRegistryKey(key)));
     }
 
     @Override
@@ -872,6 +872,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             if (isDefaultWorld) {
                 levelData = (ServerWorldInfo) this.server.getWorldData();
                 settings = defaultLevelSettings;
+
+                ((IServerWorldInfoBridge) levelData).bridge$setDimensionType(dimensionType, false);
+                ((IServerWorldInfoBridge) levelData).bridge$setConfigAdapter(configAdapter);
+                ((ResourceKeyBridge) levelData).bridge$setKey(key);
             } else {
                 final WorldSettingsImport<INBT> worldSettingsImport = WorldSettingsImport.create(NBTDynamicOps.INSTANCE,
                         ((MinecraftServerAccessor) this.server).accessor$dataPackRegistries().getResourceManager(),
@@ -894,8 +898,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                         dimensionGeneratorSettings = DimensionGeneratorSettings.demoSettings(DynamicRegistries.builtin());
                     } else {
                         if (settings == null) {
-                            settings = new WorldSettings(this.getDirectoryName(key), levelData.getGameType(), levelData.isHardcore(),
-                                    levelData.getDifficulty(), false, new GameRules(), levelData.getDataPackConfig());
+                            settings = new WorldSettings(this.getDirectoryName(key), defaultLevelData.getGameType(), defaultLevelData.isHardcore(),
+                                    defaultLevelData.getDifficulty(), false, new GameRules(), defaultLevelData.getDataPackConfig());
 
                             ((WorldSettingsBridge) (Object) settings).bridge$setConfigExists(configExists);
                             ((WorldSettingsBridge) (Object) settings).bridge$setInfoConfigAdapter(configAdapter);

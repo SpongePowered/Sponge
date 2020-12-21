@@ -56,7 +56,7 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_
         lifecycle.establishServerFeatures();
         lifecycle.establishCommands();
 
-        lifecycle.establishEngineRegistries(this);
+        lifecycle.establishServerRegistries(this);
         lifecycle.callStartingEngineEvent(this);
     }
 

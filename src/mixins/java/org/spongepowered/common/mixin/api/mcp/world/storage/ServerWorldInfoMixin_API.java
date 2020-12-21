@@ -65,11 +65,11 @@ public abstract class ServerWorldInfoMixin_API {
     }
 
     public void serverWorldProperties$setHardcore(final boolean state) {
-        ((WorldSettingsAccessor) (Object) this.settings).accessor$setHardcode(state);
+        ((WorldSettingsAccessor) (Object) this.settings).accessor$hardcode(state);
     }
 
     public void serverWorldProperties$setCommandsEnabled(final boolean state) {
-        ((WorldSettingsAccessor) (Object) this.settings).accessor$setAllowCommands(state);
+        ((WorldSettingsAccessor) (Object) this.settings).accessor$allowCommands(state);
     }
 
     public void serverWorldProperties$setDifficulty(final org.spongepowered.api.world.difficulty.Difficulty difficulty) {

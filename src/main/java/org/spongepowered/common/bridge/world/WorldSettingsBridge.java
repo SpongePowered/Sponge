@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -38,9 +37,7 @@ public interface WorldSettingsBridge {
     DimensionType bridge$getDimensionType();
 
     WorldGenerationSettings bridge$getWorldGenerationSettings();
-
-    Difficulty bridge$getDifficulty();
-
+    
     SerializationBehavior bridge$getSerializationBehavior();
 
     boolean bridge$doesKeepSpawnLoaded();
@@ -56,8 +53,6 @@ public interface WorldSettingsBridge {
     void bridge$setDimensionType(DimensionType dimensionType);
 
     void bridge$setWorldGenerationSettings(WorldGenerationSettings worldGenerationSettings);
-
-    void bridge$setDifficulty(Difficulty difficulty);
 
     void bridge$setSerializationBehavior(SerializationBehavior behavior);
 

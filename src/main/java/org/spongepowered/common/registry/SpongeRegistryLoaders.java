@@ -32,16 +32,13 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import java.util.function.Function;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.BlockStateArgument;
 import net.minecraft.command.arguments.ComponentArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.EntitySelectorParser;
 import net.minecraft.command.arguments.GameProfileArgument;
-import net.minecraft.command.arguments.IArgumentSerializer;
 import net.minecraft.command.arguments.ItemArgument;
 import net.minecraft.command.arguments.NBTCompoundTagArgument;
 import net.minecraft.command.arguments.ResourceLocationArgument;
@@ -272,6 +269,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
@@ -915,7 +913,6 @@ public final class SpongeRegistryLoaders {
         ((ResourceKeyBridge) (Object) archetype).bridge$setKey(key);
         final net.minecraft.world.DimensionType mcType = (net.minecraft.world.DimensionType) dimensionType.get(Sponge.getServer().registries());
         ((WorldSettingsBridge) (Object) archetype).bridge$setDimensionType(mcType);
-        ((WorldSettingsBridge) (Object) archetype).bridge$setDifficulty(Difficulty.NORMAL);
         if (mcType == DimensionTypes.OVERWORLD.get(Sponge.getServer().registries())) {
             ((WorldSettingsBridge) (Object) archetype).bridge$setGenerateSpawnOnLoad(true);
         }

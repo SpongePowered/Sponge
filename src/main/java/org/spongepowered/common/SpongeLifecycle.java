@@ -30,8 +30,10 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
@@ -138,14 +140,22 @@ public final class SpongeLifecycle {
         }
     }
 
-    public void establishEngineRegistries(final Engine engine) {
-        SpongeRegistries.registerEngineRegistries((SpongeRegistryHolder) engine.registries());
+    public void establishServerRegistries(final Server server) {
+        SpongeRegistries.registerServerRegistries((SpongeRegistryHolder) server.registries());
 
         this.game.getEventManager().post(new AbstractRegisterRegistryEvent.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.game), this.game,
-         engine));
+         server));
 
         this.game.getEventManager().post(new AbstractRegisterRegistryValueEvent.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.game),
-                this.game, engine));
+                this.game, server));
+    }
+
+    public void establishClientRegistries(final Client client) {
+        this.game.getEventManager().post(new AbstractRegisterRegistryEvent.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.game), this.game,
+                client));
+
+        this.game.getEventManager().post(new AbstractRegisterRegistryValueEvent.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.game),
+                this.game, client));
     }
 
     public void callStartingEngineEvent(final Engine engine) {

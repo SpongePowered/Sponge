@@ -32,6 +32,7 @@ import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.gen.WorldGenerationSettings;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
@@ -40,6 +41,8 @@ import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     //@formatter:off
+    @Shadow @Final private net.minecraft.world.Difficulty difficulty;
+
     @Shadow public abstract GameType shadow$gameType();
     @Shadow public abstract boolean shadow$hardcore();
     @Shadow public abstract boolean shadow$allowCommands();
@@ -67,7 +70,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     @Override
     public Difficulty getDifficulty() {
-        return (Difficulty) (Object) ((WorldSettingsBridge) this).bridge$getDifficulty();
+        return (Difficulty) (Object) this.difficulty;
     }
 
     @Override

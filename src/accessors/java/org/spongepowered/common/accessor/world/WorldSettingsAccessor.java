@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.world;
 
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -31,7 +32,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(WorldSettings.class)
 public interface WorldSettingsAccessor {
 
-    @Accessor("hardcore") void accessor$setHardcode(boolean hardcode);
+    @Accessor("hardcore") void accessor$hardcode(boolean hardcode);
 
-    @Accessor("allowCommands") void accessor$setAllowCommands(boolean allowCommands);
+    @Accessor("allowCommands") void accessor$allowCommands(boolean allowCommands);
+
+    @Accessor("difficulty") void accessor$difficulty(Difficulty difficulty);
 }

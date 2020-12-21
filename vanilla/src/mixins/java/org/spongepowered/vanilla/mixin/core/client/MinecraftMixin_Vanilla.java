@@ -64,7 +64,7 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
-        lifecycle.establishEngineRegistries(this);
+        lifecycle.establishClientRegistries(this);
 
         lifecycle.callStartingEngineEvent(this);
     }

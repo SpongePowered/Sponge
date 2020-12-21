@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.ResourceKey;
@@ -35,8 +34,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
+import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 
@@ -52,7 +51,6 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     private ResourceKey impl$key;
     // Sponge Start - Vanilla registry catalogs cannot be default set here, causes chain classloading
     private DimensionType impl$dimensionType;
-    private Difficulty impl$difficulty;
     // Sponge End
     private WorldGenerationSettings impl$worldGenerationSettings;
     private SerializationBehavior impl$serializationBehavior = SerializationBehavior.AUTOMATIC;
@@ -82,11 +80,6 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     @Override
     public WorldGenerationSettings bridge$getWorldGenerationSettings() {
         return this.impl$worldGenerationSettings;
-    }
-
-    @Override
-    public Difficulty bridge$getDifficulty() {
-        return this.impl$difficulty;
     }
 
     @Override
@@ -127,11 +120,6 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     @Override
     public void bridge$setWorldGenerationSettings(final WorldGenerationSettings worldGenerationSettings) {
         this.impl$worldGenerationSettings = worldGenerationSettings;
-    }
-
-    @Override
-    public void bridge$setDifficulty(final Difficulty difficulty) {
-        this.impl$difficulty = difficulty;
     }
 
     @Override
@@ -181,10 +169,6 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
 
     @Override
     public void bridge$populateInfo(final IServerWorldInfoBridge infoBridge) {
-        if (infoBridge.bridge$isSinglePlayerProperties()) {
-            return;
-        }
-
         if (this.impl$configAdapter != null) {
             infoBridge.bridge$setConfigAdapter(this.impl$configAdapter);
             this.impl$configAdapter = null;
@@ -201,7 +185,6 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
         infoBridge.bridge$setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
         infoBridge.bridge$setKeepSpawnLoaded(this.impl$keepSpawnLoaded);
         infoBridge.bridge$setSerializationBehavior(this.impl$serializationBehavior);
-        infoBridge.bridge$forceSetDifficulty((net.minecraft.world.Difficulty) (Object) this.impl$difficulty);
         infoBridge.bridge$setPVPEnabled(this.impl$pvpEnabled);
     }
 }

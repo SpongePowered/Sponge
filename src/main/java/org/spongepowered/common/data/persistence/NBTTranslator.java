@@ -56,14 +56,10 @@ import java.util.Map;
 
 public final class NBTTranslator implements DataTranslator<CompoundNBT> {
 
-    public static NBTTranslator INSTANCE;
+    public static final NBTTranslator INSTANCE = new NBTTranslator();
 
     private static final TypeToken<CompoundNBT> TOKEN = TypeToken.get(CompoundNBT.class);
     public static final String BOOLEAN_IDENTIFIER = "$Boolean";
-
-    public NBTTranslator() {
-        NBTTranslator.INSTANCE = this;
-    }
 
     private static CompoundNBT containerToCompound(final DataView container) {
         checkNotNull(container);

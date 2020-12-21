@@ -80,11 +80,6 @@ public interface IServerWorldInfoMixin extends IServerWorldInfoBridge, ResourceK
     }
 
     @Override
-    default boolean bridge$isSinglePlayerProperties() {
-        return this.shadow$getLevelName() != null && this.shadow$getLevelName().equals("MpServer");
-    }
-
-    @Override
     default DimensionType bridge$getDimensionType() {
         return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.OVERWORLD_LOCATION);
     }
