@@ -45,7 +45,8 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
+        final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
+    ) {
         if (!flag.updateLighting()) {
             return EffectResult.NULL_PASS;
         }

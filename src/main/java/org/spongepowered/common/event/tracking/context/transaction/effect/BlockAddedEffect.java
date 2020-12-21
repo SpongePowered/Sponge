@@ -43,7 +43,8 @@ public final class BlockAddedEffect implements ProcessingSideEffect {
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
+        final SpongeBlockChangeFlag flag, final int limit
+    ) {
         if (flag.performBlockPhysics()) {
             newState.onPlace(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
         }

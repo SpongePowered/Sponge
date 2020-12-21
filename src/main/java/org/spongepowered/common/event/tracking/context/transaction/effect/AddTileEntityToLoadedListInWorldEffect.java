@@ -45,7 +45,8 @@ public final class AddTileEntityToLoadedListInWorldEffect implements ProcessingS
     
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag
+        final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
         final ServerWorld serverWorld = pipeline.getServerWorld();
         final TileEntity tileEntity = oldState.tileEntity;

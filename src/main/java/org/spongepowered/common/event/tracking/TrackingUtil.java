@@ -498,7 +498,7 @@ public final class TrackingUtil {
     }
 
     public static SpongeBlockSnapshot createPooledSnapshot(final net.minecraft.block.BlockState state, final BlockPos pos,
-        final BlockChangeFlag updateFlag, @Nullable final TileEntity existing,
+        final BlockChangeFlag updateFlag, final int limit, @Nullable final TileEntity existing,
         final Supplier<ServerWorld> worldSupplier,
         final Supplier<Optional<UUID>> creatorSupplier,
         final Supplier<Optional<UUID>> notifierSupplier

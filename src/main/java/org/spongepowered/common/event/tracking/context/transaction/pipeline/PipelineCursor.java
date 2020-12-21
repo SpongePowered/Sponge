@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -39,27 +40,36 @@ public final class PipelineCursor {
     public final int opacity;
     public final BlockPos pos;
     public final @Nullable TileEntity tileEntity;
+    public final @Nullable Entity destroyer;
     public final List<ItemStack> drops;
+    public final int limit;
 
     public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
-        @Nullable final TileEntity tileEntity
+        @Nullable final TileEntity tileEntity,
+        @Nullable final Entity destroyer, final int limit
     ) {
         this.state = state;
         this.opacity = opacity;
         this.pos = pos;
         this.tileEntity = tileEntity;
+        this.destroyer = destroyer;
         this.drops = Collections.emptyList();
+        this.limit = limit;
     }
 
     public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
         @Nullable final TileEntity tileEntity,
-        final List<ItemStack> drops
+        final @Nullable Entity destroyer,
+        final List<ItemStack> drops,
+        final int limit
     ) {
         this.state = state;
         this.opacity = opacity;
         this.pos = pos;
         this.tileEntity = tileEntity;
         this.drops = drops;
+        this.limit = limit;
+        this.destroyer = destroyer;
     }
 
     @Override

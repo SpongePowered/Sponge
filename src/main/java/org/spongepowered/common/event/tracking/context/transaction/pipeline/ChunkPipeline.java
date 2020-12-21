@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
@@ -104,7 +105,8 @@ public final class ChunkPipeline implements BlockPipeline {
 
     @Nullable
     public BlockState processChange(final PhaseContext<?> context, final BlockState currentState, final BlockState proposedState,
-        final BlockPos pos
+        final BlockPos pos,
+        final int limit
     ) {
         if (this.chunkEffects.isEmpty()) {
             return null;
@@ -113,7 +115,7 @@ public final class ChunkPipeline implements BlockPipeline {
         final int oldOpacity = currentState.getLightBlock(serverWorld, pos);
         final SpongeBlockChangeFlag flag = this.transaction.getBlockChangeFlag();
         final @Nullable TileEntity existing = this.chunkSupplier.get().getBlockEntity(pos, Chunk.CreateEntityType.CHECK);
-        PipelineCursor formerState = new PipelineCursor(currentState, oldOpacity, pos, existing);
+        PipelineCursor formerState = new PipelineCursor(currentState, oldOpacity, pos, existing, (Entity) null, limit);
 
         for (final ResultingTransactionBySideEffect effect : this.chunkEffects) {
             try (final EffectTransactor ignored = context.getTransactor().pushEffect(effect)) {
@@ -121,13 +123,14 @@ public final class ChunkPipeline implements BlockPipeline {
                     this,
                     formerState,
                     proposedState,
-                    flag
+                    flag,
+                    limit
                 );
                 if (result.hasResult) {
                     return result.resultingState;
                 }
                 if (formerState.drops.isEmpty() && !result.drops.isEmpty()) {
-                    formerState = new PipelineCursor(currentState, oldOpacity, pos, existing, result.drops);
+                    formerState = new PipelineCursor(currentState, oldOpacity, pos, existing, null, result.drops, limit);
                 }
             }
         }

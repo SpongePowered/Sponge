@@ -105,6 +105,7 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.CheckB
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
 import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyClientEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyNeighborSideEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.PerformBlockDropsFromDestruction;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveTileEntityFromChunkEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveTileEntityFromWorldEffect;
@@ -114,12 +115,14 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.Update
 import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateLightSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateWorldRendererEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.WorldBlockChangeCompleteEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.WorldDestroyBlockLevelEffect;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.TileEntityPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.mixin.tracker.world.WorldMixin_Tracker;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -456,7 +459,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final net.minecraft.block.BlockState currentState = chunk.getBlockState(pos);
 
 
-        return Optional.of(this.bridge$makePipeline(pos, currentState, newState, chunk, spongeFlag));
+        return Optional.of(this.bridge$makePipeline(pos, currentState, newState, chunk, spongeFlag, Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
     }
 
     private WorldPipeline.Builder bridge$makePipeline(
@@ -464,14 +467,15 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final BlockState currentState,
         final BlockState newState,
         final Chunk chunk,
-        final SpongeBlockChangeFlag spongeFlag
+        final SpongeBlockChangeFlag spongeFlag,
+        final int limit
     ) {
         final TrackedChunkBridge mixinChunk = (TrackedChunkBridge) chunk;
 
         // Then build and use the BlockPipeline
-        final ChunkPipeline chunkPipeline = mixinChunk.bridge$createChunkPipeline(pos, newState, currentState, spongeFlag);
+        final ChunkPipeline chunkPipeline = mixinChunk.bridge$createChunkPipeline(pos, newState, currentState, spongeFlag, limit);
         final WorldPipeline.Builder worldPipelineBuilder = WorldPipeline.builder(chunkPipeline);
-        worldPipelineBuilder.addEffect((pipeline, oldState, newState1, flag1) -> {
+        worldPipelineBuilder.addEffect((pipeline, oldState, newState1, flag1, cursorLimit) -> {
             if (oldState == null) {
                 return EffectResult.NULL_RETURN;
             }
@@ -494,7 +498,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      * Purpose: Rewritten to support capturing blocks
      */
     @Override
-    public boolean setBlock(final BlockPos pos, final net.minecraft.block.BlockState newState, final int flags) {
+    public boolean setBlock(final BlockPos pos, final net.minecraft.block.BlockState newState, final int flags, final int limit) {
         if (World.isOutsideBuildHeight(pos)) {
             return false;
         } else if (this.shadow$isDebug()) { // isClientSide is always false since this is WorldServer
@@ -502,7 +506,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         }
         // Sponge Start - Sanity check against the PhaseTracker for instances
         if (this.bridge$isFake()) {
-            return super.setBlock(pos, newState, flags);
+            return super.setBlock(pos, newState, flags, limit);
         }
         final PhaseTracker instance = PhaseTracker.getInstance();
         if (instance.getSidedThread() != PhaseTracker.SERVER.getSidedThread() && instance != PhaseTracker.SERVER) {
@@ -515,11 +519,48 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             return false;
         }
         final net.minecraft.block.BlockState currentState = chunk.getBlockState(pos);
-        final WorldPipeline pipeline = this.bridge$makePipeline(pos, currentState, newState, chunk, spongeFlag)
+        final WorldPipeline pipeline = this.bridge$makePipeline(pos, currentState, newState, chunk, spongeFlag, limit)
             .addEffect(WorldBlockChangeCompleteEffect.getInstance())
             .build();
 
-        return pipeline.processEffects(instance.getPhaseContext(), currentState, newState, pos, spongeFlag);
+        return pipeline.processEffects(instance.getPhaseContext(), currentState, newState, pos, null, spongeFlag, limit);
+    }
+
+    @Override
+    public boolean destroyBlock(final BlockPos pos, final boolean doDrops, @Nullable final Entity p_241212_3_, final int limit) {
+        final BlockState currentState = this.shadow$getBlockState(pos);
+        if (currentState.isAir()) {
+            return false;
+        } else {
+            // Sponge Start - Sanity check against the PhaseTracker for instances
+            if (this.bridge$isFake()) {
+                return super.destroyBlock(pos, doDrops, p_241212_3_, limit);
+            }
+            final PhaseTracker instance = PhaseTracker.getInstance();
+            if (instance.getSidedThread() != PhaseTracker.SERVER.getSidedThread() && instance != PhaseTracker.SERVER) {
+                throw new UnsupportedOperationException("Cannot perform a tracked Block Change on a ServerWorld while not on the main thread!");
+            }
+            final FluidState fluidstate = this.shadow$getFluidState(pos);
+            final BlockState emptyBlock = fluidstate.createLegacyBlock();
+            final SpongeBlockChangeFlag spongeFlag = BlockChangeFlagManager.fromNativeInt(3);
+
+            final Chunk chunk = this.shadow$getChunkAt(pos);
+            if (chunk.isEmpty()) {
+                return false;
+            }
+            final WorldPipeline.Builder pipelineBuilder = this.bridge$makePipeline(pos, currentState, emptyBlock, chunk, spongeFlag, limit)
+                .addEffect(WorldDestroyBlockLevelEffect.getInstance());
+
+            if (doDrops) {
+                pipelineBuilder.addEffect(PerformBlockDropsFromDestruction.getInstance());
+            }
+
+            final WorldPipeline pipeline = pipelineBuilder
+                .addEffect(WorldBlockChangeCompleteEffect.getInstance())
+                .build();
+
+            return pipeline.processEffects(instance.getPhaseContext(), currentState, emptyBlock, pos, p_241212_3_, spongeFlag, limit);
+        }
     }
 
     @Override
@@ -603,7 +644,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
                 .addEffect(RemoveTileEntityFromWorldEffect.getInstance())
                 .addEffect(RemoveTileEntityFromChunkEffect.getInstance())
                 .build();
-            pipeline.processEffects(current, new PipelineCursor(tileentity.getBlockState(), 0,immutable, tileentity));
+            pipeline.processEffects(current, new PipelineCursor(tileentity.getBlockState(), 0,immutable, tileentity, (Entity) null, Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
             return;
         }
         super.shadow$removeBlockEntity(immutable);
@@ -638,7 +679,9 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
                     .addEffect(AddTileEntityToTickableListEffect.getInstance())
                     .addEffect(TileOnLoadDuringAddToWorldEffect.getInstance())
                     .build();
-                return pipeline.processEffects(current, new PipelineCursor(tileEntity.getBlockState(), 0,immutable, tileEntity));
+                return pipeline.processEffects(current, new PipelineCursor(tileEntity.getBlockState(), 0, immutable, tileEntity,
+                    (Entity) null,
+                    Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
             }
         }
 
@@ -673,7 +716,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
                     .addEffect(RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect.getInstance())
                     .addEffect(ReplaceTileEntityInWorldEffect.getInstance())
                     .build();
-                pipeline.processEffects(current, new PipelineCursor(proposed.getBlockState(), 0,immutable, proposed));
+                pipeline.processEffects(current, new PipelineCursor(proposed.getBlockState(), 0,immutable, proposed, (Entity) null, Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
                 return;
             }
         }

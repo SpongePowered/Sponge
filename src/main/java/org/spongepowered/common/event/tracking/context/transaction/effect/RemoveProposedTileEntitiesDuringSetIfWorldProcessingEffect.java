@@ -50,7 +50,8 @@ public final class RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect im
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag
+        final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
         final ServerWorld serverWorld = pipeline.getServerWorld();
         final @Nullable TileEntity tileEntity = oldState.tileEntity;

@@ -47,7 +47,8 @@ public final class RemoveTileEntityFromWorldEffect implements ProcessingSideEffe
 
     @Override
     public EffectResult processSideEffect(
-        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag
+        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
         final @Nullable TileEntity tileEntity = oldState.tileEntity;
         if (tileEntity == null) {

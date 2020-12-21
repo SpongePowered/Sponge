@@ -43,7 +43,8 @@ public final class UpdateWorldRendererEffect implements ProcessingSideEffect {
     
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
+        final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
+    ) {
         if (oldState.state != newState) {
             pipeline.getServerWorld().setBlocksDirty(oldState.pos, oldState.state, newState);
         }

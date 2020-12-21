@@ -47,7 +47,8 @@ public final class UpdateHeightMapEffect implements ProcessingSideEffect {
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
+        final SpongeBlockChangeFlag flag, final int limit
+    ) {
         final Map<Heightmap.Type, Heightmap> heightMap = ((ChunkAccessor) pipeline.getAffectedChunk()).accessor$heightmaps();
         if (heightMap == null) {
             throw new IllegalStateException("Heightmap dereferenced!");

@@ -54,7 +54,8 @@ public final class AddBlockLootDropsEffect implements ProcessingSideEffect {
 
     @Override
     public EffectResult processSideEffect(
-        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag
+        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
         final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
 

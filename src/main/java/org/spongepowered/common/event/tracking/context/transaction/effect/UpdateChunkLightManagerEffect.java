@@ -44,7 +44,8 @@ public final class UpdateChunkLightManagerEffect implements ProcessingSideEffect
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag
+        final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
         final ChunkSection chunkSection = pipeline.getAffectedSection();
         final boolean wasEmpty = pipeline.wasEmpty();

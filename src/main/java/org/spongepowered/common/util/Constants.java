@@ -392,6 +392,7 @@ public final class Constants {
                 net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH);
         public static final ResourceKey INVALID_WORLD_KEY = ResourceKey.sponge("invalid_world");
         public static final String LEVEL_DAT_OLD = FolderName.LEVEL_DATA_FILE.getId() + "_old";
+        public static final int DEFAULT_BLOCK_CHANGE_LIMIT = 512;
     }
 
     public static final class Chunk {

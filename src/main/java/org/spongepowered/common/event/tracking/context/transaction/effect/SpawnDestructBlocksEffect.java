@@ -50,7 +50,8 @@ public final class SpawnDestructBlocksEffect implements ProcessingSideEffect {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public EffectResult processSideEffect(
-        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag
+        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
         final ServerWorld world = pipeline.getServerWorld();
         final BlockPos pos = oldState.pos;

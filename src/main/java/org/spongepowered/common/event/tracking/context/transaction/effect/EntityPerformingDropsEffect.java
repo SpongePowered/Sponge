@@ -41,7 +41,8 @@ public final class EntityPerformingDropsEffect implements ProcessingSideEffect {
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
+        final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
+    ) {
         return EffectResult.NULL_RETURN;
     }
 

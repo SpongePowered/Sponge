@@ -44,7 +44,8 @@ public final class RemoveTileEntityFromChunkEffect implements ProcessingSideEffe
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
+        final SpongeBlockChangeFlag flag, final int limit
+    ) {
         final TileEntity tileEntity = oldState.tileEntity;
         if (tileEntity == null) {
             return EffectResult.NULL_RETURN;

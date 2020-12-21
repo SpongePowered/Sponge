@@ -49,6 +49,7 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.Explod
 import org.spongepowered.common.event.tracking.context.transaction.effect.SpawnDestructBlocksEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.WorldBlockChangeCompleteEffect;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Collections;
 import java.util.List;
@@ -150,7 +151,10 @@ public abstract class ExplosionMixin_Tracker {
                                 .addEffect(SpawnDestructBlocksEffect.getInstance())
                                 .addEffect(WorldBlockChangeCompleteEffect.getInstance())
                                 .build();
-                            build.processEffects(context, blockstate, Blocks.AIR.defaultBlockState(), blockpos1, BlockChangeFlagManager.fromNativeInt(3));
+                            build.processEffects(context, blockstate, Blocks.AIR.defaultBlockState(), blockpos1,
+                                null,
+                                BlockChangeFlagManager.fromNativeInt(3),
+                                Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT);
                         });
                     // Sponge End
                     this.level.getProfiler().pop();

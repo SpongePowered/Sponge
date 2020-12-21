@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.tracker.world;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -64,7 +65,7 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
     @Shadow public abstract IChunk shadow$getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull);
     @Shadow public abstract Chunk shadow$getChunkAt(BlockPos pos);
     @Shadow public abstract void shadow$guardEntityTick(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
-    @Shadow public boolean setBlock(final BlockPos pos, final BlockState state, final int flags) { throw new IllegalStateException("Untransformed shadow!"); }
+    @Shadow public boolean setBlock(final BlockPos pos, final BlockState state, final int flags, final int limit) { throw new IllegalStateException("Untransformed shadow!"); }
     @Shadow public void shadow$removeBlockEntity(final BlockPos pos) { } // shadowed
     @Shadow public boolean shadow$addBlockEntity(final TileEntity tile) { return false; }
     @Shadow @Nullable public abstract TileEntity shadow$getBlockEntity(BlockPos pos);
@@ -72,6 +73,8 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
     @Shadow public void shadow$neighborChanged(final BlockPos pos, final Block blockIn, final BlockPos fromPos) { } // Shadowed
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
     @Shadow public abstract boolean shadow$isDebug();
+    @Shadow public boolean destroyBlock(final BlockPos p_241212_1_, final boolean p_241212_2_, @Nullable final Entity p_241212_3_, final int p_241212_4_) { throw new IllegalStateException("Untransformed shadow!"); }
+    @Shadow public abstract FluidState shadow$getFluidState(BlockPos p_204610_1_);
     // @formatter:on
 
 

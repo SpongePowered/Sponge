@@ -48,7 +48,7 @@ public interface TrackedChunkBridge {
      * @return The original block state at the position (redundant with currentState)
      */
     @NonNull
-    ChunkPipeline bridge$createChunkPipeline(BlockPos pos, BlockState newState, BlockState currentState, SpongeBlockChangeFlag flag);
+    ChunkPipeline bridge$createChunkPipeline(BlockPos pos, BlockState newState, BlockState currentState, SpongeBlockChangeFlag flag, int limit);
 
     /**
      * A callback method for a tile entity being removed, only when the removal is being requested due

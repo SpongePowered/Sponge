@@ -40,7 +40,8 @@ public final class OldBlockOnReplaceEffect implements ProcessingSideEffect {
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
+        final SpongeBlockChangeFlag flag, final int limit
+    ) {
         oldState.state.onRemove(pipeline.getServerWorld(), oldState.pos, newState, flag.isBlockMoving());
         return EffectResult.NULL_PASS;
     }

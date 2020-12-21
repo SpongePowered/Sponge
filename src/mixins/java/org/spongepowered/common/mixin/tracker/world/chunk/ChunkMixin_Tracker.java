@@ -117,7 +117,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     @Override
     @NonNull
     public ChunkPipeline bridge$createChunkPipeline(final BlockPos pos, final BlockState newState, final BlockState currentState,
-            final SpongeBlockChangeFlag flag) {
+            final SpongeBlockChangeFlag flag, final int limit) {
         final boolean isFake = ((WorldBridge) this.level).bridge$isFake();
         if (isFake) {
             throw new IllegalStateException("Cannot call ChunkBridge.bridge$buildChunkPipeline in non-Server managed worlds");
@@ -144,7 +144,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         final @Nullable TileEntity existing = this.shadow$getBlockEntity(pos, Chunk.CreateEntityType.CHECK);
         // Build a transaction maybe?
         final WeakReference<ServerWorld> ref = new WeakReference<>((ServerWorld) this.level);
-        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(currentState, pos, flag, existing,
+        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(currentState, pos, flag, limit, existing,
             () -> Objects.requireNonNull(ref.get(), "ServerWorld dereferenced"),
             Optional::empty, Optional::empty
         );

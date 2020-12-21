@@ -24,39 +24,30 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class AddTileEntityToTickableListEffect implements ProcessingSideEffect {
+public final class PerformBlockDropsFromDestruction implements ProcessingSideEffect {
 
     private static final class Holder {
-        static final AddTileEntityToTickableListEffect INSTANCE = new AddTileEntityToTickableListEffect();
+        static final PerformBlockDropsFromDestruction INSTANCE = new PerformBlockDropsFromDestruction();
+    }
+    public static PerformBlockDropsFromDestruction getInstance() {
+        return Holder.INSTANCE;
     }
 
-    public static AddTileEntityToTickableListEffect getInstance() {
-        return AddTileEntityToTickableListEffect.Holder.INSTANCE;
-    }
-
-    AddTileEntityToTickableListEffect() {}
+    PerformBlockDropsFromDestruction() {}
 
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag,
-        final int limit
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
+        final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
     ) {
-        final ServerWorld serverWorld = pipeline.getServerWorld();
-        final TileEntity tileEntity = oldState.tileEntity;
-        if (tileEntity == null) {
-            return EffectResult.NULL_RETURN;
-        }
-        if (tileEntity instanceof ITickableTileEntity) {
-            serverWorld.tickableBlockEntities.add(tileEntity);
-        }
+        Block.dropResources(oldState.state, pipeline.getServerWorld(), oldState.pos, oldState.tileEntity, oldState.destroyer, ItemStack.EMPTY);
         return EffectResult.NULL_PASS;
     }
+
 }

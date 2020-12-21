@@ -32,6 +32,8 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 @FunctionalInterface
 public interface ProcessingSideEffect {
 
-    EffectResult processSideEffect(BlockPipeline pipeline, PipelineCursor oldState, BlockState newState, SpongeBlockChangeFlag flag);
+    EffectResult processSideEffect(BlockPipeline pipeline, PipelineCursor oldState, BlockState newState, SpongeBlockChangeFlag flag,
+        int limit
+    );
 
 }

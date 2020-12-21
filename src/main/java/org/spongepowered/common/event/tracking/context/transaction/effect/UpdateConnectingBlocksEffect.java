@@ -45,21 +45,19 @@ public final class UpdateConnectingBlocksEffect implements ProcessingSideEffect 
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
+        final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
+    ) {
         final ServerWorld world = pipeline.getServerWorld();
         final BlockPos pos = oldState.pos;
         if (flag.notifyObservers() && flag.getRawFlag() > 0) {
             // int i = p_241211_3_ & -34; // Vanilla negates 34 to flip neighbor notification and and "is moving?"
-            // todo - determine what the new flag negation is asking for. 32 "was" the moving flag, is this negating
-            // moving and neighbor notifications? Why the minus 1?
             final int strangeFlag = flag.getRawFlag() & -34;
-            final int neighborAdjustedFlag = flag.getRawFlag() - 1;
             // blockstate.updateIndirectNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
-            oldState.state.updateIndirectNeighbourShapes(world, pos, strangeFlag, neighborAdjustedFlag);
+            oldState.state.updateIndirectNeighbourShapes(world, pos, strangeFlag, limit - 1);
             // p_241211_2_.updateNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
-            newState.updateNeighbourShapes(world, pos, strangeFlag, neighborAdjustedFlag);
+            newState.updateNeighbourShapes(world, pos, strangeFlag, limit - 1);
             // p_241211_2_.updateIndirectNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
-            newState.updateIndirectNeighbourShapes(world, pos, strangeFlag, neighborAdjustedFlag);
+            newState.updateIndirectNeighbourShapes(world, pos, strangeFlag, limit - 1);
         }
 
         return EffectResult.NULL_PASS;

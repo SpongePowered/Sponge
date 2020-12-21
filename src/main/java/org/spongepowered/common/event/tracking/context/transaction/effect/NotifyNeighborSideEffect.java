@@ -45,7 +45,8 @@ public final class NotifyNeighborSideEffect implements ProcessingSideEffect {
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
+        final SpongeBlockChangeFlag flag, final int limit
+    ) {
         final ServerWorld world = pipeline.getServerWorld();
 
         // Vanilla isClientSide is redundant

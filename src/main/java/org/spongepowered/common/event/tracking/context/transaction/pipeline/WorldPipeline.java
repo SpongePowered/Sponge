@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
@@ -79,20 +80,22 @@ public final class WorldPipeline implements BlockPipeline {
     }
 
     public boolean processEffects(final PhaseContext<?> context, final BlockState currentState,
-        final BlockState newProposedState, final BlockPos pos, final SpongeBlockChangeFlag flag
+        final BlockState newProposedState, final BlockPos pos,
+        final @Nullable Entity destroyer, final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
         if (this.worldEffects.isEmpty()) {
             return false;
         }
         final ServerWorld serverWorld = Objects.requireNonNull(this.serverWorld).get();
         // We have to get the "old state" from
-        final @Nullable BlockState oldState = this.chunkPipeline.processChange(context, currentState, newProposedState, pos);
+        final @Nullable BlockState oldState = this.chunkPipeline.processChange(context, currentState, newProposedState, pos, limit);
         if (oldState == null) {
             return false;
         }
         final int oldOpacity = oldState.getLightBlock(serverWorld, pos);
         final @Nullable TileEntity existing = this.chunkSupplier.get().getBlockEntity(pos, Chunk.CreateEntityType.CHECK);
-        PipelineCursor formerState = new PipelineCursor(oldState, oldOpacity, pos, existing);
+        PipelineCursor formerState = new PipelineCursor(oldState, oldOpacity, pos, existing, destroyer, limit);
 
         for (final ResultingTransactionBySideEffect effect : this.worldEffects) {
             try (final EffectTransactor ignored = context.getTransactor().pushEffect(effect)) {
@@ -100,13 +103,14 @@ public final class WorldPipeline implements BlockPipeline {
                     this,
                     formerState,
                     newProposedState,
-                    flag
+                    flag,
+                    limit
                 );
                 if (result.hasResult) {
                     return result.resultingState != null;
                 }
                 if (formerState.drops.isEmpty() && !result.drops.isEmpty()) {
-                    formerState = new PipelineCursor(oldState, oldOpacity, pos, existing, result.drops);
+                    formerState = new PipelineCursor(oldState, oldOpacity, pos, existing, formerState.destroyer, result.drops, limit);
                 }
             }
         }
