@@ -27,6 +27,7 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
@@ -44,7 +45,8 @@ import javax.inject.Singleton;
 @Singleton
 public final class SpongeDataPackManager {
 
-    public static SpongeDataPackManager INSTANCE;
+    // TODO @Zidane where do you want to instantiate this?
+    public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.getGame());
     private final Game game;
     private final Map<SpongeDataPackType, List<DataPackSerializable>> serializables;
 

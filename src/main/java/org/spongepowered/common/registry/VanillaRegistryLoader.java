@@ -26,6 +26,7 @@ package org.spongepowered.common.registry;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.FrameType;
+import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import net.minecraft.entity.item.BoatEntity;
@@ -60,17 +61,23 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.raid.Raid;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.advancement.criteria.trigger.Triggers;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
+import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 import org.spongepowered.common.accessor.entity.passive.MooshroomEntity_TypeAccessor;
 import org.spongepowered.common.accessor.item.ArmorMaterialAccessor;
+import org.spongepowered.common.advancement.criterion.SpongeDummyTrigger;
+import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -107,7 +114,8 @@ final class VanillaRegistryLoader {
             map.put(PhaseType.HOVERING, "hover");
         });
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape().values());
-        this.holder.createRegistry(RegistryTypes.TRIGGER, () -> VanillaRegistryLoader.trigger().values(), true);
+        this.holder.createRegistry(RegistryTypes.TRIGGER, () -> VanillaRegistryLoader.trigger().values(), true,
+                (k, trigger) -> CriteriaTriggersAccessor.invoker$register((ICriterionTrigger<?>) trigger));
     }
 
     private void loadEnumRegistries() {
@@ -248,6 +256,12 @@ final class VanillaRegistryLoader {
             l.add(Triggers.USED_ENDER_EYE, k -> (Trigger) CriteriaTriggers.USED_ENDER_EYE);
             l.add(Triggers.USED_TOTEM, k -> (Trigger) CriteriaTriggers.USED_TOTEM);
             l.add(Triggers.VILLAGER_TRADE, k -> (Trigger) CriteriaTriggers.TRADE);
+            final DefaultedRegistryReference<Trigger<?>> dummyKey =
+                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("dummy")).asDefaultedReference(() -> Sponge.getGame().registries());
+            l.add(dummyKey, k -> (Trigger) (Object) SpongeDummyTrigger.DUMMY_TRIGGER);
+            final DefaultedRegistryReference<Trigger<?>> scoreKey =
+                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("score")).asDefaultedReference(() -> Sponge.getGame().registries());
+            l.add(scoreKey, k -> (Trigger) (Object) SpongeScoreTrigger.SCORE_TRIGGER);
         });
     }
 

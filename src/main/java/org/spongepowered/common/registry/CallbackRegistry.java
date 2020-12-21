@@ -34,6 +34,7 @@ import java.util.function.BiConsumer;
 public final class CallbackRegistry<T> extends SimpleRegistry<T> {
 
     private final BiConsumer<RegistryKey<T>, T> callback;
+    private boolean callbackEnabled;
 
     public CallbackRegistry(final RegistryKey<? extends Registry<T>> key, final Lifecycle lifecycle, final BiConsumer<RegistryKey<T>, T> callback) {
         super(key, lifecycle);
@@ -43,7 +44,13 @@ public final class CallbackRegistry<T> extends SimpleRegistry<T> {
     @Override
     public <V extends T> V register(final RegistryKey<T> key, final V instance, final Lifecycle lifecycle) {
         V value = super.register(key, instance, lifecycle);
-        this.callback.accept(key, instance);
+        if (this.callbackEnabled) {
+            this.callback.accept(key, instance);
+        }
         return value;
+    }
+
+    public void setCallbackEnabled(boolean callbackEnabled) {
+        this.callbackEnabled = callbackEnabled;
     }
 }
