@@ -41,6 +41,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryEvent;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryValueEvent;
@@ -57,6 +58,9 @@ import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -70,6 +74,18 @@ public final class SpongeLifecycle {
     public SpongeLifecycle(final Game game, final Injector injector) {
         this.game = game;
         this.injector = injector;
+    }
+
+    // Called before loading datapacks
+    public void earlyInit(final Path datapackDir) {
+        this.establishGlobalRegistries();
+        this.establishDataProviders();
+        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
+        try {
+            SpongeDataPackManager.INSTANCE.serialize(datapackDir, new ArrayList<>());
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void establishFactories() {
@@ -94,7 +110,7 @@ public final class SpongeLifecycle {
         // Need to do this here to prevent classloading Registry too early...
         holder.setRootMinecraftRegistry((Registry<Registry<?>>) Registry.REGISTRY);
 
-        SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) Sponge.getGame().registries());
+        SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) this.game.registries());
 
         this.game.getEventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
         this.game.getEventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
@@ -105,7 +121,7 @@ public final class SpongeLifecycle {
     }
 
     public void initTimings() {
-        ((SpongeTimingsFactory) Sponge.getGame().getFactoryProvider().provide(TimingsFactory.class)).init();
+        ((SpongeTimingsFactory) this.game.getFactoryProvider().provide(TimingsFactory.class)).init();
     }
 
     public void establishGameServices() {
@@ -185,10 +201,10 @@ public final class SpongeLifecycle {
     }
 
     public void establishDataProviders() {
-        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerDefaultProviders();
+        ((SpongeDataManager) this.game.getDataManager()).registerDefaultProviders();
     }
 
     public void establishDataKeyListeners() {
-        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerKeyListeners();
+        ((SpongeDataManager) this.game.getDataManager()).registerKeyListeners();
     }
 }

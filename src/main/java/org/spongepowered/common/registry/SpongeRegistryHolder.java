@@ -45,6 +45,7 @@ import org.spongepowered.common.bridge.util.registry.MutableRegistryBridge;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -145,6 +146,15 @@ public final class SpongeRegistryHolder implements RegistryHolder {
         final @Nullable Supplier<Map<ResourceKey, T>> defaultValues,
         final boolean isDynamic
     ) {
+        return this.createRegistry(type, defaultValues, isDynamic, null);
+    }
+
+    public <T> Registry<T> createRegistry(
+            final RegistryType<T> type,
+            final @Nullable Supplier<Map<ResourceKey, T>> defaultValues,
+            final boolean isDynamic,
+            final @Nullable
+            BiConsumer<RegistryKey<T>, T> callback) {
         Objects.requireNonNull(type, "type");
 
         final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> root = this.roots.get(type.root());
@@ -160,22 +170,31 @@ public final class SpongeRegistryHolder implements RegistryHolder {
             key = net.minecraft.util.RegistryKey.createRegistryKey((ResourceLocation) (Object) type.location());
         } else {
             key = RegistryKeyAccessor.invoker$create(
-                (ResourceLocation) (Object) RegistryRoots.SPONGE,
-                (ResourceLocation) (Object) type.location()
+                    (ResourceLocation) (Object) RegistryRoots.SPONGE,
+                    (ResourceLocation) (Object) type.location()
             );
         }
-        registry = new SimpleRegistry<>(key, Lifecycle.stable());
+        if (callback == null) {
+            registry = new SimpleRegistry<>(key, Lifecycle.stable());
+
+        } else {
+            registry = new CallbackRegistry<>(key, Lifecycle.stable(), callback);
+        }
+
         ((MutableRegistryBridge<T>) registry).bridge$setDynamic(isDynamic);
         if (defaultValues != null) {
             for (final Map.Entry<ResourceKey, T> entry : defaultValues.get().entrySet()) {
                 ((SimpleRegistry<T>) registry).register(
-                    net.minecraft.util.RegistryKey.create(key, (ResourceLocation) (Object) entry.getKey()),
-                    entry.getValue(),
-                    Lifecycle.stable()
+                        net.minecraft.util.RegistryKey.create(key, (ResourceLocation) (Object) entry.getKey()),
+                        entry.getValue(),
+                        Lifecycle.stable()
                 );
             }
         }
         ((MutableRegistry) root).register(key, registry, Lifecycle.stable());
+        if (registry instanceof CallbackRegistry) {
+            ((CallbackRegistry<?>) registry).setCallbackEnabled(true);
+        }
         return (Registry<T>) registry;
     }
 }

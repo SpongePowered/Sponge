@@ -27,45 +27,50 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.datapack.DataPackSerializable;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.common.event.lifecycle.RegisterDataPackValueEventImpl;
+import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-@Singleton
 public final class SpongeDataPackManager {
 
-    public static SpongeDataPackManager INSTANCE;
+    public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.getGame());
     private final Game game;
     private final Map<SpongeDataPackType, List<DataPackSerializable>> serializables;
 
-    @Inject
-    public SpongeDataPackManager(final Game game) {
+    private SpongeDataPackManager(final Game game) {
         SpongeDataPackManager.INSTANCE = this;
         this.game = game;
         this.serializables = new Object2ObjectOpenHashMap<>();
     }
 
     public void callRegisterDataPackValueEvent() {
-        final RegisterDataPackValueEventImpl event =
-                new RegisterDataPackValueEventImpl(Cause.of(EventContext.empty(), this.game), this.game);
+        SpongeIngredient.clearCache();
+        ResultUtil.clearCache();
+
+        final RegisterDataPackValueEventImpl event = new RegisterDataPackValueEventImpl(Cause.of(EventContext.empty(), this.game), this.game);
         this.game.getEventManager().post(event);
 
         this.serializables.putAll(event.getSerializables());
     }
 
     @SuppressWarnings("unchecked")
-    public void serialize(final Path dataPacksDirectory) throws IOException {
-        this.serializables.clear();
+    public void serialize(final Path dataPacksDirectory, Collection<String> dataPacksToLoad) throws IOException {
+        // If there are no plugin Recipes/Advancements - delete its datapack
+        this.serializables.putIfAbsent((SpongeDataPackType) DataPackTypes.RECIPE, Collections.EMPTY_LIST);
+        this.serializables.putIfAbsent((SpongeDataPackType) DataPackTypes.ADVANCEMENT, Collections.EMPTY_LIST);
 
         for (final Map.Entry<SpongeDataPackType, List<DataPackSerializable>> entry : this.serializables.entrySet()) {
             final SpongeDataPackType key = entry.getKey();
@@ -78,9 +83,14 @@ public final class SpongeDataPackManager {
                 serialized.add((DataPackSerializedObject) key.getObjectFunction().apply(serializable, o));
             }
 
-            if (!serialized.isEmpty()) {
-                key.getPackSerializer().serialize(dataPacksDirectory.resolve("plugin-recipes"), serialized);
+            // When reloading we must update the dataPacksToLoad
+            if (key.getPackSerializer().serialize(dataPacksDirectory, serialized)) {
+                dataPacksToLoad.add("file/" + key.getPackSerializer().getPackName());
+            } else {
+                dataPacksToLoad.remove("file/" + key.getPackSerializer().getPackName());
             }
         }
+        this.serializables.clear();
     }
+
 }

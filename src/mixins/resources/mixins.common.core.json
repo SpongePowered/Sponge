@@ -113,6 +113,7 @@
     "scoreboard.ScorePlayerTeamMixin",
     "scoreboard.ServerScoreboardMixin",
     "server.CustomServerBossInfoMixin",
+    "server.MainMixin",
     "server.MinecraftServerMixin",
     "server.dedicated.DedicatedPlayerListMixin",
     "server.management.PlayerInteractionManagerMixin",

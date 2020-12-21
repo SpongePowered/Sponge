@@ -122,7 +122,7 @@ public final class RecipeTest implements LoadableModule {
         final Ingredient redRock = Ingredient.of(ItemTypes.POLISHED_GRANITE);
         final Ingredient redBed = Ingredient.of(ItemTypes.RED_BED);
         final ItemStack redBedRock = bedrock.copy();
-        redBedRock.offer(Keys.DISPLAY_NAME, Component.text("Bedrock", NamedTextColor.RED));
+        redBedRock.offer(Keys.CUSTOM_NAME, Component.text("Bedrock", NamedTextColor.RED));
 
         final RecipeRegistration redBedrockRecipe = CraftingRecipe.shapedBuilder().rows()
                 .aisle("ggg", "gbg", "ggg")
@@ -199,7 +199,7 @@ public final class RecipeTest implements LoadableModule {
         event.register(charcoalToCoalRecipe);
 
         final ItemStack redderBedrock = bedrock.copy();
-        redderBedrock.offer(Keys.DISPLAY_NAME, Component.text("Bedrock", NamedTextColor.DARK_RED));
+        redderBedrock.offer(Keys.CUSTOM_NAME, Component.text("Bedrock", NamedTextColor.DARK_RED));
 
         final RecipeRegistration removeRedOnBedrock = CookingRecipe.builder().type(RecipeTypes.BLASTING)
                 .ingredient(Ingredient.of(redBedRock))
@@ -271,7 +271,7 @@ public final class RecipeTest implements LoadableModule {
                 .result(grid -> {
                     final Optional<ServerPlayer> player = Sponge.getServer().getCauseStackManager().getCurrentCause().first(ServerPlayer.class);
                     final String name = player.map(ServerPlayer::getName).orElse("Steve");
-                    villagerEgg.offer(Keys.DISPLAY_NAME, Component.text(name));
+                    villagerEgg.offer(Keys.CUSTOM_NAME, Component.text(name));
                     return villagerEgg.copy();
                 }, villagerEgg.copy())
                 .key(ResourceKey.of(this.plugin, "villager_spawn_egg"))

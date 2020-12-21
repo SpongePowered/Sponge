@@ -44,12 +44,17 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
         this.typeDirectoryName = typeDirectoryName;
     }
 
-    protected void serialize(final Path dataPackDirectory, final List<T> objects) throws IOException {
-        FileUtils.deleteDirectory(dataPackDirectory.toFile());
+    protected boolean serialize(final Path dataPackDirectory, final List<T> objects) throws IOException {
+        final Path datapackDir = dataPackDirectory.resolve(this.getPackName());
+        FileUtils.deleteDirectory(datapackDir.toFile());
+
+        if (objects.isEmpty()) {
+            return false;
+        }
 
         // Write our objects
         for (final T object : objects) {
-            final Path namespacedDataDirectory = dataPackDirectory.resolve("data").resolve(object.getKey().getNamespace());
+            final Path namespacedDataDirectory = datapackDir.resolve("data").resolve(object.getKey().getNamespace());
             final Path objectFile = namespacedDataDirectory.resolve(this.typeDirectoryName).resolve(object.getKey().getValue() + ".json");
             Files.createDirectories(objectFile.getParent());
 
@@ -59,7 +64,7 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
         }
 
         // Write our pack metadata
-        final Path packMeta = dataPackDirectory.resolve("pack.mcmeta");
+        final Path packMeta = datapackDir.resolve("pack.mcmeta");
         final JsonObject packDataRoot = new JsonObject();
         final JsonObject packData = new JsonObject();
         packDataRoot.add("pack", packData);
@@ -67,6 +72,7 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
         packData.addProperty("description", "Sponge plugin provided " + this.token);
 
         this.writeFile(packMeta, packDataRoot);
+        return true;
     }
 
     protected void serializeAdditional(Path dataDirectory, T object) throws IOException {
@@ -76,5 +82,9 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
         try (BufferedWriter bufferedwriter = Files.newBufferedWriter(file)) {
             bufferedwriter.write(object.toString());
         }
+    }
+
+    public String getPackName() {
+        return "plugin-" + this.typeDirectoryName;
     }
 }

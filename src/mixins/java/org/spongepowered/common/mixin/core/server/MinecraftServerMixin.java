@@ -26,6 +26,9 @@ package org.spongepowered.common.mixin.core.server;
 
 import com.google.inject.Injector;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.resources.DataPackRegistries;
+import net.minecraft.resources.IResourcePack;
 import net.minecraft.resources.ResourcePackList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
@@ -59,9 +62,11 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
@@ -76,8 +81,6 @@ import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
-import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
@@ -89,6 +92,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -355,22 +359,22 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     }
 
     @Inject(method = "reloadResources", at = @At(value = "HEAD"))
-    public void impl$reloadPluginRecipes(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        SpongeIngredient.clearCache();
-        ResultUtil.clearCache();
+    public void impl$reloadResources(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+
         SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
         try {
-            SpongeDataPackManager.INSTANCE.serialize(this.storageSource.getLevelPath(FolderName.DATAPACK_DIR));
+            SpongeDataPackManager.INSTANCE.serialize(this.storageSource.getLevelPath(FolderName.DATAPACK_DIR), datapacksToLoad);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-
         this.shadow$getPackRepository().reload();
-        final List<String> disabledPacks = this.worldData.getDataPackConfig().getDisabled();
-        for (String selectedPack : this.shadow$getPackRepository().getSelectedIds()) {
-            if (!disabledPacks.contains(selectedPack) && !datapacksToLoad.contains(selectedPack)) {
-                datapacksToLoad.add(selectedPack);
-            }
-        }
+    }
+
+    // reloadResources lambda
+    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/DataPackRegistries;loadResources(Ljava/util/List;Lnet/minecraft/command/Commands$EnvironmentType;ILjava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"))
+    public CompletableFuture<DataPackRegistries> impl$loadResources(List<IResourcePack> p_240961_0_, Commands.EnvironmentType p_240961_1_, int p_240961_2_, Executor p_240961_3_, Executor p_240961_4_) {
+        final CompletableFuture<DataPackRegistries> future = DataPackRegistries.loadResources(p_240961_0_, p_240961_1_, p_240961_2_, p_240961_3_, p_240961_4_);
+        SpongeBootstrap.getLifecycle().establishCommands();
+        return future;
     }
 }

@@ -22,30 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancements;
+package org.spongepowered.common.mixin.core.server;
 
-import com.google.gson.JsonObject;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.server.Main;
+import net.minecraft.world.storage.FolderName;
+import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.advancements.AdvancementBridge;
+import org.spongepowered.common.SpongeBootstrap;
 
-@Mixin(Advancement.Builder.class)
-public abstract class AdvancementBuilderMixin implements AdvancementBridge {
-//
-//    @Redirect(method = "serialize", at = @At(value = "INVOKE", target = "Ljava/util/Map;entrySet()Ljava/util/Set;"))
-//    public Set<Map.Entry<String, Criterion>> impl$getCriteraSet(Map<String, Criterion> criteria) {
-//        return criteria.entrySet();
-//    }
+import java.nio.file.Path;
 
-    // Serializing causes the following JSON: "rewards": null
-    // Deserializing does consider JsonNull to be an error here - so we fix it
-    @Redirect(method = "fromJson", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z", ordinal = 2))
-    private static boolean impl$onHasRewards(final JsonObject p_241043_0_, final String rewards) {
-        if (p_241043_0_.has(rewards)) {
-            return !p_241043_0_.get(rewards).isJsonNull();
-        }
-        return false;
+@Mixin(Main.class)
+public abstract class MainMixin {
+
+    // Before loading datapacks on startup call events so that plugins can register theirs
+    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveFormat$LevelSave;getLevelPath(Lnet/minecraft/world/storage/FolderName;)Ljava/nio/file/Path;"))
+    private static Path impl$configurePackRepository(SaveFormat.LevelSave levelSave, FolderName folderName) {
+        final Path datapackDir = levelSave.getLevelPath(folderName);
+        SpongeBootstrap.getLifecycle().earlyInit(datapackDir);
+        return datapackDir;
     }
 }
