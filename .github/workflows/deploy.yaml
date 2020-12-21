@@ -37,7 +37,7 @@ jobs:
           echo "BUILD_NUMBER=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
       - name: Build with Gradle
         run: |
-          ./gradlew -PenableTestPlugins=true -PenableSpongeForge=true -s build
+          ./gradlew -PenableTestPlugins=true -s build
         env:
           CI_SYSTEM: Github Actions
       - name: Add artifacts to build
