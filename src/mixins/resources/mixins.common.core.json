@@ -91,7 +91,7 @@
     "item.ChorusFruitItemMixin",
     "item.EnderEyeItemMixin",
     "item.FishingRodItemMixin",
-    "item.ItemFireworkMixin",
+    "item.FireworkRocketItemMixin",
     "item.ItemMixin",
     "item.ItemStackMixin",
     "network.LegacyPingHandlerMixin",
