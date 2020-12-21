@@ -33,6 +33,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -45,6 +46,7 @@ import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
@@ -325,6 +327,22 @@ public final class WorldTest {
                         .build()
                 , "wai", "whereami"
         );
+
+        event.register(this.plugin,
+                Command.builder()
+                    .parameter(locationParameter)
+                    .setExecutor(context -> {
+                        final Object root = context.getCause().root();
+                        if (root instanceof ServerPlayer) {
+                            final PortalType netherType = PortalTypes.NETHER.get();
+                            netherType.teleport((ServerPlayer) root, context.requireOne(locationParameter), true);
+                            context.sendMessage(Identity.nil(), Component.text("You have been teleported via nether portal."));
+                            return CommandResult.success();
+                        }
+                        throw new CommandException(Component.text("This command must be run by a player."));
+                    })
+                    .build(),
+                "nptp", "netherportaltp");
     }
 
     @Listener
