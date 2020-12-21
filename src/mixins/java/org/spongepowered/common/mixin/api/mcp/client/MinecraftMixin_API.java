@@ -24,15 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.client;
 
-import com.mojang.serialization.Lifecycle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.util.RegistryKey;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.client.LocalServer;
@@ -80,6 +76,7 @@ public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> im
     public Optional<LocalServer> getServer() {
         final MinecraftBridge minecraftBridge = (MinecraftBridge) (this);
         final IntegratedServer integratedServer = minecraftBridge.bridge$getTemporaryIntegratedServer();
+
         if (integratedServer != null) {
             return (Optional<LocalServer>) (Object) Optional.ofNullable(integratedServer);
         }

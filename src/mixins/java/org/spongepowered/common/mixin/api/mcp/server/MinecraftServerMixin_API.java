@@ -104,6 +104,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     // @formatter:off
     @Shadow @Final public long[] tickTimes;
+    @Shadow @Final protected IServerConfiguration worldData;
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract boolean shadow$usesAuthentication();
     @Shadow public abstract String shadow$getMotd();
@@ -119,8 +120,6 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract boolean shadow$isSpawningAnimals();
     @Shadow public abstract boolean shadow$isNetherEnabled();
     // @formatter:on
-
-    @Shadow @Final protected IServerConfiguration worldData;
 
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
