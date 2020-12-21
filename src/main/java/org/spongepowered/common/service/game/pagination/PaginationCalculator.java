@@ -33,6 +33,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.commons.lang3.ArrayUtils;
+import org.spongepowered.common.bridge.adventure.ComponentBridge;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -148,7 +149,7 @@ final class PaginationCalculator {
      */
     @VisibleForTesting
     int getWidth(final Component text) {
-        final ITextComponent vanilla = SpongeAdventure.asVanilla(text);
+        final ITextComponent vanilla = ((ComponentBridge) text).bridge$asVanillaComponent();
         final List<ITextComponent> children = new ArrayList<>(1 + vanilla.getSiblings().size());
         children.add(vanilla);
         children.addAll(vanilla.getSiblings());
