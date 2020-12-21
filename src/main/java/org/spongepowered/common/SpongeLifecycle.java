@@ -79,6 +79,7 @@ public final class SpongeLifecycle {
     // Called before loading datapacks
     public void earlyInit(final Path datapackDir) {
         this.establishGlobalRegistries();
+        this.establishDataProviders();
         SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
         try {
             SpongeDataPackManager.INSTANCE.serialize(datapackDir, new ArrayList<>());
@@ -109,7 +110,7 @@ public final class SpongeLifecycle {
         // Need to do this here to prevent classloading Registry too early...
         holder.setRootMinecraftRegistry((Registry<Registry<?>>) Registry.REGISTRY);
 
-        SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder)  this.game.registries());
+        SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) this.game.registries());
 
         this.game.getEventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
         this.game.getEventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));

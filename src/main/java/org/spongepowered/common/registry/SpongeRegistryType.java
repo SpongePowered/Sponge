@@ -28,6 +28,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryType;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public final class SpongeRegistryType<T> implements RegistryType<T> {
 
@@ -54,10 +55,10 @@ public final class SpongeRegistryType<T> implements RegistryType<T> {
 
     @Override
     public String toString() {
-        return "SpongeRegistryType{" +
-                "root=" + root +
-                ", location=" + location +
-                '}';
+        return new StringJoiner(", ", SpongeRegistryType.class.getSimpleName() + "[", "]")
+                .add("root=" + this.root)
+                .add("location='" + this.location + "'")
+                .toString();
     }
 
     public static final class FactoryImpl implements Factory {

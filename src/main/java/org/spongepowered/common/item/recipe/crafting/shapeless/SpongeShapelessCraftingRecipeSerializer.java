@@ -56,7 +56,8 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
 
     public static IRecipeSerializer<?> SPONGE_CRAFTING_SHAPELESS = SpongeRecipeRegistration.register("crafting_shapeless", new SpongeShapelessCraftingRecipeSerializer());
 
-    public ShapelessRecipe read(ResourceLocation recipeId, JsonObject json) {
+    @Override
+    public ShapelessRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
         final String s = JSONUtils.getAsString(json, Constants.Recipe.GROUP, "");
         final NonNullList<Ingredient> nonnulllist = this.readIngredients(JSONUtils.getAsJsonArray(json, Constants.Recipe.SHAPELESS_INGREDIENTS));
         if (nonnulllist.isEmpty()) {

@@ -45,16 +45,13 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-@Singleton
 public final class SpongeDataPackManager {
 
-    // TODO @Zidane where do you want to instantiate this?
     public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.getGame());
     private final Game game;
     private final Map<SpongeDataPackType, List<DataPackSerializable>> serializables;
 
-    @Inject
-    public SpongeDataPackManager(final Game game) {
+    private SpongeDataPackManager(final Game game) {
         SpongeDataPackManager.INSTANCE = this;
         this.game = game;
         this.serializables = new Object2ObjectOpenHashMap<>();

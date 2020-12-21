@@ -42,7 +42,7 @@ public abstract class AdvancementBuilderMixin implements AdvancementBridge {
     // Serializing causes the following JSON: "rewards": null
     // Deserializing does consider JsonNull to be an error here - so we fix it
     @Redirect(method = "fromJson", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z", ordinal = 2))
-    private static boolean impl$onHasRewards(JsonObject p_241043_0_, String rewards) {
+    private static boolean impl$onHasRewards(final JsonObject p_241043_0_, final String rewards) {
         if (p_241043_0_.has(rewards)) {
             return !p_241043_0_.get(rewards).isJsonNull();
         }

@@ -27,6 +27,7 @@ package org.spongepowered.common.datapack.recipe;
 import org.spongepowered.common.datapack.DataPackSerializer;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class RecipeDataPackSerializer extends DataPackSerializer<RecipeSerializedObject> {
@@ -39,6 +40,7 @@ public final class RecipeDataPackSerializer extends DataPackSerializer<RecipeSer
     protected void serializeAdditional(final Path dataDirectory, final RecipeSerializedObject object) throws IOException {
         if (object.getAdvancementObject() != null) {
             final Path advancementFile = dataDirectory.resolve("advancements").resolve(object.getAdvancementObject().getKey().getValue() + ".json");
+            Files.createDirectories(advancementFile.getParent());
             this.writeFile(advancementFile, object.getAdvancementObject().getObject());
         }
     }
