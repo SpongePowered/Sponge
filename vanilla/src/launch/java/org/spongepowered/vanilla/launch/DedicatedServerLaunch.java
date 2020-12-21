@@ -26,7 +26,6 @@ package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Stage;
 import net.minecraft.server.Main;
-import net.minecraft.server.MinecraftServer;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;

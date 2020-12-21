@@ -553,48 +553,6 @@ public final class SpongeRegistryLoaders {
         });
     }
 
-    public static RegistryLoader<EventContextKey<?>> eventContextKey() {
-        return RegistryLoader.of(l -> {
-            l.add(EventContextKeys.AUDIENCE, k -> new SpongeEventContextKey<>(Audience.class));
-            l.add(EventContextKeys.BLOCK_EVENT_PROCESS, k -> new SpongeEventContextKey<>(LocatableBlock.class));
-            l.add(EventContextKeys.BLOCK_EVENT_QUEUE, k -> new SpongeEventContextKey<>(LocatableBlock.class));
-            l.add(EventContextKeys.BLOCK_HIT, k -> new SpongeEventContextKey<>(BlockSnapshot.class));
-            l.add(EventContextKeys.BLOCK_TARGET, k -> new SpongeEventContextKey<>(BlockSnapshot.class));
-            l.add(EventContextKeys.COMMAND, k -> new SpongeEventContextKey<>(String.class));
-            l.add(EventContextKeys.CREATOR, k -> new SpongeEventContextKey<>(User.class));
-            l.add(EventContextKeys.DAMAGE_TYPE, k -> new SpongeEventContextKey<>(DamageType.class));
-            l.add(EventContextKeys.DISMOUNT_TYPE, k -> new SpongeEventContextKey<>(DismountType.class));
-            l.add(EventContextKeys.ENTITY_HIT, k -> new SpongeEventContextKey<>(Entity.class));
-            l.add(EventContextKeys.FAKE_PLAYER, k -> new SpongeEventContextKey<>(Player.class));
-            l.add(EventContextKeys.FIRE_SPREAD, k -> new SpongeEventContextKey<>(ServerWorld.class));
-            l.add(EventContextKeys.GROWTH_ORIGIN, k -> new SpongeEventContextKey<>(BlockSnapshot.class));
-            l.add(EventContextKeys.IGNITER, k -> new SpongeEventContextKey<>(Living.class));
-            l.add(EventContextKeys.LAST_DAMAGE_SOURCE, k -> new SpongeEventContextKey<>(DamageSource.class));
-            l.add(EventContextKeys.LEAVES_DECAY, k -> new SpongeEventContextKey<>(ServerWorld.class));
-            l.add(EventContextKeys.LIQUID_BREAK, k -> new SpongeEventContextKey<>(ServerWorld.class));
-            l.add(EventContextKeys.LIQUID_FLOW, k -> new SpongeEventContextKey<>(ServerWorld.class));
-            l.add(EventContextKeys.LIQUID_MIX, k -> new SpongeEventContextKey<>(ServerWorld.class));
-            l.add(EventContextKeys.LOCATION, k -> new SpongeEventContextKey<>(ServerLocation.class));
-            l.add(EventContextKeys.MOVEMENT_TYPE, k -> new SpongeEventContextKey<>(MovementType.class));
-            l.add(EventContextKeys.NEIGHBOR_NOTIFY_SOURCE, k -> new SpongeEventContextKey<>(BlockSnapshot.class));
-            l.add(EventContextKeys.NOTIFIER, k -> new SpongeEventContextKey<>(User.class));
-            l.add(EventContextKeys.PISTON_EXTEND, k -> new SpongeEventContextKey<>(ServerWorld.class));
-            l.add(EventContextKeys.PISTON_RETRACT, k -> new SpongeEventContextKey<>(ServerWorld.class));
-            l.add(EventContextKeys.PLAYER, k -> new SpongeEventContextKey<>(Player.class));
-            l.add(EventContextKeys.PLAYER_BREAK, k -> new SpongeEventContextKey<>(ServerWorld.class));
-            l.add(EventContextKeys.PLAYER_PLACE, k -> new SpongeEventContextKey<>(ServerWorld.class));
-            l.add(EventContextKeys.PLUGIN, k -> new SpongeEventContextKey<>(PluginContainer.class));
-            l.add(EventContextKeys.PROJECTILE_SOURCE, k -> new SpongeEventContextKey<>(ProjectileSource.class));
-            l.add(EventContextKeys.ROTATION, k -> new SpongeEventContextKey<>(Vector3d.class));
-            l.add(EventContextKeys.SIMULATED_PLAYER, k -> new SpongeEventContextKey<>(GameProfile.class));
-            l.add(EventContextKeys.SPAWN_TYPE, k -> new SpongeEventContextKey<>(SpawnType.class));
-            l.add(EventContextKeys.SUBJECT, k -> new SpongeEventContextKey<>(Subject.class));
-            l.add(EventContextKeys.USED_HAND, k -> new SpongeEventContextKey<>(HandType.class));
-            l.add(EventContextKeys.USED_ITEM, k -> new SpongeEventContextKey<>(ItemStackSnapshot.class));
-            l.add(EventContextKeys.WEAPON, k -> new SpongeEventContextKey<>(ItemStackSnapshot.class));
-        });
-    }
-
     public static RegistryLoader<GoalExecutorType> goalExecutorType() {
         return RegistryLoader.of(l -> l.mapping(SpongeGoalExecutorType::new, m -> m.add(
                     GoalExecutorTypes.NORMAL,

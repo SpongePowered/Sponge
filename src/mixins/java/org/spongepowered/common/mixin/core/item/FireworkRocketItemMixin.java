@@ -130,8 +130,8 @@ public abstract class FireworkRocketItemMixin {
     private boolean impl$throwConstructPreEvent(final World world, final PlayerEntity player, final ItemStack usedItem) {
         if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((WorldBridge) world).bridge$isFake()) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.addContext(EventContextKeys.USED_ITEM.get(), ItemStackUtil.snapshotOf(usedItem));
-                frame.addContext(EventContextKeys.PROJECTILE_SOURCE.get(), (ProjectileSource) player);
+                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
+                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);
                 final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
                         ServerLocation.of((ServerWorld) world, player.getX(), player.getY(), player.getZ()), new Vector3d(0, 0, 0),
@@ -201,8 +201,8 @@ public abstract class FireworkRocketItemMixin {
         ((FireworkRocket) rocket).offer(Keys.SHOOTER, (Player) player);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.addContext(EventContextKeys.USED_ITEM.get(), ItemStackUtil.snapshotOf(usedItem));
-                frame.addContext(EventContextKeys.PROJECTILE_SOURCE.get(), (ProjectileSource) player);
+                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
+                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);
                 if (!((FusedExplosiveBridge) rocket).bridge$shouldPrime()) {
                     return true;

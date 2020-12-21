@@ -369,8 +369,8 @@ public final class SpongeCommandManager implements CommandManager {
             @NonNull final T subjectReceiver,
             @NonNull final String arguments) throws CommandException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SUBJECT.get(), subjectReceiver);
-            frame.addContext(EventContextKeys.AUDIENCE.get(), subjectReceiver);
+            frame.addContext(EventContextKeys.SUBJECT, subjectReceiver);
+            frame.addContext(EventContextKeys.AUDIENCE, subjectReceiver);
             return this.process(arguments);
         }
     }
@@ -382,8 +382,8 @@ public final class SpongeCommandManager implements CommandManager {
             @NonNull final Audience receiver,
             @NonNull final String arguments) throws CommandException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SUBJECT.get(), subject);
-            frame.addContext(EventContextKeys.AUDIENCE.get(), receiver);
+            frame.addContext(EventContextKeys.SUBJECT, subject);
+            frame.addContext(EventContextKeys.AUDIENCE, receiver);
             return this.process(arguments);
         }
     }
@@ -442,7 +442,7 @@ public final class SpongeCommandManager implements CommandManager {
     @NonNull
     public List<String> suggest(@NonNull final String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.COMMAND.get(), arguments);
+            frame.addContext(EventContextKeys.COMMAND, arguments);
             final String[] splitArg = arguments.split(" ", 2);
             final String command = splitArg[0].toLowerCase();
 
@@ -472,8 +472,8 @@ public final class SpongeCommandManager implements CommandManager {
             @NonNull final T subjectReceiver,
             @NonNull final String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SUBJECT.get(), subjectReceiver);
-            frame.addContext(EventContextKeys.AUDIENCE.get(), subjectReceiver);
+            frame.addContext(EventContextKeys.SUBJECT, subjectReceiver);
+            frame.addContext(EventContextKeys.AUDIENCE, subjectReceiver);
             return this.suggest(arguments);
         }
     }
@@ -485,8 +485,8 @@ public final class SpongeCommandManager implements CommandManager {
             @NonNull final Audience receiver,
             @NonNull final String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SUBJECT.get(), subject);
-            frame.addContext(EventContextKeys.AUDIENCE.get(), receiver);
+            frame.addContext(EventContextKeys.SUBJECT, subject);
+            frame.addContext(EventContextKeys.AUDIENCE, receiver);
             return this.suggest(arguments);
         }
     }

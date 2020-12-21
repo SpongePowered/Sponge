@@ -34,7 +34,7 @@ import java.util.Objects;
 public abstract class AbstractResourceKeyedBuilder<T extends ResourceKeyed, B extends ResourceKeyedBuilder<T, B>> implements
         ResourceKeyedBuilder<T, B> {
 
-    protected ResourceKey key;
+    public ResourceKey key;
 
     @Override
     public final B key(final ResourceKey key) {

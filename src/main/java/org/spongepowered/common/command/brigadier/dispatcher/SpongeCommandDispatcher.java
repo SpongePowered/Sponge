@@ -109,7 +109,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
     public int execute(final StringReader input, final CommandSource source) throws CommandSyntaxException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final CommandSourceBridge sourceBridge = (CommandSourceBridge) source;
-            frame.addContext(EventContextKeys.COMMAND.get(), input.getString());
+            frame.addContext(EventContextKeys.COMMAND, input.getString());
             sourceBridge.bridge$updateFrameFromICommandSource(frame);
             return ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).process(sourceBridge.bridge$withCurrentCause(), input.getRemaining()).getResult();
         } catch (final CommandException e) {

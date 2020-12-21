@@ -29,13 +29,14 @@ import static com.google.common.base.Preconditions.checkState;
 
 import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.event.EventContextKey;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
 
 import javax.annotation.Nullable;
 
-public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Builder<T> {
+public final class SpongeEventContextKeyBuilder<T> extends AbstractResourceKeyedBuilder<EventContextKey<T>, EventContextKey.Builder<T>> implements EventContextKey.Builder<T> {
 
     @Nullable Type typeClass;
 
@@ -56,7 +57,7 @@ public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Bu
     }
 
     @Override
-    public EventContextKey<T> build() {
+    public EventContextKey<T> build0() {
         checkState(this.typeClass != null, "Allowed type cannot be null!");
         return new SpongeEventContextKey<>(this);
     }

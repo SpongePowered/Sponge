@@ -168,7 +168,7 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
                     .map(x -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld, x.getPosition()))
                     .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld,
                             VecHelper.toVector3d(cir.getReturnValue().getPosition())));
-            ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION.get(), location));
+            ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION, location));
         }
     }
 
@@ -179,7 +179,7 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
             final ServerLocation location = this.impl$cause.getContext().get(EventContextKeys.LOCATION)
                     .map(x -> ServerLocation.of(x.getWorld(), position))
                     .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) cir.getReturnValue().getLevel(), position));
-            ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION.get(), location));
+            ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION, location));
         }
     }
 
@@ -187,7 +187,7 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
     private void impl$updateCauseOnWithRotation(final Vector2f rotation, final CallbackInfoReturnable<CommandSource> cir) {
         if (cir.getReturnValue() != (Object) this) {
             final org.spongepowered.math.vector.Vector3d rot = new org.spongepowered.math.vector.Vector3d(rotation.x, rotation.y, 0); // no roll
-            ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.ROTATION.get(), rot));
+            ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.ROTATION, rot));
         }
     }
 

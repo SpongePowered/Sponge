@@ -44,7 +44,6 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.DAMAGE_MODIFIER_TYPE, SpongeRegistryLoaders.damageModifierType().values());
         holder.createRegistry(RegistryTypes.DISMOUNT_TYPE, SpongeRegistryLoaders.dismountType().values());
         holder.createRegistry(RegistryTypes.DISPLAY_SLOT, SpongeRegistryLoaders.displaySlot().values());
-        holder.createRegistry(RegistryTypes.EVENT_CONTEXT_KEY, SpongeRegistryLoaders.eventContextKey().values());
         holder.createRegistry(RegistryTypes.GOAL_EXECUTOR_TYPE, SpongeRegistryLoaders.goalExecutorType().values());
         holder.createRegistry(RegistryTypes.GOAL_TYPE, SpongeRegistryLoaders.goalType().values());
         holder.createRegistry(RegistryTypes.HORSE_COLOR, SpongeRegistryLoaders.horseColor().values());
