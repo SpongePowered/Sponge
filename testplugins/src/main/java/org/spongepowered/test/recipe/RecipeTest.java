@@ -252,7 +252,7 @@ public final class RecipeTest implements LoadableModule {
 
         // Predicate Ingredients
 
-        final Predicate<ItemStack> hardnessPredicate = stack -> stack.getType().getBlock().map(b -> b.getDefaultState().get(Keys.HARDNESS).orElse(0d) > 20).orElse(false); // e.g. obsidian
+        final Predicate<ItemStack> hardnessPredicate = stack -> stack.getType().getBlock().map(b -> b.getDefaultState().get(Keys.DESTROY_SPEED).orElse(0d) > 20).orElse(false); // e.g. obsidian
         final Ingredient hardBlock = Ingredient.of(ResourceKey.of(this.plugin, "hardblock"), hardnessPredicate, ItemStack.of(ItemTypes.BEDROCK));
         final RecipeRegistration hardblockToWool =
                 ShapelessCraftingRecipe.builder().addIngredients(hardBlock).result(ItemStack.of(ItemTypes.WHITE_WOOL))
