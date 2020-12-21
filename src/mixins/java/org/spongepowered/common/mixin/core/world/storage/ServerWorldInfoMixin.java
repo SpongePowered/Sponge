@@ -50,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
@@ -65,7 +66,7 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 @Mixin(ServerWorldInfo.class)
-public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, IServerConfiguration {
+public abstract class ServerWorldInfoMixin implements IServerConfiguration {
 
     // @formatter:off
     @Shadow public abstract boolean shadow$isDifficultyLocked();
@@ -84,18 +85,15 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, ISe
 
     // ResourceKeyBridge
 
-    @Override
     public ResourceKey bridge$getKey() {
         return this.impl$key;
     }
 
-    @Override
     public void bridge$setKey(final ResourceKey key) {
         this.impl$key = key;
     }
 
     @Nullable
-    @Override
     public ServerWorld bridge$getWorld() {
         if (!Sponge.isServerAvailable()) {
             return null;
@@ -116,32 +114,27 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, ISe
 
     // WorldInfoBridge
 
-    @Override
     public UUID bridge$getUniqueId() {
         return this.impl$uniqueId;
     }
 
-    @Override
     public void bridge$setUniqueId(final UUID uniqueId) {
         this.impl$uniqueId = uniqueId;
     }
 
-    @Override
     public boolean bridge$hasCustomDifficulty() {
         return this.impl$hasCustomDifficulty;
     }
 
-    @Override
     public void bridge$forceSetDifficulty(final Difficulty difficulty) {
         this.impl$hasCustomDifficulty = true;
         this.impl$customDifficulty = difficulty;
         this.impl$updateWorldForDifficultyChange(this.bridge$getWorld(), this.shadow$isDifficultyLocked());
     }
 
-    @Override
     public InheritableConfigHandle<WorldConfig> bridge$getConfigAdapter() {
         if (this.impl$configAdapter == null) {
-            if (this.bridge$isValid()) {
+            if (((IServerWorldInfoBridge) this).bridge$isValid()) {
                 this.impl$configAdapter = SpongeGameConfigs.createWorld(null, this.bridge$getKey());
             } else {
                 this.impl$configAdapter = SpongeGameConfigs.createDetached();
@@ -150,12 +143,10 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, ISe
         return this.impl$configAdapter;
     }
 
-    @Override
     public void bridge$setConfigAdapter(final InheritableConfigHandle<WorldConfig> adapter) {
         this.impl$configAdapter = Objects.requireNonNull(adapter, "adapter");
     }
 
-    @Override
     public int bridge$getIndexForUniqueId(final UUID uniqueId) {
         final Integer index = this.impl$playerUniqueIdMap.inverse().get(uniqueId);
         if (index != null) {
@@ -167,12 +158,10 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, ISe
         return this.impl$trackedUniqueIdCount++;
     }
 
-    @Override
     public Optional<UUID> bridge$getUniqueIdForIndex(final int index) {
         return Optional.ofNullable(this.impl$playerUniqueIdMap.get(index));
     }
 
-    @Override
     public void bridge$writeTrackedPlayerTable(CompoundNBT spongeDataCompound) {
         final Iterator<UUID> iter = this.impl$pendingUniqueIds.iterator();
         final ListNBT playerIdList = spongeDataCompound.getList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
@@ -184,9 +173,8 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, ISe
         }
     }
 
-    @Override
     public void bridge$writeSpongeLevelData(final CompoundNBT compound) {
-        if (!this.bridge$isValid()) {
+        if (!((IServerWorldInfoBridge) this).bridge$isValid()) {
             return;
         }
 
@@ -202,7 +190,6 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, ISe
         compound.put(Constants.Sponge.SPONGE_DATA, spongeDataCompound);
     }
 
-    @Override
     public void bridge$readSpongeLevelData(final CompoundNBT compound) {
         if (!compound.contains(Constants.Sponge.SPONGE_DATA)) {
             // TODO Minecraft 1.16 - Bad Sponge level data...warn/crash?
@@ -217,7 +204,7 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, ISe
         this.impl$dimensionType = SpongeCommon.getServer().registryAccess().dimensionTypes().getOptional(new ResourceLocation(rawDimensionType))
             .orElseGet(() -> {
             SpongeCommon.getLogger().warn("Level data '{}' specifies dimension type '{}' which does not exist, defaulting to '{}'",
-                this.shadow$getLevelName(), rawDimensionType, World.OVERWORLD.location());
+                ((IServerWorldInfo) this).getLevelName(), rawDimensionType, World.OVERWORLD.location());
 
             return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.OVERWORLD_LOCATION);
         });
@@ -294,7 +281,7 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, ISe
                 .add("spawnX=" + ((IWorldInfo) this).getXSpawn())
                 .add("spawnY=" + ((IWorldInfo) this).getYSpawn())
                 .add("spawnZ=" + ((IWorldInfo) this).getZSpawn())
-                .add("gameType=" + this.shadow$getGameType())
+                .add("gameType=" + ((IServerWorldInfo) this).getGameType())
                 .add("hardcore=" + ((IWorldInfo) this).isHardcore())
                 .add("difficulty=" + ((IWorldInfo) this).getDifficulty())
                 .toString();
