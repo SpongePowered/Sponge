@@ -32,6 +32,9 @@ import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,6 +51,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.util.registry.Registry.class)
+@Implements(@Interface(iface = Registry.class, prefix = "registry$"))
 public abstract class RegistryMixin_API<T> implements Registry<T> {
 
     // @formatter:off
@@ -102,8 +106,8 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
         return value;
     }
 
-    @Override
-    public Stream<RegistryEntry<T>> stream() {
+    @Intrinsic
+    public Stream<RegistryEntry<T>> registry$stream() {
         return ((RegistryBridge<T>) this).bridge$getEntries().values().stream();
     }
 
