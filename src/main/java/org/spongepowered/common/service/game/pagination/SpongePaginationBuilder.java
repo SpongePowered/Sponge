@@ -36,7 +36,7 @@ import javax.annotation.Nullable;
 
 public final class SpongePaginationBuilder implements PaginationList.Builder {
 
-    private static final @NonNull Component EQUALS_TEXT = Component.text("=");
+    static final @NonNull Component DEFAULT_PADDING = Component.text("=");
 
     private final SpongePaginationService service;
     @Nullable
@@ -47,7 +47,7 @@ public final class SpongePaginationBuilder implements PaginationList.Builder {
     private Component header;
     @Nullable
     private Component footer;
-    private Component paginationSpacer = SpongePaginationBuilder.EQUALS_TEXT;
+    private Component paginationSpacer = SpongePaginationBuilder.DEFAULT_PADDING;
     private int linesPerPage = 20;
 
     @Nullable
@@ -138,7 +138,7 @@ public final class SpongePaginationBuilder implements PaginationList.Builder {
         this.title = null;
         this.header = null;
         this.footer = null;
-        this.paginationSpacer = SpongePaginationBuilder.EQUALS_TEXT;
+        this.paginationSpacer = SpongePaginationBuilder.DEFAULT_PADDING;
 
         this.paginationList = null;
         return this;
