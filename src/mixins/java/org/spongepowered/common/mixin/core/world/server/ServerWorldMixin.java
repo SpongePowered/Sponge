@@ -298,7 +298,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
                 levelData.setCustomBossEvents(((ServerWorldBridge) this$).bridge$getBossBarManager().save());
 
-                ((MinecraftServerAccessor) SpongeCommon.getServer()).accessor$storageSource().saveDataTag(SpongeCommon.getServer().registryAccess()
+                ((ServerWorldBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.getServer().registryAccess()
                     , (ServerWorldInfo) this.getLevelData(), this.shadow$dimension() == World.OVERWORLD ? SpongeCommon.getServer().getPlayerList()
                         .getSingleplayerData() : null);
 

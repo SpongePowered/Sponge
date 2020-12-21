@@ -270,7 +270,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
                 // Not forced means this is an auto-save or a shut down, handle accordingly
 
                 // If the server isn't running or we hit Vanilla's save interval, save our configs
-                if (!this.shadow$isRunning() || this.tickCount % 6000 == 0) {
+                if (!this.shadow$isRunning()) {
                     ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter().save();
                 }
 
@@ -315,8 +315,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
                 world.save(null, false, world.noSave);
             }
         }
-
-        this.storageSource.saveDataTag(this.registryHolder, this.worldData, this.shadow$getPlayerList().getSingleplayerData());
 
         return true;
     }
