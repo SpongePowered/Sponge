@@ -40,7 +40,7 @@ public class EntityCollisionCategory extends ConfigCategory {
     @Setting(value = "max-entities-within-aabb", comment = ""
             + "Maximum amount of entities any given entity or block can collide with.\n"
             + "This improves performance when there are more than 8 entities on top of each other\n"
-            + "such as a 1x1 spawn pen."
+            + "such as a 1x1 spawn pen.\n"
             + "Set to '0' to disable.")
     private int maxEntitiesWithinAABB = 8;
 

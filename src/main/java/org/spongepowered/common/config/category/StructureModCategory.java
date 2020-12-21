@@ -40,8 +40,8 @@ public class StructureModCategory extends ConfigCategory {
     private boolean isEnabled = true;
 
     @Setting(value = "structures", comment = ""
-            + "The configuration for each struture.\n"
-            + "A value of 'false' prevents that struture from being saved.\n"
+            + "The configuration for each structure.\n"
+            + "A value of 'false' prevents that structure from being saved.\n"
             + "Entries that are either missing in this list or have the value 'true' will still be saved,\n"
             + "unless the structure saving of the mod is globally disabled.")
     private Map<String, Boolean> structureList = new HashMap<>();
