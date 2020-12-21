@@ -60,11 +60,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
 
     private final Map<CommandMapping, Command.Parameterized> commandMap = new HashMap<>();
     private static final TypeToken<Command.Parameterized> COMMAND_TYPE = TypeToken.get(Command.Parameterized.class);
-    public static SpongeParameterizedCommandRegistrar INSTANCE;
-
-    public SpongeParameterizedCommandRegistrar() {
-        SpongeParameterizedCommandRegistrar.INSTANCE = this;
-    }
+    public static final SpongeParameterizedCommandRegistrar INSTANCE = new SpongeParameterizedCommandRegistrar();
 
     @Override
     public TypeToken<Command.Parameterized> handledType() {

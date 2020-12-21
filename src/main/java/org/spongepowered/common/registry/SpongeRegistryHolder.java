@@ -152,7 +152,7 @@ public final class SpongeRegistryHolder implements RegistryHolder {
         ((MutableRegistryBridge<T>) registry).bridge$setDynamic(isDynamic);
         if (defaultValues != null) {
             for (final Map.Entry<ResourceKey, T> entry : defaultValues.get().entrySet()) {
-                ((SimpleRegistry<T>) root).register(
+                ((SimpleRegistry<T>) registry).register(
                     net.minecraft.util.RegistryKey.create(key, (ResourceLocation) (Object) entry.getKey()),
                     entry.getValue(),
                     Lifecycle.stable()

@@ -70,7 +70,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
 
     private static final TypeToken<LiteralArgumentBuilder<CommandSource>> COMMAND_TYPE = new TypeToken<LiteralArgumentBuilder<CommandSource>>() {};
 
-    public static BrigadierCommandRegistrar INSTANCE = new BrigadierCommandRegistrar();
+    public static final BrigadierCommandRegistrar INSTANCE = new BrigadierCommandRegistrar();
 
     private boolean hasVanillaRegistered;
     private final List<LiteralCommandNode<CommandSource>> vanilla = new ArrayList<>();

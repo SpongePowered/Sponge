@@ -49,13 +49,9 @@ import java.util.Optional;
 public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command.Raw> {
 
     private static final TypeToken<Command.Raw> COMMAND_TYPE = TypeToken.get(Command.Raw.class);
-    public static SpongeRawCommandRegistrar INSTANCE;
+    public static final SpongeRawCommandRegistrar INSTANCE = new SpongeRawCommandRegistrar();
 
     private final HashMap<CommandMapping, Command.Raw> commands = new HashMap<>();
-
-    public SpongeRawCommandRegistrar() {
-        SpongeRawCommandRegistrar.INSTANCE = this;
-    }
 
     @Override
     @NonNull
