@@ -515,7 +515,7 @@ public final class SpongeCommandManager implements CommandManager {
             throw new RuntimeException("Failed to create pagination command!", ex);
         }
         final Set<TypeToken<?>> usedTokens = new HashSet<>();
-        Sponge.getGame().registries().registry(SpongeRegistryTypes.COMMAND_REGISTRAR).stream().forEach(entry -> {
+        Sponge.getGame().registries().registry(SpongeRegistryTypes.COMMAND_REGISTRAR).streamEntries().forEach(entry -> {
             final CommandRegistrar<?> registrar = entry.value();
             // someone's gonna do it, let's not let them take us down.
             final TypeToken<?> handledType = registrar.handledType();
@@ -565,7 +565,7 @@ public final class SpongeCommandManager implements CommandManager {
     public void reset() {
         if (this.hasStarted) {
             this.isResetting = true;
-            Sponge.getGame().registries().registry(SpongeRegistryTypes.COMMAND_REGISTRAR).stream().forEach(entry -> entry.value().reset());
+            Sponge.getGame().registries().registry(SpongeRegistryTypes.COMMAND_REGISTRAR).streamEntries().forEach(entry -> entry.value().reset());
             this.commandMappings.clear();
             this.inverseCommandMappings.clear();
             this.pluginToCommandMap.clear();

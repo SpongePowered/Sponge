@@ -102,7 +102,7 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
             return Collections.emptyList();
         }
         final String lowerCase = currentInput.toLowerCase();
-        return registry.stream()
+        return registry.streamEntries()
                 .map(RegistryEntry::key)
                 .map(x -> {
                     if (x.asString().startsWith(lowerCase)) {
