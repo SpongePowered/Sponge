@@ -14,7 +14,6 @@
         "block.DispenserBlockMixin_Tracker",
         "block.LeavesBlockMixin_Tracker",
         "entity.EntityMixin_Tracker",
-        "entity.EntityTypeMixin_Tracker",
         "entity.LivingEntityMixin_Tracker",
         "entity.item.FallingBlockEntityMixin_Tracker",
         "entity.item.TNTEntityMixin_Tracker",

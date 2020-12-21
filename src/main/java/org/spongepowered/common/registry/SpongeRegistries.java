@@ -30,6 +30,7 @@ public final class SpongeRegistries {
 
     public static void registerGlobalRegistries(final SpongeRegistryHolder holder) {
         VanillaRegistryLoader.load(holder);
+
         holder.createRegistry(RegistryTypes.ACCOUNT_DELETION_RESULT_TYPE, SpongeRegistryLoaders.accountDeletionResultType().values());
         holder.createRegistry(RegistryTypes.BAN_TYPE, SpongeRegistryLoaders.banType().values());
         holder.createRegistry(SpongeRegistryTypes.TRANSACTION_TYPE, SpongeRegistryLoaders.blockTransactionTypes().values());

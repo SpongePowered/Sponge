@@ -85,7 +85,7 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
         final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
         final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
-        return lens.setStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getFilterFlag(), ItemStackUtil.toNative(equipment));
+        return lens.setStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getIndex(), ItemStackUtil.toNative(equipment));
     }
 
     @Override

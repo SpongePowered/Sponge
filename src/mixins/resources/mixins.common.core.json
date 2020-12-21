@@ -50,6 +50,7 @@
     "entity.GrieferBridgeMixin",
     "entity.LivingEntityMixin",
     "entity.MobEntityMixin",
+    "entity.ai.attribute.GlobalEntityTypeAttributesMixin",
     "entity.ai.goal.BreakDoorGoalMixin",
     "entity.ai.goal.BreedGoalMixin",
     "entity.ai.goal.EatGrassGoalMixin",
@@ -203,6 +204,7 @@
     "client.network.handshake.ClientHandshakeNetHandlerMixin",
     "client.network.login.ClientLoginNetHandlerMixin",
     "client.network.play.ClientPlayNetHandlerMixin",
+    "client.renderer.entity.EntityRendererManagerMixin",
     "client.util.text.TranslationTextComponentMixin",
     "client.world.ClientWorldMixin"
   ],

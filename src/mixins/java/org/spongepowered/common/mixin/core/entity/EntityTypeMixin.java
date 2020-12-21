@@ -26,44 +26,17 @@ package org.spongepowered.common.mixin.core.entity;
 
 import co.aikar.timings.Timing;
 import net.minecraft.entity.EntityType;
-import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
 @Mixin(EntityType.class)
-public abstract class EntityTypeMixin implements ResourceKeyBridge, EntityTypeBridge {
+public abstract class EntityTypeMixin implements EntityTypeBridge {
 
-    private ResourceKey impl$key;
     private boolean impl$isActivationRangeInitialized = false;
     private boolean impl$hasCheckedDamageEntity = false;
     private boolean impl$overridesDamageEntity = false;
     private Timing impl$timings;
-
-    @Redirect(method = "register",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"
-        )
-    )
-    private static Object impl$setKey(final Registry<Object> registry, final String key, final Object catalog) {
-        ((EntityTypeMixin) catalog).impl$key = ResourceKey.of(SpongeCommon.getActivePlugin(), key.toLowerCase());
-        return Registry.register(registry, key, catalog);
-    }
-
-    @Override
-    public ResourceKey bridge$getKey() {
-        return this.impl$key;
-    }
-
-    @Override
-    public void bridge$setKey(final ResourceKey key) {
-        this.impl$key = key;
-    }
 
     @Override
     public boolean bridge$isActivationRangeInitialized() {

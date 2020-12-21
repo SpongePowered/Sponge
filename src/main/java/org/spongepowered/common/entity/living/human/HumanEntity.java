@@ -27,15 +27,18 @@ package org.spongepowered.common.entity.living.human;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import com.mojang.serialization.Lifecycle;
 import net.kyori.adventure.text.Component;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
@@ -54,12 +57,16 @@ import net.minecraft.network.play.server.SSpawnPlayerPacket;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scheduler.Task;
@@ -85,9 +92,22 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
-
 public final class HumanEntity extends CreatureEntity implements TeamMember, IRangedAttackMob {
+    public static final RegistryKey<EntityType<?>> KEY = RegistryKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation("sponge", "human"));
+    public static final EntityType<HumanEntity> TYPE = Registry.ENTITY_TYPE.register(
+        KEY,
+        EntityType.Builder.of(HumanEntity::new, EntityClassification.MISC)
+            .noSave()
+            .clientTrackingRange(Constants.Entity.Player.TRACKING_RANGE)
+            .build("sponge:human"),
+        Lifecycle.stable()
+    );
+    public static final AttributeModifierMap ATTRIBUTES = MobEntity.createMobAttributes()
+        .add(Attributes.ATTACK_DAMAGE, 1.0d) // Player
+        .add(Attributes.MOVEMENT_SPEED, (double) 0.23f) // Player (custom value)
+        .add(Attributes.ATTACK_SPEED) // Player
+        .add(Attributes.LUCK) // Player
+        .build();
 
     // A queue of packets waiting to send to players tracking this human
     private final Map<UUID, List<Stream<IPacket<?>>>> playerPacketMap = new HashMap<>();
@@ -95,23 +115,11 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     private GameProfile fakeProfile;
     private boolean aiDisabled = false, leftHanded = false;
 
-    public HumanEntity(final EntityType<? extends HumanEntity> type, final World worldIn) {
-        super(type, worldIn);
+    public HumanEntity(final EntityType<? extends HumanEntity> type, final World world) {
+        super(TYPE, world);
         this.fakeProfile = new GameProfile(this.uuid, "");
         this.setCanPickUpLoot(true);
     }
-
-    // TODO Minecraft 1.16 - Think about how to do attribute registration...
-//    @Override
-//    protected void registerAttributes() {
-//        super.registerAttributes();
-//
-//        // PlayerEntity
-//        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
-//        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23F);
-//        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
-//        this.getAttributes().registerAttribute(SharedMonsterAttributes.LUCK);
-//    }
 
     @Override
     protected void defineSynchedData() {
@@ -163,7 +171,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     }
 
     @Override
-    public void setCustomName(@Nullable final ITextComponent name) {
+    public void setCustomName(final @Nullable ITextComponent name) {
         final ITextComponent customName = this.getCustomName();
         if (customName == null && name == null || customName != null && customName.equals(name)) {
             return;
@@ -176,19 +184,17 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     }
 
     @Override
-    public void readAdditionalSaveData(final CompoundNBT compound) {
-        super.readAdditionalSaveData(compound);
-        if (compound.contains("profile")) {
-            this.fakeProfile = NBTUtil.readGameProfile(compound.getCompound("profile"));
+    public void readAdditionalSaveData(final CompoundNBT tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains("profile")) {
+            this.fakeProfile = NBTUtil.readGameProfile(tag.getCompound("profile"));
         }
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT compound) {
-        super.addAdditionalSaveData(compound);
-        final CompoundNBT profileCompound = new CompoundNBT();
-        NBTUtil.writeGameProfile(profileCompound, this.fakeProfile);
-        compound.put("profile", profileCompound);
+    public void addAdditionalSaveData(final CompoundNBT tag) {
+        super.addAdditionalSaveData(tag);
+        tag.put("profile", NBTUtil.writeGameProfile(new CompoundNBT(), this.fakeProfile));
     }
 
     @Override
@@ -409,7 +415,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
 
     private void respawnOnClient() {
         this.pushPackets(new SDestroyEntitiesPacket(this.getId()), this.createPlayerListPacket(SPlayerListItemPacket.Action.ADD_PLAYER));
-        this.pushPackets(this.createSpawnPacket());
+        this.pushPackets(this.getAddEntityPacket());
         this.removeFromTabListDelayed(null, this.createPlayerListPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER));
     }
 
@@ -444,8 +450,8 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
      *
      * @return A new spawn packet
      */
-    @SuppressWarnings("ConstantConditions")
-    public SSpawnPlayerPacket createSpawnPacket() {
+    @Override
+    public SSpawnPlayerPacket getAddEntityPacket() {
         final SSpawnPlayerPacket packet = new SSpawnPlayerPacket();
         final SSpawnPlayerPacketAccessor accessor = (SSpawnPlayerPacketAccessor) packet;
         accessor.accessor$entityId(this.getId());

@@ -106,7 +106,8 @@ public final class SpongeTimings {
      * @return The timing
      */
     public static Timing getEntityTiming(EntityType<?> entity) {
-        return SpongeTimingsFactory.ofSafe("Minecraft", "## blockEntity - " + ((ResourceKeyBridge) entity).bridge$getKey().getFormatted());
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ENTITY_TYPE).valueKey((org.spongepowered.api.entity.EntityType<?>) entity);
+        return SpongeTimingsFactory.ofSafe("Minecraft", "## entity - " + resourceKey);
     }
 
     public static Timing getTileEntityTiming(final BlockEntity entity) {
