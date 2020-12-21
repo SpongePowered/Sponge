@@ -39,6 +39,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.IServerWorldInfo;
+import net.minecraft.world.storage.IWorldInfo;
 import net.minecraft.world.storage.ServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -228,7 +229,7 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, ISe
         }
 
         if (spongeDataCompound.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY)) {
-            this.bridge$forceSetDifficulty(this.shadow$getDifficulty());
+            this.bridge$forceSetDifficulty(((IWorldInfo) this).getDifficulty());
         }
 
         this.impl$trackedUniqueIdCount = 0;
@@ -271,7 +272,7 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, ISe
         }
 
         final MinecraftServer server = serverWorld.getServer();
-        final Difficulty difficulty = this.shadow$getDifficulty();
+        final Difficulty difficulty = ((IWorldInfo) this).getDifficulty();
 
         if (difficulty == Difficulty.HARD) {
             serverWorld.setSpawnSettings(true, true);
@@ -290,12 +291,12 @@ public abstract class ServerWorldInfoMixin implements IServerWorldInfoMixin, ISe
                 .add("key=" + this.impl$key)
                 .add("dimensionType=" + this.impl$dimensionType)
                 .add("uniqueId=" + this.impl$uniqueId)
-                .add("spawnX=" + this.shadow$getXSpawn())
-                .add("spawnY=" + this.shadow$getYSpawn())
-                .add("spawnZ=" + this.shadow$getZSpawn())
+                .add("spawnX=" + ((IWorldInfo) this).getXSpawn())
+                .add("spawnY=" + ((IWorldInfo) this).getYSpawn())
+                .add("spawnZ=" + ((IWorldInfo) this).getZSpawn())
                 .add("gameType=" + this.shadow$getGameType())
-                .add("hardcore=" + this.shadow$isHardcore())
-                .add("difficulty=" + this.shadow$getDifficulty())
+                .add("hardcore=" + ((IWorldInfo) this).isHardcore())
+                .add("difficulty=" + ((IWorldInfo) this).getDifficulty())
                 .toString();
     }
 }

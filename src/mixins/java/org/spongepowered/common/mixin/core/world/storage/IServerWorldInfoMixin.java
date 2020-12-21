@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(IServerWorldInfo.class)
-public interface IServerWorldInfoMixin extends IServerWorldInfoBridge, ResourceKeyBridge, IWorldInfoMixin {
+public interface IServerWorldInfoMixin extends IServerWorldInfoBridge, ResourceKeyBridge {
 
     // @formatter:off
     @Shadow String shadow$getLevelName();
