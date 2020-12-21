@@ -554,7 +554,10 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         this.shadow$setLevel(targetWorld);
         targetWorld.addDuringPortalTeleport((ServerPlayerEntity) (Object) this);
         this.shadow$setRot(portalinfo.yRot, portalinfo.xRot);
-        this.shadow$moveTo(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z);
+        // Sponge Start: prevent sending the teleport packet here, we'll do so later.
+        // this.shadow$moveTo(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z);
+        this.shadow$absMoveTo(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z);
+        // Sponge End
         serverworld.getProfiler().pop();
 
         return (Entity) (Object) this;
@@ -569,6 +572,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         final PlayerList playerlist = this.server.getPlayerList();
         playerlist.sendLevelInfo((ServerPlayerEntity) (Object) this, targetWorld);
         playerlist.sendAllPlayerInfo((ServerPlayerEntity) (Object) this);
+
+        // Sponge Start: teleport here after all data is sent to avoid any potential "stuttering" due to slow packets.
+        final net.minecraft.util.math.vector.Vector3d finalPos = this.shadow$position();
+        this.shadow$moveTo(finalPos.x, finalPos.y, finalPos.z);
+        // Sponge End
 
         for (final EffectInstance effectinstance : this.shadow$getActiveEffects()) {
             this.connection.send(new SPlayEntityEffectPacket(this.shadow$getId(), effectinstance));

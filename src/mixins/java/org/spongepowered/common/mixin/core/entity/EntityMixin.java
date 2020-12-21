@@ -184,9 +184,15 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected abstract net.minecraft.util.math.vector.Vector3d shadow$getRelativePortalPosition(Direction.Axis direction$axis,
             TeleportationRepositioner.Result teleportationrepositioner$result);
     @Shadow protected abstract void shadow$removeAfterChangingDimensions();
+    @Shadow public abstract void shadow$absMoveTo(double p_242281_1_, double p_242281_3_, double p_242281_5_);
+
     // @formatter:on
 
     @Shadow private BlockPos blockPosition;
+
+    @Shadow public double xo;
+    @Shadow public double yo;
+    @Shadow public double zo;
     private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
     private boolean impl$isVanished = false;
@@ -520,56 +526,65 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 if (portalinfo != null) {
                     // Only start teleporting if we have somewhere to go.
                     this.bridge$playerPrepareForPortalTeleport(serverworld, targetWorld);
+                    try {
+                        // Sponge Start: wrap the teleportation logic within a function to allow for modification
+                        // of the teleporter
+                        final Vector3d originalDestination = new Vector3d(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z);
+                        final Entity transportedEntity =
+                                platformTeleporter.performTeleport((Entity) (Object) this, serverworld, targetWorld, this.xRot,
+                                        createEndPlatform -> this
+                                                .bridge$portalRepositioning(createEndPlatform, serverworld, targetWorld, portalinfo));
+                        // Make sure the right object was returned
+                        this.bridge$validateEntityAfterTeleport(transportedEntity, platformTeleporter);
 
-                    // Sponge Start: wrap the teleportation logic within a function to allow for modification
-                    // of the teleporter
-                    final Vector3d originalDestination = new Vector3d(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z);
-                    final Entity transportedEntity =
-                            platformTeleporter.performTeleport((Entity) (Object) this, serverworld, targetWorld, this.xRot,
-                                    createEndPlatform -> this.bridge$portalRepositioning(createEndPlatform, serverworld, targetWorld, portalinfo));
-                    // Make sure the right object was returned
-                    this.bridge$validateEntityAfterTeleport(transportedEntity, platformTeleporter);
+                        // If we need to reposition: well... reposition.
+                        // Downside: portals won't come with us, but with how it's implemented in Forge,
+                        // not sure how we'd do this.
+                        //
+                        // If this is vanilla, we've already fired and dealt with the event
+                        if (transportedEntity != null && this.impl$shouldFireRepositionEvent) {
+                            final Vector3d destination = VecHelper.toVector3d(this.shadow$position());
+                            final ChangeEntityWorldEvent.Reposition reposition = SpongeEventFactory.createChangeEntityWorldEventReposition(
+                                    PhaseTracker.getCauseStackManager().getCurrentCause(),
+                                    (org.spongepowered.api.entity.Entity) transportedEntity,
+                                    (org.spongepowered.api.world.server.ServerWorld) serverworld,
+                                    currentPosition,
+                                    destination,
+                                    (org.spongepowered.api.world.server.ServerWorld) originalDestinationWorld,
+                                    originalDestination,
+                                    (org.spongepowered.api.world.server.ServerWorld) targetWorld
+                            );
+                            final Vector3d finalPosition;
+                            if (reposition.isCancelled()) {
+                                // send them back to the original destination
+                                finalPosition = originalDestination;
+                            } else if (reposition.getDestinationPosition() != destination) {
+                                finalPosition = reposition.getDestinationPosition();
+                            } else {
+                                finalPosition = null;
+                            }
 
-                    // If we need to reposition: well... reposition.
-                    // Downside: portals won't come with us, but with how it's implemented in Forge,
-                    // not sure how we'd do this.
-                    //
-                    // If this is vanilla, we've already fired and dealt with the event
-                    if (transportedEntity != null && this.impl$shouldFireRepositionEvent) {
-                        final Vector3d destination = VecHelper.toVector3d(this.shadow$position());
-                        final ChangeEntityWorldEvent.Reposition reposition = SpongeEventFactory.createChangeEntityWorldEventReposition(
-                                PhaseTracker.getCauseStackManager().getCurrentCause(),
-                                (org.spongepowered.api.entity.Entity) transportedEntity,
-                                (org.spongepowered.api.world.server.ServerWorld) serverworld,
-                                currentPosition,
-                                destination,
-                                (org.spongepowered.api.world.server.ServerWorld) originalDestinationWorld,
-                                originalDestination,
-                                (org.spongepowered.api.world.server.ServerWorld) targetWorld
-                        );
-                        final Vector3d finalPosition;
-                        if (reposition.isCancelled()) {
-                            // send them back to the original destination
-                            finalPosition = originalDestination;
-                        } else if (reposition.getDestinationPosition() != destination) {
-                            finalPosition = reposition.getDestinationPosition();
-                        } else {
-                            finalPosition = null;
+                            if (finalPosition != null) {
+                                // TODO: Rollback captures during phase - anything generated needs to vanish here
+                                // Issue chunk ticket of type Portal, even if a portal isn't being created here.
+                                final BlockPos ticketPos = VecHelper.toBlockPos(finalPosition);
+                                targetWorld.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(ticketPos), 3, ticketPos);
+
+                                this.shadow$absMoveTo(finalPosition.getX(), finalPosition.getY(), finalPosition.getZ());
+                            }
                         }
 
-                        if (finalPosition != null) {
-                            // TODO: Rollback captures during phase - anything generated needs to vanish here
-                            // Issue chunk ticket of type Portal, even if a portal isn't being created here.
-                            final BlockPos ticketPos = VecHelper.toBlockPos(finalPosition);
-                            targetWorld.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(ticketPos), 3, ticketPos);
-
-                            this.shadow$moveTo(finalPosition.getX(), finalPosition.getY(), finalPosition.getZ());
+                        this.bridge$postPortalForceChangeTasks(transportedEntity, targetWorld, platformTeleporter.getPortalType() instanceof NetherPortalType);
+                        // Call post event
+                        PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost((Entity) (Object) this, serverworld, targetWorld);
+                    } catch (final RuntimeException e) {
+                        // nothing throws a checked exception in this block, but we want to catch unchecked stuff and try to recover
+                        // just in case a mod does something less than clever.
+                        if ((Object) this instanceof ServerPlayerEntity) {
+                            this.bridge$postPortalForceChangeTasks((Entity) (Object) this, (net.minecraft.world.server.ServerWorld) this.level, false);
                         }
+                        throw e;
                     }
-
-                    this.bridge$postPortalForceChangeTasks(transportedEntity, targetWorld, platformTeleporter.getPortalType() instanceof NetherPortalType);
-                    // Call post event
-                    PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost((Entity) (Object) this, serverworld, targetWorld);
                     // Sponge End
                 } else {
                     // Didn't work out.
