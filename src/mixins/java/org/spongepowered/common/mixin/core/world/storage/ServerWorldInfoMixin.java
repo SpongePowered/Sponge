@@ -74,6 +74,7 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, ISer
 
     @Shadow private WorldSettings settings;
     @Nullable private ResourceKey impl$key;
+    private String impl$rawDimensionType;
     private DimensionType impl$dimensionType;
     private UUID impl$uniqueId = UUID.randomUUID();
     private boolean impl$hasCustomDifficulty = false;
@@ -110,6 +111,20 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, ISer
         }
 
         return world;
+    }
+
+    @Override
+    public DimensionType bridge$getDimensionType() {
+        if (this.impl$dimensionType == null) {
+            this.impl$dimensionType = SpongeCommon.getServer().registryAccess().dimensionTypes().getOptional(new ResourceLocation(this.impl$rawDimensionType))
+                    .orElseGet(() -> {
+                        SpongeCommon.getLogger().warn("Level data '{}' specifies dimension type '{}' which does not exist, defaulting to '{}'",
+                                ((IServerWorldInfo) this).getLevelName(), this.impl$dimensionType, World.OVERWORLD.location());
+
+                        return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.OVERWORLD_LOCATION);
+                    });
+        }
+        return this.impl$dimensionType;
     }
 
     @Override
@@ -185,6 +200,7 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, ISer
 
         final CompoundNBT spongeDataCompound = new CompoundNBT();
         spongeDataCompound.putInt(Constants.Sponge.DATA_VERSION, Constants.Sponge.SPONGE_DATA_VERSION);
+        final DimensionType dimensionType = this.bridge$getDimensionType();
         final ResourceLocation dimensionTypeKey = SpongeCommon.getServer().registryAccess().dimensionTypes().getKey(this.impl$dimensionType);
         spongeDataCompound.putString(Constants.Sponge.World.DIMENSION_TYPE, dimensionTypeKey.toString());
         spongeDataCompound.putUUID(Constants.Sponge.World.UNIQUE_ID, this.bridge$getUniqueId());
@@ -205,14 +221,7 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, ISer
 
         final CompoundNBT spongeDataCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
 
-        final String rawDimensionType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
-        this.impl$dimensionType = SpongeCommon.getServer().registryAccess().dimensionTypes().getOptional(new ResourceLocation(rawDimensionType))
-            .orElseGet(() -> {
-            SpongeCommon.getLogger().warn("Level data '{}' specifies dimension type '{}' which does not exist, defaulting to '{}'",
-                ((IServerWorldInfo) this).getLevelName(), rawDimensionType, World.OVERWORLD.location());
-
-            return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.OVERWORLD_LOCATION);
-        });
+        this.impl$rawDimensionType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
 
         if (spongeDataCompound.hasUUID(Constants.Sponge.World.UNIQUE_ID)) {
             this.bridge$setUniqueId(spongeDataCompound.getUUID(Constants.Sponge.World.UNIQUE_ID));

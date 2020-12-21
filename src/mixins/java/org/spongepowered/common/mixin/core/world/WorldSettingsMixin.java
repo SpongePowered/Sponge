@@ -174,13 +174,14 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
             this.impl$configAdapter = null;
         }
 
+        infoBridge.bridge$setDimensionType(this.impl$dimensionType, false);
+
         if (this.impl$configExists) {
             this.impl$configExists = false;
             return;
         }
 
         infoBridge.bridge$setEnabled(this.impl$isEnabled);
-        infoBridge.bridge$setDimensionType(this.impl$dimensionType, false);
         infoBridge.bridge$setLoadOnStartup(this.impl$loadOnStartup);
         infoBridge.bridge$setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
         infoBridge.bridge$setKeepSpawnLoaded(this.impl$keepSpawnLoaded);

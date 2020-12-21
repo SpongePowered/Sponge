@@ -26,7 +26,10 @@ package org.spongepowered.common.mixin.core.world.storage;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
 import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.SaveFormat;
@@ -38,6 +41,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -46,6 +50,7 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.util.Constants;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -135,10 +140,6 @@ public abstract class SaveFormat_LevelSaveMixin {
 
     @Inject(method = "getDataTag", at = @At("RETURN"))
     private void impl$loadSpongeLevelDataBeforeVanilla(final CallbackInfoReturnable<IServerConfiguration> cir) {
-        if (!Sponge.isServerAvailable()) {
-            return;
-        }
-
         final ServerWorldInfo info = (ServerWorldInfo) cir.getReturnValue();
 
         final Path spongeLevelFile = this.levelPath.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT);
@@ -177,6 +178,15 @@ public abstract class SaveFormat_LevelSaveMixin {
         if (exceptionRaised) {
             throw new RuntimeException("Unable to load sponge level data for world '" + info.getLevelName() + "'!");
         }
+    }
+
+    @Redirect(method = "getDimensionPath", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getStorageFolder(Lnet/minecraft/util/RegistryKey;Ljava/io/File;)Ljava/io/File;"))
+    private File impl$adjustPathIndexIfSubLevel(RegistryKey<World> p_236031_0_, File p_236031_1_) {
+        if (p_236031_0_ == World.OVERWORLD) {
+            return DimensionType.getStorageFolder(p_236031_0_, p_236031_1_);
+        }
+
+        return DimensionType.getStorageFolder(p_236031_0_, p_236031_1_.getParentFile());
     }
 
     private boolean impl$loadSpongeLevelData(final IServerWorldInfo info, final Path levelFile, final boolean isCurrent) {

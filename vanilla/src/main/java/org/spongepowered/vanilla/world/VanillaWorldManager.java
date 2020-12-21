@@ -134,7 +134,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     public VanillaWorldManager(final MinecraftServer server) {
         this.server = server;
-        this.defaultWorldDirectory = ((SaveFormat_LevelSaveAccessor) ((MinecraftServerAccessor) this.server).accessor$storageSource()).accessor$levelPath().getParent();
+        this.defaultWorldDirectory = ((SaveFormat_LevelSaveAccessor) ((MinecraftServerAccessor) this.server).accessor$storageSource()).accessor$levelPath();
         this.customWorldsDirectory = this.defaultWorldDirectory.resolve("dimensions");
         this.worlds = ((MinecraftServerAccessor) this.server).accessor$levels();
         this.loadedWorldInfos = new Object2ObjectOpenHashMap<>();
@@ -915,6 +915,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     if (populateLevelDataFromSettings) {
                         ((WorldSettingsBridge) (Object) settings).bridge$populateInfo((IServerWorldInfoBridge) levelData);
                     }
+                } else if (!isNewLevelData) {
+                    dimensionType = ((IServerWorldInfoBridge) levelData).bridge$getDimensionType();
                 }
             }
 
