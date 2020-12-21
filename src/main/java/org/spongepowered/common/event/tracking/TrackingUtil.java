@@ -345,7 +345,10 @@ public final class TrackingUtil {
             .position(pos.getX(), pos.getY(), pos.getZ())
             .state((BlockState) state.createLegacyBlock())
             .build();
-        final FluidTickContext phaseContext = TickPhase.Tick.RANDOM_FLUID.createPhaseContext(PhaseTracker.SERVER).source(locatable);
+        final FluidTickContext phaseContext = TickPhase.Tick.RANDOM_FLUID.createPhaseContext(PhaseTracker.SERVER)
+            .source(locatable)
+            .fluid(state);
+
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
