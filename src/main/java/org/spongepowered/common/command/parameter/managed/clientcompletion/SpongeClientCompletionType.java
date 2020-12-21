@@ -29,6 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 
 public final class SpongeClientCompletionType implements ClientCompletionType {
+    public static final SpongeClientCompletionType NONE = new SpongeClientCompletionType(null);
 
     @Nullable private final ArgumentType<?> type;
 

@@ -34,6 +34,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
+import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collections;
@@ -42,7 +43,7 @@ import java.util.Optional;
 
 public abstract class ResourceKeyedZeroAdvanceValueParameter<T> extends ResourceKeyedArgumentValueParser<T> {
 
-    private static final List<ClientCompletionType> NONE_KEY = Collections.singletonList(ClientCompletionTypes.NONE.get());
+    private static final List<ClientCompletionType> NONE_KEY = Collections.singletonList(SpongeClientCompletionType.NONE);
 
     public ResourceKeyedZeroAdvanceValueParameter(final ResourceKey key) {
         super(key);
