@@ -25,6 +25,7 @@
 package org.spongepowered.common.registry;
 
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.FrameType;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import net.minecraft.entity.item.BoatEntity;
@@ -106,7 +107,7 @@ final class VanillaRegistryLoader {
             map.put(PhaseType.HOVERING, "hover");
         });
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape().values());
-        this.holder.createRegistry(RegistryTypes.TRIGGER, VanillaRegistryLoader.trigger().values());
+        this.holder.createRegistry(RegistryTypes.TRIGGER, () -> VanillaRegistryLoader.trigger().values(), true);
     }
 
     private void loadEnumRegistries() {
@@ -174,6 +175,7 @@ final class VanillaRegistryLoader {
             map.put(Team.Visible.HIDE_FOR_OTHER_TEAMS, "hide_for_other_teams");
             map.put(Team.Visible.HIDE_FOR_OWN_TEAM, "hide_for_own_team");
         });
+        this.knownName(RegistryTypes.ADVANCEMENT_TYPE, FrameType.values(), FrameType::getName);
     }
 
     private static RegistryLoader<Criterion> criterion() {

@@ -138,7 +138,7 @@ public final class AdvancementTest implements LoadableModule {
     }
 
     @Listener
-    public void onTriggerRegistry(final RegisterRegistryValueEvent event) {
+    public void onTriggerRegistry(final RegisterRegistryValueEvent.GameScoped event) {
         Sponge.getDataManager().registerBuilder(InventoryChangeTriggerConfig.class, new InventoryChangeTriggerConfig.Builder());
         this.inventoryChangeTrigger = Trigger.builder()
                 .dataSerializableConfig(InventoryChangeTriggerConfig.class)
@@ -147,6 +147,8 @@ public final class AdvancementTest implements LoadableModule {
                     final int found = triggerEvent.getPlayer().getInventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY, stack).totalQuantity();
                     triggerEvent.setResult(stack.getQuantity() <= found);
                 })
+                .key(ResourceKey.of(this.plugin, "my_inventory_trigger"))
+                .name("my_inventory_trigger")
                 .build();
         event.registry(RegistryTypes.TRIGGER).register(ResourceKey.of(this.plugin, "my_inventory_trigger"), this.inventoryChangeTrigger);
     }

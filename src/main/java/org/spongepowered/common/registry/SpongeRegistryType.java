@@ -52,6 +52,14 @@ public final class SpongeRegistryType<T> implements RegistryType<T> {
         return this.location;
     }
 
+    @Override
+    public String toString() {
+        return "SpongeRegistryType{" +
+                "root=" + root +
+                ", location=" + location +
+                '}';
+    }
+
     public static final class FactoryImpl implements Factory {
 
         @Override

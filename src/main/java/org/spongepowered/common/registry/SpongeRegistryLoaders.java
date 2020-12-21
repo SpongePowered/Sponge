@@ -73,6 +73,8 @@ import org.spongepowered.api.command.selector.SelectorSortAlgorithms;
 import org.spongepowered.api.command.selector.SelectorType;
 import org.spongepowered.api.command.selector.SelectorTypes;
 import org.spongepowered.api.data.KeyValueMatcher;
+import org.spongepowered.api.data.persistence.DataFormat;
+import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.data.type.CatType;
@@ -205,6 +207,9 @@ import org.spongepowered.common.command.selector.SpongeSelectorType;
 import org.spongepowered.common.data.nbt.validation.SpongeValidationType;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
+import org.spongepowered.common.data.persistence.HoconDataFormat;
+import org.spongepowered.common.data.persistence.JsonDataFormat;
+import org.spongepowered.common.data.persistence.NBTDataFormat;
 import org.spongepowered.common.data.type.SpongeBodyPart;
 import org.spongepowered.common.data.type.SpongeCatType;
 import org.spongepowered.common.data.type.SpongeHorseColor;
@@ -875,6 +880,14 @@ public final class SpongeRegistryLoaders {
             ((WorldSettingsBridge) (Object) archetype).bridge$setGenerateSpawnOnLoad(true);
         }
         return (WorldArchetype) (Object)  archetype;
+    }
+
+    public static RegistryLoader<DataFormat> dataFormat() {
+        return RegistryLoader.of(l -> {
+            l.add(DataFormats.JSON, k -> new JsonDataFormat());
+            l.add(DataFormats.HOCON, k -> new HoconDataFormat());
+            l.add(DataFormats.NBT, k -> new NBTDataFormat());
+        });
     }
 
     // @formatter:on

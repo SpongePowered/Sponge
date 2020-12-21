@@ -45,11 +45,12 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
     }
 
     protected void serialize(final Path dataPackDirectory, final List<T> objects) throws IOException {
-        FileUtils.deleteDirectory(dataPackDirectory.toFile());
+        final Path datapackDir = dataPackDirectory.resolve("plugin-" + this.typeDirectoryName);
+        FileUtils.deleteDirectory(datapackDir.toFile());
 
         // Write our objects
         for (final T object : objects) {
-            final Path namespacedDataDirectory = dataPackDirectory.resolve("data").resolve(object.getKey().getNamespace());
+            final Path namespacedDataDirectory = datapackDir.resolve("data").resolve(object.getKey().getNamespace());
             final Path objectFile = namespacedDataDirectory.resolve(this.typeDirectoryName).resolve(object.getKey().getValue() + ".json");
             Files.createDirectories(objectFile.getParent());
 
@@ -59,7 +60,7 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
         }
 
         // Write our pack metadata
-        final Path packMeta = dataPackDirectory.resolve("pack.mcmeta");
+        final Path packMeta = datapackDir.resolve("pack.mcmeta");
         final JsonObject packDataRoot = new JsonObject();
         final JsonObject packData = new JsonObject();
         packDataRoot.add("pack", packData);

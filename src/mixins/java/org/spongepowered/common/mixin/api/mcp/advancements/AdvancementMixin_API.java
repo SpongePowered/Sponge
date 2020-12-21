@@ -33,6 +33,8 @@ import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -111,5 +113,10 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
             return null;
         }
         return this.display.getBackground().getPath();
+    }
+
+    @Override
+    public DataPackType type() {
+        return DataPackTypes.ADVANCEMENT;
     }
 }

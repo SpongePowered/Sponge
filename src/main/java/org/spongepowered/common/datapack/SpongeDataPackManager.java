@@ -65,8 +65,6 @@ public final class SpongeDataPackManager {
 
     @SuppressWarnings("unchecked")
     public void serialize(final Path dataPacksDirectory) throws IOException {
-        this.serializables.clear();
-
         for (final Map.Entry<SpongeDataPackType, List<DataPackSerializable>> entry : this.serializables.entrySet()) {
             final SpongeDataPackType key = entry.getKey();
             final List<DataPackSerializable> value = entry.getValue();
@@ -79,8 +77,9 @@ public final class SpongeDataPackManager {
             }
 
             if (!serialized.isEmpty()) {
-                key.getPackSerializer().serialize(dataPacksDirectory.resolve("plugin-recipes"), serialized);
+                key.getPackSerializer().serialize(dataPacksDirectory, serialized);
             }
         }
+        this.serializables.clear();
     }
 }

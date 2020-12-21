@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.advancements;
 
+import com.google.gson.JsonObject;
 import net.minecraft.advancements.Advancement;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 
 @Mixin(Advancement.Builder.class)
@@ -36,4 +39,13 @@ public abstract class AdvancementBuilderMixin implements AdvancementBridge {
 //        return criteria.entrySet();
 //    }
 
+    // Serializing causes the following JSON: "rewards": null
+    // Deserializing does consider JsonNull to be an error here - so we fix it
+    @Redirect(method = "fromJson", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z", ordinal = 2))
+    private static boolean impl$onHasRewards(JsonObject p_241043_0_, String rewards) {
+        if (p_241043_0_.has(rewards)) {
+            return !p_241043_0_.get(rewards).isJsonNull();
+        }
+        return false;
+    }
 }
