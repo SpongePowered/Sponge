@@ -30,11 +30,13 @@ import net.minecraft.resources.ResourcePackList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
 import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.IServerConfiguration;
@@ -68,6 +70,7 @@ import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.command.ICommandSourceBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
@@ -84,6 +87,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
@@ -111,6 +115,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract ResourcePackList shadow$getPackRepository();
     // @formatter:on
 
+    @Shadow @Final private Map<RegistryKey<World>, ServerWorld> levels;
     @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
     @Nullable private ResourcePack impl$resourcePack;
 
@@ -204,6 +209,22 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Inject(method = "tickServer", at = @At(value = "RETURN"))
     private void impl$completeTickCheckAnimation(final CallbackInfo ci) {
         TimingsManager.FULL_SERVER_TICK.stopTiming();
+    }
+
+    @Inject(method = "stopServer", at = @At(value = "TAIL"))
+    private void impl$closeLevelSaveForOtherWorlds(final CallbackInfo ci) {
+        for (final Map.Entry<RegistryKey<World>, ServerWorld> entry : this.levels.entrySet()) {
+            if (entry.getKey() == World.OVERWORLD) {
+                continue;
+            }
+
+            final SaveFormat.LevelSave levelSave = ((ServerWorldBridge) entry.getValue()).bridge$getLevelSave();
+            try {
+                levelSave.close();
+            } catch (IOException e) {
+                LOGGER.error("Failed to unlock level {}", levelSave.getLevelId(), e);
+            }
+        }
     }
 
     @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 6000, ordinal = 0))
