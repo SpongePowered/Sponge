@@ -209,13 +209,12 @@ public class WorldCategory extends ConfigCategory {
         return this.portalAgents;
     }
 
-    public String getPortalDestination(String dimensionName) {
-        // TODO I would like to know how to retrieve the default world name from here, in a better way than below
-        return this.portalAgents.getOrDefault(dimensionName, Sponge.getServer().getDefaultWorldName());
+    public String getPortalDestination(final String portalAgentName) {
+        return this.portalAgents.getOrDefault(portalAgentName, Sponge.getServer().getDefaultWorldName());
     }
 
-    public void setPortalDestination(String dimensionName, String destinationWorldName) {
-        this.portalAgents.put(dimensionName, destinationWorldName);
+    public void setPortalDestination(final String portalAgentName, final String destinationWorldName) {
+        this.portalAgents.put(portalAgentName, destinationWorldName);
     }
 
     public boolean getDenyChunkRequests() {

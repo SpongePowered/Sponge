@@ -36,6 +36,7 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -67,9 +68,11 @@ import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -178,40 +181,96 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public Map<String, String> getPortalAgents() {
-        return ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().getPortalAgents();
+    public Map<PortalType, String> getPortalAgents() {
+        final Map<PortalType, String> portalAgents = new HashMap<>();
+        final DimensionType dimensionType = ((WorldInfoBridge) this).bridge$getDimensionType();
+
+        // Is there a way to improve this to not have to rebuild the map on each method call ?
+        // Should I store somewhere this map ?
+
+        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().getPortalAgents().forEach((portalAgentName, destinationWorldName) -> {
+            PortalType portalType = null;
+
+            if (DimensionTypes.OVERWORLD.equals(dimensionType)) {
+                if (portalAgentName.equals("minecraft:default_the_nether")) {
+                    portalType = PortalTypes.NETHER;
+                } else if (portalAgentName.equals("minecraft:default_the_end")) {
+                    portalType = PortalTypes.END;
+                }
+            } else if (DimensionTypes.NETHER.equals(dimensionType)) {
+                if (portalAgentName.equals("minecraft:default_overworld")) {
+                    portalType = PortalTypes.NETHER;
+                } else if (portalAgentName.equals("minecraft:default_the_end")) {
+                    portalType = PortalTypes.END;
+                }
+            } else if (DimensionTypes.THE_END.equals(dimensionType)) {
+                if (portalAgentName.equals("minecraft:default_overworld")) {
+                    portalType = PortalTypes.END;
+                } else if (portalAgentName.equals("minecraft:default_the_nether")) {
+                    portalType = PortalTypes.NETHER;
+                }
+            }
+
+            if (portalType != null) {
+                portalAgents.put(portalType, destinationWorldName);
+            }
+        });
+
+        return portalAgents;
     }
 
     @Override
-    public String getPortalDestination(PortalType portalType) {
-        String portalName = "minecraft:default_overworld";
+    public Optional<WorldProperties> getPortalDestination(final PortalType portalType) {
+        final DimensionType dimensionType = ((WorldInfoBridge) this).bridge$getDimensionType();
+        String portalAgentName = "minecraft:default_overworld";
 
-        if (DimensionTypes.OVERWORLD.equals(((WorldInfoBridge) this).bridge$getDimensionType())) {
+        if (DimensionTypes.OVERWORLD.equals(dimensionType)) {
             if (PortalTypes.NETHER.equals(portalType)) {
-                portalName = "minecraft:default_the_nether";
+                portalAgentName = "minecraft:default_the_nether";
             } else if (PortalTypes.END.equals(portalType)) {
-                portalName = "minecraft:default_the_end";
+                portalAgentName = "minecraft:default_the_end";
+            }
+        } else if (DimensionTypes.NETHER.equals(dimensionType)) {
+            if (PortalTypes.END.equals(portalType)) {
+                portalAgentName = "minecraft:default_the_end";
+            }
+        } else if (DimensionTypes.THE_END.equals(dimensionType)) {
+            if (PortalTypes.NETHER.equals(portalType)) {
+                portalAgentName = "minecraft:default_the_nether";
             }
         }
 
-        return ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().getPortalDestination(portalName);
+        // OR THIS What do you prefer ?
+        // return Sponge.getServer().getWorldProperties(((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().getPortalDestination(portalAgentName));
+
+        final String worldName = ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().getPortalDestination(portalAgentName);
+        return Sponge.getServer().getWorldProperties(worldName);
     }
 
     @Override
-    public void setPortalDestination(PortalType portalType, String destinationWorldName) {
+    public void setPortalDestination(final PortalType portalType, final String destinationWorldName) {
         checkNotNull(destinationWorldName, "The destination world name cannot be null!");
 
-        String portalName = "minecraft:default_overworld";
+        final DimensionType dimensionType = ((WorldInfoBridge) this).bridge$getDimensionType();
+        String portalAgentName = "minecraft:default_overworld";
 
-        if (DimensionTypes.OVERWORLD.equals(((WorldInfoBridge) this).bridge$getDimensionType())) {
+        if (DimensionTypes.OVERWORLD.equals(dimensionType)) {
             if (PortalTypes.NETHER.equals(portalType)) {
-                portalName = "minecraft:default_the_nether";
+                portalAgentName = "minecraft:default_the_nether";
             } else if (PortalTypes.END.equals(portalType)) {
-                portalName = "minecraft:default_the_end";
+                portalAgentName = "minecraft:default_the_end";
+            }
+        } else if (DimensionTypes.NETHER.equals(dimensionType)) {
+            if (PortalTypes.END.equals(portalType)) {
+                portalAgentName = "minecraft:default_the_end";
+            }
+        } else if (DimensionTypes.THE_END.equals(dimensionType)) {
+            if (PortalTypes.NETHER.equals(portalType)) {
+                portalAgentName = "minecraft:default_the_nether";
             }
         }
 
-        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setPortalDestination(portalName, destinationWorldName);
+        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setPortalDestination(portalAgentName, destinationWorldName);
     }
 
     @Intrinsic
