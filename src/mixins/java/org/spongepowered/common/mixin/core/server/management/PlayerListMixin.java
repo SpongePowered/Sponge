@@ -365,7 +365,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Redirect(method = "sendLevelInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/world/server/ServerWorld;"))
-    private ServerWorld impl$usePerWorldWorldBorder(final MinecraftServer minecraftServer, final DimensionType dimension, final ServerPlayerEntity playerIn,
+    private ServerWorld impl$usePerWorldWorldBorder(final MinecraftServer minecraftServer, final ServerPlayerEntity playerIn,
             final ServerWorld worldIn) {
         return worldIn;
     }
