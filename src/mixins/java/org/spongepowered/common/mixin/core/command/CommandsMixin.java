@@ -40,6 +40,8 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,6 +50,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDispatcher;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeNodePermissionCache;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
@@ -275,17 +279,21 @@ public abstract class CommandsMixin {
             final CommandSource p_197052_3_,
             final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> p_197052_4_,
             final ServerPlayerEntity playerEntity) {
-        try {
-            this.impl$playerNodeCache.put(playerEntity, new IdentityHashMap<>());
-            // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
-            final IdentityHashMap<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> idMap = new IdentityHashMap<>(p_197052_4_);
-            this.shadow$fillUsableCommands(p_197052_1_, p_197052_2_, p_197052_3_, idMap);
-        } finally {
-            this.impl$playerNodeCache.remove(playerEntity);
-        }
-        for (final CommandNode<ISuggestionProvider> node :
-                ((SpongeCommandManager) Sponge.getGame().getCommandManager()).getNonBrigadierSuggestions((CommandCause) p_197052_3_)) {
-            p_197052_2_.addChild(node);
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SUBJECT, (Subject) playerEntity);
+            final CommandCause sourceToUse = ((CommandSourceBridge) p_197052_3_).bridge$withCurrentCause();
+            try {
+                this.impl$playerNodeCache.put(playerEntity, new IdentityHashMap<>());
+                // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
+                final IdentityHashMap<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> idMap = new IdentityHashMap<>(p_197052_4_);
+                this.shadow$fillUsableCommands(p_197052_1_, p_197052_2_, (CommandSource) sourceToUse, idMap);
+            } finally {
+                this.impl$playerNodeCache.remove(playerEntity);
+            }
+            for (final CommandNode<ISuggestionProvider> node :
+                    ((SpongeCommandManager) Sponge.getGame().getCommandManager()).getNonBrigadierSuggestions(sourceToUse)) {
+                p_197052_2_.addChild(node);
+            }
         }
     }
 
