@@ -243,6 +243,7 @@
         "mcp.potion.PotionEffectMixin_API",
         "mcp.potion.PotionMixin_API",
         "mcp.potion.PotionTypeMixin_API",
+        "mcp.scoreboard.CriterionColoredMixin_API",
         "mcp.scoreboard.CriterionMixin_API",
         "mcp.scoreboard.IScoreCriteria_EnumRenderTypeMixin_API",
         "mcp.scoreboard.ScorePlayerTeamMixin_API",

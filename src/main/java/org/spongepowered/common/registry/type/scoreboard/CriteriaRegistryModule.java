@@ -55,8 +55,8 @@ public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalog
             this.register(criterion);
 
             criterion.getTeamColor().ifPresent(color -> {
-                teamKillMappings.put(color.getId(), criterion);
-                killedByTeamMappings.put(color.getId(), criterion);
+                this.teamKillMappings.put(color.getId(), criterion);
+                this.killedByTeamMappings.put(color.getId(), criterion);
             });
         });
     }
@@ -66,11 +66,11 @@ public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalog
     }
 
     public Map<String, Criterion> getTeamKillMappings() {
-        return teamKillMappings;
+        return this.teamKillMappings;
     }
 
     public Map<String, Criterion> getKilledByTeamMappings() {
-        return killedByTeamMappings;
+        return this.killedByTeamMappings;
     }
 
 }
