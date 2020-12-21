@@ -27,6 +27,7 @@ package org.spongepowered.common.registry;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.MutableRegistry;
 import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -158,6 +159,7 @@ public final class SpongeRegistryHolder implements RegistryHolder {
                 );
             }
         }
+        ((MutableRegistry) root).register(key, registry, Lifecycle.stable());
         return (Registry<T>) registry;
     }
 }

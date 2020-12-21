@@ -470,7 +470,7 @@ public final class SpongeRegistryLoaders {
 
     public static RegistryLoader<CommandRegistrar<?>> commandRegistrar() {
         return RegistryLoader.of(l -> {
-            l.add(SpongeCommandRegistrars.BRIGADIER, BrigadierCommandRegistrar::new);
+            l.add(SpongeCommandRegistrars.BRIGADIER, () -> BrigadierCommandRegistrar.INSTANCE);
             l.add(SpongeCommandRegistrars.MANAGED, SpongeParameterizedCommandRegistrar::new);
             l.add(SpongeCommandRegistrars.RAW, SpongeRawCommandRegistrar::new);
         });

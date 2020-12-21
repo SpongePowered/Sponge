@@ -70,16 +70,12 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
 
     private static final TypeToken<LiteralArgumentBuilder<CommandSource>> COMMAND_TYPE = new TypeToken<LiteralArgumentBuilder<CommandSource>>() {};
 
-    public static BrigadierCommandRegistrar INSTANCE;
+    public static BrigadierCommandRegistrar INSTANCE = new BrigadierCommandRegistrar();
 
     private boolean hasVanillaRegistered;
     private final List<LiteralCommandNode<CommandSource>> vanilla = new ArrayList<>();
 
     private SpongeCommandDispatcher dispatcher = new SpongeCommandDispatcher();
-
-    public BrigadierCommandRegistrar() {
-        BrigadierCommandRegistrar.INSTANCE = this;
-    }
 
     // For mods and others that use this. We get the plugin container from the CauseStack
     // TODO: Make sure this is valid. For Forge, I suspect we'll have done this in a context of some sort.
