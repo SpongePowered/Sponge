@@ -58,7 +58,6 @@ public final class WorldCategory {
 
     public WorldCategory() {
         this.invalidLookupUuids.add(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-        this.invalidLookupUuids.add(UUID.fromString("0d0c4ca0-4ff1-11e4-916c-0800200c9a66")); // ComputerCraft FakePlayer
         this.invalidLookupUuids.add(UUID.fromString("41c82c87-7afb-4024-ba57-13d2c99cae77")); // Forge FakePlayer
     }
 }
