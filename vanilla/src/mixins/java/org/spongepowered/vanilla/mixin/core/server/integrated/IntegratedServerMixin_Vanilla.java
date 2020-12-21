@@ -55,7 +55,7 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin
     @Shadow private boolean paused;
     // @formatter:on
 
-    @Inject(method = "<init>", at = @At("HEAD"))
+    @Inject(method = "<init>", at = @At("RETURN"))
     private void vanilla$setIntegratedServer(Thread p_i232494_1_, Minecraft p_i232494_2_, DynamicRegistries.Impl p_i232494_3_,
             SaveFormat.LevelSave p_i232494_4_, ResourcePackList p_i232494_5_, DataPackRegistries p_i232494_6_, IServerConfiguration p_i232494_7_,
             MinecraftSessionService p_i232494_8_, GameProfileRepository p_i232494_9_, PlayerProfileCache p_i232494_10_,
