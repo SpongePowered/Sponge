@@ -64,7 +64,7 @@ public final class BeaconData {
             final BiConsumer<BeaconTileEntityAccessor, Effect> setter) {
         final BeaconTileEntityAccessor accessor = (BeaconTileEntityAccessor) holder;
         final Effect effect = (Effect) value;
-        if (!BeaconTileEntityAccessor.accessor$getVALID_EFFECTS().contains(effect)) {
+        if (!BeaconTileEntityAccessor.accessor$VALID_EFFECTS().contains(effect)) {
             return false;
         }
         setter.accept(accessor, (Effect) value);

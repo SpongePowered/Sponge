@@ -34,7 +34,7 @@ import org.spongepowered.common.UntransformedAccessorError;
 public interface PillagerEntityAccessor {
 
     @Accessor("IS_CHARGING_CROSSBOW")
-    static DataParameter<Boolean> accessor$getIS_CHARGING_CROSSBOW() {
+    static DataParameter<Boolean> accessor$IS_CHARGING_CROSSBOW() {
         throw new UntransformedAccessorError();
     }
 }

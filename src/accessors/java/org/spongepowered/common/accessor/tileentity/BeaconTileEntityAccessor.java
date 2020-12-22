@@ -37,7 +37,7 @@ import java.util.Set;
 public interface BeaconTileEntityAccessor {
 
     @Accessor("VALID_EFFECTS")
-    static Set<Effect> accessor$getVALID_EFFECTS() {
+    static Set<Effect> accessor$VALID_EFFECTS() {
         throw new UntransformedAccessorError();
     }
 

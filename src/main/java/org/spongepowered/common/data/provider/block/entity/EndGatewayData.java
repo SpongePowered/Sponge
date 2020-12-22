@@ -46,7 +46,7 @@ public final class EndGatewayData {
                             if (ticks < 0) {
                                 return false;
                             }
-                            h.accessor$setTeleportCooldown(ticks);
+                            h.accessor$teleportCooldown(ticks);
                             return true;
                         })
                     .create(Keys.DO_EXACT_TELEPORT)

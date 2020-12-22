@@ -38,7 +38,7 @@ public interface EndGatewayTileEntityAccessor {
 
     @Accessor("teleportCooldown") int accessor$teleportCooldown();
 
-    @Accessor("teleportCooldown") void accessor$setTeleportCooldown(final int teleportCooldown);
+    @Accessor("teleportCooldown") void accessor$teleportCooldown(final int teleportCooldown);
 
     @Accessor("exitPortal") BlockPos accessor$exitPortal();
 
