@@ -38,7 +38,6 @@
     "command.impl.GameRuleCommandMixin",
     "command.impl.KickCommandMixin",
     "command.impl.SaveAllCommandMixin",
-    "command.impl.SetWorldSpawnCommandMixin",
     "command.impl.SpreadPlayersCommandMixin",
     "command.impl.TeleportCommandMixin",
     "data.CustomDataHolderMixin",
