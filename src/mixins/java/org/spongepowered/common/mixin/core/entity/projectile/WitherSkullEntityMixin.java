@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.accessor.entity.projectile.ProjectileEntityAccessor;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.projectile.WitherSkullEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
@@ -46,8 +47,9 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(WitherSkullEntity.class)
 public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMixin implements WitherSkullEntityBridge, ExplosiveBridge {
@@ -58,11 +60,11 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
 
     @ModifyArg(method = "onHitEntity",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"))
-    private float onAttackEntityFrom(final float amount) {
+    private float impl$onAttackEntityFrom(final float amount) {
         if (this.impl$damageSet) {
             return this.impl$damage;
         }
-        if (this.ownerUUID != null) {
+        if (((ProjectileEntityAccessor) this).accessor$ownerUUID() != null) {
             return Constants.Entity.WitherSkull.DEFAULT_WITHER_CREATED_SKULL_DAMAGE;
         }
         return Constants.Entity.WitherSkull.DEFAULT_NO_SOURCE_SKULL_DAMAGE;

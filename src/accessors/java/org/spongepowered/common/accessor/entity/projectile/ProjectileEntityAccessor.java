@@ -22,24 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.projectile;
+package org.spongepowered.common.accessor.entity.projectile;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.core.entity.EntityMixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import javax.annotation.Nullable;
+import java.util.UUID;
 
 @Mixin(ProjectileEntity.class)
-public abstract class ProjectileEntityMixin extends EntityMixin {
+public interface ProjectileEntityAccessor {
 
-    // @formatter:off
-    @Shadow protected abstract void shadow$onHit(RayTraceResult result);
-    @Shadow public abstract void shadow$setOwner(@Nullable Entity p_212361_1_);
-    @Shadow public abstract Entity shadow$getOwner();
-    // @formatter:on
-
+    @Accessor("ownerUUID") UUID accessor$ownerUUID();
 }

@@ -191,7 +191,8 @@
         "world.gen.DimensionGeneratorSettingsAccessor",
         "world.storage.SaveFormat_LevelSaveAccessor",
         "client.gui.widget.list.AbstractListAccessor",
-        "util.registry.DynamicRegistriesAccessor"
+        "util.registry.DynamicRegistriesAccessor",
+        "entity.projectile.ProjectileEntityAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",
