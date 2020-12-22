@@ -13,11 +13,11 @@ The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms
 
 ### Sponge
 
-**1.15.2**: ![Snapshots](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=Sponge&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
+**1.16.4**: ![Snapshots](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=Sponge&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
 
 ### SpongeVanilla
 
-**1.15.2**: ![Snapshots](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=SpongeVanilla&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
+**1.16.4**: ![Snapshots](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=SpongeVanilla&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
 
 
 ## Prerequisites
