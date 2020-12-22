@@ -446,6 +446,8 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
         final List<Component> newLines = new ArrayList<>();
         for (final String line : list) {
+            // Sponge Start - While Vanilla does some strip formatting, it doesn't catch everything. This patches an exploit that allows color
+            // signs to be created.
             newLines.add(Component.text(SharedConstants.filterText(line)));
         }
 
