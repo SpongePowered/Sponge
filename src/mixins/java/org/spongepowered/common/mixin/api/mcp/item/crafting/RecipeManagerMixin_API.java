@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.PlayerContainer;
@@ -47,6 +48,8 @@ import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.accessor.inventory.container.PlayerContainerAccessor;
 import org.spongepowered.common.accessor.inventory.container.WorkbenchContainerAccessor;
 import org.spongepowered.common.accessor.tileentity.AbstractFurnaceTileEntityAccessor;
@@ -66,6 +69,8 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
     @Shadow public abstract Collection<IRecipe<?>> shadow$getRecipes();
     @Shadow public abstract <C extends IInventory, T extends IRecipe<C>> Optional<T> shadow$getRecipeFor(IRecipeType<T> recipeTypeIn, C inventoryIn, net.minecraft.world.World worldIn);
     // @formatter:on
+
+    @Shadow private Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> recipes;
 
     @Override
     public Optional<Recipe> getByKey(ResourceKey key) {
@@ -142,5 +147,10 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
         final net.minecraft.inventory.Inventory fakeFurnace = new net.minecraft.inventory.Inventory(1);
         fakeFurnace.setItem(0, ItemStackUtil.fromSnapshotToNative(ingredient));
         return this.shadow$getRecipeFor((IRecipeType) type, fakeFurnace, null);
+    }
+
+    @Redirect(method = "apply", at = @At(value = "INVOKE", target = "Ljava/util/Map;size()I"))
+    public int impl$getActualRecipeCount(Map<IRecipeType<?>, ImmutableMap.Builder<ResourceLocation, IRecipe<?>>>  map) {
+        return this.recipes.values().stream().mapToInt(Map::size).sum();
     }
 }
