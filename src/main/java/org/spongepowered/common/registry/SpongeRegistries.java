@@ -37,6 +37,7 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.BODY_PART, SpongeRegistryLoaders.bodyPart().values());
         holder.createRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, SpongeRegistryLoaders.valueParameter().values());
         holder.createRegistry(RegistryTypes.CLICK_TYPE, SpongeRegistryLoaders.clickType().values());
+        holder.createRegistry(RegistryTypes.CAT_TYPE, SpongeRegistryLoaders.catType().values());
         holder.createRegistry(RegistryTypes.CLIENT_COMPLETION_KEY, SpongeRegistryLoaders.clientCompletionKey().values());
         holder.createRegistry(RegistryTypes.CLIENT_COMPLETION_TYPE, SpongeRegistryLoaders.clientCompletionType().values());
         holder.createRegistry(RegistryTypes.COMMAND_REGISTRAR, () -> SpongeRegistryLoaders.commandRegistrar().values(), true);
@@ -70,15 +71,6 @@ public final class SpongeRegistries {
         holder.createRegistry(SpongeRegistryTypes.VALIDATION_TYPE, SpongeRegistryLoaders.validationType().values());
         holder.createRegistry(RegistryTypes.WEATHER, SpongeRegistryLoaders.weather().values());
         holder.createRegistry(RegistryTypes.DATA_FORMAT, SpongeRegistryLoaders.dataFormat().values());
-
-
-        // ----------------------------------------------------------------------------------------------------
-//                .generateRegistry(BannerPatternShape.class, ResourceKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true, false)
-//                .generateCallbackRegistry(DataRegistration.class, ResourceKey.sponge("data_registration"), Stream.empty(), (key, value) -> ((SpongeDataManager) Sponge.getGame().getDataManager()).registerCustomDataRegistration((SpongeDataRegistration) value), false, true)
-//                .generateRegistry(EquipmentGroup.class, ResourceKey.minecraft("equipment_group"), EquipmentGroupStreamGenerator.stream(), true, false)
-//                .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), EquipmentTypeStreamGenerator.stream(), true, false)
-//                .generateRegistry(TropicalFishShape.class, ResourceKey.minecraft("tropical_fish_shape"), Arrays.stream(TropicalFishEntity.Type.values()), true, false)
-//        ;
     }
 
     public static void registerServerRegistries(final SpongeRegistryHolder holder) {

@@ -428,7 +428,8 @@ public final class DataTest  {
         this.checkGetData(acaciaStairs, Keys.DIRECTION, Direction.NORTH);
         this.checkWithData(acaciaStairs, Keys.DIRECTION, Direction.WEST);
 
-        this.checkGetData(jungleAxe, Keys.DISPLAY_NAME, Component.text("Jungle Axe"));
+        // TODO DisplayNames include font
+        this.checkGetData(jungleAxe, Keys.DISPLAY_NAME, Component.text("Jungle Axe")); // TODO itemstack DisplayName includes a chat.square_brackets
         this.checkGetData(shulkerBullet, Keys.DISPLAY_NAME, Component.text("Angry Shulker Bullet")); // TODO entity DisplayName includes a hoverevent
         this.checkGetData(sheep, Keys.DISPLAY_NAME, Component.text("A sheep")); // Set with CUSTOM_NAME
         world.setBlock(blockPos, BlockTypes.CHEST.get().getDefaultState());
@@ -1122,6 +1123,7 @@ public final class DataTest  {
         final BlockState signState = BlockTypes.SPRUCE_SIGN.get().getDefaultState();
         world.setBlock(blockPos, signState);
         final Component emptyText = Component.empty().style(Style.empty());
+        // TODO signlines component contain font
         this.checkGetListData(location, Keys.SIGN_LINES, Arrays.asList(emptyText, emptyText, emptyText, emptyText));
         final Component text = Component.text("Test").style(Style.style(NamedTextColor.RED));
         this.checkOfferListData(location, Keys.SIGN_LINES, Arrays.asList(text, text, text, text));
@@ -1277,10 +1279,10 @@ public final class DataTest  {
 
         // And now test nbt data
         final EntitySnapshot snapshot = sheep.createSnapshot();
-        this.checkWithData(snapshot, Keys.DISPLAY_NAME, Component.text("Snapshot"));
+        this.checkWithData(snapshot, Keys.CUSTOM_NAME, Component.text("Snapshot"));
 
         final EntityArchetype archetype = sheep.createArchetype();
-        this.checkOfferData(archetype, Keys.DISPLAY_NAME, Component.text("Archetype"));
+        this.checkOfferData(archetype, Keys.CUSTOM_NAME, Component.text("Archetype"));
 
         world.setBlock(blockPos, oldState);
     }

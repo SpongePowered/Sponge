@@ -46,8 +46,7 @@ public final class CatData {
                     .create(Keys.CAT_TYPE)
                         .get(h -> {
                             final int type = h.getCatType();
-                            return ((SimpleRegistry<CatType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.CAT_TYPE))
-                                    .byId(type);
+                            return ((SimpleRegistry<CatType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.CAT_TYPE)).byId(type);
                         })
                         .set((h, v) -> h.setCatType(((SimpleRegistry<CatType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.CAT_TYPE)).getId(v)))
                     .create(Keys.DYE_COLOR)

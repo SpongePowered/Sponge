@@ -140,7 +140,7 @@ public final class ItemStackData {
                             }
                         })
                     .create(Keys.CUSTOM_NAME)
-                        .get(h -> h.hasCustomHoverName() ? SpongeAdventure.asAdventure(h.getDisplayName()) : null)
+                        .get(h -> h.hasCustomHoverName() ? SpongeAdventure.asAdventure(h.getHoverName()) : null)
                         .set((h, v) -> h.setHoverName(SpongeAdventure.asVanilla(v)))
                         .delete(ItemStack::resetHoverName)
                     .create(Keys.IS_UNBREAKABLE)

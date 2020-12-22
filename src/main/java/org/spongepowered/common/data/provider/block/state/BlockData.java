@@ -58,7 +58,7 @@ public final class BlockData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.BLAST_RESISTANCE)
-                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$explosionResistance())
+                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) ((AbstractBlockAccessor) h.getBlock()).accessor$properties()).accessor$explosionResistance())
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
                             if (h.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
@@ -86,7 +86,7 @@ public final class BlockData {
                     .create(Keys.IS_PASSABLE)
                         .get(h -> !h.getMaterial().blocksMotion())
                     .create(Keys.IS_UNBREAKABLE)
-                        .get(h -> ((AbstractBlock_PropertiesAccessor) h.getBlock()).accessor$destroyTime() < 0)
+                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) ((AbstractBlockAccessor) h.getBlock()).accessor$properties()).accessor$destroyTime() < 0)
                     .create(Keys.IS_FLAMMABLE)
                         .get(((AbstractFireBlockAccessor) Blocks.FIRE)::invoker$canBurn)
                     .create(Keys.IS_SOLID)

@@ -35,6 +35,7 @@ import net.minecraft.entity.monster.SpellcastingIllagerEntity;
 import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.passive.PandaEntity;
+import net.minecraft.entity.passive.fish.TropicalFishEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorMaterial;
@@ -55,6 +56,7 @@ import net.minecraft.state.properties.RedstoneSide;
 import net.minecraft.state.properties.SlabType;
 import net.minecraft.state.properties.StairsShape;
 import net.minecraft.state.properties.StructureMode;
+import net.minecraft.tileentity.BannerPattern;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.world.Difficulty;
@@ -184,6 +186,8 @@ final class VanillaRegistryLoader {
             map.put(Team.Visible.HIDE_FOR_OWN_TEAM, "hide_for_own_team");
         });
         this.knownName(RegistryTypes.ADVANCEMENT_TYPE, FrameType.values(), FrameType::getName);
+        this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), BannerPattern::getFilename);
+        this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFishEntity.Type.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {
