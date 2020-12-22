@@ -82,6 +82,6 @@ public final class AddTileEntity extends BlockEventBasedTransaction {
 
     @Override
     protected SpongeBlockSnapshot getOriginalSnapshot() {
-        return this.addedSnapshot;
+        return this.oldSnapshot;
     }
 }
