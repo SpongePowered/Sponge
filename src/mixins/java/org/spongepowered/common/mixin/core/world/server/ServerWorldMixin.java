@@ -63,6 +63,7 @@ import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -207,14 +208,16 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     public void bridge$triggerExplosion(Explosion explosion) {
         // Sponge start
         // Set up the pre event
-        final ExplosionEvent.Pre
-                event =
-                SpongeEventFactory.createExplosionEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                        explosion, (org.spongepowered.api.world.server.ServerWorld) this);
-        if (SpongeCommon.postEvent(event)) {
-            return;
+        if (ShouldFire.EXPLOSION_EVENT_PRE) {
+            final ExplosionEvent.Pre
+                    event =
+                    SpongeEventFactory.createExplosionEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                            explosion, (org.spongepowered.api.world.server.ServerWorld) this);
+            if (SpongeCommon.postEvent(event)) {
+                return;
+            }
+            explosion = event.getExplosion();
         }
-        explosion = event.getExplosion();
         final net.minecraft.world.Explosion mcExplosion;
         try {
             // Since we already have the API created implementation Explosion, let's use it.

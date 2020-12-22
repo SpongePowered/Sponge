@@ -48,6 +48,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;

@@ -78,6 +78,7 @@ import org.spongepowered.common.bridge.entity.PlatformLivingEntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
@@ -647,6 +648,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Inject(method = "randomTeleport", at = @At(value = "RETURN", ordinal = 0, shift = At.Shift.BY, by = 2), cancellable = true)
     private void impl$callMoveEntityEventForTeleport(double x, double y, double z, boolean changeState,
             CallbackInfoReturnable<Boolean> cir) {
+        if (!ShouldFire.MOVE_ENTITY_EVENT) {
+            return;
+        }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);

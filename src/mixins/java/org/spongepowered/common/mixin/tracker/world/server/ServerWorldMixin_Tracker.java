@@ -366,16 +366,18 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final Function<? super Explosion, ? extends PhaseContext<@NonNull ?>> contextCreator) {
         // Sponge start
         final Explosion originalExplosion = (Explosion) explosion;
-        // Set up the pre event
-        final ExplosionEvent.Pre
-            event =
-            SpongeEventFactory.createExplosionEventPre(
-                PhaseTracker.SERVER.getCurrentCause(),
-                explosion, ((org.spongepowered.api.world.server.ServerWorld) this));
-        if (SpongeCommon.postEvent(event)) {
-            return (Explosion) explosion;
+        if (ShouldFire.EXPLOSION_EVENT_PRE) {
+            // Set up the pre event
+            final ExplosionEvent.Pre
+                    event =
+                    SpongeEventFactory.createExplosionEventPre(
+                            PhaseTracker.SERVER.getCurrentCause(),
+                            explosion, ((org.spongepowered.api.world.server.ServerWorld) this));
+            if (SpongeCommon.postEvent(event)) {
+                return (Explosion) explosion;
+            }
+            explosion = event.getExplosion();
         }
-        explosion = event.getExplosion();
         final Explosion mcExplosion;
         try {
             // Since we already have the API created implementation Explosion, let's use it.

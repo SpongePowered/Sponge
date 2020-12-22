@@ -224,7 +224,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
             ServerWorld destinationWorld = (net.minecraft.world.server.ServerWorld) location.getWorld();
 
-            final Vector3d toPosition;
+            Vector3d toPosition = location.getPosition();
 
             if (this.shadow$getLevel() != destinationWorld) {
                 final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.getCurrentCause(),
@@ -248,14 +248,16 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
                 toPosition = repositionEvent.getDestinationPosition();
             } else {
-                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
-                        location.getPosition(), location.getPosition());
-                if (SpongeCommon.postEvent(event)) {
-                    return false;
-                }
+                if (ShouldFire.MOVE_ENTITY_EVENT) {
+                    final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
+                            location.getPosition(), location.getPosition());
+                    if (SpongeCommon.postEvent(event)) {
+                        return false;
+                    }
 
-                toPosition = event.getDestinationPosition();
+                    toPosition = event.getDestinationPosition();
+                }
             }
 
             ((ServerPlayerEntity) (Object) this).stopRiding();
@@ -411,9 +413,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     public void teleportTo(
             final net.minecraft.world.server.ServerWorld world, final double x, final double y, final double z, final float yaw, final float pitch) {
         final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
-        final double actualX;
-        final double actualY;
-        final double actualZ;
+        double actualX = x;
+        double actualY = y;
+        double actualZ = z;
         double actualYaw = yaw;
         double actualPitch = pitch;
 
@@ -426,25 +428,30 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             }
 
             if (world == player.level) {
-                final MoveEntityEvent posEvent = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) player, VecHelper.toVector3d(player.position()),
-                        new Vector3d(x, y, z), new Vector3d(x, y, z));
+                if (ShouldFire.MOVE_ENTITY_EVENT) {
+                    final MoveEntityEvent posEvent = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) player, VecHelper.toVector3d(player.position()),
+                            new Vector3d(x, y, z), new Vector3d(x, y, z));
 
-                if (SpongeCommon.postEvent(posEvent)) {
-                    return;
+                    if (SpongeCommon.postEvent(posEvent)) {
+                        return;
+                    }
+
+                    actualX = posEvent.getDestinationPosition().getX();
+                    actualY = posEvent.getDestinationPosition().getY();
+                    actualZ = posEvent.getDestinationPosition().getZ();
                 }
 
-                final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) player, new Vector3d(actualPitch, actualYaw, 0),
-                        new Vector3d(pitch, yaw, 0));
+                if (ShouldFire.ROTATE_ENTITY_EVENT) {
+                    final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) player, new Vector3d(actualPitch, actualYaw, 0),
+                            new Vector3d(pitch, yaw, 0));
 
-                SpongeCommon.postEvent(rotateEvent);
+                    SpongeCommon.postEvent(rotateEvent);
 
-                actualX = posEvent.getDestinationPosition().getX();
-                actualY = posEvent.getDestinationPosition().getY();
-                actualZ = posEvent.getDestinationPosition().getZ();
-                actualYaw = rotateEvent.isCancelled() ? player.yRot : rotateEvent.getToRotation().getY();
-                actualPitch = rotateEvent.isCancelled() ? player.xRot : rotateEvent.getToRotation().getX();
+                    actualYaw = rotateEvent.isCancelled() ? player.yRot : rotateEvent.getToRotation().getY();
+                    actualPitch = rotateEvent.isCancelled() ? player.xRot : rotateEvent.getToRotation().getX();
+                }
 
                 this.shadow$setCamera(player);
                 this.shadow$stopRiding();
@@ -465,25 +472,33 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                     return;
                 }
 
-                final MoveEntityEvent posEvent = SpongeEventFactory.createChangeEntityWorldEventReposition(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) player, preEvent.getOriginalWorld(), VecHelper.toVector3d(player.position()),
-                        new Vector3d(x, y, z), preEvent.getOriginalDestinationWorld(), new Vector3d(x, y, z), preEvent.getDestinationWorld());
+                if (ShouldFire.MOVE_ENTITY_EVENT) {
+                    final MoveEntityEvent posEvent = SpongeEventFactory.createChangeEntityWorldEventReposition(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) player, preEvent.getOriginalWorld(), VecHelper.toVector3d(player.position()),
+                            new Vector3d(x, y, z), preEvent.getOriginalDestinationWorld(), new Vector3d(x, y, z), preEvent.getDestinationWorld());
 
-                final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) player, new Vector3d(actualYaw, actualPitch, 0),
-                        new Vector3d(yaw, pitch, 0));
+                    if (SpongeCommon.postEvent(posEvent)) {
+                        return;
+                    }
 
-                if (SpongeCommon.postEvent(posEvent)) {
-                    return;
+                    actualX = posEvent.getDestinationPosition().getX();
+                    actualY = posEvent.getDestinationPosition().getY();
+                    actualZ = posEvent.getDestinationPosition().getZ();
                 }
+                this.shadow$setPos(actualX, actualY, actualZ);
 
-                this.shadow$setPos(posEvent.getDestinationPosition().getX(), posEvent.getDestinationPosition().getY(),
-                        posEvent.getDestinationPosition().getZ());
+                if (ShouldFire.ROTATE_ENTITY_EVENT) {
+                    final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) player, new Vector3d(actualYaw, actualPitch, 0),
+                            new Vector3d(yaw, pitch, 0));
 
-                if (!SpongeCommon.postEvent(rotateEvent)) {
-                    this.yRot = (float) rotateEvent.getToRotation().getX();
-                    this.xRot = (float) rotateEvent.getToRotation().getY();
+                    if (!SpongeCommon.postEvent(rotateEvent)) {
+                        actualYaw = (float) rotateEvent.getToRotation().getX();
+                        actualPitch = (float) rotateEvent.getToRotation().getY();
+                    }
                 }
+                this.yRot = (float) actualYaw;
+                this.xRot = (float) actualPitch;
 
                 EntityUtil.performPostChangePlayerWorldLogic(player, (net.minecraft.world.server.ServerWorld) preEvent.getOriginalWorld(),
                         (net.minecraft.world.server.ServerWorld) preEvent.getOriginalDestinationWorld(),
@@ -754,6 +769,10 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @SuppressWarnings({"ConstantConditions", "UnstableApiUsage"})
     @Inject(method = "updateOptions", at = @At("HEAD"))
     private void impl$handleClientSettings(final CClientSettingsPacket packet, final CallbackInfo ci) {
+        if (!ShouldFire.PLAYER_CHANGE_CLIENT_SETTINGS_EVENT) {
+            return;
+        }
+
         final CClientSettingsPacketAccessor $packet = (CClientSettingsPacketAccessor) packet;
         final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
 

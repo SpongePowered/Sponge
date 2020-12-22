@@ -702,27 +702,32 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         if (this.level instanceof net.minecraft.world.server.ServerWorld) {
             // Sponge start
             final PhaseTracker server = PhaseTracker.SERVER;
+            final Vector3d destinationPosition;
             boolean hasMovementContext = true;
-            if (!server.getCurrentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
-                hasMovementContext = false;
-                server.pushCause(SpongeCommon.getActivePlugin());
-                server.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+            if (ShouldFire.MOVE_ENTITY_EVENT) {
+                if (!server.getCurrentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
+                    hasMovementContext = false;
+                    server.pushCause(SpongeCommon.getActivePlugin());
+                    server.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+                }
+
+                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(server.getCurrentCause(),
+                        (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()), new Vector3d(x, y, z),
+                        new Vector3d(x, y, z));
+
+                if (!hasMovementContext) {
+                    server.popCause();
+                    server.removeContext(EventContextKeys.MOVEMENT_TYPE);
+                }
+
+                if (SpongeCommon.postEvent(event)) {
+                    return;
+                }
+
+                destinationPosition = event.getDestinationPosition();
+            } else {
+                destinationPosition = new Vector3d(x, y, z);
             }
-
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(server.getCurrentCause(),
-                    (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()), new Vector3d(x, y, z),
-                    new Vector3d(x, y, z));
-
-            if (!hasMovementContext) {
-                server.popCause();
-                server.removeContext(EventContextKeys.MOVEMENT_TYPE);
-            }
-
-            if (SpongeCommon.postEvent(event)) {
-                return;
-            }
-
-            final Vector3d destinationPosition = event.getDestinationPosition();
             // Sponge end
             final ChunkPos chunkpos = new ChunkPos(new BlockPos(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ()));
             ((net.minecraft.world.server.ServerWorld)this.level).getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 0,

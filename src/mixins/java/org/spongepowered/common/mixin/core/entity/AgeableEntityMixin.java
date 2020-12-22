@@ -35,6 +35,7 @@ import org.spongepowered.common.SpongeCommon;
 
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.passive.AnimalEntity;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(AgeableEntity.class)
@@ -42,7 +43,7 @@ public abstract class AgeableEntityMixin extends MobEntityMixin {
 
     @Inject(method = "setAge", at = @At("RETURN"))
     private void impl$callReadyToMateOnAgeUp(final int age, final CallbackInfo ci) {
-        if (age == 0) {
+        if (age == 0 && ShouldFire.BREEDING_EVENT_READY_TO_MATE) {
             if (((AgeableEntity) (Object) this) instanceof AnimalEntity) {
                 final BreedingEvent.ReadyToMate event = SpongeEventFactory.createBreedingEventReadyToMate(PhaseTracker.getCauseStackManager().getCurrentCause(), (Animal) this);
                 SpongeCommon.postEvent(event);
