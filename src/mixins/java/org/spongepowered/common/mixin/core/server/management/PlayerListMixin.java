@@ -103,10 +103,16 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     private boolean impl$isGameMechanicRespawn = false;
     RegistryKey<World> impl$newDestination = null;
+    RegistryKey<World> impl$originalDestination = null;
 
     @Override
-    public void bridge$setNewDestinationDimensionKey(final RegistryKey<World> key) {
-        this.impl$newDestination = key;
+    public void bridge$setOriginalDestinationDimension(final RegistryKey<World> dimension) {
+        this.impl$originalDestination = dimension;
+    }
+
+    @Override
+    public void bridge$setNewDestinationDimension(final RegistryKey<World> dimension) {
+        this.impl$newDestination = dimension;
     }
 
     @Redirect(method = "placeNewPlayer",
@@ -339,17 +345,14 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Vector3d originalPosition = VecHelper.toVector3d(originalPlayer.position());
         final Vector3d destinationPosition = VecHelper.toVector3d(recreatedPlayer.position());
         final org.spongepowered.api.world.server.ServerWorld originalWorld = (org.spongepowered.api.world.server.ServerWorld) originalPlayer.level;
-        final org.spongepowered.api.world.server.ServerWorld originalDestinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server
-                .getLevel(this.impl$newDestination == null ? World.OVERWORLD : this.impl$newDestination);
-        final org.spongepowered.api.world.server.ServerWorld destinationWorld = (org.spongepowered.api.world.server.ServerWorld) recreatedPlayer.level;
+        final org.spongepowered.api.world.server.ServerWorld originalDestinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server.getLevel(this.impl$originalDestination == null ? World.OVERWORLD : this.impl$originalDestination);
+        final org.spongepowered.api.world.server.ServerWorld destinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server.getLevel(this.impl$newDestination == null ? World.OVERWORLD : this.impl$newDestination);
 
-        final RespawnPlayerEvent.Recreate event =
-                SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().getCurrentCause(), destinationPosition,
-                        originalWorld, originalPosition, destinationWorld, originalDestinationWorld, destinationPosition, (ServerPlayer) originalPlayer,
-                        (ServerPlayer) recreatedPlayer, this.impl$isGameMechanicRespawn, !keepAllPlayerData);
+        final RespawnPlayerEvent.Recreate event = SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().getCurrentCause(), destinationPosition, originalWorld, originalPosition, destinationWorld, originalDestinationWorld, destinationPosition, (ServerPlayer) originalPlayer, (ServerPlayer) recreatedPlayer, this.impl$isGameMechanicRespawn, !keepAllPlayerData);
         SpongeCommon.postEvent(event);
         recreatedPlayer.setPos(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(), event.getDestinationPosition().getZ());
         this.impl$isGameMechanicRespawn = false;
+        this.impl$originalDestination = null;
         this.impl$newDestination = null;
 
         final ServerWorld targetWorld = (ServerWorld) event.getDestinationWorld();

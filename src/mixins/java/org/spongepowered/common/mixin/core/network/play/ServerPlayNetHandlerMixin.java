@@ -433,7 +433,8 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
                         (org.spongepowered.api.world.server.ServerWorld) overworld,
                         (ServerPlayer) player);
         SpongeCommon.postEvent(event);
-        ((PlayerListBridge) this.server.getPlayerList()).bridge$setNewDestinationDimensionKey(((ServerWorld) event.getDestinationWorld()).dimension());
+        ((PlayerListBridge) this.server.getPlayerList()).bridge$setOriginalDestinationDimension(((ServerWorld) event.getOriginalDestinationWorld()).dimension());
+        ((PlayerListBridge) this.server.getPlayerList()).bridge$setNewDestinationDimension(((ServerWorld) event.getDestinationWorld()).dimension());
         // The key is reset to null in the overwrite
         return playerList.respawn(player, keepAllPlayerData);
     }
