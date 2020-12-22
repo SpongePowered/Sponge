@@ -66,4 +66,6 @@ public interface StyleAccessor {
 
     @Accessor("obfuscated") Boolean accessor$obfuscated();
 
+    @Accessor("font") ResourceLocation accessor$font();
+
 }
