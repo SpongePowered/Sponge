@@ -49,7 +49,6 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.SharedConstants;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -439,37 +438,25 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         return playerList.respawn(player, keepAllPlayerData);
     }
 
-    @SuppressWarnings("deprecation")
-    @Redirect(method = "handleSignUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CUpdateSignPacket;getLines()[Ljava/lang/String;"))
-    private String[] impl$callChangeSignEvent(final CUpdateSignPacket packet) {
-        final @Nullable ServerWorld world = this.server.getLevel(this.player.getLevel().dimension());
-        if (world == null) {
-            return new String[] {};
-        }
-        final BlockPos position = packet.getPos();
-        if (!world.hasChunkAt(position)) {
-            return new String[] {};
-        }
-        final @Nullable SignTileEntity sign = (SignTileEntity) world.getBlockEntity(position);
-        if (sign == null) {
-            return new String[] {};
-        }
-        final ListValue<Component> originalLinesValue = ((Sign) sign).getValue(Keys.SIGN_LINES)
-            .orElseGet(() -> new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.of()));
+    @Redirect(method = "updateSignText", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
+    private int impl$callChangeSignEvent(final List<String> list, CUpdateSignPacket p_244542_1_, List<String> p_244542_2_) {
+        final SignTileEntity blockEntity = (SignTileEntity) this.player.level.getBlockEntity(p_244542_1_.getPos());
+        final ListValue<Component> originalLinesValue = ((Sign) blockEntity).getValue(Keys.SIGN_LINES)
+                .orElseGet(() -> new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.of()));
 
         final List<Component> newLines = new ArrayList<>();
-        for (final String line : packet.getLines()) {
+        for (final String line : list) {
             newLines.add(Component.text(SharedConstants.filterText(line)));
         }
 
         final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES, newLines);
         final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 originalLinesValue.asImmutable(), newLinesValue,
-                (Sign) sign);
+                (Sign) blockEntity);
         final ListValue<Component> toApply = SpongeCommon.postEvent(event) ? originalLinesValue : newLinesValue;
-        ((Sign) sign).offer(toApply);
+        ((Sign) blockEntity).offer(toApply);
 
-        return ServerPlayNetHandlerMixin.IMPL$ZERO_LENGTH_STRING_ARRAY;
+        return 0;
     }
 
     private String[] impl$extractCommandString(final String commandString) {
