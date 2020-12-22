@@ -35,7 +35,7 @@ public final class RegisterDataEventImpl extends AbstractLifecycleEvent implemen
 
     private final SpongeDataManager spongeDataManager;
 
-    public RegisterDataEventImpl(SpongeDataManager spongeDataManager, final Cause cause, final Game game) {
+    public RegisterDataEventImpl(final Cause cause, final Game game, final SpongeDataManager spongeDataManager) {
         super(cause, game);
         this.spongeDataManager = spongeDataManager;
     }

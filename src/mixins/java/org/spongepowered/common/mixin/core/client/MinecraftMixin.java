@@ -92,11 +92,10 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         SpongeCommon.getGame().getAsyncScheduler().close();
     }
 
-    // Before loading datapacks on startup call events so that plugins can register theirs
     @Redirect(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveFormat$LevelSave;getLevelPath(Lnet/minecraft/world/storage/FolderName;)Ljava/nio/file/Path;"))
-    private Path impl$configurePackRepository(SaveFormat.LevelSave levelSave, FolderName folderName) {
+    private Path impl$configurePackRepository(final SaveFormat.LevelSave levelSave, final FolderName folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
-        SpongeBootstrap.getLifecycle().earlyInit(datapackDir);
+        SpongeBootstrap.getLifecycle().callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
     }
 

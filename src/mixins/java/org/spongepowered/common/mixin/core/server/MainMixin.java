@@ -37,11 +37,13 @@ import java.nio.file.Path;
 @Mixin(Main.class)
 public abstract class MainMixin {
 
-    // Before loading datapacks on startup call events so that plugins can register theirs
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveFormat$LevelSave;getLevelPath(Lnet/minecraft/world/storage/FolderName;)Ljava/nio/file/Path;"))
-    private static Path impl$configurePackRepository(SaveFormat.LevelSave levelSave, FolderName folderName) {
+    private static Path impl$configurePackRepository(final SaveFormat.LevelSave levelSave, final FolderName folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
-        SpongeBootstrap.getLifecycle().earlyInit(datapackDir);
+        SpongeBootstrap.getLifecycle().establishGlobalRegistries();
+        SpongeBootstrap.getLifecycle().establishDataProviders();
+        SpongeBootstrap.getLifecycle().callRegisterDataEvent();
+        SpongeBootstrap.getLifecycle().callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
     }
 }

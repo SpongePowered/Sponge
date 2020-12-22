@@ -350,9 +350,4 @@ public final class SpongeDataManager implements DataManager {
         }
         return Optional.empty();
     }
-
-    public void callRegisterDataEvent() {
-        final RegisterDataEventImpl event = new RegisterDataEventImpl(this, Cause.of(EventContext.empty(), Sponge.getGame()), Sponge.getGame());
-        SpongeCommon.postEvent(event);
-    }
 }

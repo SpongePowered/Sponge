@@ -46,6 +46,7 @@ import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryEvent;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryValueEvent;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
+import org.spongepowered.common.event.lifecycle.RegisterDataEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
@@ -76,19 +77,6 @@ public final class SpongeLifecycle {
         this.injector = injector;
     }
 
-    // Called before loading datapacks
-    public void earlyInit(final Path datapackDir) {
-        this.establishGlobalRegistries();
-        this.establishDataProviders();
-        SpongeDataManager.INSTANCE.callRegisterDataEvent();
-        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
-        try {
-            SpongeDataPackManager.INSTANCE.serialize(datapackDir, new ArrayList<>());
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public void establishFactories() {
         ((SpongeFactoryProvider) this.game.getFactoryProvider()).registerDefaultFactories();
     }
@@ -115,6 +103,29 @@ public final class SpongeLifecycle {
 
         this.game.getEventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
         this.game.getEventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
+    }
+
+    public void callRegisterDataEvent() {
+        this.game.getEventManager().post(new RegisterDataEventImpl(Cause.of(EventContext.empty(), Sponge.getGame()), Sponge.getGame(),
+            (SpongeDataManager) this.game.getDataManager()));
+    }
+
+    public void establishDataProviders() {
+        ((SpongeDataManager) this.game.getDataManager()).registerDefaultProviders();
+    }
+
+    public void establishDataKeyListeners() {
+        ((SpongeDataManager) this.game.getDataManager()).registerKeyListeners();
+    }
+
+    public void callRegisterDataPackValueEvent(final Path datapackDir) {
+
+        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
+        try {
+            SpongeDataPackManager.INSTANCE.serialize(datapackDir, new ArrayList<>());
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void callRegisterChannelEvent() {
@@ -199,13 +210,5 @@ public final class SpongeLifecycle {
                 .stream()
                 .filter(plugin -> !(plugin instanceof DummyPluginContainer))
                 .collect(Collectors.toList());
-    }
-
-    public void establishDataProviders() {
-        ((SpongeDataManager) this.game.getDataManager()).registerDefaultProviders();
-    }
-
-    public void establishDataKeyListeners() {
-        ((SpongeDataManager) this.game.getDataManager()).registerKeyListeners();
     }
 }

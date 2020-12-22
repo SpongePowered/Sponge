@@ -338,15 +338,19 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         }
     }
 
-    @Inject(method = "handleInteract", cancellable = true,
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/Entity;interactAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/vector/Vector3d;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResultType;"),
-            locals = LocalCapture.CAPTURE_FAILHARD
+    @Inject(
+        method = "handleInteract",
+        cancellable = true,
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/entity/Entity;interactAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/vector/Vector3d;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResultType;"
+        )
     )
-    public void impl$onRightClickAtEntity(final CUseEntityPacket packetIn, final CallbackInfo ci, final ServerWorld serverworld, final Entity entity) {
-        final ItemStack itemInHand = packetIn.getHand() == null ? ItemStack.EMPTY : this.player.getItemInHand(packetIn.getHand());
+    public void impl$onRightClickAtEntity(final CUseEntityPacket p_147340_1, final CallbackInfo ci) {
+        final Entity entity = p_147340_1.getTarget(this.player.getLevel());
+        final ItemStack itemInHand = p_147340_1.getHand() == null ? ItemStack.EMPTY : this.player.getItemInHand(p_147340_1.getHand());
         final InteractEntityEvent.Secondary event = SpongeCommonEventFactory
-                .callInteractEntityEventSecondary(this.player, itemInHand, entity, packetIn.getHand(), null);
+                .callInteractEntityEventSecondary(this.player, itemInHand, entity, p_147340_1.getHand(), null);
         if (event.isCancelled()) {
             ci.cancel();
         }
