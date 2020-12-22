@@ -42,6 +42,7 @@ import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.IndirectEntityDamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -325,16 +326,16 @@ public final class DamageEventHandler {
         final Multimap<Enchantment, Integer> enchantments = LinkedHashMultimap.create();
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
         if (!heldItem.isEmpty()) {
-            final ListNBT nbttaglist = heldItem.getEnchantmentTags();
-            if (nbttaglist.isEmpty()) {
+            final ListNBT enchantmentCompounds = heldItem.getEnchantmentTags();
+            if (enchantmentCompounds.isEmpty()) {
                 return ImmutableList.of();
             }
 
-            for (int i = 0; i < nbttaglist.size(); ++i) {
-                final int j = nbttaglist.getCompound(i).getShort("id");
-                final int enchantmentLevel = nbttaglist.getCompound(i).getShort("lvl");
+            for (int i = 0; i < enchantmentCompounds.size(); ++i) {
+                final String id = enchantmentCompounds.getCompound(i).getString("id");
+                final int enchantmentLevel = enchantmentCompounds.getCompound(i).getInt("lvl");
 
-                final Enchantment enchantment = Registry.ENCHANTMENT.byId(j);
+                final Enchantment enchantment = Registry.ENCHANTMENT.get(new ResourceLocation(id));
                 if (enchantment != null) {
                     enchantments.put(enchantment, enchantmentLevel);
                 }
