@@ -877,9 +877,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 ((IServerWorldInfoBridge) levelData).bridge$setConfigAdapter(configAdapter);
                 ((ResourceKeyBridge) levelData).bridge$setKey(key);
             } else {
+                final ServerWorld defaultWorld = this.worlds.get(World.OVERWORLD);
                 final WorldSettingsImport<INBT> worldSettingsImport = WorldSettingsImport.create(NBTDynamicOps.INSTANCE,
                         ((MinecraftServerAccessor) this.server).accessor$dataPackRegistries().getResourceManager(),
-                        DynamicRegistries.builtin());
+                        (DynamicRegistries.Impl) defaultWorld.registryAccess());
                 levelData = (ServerWorldInfo) levelSave.getDataTag(worldSettingsImport, defaultLevelSettings.getDataPackConfig());
                 if (levelData == null) {
                     isNewLevelData = true;
@@ -976,7 +977,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getProgressListenerFactory().create(11);
 
             final ServerWorld serverWorld = new ServerWorld(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), levelSave, levelData,
-                    registryKey, dimensionType, chunkStatusListener, chunkGenerator, isDebugGeneration, seed, spawners, true);
+                    registryKey, dimensionType, chunkStatusListener, chunkGenerator, isDebugGeneration, seed, isDefaultWorld ? spawners :
+                    ImmutableList.of(), true);
 
             this.worlds.put(registryKey, serverWorld);
 
