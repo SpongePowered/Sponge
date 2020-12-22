@@ -25,10 +25,22 @@
 package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
 import net.minecraft.item.crafting.ShapelessRecipe;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ShapelessRecipe.class)
 public abstract class ShapelessRecipeMixin_API implements ShapelessCraftingRecipe {
 
+    // @formatter:off
+    @Shadow @Final private ResourceLocation id;
+    // @formatter:on
+
+    @Override
+    public ResourceKey getKey() {
+        return (ResourceKey) (Object) this.id;
+    }
 }

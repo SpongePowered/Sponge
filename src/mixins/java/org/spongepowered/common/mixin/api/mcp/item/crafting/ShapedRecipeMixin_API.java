@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.item.crafting;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,7 +41,13 @@ public abstract class ShapedRecipeMixin_API implements ShapedCraftingRecipe {
     @Shadow @Final private int width;
     @Shadow @Final private int height;
     @Shadow @Final private NonNullList<Ingredient> recipeItems;
+    @Shadow @Final private ResourceLocation id;
     // @formatter:on
+
+    @Override
+    public ResourceKey getKey() {
+        return (ResourceKey) (Object) this.id;
+    }
 
     @SuppressWarnings("ConstantConditions")
     @Override

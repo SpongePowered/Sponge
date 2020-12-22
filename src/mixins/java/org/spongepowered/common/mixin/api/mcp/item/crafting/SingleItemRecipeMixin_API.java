@@ -24,21 +24,20 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
-import net.minecraft.item.crafting.SpecialRecipe;
+import net.minecraft.item.crafting.SingleItemRecipe;
+import net.minecraft.item.crafting.StonecuttingRecipe;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
+import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(SpecialRecipe.class)
-public abstract class SpecialRecipeMixin_API implements SpecialCraftingRecipe {
+@Mixin(SingleItemRecipe.class)
+public abstract class SingleItemRecipeMixin_API {
 
-    @Shadow @Final private ResourceLocation id;
+    // @formatter:off
+    @Shadow @Final protected ResourceLocation id;
+    // @formatter:on
 
-    @Override
-    public ResourceKey getKey() {
-        return (ResourceKey) (Object) this.id;
-    }
 }

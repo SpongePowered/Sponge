@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.item.crafting;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.item.recipe.cooking.CookingResult;
@@ -51,6 +52,12 @@ public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
     @Shadow public abstract float shadow$getExperience();
     @Shadow public abstract int shadow$getCookingTime();
     // @formatter:on
+
+
+    @Override
+    public ResourceKey getKey() {
+        return (ResourceKey) (Object) this.id;
+    }
 
     @Override
     public org.spongepowered.api.item.recipe.crafting.Ingredient getIngredient() {
