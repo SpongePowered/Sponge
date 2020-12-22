@@ -62,7 +62,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
 
     @Override
     default <E> DataTransactionResult offer(Key<? extends Value<E>> key, E value) {
-        return this.getProviderFor(key).offer(this.delegateDataHolder(), value);
+        return this.getProviderFor(requireNonNull(key, "key")).offer(this.delegateDataHolder(), value);
     }
 
     @Override

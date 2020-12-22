@@ -80,6 +80,7 @@ public final class SpongeLifecycle {
     public void earlyInit(final Path datapackDir) {
         this.establishGlobalRegistries();
         this.establishDataProviders();
+        SpongeDataManager.INSTANCE.callRegisterDataEvent();
         SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
         try {
             SpongeDataPackManager.INSTANCE.serialize(datapackDir, new ArrayList<>());

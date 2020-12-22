@@ -48,6 +48,8 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -62,6 +64,7 @@ import org.spongepowered.common.data.provider.CustomDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
+import org.spongepowered.common.event.lifecycle.RegisterDataEventImpl;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.registry.provider.DataTranslatorProvider;
 import org.spongepowered.common.util.Constants;
@@ -301,6 +304,7 @@ public final class SpongeDataManager implements DataManager {
 
     public void registerDefaultProviders() {
         this.dataProviderRegistry.registerDefaultProviders();
+
     }
 
     public static DataStoreRegistry getDatastoreRegistry() {
@@ -345,5 +349,10 @@ public final class SpongeDataManager implements DataManager {
             }
         }
         return Optional.empty();
+    }
+
+    public void callRegisterDataEvent() {
+        final RegisterDataEventImpl event = new RegisterDataEventImpl(this, Cause.of(EventContext.empty(), Sponge.getGame()), Sponge.getGame());
+        SpongeCommon.postEvent(event);
     }
 }
