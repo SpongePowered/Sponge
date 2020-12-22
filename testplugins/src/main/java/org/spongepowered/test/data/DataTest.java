@@ -26,10 +26,14 @@ package org.spongepowered.test.data;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -429,9 +433,16 @@ public final class DataTest  {
         this.checkWithData(acaciaStairs, Keys.DIRECTION, Direction.WEST);
 
         // TODO DisplayNames include font
-        this.checkGetData(jungleAxe, Keys.DISPLAY_NAME, Component.text("Jungle Axe")); // TODO itemstack DisplayName includes a chat.square_brackets
-        this.checkGetData(shulkerBullet, Keys.DISPLAY_NAME, Component.text("Angry Shulker Bullet")); // TODO entity DisplayName includes a hoverevent
-        this.checkGetData(sheep, Keys.DISPLAY_NAME, Component.text("A sheep")); // Set with CUSTOM_NAME
+
+        this.checkGetData(jungleAxe, Keys.DISPLAY_NAME,
+                Component.translatable("chat.square_brackets").args(Component.empty().append(Component.text("Jungle Axe")).decorate(TextDecoration.ITALIC))
+                        .color(NamedTextColor.WHITE).hoverEvent(jungleAxe.createSnapshot().asHoverEvent()));
+        this.checkGetData(shulkerBullet, Keys.DISPLAY_NAME, Component.text("Angry Shulker Bullet")
+                .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("shulker_bullet"), shulkerBullet.getUniqueId(), Component.text("Angry Shulker Bullet")))
+                .insertion(shulkerBullet.getUniqueId().toString()));
+        this.checkGetData(sheep, Keys.DISPLAY_NAME, Component.text("A sheep")
+                .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("sheep"), sheep.getUniqueId(), Component.text("A sheep")))
+                .insertion(sheep.getUniqueId().toString())); // Set with CUSTOM_NAME
         world.setBlock(blockPos, BlockTypes.CHEST.get().getDefaultState());
         this.checkGetData(location, Keys.CUSTOM_NAME, null);
         this.checkGetData(location, Keys.DISPLAY_NAME, Component.translatable("container.chest"));
