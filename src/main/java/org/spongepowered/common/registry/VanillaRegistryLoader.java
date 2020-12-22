@@ -78,6 +78,7 @@ import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 import org.spongepowered.common.accessor.entity.passive.MooshroomEntity_TypeAccessor;
 import org.spongepowered.common.accessor.item.ArmorMaterialAccessor;
+import org.spongepowered.common.accessor.tileentity.BannerPatternAccessor;
 import org.spongepowered.common.advancement.criterion.SpongeDummyTrigger;
 import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 
@@ -186,7 +187,7 @@ final class VanillaRegistryLoader {
             map.put(Team.Visible.HIDE_FOR_OWN_TEAM, "hide_for_own_team");
         });
         this.knownName(RegistryTypes.ADVANCEMENT_TYPE, FrameType.values(), FrameType::getName);
-        this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), BannerPattern::getFilename);
+        this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFishEntity.Type.values());
     }
 

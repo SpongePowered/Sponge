@@ -49,6 +49,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.ExplosionBridge;
@@ -89,10 +90,24 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     private float impl$randomness;
     private double impl$knockback;
 
-    @Inject(method = "<init>(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;DDDFZLnet/minecraft/world/Explosion$Mode;)V", at = @At("RETURN"))
-    private void onConstructed(
-        final World worldIn, final Entity exploderIn, final double xIn, final double yIn, final double zIn, final float sizeIn, final boolean causesFireIn,
+    @Inject(
+        method = "<init>(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;Lnet/minecraft/util/DamageSource;Lnet/minecraft/world/ExplosionContext;DDDFZLnet/minecraft/world/Explosion$Mode;)V",
+        at = @At("RETURN")
+    )
+    private void impl$onConstructed(final World worldIn, final Entity exploderIn, final double xIn, final double yIn, final double zIn, final float sizeIn, final boolean causesFireIn,
             final net.minecraft.world.Explosion.Mode modeIn, final CallbackInfo ci) {
+        // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
+        // Sponge-created explosions will explicitly set 'impl$shouldBreakBlocks' to its proper value
+        this.impl$shouldBreakBlocks = this.blockInteraction == net.minecraft.world.Explosion.Mode.BREAK || this.blockInteraction == net.minecraft.world.Explosion.Mode.DESTROY;
+        this.impl$shouldDamageEntities = true;
+        this.impl$resolution = 16;
+        this.impl$randomness = 1.0F;
+        this.impl$knockback = 1.0;
+    }
+
+    // (Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;Lnet/minecraft/util/DamageSource;Lnet/minecraft/world/ExplosionContext;DDDFZLnet/minecraft/world/Explosion$Mode;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V
+    @Surrogate
+    private void impl$onConstructed(final World worldIn, final Entity exploderIn, final DamageSource damageSourceIn, final ExplosionContext explosionContextIn, final double xIn, final double yIn, final double zIn, final float sizeIn, final boolean causesFireIn, final net.minecraft.world.Explosion.Mode modeIn, final CallbackInfo ci) {
         // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
         // Sponge-created explosions will explicitly set 'impl$shouldBreakBlocks' to its proper value
         this.impl$shouldBreakBlocks = this.blockInteraction == net.minecraft.world.Explosion.Mode.BREAK || this.blockInteraction == net.minecraft.world.Explosion.Mode.DESTROY;

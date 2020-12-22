@@ -54,8 +54,6 @@ public interface StyleAccessor {
         throw new UntransformedInvokerError();
     }
 
-    @Accessor("color") Color accessor$color();
-
     @Accessor("bold") Boolean accessor$bold();
 
     @Accessor("italic") Boolean accessor$italic();

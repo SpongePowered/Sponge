@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EyeOfEnderEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnderEyeItem;
@@ -49,6 +50,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -124,54 +126,13 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         }
     }
 
-    /**
-     * @author gabizou - June 10th, 2019 - 1.12.2
-     * @reason Instead of redirecting the world.spawnEntity,
-     * we'll inject with a local capture to have the ability to
-     * add context to the entity being spawned. Normally, by this point,
-     * the cause stack will have the information available, but,
-     * there are cases where we need to add the context of the item
-     * and stack if the interact is being called by another source.
-     *
-     * @param worldIn The world
-     * @param playerIn The player using the item
-     * @param handIn The hand
-     * @param cir The callback
-     * @param playerStack The ItemStack used from the hand
-     * @param result The raytrace validated using the item
-     * @param targetPos The target position of the dungeon
-     * @param enderEye The ender eye being spawned
-     */
-    @Inject(method = "use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/World;addFreshEntity(Lnet/minecraft/entity/Entity;)Z"
-        ),
-        locals = LocalCapture.CAPTURE_FAILSOFT
-    )
-    private void impl$setShooter(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
-        final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack playerStack, final RayTraceResult result,
-        final BlockPos targetPos, final EyeOfEnderEntity enderEye) {
-        if (((WorldBridge) worldIn).bridge$isFake()) {
-            return;
+    @Redirect(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addFreshEntity(Lnet/minecraft/entity/Entity;)Z"))
+    private boolean impl$setShooter(final World world, final Entity entity, final World p_77659_1_, final PlayerEntity p_77659_2_) {
+        if (((WorldBridge) world).bridge$isFake()) {
+            return world.addFreshEntity(entity);
         }
-        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER, (ProjectileSource) playerIn);
-    }
 
-    /**
-     * The RayTraceResult is lost, and somehow, production JVM will shove the CallbackInfoReturnable
-     * into the LVT.... So.... Don't care which one is actually on the stack, it might be the one from
-     * {@link #impl$ThrowForPreEvent(World, PlayerEntity, Hand, CallbackInfoReturnable, ItemStack, BlockPos)}
-     * or some other injection. Either way, this one works in production.
-     */
-    @Surrogate
-    private void impl$setShooter(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
-        final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack playerStack,
-        final BlockPos targetPos, final EyeOfEnderEntity enderEye, final CallbackInfoReturnable<ActionResult<ItemStack>> preEventCir) {
-        if (((WorldBridge) worldIn).bridge$isFake()) {
-            return;
-        }
-        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER, (ProjectileSource) playerIn);
+        ((EyeOfEnder) entity).offer(Keys.SHOOTER, (ProjectileSource) p_77659_2_);
+        return world.addFreshEntity(entity);
     }
-
 }

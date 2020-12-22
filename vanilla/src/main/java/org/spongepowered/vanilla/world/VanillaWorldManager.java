@@ -80,6 +80,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.storage.SaveFormat_LevelSaveAccessor;
+import org.spongepowered.common.accessor.world.storage.ServerWorldInfoAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
@@ -770,7 +771,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     @Override
     public void loadLevel() {
         final ServerWorldInfo defaultLevelData = (ServerWorldInfo) this.server.getWorldData();
-        final WorldSettings defaultLevelSettings = defaultLevelData.getLevelSettings();
+        final WorldSettings defaultLevelSettings = ((ServerWorldInfoAccessor) defaultLevelData).accessor$settings();
 
         SpongeCommon.postEvent(new RegisterWorldEventImpl(PhaseTracker.getCauseStackManager().getCurrentCause(), SpongeCommon.getGame(), this));
 

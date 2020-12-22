@@ -33,15 +33,10 @@ import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 
 @Mixin(Advancement.Builder.class)
 public abstract class AdvancementBuilderMixin implements AdvancementBridge {
-//
-//    @Redirect(method = "serialize", at = @At(value = "INVOKE", target = "Ljava/util/Map;entrySet()Ljava/util/Set;"))
-//    public Set<Map.Entry<String, Criterion>> impl$getCriteraSet(Map<String, Criterion> criteria) {
-//        return criteria.entrySet();
-//    }
 
     // Serializing causes the following JSON: "rewards": null
     // Deserializing does consider JsonNull to be an error here - so we fix it
-    @Redirect(method = "fromJson", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z", ordinal = 2))
+    @Redirect(method = "fromJson", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z", ordinal = 2, remap = false))
     private static boolean impl$onHasRewards(final JsonObject p_241043_0_, final String rewards) {
         if (p_241043_0_.has(rewards)) {
             return !p_241043_0_.get(rewards).isJsonNull();

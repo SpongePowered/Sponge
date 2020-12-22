@@ -187,13 +187,10 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             value = "INVOKE",
             target = "Lnet/minecraft/server/MinecraftServer;getLevel(Lnet/minecraft/util/RegistryKey;)Lnet/minecraft/world/server/ServerWorld;",
             shift = At.Shift.AFTER
-        ),
-        locals = LocalCapture.CAPTURE_FAILHARD
+        )
     )
-    private void impl$onInitPlayer_BeforeSetWorld(final NetworkManager networkManager, final ServerPlayerEntity mcPlayer, final CallbackInfo ci,
-            com.mojang.authlib.GameProfile gameprofile, PlayerProfileCache playerprofilecache, com.mojang.authlib.GameProfile gameprofile1, String s,
-            CompoundNBT compoundnbt, RegistryKey registrykey, MinecraftServer var23, RegistryKey var24) {
-        if (mcPlayer.level == null) {
+    private void impl$onInitPlayer_BeforeSetWorld(final NetworkManager p_72355_1_, final ServerPlayerEntity p_72355_2_, final CallbackInfo ci) {
+        if (p_72355_2_.level == null) {
             ci.cancel();
         }
     }
@@ -209,7 +206,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             final Object p4, final Object p5, final NetworkManager manager, final ServerPlayerEntity entity) {
         logger.info("{}[{}] logged in to world '{}' with entity id {} at ({}, {}, {})", p0, p1, ((org.spongepowered.api.world.server.ServerWorld) entity.getLevel()).getKey(), p2, p3, p4, p5);
     }
-
 
     @Redirect(method = "placeNewPlayer",
         slice = @Slice(

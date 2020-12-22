@@ -352,25 +352,14 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         }
     }
 
-    @Inject(method = "handleInteract", cancellable = true,
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/ServerPlayerEntity;attack(Lnet/minecraft/entity/Entity;)V"),
-            locals = LocalCapture.CAPTURE_FAILHARD
+    @Inject(
+        method = "handleInteract",
+        cancellable = true,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;attack(Lnet/minecraft/entity/Entity;)V")
     )
-    public void impl$onLeftClickEntity(final CUseEntityPacket packetIn, final CallbackInfo ci, final ServerWorld serverworld, final Entity entity) {
-        final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
-                this.player.getItemInHand(this.player.getUsedItemHand()), entity, this.player.getUsedItemHand(), null);
-        if (event.isCancelled()) {
-            ci.cancel();
-        }
-    }
+    public void impl$onLeftClickEntity(final CUseEntityPacket p_147340_1_, final CallbackInfo ci) {
+        final Entity entity = p_147340_1_.getTarget(this.player.getLevel());
 
-    /**
-     * In production, the ServerWorld is lost.
-     */
-    @SuppressWarnings("Duplicates")
-    @Surrogate
-    public void impl$onLeftClickEntity(final CUseEntityPacket packetIn, final CallbackInfo ci, final Entity entity) {
         final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
                 this.player.getItemInHand(this.player.getUsedItemHand()), entity, this.player.getUsedItemHand(), null);
         if (event.isCancelled()) {

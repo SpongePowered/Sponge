@@ -40,7 +40,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
@@ -62,12 +61,11 @@ import java.util.Optional;
 @Mixin(value = LivingEntity.class)
 public abstract class LivingEntityMixin_Inventory {
 
-    @Shadow public abstract ItemStack shadow$getItemBySlot(EquipmentSlotType slotIn);
+    // @formatter:off
     @Shadow public abstract void shadow$setItemSlot(EquipmentSlotType slotIn, ItemStack stack);
     @Shadow protected abstract ItemStack shadow$getLastHandItem(EquipmentSlotType p_241347_1_);
     @Shadow protected abstract ItemStack shadow$getLastArmorItem(EquipmentSlotType p_241346_1_);
-
-    @Shadow protected Brain<?> brain;
+    // @formatter:on
 
     private final EnumMap<EquipmentSlotType, SlotLens> impl$slotLens = new EnumMap<>(EquipmentSlotType.class);
 
