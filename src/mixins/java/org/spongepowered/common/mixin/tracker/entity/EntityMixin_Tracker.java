@@ -51,6 +51,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.entity.EntityTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -167,7 +168,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
         this.tracker$trackedInWorld = tracked;
         // Since this is called during removeEntity from world, we can
         // post the removal event here, basically.
-        if (!tracked && this.tracker$destructCause != null) {
+        if (!tracked && this.tracker$destructCause != null && ShouldFire.DESTRUCT_ENTITY_EVENT) {
             final Audience originalChannel = Audience.empty();
             SpongeCommon.postEvent(SpongeEventFactory.createDestructEntityEvent(
                 this.tracker$destructCause,

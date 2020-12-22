@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -60,6 +61,9 @@ public abstract class FallingBlockMixin {
         final CallbackInfo ci
     ) {
         if (pos.getY() < 0) {
+            return pos.getY();
+        }
+        if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             return pos.getY();
         }
         final EntityType<org.spongepowered.api.entity.FallingBlock> fallingBlock = EntityTypes.FALLING_BLOCK.get();

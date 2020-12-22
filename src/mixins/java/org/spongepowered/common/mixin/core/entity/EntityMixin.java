@@ -260,15 +260,17 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 this.shadow$setPos(repositionEvent.getDestinationPosition().getX(),
                         repositionEvent.getDestinationPosition().getY(), repositionEvent.getDestinationPosition().getZ());
             } else {
-                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
-                        location.getPosition(), location.getPosition());
-                if (SpongeCommon.postEvent(event)) {
-                    return false;
-                }
+                if (ShouldFire.MOVE_ENTITY_EVENT) {
+                    final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
+                            location.getPosition(), location.getPosition());
+                    if (SpongeCommon.postEvent(event)) {
+                        return false;
+                    }
 
-                this.shadow$setPos(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(),
-                        event.getDestinationPosition().getZ());
+                    this.shadow$setPos(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(),
+                            event.getDestinationPosition().getZ());
+                }
             }
 
             if (!destinationWorld.getChunkSource().hasChunk((int) this.shadow$getX() >> 4, (int) this.shadow$getZ() >> 4)) {

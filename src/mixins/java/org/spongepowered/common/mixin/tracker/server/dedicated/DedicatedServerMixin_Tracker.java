@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -57,7 +58,7 @@ public abstract class DedicatedServerMixin_Tracker {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
         if (!context.isInteraction()) {
             // TODO BLOCK_PROTECTED flag
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos, playerIn).isCancelled()) {
+            if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos, playerIn).isCancelled()) {
                 return true;
             }
         }

@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.projectile.ThrowableEntityMixin;
 import org.spongepowered.common.util.Constants;
@@ -83,7 +84,7 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
             cancellable = true
     )
     private void impl$callMoveEntityEventForThrower(final RayTraceResult result, final CallbackInfo ci) {
-        if (this.shadow$getCommandSenderWorld().isClientSide) {
+        if (this.shadow$getCommandSenderWorld().isClientSide || !ShouldFire.MOVE_ENTITY_EVENT) {
             return;
         }
         final Entity entity = this.shadow$getOwner();
