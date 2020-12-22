@@ -48,7 +48,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.util.RegistryKey;
-import net.minecraft.util.SharedConstants;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -446,13 +445,12 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
         final List<Component> newLines = new ArrayList<>();
         for (final String line : list) {
-            newLines.add(Component.text(SharedConstants.filterText(line)));
+            newLines.add(Component.text(line));
         }
 
         final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES, newLines);
         final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                originalLinesValue.asImmutable(), newLinesValue,
-                (Sign) blockEntity);
+                originalLinesValue.asImmutable(), newLinesValue, (Sign) blockEntity);
         final ListValue<Component> toApply = SpongeCommon.postEvent(event) ? originalLinesValue : newLinesValue;
         ((Sign) blockEntity).offer(toApply);
 
