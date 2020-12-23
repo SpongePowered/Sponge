@@ -41,12 +41,14 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
     private final DataPackSerializer<U> packSerializer;
     private final DataPackSerializableSerializer<T> objectSerializer;
     private final BiFunction<T, JsonObject, U> objectFunction;
+    private final boolean persistent;
 
     public SpongeDataPackType(final DataPackSerializer<U> packSerializer, final DataPackSerializableSerializer<T> objectSerializer,
-            final BiFunction<T, JsonObject, U> objectFunction) {
+            final BiFunction<T, JsonObject, U> objectFunction, final boolean persistent) {
         this.packSerializer = packSerializer;
         this.objectSerializer = objectSerializer;
         this.objectFunction = objectFunction;
+        this.persistent = persistent;
     }
 
     public DataPackSerializer<U> getPackSerializer() {
@@ -59,6 +61,11 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 
     public BiFunction<T, JsonObject, U> getObjectFunction() {
         return this.objectFunction;
+    }
+
+    @Override
+    public boolean persistent() {
+        return this.persistent;
     }
 
     public static final class FactoryImpl implements DataPackType.Factory {
