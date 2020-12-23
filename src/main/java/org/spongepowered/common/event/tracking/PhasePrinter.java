@@ -29,6 +29,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
@@ -65,19 +66,19 @@ public final class PhasePrinter {
     private static boolean hasPrintedAboutRunnawayPhases = false;
     private static boolean hasPrintedAsyncEntities = false;
     private static int printRunawayCount = 0;
-    private static final List<IPhaseState<?>> printedExceptionsForBlocks = new ArrayList<>();
-    private static final List<IPhaseState<?>> printedExceptionsForEntities = new ArrayList<>();
-    private static final List<Tuple<IPhaseState<?>, IPhaseState<?>>> completedIncorrectStates = new ArrayList<>();
-    private static final List<IPhaseState<?>> printedExceptionsForState = new ArrayList<>();
-    static final Set<IPhaseState<?>> printedExceptionsForUnprocessedState = new HashSet<>();
-    static final Set<IPhaseState<?>> printedExceptionForMaximumProcessDepth = new HashSet<>();
+    private static final List<IPhaseState<@NonNull ?>> printedExceptionsForBlocks = new ArrayList<>();
+    private static final List<IPhaseState<@NonNull ?>> printedExceptionsForEntities = new ArrayList<>();
+    private static final List<Tuple<IPhaseState<@NonNull ?>, IPhaseState<@NonNull ?>>> completedIncorrectStates = new ArrayList<>();
+    private static final List<IPhaseState<@NonNull ?>> printedExceptionsForState = new ArrayList<>();
+    static final Set<IPhaseState<@NonNull ?>> printedExceptionsForUnprocessedState = new HashSet<>();
+    static final Set<IPhaseState<@NonNull ?>> printedExceptionForMaximumProcessDepth = new HashSet<>();
     static final PhaseStack EMPTY = new PhaseStack();
 
 
-    public static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
+    public static final BiConsumer<PrettyPrinter, PhaseContext<@NonNull ?>> CONTEXT_PRINTER = (printer, context) ->
         context.printCustom(printer, 4);
 
-    static final BiConsumer<PrettyPrinter, PhaseContext<?>> PHASE_PRINTER = (printer, context) -> {
+    static final BiConsumer<PrettyPrinter, PhaseContext<@NonNull ?>> PHASE_PRINTER = (printer, context) -> {
             printer.add("  - Phase: %s", context.state);
             printer.add("    Context:");
             context.printCustom(printer, 4);
@@ -131,7 +132,7 @@ public final class PhasePrinter {
     }
 
 
-    static void printExceptionSpawningEntity(final PhaseTracker tracker, final PhaseContext<?> context, final Throwable e) {
+    static void printExceptionSpawningEntity(final PhaseTracker tracker, final PhaseContext<@NonNull ?> context, final Throwable e) {
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && !PhasePrinter.printedExceptionsForEntities.isEmpty()) {
             if (PhasePrinter.printedExceptionsForEntities.contains(context.state)) {
                 return;
@@ -197,7 +198,7 @@ public final class PhasePrinter {
         PhasePrinter.generateVersionInfo(printer);
     }
 
-    static void printBlockTrackingException(final PhaseTracker tracker, final PhaseContext<?> phaseData, final IPhaseState<?> phaseState, final Throwable e) {
+    static void printBlockTrackingException(final PhaseTracker tracker, final PhaseContext<@NonNull ?> phaseData, final IPhaseState<@NonNull ?> phaseState, final Throwable e) {
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && !PhasePrinter.printedExceptionsForBlocks.isEmpty()) {
             if (PhasePrinter.printedExceptionsForBlocks.contains(phaseState)) {
                 return;
@@ -211,7 +212,7 @@ public final class PhasePrinter {
         }
     }
 
-    static void printPhasestack(final PhaseTracker tracker, final PhaseContext<?> phaseData, final Throwable e, final PrettyPrinter printer) {
+    static void printPhasestack(final PhaseTracker tracker, final PhaseContext<@NonNull ?> phaseData, final Throwable e, final PrettyPrinter printer) {
         printer.addWrapped(60, "%s :", "PhaseContext");
         PhasePrinter.CONTEXT_PRINTER.accept(printer, phaseData);
         printer.addWrapped(60, "%s :", "Phases remaining");
@@ -224,11 +225,11 @@ public final class PhasePrinter {
         PhasePrinter.printMessageWithCaughtException(tracker.stack, header, subheader, tracker.getPhaseContext().state, tracker.getPhaseContext(), e);
     }
 
-    public static void printMessageWithCaughtException(final PhaseTracker tracker, final String header, final String subHeader, final IPhaseState<?> state, final PhaseContext<?> context, @Nullable final Throwable t) {
+    public static void printMessageWithCaughtException(final PhaseTracker tracker, final String header, final String subHeader, final IPhaseState<@NonNull ?> state, final PhaseContext<@NonNull ?> context, @Nullable final Throwable t) {
         PhasePrinter.printMessageWithCaughtException(tracker.stack, header, subHeader, state, context, t);
     }
 
-    public static void printMessageWithCaughtException(final PhaseStack stack, final String header, final String subHeader, final IPhaseState<?> state, final PhaseContext<?> context, @Nullable final Throwable t) {
+    public static void printMessageWithCaughtException(final PhaseStack stack, final String header, final String subHeader, final IPhaseState<@NonNull ?> state, final PhaseContext<@NonNull ?> context, @Nullable final Throwable t) {
         final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add(header).centre().hr()
                 .add("%s %s", subHeader, state)
@@ -248,9 +249,9 @@ public final class PhasePrinter {
         printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
     }
 
-    static void printExceptionFromPhase(final PhaseStack stack, final Throwable e, final PhaseContext<?> context) {
+    static void printExceptionFromPhase(final PhaseStack stack, final Throwable e, final PhaseContext<@NonNull ?> context) {
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && !PhasePrinter.printedExceptionsForState.isEmpty()) {
-            for (final IPhaseState<?> iPhaseState : PhasePrinter.printedExceptionsForState) {
+            for (final IPhaseState<@NonNull ?> iPhaseState : PhasePrinter.printedExceptionsForState) {
                 if (context.state == iPhaseState) {
                     return;
                 }
@@ -272,13 +273,13 @@ public final class PhasePrinter {
         }
     }
 
-    static void printUnprocessedPhaseContextObjects(final PhaseStack stack, final IPhaseState<?> state, final PhaseContext<?> context) {
+    static void printUnprocessedPhaseContextObjects(final PhaseStack stack, final IPhaseState<@NonNull ?> state, final PhaseContext<@NonNull ?> context) {
         PhasePrinter.printMessageWithCaughtException(stack, "Failed to process all PhaseContext captured!",
                 "During the processing of a phase, certain objects were captured in a PhaseContext. All of them should have been removed from the PhaseContext by this point",
                 state, context, null);
     }
 
-    static void printRunawayPhase(final PhaseStack stack, final IPhaseState<?> state, final PhaseContext<?> context) {
+    static void printRunawayPhase(final PhaseStack stack, final IPhaseState<@NonNull ?> state, final PhaseContext<@NonNull ?> context) {
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && !PhasePrinter.hasPrintedAboutRunnawayPhases) {
             // Avoiding spam logs.
             return;
@@ -296,7 +297,7 @@ public final class PhasePrinter {
         }
     }
 
-    static void printRunnawayPhaseCompletion(final PhaseStack stack, final IPhaseState<?> state) {
+    static void printRunnawayPhaseCompletion(final PhaseStack stack, final IPhaseState<@NonNull ?> state) {
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && !PhasePrinter.hasPrintedAboutRunnawayPhases) {
             // Avoiding spam logs.
             return;
@@ -322,9 +323,9 @@ public final class PhasePrinter {
         }
     }
 
-    static void printIncorrectPhaseCompletion(final PhaseStack stack, final IPhaseState<?> prevState, final IPhaseState<?> state) {
+    static void printIncorrectPhaseCompletion(final PhaseStack stack, final IPhaseState<@NonNull ?> prevState, final IPhaseState<@NonNull ?> state) {
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && !PhasePrinter.completedIncorrectStates.isEmpty()) {
-            for (final Tuple<IPhaseState<?>, IPhaseState<?>> tuple : PhasePrinter.completedIncorrectStates) {
+            for (final Tuple<IPhaseState<@NonNull ?>, IPhaseState<@NonNull ?>> tuple : PhasePrinter.completedIncorrectStates) {
                 if ((tuple.getFirst().equals(prevState)
                         && tuple.getSecond().equals(state))) {
                     // we've already printed once about the previous state and the current state
@@ -352,7 +353,7 @@ public final class PhasePrinter {
         }
     }
 
-    static void printEmptyStackOnCompletion(final PhaseContext<?> context) {
+    static void printEmptyStackOnCompletion(final PhaseContext<@NonNull ?> context) {
         if (PhasePrinter.hasPrintedEmptyOnce) {
             // We want to only mention it once that we are completing an
             // empty state, of course something is bound to break, but
@@ -467,7 +468,7 @@ public final class PhasePrinter {
         PhasePrinter.hasPrintedAsyncEntities = true;
     }
 
-    static boolean checkMaxBlockProcessingDepth(final IPhaseState<?> state, final PhaseContext<?> context, final int currentDepth) {
+    static boolean checkMaxBlockProcessingDepth(final IPhaseState<@NonNull ?> state, final PhaseContext<@NonNull ?> context, final int currentDepth) {
         final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
         final PhaseTrackerCategory trackerConfig = globalConfigAdapter.get().phaseTracker;
         int maxDepth = trackerConfig.maxBlockProcessingDepth;

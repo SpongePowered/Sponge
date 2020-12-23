@@ -386,10 +386,19 @@ public class PrettyPrinter {
      */
     private static final int MIN_WIDTH = 40;
 
+    private static final char DEFAULT_RULER = System.getProperty("sponge.prettyPrintingRulerChar", "-").charAt(0);
+    private static final boolean INCLUDE_BORDERS = Boolean.parseBoolean(System.getProperty("sponge.prettyPrinting.borders"));
+    private static String border() {
+        return PrettyPrinter.INCLUDE_BORDERS ? "/*" : "";
+    }
+    private static String endBorder() {
+        return PrettyPrinter.INCLUDE_BORDERS ? "*/" : "";
+    }
+
     /**
      * Horizontal rule
      */
-    private final HorizontalRule horizontalRule = new HorizontalRule('*');
+    private final HorizontalRule horizontalRule = new HorizontalRule(PrettyPrinter.DEFAULT_RULER);
 
     /**
      * Content lines
@@ -1095,12 +1104,12 @@ public class PrettyPrinter {
     }
 
     private void printSpecial(final PrintStream stream, final ISpecialEntry line) {
-        stream.printf("/*%s*/\n", line.toString());
+        stream.printf(PrettyPrinter.border() + "%s" + PrettyPrinter.endBorder() + "\n", line.toString());
     }
 
     private void printString(final PrintStream stream, final String string) {
         if (string != null) {
-            stream.printf("/* %-" + this.width + "s */\n", string);
+            stream.printf(PrettyPrinter.border() + " %-" + this.width + "s" + PrettyPrinter.endBorder() + "\n", string);
         }
     }
 
@@ -1150,11 +1159,11 @@ public class PrettyPrinter {
     }
 
     private void logSpecial(final Logger logger, final Level level, final ISpecialEntry line) {
-        logger.log(level, "/*{}*/", line.toString());
+        logger.log(level, PrettyPrinter.border() + "{}" + PrettyPrinter.endBorder(), line.toString());
     }
 
     private void logSpecial(final Logger logger, final Level level, final Marker marker, final ISpecialEntry line) {
-        logger.log(level, marker, "/*{}*/", line.toString());
+        logger.log(level, marker, PrettyPrinter.border() + "{}" + PrettyPrinter.endBorder(), line.toString());
     }
 
     private void logString(final Logger logger, final Level level, final String line) {
@@ -1163,7 +1172,7 @@ public class PrettyPrinter {
 
     private void logString(final Logger logger, final Level level, final Marker marker, final String line) {
         if (line != null) {
-            logger.log(level, String.format("/* %-" + this.width + "s */", line));
+            logger.log(level, String.format(PrettyPrinter.border() + " %-" + this.width + "s" + PrettyPrinter.endBorder(), line));
         }
     }
 
