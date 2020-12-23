@@ -334,7 +334,7 @@ public final class SpongeEventManager implements EventManager {
     @Override
     public <T extends Event> void registerListener(final PluginContainer plugin, final Class<T> eventClass, final Order order,
             final boolean beforeModifications, final EventListener<? super T> listener) {
-        this.registerListener(plugin, eventClass, Order.DEFAULT, false, listener);
+        this.registerListener(plugin, TypeToken.get(eventClass), Order.DEFAULT, false, listener);
     }
 
     @Override
