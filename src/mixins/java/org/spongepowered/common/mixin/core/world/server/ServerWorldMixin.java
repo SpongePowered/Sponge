@@ -29,6 +29,7 @@ import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.RegistryKey;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -99,7 +100,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             ChunkGenerator p_i241885_8_, boolean p_i241885_9_, long p_i241885_10_, List<ISpecialSpawner> p_i241885_12_, boolean p_i241885_13_,
             CallbackInfo ci) {
         this.impl$levelSave = p_i241885_3_;
-        this.impl$registerHolder = new SpongeRegistryHolder();
+        this.impl$registerHolder = new SpongeRegistryHolder(((DynamicRegistries.Impl) p_i241885_1_.registryAccess()));
     }
 
     @Override
