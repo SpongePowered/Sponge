@@ -127,11 +127,10 @@ import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
+import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -767,8 +766,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
 
         //  try { // Vanilla - We need to push the effect transactor so that it always pops
         try {
-            final WeakReference<ServerWorld> worldReference = new WeakReference<>((ServerWorld) (Object) this);
-            final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldReference.get(), "ServerWorld dereferenced");
+            final Supplier<ServerWorld> worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier((ServerWorld) (Object) this, "ServerWorld");
             final @Nullable TileEntity existingTile = targetChunk.getBlockEntity(immutableTarget, Chunk.CreateEntityType.CHECK);
             peek.getTransactor().logNeighborNotification(worldSupplier, immutableFrom, blockIn, immutableTarget, targetBlockState, existingTile);
 
