@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Vanilla Server Dev" type="Application" factoryName="Application">
+  <configuration default="false" name="Sponge (vanilla/server)" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="org.spongepowered.vanilla.applaunch.Main" />
     <module name="Sponge.SpongeVanilla.applaunch" />
     <option name="PROGRAM_PARAMETERS" value="-launchTarget sponge_server_dev nogui" />
