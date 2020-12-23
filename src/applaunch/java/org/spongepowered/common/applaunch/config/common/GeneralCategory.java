@@ -32,10 +32,6 @@ import org.spongepowered.common.applaunch.config.core.TokenHoldingString;
 @ConfigSerializable
 public final class GeneralCategory {
 
-    @Setting("file-io-thread-sleep")
-    @Comment("If 'true', sleeping between chunk saves will be enabled, beware of memory issues.")
-    public boolean fileIOThreadSleep = false;
-
     @Setting("plugins-dir")
     @Comment("Additional directory to search for plugins, relative to the \n"
             + "execution root or specified as an absolute path. \n"
