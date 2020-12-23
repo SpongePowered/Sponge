@@ -717,13 +717,13 @@ public final class SpongeRegistryLoaders {
     public static RegistryLoader<ParticleOption<?>> particleOption() {
         return RegistryLoader.of(l -> {
             l.add(ParticleOptions.BLOCK_STATE, k -> new SpongeParticleOption<>(BlockState.class));
-            l.add(ParticleOptions.BLOCK_STATE, k -> new SpongeParticleOption<>(Color.class));
-            l.add(ParticleOptions.BLOCK_STATE, k -> new SpongeParticleOption<>(Direction.class));
-            l.add(ParticleOptions.BLOCK_STATE, k -> new SpongeParticleOption<>(ItemStackSnapshot.class));
-            l.add(ParticleOptions.BLOCK_STATE, k -> new SpongeParticleOption<>(Vector3d.class));
-            l.add(ParticleOptions.BLOCK_STATE, k -> new SpongeParticleOption<>(PotionEffectType.class));
-            l.add(ParticleOptions.BLOCK_STATE, k -> new SpongeParticleOption<>(Integer.class, v -> v < 1 ? new IllegalArgumentException("Quantity must be at least one") : null));
-            l.add(ParticleOptions.BLOCK_STATE, k -> new SpongeParticleOption<>(Vector3d.class));
+            l.add(ParticleOptions.COLOR, k -> new SpongeParticleOption<>(Color.class));
+            l.add(ParticleOptions.DIRECTION, k -> new SpongeParticleOption<>(Direction.class));
+            l.add(ParticleOptions.ITEM_STACK_SNAPSHOT, k -> new SpongeParticleOption<>(ItemStackSnapshot.class));
+            l.add(ParticleOptions.OFFSET, k -> new SpongeParticleOption<>(Vector3d.class));
+            l.add(ParticleOptions.POTION_EFFECT_TYPE, k -> new SpongeParticleOption<>(PotionEffectType.class));
+            l.add(ParticleOptions.QUANTITY, k -> new SpongeParticleOption<>(Integer.class, v -> v < 1 ? new IllegalArgumentException("Quantity must be at least one") : null));
+            l.add(ParticleOptions.VELOCITY, k -> new SpongeParticleOption<>(Vector3d.class));
         });
     }
 
