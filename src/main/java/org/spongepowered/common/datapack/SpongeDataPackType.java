@@ -29,6 +29,7 @@ import net.minecraft.data.IFinishedRecipe;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
@@ -63,7 +64,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
     public static final class FactoryImpl implements DataPackType.Factory {
 
         private final SpongeDataPackType<Advancement, DataPackSerializedObject> advancement = new SpongeDataPackType<>(
-                new DataPackSerializer<>("Advancements", "advancements"),
+                new DataPackSerializer<>(DataPackTypes.ADVANCEMENT, "Advancements", "advancements"),
                 s -> ((net.minecraft.advancements.Advancement) s).deconstruct().serializeToJson(),
                 (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2)
         );

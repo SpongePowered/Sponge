@@ -27,6 +27,7 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonObject;
 import net.minecraft.util.SharedConstants;
 import org.apache.commons.io.FileUtils;
+import org.spongepowered.api.datapack.DataPackType;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -36,17 +37,22 @@ import java.util.List;
 
 public class DataPackSerializer<T extends DataPackSerializedObject> {
 
+    private final DataPackType type;
     private final String token;
     private final String typeDirectoryName;
 
-    public DataPackSerializer(final String token, final String typeDirectoryName) {
+    public DataPackSerializer(final DataPackType type, final String token, final String typeDirectoryName) {
+        this.type = type;
         this.token = token;
         this.typeDirectoryName = typeDirectoryName;
     }
 
     protected boolean serialize(final Path dataPackDirectory, final List<T> objects) throws IOException {
         final Path datapackDir = dataPackDirectory.resolve(this.getPackName());
-        FileUtils.deleteDirectory(datapackDir.toFile());
+
+        if (!this.type.persistent()) {
+            FileUtils.deleteDirectory(datapackDir.toFile());
+        }
 
         if (objects.isEmpty()) {
             return false;
@@ -79,6 +85,8 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
     }
 
     protected final void writeFile(final Path file, final JsonObject object) throws IOException {
+        Files.deleteIfExists(file);
+
         try (BufferedWriter bufferedwriter = Files.newBufferedWriter(file)) {
             bufferedwriter.write(object.toString());
         }

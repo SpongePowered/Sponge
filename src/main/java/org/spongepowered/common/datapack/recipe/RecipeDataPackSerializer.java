@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.datapack.recipe;
 
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.common.datapack.DataPackSerializer;
 
 import java.io.IOException;
@@ -33,7 +34,7 @@ import java.nio.file.Path;
 public final class RecipeDataPackSerializer extends DataPackSerializer<RecipeSerializedObject> {
 
     public RecipeDataPackSerializer() {
-        super("Recipes", "recipes");
+        super(DataPackTypes.RECIPE, "Recipes", "recipes");
     }
 
     @Override
