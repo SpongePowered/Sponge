@@ -18,6 +18,7 @@ val mappingsChannel: String by project
 val mappingsVersion: String by project
 val minecraftDep: String by project
 val minecraftVersion: String by project
+val minecraftMcpVersion: String by project
 val recommendedVersion: String by project
 
 val asmVersion: String by project
@@ -188,7 +189,7 @@ repositories {
     }
 }
 dependencies {
-    minecraft("net.minecraft:$minecraftDep:$minecraftVersion")
+    minecraft("net.minecraft:$minecraftDep:$minecraftMcpVersion")
 
     // api
     api(project(":SpongeAPI"))
@@ -648,7 +649,7 @@ project("SpongeVanilla") {
     }
 
     dependencies {
-        minecraft("net.minecraft:$minecraftDep:$minecraftVersion")
+        minecraft("net.minecraft:$minecraftDep:$minecraftMcpVersion")
 
         api(launch.get().output)
         implementation(accessors.get().output)
