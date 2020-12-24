@@ -85,23 +85,34 @@ public final class SpongeNodePermissionCache {
         } else {
             // get the root node.
             final Collection<String> path = dispatcher.getPath(node);
-            final String original = path.iterator().next();
-            final String pluginId = SpongeCommon.getGame().getCommandManager()
-                    .getCommandMapping(original)
-                    .map(x -> x.getPlugin().getMetadata().getId()).orElseGet(() -> {
-                        SpongeCommon.getLogger().error("Root command /{} does not have an associated plugin!", original);
-                        return "unknown";
-                    });
-            final String permString = path.stream().map(x -> {
-                final String replaced = SpongeNodePermissionCache.ILLEGAL_CHARS.matcher(x).replaceAll("").toLowerCase(Locale.ROOT);
-                if (replaced.startsWith(pluginId)) {
-                    return replaced.replaceFirst(pluginId, "");
-                }
-                if (replaced.isEmpty()) {
-                    return "node";
-                }
-                return replaced;
-            }).collect(Collectors.joining("."));
+            final String pluginId;
+            final String permString;
+            if (path.isEmpty()) {
+                pluginId = "unknown";
+                permString = node.getName();
+                // Add a warning here, it's likely due to a dangling redirect
+                SpongeCommon.getLogger()
+                        .warn("No path to command node with name {} could be found when generating it's permission node. "
+                                + "Unable to determine owning plugin - using \"unknown\" as plugin ID", permString);
+            } else {
+                final String original = path.iterator().next();
+                pluginId = SpongeCommon.getGame().getCommandManager()
+                        .getCommandMapping(original)
+                        .map(x -> x.getPlugin().getMetadata().getId()).orElseGet(() -> {
+                            SpongeCommon.getLogger().error("Root command /{} does not have an associated plugin!", original);
+                            return "unknown";
+                        });
+                permString = path.stream().map(x -> {
+                    final String replaced = SpongeNodePermissionCache.ILLEGAL_CHARS.matcher(x).replaceAll("").toLowerCase(Locale.ROOT);
+                    if (replaced.startsWith(pluginId)) {
+                        return replaced.replaceFirst(pluginId, "");
+                    }
+                    if (replaced.isEmpty()) {
+                        return "node";
+                    }
+                    return replaced;
+                }).collect(Collectors.joining("."));
+            }
             // We need to calculate this. getPath does not follow redirects thankfully.
             permission = pluginId + ".command." + permString + ".root";
         }
