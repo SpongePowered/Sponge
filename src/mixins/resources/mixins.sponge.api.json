@@ -343,7 +343,8 @@
         "mcp.world.storage.ISpawnWorldInfoMixin_API",
         "mcp.world.gen.DimensionGeneratorSettingsMixin_API",
         "mcp.item.crafting.SingleItemRecipeMixin_API",
-        "mcp.world.DimensionTypeMixin_API"
+        "mcp.world.DimensionTypeMixin_API",
+        "mcp.world.biome.IBiomeMagnifier_API"
     ],
     "client": [
         "mcp.client.MinecraftMixin_API",

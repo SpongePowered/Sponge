@@ -27,8 +27,11 @@ package org.spongepowered.common.accessor.world;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.IBiomeMagnifier;
+import org.spongepowered.api.world.dimension.DimensionEffect;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 import org.spongepowered.common.UntransformedInvokerError;
 
 import java.util.OptionalLong;
@@ -43,4 +46,22 @@ public interface DimensionTypeAccessor {
     ) {
         throw new UntransformedInvokerError();
     }
+
+    @Accessor("DEFAULT_OVERWORLD") static DimensionType accessor$DEFAULT_OVERWORLD() {
+        throw new UntransformedAccessorError();
+    }
+
+    @Accessor("DEFAULT_NETHER") static DimensionType accessor$DEFAULT_NETHER() {
+        throw new UntransformedAccessorError();
+    }
+
+    @Accessor("DEFAULT_END") static DimensionType accessor$DEFAULT_END() {
+        throw new UntransformedAccessorError();
+    }
+
+    @Accessor("fixedTime") OptionalLong accessor$fixedTime();
+
+    @Accessor("effectsLocation") ResourceLocation accessor$effectsLocation();
+
+    @Accessor("ambientLight") float accessor$ambientLight();
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe.ingredient;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.NonNullList;
@@ -39,13 +40,15 @@ import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class ResultUtil {
+public final class ResultUtil {
 
-    public static net.minecraft.item.ItemStack deserializeItemStack(JsonObject result) {
+    private static final Map<String, Function<?, net.minecraft.item.ItemStack>> cachedResultFunctions = new Object2ObjectOpenHashMap<>();
+    private static final Map<String, Function<?, NonNullList<net.minecraft.item.ItemStack>>> cachedRemainingItemsFunctions = new Object2ObjectOpenHashMap<>();
+
+    public static net.minecraft.item.ItemStack deserializeItemStack(final JsonObject result) {
         if (result == null) {
             return null;
         }
@@ -57,7 +60,7 @@ public class ResultUtil {
         }
     }
 
-    public static JsonElement serializeItemStack(net.minecraft.item.ItemStack spongeResult) {
+    public static JsonElement serializeItemStack(final net.minecraft.item.ItemStack spongeResult) {
         final DataContainer dataContainer = ItemStackUtil.fromNative(spongeResult).toContainer();
         try {
             return JSONUtils.parse(DataFormats.JSON.get().write(dataContainer));
@@ -65,8 +68,6 @@ public class ResultUtil {
             throw new IllegalStateException(e);
         }
     }
-
-    private static final Map<String, Function<?, net.minecraft.item.ItemStack>> cachedResultFunctions = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public static <C extends IInventory> Function<C, net.minecraft.item.ItemStack> deserializeResultFunction(JsonObject json) {
@@ -86,8 +87,6 @@ public class ResultUtil {
         }
         return id.toString();
     }
-
-    private static final Map<String, Function<?, NonNullList<net.minecraft.item.ItemStack>>> cachedRemainingItemsFunctions = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public static <C extends IInventory> Function<C, NonNullList<net.minecraft.item.ItemStack>> deserializeRemainingItemsFunction(JsonObject json) {

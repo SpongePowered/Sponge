@@ -27,8 +27,29 @@ package org.spongepowered.common.registry;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.plugin.PluginContainer;
 
 public final class SpongeResourceKeyFactory implements ResourceKey.Factory {
+
+    @Override
+    public ResourceKey of(final String namespace, final String value) {
+        try {
+            final ResourceLocation resourceLocation = new ResourceLocation(namespace, value);
+            return (ResourceKey) (Object) resourceLocation;
+        } catch (ResourceLocationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public ResourceKey of(final PluginContainer plugin, final String value) {
+        try {
+            final ResourceLocation resourceLocation = new ResourceLocation(plugin.getMetadata().getId(), value);
+            return (ResourceKey) (Object) resourceLocation;
+        } catch (ResourceLocationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     @Override
     public ResourceKey resolve(final String formatted) {

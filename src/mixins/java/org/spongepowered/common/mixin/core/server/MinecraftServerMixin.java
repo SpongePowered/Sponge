@@ -360,7 +360,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
     @Inject(method = "reloadResources", at = @At(value = "HEAD"))
     public void impl$reloadResources(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-
         SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
         try {
             SpongeDataPackManager.INSTANCE.serialize(this.storageSource.getLevelPath(FolderName.DATAPACK_DIR), datapacksToLoad);

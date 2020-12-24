@@ -22,21 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.registry.provider;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import net.minecraft.world.biome.ColumnFuzzedBiomeMagnifier;
+import net.minecraft.world.biome.DefaultBiomeMagnifier;
+import net.minecraft.world.biome.FuzzedBiomeMagnifier;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.ResourceKeyed;
+import org.spongepowered.api.world.biome.BiomeFinder;
 
-public abstract class AbstractResourceKeyed implements ResourceKeyed {
+public final class BiomeFinderProvider {
 
-    protected ResourceKey key;
+    public static BiomeFinderProvider INSTANCE = new BiomeFinderProvider();
 
-    public AbstractResourceKeyed(final ResourceKey key) {
-        this.key = key;
+    private final BiMap<ResourceKey, BiomeFinder> mappings;
+
+    private BiomeFinderProvider() {
+        this.mappings = HashBiMap.create();
+
+        this.mappings.put(ResourceKey.sponge("column_fuzzed"), (BiomeFinder) (Object) ColumnFuzzedBiomeMagnifier.INSTANCE);
+        this.mappings.put(ResourceKey.sponge("fuzzy"), (BiomeFinder) (Object) FuzzedBiomeMagnifier.INSTANCE);
+        this.mappings.put(ResourceKey.sponge("default"), (BiomeFinder) (Object) DefaultBiomeMagnifier.INSTANCE);
     }
 
-    @Override
-    public final ResourceKey getKey() {
-        return this.key;
+    @Nullable
+    public BiomeFinder get(final ResourceKey key) {
+        return this.mappings.get(key);
+    }
+
+    @Nullable
+    public ResourceKey get(final BiomeFinder biomeFinder) {
+        return this.mappings.inverse().get(biomeFinder);
     }
 }

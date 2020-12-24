@@ -22,26 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.datapack.recipe;
+package org.spongepowered.common.mixin.api.mcp.world.biome;
 
-import org.spongepowered.common.datapack.DataPackSerializer;
+import net.minecraft.world.biome.IBiomeMagnifier;
+import org.spongepowered.api.world.biome.BiomeFinder;
+import org.spongepowered.asm.mixin.Mixin;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+@Mixin(IBiomeMagnifier.class)
+public interface IBiomeMagnifier_API extends BiomeFinder {
 
-public final class RecipeDataPackSerializer extends DataPackSerializer<RecipeSerializedObject> {
-
-    public RecipeDataPackSerializer() {
-        super("Recipes", "recipes");
-    }
-
-    @Override
-    protected void serializeAdditional(final Path dataDirectory, final RecipeSerializedObject object) throws IOException {
-        if (object.getAdvancementObject() != null) {
-            final Path advancementFile = dataDirectory.resolve("advancements").resolve(object.getAdvancementObject().getKey().getValue() + ".json");
-            Files.createDirectories(advancementFile.getParent());
-            this.writeFile(advancementFile, object.getAdvancementObject().getObject());
-        }
-    }
 }

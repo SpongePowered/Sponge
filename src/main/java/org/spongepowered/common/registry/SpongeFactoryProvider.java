@@ -61,7 +61,9 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.biome.BiomeFinder;
 import org.spongepowered.api.world.dimension.DimensionEffect;
+import org.spongepowered.api.world.dimension.DimensionTypeRegistration;
 import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeEntry;
 import org.spongepowered.api.world.volume.block.BlockVolumeFactory;
@@ -95,9 +97,11 @@ import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransform;
 import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
 import org.spongepowered.common.world.SpongeServerLocation;
+import org.spongepowered.common.world.biome.SpongeBiomeFinderFactory;
 import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
 import org.spongepowered.common.world.volume.archetype.entity.SpongeEntityArchetypeEntryFactory;
 import org.spongepowered.common.world.dimension.SpongeDimensionEffect;
+import org.spongepowered.common.world.dimension.SpongeDimensionTypeRegistration;
 import org.spongepowered.common.world.volume.block.SpongeBlockVolumeFactory;
 
 import java.util.Map;
@@ -173,7 +177,8 @@ public final class SpongeFactoryProvider implements FactoryProvider {
             .registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory())
             .registerFactory(EntityArchetypeEntry.Factory.class, new SpongeEntityArchetypeEntryFactory())
             .registerFactory(DimensionEffect.Factory.class, new SpongeDimensionEffect.FactoryImpl())
+            .registerFactory(DimensionTypeRegistration.Factory.class, new SpongeDimensionTypeRegistration.FactoryImpl())
+            .registerFactory(BiomeFinder.Factory.class, new SpongeBiomeFinderFactory())
         ;
     }
-
 }

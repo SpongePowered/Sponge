@@ -30,12 +30,10 @@ import net.minecraft.data.IFinishedRecipe;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;
-import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.dimension.DimensionTypeRegistration;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
+import org.spongepowered.common.world.dimension.SpongeDimensionTypeRegistration;
 
 import java.util.function.BiFunction;
 
@@ -74,7 +72,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
     public static final class FactoryImpl implements DataPackType.Factory {
 
         private final SpongeDataPackType<Advancement, DataPackSerializedObject> advancement = new SpongeDataPackType<>(
-                new DataPackSerializer<>(DataPackTypes.ADVANCEMENT, "Advancements", "advancements"),
+                new DataPackSerializer<>("Advancements", "advancements"),
                 s -> ((net.minecraft.advancements.Advancement) s).deconstruct().serializeToJson(),
                 (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
                 false
@@ -87,9 +85,9 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                 false
         );
 
-        private final SpongeDataPackType<DimensionTypeRegistration, DataPackSerializedObject> dimensionType = new SpongeDataPackType<>(
-                new DataPackSerializer<>(DataPackTypes.DIMENSION_TYPE, "Dimension Types", "dimension_type"),
-                s -> net.minecraft.world.DimensionType.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, (net.minecraft.world.DimensionType) s).getOrThrow(false, e -> {}),
+        private final SpongeDataPackType<SpongeDimensionTypeRegistration, DataPackSerializedObject> dimensionType = new SpongeDataPackType<>(
+                new DataPackSerializer<>("Dimension Types", "dimension_type"),
+                s -> SpongeDimensionTypeRegistration.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, s).getOrThrow(false, e -> {}),
                 (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
                 true
         );

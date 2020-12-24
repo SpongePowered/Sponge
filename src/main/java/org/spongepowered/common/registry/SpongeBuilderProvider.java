@@ -105,6 +105,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.dimension.DimensionEffect;
+import org.spongepowered.api.world.dimension.DimensionTypeRegistration;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.gen.MutableWorldGenerationSettings;
 import org.spongepowered.api.world.schematic.PaletteType;
@@ -187,6 +188,7 @@ import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.dimension.SpongeDimensionEffect;
+import org.spongepowered.common.world.dimension.SpongeDimensionTypeRegistration;
 import org.spongepowered.common.world.gen.SpongeMutableWorldGenerationSettingsBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.volume.stream.SpongeStreamOptionsBuilder;
@@ -313,6 +315,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
             .register(FluidState.Builder.class, SpongeFluidStateBuilder::new)
             .register(MutableWorldGenerationSettings.Builder.class, SpongeMutableWorldGenerationSettingsBuilder::new)
             .register(DimensionEffect.Builder.class, SpongeDimensionEffect.BuilderImpl::new)
+            .register(DimensionTypeRegistration.Builder.class, SpongeDimensionTypeRegistration.BuilderImpl::new)
         ;
     }
 }

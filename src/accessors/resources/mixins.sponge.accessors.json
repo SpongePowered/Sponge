@@ -195,6 +195,7 @@
         "world.gen.DimensionGeneratorSettingsAccessor",
         "world.storage.SaveFormat_LevelSaveAccessor",
         "util.registry.DynamicRegistriesAccessor",
+        "world.DimensionTypeAccessor",
         "entity.projectile.ProjectileEntityAccessor",
         "server.management.PlayerInteractionManagerAccessor",
         "util.text.ColorAccessor"

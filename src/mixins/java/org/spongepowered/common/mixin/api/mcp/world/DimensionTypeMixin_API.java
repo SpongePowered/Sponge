@@ -24,19 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import com.mojang.serialization.Codec;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.biome.IBiomeMagnifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.datapack.DataPackType;
-import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.MinecraftDayTime;
+import org.spongepowered.api.world.biome.BiomeFinder;
 import org.spongepowered.api.world.dimension.DimensionEffect;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -45,7 +40,6 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 
@@ -57,11 +51,10 @@ import java.util.OptionalLong;
 public abstract class DimensionTypeMixin_API implements org.spongepowered.api.world.dimension.DimensionType {
 
     // @formatter:off
-    @Shadow @Final public static Codec<DimensionType> DIRECT_CODEC;
-
     @Shadow @Final private ResourceLocation effectsLocation;
     @Shadow @Final private float ambientLight;
     @Shadow @Final private OptionalLong fixedTime;
+    @Shadow public abstract IBiomeMagnifier shadow$getBiomeZoomer();
 
     @Shadow public abstract boolean shadow$ultraWarm();
     @Shadow public abstract boolean shadow$natural();
@@ -73,9 +66,10 @@ public abstract class DimensionTypeMixin_API implements org.spongepowered.api.wo
     @Shadow public abstract boolean shadow$respawnAnchorWorks();
     @Shadow public abstract boolean shadow$hasRaids();
     @Shadow public abstract int shadow$logicalHeight();
+    @Shadow public abstract boolean shadow$createDragonFight();
     // @formatter:on
 
-    private Context api$context;
+    @Nullable private Context api$context;
 
     @Override
     public Context getContext() {
@@ -94,6 +88,11 @@ public abstract class DimensionTypeMixin_API implements org.spongepowered.api.wo
             throw new IllegalStateException(String.format("The effect '%s' has not been registered!", this.effectsLocation));
         }
         return effect;
+    }
+
+    @Override
+    public BiomeFinder biomeFinder() {
+        return (BiomeFinder) (Object) this.shadow$getBiomeZoomer();
     }
 
     @Override
@@ -135,28 +134,33 @@ public abstract class DimensionTypeMixin_API implements org.spongepowered.api.wo
         return Optional.of(new SpongeMinecraftDayTime(fixedTime.getAsLong()));
     }
 
-    @Override
-    public boolean piglinZombify() {
+    @Intrinsic
+    public boolean dimensionType$piglinSafe() {
         return this.shadow$piglinSafe();
     }
 
     @Override
-    public boolean bedUsable() {
+    public boolean bedsUsable() {
         return this.shadow$bedWorks();
     }
 
     @Override
-    public boolean respawnAnchorUsable() {
+    public boolean respawnAnchorsUsable() {
         return this.shadow$respawnAnchorWorks();
     }
 
-    @Override
-    public boolean omenTriggersRaids() {
+    @Intrinsic
+    public boolean dimensionType$hasRaids() {
         return this.shadow$hasRaids();
     }
 
-    @Override
-    public int maxTeleportTransferHeight() {
+    @Intrinsic
+    public int dimensionType$logicalHeight() {
         return this.shadow$logicalHeight();
+    }
+
+    @Override
+    public boolean spawnDragonFight() {
+        return this.shadow$createDragonFight();
     }
 }

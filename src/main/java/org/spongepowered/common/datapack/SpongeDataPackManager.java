@@ -47,6 +47,7 @@ import java.util.Map;
 public final class SpongeDataPackManager {
 
     public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.getGame());
+
     private final Game game;
     private final Map<SpongeDataPackType, List<DataPackSerializable>> serializables;
 
@@ -59,6 +60,7 @@ public final class SpongeDataPackManager {
     public void callRegisterDataPackValueEvent() {
         SpongeIngredient.clearCache();
         ResultUtil.clearCache();
+        this.reset();
 
         final RegisterDataPackValueEventImpl event = new RegisterDataPackValueEventImpl(Cause.of(EventContext.empty(), this.game), this.game);
         this.game.getEventManager().post(event);
@@ -68,10 +70,6 @@ public final class SpongeDataPackManager {
 
     @SuppressWarnings("unchecked")
     public void serialize(final Path dataPacksDirectory, Collection<String> dataPacksToLoad) throws IOException {
-        // If there are no plugin Recipes/Advancements - delete its datapack
-        this.serializables.putIfAbsent((SpongeDataPackType) DataPackTypes.RECIPE, Collections.EMPTY_LIST);
-        this.serializables.putIfAbsent((SpongeDataPackType) DataPackTypes.ADVANCEMENT, Collections.EMPTY_LIST);
-
         for (final Map.Entry<SpongeDataPackType, List<DataPackSerializable>> entry : this.serializables.entrySet()) {
             final SpongeDataPackType key = entry.getKey();
             final List<DataPackSerializable> value = entry.getValue();
@@ -84,13 +82,26 @@ public final class SpongeDataPackManager {
             }
 
             // When reloading we must update the dataPacksToLoad
-            if (key.getPackSerializer().serialize(dataPacksDirectory, serialized)) {
-                dataPacksToLoad.add("file/" + key.getPackSerializer().getPackName());
-            } else {
+            try {
+                if (key.getPackSerializer().serialize(key, dataPacksDirectory, serialized)) {
+                    dataPacksToLoad.add("file/" + key.getPackSerializer().getPackName());
+                } else {
+                    dataPacksToLoad.remove("file/" + key.getPackSerializer().getPackName());
+                }
+            } catch (final IOException e) {
                 dataPacksToLoad.remove("file/" + key.getPackSerializer().getPackName());
+                throw e;
             }
         }
-        this.serializables.clear();
+
+        this.reset();
     }
 
+    private void reset() {
+        this.serializables.clear();
+
+        this.serializables.put((SpongeDataPackType) DataPackTypes.ADVANCEMENT, new ArrayList<>());
+        this.serializables.put((SpongeDataPackType) DataPackTypes.RECIPE, new ArrayList<>());
+        this.serializables.put((SpongeDataPackType) DataPackTypes.DIMENSION_TYPE, new ArrayList<>());
+    }
 }

@@ -28,9 +28,10 @@ import com.google.inject.Inject;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.api.world.biome.BiomeFinders;
 import org.spongepowered.api.world.dimension.DimensionEffects;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.dimension.DimensionTypes;
+import org.spongepowered.api.world.dimension.DimensionTypeRegistration;
+import org.spongepowered.api.world.dimension.DimensionTypeRegistrations;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
@@ -46,12 +47,25 @@ public final class DimensionTest {
 
     @Listener
     public void onRegisterDataPackValue(final RegisterDataPackValueEvent event) {
-        event.register(DimensionType
-                .newRegistration()
-                .key(ResourceKey.of(this.plugin, "ender_over"))
-                .from(DimensionTypes.OVERWORLD.get())
-                .setEffect(DimensionEffects.END)
-                .build()
-        );
+        event
+            .register(DimensionTypeRegistration
+                .builder()
+                    .key(ResourceKey.of(this.plugin, "test_one"))
+                    .from(DimensionTypeRegistrations.THE_NETHER)
+                    .effect(DimensionEffects.END)
+                    .spawnDragonFight(true)
+                    .build()
+            )
+            .register(DimensionTypeRegistration
+                    .builder()
+                    .from(DimensionTypeRegistrations.OVERWORLD)
+                    .key(ResourceKey.of(this.plugin, "test_two"))
+                    .coordinateMultiplier(2)
+                    .biomeFinder(BiomeFinders.FUZZY) // Overworld is column fuzzed by default...this should be interesting
+                    .spawnDragonFight(true)
+                    .piglinSafe(true)
+                    .build()
+            )
+        ;
     }
 }
