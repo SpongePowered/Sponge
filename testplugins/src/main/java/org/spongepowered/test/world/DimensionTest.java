@@ -22,18 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.dimension;
+package org.spongepowered.test.world;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.api.world.dimension.DimensionEffects;
+import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionTypes;
+import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.jvm.Plugin;
 
-public final class SpongeDimensionEffects {
+@Plugin("dimensiontest")
+public final class DimensionTest {
 
-    public static final SpongeDimensionEffect OVERWORLD = new SpongeDimensionEffect(ResourceKey.minecraft("overworld"));
+    private final PluginContainer plugin;
 
-    public static final SpongeDimensionEffect NETHER = new SpongeDimensionEffect(ResourceKey.minecraft("nether"));
+    @Inject
+    public DimensionTest(final PluginContainer plugin) {
+        this.plugin = plugin;
+    }
 
-    public static final SpongeDimensionEffect END = new SpongeDimensionEffect(ResourceKey.minecraft("end"));
-
-    private SpongeDimensionEffects() {
+    @Listener
+    public void onRegisterDataPackValue(final RegisterDataPackValueEvent event) {
+        event.register(DimensionType
+                .newRegistration()
+                .key(ResourceKey.of(this.plugin, "ender_over"))
+                .from(DimensionTypes.OVERWORLD.get())
+                .setEffect(DimensionEffects.END)
+                .build()
+        );
     }
 }

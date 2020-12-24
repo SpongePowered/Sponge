@@ -22,18 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.dimension;
+package org.spongepowered.common.registry.provider;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.world.dimension.DimensionEffect;
 
-public final class SpongeDimensionEffects {
+import java.util.Map;
 
-    public static final SpongeDimensionEffect OVERWORLD = new SpongeDimensionEffect(ResourceKey.minecraft("overworld"));
+public final class DimensionEffectProvider {
 
-    public static final SpongeDimensionEffect NETHER = new SpongeDimensionEffect(ResourceKey.minecraft("nether"));
+    public static DimensionEffectProvider INSTANCE = new DimensionEffectProvider();
 
-    public static final SpongeDimensionEffect END = new SpongeDimensionEffect(ResourceKey.minecraft("end"));
+    private final Map<ResourceKey, DimensionEffect> mappings;
 
-    private SpongeDimensionEffects() {
+    private DimensionEffectProvider() {
+        this.mappings = new Object2ObjectOpenHashMap<>();
+    }
+
+    @Nullable
+    public DimensionEffect get(final ResourceKey key) {
+        return this.mappings.get(key);
+    }
+
+    public void put(final ResourceKey key, final DimensionEffect effect) {
+        this.mappings.put(key, effect);
     }
 }

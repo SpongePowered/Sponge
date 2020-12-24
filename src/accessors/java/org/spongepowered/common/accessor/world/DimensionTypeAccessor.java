@@ -22,18 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.dimension;
+package org.spongepowered.common.accessor.world;
 
-import org.spongepowered.api.ResourceKey;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.biome.IBiomeMagnifier;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-public final class SpongeDimensionEffects {
+import java.util.OptionalLong;
 
-    public static final SpongeDimensionEffect OVERWORLD = new SpongeDimensionEffect(ResourceKey.minecraft("overworld"));
+@Mixin(DimensionType.class)
+public interface DimensionTypeAccessor {
 
-    public static final SpongeDimensionEffect NETHER = new SpongeDimensionEffect(ResourceKey.minecraft("nether"));
-
-    public static final SpongeDimensionEffect END = new SpongeDimensionEffect(ResourceKey.minecraft("end"));
-
-    private SpongeDimensionEffects() {
+    @Invoker("<init>") static DimensionType invoker$construct(OptionalLong p_i241973_1_, boolean p_i241973_2_, boolean p_i241973_3_,
+            boolean p_i241973_4_, boolean p_i241973_5_, double p_i241973_6_, boolean p_i241973_8_, boolean p_i241973_9_, boolean p_i241973_10_,
+            boolean p_i241973_11_, boolean p_i241973_12_, int p_i241973_13_, IBiomeMagnifier p_i241973_14_, ResourceLocation p_i241973_15_,
+            ResourceLocation p_i241973_16_, float p_i241973_17_
+    ) {
+        throw new UntransformedInvokerError();
     }
 }

@@ -152,7 +152,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
             .registerFactory(VariableValueParameters.Factory.class, new SpongeVariableValueParametersFactory())
             .registerFactory(ChannelExceptionHandler.Factory.class, new SpongeChannelExceptionHandlerFactory())
             .registerFactory(Selector.Factory.class, new SpongeSelectorFactory())
-            .registerFactory(Range.Factory.class, new SpongeRange.Factory())
+            .registerFactory(Range.Factory.class, new SpongeRange.FactoryImpl())
             .registerFactory(Value.Factory.class, new SpongeValueFactory())
             .registerFactory(DataManipulator.Mutable.Factory.class, new MutableDataManipulatorFactory())
             .registerFactory(DataManipulator.Immutable.Factory.class, new ImmutableDataManipulatorFactory())

@@ -25,12 +25,15 @@
 package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.data.IFinishedRecipe;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionTypeRegistration;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
 
@@ -73,23 +76,37 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         private final SpongeDataPackType<Advancement, DataPackSerializedObject> advancement = new SpongeDataPackType<>(
                 new DataPackSerializer<>(DataPackTypes.ADVANCEMENT, "Advancements", "advancements"),
                 s -> ((net.minecraft.advancements.Advancement) s).deconstruct().serializeToJson(),
-                (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2)
+                (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
+                false
         );
 
         private final SpongeDataPackType<RecipeRegistration, RecipeSerializedObject> recipe = new SpongeDataPackType<>(
                 new RecipeDataPackSerializer(),
                 s -> ((IFinishedRecipe) s).serializeRecipe(),
-                (i1, i2) -> new RecipeSerializedObject(i1.getKey(), i2, new DataPackSerializedObject(i1.getKey(), ((IFinishedRecipe) i1).serializeAdvancement()))
+                (i1, i2) -> new RecipeSerializedObject(i1.getKey(), i2, new DataPackSerializedObject(i1.getKey(), ((IFinishedRecipe) i1).serializeAdvancement())),
+                false
+        );
+
+        private final SpongeDataPackType<DimensionTypeRegistration, DataPackSerializedObject> dimensionType = new SpongeDataPackType<>(
+                new DataPackSerializer<>(DataPackTypes.DIMENSION_TYPE, "Dimension Types", "dimension_type"),
+                s -> net.minecraft.world.DimensionType.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, (net.minecraft.world.DimensionType) s).getOrThrow(false, e -> {}),
+                (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
+                true
         );
 
         @Override
         public DataPackType recipe() {
-            return recipe;
+            return this.recipe;
         }
 
         @Override
         public DataPackType advancement() {
             return this.advancement;
+        }
+
+        @Override
+        public DataPackType dimensionType() {
+            return this.dimensionType;
         }
     }
 }

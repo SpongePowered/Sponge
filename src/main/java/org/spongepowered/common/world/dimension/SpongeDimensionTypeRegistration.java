@@ -25,15 +25,31 @@
 package org.spongepowered.common.world.dimension;
 
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.world.dimension.DimensionTypeRegistration;
+import org.spongepowered.common.AbstractResourceKeyed;
 
-public final class SpongeDimensionEffects {
+public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed implements DimensionTypeRegistration {
 
-    public static final SpongeDimensionEffect OVERWORLD = new SpongeDimensionEffect(ResourceKey.minecraft("overworld"));
+    public SpongeDimensionTypeRegistration(final ResourceKey key) {
+        super(key);
+    }
 
-    public static final SpongeDimensionEffect NETHER = new SpongeDimensionEffect(ResourceKey.minecraft("nether"));
+    @Override
+    public int getContentVersion() {
+        return 0;
+    }
 
-    public static final SpongeDimensionEffect END = new SpongeDimensionEffect(ResourceKey.minecraft("end"));
+    @Override
+    public DataContainer toContainer() {
+        // TODO
+        throw new RuntimeException();
+    }
 
-    private SpongeDimensionEffects() {
+    @Override
+    public DataPackType type() {
+        return DataPackTypes.DIMENSION_TYPE;
     }
 }

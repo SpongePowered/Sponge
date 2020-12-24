@@ -79,7 +79,7 @@ public final class SpongeDataPackManager {
             final List<DataPackSerializedObject> serialized = new ArrayList<>();
 
             for (final DataPackSerializable serializable : value) {
-                final JsonObject o = key.getObjectSerializer().serialize(serializable);
+                final JsonObject o = (JsonObject) key.getObjectSerializer().serialize(serializable);
                 serialized.add((DataPackSerializedObject) key.getObjectFunction().apply(serializable, o));
             }
 
