@@ -92,7 +92,7 @@ public final class SpongeNodePermissionCache {
                 permString = node.getName();
                 // Add a warning here, it's likely due to a dangling redirect
                 SpongeCommon.getLogger()
-                        .warn("No path to command node with name {} could be found when generating it's permission node. "
+                        .warn("No path to command node with name {} could be found when generating its permission node. "
                                 + "Unable to determine owning plugin - using \"unknown\" as plugin ID", permString);
             } else {
                 final String original = path.iterator().next();
