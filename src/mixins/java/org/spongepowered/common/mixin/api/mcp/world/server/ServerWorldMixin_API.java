@@ -43,6 +43,7 @@ import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerTickList;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.FolderName;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
@@ -152,6 +153,11 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Override
     public ServerWorldProperties getProperties() {
         return (ServerWorldProperties) this.shadow$getLevelData();
+    }
+
+    @Override
+    public ResourceKey getKey() {
+        return (ResourceKey) (Object) this.dimension().location();
     }
 
     @Override

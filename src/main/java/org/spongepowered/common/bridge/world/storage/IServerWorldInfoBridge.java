@@ -50,30 +50,6 @@ public interface IServerWorldInfoBridge {
 
     void bridge$setUniqueId(UUID uniqueId);
 
-    boolean bridge$isEnabled();
-
-    void bridge$setEnabled(boolean state);
-
-    boolean bridge$isPVPEnabled();
-
-    void bridge$setPVPEnabled(boolean state);
-
-    boolean bridge$doesLoadOnStartup();
-
-    void bridge$setLoadOnStartup(boolean state);
-
-    boolean bridge$doesKeepSpawnLoaded();
-
-    void bridge$setKeepSpawnLoaded(boolean state);
-
-    boolean bridge$doesGenerateSpawnOnLoad();
-
-    void bridge$setGenerateSpawnOnLoad(boolean state);
-
-    SerializationBehavior bridge$getSerializationBehavior();
-
-    void bridge$setSerializationBehavior(SerializationBehavior behavior);
-
     boolean bridge$isValid();
 
     boolean bridge$hasCustomDifficulty();

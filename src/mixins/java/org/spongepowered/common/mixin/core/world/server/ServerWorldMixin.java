@@ -275,52 +275,52 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
      * @author zidane - December 17th, 2020 - Minecraft 1.16.4
      * @reason Honor our serialization behavior in performing saves
      */
-    @Overwrite
-    public void save(@Nullable IProgressUpdate progress, boolean flush, boolean skipSave) {
-        final ServerWorld this$ = (ServerWorld) (Object) this;
-        final ServerWorldInfo levelData = (ServerWorldInfo) this.getLevelData();
-
-        ServerChunkProvider serverchunkprovider = this$.getChunkSource();
-
-        if (!skipSave) {
-
-            final SerializationBehavior behavior = ((IServerWorldInfoBridge) levelData).bridge$getSerializationBehavior();
-
-            if (progress != null) {
-                progress.progressStartNoAbort(new TranslationTextComponent("menu.savingLevel"));
-            }
-
-            // We always save the metadata unless it is NONE
-            if (behavior != SerializationBehavior.NONE) {
-
-                this.shadow$saveLevelData();
-
-                // Sponge Start - We do per-world WorldInfo/WorldBorders/BossBars
-
-                levelData.setWorldBorder(this.getWorldBorder().createSettings());
-
-                levelData.setCustomBossEvents(((ServerWorldBridge) this$).bridge$getBossBarManager().save());
-
-                ((ServerWorldBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.getServer().registryAccess()
-                    , (ServerWorldInfo) this.getLevelData(), this.shadow$dimension() == World.OVERWORLD ? SpongeCommon.getServer().getPlayerList()
-                        .getSingleplayerData() : null);
-
-                // Sponge End
-            }
-            if (progress != null) {
-                progress.progressStage(new TranslationTextComponent("menu.savingChunks"));
-            }
-
-            final boolean canAutomaticallySave = !this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC;
-            final boolean canManuallySave = this.impl$isManualSave && behavior == SerializationBehavior.MANUAL;
-
-            if (canAutomaticallySave || canManuallySave) {
-                serverchunkprovider.save(flush);
-            }
-        }
-
-        this.impl$isManualSave = false;
-    }
+//    @Overwrite
+//    public void save(@Nullable IProgressUpdate progress, boolean flush, boolean skipSave) {
+//        final ServerWorld this$ = (ServerWorld) (Object) this;
+//        final ServerWorldInfo levelData = (ServerWorldInfo) this.getLevelData();
+//
+//        ServerChunkProvider serverchunkprovider = this$.getChunkSource();
+//
+//        if (!skipSave) {
+//
+//            final SerializationBehavior behavior = ((IServerWorldInfoBridge) levelData).bridge$getConfigAdapter().get().world.serializationBehavior;
+//
+//            if (progress != null) {
+//                progress.progressStartNoAbort(new TranslationTextComponent("menu.savingLevel"));
+//            }
+//
+//            // We always save the metadata unless it is NONE
+//            if (behavior != SerializationBehavior.NONE) {
+//
+//                this.shadow$saveLevelData();
+//
+//                // Sponge Start - We do per-world WorldInfo/WorldBorders/BossBars
+//
+//                levelData.setWorldBorder(this.getWorldBorder().createSettings());
+//
+//                levelData.setCustomBossEvents(((ServerWorldBridge) this$).bridge$getBossBarManager().save());
+//
+//                ((ServerWorldBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.getServer().registryAccess()
+//                    , (ServerWorldInfo) this.getLevelData(), this.shadow$dimension() == World.OVERWORLD ? SpongeCommon.getServer().getPlayerList()
+//                        .getSingleplayerData() : null);
+//
+//                // Sponge End
+//            }
+//            if (progress != null) {
+//                progress.progressStage(new TranslationTextComponent("menu.savingChunks"));
+//            }
+//
+//            final boolean canAutomaticallySave = !this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC;
+//            final boolean canManuallySave = this.impl$isManualSave && behavior == SerializationBehavior.MANUAL;
+//
+//            if (canAutomaticallySave || canManuallySave) {
+//                serverchunkprovider.save(flush);
+//            }
+//        }
+//
+//        this.impl$isManualSave = false;
+//    }
 
     @Override
     public String toString() {

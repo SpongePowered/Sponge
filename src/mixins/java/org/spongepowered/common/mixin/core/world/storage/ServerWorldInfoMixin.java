@@ -69,10 +69,10 @@ import java.util.UUID;
 public abstract class ServerWorldInfoMixin implements IServerConfiguration, IServerWorldInfoBridge, ResourceKeyBridge {
 
     // @formatter:off
+    @Shadow private WorldSettings settings;
     @Shadow public abstract boolean shadow$isDifficultyLocked();
     // @formatter:on
 
-    @Shadow private WorldSettings settings;
     @Nullable private ResourceKey impl$key;
     private String impl$rawDimensionType;
     private DimensionType impl$dimensionType;
@@ -250,14 +250,14 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, ISer
         }
     }
 
-    @Override
-    public IServerWorldInfo overworldData() {
-        if (World.OVERWORLD.location().equals(this.impl$key)) {
-            return (IServerWorldInfo) this;
-        }
-
-        return (IServerWorldInfo) SpongeCommon.getServer().getLevel(World.OVERWORLD).getLevelData();
-    }
+//    @Override
+//    public IServerWorldInfo overworldData() {
+//        if (World.OVERWORLD.location().equals(this.impl$key)) {
+//            return (IServerWorldInfo) this;
+//        }
+//
+//        return (IServerWorldInfo) SpongeCommon.getServer().getLevel(World.OVERWORLD).getLevelData();
+//    }
 
     void impl$updateWorldForDifficultyChange(final ServerWorld serverWorld, final boolean isLocked) {
         if (serverWorld == null) {

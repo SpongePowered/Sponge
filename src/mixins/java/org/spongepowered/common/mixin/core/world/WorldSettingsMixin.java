@@ -37,6 +37,7 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldCategory;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 
 import javax.annotation.Nullable;
@@ -181,11 +182,12 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
             return;
         }
 
-        infoBridge.bridge$setEnabled(this.impl$isEnabled);
-        infoBridge.bridge$setLoadOnStartup(this.impl$loadOnStartup);
-        infoBridge.bridge$setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
-        infoBridge.bridge$setKeepSpawnLoaded(this.impl$keepSpawnLoaded);
-        infoBridge.bridge$setSerializationBehavior(this.impl$serializationBehavior);
-        infoBridge.bridge$setPVPEnabled(this.impl$pvpEnabled);
+        final WorldCategory category = infoBridge.bridge$getConfigAdapter().get().world;
+        category.enabled = this.impl$isEnabled;
+        category.loadOnStartup = this.impl$loadOnStartup;
+        category.generateSpawnOnLoad = this.impl$generateSpawnOnLoad;
+        category.keepSpawnLoaded = this.impl$keepSpawnLoaded;
+        category.serializationBehavior = this.impl$serializationBehavior;
+        category.pvp = this.impl$pvpEnabled;
     }
 }

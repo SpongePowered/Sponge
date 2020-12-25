@@ -159,8 +159,8 @@ public abstract class DimensionTypeMixin_API implements org.spongepowered.api.wo
         return this.shadow$logicalHeight();
     }
 
-    @Override
-    public boolean spawnDragonFight() {
+    @Intrinsic
+    public boolean dimensionType$createDragonFight() {
         return this.shadow$createDragonFight();
     }
 }

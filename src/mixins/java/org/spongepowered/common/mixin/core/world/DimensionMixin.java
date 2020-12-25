@@ -22,19 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.dimension;
+package org.spongepowered.common.mixin.core.world;
 
+import com.mojang.serialization.Codec;
+import net.minecraft.world.Dimension;
 import net.minecraft.world.DimensionType;
-import org.spongepowered.api.ResourceKey;
+import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.world.dimension.SpongeDimensionTypeRegistration;
 
-public final class SpongeDimensionEffects {
+import java.util.function.Supplier;
 
-    public static final SpongeDimensionEffect OVERWORLD = new SpongeDimensionEffect((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
+@Mixin(Dimension.class)
+public abstract class DimensionMixin {
 
-    public static final SpongeDimensionEffect NETHER = new SpongeDimensionEffect((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
-
-    public static final SpongeDimensionEffect END = new SpongeDimensionEffect((ResourceKey) (Object) DimensionType.END_EFFECTS);
-
-    private SpongeDimensionEffects() {
+    @Redirect(
+            method = "*",
+            at = @At(value = "FIELD", opcode = Opcodes.GETSTATIC, target = "Lnet/minecraft/world/DimensionType;CODEC:Lcom/mojang/serialization/Codec;")
+    )
+    private static Codec<Supplier<DimensionType>> impl$useRegistrationCodec() {
+        return SpongeDimensionTypeRegistration.CODEC;
     }
 }

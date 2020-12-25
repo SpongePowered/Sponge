@@ -104,6 +104,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         CommandSourceProviderBridge, SubjectProxy, ICommandSourceBridge {
 
     // @formatter:off
+    @Shadow @Final private Map<RegistryKey<World>, ServerWorld> levels;
     @Shadow @Final private PlayerProfileCache profileCache;
     @Shadow @Final private static Logger LOGGER;
     @Shadow private int tickCount;
@@ -119,7 +120,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract ResourcePackList shadow$getPackRepository();
     // @formatter:on
 
-    @Shadow @Final private Map<RegistryKey<World>, ServerWorld> levels;
     @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
     @Nullable private ResourcePack impl$resourcePack;
 
@@ -215,124 +215,124 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         TimingsManager.FULL_SERVER_TICK.stopTiming();
     }
 
-    @Inject(method = "stopServer", at = @At(value = "TAIL"))
-    private void impl$closeLevelSaveForOtherWorlds(final CallbackInfo ci) {
-        for (final Map.Entry<RegistryKey<World>, ServerWorld> entry : this.levels.entrySet()) {
-            if (entry.getKey() == World.OVERWORLD) {
-                continue;
-            }
+//    @Inject(method = "stopServer", at = @At(value = "TAIL"))
+//    private void impl$closeLevelSaveForOtherWorlds(final CallbackInfo ci) {
+//        for (final Map.Entry<RegistryKey<World>, ServerWorld> entry : this.levels.entrySet()) {
+//            if (entry.getKey() == World.OVERWORLD) {
+//                continue;
+//            }
+//
+//            final SaveFormat.LevelSave levelSave = ((ServerWorldBridge) entry.getValue()).bridge$getLevelSave();
+//            try {
+//                levelSave.close();
+//            } catch (IOException e) {
+//                LOGGER.error("Failed to unlock level {}", levelSave.getLevelId(), e);
+//            }
+//        }
+//    }
 
-            final SaveFormat.LevelSave levelSave = ((ServerWorldBridge) entry.getValue()).bridge$getLevelSave();
-            try {
-                levelSave.close();
-            } catch (IOException e) {
-                LOGGER.error("Failed to unlock level {}", levelSave.getLevelId(), e);
-            }
-        }
-    }
-
-    @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 6000, ordinal = 0))
-    private int getSaveTickInterval(final int tickInterval) {
-        if (!this.shadow$isDedicatedServer()) {
-            return tickInterval;
-        } else if (!this.shadow$isRunning()) {
-            // Don't autosave while server is stopping
-            return this.tickCount + 1;
-        }
-
-        final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().world.playerAutoSaveInterval;
-        if (autoPlayerSaveInterval > 0 && (this.tickCount % autoPlayerSaveInterval == 0)) {
-            this.shadow$getPlayerList().saveAll();
-        }
-
-        this.saveAllChunks(true, false, false);
-
-        // force check to fail as we handle everything above
-        return this.tickCount + 1;
-    }
+//    @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 6000, ordinal = 0))
+//    private int getSaveTickInterval(final int tickInterval) {
+//        if (!this.shadow$isDedicatedServer()) {
+//            return tickInterval;
+//        } else if (!this.shadow$isRunning()) {
+//            // Don't autosave while server is stopping
+//            return this.tickCount + 1;
+//        }
+//
+//        final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().world.playerAutoSaveInterval;
+//        if (autoPlayerSaveInterval > 0 && (this.tickCount % autoPlayerSaveInterval == 0)) {
+//            this.shadow$getPlayerList().saveAll();
+//        }
+//
+//        this.saveAllChunks(true, false, false);
+//
+//        // force check to fail as we handle everything above
+//        return this.tickCount + 1;
+//    }
 
     /**
      * @author Zidane - November, 24th 2020 - Minecraft 1.15
      * @reason To allow per-world auto-save tick intervals or disable auto-saving entirely
      */
-    @Overwrite
-    public boolean saveAllChunks(final boolean suppressLog, final boolean flush, final boolean isForced) {
-        for (final ServerWorld world : this.shadow$getAllLevels()) {
-            final SerializationBehavior serializationBehavior = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getSerializationBehavior();
-            boolean log = !suppressLog;
-
-            // Not forced happens during ticks and when shutting down
-            if (!isForced) {
-                final InheritableConfigHandle<WorldConfig> adapter = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
-                final int autoSaveInterval = adapter.get().world.autoSaveInterval;
-                if (log) {
-                    if (this.bridge$performAutosaveChecks()) {
-                        log = adapter.get().world.logAutoSave;
-                    }
-                }
-
-                // Not forced means this is an auto-save or a shut down, handle accordingly
-
-                // If the server isn't running or we hit Vanilla's save interval, save our configs
-                if (!this.shadow$isRunning() || this.tickCount % 6000 == 0) {
-                    ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter().save();
-                }
-
-                final boolean canSaveAtAll = serializationBehavior != SerializationBehavior.NONE;
-
-                // This world is set to not save of any time, no reason to check the auto-save/etc, skip it
-                if (!canSaveAtAll) {
-                    continue;
-                }
-
-                // Only run auto-save skipping if the server is still running
-                if (this.bridge$performAutosaveChecks()) {
-
-                    // Do not process properties or chunks if the world is not set to do so unless the server is shutting down
-                    if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehavior.AUTOMATIC) {
-                        continue;
-                    }
-
-                    // Now check the interval vs the tick counter and skip it
-                    if (this.tickCount % autoSaveInterval != 0) {
-                        continue;
-                    }
-                }
-
-                world.save(null, false, world.noSave);
-
-                if (log) {
-                    if (this.bridge$performAutosaveChecks()) {
-                        MinecraftServerMixin.LOGGER.info("Auto-saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
-                    } else {
-                        MinecraftServerMixin.LOGGER.info("Saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
-                    }
-                }
-            // Forced happens during command
-            } else {
-                if (log) {
-                    MinecraftServerMixin.LOGGER.info("Manually saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
-                }
-
-                ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter().save();
-
-                world.save(null, false, world.noSave);
-            }
-        }
-
-        return true;
-    }
+//    @Overwrite
+//    public boolean saveAllChunks(final boolean suppressLog, final boolean flush, final boolean isForced) {
+//        for (final ServerWorld world : this.shadow$getAllLevels()) {
+//            final SerializationBehavior serializationBehavior = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter().get().world.serializationBehavior;
+//            boolean log = !suppressLog;
+//
+//            // Not forced happens during ticks and when shutting down
+//            if (!isForced) {
+//                final InheritableConfigHandle<WorldConfig> adapter = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
+//                final int autoSaveInterval = adapter.get().world.autoSaveInterval;
+//                if (log) {
+//                    if (this.bridge$performAutosaveChecks()) {
+//                        log = adapter.get().world.logAutoSave;
+//                    }
+//                }
+//
+//                // Not forced means this is an auto-save or a shut down, handle accordingly
+//
+//                // If the server isn't running or we hit Vanilla's save interval, save our configs
+//                if (!this.shadow$isRunning() || this.tickCount % 6000 == 0) {
+//                    ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter().save();
+//                }
+//
+//                final boolean canSaveAtAll = serializationBehavior != SerializationBehavior.NONE;
+//
+//                // This world is set to not save of any time, no reason to check the auto-save/etc, skip it
+//                if (!canSaveAtAll) {
+//                    continue;
+//                }
+//
+//                // Only run auto-save skipping if the server is still running
+//                if (this.bridge$performAutosaveChecks()) {
+//
+//                    // Do not process properties or chunks if the world is not set to do so unless the server is shutting down
+//                    if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehavior.AUTOMATIC) {
+//                        continue;
+//                    }
+//
+//                    // Now check the interval vs the tick counter and skip it
+//                    if (this.tickCount % autoSaveInterval != 0) {
+//                        continue;
+//                    }
+//                }
+//
+//                world.save(null, false, world.noSave);
+//
+//                if (log) {
+//                    if (this.bridge$performAutosaveChecks()) {
+//                        MinecraftServerMixin.LOGGER.info("Auto-saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+//                    } else {
+//                        MinecraftServerMixin.LOGGER.info("Saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+//                    }
+//                }
+//            // Forced happens during command
+//            } else {
+//                if (log) {
+//                    MinecraftServerMixin.LOGGER.info("Manually saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+//                }
+//
+//                ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter().save();
+//
+//                world.save(null, false, world.noSave);
+//            }
+//        }
+//
+//        return true;
+//    }
 
     /**
      * @author Zidane
      * @reason Set the difficulty without marking as custom
      */
-    @Overwrite
-    public void setDifficulty(final Difficulty difficulty, final boolean forceDifficulty) {
-        for (final ServerWorld world : this.shadow$getAllLevels()) {
-            ((SpongeServer) SpongeCommon.getServer()).getWorldManager().adjustWorldForDifficulty(world, difficulty, forceDifficulty);
-        }
-    }
+//    @Overwrite
+//    public void setDifficulty(final Difficulty difficulty, final boolean forceDifficulty) {
+//        for (final ServerWorld world : this.shadow$getAllLevels()) {
+//            ((SpongeServer) SpongeCommon.getServer()).getWorldManager().adjustWorldForDifficulty(world, difficulty, forceDifficulty);
+//        }
+//    }
 
     @Override
     public void bridge$initServices(final Game game, final Injector injector) {

@@ -30,18 +30,18 @@ import net.minecraft.block.Block;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKeyCodec;
 import net.minecraft.world.DimensionType;
-import net.minecraft.world.biome.FuzzedBiomeMagnifier;
+import net.minecraft.world.biome.ColumnFuzzedBiomeMagnifier;
 import net.minecraft.world.biome.IBiomeMagnifier;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.util.MinecraftDayTime;
-import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.biome.BiomeFinder;
 import org.spongepowered.api.world.biome.BiomeFinders;
 import org.spongepowered.api.world.dimension.DimensionEffect;
@@ -57,29 +57,30 @@ import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Supplier;
 
 public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed implements DimensionTypeRegistration {
 
     public final DimensionEffect effect;
     public final BiomeFinder biomeFinder;
-    public final MinecraftDayTime fixedTime;
+    @Nullable public final MinecraftDayTime fixedTime;
     public final ResourceKey infiniburn;
 
-    public final boolean ultraWarm, natural, skylight, ceiling, piglinSafe, bedWorks, respawnAnchorWorks, hasRaids, spawnDragonFight;
+    public final boolean ultraWarm, natural, skylight, ceiling, piglinSafe, bedWorks, respawnAnchorWorks, hasRaids, createDragonFight;
     public final float ambientLight;
     public final int logicalHeight;
     public final double coordinateScale;
 
-    private static final Codec<SpongeDataSection> EXTENDED_CODEC = RecordCodecBuilder
+    private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
             .create(r -> r
                     .group(
                             ResourceLocation.CODEC.optionalFieldOf("biome_finder", new ResourceLocation("sponge", "default")).forGetter(v -> v.biomeFinder),
-                            Codec.BOOL.optionalFieldOf("spawn_dragon_fight", Boolean.FALSE).forGetter(v -> v.spawnDragonFight)
+                            Codec.BOOL.optionalFieldOf("create_dragon_fight", Boolean.FALSE).forGetter(v -> v.createDragonFight)
                     )
                     .apply(r, SpongeDataSection::new)
             );
 
-    public static final Codec<SpongeDimensionTypeRegistration> DIRECT_CODEC = RecordCodecBuilder
+    public static final Codec<DimensionType> DIRECT_CODEC = RecordCodecBuilder
             .create(r -> r
                     .group(
                             Codec.LONG.optionalFieldOf("fixed_time")
@@ -87,31 +88,34 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
                                             v -> v.map(OptionalLong::of).orElseGet(OptionalLong::empty),
                                             v -> v.isPresent() ? Optional.of(v.getAsLong()) : Optional.empty()
                                     )
-                                    .forGetter(v -> {
-                                        if (v.fixedTime == null) {
-                                            return OptionalLong.empty();
-                                        }
-
-                                        return OptionalLong.of(v.fixedTime.asTicks().getTicks());
-                                    })
+                                    .forGetter(v -> ((DimensionTypeAccessor) v).accessor$fixedTime())
                             ,
-                            Codec.BOOL.fieldOf("has_skylight").forGetter(v -> v.skylight),
-                            Codec.BOOL.fieldOf("has_ceiling").forGetter(v -> v.ceiling),
-                            Codec.BOOL.fieldOf("ultrawarm").forGetter(v -> v.ultraWarm),
-                            Codec.BOOL.fieldOf("natural").forGetter(v -> v.natural),
-                            Codec.doubleRange(1.0E-5F, 3.0E7D).fieldOf("coordinate_scale").forGetter(v -> v.coordinateScale),
-                            Codec.BOOL.fieldOf("piglin_safe").forGetter(v -> v.piglinSafe),
-                            Codec.BOOL.fieldOf("bed_works").forGetter(v -> v.bedWorks),
-                            Codec.BOOL.fieldOf("respawn_anchor_works").forGetter(v -> v.respawnAnchorWorks),
-                            Codec.BOOL.fieldOf("has_raids").forGetter(v -> v.hasRaids),
-                            Codec.intRange(0, 256).fieldOf("logical_height").forGetter(v -> v.logicalHeight),
-                            ResourceLocation.CODEC.fieldOf("infiniburn").forGetter(v -> (ResourceLocation) (Object) v.infiniburn),
-                            ResourceLocation.CODEC.fieldOf("effects").orElse((ResourceLocation) (Object) DimensionEffects.OVERWORLD.getKey()).forGetter(v -> (ResourceLocation) (Object) v.effect.getKey()),
-                            Codec.FLOAT.fieldOf("ambient_light").forGetter(v -> v.ambientLight),
-                            Codec.optionalField("_sponge", SpongeDimensionTypeRegistration.EXTENDED_CODEC).forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeFinderProvider.INSTANCE.get(v.biomeFinder), v.spawnDragonFight)))
+                            Codec.BOOL.fieldOf("has_skylight").forGetter(DimensionType::hasSkyLight),
+                            Codec.BOOL.fieldOf("has_ceiling").forGetter(DimensionType::hasCeiling),
+                            Codec.BOOL.fieldOf("ultrawarm").forGetter(DimensionType::ultraWarm),
+                            Codec.BOOL.fieldOf("natural").forGetter(DimensionType::natural),
+                            Codec.doubleRange(1.0E-5F, 3.0E7D).fieldOf("coordinate_scale").forGetter(DimensionType::coordinateScale),
+                            Codec.BOOL.fieldOf("piglin_safe").forGetter(DimensionType::piglinSafe),
+                            Codec.BOOL.fieldOf("bed_works").forGetter(DimensionType::bedWorks),
+                            Codec.BOOL.fieldOf("respawn_anchor_works").forGetter(DimensionType::respawnAnchorWorks),
+                            Codec.BOOL.fieldOf("has_raids").forGetter(DimensionType::hasRaids),
+                            Codec.intRange(0, 256).fieldOf("logical_height").forGetter(DimensionType::logicalHeight),
+                            ResourceLocation.CODEC.fieldOf("infiniburn").forGetter(v -> ((ITag.INamedTag<Block>)v.infiniburn()).getName()),
+                            ResourceLocation.CODEC.fieldOf("effects").orElse((ResourceLocation) (Object) DimensionEffects.OVERWORLD.getKey()).forGetter(v -> ((DimensionTypeAccessor) v).accessor$effectsLocation()),
+                            Codec.FLOAT.fieldOf("ambient_light").forGetter(v -> ((DimensionTypeAccessor) v).accessor$ambientLight()),
+                            Codec.optionalField("_sponge", SpongeDimensionTypeRegistration.SPONGE_CODEC).forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeFinderProvider.INSTANCE.get((BiomeFinder) v.getBiomeZoomer()), v.createDragonFight())))
                     )
-                    .apply(r,  SpongeDimensionTypeRegistration::new)
+                    // *Chuckles* I'm in danger
+                    .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15) -> {
+                        final IBiomeMagnifier biomeMagnifier = f15.isPresent() ? (IBiomeMagnifier) BiomeFinderProvider.INSTANCE.get((ResourceKey) (Object) f15.get().biomeFinder) : ColumnFuzzedBiomeMagnifier.INSTANCE;
+                        final boolean createDragonFight = f15.isPresent() ? f15.get().createDragonFight : false;
+
+                        return DimensionTypeAccessor.invoker$construct(f1, f2, f3, f4, f5, f6, createDragonFight, f7, f8, f9, f10, f11,
+                                biomeMagnifier, f12, f13, f14);
+                    })
             );
+
+    public static final Codec<Supplier<DimensionType>> CODEC = RegistryKeyCodec.create(Registry.DIMENSION_TYPE_REGISTRY, SpongeDimensionTypeRegistration.DIRECT_CODEC);
 
     protected SpongeDimensionTypeRegistration(final BuilderImpl builder) {
         super(builder.key);
@@ -133,37 +137,7 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
 
         // Sponge
         this.biomeFinder = builder.biomeFinder;
-        this.spawnDragonFight = builder.spawnDragonFight;
-    }
-
-    // Codec constructor
-    public SpongeDimensionTypeRegistration(final OptionalLong fixedTime, final boolean hasSkyLight, final boolean hasCeiling,
-            final boolean ultraWarm, final boolean natural, final double coordinateScale, final boolean piglinSafe, final boolean bedWorks,
-            final boolean respawnAnchorWorks, final boolean hasRaids, final int logicalHeight, final ResourceLocation infiniburn,
-            final ResourceLocation effectsLocation, final float ambientLight, final Optional<SpongeDataSection> spongeDataSection) {
-        super(null);
-        this.fixedTime = fixedTime.isPresent() ? MinecraftDayTime.of(Sponge.getServer(), Ticks.of(fixedTime.getAsLong())) : null;
-        this.skylight = hasSkyLight;
-        this.ceiling = hasCeiling;
-        this.ultraWarm = ultraWarm;
-        this.natural = natural;
-        this.coordinateScale = coordinateScale;
-        this.piglinSafe = piglinSafe;
-        this.bedWorks = bedWorks;
-        this.respawnAnchorWorks = respawnAnchorWorks;
-        this.hasRaids = hasRaids;
-        this.logicalHeight = logicalHeight;
-        this.infiniburn = (ResourceKey) (Object) infiniburn;
-        this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) effectsLocation);
-        this.ambientLight = ambientLight;
-        final SpongeDataSection sds = spongeDataSection.orElse(null);
-        if (sds == null) {
-            this.biomeFinder = (BiomeFinder) (Object) FuzzedBiomeMagnifier.INSTANCE;
-            this.spawnDragonFight = false;
-        } else {
-            this.biomeFinder = BiomeFinderProvider.INSTANCE.get((ResourceKey) (Object) sds.biomeFinder);
-            this.spawnDragonFight = sds.spawnDragonFight;
-        }
+        this.createDragonFight = builder.spawnDragonFight;
     }
 
     public SpongeDimensionTypeRegistration(final ResourceKey key, final DimensionType dimensionType) {
@@ -185,7 +159,7 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
         this.infiniburn = (ResourceKey) (Object) ((ITag.INamedTag<Block>) dimensionType.infiniburn()).getName();
         this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) ((DimensionTypeAccessor) dimensionType).accessor$effectsLocation());
         this.ambientLight = ((DimensionTypeAccessor) dimensionType).accessor$ambientLight();
-        this.spawnDragonFight = dimensionType.createDragonFight();
+        this.createDragonFight = dimensionType.createDragonFight();
     }
 
     public void setKey(final ResourceKey key) {
@@ -279,29 +253,17 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
     }
 
     @Override
-    public boolean spawnDragonFight() {
-        return this.spawnDragonFight;
-    }
-
-    public DimensionType asType() {
-        final OptionalLong fixedTime = this.fixedTime == null ? OptionalLong.empty() : OptionalLong.of(this.fixedTime.asTicks().getTicks());
-
-        final net.minecraft.world.DimensionType dimensionType = DimensionTypeAccessor.invoker$construct(fixedTime, this.skylight, this.ceiling,
-                this.ultraWarm, this.natural, this.coordinateScale, this.spawnDragonFight, this.piglinSafe, this.bedWorks,
-                this.respawnAnchorWorks, this.hasRaids, this.logicalHeight, (IBiomeMagnifier) this.biomeFinder,
-                (ResourceLocation) (Object) this.infiniburn, (ResourceLocation) (Object) this.effect.getKey(), this.ambientLight
-        );
-
-        return dimensionType;
+    public boolean createDragonFight() {
+        return this.createDragonFight;
     }
 
     private static final class SpongeDataSection {
         private final ResourceLocation biomeFinder;
-        private final boolean spawnDragonFight;
+        private final boolean createDragonFight;
 
-        public SpongeDataSection(final ResourceLocation biomeFinder, final boolean spawnDragonFight) {
+        public SpongeDataSection(final ResourceLocation biomeFinder, final boolean createDragonFight) {
             this.biomeFinder = biomeFinder;
-            this.spawnDragonFight = spawnDragonFight;
+            this.createDragonFight = createDragonFight;
         }
     }
 
@@ -427,7 +389,7 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
         }
 
         @Override
-        public DimensionTypeRegistration.Builder spawnDragonFight(final boolean spawnDragonFight) {
+        public DimensionTypeRegistration.Builder createDragonFight(final boolean spawnDragonFight) {
             this.spawnDragonFight = spawnDragonFight;
             return this;
         }
@@ -451,7 +413,7 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
             this.ambientLighting = value.ambientLighting();
             this.logicalHeight = value.logicalHeight();
             this.coordinateMultiplier = value.coordinateMultiplier();
-            this.spawnDragonFight = value.spawnDragonFight();
+            this.spawnDragonFight = value.createDragonFight();
             return this;
         }
 

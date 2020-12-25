@@ -124,6 +124,8 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
     @Shadow public abstract RegistryKey<net.minecraft.world.World> shadow$dimension();
     // @formatter:on
 
+    @Shadow public abstract RegistryKey<net.minecraft.world.World> dimension();
+
     private Context impl$context;
 
     // World

@@ -27,14 +27,20 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.biome.IBiomeMagnifier;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.common.accessor.world.DimensionTypeAccessor;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
 import org.spongepowered.common.world.dimension.SpongeDimensionTypeRegistration;
 
+import java.util.OptionalLong;
 import java.util.function.BiFunction;
 
 public final class SpongeDataPackType<T extends DataPackSerializable, U extends DataPackSerializedObject> implements DataPackType {
@@ -71,23 +77,31 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 
     public static final class FactoryImpl implements DataPackType.Factory {
 
-        private final SpongeDataPackType<Advancement, DataPackSerializedObject> advancement = new SpongeDataPackType<>(
+        private final SpongeDataPackType<@NonNull Advancement, DataPackSerializedObject> advancement = new SpongeDataPackType<>(
                 new DataPackSerializer<>("Advancements", "advancements"),
                 s -> ((net.minecraft.advancements.Advancement) s).deconstruct().serializeToJson(),
                 (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
                 false
         );
 
-        private final SpongeDataPackType<RecipeRegistration, RecipeSerializedObject> recipe = new SpongeDataPackType<>(
+        private final SpongeDataPackType<@NonNull RecipeRegistration, RecipeSerializedObject> recipe = new SpongeDataPackType<>(
                 new RecipeDataPackSerializer(),
                 s -> ((IFinishedRecipe) s).serializeRecipe(),
                 (i1, i2) -> new RecipeSerializedObject(i1.getKey(), i2, new DataPackSerializedObject(i1.getKey(), ((IFinishedRecipe) i1).serializeAdvancement())),
                 false
         );
 
-        private final SpongeDataPackType<SpongeDimensionTypeRegistration, DataPackSerializedObject> dimensionType = new SpongeDataPackType<>(
+        private final SpongeDataPackType<@NonNull SpongeDimensionTypeRegistration, DataPackSerializedObject> dimensionType = new SpongeDataPackType<>(
                 new DataPackSerializer<>("Dimension Types", "dimension_type"),
-                s -> SpongeDimensionTypeRegistration.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, s).getOrThrow(false, e -> {}),
+                s -> {
+                    final OptionalLong fixedTime = s.fixedTime == null ? OptionalLong.empty() : OptionalLong.of(s.fixedTime.asTicks().getTicks());
+                    final DimensionType type =
+                            DimensionTypeAccessor.invoker$construct(fixedTime, s.skylight, s.ceiling, s.ultraWarm, s.natural, s.coordinateScale,
+                                    s.createDragonFight, s.piglinSafe, s.bedWorks, s.respawnAnchorWorks, s.hasRaids, s.logicalHeight,
+                                    (IBiomeMagnifier) s.biomeFinder, (ResourceLocation) (Object) s.infiniburn,
+                                    (ResourceLocation) (Object) s.effect.getKey(), s.ambientLight);
+                    return SpongeDimensionTypeRegistration.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, type).getOrThrow(false, e -> {});
+                },
                 (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
                 true
         );

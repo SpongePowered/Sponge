@@ -1027,7 +1027,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         serverChunkProvider.getLightEngine().setTaskPerBatch(5);
 
         // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
-        if (!((IServerWorldInfoBridge) serverWorld.getLevelData()).bridge$doesKeepSpawnLoaded()) {
+        if (!((IServerWorldInfoBridge) serverWorld.getLevelData()).bridge$getConfigAdapter().get().world.keepSpawnLoaded) {
             serverChunkProvider.removeRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, 11, serverWorld.dimension().location());
         }
     }
@@ -1094,7 +1094,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 apiWorld));
 
-        final boolean generateSpawnOnLoad = ((IServerWorldInfoBridge) levelData).bridge$doesGenerateSpawnOnLoad() || isDefaultWorld;
+        final boolean generateSpawnOnLoad = ((IServerWorldInfoBridge) levelData).bridge$getConfigAdapter().get().world.generateSpawnOnLoad || isDefaultWorld;
 
         if (generateSpawnOnLoad) {
             this.loadSpawnChunks(serverWorld, listener);

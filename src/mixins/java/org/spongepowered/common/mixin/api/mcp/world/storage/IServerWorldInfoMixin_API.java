@@ -127,12 +127,12 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
 
     @Override
     default boolean isPVPEnabled() {
-        return ((IServerWorldInfoBridge) this).bridge$isPVPEnabled();
+        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.pvp;
     }
 
     @Override
     default void setPVPEnabled(final boolean state) {
-        ((IServerWorldInfoBridge) this).bridge$setPVPEnabled(state);
+        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.pvp = state;
     }
 
     @Override
@@ -142,42 +142,42 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
 
     @Override
     default boolean isEnabled() {
-        return ((IServerWorldInfoBridge) this).bridge$isEnabled();
+        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.enabled;
     }
 
     @Override
     default void setEnabled(final boolean state) {
-        ((IServerWorldInfoBridge) this).bridge$setEnabled(state);
+        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.enabled = state;
     }
 
     @Override
     default boolean doesLoadOnStartup() {
-        return ((IServerWorldInfoBridge) this).bridge$doesLoadOnStartup();
+        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.loadOnStartup;
     }
 
     @Override
     default void setLoadOnStartup(final boolean state) {
-        ((IServerWorldInfoBridge) this).bridge$setLoadOnStartup(state);
+        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.loadOnStartup = state;
     }
 
     @Override
     default boolean doesKeepSpawnLoaded() {
-        return ((IServerWorldInfoBridge) this).bridge$doesKeepSpawnLoaded();
+        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.keepSpawnLoaded;
     }
 
     @Override
     default void setKeepSpawnLoaded(final boolean state) {
-        ((IServerWorldInfoBridge) this).bridge$setKeepSpawnLoaded(state);
+        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.keepSpawnLoaded = state;
     }
 
     @Override
     default boolean doesGenerateSpawnOnLoad() {
-        return ((IServerWorldInfoBridge) this).bridge$doesGenerateSpawnOnLoad();
+        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.generateSpawnOnLoad;
     }
 
     @Override
     default void setGenerateSpawnOnLoad(final boolean state) {
-        ((IServerWorldInfoBridge) this).bridge$setGenerateSpawnOnLoad(state);
+        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.generateSpawnOnLoad = state;
     }
 
     @Override
@@ -187,12 +187,12 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
 
     @Override
     default SerializationBehavior getSerializationBehavior() {
-        return ((IServerWorldInfoBridge) this).bridge$getSerializationBehavior();
+        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.serializationBehavior;
     }
 
     @Override
     default void setSerializationBehavior(final SerializationBehavior behavior) {
-        ((IServerWorldInfoBridge) this).bridge$setSerializationBehavior(Objects.requireNonNull(behavior));
+        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.serializationBehavior = behavior;
     }
 
     @Intrinsic
@@ -260,18 +260,18 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     default void setWeather(final Weather weather, final Ticks ticks) {
         if (weather == Weathers.CLEAR.get()) {
             this.shadow$setClearWeatherTime((int) ticks.getTicks());
-            ((IServerWorldInfo) (Object) this).setRaining(false);
+            ((IServerWorldInfo) this).setRaining(false);
             this.shadow$setRainTime(0);
             this.shadow$setThundering(false);
             this.shadow$setThunderTime(0);
         } else if (weather == Weathers.RAIN.get()) {
-            ((IServerWorldInfo) (Object) this).setRaining(true);
+            ((IServerWorldInfo) this).setRaining(true);
             this.shadow$setRainTime((int) ticks.getTicks());
             this.shadow$setThundering(false);
             this.shadow$setThunderTime(0);
             this.shadow$setClearWeatherTime(0);
         } else if (weather == Weathers.THUNDER.get()) {
-            ((IServerWorldInfo) (Object) this).setRaining(true);
+            ((IServerWorldInfo) this).setRaining(true);
             this.shadow$setRainTime((int) ticks.getTicks());
             this.shadow$setThundering(true);
             this.shadow$setThunderTime((int) ticks.getTicks());

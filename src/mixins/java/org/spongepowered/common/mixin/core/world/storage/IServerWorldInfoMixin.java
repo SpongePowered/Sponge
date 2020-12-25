@@ -36,8 +36,11 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
+import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 
@@ -71,12 +74,12 @@ public interface IServerWorldInfoMixin extends IServerWorldInfoBridge, ResourceK
 
     @Override
     default boolean bridge$hasCustomDifficulty() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
+        return false;
     }
 
     @Override
     default void bridge$forceSetDifficulty(Difficulty difficulty) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
+
     }
 
     @Override
@@ -97,66 +100,6 @@ public interface IServerWorldInfoMixin extends IServerWorldInfoBridge, ResourceK
     @Override
     default void bridge$setUniqueId(UUID uniqueId) {
         throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default boolean bridge$isEnabled() {
-        return this.bridge$getConfigAdapter().get().world.enabled;
-    }
-
-    @Override
-    default void bridge$setEnabled(final boolean state) {
-        this.bridge$getConfigAdapter().get().world.enabled = state;
-    }
-
-    @Override
-    default boolean bridge$isPVPEnabled() {
-        return this.bridge$getConfigAdapter().get().world.pvp;
-    }
-
-    @Override
-    default void bridge$setPVPEnabled(final boolean state) {
-        this.bridge$getConfigAdapter().get().world.pvp = state;
-    }
-
-    @Override
-    default boolean bridge$doesLoadOnStartup() {
-        return this.bridge$getConfigAdapter().get().world.loadOnStartup;
-    }
-
-    @Override
-    default void bridge$setLoadOnStartup(final boolean state) {
-        this.bridge$getConfigAdapter().get().world.loadOnStartup = state;
-    }
-
-    @Override
-    default boolean bridge$doesKeepSpawnLoaded() {
-        return this.bridge$getConfigAdapter().get().world.keepSpawnLoaded;
-    }
-
-    @Override
-    default void bridge$setKeepSpawnLoaded(final boolean state) {
-        this.bridge$getConfigAdapter().get().world.keepSpawnLoaded = state;
-    }
-
-    @Override
-    default boolean bridge$doesGenerateSpawnOnLoad() {
-        return this.bridge$getConfigAdapter().get().world.generateSpawnOnLoad;
-    }
-
-    @Override
-    default void bridge$setGenerateSpawnOnLoad(final boolean state) {
-        this.bridge$getConfigAdapter().get().world.generateSpawnOnLoad = state;
-    }
-
-    @Override
-    default SerializationBehavior bridge$getSerializationBehavior() {
-        return this.bridge$getConfigAdapter().get().world.serializationBehavior;
-    }
-
-    @Override
-    default void bridge$setSerializationBehavior(final SerializationBehavior behavior) {
-        this.bridge$getConfigAdapter().get().world.serializationBehavior = behavior;
     }
 
     @Nullable
@@ -188,12 +131,12 @@ public interface IServerWorldInfoMixin extends IServerWorldInfoBridge, ResourceK
     @Nullable
     @Override
     default InheritableConfigHandle<WorldConfig> bridge$getConfigAdapter() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
+        return SpongeGameConfigs.createDetached();
     }
 
     @Override
     default void bridge$setConfigAdapter(final InheritableConfigHandle<WorldConfig> adapter) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
+
     }
 
     @Override
