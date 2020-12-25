@@ -114,23 +114,10 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         if (!hasCaptures) {
             final ArrayList<Entity> entities = new ArrayList<>();
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            boolean keepInventoryRule = false;
 
-            if (entityPlayer != null) {
-                if (((EntityPlayerBridge) entityPlayer).bridge$keepInventory()) {
-                    keepInventoryRule = entityPlayer.world.getGameRules().getBoolean(DefaultGameRules.KEEP_INVENTORY);
-                    // Set global keep-inventory gamerule so mods do not drop items
-                    ((GameRulesBridge) entityPlayer.world.getGameRules()).bridge$setOrCreateGameRule(DefaultGameRules.KEEP_INVENTORY, "true");
-                }
-            }
-            SpongeCommonEventFactory.callDropItemDestruct(entities, context);
-
-            if (entityPlayer != null) {
-                if (((EntityPlayerBridge) entityPlayer).bridge$keepInventory()) {
-                    // Restore global keep-inventory gamerule
-                    ((GameRulesBridge) entityPlayer.world.getGameRules()).bridge$setOrCreateGameRule(DefaultGameRules.KEEP_INVENTORY,
-                        String.valueOf(keepInventoryRule));
-                }
+            // Do not fire any drop event if the player or server has keep-inventory
+            if (entityPlayer == null || !((EntityPlayerBridge) entityPlayer).bridge$keepInventory()) {
+                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
             }
         }
 
