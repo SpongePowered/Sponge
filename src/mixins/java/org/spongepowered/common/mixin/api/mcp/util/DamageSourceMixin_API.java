@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 
 @Mixin(value = net.minecraft.util.DamageSource.class)
-@Implements(@Interface(iface = DamageSource.class, prefix = "damagesource$"))
+@Implements(@Interface(iface = DamageSource.class, prefix = "damageSource$"))
 public abstract class DamageSourceMixin_API implements DamageSource {
 
     // @formatter:off
@@ -54,7 +54,7 @@ public abstract class DamageSourceMixin_API implements DamageSource {
     }
 
     @Intrinsic
-    public boolean damagesource$isMagic() {
+    public boolean damageSource$isMagic() {
         return this.shadow$isMagic();
     }
 
