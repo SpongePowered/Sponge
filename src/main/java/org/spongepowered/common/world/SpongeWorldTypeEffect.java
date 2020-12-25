@@ -22,19 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.dimension;
+package org.spongepowered.common.world;
 
-import net.minecraft.world.DimensionType;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.world.WorldTypeEffect;
+import org.spongepowered.common.AbstractResourceKeyed;
+import org.spongepowered.common.registry.provider.DimensionEffectProvider;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
-public final class SpongeDimensionEffects {
+public final class SpongeWorldTypeEffect extends AbstractResourceKeyed implements WorldTypeEffect {
 
-    public static final SpongeDimensionEffect OVERWORLD = new SpongeDimensionEffect((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
+    public SpongeWorldTypeEffect(final ResourceKey key) {
+        super(key);
 
-    public static final SpongeDimensionEffect NETHER = new SpongeDimensionEffect((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
+        DimensionEffectProvider.INSTANCE.put(key, this);
+    }
 
-    public static final SpongeDimensionEffect END = new SpongeDimensionEffect((ResourceKey) (Object) DimensionType.END_EFFECTS);
+    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeEffect, WorldTypeEffect.Builder> implements WorldTypeEffect.Builder {
 
-    private SpongeDimensionEffects() {
+        @Override
+        protected WorldTypeEffect build0() {
+            return new SpongeWorldTypeEffect(this.key);
+        }
+    }
+
+    public static final class FactoryImpl implements WorldTypeEffect.Factory {
+
+        @Override
+        public WorldTypeEffect overworld() {
+            return SpongeWorldTypeEffects.OVERWORLD;
+        }
+
+        @Override
+        public WorldTypeEffect nether() {
+            return SpongeWorldTypeEffects.NETHER;
+        }
+
+        @Override
+        public WorldTypeEffect end() {
+            return SpongeWorldTypeEffects.END;
+        }
     }
 }

@@ -28,7 +28,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.LecternContainer;
 import net.minecraft.tileentity.LecternTileEntity;
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

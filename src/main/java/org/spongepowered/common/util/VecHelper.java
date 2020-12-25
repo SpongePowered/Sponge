@@ -32,7 +32,7 @@ import net.minecraft.util.math.Rotations;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.bridge.api.LocationBridge;
 import org.spongepowered.math.vector.Vector2i;
 

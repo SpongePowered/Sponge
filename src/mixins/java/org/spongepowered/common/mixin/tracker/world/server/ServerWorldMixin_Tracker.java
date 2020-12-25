@@ -126,7 +126,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
+import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
 import java.util.Collections;

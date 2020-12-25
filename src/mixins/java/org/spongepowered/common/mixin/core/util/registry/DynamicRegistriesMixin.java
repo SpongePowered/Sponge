@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.dimension.SpongeDimensionTypeRegistration;
+import org.spongepowered.common.world.SpongeWorldTypeTemplate;
 
 @Mixin(DynamicRegistries.class)
 public abstract class DynamicRegistriesMixin {
@@ -54,6 +54,6 @@ public abstract class DynamicRegistriesMixin {
             )
     )
     private static <E> void impl$separateDimensionTypeNetworkCodec(final ImmutableMap.Builder<RegistryKey<? extends Registry<?>>, DynamicRegistries> builder, final RegistryKey<? extends Registry<E>> key, final Codec<E> resourceCodec, final Codec<E> networkCodec) {
-        DynamicRegistriesMixin.put(builder, (RegistryKey) key, SpongeDimensionTypeRegistration.DIRECT_CODEC, (Codec<DimensionType>) networkCodec);
+        DynamicRegistriesMixin.put(builder, (RegistryKey) key, SpongeWorldTypeTemplate.DIRECT_CODEC, (Codec<DimensionType>) networkCodec);
     }
 }

@@ -60,7 +60,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
@@ -157,7 +157,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public ResourceKey getKey() {
-        return (ResourceKey) (Object) this.dimension().location();
+        return (ResourceKey) (Object) this.shadow$dimension().location();
     }
 
     @Override

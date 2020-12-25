@@ -39,7 +39,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
 import org.spongepowered.common.data.AbstractArchetype;
 import org.spongepowered.common.data.SpongeDataManager;

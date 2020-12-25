@@ -32,7 +32,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.arguments.BlockStateArgument;
 import net.minecraft.command.arguments.ComponentArgument;
@@ -57,7 +56,6 @@ import net.minecraft.world.WorldSettings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
@@ -79,7 +77,6 @@ import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.CatTypes;
-import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyle;
@@ -115,11 +112,7 @@ import org.spongepowered.api.entity.ai.goal.builtin.creature.RandomWalkingGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.RangedAttackAgainstAgentGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLikeCrazyGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
-import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.EventContextKey;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.DismountType;
 import org.spongepowered.api.event.cause.entity.DismountTypes;
 import org.spongepowered.api.event.cause.entity.MovementType;
@@ -130,7 +123,6 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.menu.ClickType;
@@ -139,8 +131,6 @@ import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.placeholder.PlaceholderParsers;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
@@ -149,22 +139,18 @@ import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultTypes;
-import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Nameable;
 import org.spongepowered.api.world.Locatable;
-import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldArchetypes;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.dimension.DimensionTypes;
+import org.spongepowered.api.world.WorldType;
+import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
 import org.spongepowered.api.world.weather.Weather;
@@ -225,7 +211,6 @@ import org.spongepowered.common.effect.particle.SpongeParticleOption;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.ai.SpongeGoalExecutorType;
 import org.spongepowered.common.entity.ai.goal.SpongeGoalType;
-import org.spongepowered.common.event.SpongeEventContextKey;
 import org.spongepowered.common.event.cause.entity.SpongeDismountType;
 import org.spongepowered.common.event.cause.entity.SpongeMovementType;
 import org.spongepowered.common.event.cause.entity.SpongeSpawnType;
@@ -268,7 +253,6 @@ import org.spongepowered.common.world.teleport.SurfaceOnlyTeleportHelperFilter;
 import org.spongepowered.common.world.weather.SpongeWeather;
 import org.spongepowered.math.vector.Vector2d;
 import org.spongepowered.math.vector.Vector3d;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -865,18 +849,18 @@ public final class SpongeRegistryLoaders {
 
     public static RegistryLoader<WorldArchetype> worldArchetype() {
         return RegistryLoader.of(l -> {
-            l.add(WorldArchetypes.OVERWORLD, k -> SpongeRegistryLoaders.newWorldArchetype(k, DimensionTypes.OVERWORLD));
-            l.add(WorldArchetypes.THE_END, k -> SpongeRegistryLoaders.newWorldArchetype(k, DimensionTypes.THE_END));
-            l.add(WorldArchetypes.THE_NETHER, k -> SpongeRegistryLoaders.newWorldArchetype(k, DimensionTypes.THE_NETHER));
+            l.add(WorldArchetypes.OVERWORLD, k -> SpongeRegistryLoaders.newWorldArchetype(k, WorldTypes.OVERWORLD));
+            l.add(WorldArchetypes.THE_END, k -> SpongeRegistryLoaders.newWorldArchetype(k, WorldTypes.THE_END));
+            l.add(WorldArchetypes.THE_NETHER, k -> SpongeRegistryLoaders.newWorldArchetype(k, WorldTypes.THE_NETHER));
         });
     }
 
-    private static WorldArchetype newWorldArchetype(final ResourceKey key, final RegistryReference<DimensionType> dimensionType) {
+    private static WorldArchetype newWorldArchetype(final ResourceKey key, final RegistryReference<WorldType> dimensionType) {
         final WorldSettings archetype = new WorldSettings("", GameType.SURVIVAL, false, Difficulty.NORMAL, true, new GameRules(), DatapackCodec.DEFAULT);
         ((ResourceKeyBridge) (Object) archetype).bridge$setKey(key);
         final net.minecraft.world.DimensionType mcType = (net.minecraft.world.DimensionType) dimensionType.get(Sponge.getServer().registries());
         ((WorldSettingsBridge) (Object) archetype).bridge$setDimensionType(mcType);
-        if (mcType == DimensionTypes.OVERWORLD.get(Sponge.getServer().registries())) {
+        if (mcType == WorldTypes.OVERWORLD.get(Sponge.getServer().registries())) {
             ((WorldSettingsBridge) (Object) archetype).bridge$setGenerateSpawnOnLoad(true);
         }
         return (WorldArchetype) (Object)  archetype;

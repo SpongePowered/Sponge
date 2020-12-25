@@ -31,8 +31,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.MinecraftDayTime;
+import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.biome.BiomeFinder;
-import org.spongepowered.api.world.dimension.DimensionEffect;
+import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -47,8 +48,8 @@ import java.util.Optional;
 import java.util.OptionalLong;
 
 @Mixin(DimensionType.class)
-@Implements(@Interface(iface = org.spongepowered.api.world.dimension.DimensionType.class, prefix = "dimensionType$"))
-public abstract class DimensionTypeMixin_API implements org.spongepowered.api.world.dimension.DimensionType {
+@Implements(@Interface(iface = WorldType.class, prefix = "dimensionType$"))
+public abstract class DimensionTypeMixin_API implements WorldType {
 
     // @formatter:off
     @Shadow @Final private ResourceLocation effectsLocation;
@@ -82,8 +83,8 @@ public abstract class DimensionTypeMixin_API implements org.spongepowered.api.wo
     }
 
     @Override
-    public DimensionEffect effect() {
-        @Nullable final DimensionEffect effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) this.effectsLocation);
+    public WorldTypeEffect effect() {
+        @Nullable final WorldTypeEffect effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) this.effectsLocation);
         if (effect == null) {
             throw new IllegalStateException(String.format("The effect '%s' has not been registered!", this.effectsLocation));
         }

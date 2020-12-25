@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.world;
 
 import net.minecraft.world.World;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 
 public interface NextTickListEntryBridge {
 

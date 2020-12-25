@@ -29,9 +29,9 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
 import org.spongepowered.api.world.biome.BiomeFinders;
-import org.spongepowered.api.world.dimension.DimensionEffects;
-import org.spongepowered.api.world.dimension.DimensionTypeRegistration;
-import org.spongepowered.api.world.dimension.DimensionTypeRegistrations;
+import org.spongepowered.api.world.WorldTypeEffects;
+import org.spongepowered.api.world.WorldTypeTemplate;
+import org.spongepowered.api.world.WorldTypeTemplates;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
@@ -48,19 +48,19 @@ public final class DimensionTest {
     @Listener
     public void onRegisterDataPackValue(final RegisterDataPackValueEvent event) {
         event
-            .register(DimensionTypeRegistration
+            .register(WorldTypeTemplate
                 .builder()
                     .key(ResourceKey.of(this.plugin, "test_one"))
-                    .from(DimensionTypeRegistrations.THE_NETHER)
-                    .effect(DimensionEffects.END)
+                    .from(WorldTypeTemplates.THE_NETHER)
+                    .effect(WorldTypeEffects.END)
                     .createDragonFight(true)
                     .build()
             )
-            .register(DimensionTypeRegistration
+            .register(WorldTypeTemplate
                     .builder()
-                    .from(DimensionTypeRegistrations.OVERWORLD)
+                    .from(WorldTypeTemplates.OVERWORLD)
                     .key(ResourceKey.of(this.plugin, "test_two"))
-                    .effect(DimensionEffects.END)
+                    .effect(WorldTypeEffects.END)
                     .coordinateMultiplier(2)
                     .biomeFinder(BiomeFinders.FUZZY) // Overworld is column fuzzed by default...this should be interesting
                     .createDragonFight(true)

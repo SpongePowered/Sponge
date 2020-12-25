@@ -27,7 +27,7 @@ package org.spongepowered.common.registry.provider;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.dimension.DimensionEffect;
+import org.spongepowered.api.world.WorldTypeEffect;
 
 import java.util.Map;
 
@@ -35,18 +35,18 @@ public final class DimensionEffectProvider {
 
     public static DimensionEffectProvider INSTANCE = new DimensionEffectProvider();
 
-    private final Map<ResourceKey, DimensionEffect> mappings;
+    private final Map<ResourceKey, WorldTypeEffect> mappings;
 
     private DimensionEffectProvider() {
         this.mappings = new Object2ObjectOpenHashMap<>();
     }
 
     @Nullable
-    public DimensionEffect get(final ResourceKey key) {
+    public WorldTypeEffect get(final ResourceKey key) {
         return this.mappings.get(key);
     }
 
-    public void put(final ResourceKey key, final DimensionEffect effect) {
+    public void put(final ResourceKey key, final WorldTypeEffect effect) {
         this.mappings.put(key, effect);
     }
 }

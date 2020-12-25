@@ -71,7 +71,7 @@ import org.spongepowered.api.entity.projectile.explosive.fireball.DragonFireball
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.math.vector.Vector3d;
 

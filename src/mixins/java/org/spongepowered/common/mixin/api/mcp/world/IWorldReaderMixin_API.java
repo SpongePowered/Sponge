@@ -52,9 +52,9 @@ import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.ProtoWorld;
 import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.ProtoChunk;
-import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -104,8 +104,8 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
     // Region
 
     @Override
-    default DimensionType getDimensionType() {
-        return (DimensionType) this.shadow$dimensionType();
+    default WorldType getDimensionType() {
+        return (WorldType) this.shadow$dimensionType();
     }
 
     @Override

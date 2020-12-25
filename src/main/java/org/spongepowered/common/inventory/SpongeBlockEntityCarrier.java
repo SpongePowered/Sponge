@@ -22,35 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.inventory.container;
+package org.spongepowered.common.inventory;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
+public final class SpongeBlockEntityCarrier implements DefaultSingleBlockCarrier {
 
-public interface ContainerBridge {
+    private final TileEntity inventory;
+    private final Container container;
 
-    LinkedHashMap<IInventory, Set<net.minecraft.inventory.container.Slot>> bridge$getInventories();
+    public SpongeBlockEntityCarrier(final TileEntity inventory, final Container container) {
+        this.inventory = inventory;
+        this.container = container;
+    }
 
-    void bridge$setCanInteractWith(@Nullable Predicate<PlayerEntity> predicate);
+    @Override
+    public World<?, ?> getWorld() {
+        return (World<?, ?>) this.inventory.getLevel();
+    }
 
-    @Nullable Predicate<PlayerEntity> bridge$getCanInteractWith();
+    @Override
+    public ServerLocation getLocation() {
+        final BlockPos pos = this.inventory.getBlockPos();
+        return ServerLocation.of(((ServerWorld) this.inventory.getLevel()), pos.getX(), pos.getY(), pos.getZ());
+    }
 
-    @Nullable ServerLocation bridge$getOpenLocation();
-
-    void bridge$setOpenLocation(@Nullable ServerLocation loc);
-
-    void bridge$setInUse(boolean inUse);
-
-    boolean bridge$isInUse();
-
-    List<ServerPlayerEntity> bridge$listeners();
-
+    @Override
+    @SuppressWarnings("unchecked")
+    public CarriedInventory<? extends Carrier> getInventory() {
+        return (CarriedInventory) this.container;
+    }
 }

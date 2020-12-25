@@ -49,7 +49,8 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -82,7 +83,6 @@ import javax.annotation.Nullable;
 public abstract class EntityMixin_API implements org.spongepowered.api.entity.Entity {
 
     // @formatter:off
-
     @Shadow public float yRot;
     @Shadow public float xRot;
     @Shadow public boolean removed;
@@ -90,6 +90,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public int tickCount;
     @Shadow protected UUID uuid;
     @Shadow @Final private net.minecraft.entity.EntityType<?> type;
+    @Shadow public net.minecraft.world.World level;
 
     @Shadow public abstract double shadow$getX();
     @Shadow public abstract double shadow$getY();
@@ -108,7 +109,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract boolean shadow$saveAsPassenger(CompoundNBT compound);
     @Shadow @Nullable public abstract ITextComponent shadow$getCustomName();
     @Shadow public abstract ITextComponent shadow$getDisplayName();
-
     // @formatter:on
 
     @Override
@@ -119,6 +119,11 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Override
     public Vector3d getPosition() {
         return new Vector3d(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
+    }
+
+    @Override
+    public World<?, ?> getWorld() {
+        return (World<?, ?>) this.level;
     }
 
     @Override

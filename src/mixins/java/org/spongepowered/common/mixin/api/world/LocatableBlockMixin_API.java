@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.world;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
+import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
 @Mixin(value = LocatableBlock.class, remap = false)
 public interface LocatableBlockMixin_API {

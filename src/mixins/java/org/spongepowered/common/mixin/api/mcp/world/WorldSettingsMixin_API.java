@@ -29,8 +29,8 @@ import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.gen.WorldGenerationSettings;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -64,8 +64,8 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
     }
 
     @Override
-    public DimensionType getDimensionType() {
-        return (DimensionType) ((WorldSettingsBridge) this).bridge$getDimensionType();
+    public WorldType getDimensionType() {
+        return (WorldType) ((WorldSettingsBridge) this).bridge$getDimensionType();
     }
 
     @Override

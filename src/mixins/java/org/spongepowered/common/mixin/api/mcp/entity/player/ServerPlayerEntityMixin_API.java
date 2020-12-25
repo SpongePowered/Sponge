@@ -72,7 +72,8 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.api.world.WorldType;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -113,11 +114,18 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Shadow @Final public MinecraftServer server;
     @Shadow @Final private PlayerAdvancements advancements;
     @Shadow public ServerPlayNetHandler connection;
+
+    @Shadow public abstract net.minecraft.world.server.ServerWorld shadow$getLevel();
     // @formatter:on
 
-    private PlayerChatRouter api$chatRouter;
     private final TabList api$tabList = new SpongeTabList((ServerPlayerEntity) (Object) this);
+    @Nullable private PlayerChatRouter api$chatRouter;
     @Nullable private WorldBorder api$worldBorder;
+
+    @Override
+    public ServerWorld getWorld() {
+        return (ServerWorld) this.shadow$getLevel();
+    }
 
     @Override
     public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position, final int radius) {
@@ -156,8 +164,8 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public void sendEnvironment(final DimensionType dimensionType) {
-        ((ServerPlayerEntityBridge) this).bridge$sendViewerEnvironment((net.minecraft.world.DimensionType) dimensionType);
+    public void sendEnvironment(final WorldType worldType) {
+        ((ServerPlayerEntityBridge) this).bridge$sendViewerEnvironment((net.minecraft.world.DimensionType) worldType);
     }
 
     @Override
@@ -311,7 +319,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     public Optional<WorldBorder> getWorldBorder() {
         return Optional.ofNullable(this.api$worldBorder);
     }
-
 
     @Override
     public CooldownTracker getCooldownTracker() {

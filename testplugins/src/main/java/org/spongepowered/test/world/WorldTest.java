@@ -41,10 +41,10 @@ import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Axis;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.math.vector.Vector3d;
@@ -79,11 +79,11 @@ public final class WorldTest {
                         "minecraft",
                         "sponge")
                     .setKey("portal_type").build();
-        final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.registryElement(
-                TypeToken.get(DimensionType.class),
-                RegistryTypes.DIMENSION_TYPE,
+        final Parameter.Value<WorldType> worldTypeParameter = Parameter.registryElement(
+                TypeToken.get(WorldType.class),
+                RegistryTypes.WORLD_TYPE,
                 "minecraft",
-                "sponge").setKey("dimension_type").build();
+                "sponge").setKey("world_type").build();
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
         final Parameter.Value<ResourceKey> copyWorldKeyParameter = Parameter.resourceKey().setKey("copy_world").build();
         final Parameter.Value<ResourceKey> renameWorldKeyParameter = Parameter.resourceKey().setKey("new_world_name").build();
@@ -136,12 +136,12 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                     .builder()
-                    .parameters(playerParameter, dimensionTypeParameter)
+                    .parameters(playerParameter, worldTypeParameter)
                     .setPermission(this.plugin.getMetadata().getId() + ".command.environment.change")
                     .setExecutor(context -> {
                         final ServerPlayer player = context.getOne(playerParameter).orElse(this.getSourcePlayer(context));
-                        final DimensionType dimensionType = context.requireOne(dimensionTypeParameter);
-                        player.sendEnvironment(dimensionType);
+                        final WorldType worldType = context.requireOne(worldTypeParameter);
+                        player.sendEnvironment(worldType);
                         return CommandResult.success();
                     })
                     .build()
@@ -150,22 +150,22 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                         .builder()
-                        .parameters(worldParameter, dimensionTypeParameter)
-                        .setPermission(this.plugin.getMetadata().getId() + ".command.dimension.change")
+                        .parameters(worldParameter, worldTypeParameter)
+                        .setPermission(this.plugin.getMetadata().getId() + ".command.worldtype.change")
                         .setExecutor(context -> {
                             final ServerWorldProperties world = context.requireOne(worldParameter);
-                            final DimensionType dimensionType = context.requireOne(dimensionTypeParameter);
-                            world.setDimensionType(dimensionType);
+                            final WorldType worldType = context.requireOne(worldTypeParameter);
+                            world.setWorldType(worldType);
                             return CommandResult.success();
                         })
                         .build()
-                , "cd", "changedimension"
+                , "cwt", "changeworldtype"
         );
 
         event.register(this.plugin, Command
                         .builder()
                         .parameters(playerParameter, optWorldParameter, optVector3Parameter)
-                        .setPermission(this.plugin.getMetadata().getId() + ".command.position.change")
+                        .setPermission(this.plugin.getMetadata().getId() + ".command.location.change")
                         .setExecutor(context -> {
                             final ServerPlayer player = context.getOne(playerParameter).orElse(this.getSourcePlayer(context));
                             final ServerWorldProperties properties = context.getOne(optWorldParameter).orElse(player.getWorld().getProperties());
@@ -197,11 +197,11 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                         .builder()
-                        .parameters(worldKeyParameter, dimensionTypeParameter, biomeListTypeParameter)
+                        .parameters(worldKeyParameter, worldTypeParameter, biomeListTypeParameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.world.create")
                         .setExecutor(context -> {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
-                            final DimensionType dimensionType = context.requireOne(dimensionTypeParameter);
+                            final WorldType worldType = context.requireOne(worldTypeParameter);
                             final Collection<? extends BiomeType> biomes = context.getAll(biomeListTypeParameter);
 //                            GeneratorModifierType modifierType = GeneratorModifierTypes.NONE.get();
 //                            if (!biomes.isEmpty()) {
@@ -219,7 +219,7 @@ public final class WorldTest {
 //                                        .value();
 //                            }
                             final WorldArchetype archetype = WorldArchetype.builder()
-                                    .dimensionType(dimensionType)
+                                    .worldType(worldType)
                                     .generateSpawnOnLoad(true)
                                     .build();
                             Sponge.getServer().getWorldManager().createProperties(key, archetype).whenComplete(((worldProperties, throwable) -> {

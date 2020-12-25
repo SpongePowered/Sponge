@@ -29,7 +29,7 @@ import org.spongepowered.api.ResourceKeyed;
 
 public abstract class AbstractResourceKeyed implements ResourceKeyed {
 
-    protected ResourceKey key;
+    private final ResourceKey key;
 
     public AbstractResourceKeyed(final ResourceKey key) {
         this.key = key;

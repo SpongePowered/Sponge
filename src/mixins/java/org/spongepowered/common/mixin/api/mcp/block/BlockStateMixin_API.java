@@ -36,7 +36,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.block.BlockStateSerializerDeserializer;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;

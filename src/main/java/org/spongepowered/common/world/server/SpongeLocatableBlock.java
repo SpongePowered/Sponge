@@ -22,12 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world;
+package org.spongepowered.common.world.server;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Key;
@@ -38,13 +37,15 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -64,15 +65,27 @@ public final class SpongeLocatableBlock implements LocatableBlock {
         this.worldRef = new WeakReference<>(checkNotNull(builder.worldReference.get(), "reference"));
     }
 
+    SpongeLocatableBlock(final ServerWorld world, final int x, final int y, final int z) {
+        this.world = world.getKey();
+        this.worldRef = new WeakReference<>(world);
+        this.position = new Vector3i(x, y, z);
+        this.blockState = world.getBlock(x, y, z);
+    }
+
     @Override
     public BlockState getBlockState() {
         return this.blockState;
     }
 
     @Override
+    public World<?, ?> getWorld() {
+        return Objects.requireNonNull(this.worldRef.get(), "World was de-referenced!");
+    }
+
+    @Override
     public ServerLocation getLocation() {
         if (this.location == null) {
-            this.location = ServerLocation.of(this.worldRef.get(), this.position);
+            this.location = ServerLocation.of(Objects.requireNonNull(this.worldRef.get(), "World was de-referenced!"), this.position);
         }
         return this.location;
     }
@@ -150,7 +163,6 @@ public final class SpongeLocatableBlock implements LocatableBlock {
 
     @Override
     public LocatableBlock mergeWith(final LocatableBlock that, final MergeFunction function) {
-
         return LocatableBlock.builder().from(this).state(this.blockState.mergeWith(that.getBlockState(), function)).build();
     }
 
@@ -168,14 +180,14 @@ public final class SpongeLocatableBlock implements LocatableBlock {
             return false;
         }
         final SpongeLocatableBlock that = (SpongeLocatableBlock) o;
-        return Objects.equal(this.blockState, that.blockState) &&
-               Objects.equal(this.position, that.position) &&
-               Objects.equal(this.world, that.world);
+        return com.google.common.base.Objects.equal(this.blockState, that.blockState) &&
+               com.google.common.base.Objects.equal(this.position, that.position) &&
+               com.google.common.base.Objects.equal(this.world, that.world);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.blockState, this.position, this.world);
+        return Objects.hash(this.blockState, this.position, this.world);
     }
 
     @Override

@@ -38,7 +38,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -48,7 +48,7 @@ import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
+import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.HashSet;
@@ -85,7 +85,8 @@ public abstract class TileEntityMixin_API implements BlockEntity {
             throw new RuntimeException("You should not attempt to make a server-side location on the client!");
         }
 
-        return ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3d(this.shadow$getBlockPos()));
+        final BlockPos pos = this.shadow$getBlockPos();
+        return ServerLocation.of((ServerWorld) this.level, pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
@@ -179,7 +180,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
 
     @Override
     public Set<Value.Immutable<?>> getValues() {
-        // TODO: Minecraft 1.14 - Merge custom and Vanilla values and return the merged result.
+        // TODO: Minecraft 1.1 - Merge custom and Vanilla values and return the merged result.
         return this.api$getVanillaValues();
     }
 

@@ -34,7 +34,7 @@ import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.gen.MutableWorldGenerationSettings;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.ServerWorldProperties;
@@ -50,7 +50,6 @@ import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -96,13 +95,13 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default DimensionType getDimensionType() {
-        return (DimensionType) ((IServerWorldInfoBridge) this).bridge$getDimensionType();
+    default WorldType getWorldType() {
+        return (WorldType) ((IServerWorldInfoBridge) this).bridge$getDimensionType();
     }
 
     @Override
-    default void setDimensionType(final DimensionType dimensionType) {
-        ((IServerWorldInfoBridge) this).bridge$setDimensionType((net.minecraft.world.DimensionType) dimensionType, true);
+    default void setWorldType(final WorldType worldType) {
+        ((IServerWorldInfoBridge) this).bridge$setDimensionType((net.minecraft.world.DimensionType) worldType, true);
     }
 
     @Override

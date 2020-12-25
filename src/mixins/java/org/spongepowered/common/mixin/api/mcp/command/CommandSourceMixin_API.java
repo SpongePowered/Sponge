@@ -39,7 +39,7 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.Locatable;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.math.vector.Vector3d;

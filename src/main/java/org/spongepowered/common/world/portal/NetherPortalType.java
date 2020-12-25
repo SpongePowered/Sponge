@@ -39,7 +39,7 @@ import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.util.Axis;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.common.accessor.entity.EntityAccessor;

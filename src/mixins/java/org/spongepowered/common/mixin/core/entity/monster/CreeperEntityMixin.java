@@ -30,7 +30,7 @@ import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.Explosion.Mode;
 import org.spongepowered.api.entity.living.monster.Creeper;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;

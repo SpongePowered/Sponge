@@ -55,7 +55,7 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
+import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
 import java.util.function.BiConsumer;
 

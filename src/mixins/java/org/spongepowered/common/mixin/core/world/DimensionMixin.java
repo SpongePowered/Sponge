@@ -31,7 +31,7 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.dimension.SpongeDimensionTypeRegistration;
+import org.spongepowered.common.world.SpongeWorldTypeTemplate;
 
 import java.util.function.Supplier;
 
@@ -43,6 +43,6 @@ public abstract class DimensionMixin {
             at = @At(value = "FIELD", opcode = Opcodes.GETSTATIC, target = "Lnet/minecraft/world/DimensionType;CODEC:Lcom/mojang/serialization/Codec;")
     )
     private static Codec<Supplier<DimensionType>> impl$useRegistrationCodec() {
-        return SpongeDimensionTypeRegistration.CODEC;
+        return SpongeWorldTypeTemplate.CODEC;
     }
 }

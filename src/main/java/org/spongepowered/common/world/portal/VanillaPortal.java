@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world.portal;
 
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalType;
 

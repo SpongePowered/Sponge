@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world;
 
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -45,27 +46,32 @@ import java.util.StringJoiner;
 
 public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> implements Location<W, L> {
 
-    final WeakReference<W> worldRef;
+    protected final WeakReference<W> worldRef;
     private final Vector3d position;
     private final Vector3i blockPosition;
     private final Vector3i chunkPosition;
     private final Vector3i biomePosition;
 
-    SpongeLocation(final W world, final ChunkLayout chunkLayout, final Vector3d position) {
+    private final BlockPos pos;
+
+    protected SpongeLocation(final W world, final ChunkLayout chunkLayout, final Vector3d position) {
         this.worldRef = new WeakReference<>(world);
         this.position = position;
         this.blockPosition = position.toInt();
         this.chunkPosition = chunkLayout.forceToChunk(this.blockPosition);
         this.biomePosition = position.toInt().mul(1, 0, 1);
+
+        this.pos = new BlockPos(position.getX(), position.getY(), position.getZ());
     }
 
-    SpongeLocation(final W worldRef, final Vector3d position,
-        final Vector3i chunkPosition, final Vector3i biomePosition) {
+    protected SpongeLocation(final W worldRef, final Vector3d position, final Vector3i chunkPosition, final Vector3i biomePosition) {
         this.worldRef = new WeakReference<>(worldRef);
         this.position = position;
         this.blockPosition = position.toInt();
         this.chunkPosition = chunkPosition;
         this.biomePosition = biomePosition;
+
+        this.pos = new BlockPos(position.getX(), position.getY(), position.getZ());
     }
 
     @Override
@@ -265,6 +271,10 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
     @Override
     public boolean setBlockType(final BlockType type, final BlockChangeFlag flag) {
         return this.getWorld().setBlock(this.blockPosition, type.getDefaultState(), flag);
+    }
+
+    public BlockPos asBlockPos() {
+        return this.pos;
     }
 
     @Override

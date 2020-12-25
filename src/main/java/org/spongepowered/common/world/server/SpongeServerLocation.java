@@ -22,9 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world;
+package org.spongepowered.common.world.server;
 
-import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.ResourceKey;
@@ -46,12 +45,11 @@ import org.spongepowered.api.scheduler.TaskPriority;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.ChunkLayout;
-import org.spongepowered.common.bridge.api.LocationBridge;
-import org.spongepowered.common.util.MemoizedSupplier;
 import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.common.world.SpongeLocation;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -65,15 +63,9 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
-public final class SpongeServerLocation extends SpongeLocation<ServerWorld, ServerLocation> implements ServerLocation, LocationBridge {
-
-    private final Supplier<BlockPos> posSupplier = MemoizedSupplier.memoize(() -> {
-        final Vector3i blockPosition = this.getBlockPosition();
-        return new BlockPos(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ());
-    });
+public final class SpongeServerLocation extends SpongeLocation<ServerWorld, ServerLocation> implements ServerLocation {
 
     SpongeServerLocation(final ServerWorld world, final ChunkLayout chunkLayout, final Vector3d position) {
         super(world, chunkLayout, position);
@@ -428,7 +420,7 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        final SpongeLocation<?, ?> that = (SpongeLocation<?, ?>) o;
+        final SpongeServerLocation that = (SpongeServerLocation) o;
         return this.worldRef.equals(that.worldRef) &&
                    this.getPosition().equals(that.getPosition()) &&
                    this.getBlockPosition().equals(that.getBlockPosition());
@@ -445,11 +437,6 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
                    .add("worldRef=" + this.getWorldKey())
                    .add("position=" + this.getPosition())
                    .toString();
-    }
-
-    @Override
-    public BlockPos bridge$getBlockPos() {
-        return this.posSupplier.get();
     }
 
     public static final class Factory implements ServerLocation.Factory {

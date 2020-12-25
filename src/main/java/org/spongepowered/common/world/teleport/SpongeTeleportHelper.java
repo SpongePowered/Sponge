@@ -29,7 +29,7 @@ import com.google.inject.Singleton;
 import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;

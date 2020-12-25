@@ -26,7 +26,7 @@ package org.spongepowered.common.bridge.network;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 
 public interface ServerPlayNetHandlerBridge {
 

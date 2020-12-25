@@ -26,7 +26,7 @@ package org.spongepowered.common.hooks;
 
 import net.minecraft.world.DimensionType;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.world.dimension.DimensionTypes;
+import org.spongepowered.api.world.WorldTypes;
 
 /**
  * Dimension hooks to handle differences in logic between Sponge's Multi-World system
@@ -47,6 +47,6 @@ public interface DimensionHooks {
      * @return True to generate spawn on load as a default
      */
     default boolean doesGenerateSpawnOnLoad(final DimensionType dimensionType) {
-        return DimensionTypes.OVERWORLD.get(Sponge.getServer().registries()) == dimensionType;
+        return WorldTypes.OVERWORLD.get(Sponge.getServer().registries()) == dimensionType;
     }
 }

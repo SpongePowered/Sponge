@@ -26,7 +26,6 @@ package org.spongepowered.test.data;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -111,7 +110,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.math.vector.Vector3d;
@@ -131,7 +130,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Supplier;
 
 @Plugin("datatest")
 public final class DataTest  {

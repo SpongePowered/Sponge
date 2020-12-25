@@ -34,7 +34,7 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedZeroAdvanceValueParameter;
 
 import java.util.Optional;

@@ -33,7 +33,7 @@ import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.NameableBlockEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;

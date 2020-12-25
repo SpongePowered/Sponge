@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.dimension;
+package org.spongepowered.common.world;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -44,9 +44,9 @@ import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.world.biome.BiomeFinder;
 import org.spongepowered.api.world.biome.BiomeFinders;
-import org.spongepowered.api.world.dimension.DimensionEffect;
-import org.spongepowered.api.world.dimension.DimensionEffects;
-import org.spongepowered.api.world.dimension.DimensionTypeRegistration;
+import org.spongepowered.api.world.WorldTypeEffect;
+import org.spongepowered.api.world.WorldTypeEffects;
+import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.accessor.world.DimensionTypeAccessor;
 import org.spongepowered.common.registry.provider.BiomeFinderProvider;
@@ -59,9 +59,9 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Supplier;
 
-public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed implements DimensionTypeRegistration {
+public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed implements WorldTypeTemplate {
 
-    public final DimensionEffect effect;
+    public final WorldTypeEffect effect;
     public final BiomeFinder biomeFinder;
     @Nullable public final MinecraftDayTime fixedTime;
     public final ResourceKey infiniburn;
@@ -101,9 +101,9 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
                             Codec.BOOL.fieldOf("has_raids").forGetter(DimensionType::hasRaids),
                             Codec.intRange(0, 256).fieldOf("logical_height").forGetter(DimensionType::logicalHeight),
                             ResourceLocation.CODEC.fieldOf("infiniburn").forGetter(v -> ((ITag.INamedTag<Block>)v.infiniburn()).getName()),
-                            ResourceLocation.CODEC.fieldOf("effects").orElse((ResourceLocation) (Object) DimensionEffects.OVERWORLD.getKey()).forGetter(v -> ((DimensionTypeAccessor) v).accessor$effectsLocation()),
+                            ResourceLocation.CODEC.fieldOf("effects").orElse((ResourceLocation) (Object) WorldTypeEffects.OVERWORLD.getKey()).forGetter(v -> ((DimensionTypeAccessor) v).accessor$effectsLocation()),
                             Codec.FLOAT.fieldOf("ambient_light").forGetter(v -> ((DimensionTypeAccessor) v).accessor$ambientLight()),
-                            Codec.optionalField("_sponge", SpongeDimensionTypeRegistration.SPONGE_CODEC).forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeFinderProvider.INSTANCE.get((BiomeFinder) v.getBiomeZoomer()), v.createDragonFight())))
+                            Codec.optionalField("_sponge", SpongeWorldTypeTemplate.SPONGE_CODEC).forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeFinderProvider.INSTANCE.get((BiomeFinder) v.getBiomeZoomer()), v.createDragonFight())))
                     )
                     // *Chuckles* I'm in danger
                     .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15) -> {
@@ -115,9 +115,9 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
                     })
             );
 
-    public static final Codec<Supplier<DimensionType>> CODEC = RegistryKeyCodec.create(Registry.DIMENSION_TYPE_REGISTRY, SpongeDimensionTypeRegistration.DIRECT_CODEC);
+    public static final Codec<Supplier<DimensionType>> CODEC = RegistryKeyCodec.create(Registry.DIMENSION_TYPE_REGISTRY, SpongeWorldTypeTemplate.DIRECT_CODEC);
 
-    protected SpongeDimensionTypeRegistration(final BuilderImpl builder) {
+    protected SpongeWorldTypeTemplate(final BuilderImpl builder) {
         super(builder.key);
 
         this.effect = builder.effect;
@@ -137,10 +137,10 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
 
         // Sponge
         this.biomeFinder = builder.biomeFinder;
-        this.createDragonFight = builder.spawnDragonFight;
+        this.createDragonFight = builder.createDragonFight;
     }
 
-    public SpongeDimensionTypeRegistration(final ResourceKey key, final DimensionType dimensionType) {
+    public SpongeWorldTypeTemplate(final ResourceKey key, final DimensionType dimensionType) {
         super(key);
 
         final OptionalLong fixedTime = ((DimensionTypeAccessor) dimensionType).accessor$fixedTime();
@@ -162,10 +162,6 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
         this.createDragonFight = dimensionType.createDragonFight();
     }
 
-    public void setKey(final ResourceKey key) {
-        this.key = key;
-    }
-
     @Override
     public DataPackType type() {
         return DataPackTypes.DIMENSION_TYPE;
@@ -183,7 +179,7 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
     }
 
     @Override
-    public DimensionEffect effect() {
+    public WorldTypeEffect effect() {
         return this.effect;
     }
 
@@ -267,44 +263,47 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
         }
     }
 
-    public static final class FactoryImpl implements DimensionTypeRegistration.Factory {
+    public static final class FactoryImpl implements WorldTypeTemplate.Factory {
 
-        private static final SpongeDimensionTypeRegistration OVERWORLD = new SpongeDimensionTypeRegistration(ResourceKey.minecraft("overworld"), DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD());
+        private static final SpongeWorldTypeTemplate
+                OVERWORLD = new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld"), DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD());
 
-        private static final SpongeDimensionTypeRegistration THE_NETHER = new SpongeDimensionTypeRegistration(ResourceKey.minecraft("the_nether"), DimensionTypeAccessor.accessor$DEFAULT_NETHER());
+        private static final SpongeWorldTypeTemplate
+                THE_NETHER = new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_nether"), DimensionTypeAccessor.accessor$DEFAULT_NETHER());
 
-        private static final SpongeDimensionTypeRegistration THE_END = new SpongeDimensionTypeRegistration(ResourceKey.minecraft("the_end"), DimensionTypeAccessor.accessor$DEFAULT_END());
+        private static final SpongeWorldTypeTemplate
+                THE_END = new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_end"), DimensionTypeAccessor.accessor$DEFAULT_END());
 
         @Override
-        public DimensionTypeRegistration overworld() {
+        public WorldTypeTemplate overworld() {
             return FactoryImpl.OVERWORLD;
         }
 
         @Override
-        public DimensionTypeRegistration theNether() {
+        public WorldTypeTemplate theNether() {
             return FactoryImpl.THE_NETHER;
         }
 
         @Override
-        public DimensionTypeRegistration theEnd() {
+        public WorldTypeTemplate theEnd() {
             return FactoryImpl.THE_END;
         }
     }
 
-    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<DimensionTypeRegistration, Builder> implements DimensionTypeRegistration.Builder {
+    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
 
-        protected DimensionEffect effect = DimensionEffects.OVERWORLD;
+        protected WorldTypeEffect effect = WorldTypeEffects.OVERWORLD;
         protected MinecraftDayTime fixedTime;
         protected BiomeFinder biomeFinder = BiomeFinders.DEFAULT;
         protected ResourceKey infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.getName();
 
-        protected boolean scorching, natural, skylight, ceiling, piglinSafe, bedsUsable, respawnAnchorsUsable, hasRaids, spawnDragonFight;
+        protected boolean scorching, natural, skylight, ceiling, piglinSafe, bedsUsable, respawnAnchorsUsable, hasRaids, createDragonFight;
         protected float ambientLighting;
         protected int logicalHeight;
         protected double coordinateMultiplier;
 
         @Override
-        public DimensionTypeRegistration.Builder effect(final DimensionEffect effect) {
+        public WorldTypeTemplate.Builder effect(final WorldTypeEffect effect) {
             Objects.requireNonNull(effect, "effect");
             this.effect = effect;
             return this;
@@ -317,85 +316,85 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
         }
 
         @Override
-        public DimensionTypeRegistration.Builder scorching(final boolean scorching) {
+        public WorldTypeTemplate.Builder scorching(final boolean scorching) {
             this.scorching = scorching;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder natural(final boolean natural) {
+        public WorldTypeTemplate.Builder natural(final boolean natural) {
             this.natural = natural;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder coordinateMultiplier(final double coordinateMultiplier) {
+        public WorldTypeTemplate.Builder coordinateMultiplier(final double coordinateMultiplier) {
             this.coordinateMultiplier = coordinateMultiplier;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder hasSkylight(final boolean skylight) {
+        public WorldTypeTemplate.Builder hasSkylight(final boolean skylight) {
             this.skylight = skylight;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder hasCeiling(final boolean ceiling) {
+        public WorldTypeTemplate.Builder hasCeiling(final boolean ceiling) {
             this.ceiling = ceiling;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder ambientLighting(final float ambientLighting) {
+        public WorldTypeTemplate.Builder ambientLighting(final float ambientLighting) {
             this.ambientLighting = ambientLighting;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder fixedTime(@Nullable final MinecraftDayTime fixedTime) {
+        public WorldTypeTemplate.Builder fixedTime(@Nullable final MinecraftDayTime fixedTime) {
             this.fixedTime = fixedTime;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder piglinSafe(final boolean piglinSafe) {
+        public WorldTypeTemplate.Builder piglinSafe(final boolean piglinSafe) {
             this.piglinSafe = piglinSafe;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder bedsUsable(final boolean bedsUsable) {
+        public WorldTypeTemplate.Builder bedsUsable(final boolean bedsUsable) {
             this.bedsUsable = bedsUsable;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder respawnAnchorsUsable(final boolean respawnAnchorsUsable) {
+        public WorldTypeTemplate.Builder respawnAnchorsUsable(final boolean respawnAnchorsUsable) {
             this.respawnAnchorsUsable = respawnAnchorsUsable;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder hasRaids(final boolean hasRaids) {
+        public WorldTypeTemplate.Builder hasRaids(final boolean hasRaids) {
             this.hasRaids = hasRaids;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder logicalHeight(final int logicalHeight) {
+        public WorldTypeTemplate.Builder logicalHeight(final int logicalHeight) {
             this.logicalHeight = logicalHeight;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder createDragonFight(final boolean spawnDragonFight) {
-            this.spawnDragonFight = spawnDragonFight;
+        public WorldTypeTemplate.Builder createDragonFight(final boolean spawnDragonFight) {
+            this.createDragonFight = spawnDragonFight;
             return this;
         }
 
         @Override
-        public DimensionTypeRegistration.Builder from(final DimensionTypeRegistration value) {
+        public WorldTypeTemplate.Builder from(final WorldTypeTemplate value) {
             Objects.requireNonNull(value, "value");
 
             this.effect = value.effect();
@@ -413,13 +412,13 @@ public final class SpongeDimensionTypeRegistration extends AbstractResourceKeyed
             this.ambientLighting = value.ambientLighting();
             this.logicalHeight = value.logicalHeight();
             this.coordinateMultiplier = value.coordinateMultiplier();
-            this.spawnDragonFight = value.createDragonFight();
+            this.createDragonFight = value.createDragonFight();
             return this;
         }
 
         @Override
-        public @NonNull DimensionTypeRegistration build0() {
-            return new SpongeDimensionTypeRegistration(this);
+        public @NonNull WorldTypeTemplate build0() {
+            return new SpongeWorldTypeTemplate(this);
         }
     }
 }

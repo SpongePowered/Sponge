@@ -27,7 +27,7 @@ package org.spongepowered.common.util;
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Objects;
 

@@ -30,13 +30,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
-import org.spongepowered.common.util.VecHelper;
 
 import javax.annotation.Nullable;
 

@@ -45,7 +45,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.inventory.container.AbstractFurnaceContainerAccessor;
 import org.spongepowered.common.accessor.inventory.container.BeaconContainerAccessor;
@@ -62,7 +62,7 @@ import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.SpongeLocationCarrier;
-import org.spongepowered.common.inventory.SpongeTileEntityCarrier;
+import org.spongepowered.common.inventory.SpongeBlockEntityCarrier;
 import org.spongepowered.common.inventory.custom.CustomContainer;
 import org.spongepowered.common.inventory.lens.CompoundSlotLensProvider;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -313,7 +313,7 @@ public final class ContainerUtil {
                 }
                 // Slot Inventory is a TileEntity
                 if (slot.container instanceof TileEntity) {
-                    return new SpongeTileEntityCarrier(container, (TileEntity) slot.container);
+                    return new SpongeBlockEntityCarrier((TileEntity) slot.container, container);
                 }
             }
         }

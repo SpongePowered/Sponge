@@ -27,7 +27,6 @@ package org.spongepowered.common.accessor.world;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.IBiomeMagnifier;
-import org.spongepowered.api.world.dimension.DimensionEffect;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;

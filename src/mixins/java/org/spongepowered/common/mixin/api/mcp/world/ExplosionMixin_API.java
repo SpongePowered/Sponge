@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.explosive.Explosive;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;

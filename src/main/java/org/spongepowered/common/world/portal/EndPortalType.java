@@ -27,7 +27,7 @@ package org.spongepowered.common.world.portal;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Axis;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.portal.Portal;
 
 import java.util.Objects;

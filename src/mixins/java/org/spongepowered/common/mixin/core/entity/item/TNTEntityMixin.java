@@ -30,7 +30,7 @@ import net.minecraft.entity.item.TNTEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;

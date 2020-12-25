@@ -22,36 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.world;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
+import net.minecraft.world.DimensionType;
+import org.spongepowered.api.ResourceKey;
 
-public class SpongeTileEntityCarrier implements DefaultSingleBlockCarrier {
+public final class SpongeWorldTypeEffects {
 
-    private final Container container;
-    private final TileEntity inventory;
+    public static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
 
-    public SpongeTileEntityCarrier(Container container, TileEntity inventory) {
+    public static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
 
-        this.container = container;
-        this.inventory = inventory;
-    }
+    public static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.END_EFFECTS);
 
-    @Override
-    public ServerLocation getLocation() {
-        final BlockPos pos = this.inventory.getBlockPos();
-        return ServerLocation.of(((ServerWorld) this.inventory.getLevel()), pos.getX(), pos.getY(), pos.getZ());
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory) this.container;
+    private SpongeWorldTypeEffects() {
     }
 }

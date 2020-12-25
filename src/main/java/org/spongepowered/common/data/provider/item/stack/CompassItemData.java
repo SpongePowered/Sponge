@@ -32,7 +32,7 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
