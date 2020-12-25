@@ -210,21 +210,18 @@ public class ProjectileTest implements LoadableModule {
 
         @Listener
         public void onClickBlock(final InteractBlockEvent.Secondary event, @First final ServerPlayer player) {
-            if (event.getInteractionPoint().isPresent()) {
-                final Vector3d interactionPoint = event.getInteractionPoint().get();
-                final ServerWorld world = player.getWorld();
-                final EntityType<? extends Projectile> nextType = this.projectileTypes.poll();
-                this.projectileTypes.offer(nextType);
-                final Optional<? extends BlockEntity> blockEntity = world.getBlockEntity(interactionPoint.toInt());
-                if (blockEntity.isPresent() && blockEntity.get() instanceof Dispenser) {
-                    ((Dispenser) blockEntity.get()).launchProjectile(nextType);
-                } else {
-                    player.launchProjectile(nextType);
-                }
-                event.setCancelled(true);
-                player.sendMessage(Identity.nil(), Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.getGame().registries(), nextType).toString()));
+            final Vector3d interactionPoint = event.getInteractionPoint();
+            final ServerWorld world = player.getWorld();
+            final EntityType<? extends Projectile> nextType = this.projectileTypes.poll();
+            this.projectileTypes.offer(nextType);
+            final Optional<? extends BlockEntity> blockEntity = world.getBlockEntity(interactionPoint.toInt());
+            if (blockEntity.isPresent() && blockEntity.get() instanceof Dispenser) {
+                ((Dispenser) blockEntity.get()).launchProjectile(nextType);
+            } else {
+                player.launchProjectile(nextType);
             }
-
+            event.setCancelled(true);
+            player.sendMessage(Identity.nil(), Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.getGame().registries(), nextType).toString()));
         }
 
     }

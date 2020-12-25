@@ -43,6 +43,7 @@ import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.CPlayerDiggingPacket;
 import net.minecraft.network.play.server.SOpenWindowPacket;
 import net.minecraft.tileentity.JukeboxTileEntity;
 import net.minecraft.util.DamageSource;
@@ -540,18 +541,10 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractEntityEvent.Primary callInteractEntityEventPrimary(final ServerPlayerEntity player, final ItemStack stack, final net.minecraft.entity.Entity entity, final Hand
-            hand, @Nullable final Vector3d hitVec) {
+    public static InteractEntityEvent.Primary callInteractEntityEventPrimary(final ServerPlayerEntity player, final ItemStack stack, final net.minecraft.entity.Entity entity, final Hand hand) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
-            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
-            frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) entity));
-            if (!stack.isEmpty()) {
-                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
-            }
-            final InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(frame.getCurrentCause(), (Entity) entity,
-                    Optional.ofNullable(hitVec));
+            SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, entity, frame);
+            final InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(frame.getCurrentCause(), (Entity) entity);
             if (entity instanceof Player && !((org.spongepowered.api.world.server.ServerWorld) player.getLevel()).getProperties().isPVPEnabled()) {
                 event.setCancelled(true); // if PvP is disabled for world, cancel
             }
@@ -563,147 +556,96 @@ public final class SpongeCommonEventFactory {
     public static InteractEntityEvent.Secondary callInteractEntityEventSecondary(final ServerPlayerEntity player, final ItemStack stack, final net.minecraft.entity.Entity entity,
             final Hand hand, @Nullable final Vector3d hitVec) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
-            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
-            frame.addContext(EventContextKeys.ENTITY_HIT, (Entity) entity);
-            if (!stack.isEmpty()) {
-                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
-            }
-            final HandType handType = (HandType) (Object) hand;
-            frame.addContext(EventContextKeys.USED_HAND, handType);
-            final InteractEntityEvent.Secondary event = SpongeEventFactory.createInteractEntityEventSecondary(frame.getCurrentCause(),
-                    (Entity) entity, Optional.ofNullable(hitVec));
+            SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, entity, frame);
+            final InteractEntityEvent.Secondary event = hitVec == null ?
+                    SpongeEventFactory.createInteractEntityEventSecondaryOn(frame.getCurrentCause(), (Entity) entity) :
+                    SpongeEventFactory.createInteractEntityEventSecondaryAt(frame.getCurrentCause(), (Entity) entity, hitVec);
             SpongeCommon.postEvent(event);
             return event;
         }
     }
 
-    public static InteractItemEvent.Primary callInteractItemEventPrimary(final PlayerEntity player, final ItemStack stack, final Hand hand,
-        @Nullable final Vector3d hitVec, final Object hitTarget) {
+    public static InteractItemEvent.Primary callInteractItemEventPrimary(final PlayerEntity player, final ItemStack stack, final Hand hand) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
-                frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
-            } else {
-                frame.pushCause(player);
-                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
-                frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
-            }
-
-            if (hitTarget instanceof Entity) {
-                frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
-            } else if (hitTarget instanceof BlockSnapshot) {
-                frame.addContext(EventContextKeys.BLOCK_HIT, (BlockSnapshot) hitTarget);
-            }
-            if (!stack.isEmpty()) {
-                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
-            }
-            final HandType handType = (HandType) (Object) hand;
-            frame.addContext(EventContextKeys.USED_HAND, handType);
-            final InteractItemEvent.Primary event = SpongeEventFactory.createInteractItemEventPrimary(frame.getCurrentCause(),
-                    Optional.ofNullable(hitVec), ItemStackUtil.snapshotOf(stack));
+            SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, null, frame);
+            final InteractItemEvent.Primary event = SpongeEventFactory.createInteractItemEventPrimary(frame.getCurrentCause(), ItemStackUtil.snapshotOf(stack));
             SpongeCommon.postEvent(event);
             return event;
         }
     }
 
-    public static InteractItemEvent.Secondary callInteractItemEventSecondary(final PlayerEntity player,
-        final ItemStack stack, final Hand hand,
-        @Nullable final Vector3d hitVec, final Object hitTarget) {
-
+    public static InteractItemEvent.Secondary callInteractItemEventSecondary(final PlayerEntity player, final ItemStack stack, final Hand hand) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
-                frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
-            } else {
-                frame.pushCause(player);
-                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
-                frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
-            }
-
-            if (hitTarget instanceof Entity) {
-                frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
-            } else if (hitTarget instanceof BlockSnapshot) {
-                frame.addContext(EventContextKeys.BLOCK_HIT, (BlockSnapshot) hitTarget);
-            }
-            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
-            if (!stack.isEmpty()) {
-                frame.addContext(EventContextKeys.USED_ITEM, snapshot);
-            }
-            final HandType handType = (HandType) (Object) hand;
-            frame.addContext(EventContextKeys.USED_HAND, handType);
-            final InteractItemEvent.Secondary event = SpongeEventFactory.createInteractItemEventSecondary(frame.getCurrentCause(),
-                    Optional.ofNullable(hitVec), snapshot);
+            SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, null, frame);
+            final InteractItemEvent.Secondary event = SpongeEventFactory.createInteractItemEventSecondary(frame.getCurrentCause(), ItemStackUtil.snapshotOf(stack));
             SpongeCommon.postEvent(event);
             return event;
         }
 
     }
 
-    public static InteractBlockEvent.Primary callInteractBlockEventPrimary(
-        final PlayerEntity player, final ItemStack heldItem, final Hand hand, @Nullable final Vector3d hitVec) {
-        return SpongeCommonEventFactory.callInteractBlockEventPrimary(player, heldItem, BlockSnapshot.empty(), hand, null, hitVec);
-    }
-
-    public static InteractBlockEvent.Primary callInteractBlockEventPrimary(final PlayerEntity player, final ItemStack heldItem, final BlockSnapshot blockSnapshot, final Hand hand,
-            @Nullable final net.minecraft.util.Direction side, @Nullable final Vector3d hitVec) {
-        final HandType handType = (HandType) (Object) hand;
+    public static InteractBlockEvent.Primary callInteractBlockEventPrimary(CPlayerDiggingPacket.Action action,
+            final PlayerEntity player, final ItemStack heldItem, final BlockSnapshot blockSnapshot, final Hand hand,
+            @Nullable final net.minecraft.util.Direction side) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
-                frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
-            } else {
-                frame.pushCause(player);
-                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
-                frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
-            }
-
-            frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
-            frame.addContext(EventContextKeys.USED_HAND, handType);
+            SpongeCommonEventFactory.applyCommonInteractContext(player, heldItem, hand, blockSnapshot, null, frame);
             final Direction direction;
             if (side != null) {
                 direction = DirectionFacingProvider.INSTANCE.getKey(side).get();
             } else {
                 direction = Direction.NONE;
             }
-            if (!heldItem.isEmpty()) {
-                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
+
+            final InteractBlockEvent.Primary event;
+            switch (action) {
+                case START_DESTROY_BLOCK:
+                    event = SpongeEventFactory.createInteractBlockEventPrimaryStart(frame.getCurrentCause(), blockSnapshot, direction);
+                    break;
+                case ABORT_DESTROY_BLOCK:
+                    event = SpongeEventFactory.createInteractBlockEventPrimaryStop(frame.getCurrentCause(), blockSnapshot, direction);
+                    break;
+                case STOP_DESTROY_BLOCK:
+                    event = SpongeEventFactory.createInteractBlockEventPrimaryFinish(frame.getCurrentCause(), blockSnapshot, direction);
+                    break;
+                default:
+                    throw new IllegalStateException("unreachable code");
             }
-            final InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimary(frame.getCurrentCause(), blockSnapshot,
-                    Optional.ofNullable(hitVec), direction);
+
             SpongeCommon.postEvent(event);
             return event;
         }
     }
 
-    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(
-        final PlayerEntity player, final ItemStack heldItem, @Nullable final Vector3d hitVec,
-            final BlockSnapshot targetBlock, final Direction targetSide, final Hand hand) {
-        return SpongeCommonEventFactory.callInteractBlockEventSecondary(player, heldItem, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED,
-                hitVec, targetBlock, targetSide, hand);
-    }
-
-    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(final PlayerEntity player, final ItemStack heldItem, final Tristate originalUseBlockResult, final Tristate useBlockResult,
-            final Tristate originalUseItemResult, final Tristate useItemResult, @Nullable final Vector3d hitVec, final BlockSnapshot targetBlock,
-            final Direction targetSide, final Hand hand) {
+    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(final PlayerEntity player, final ItemStack heldItem, final Vector3d hitVec, final BlockSnapshot targetBlock, final Direction targetSide, final Hand hand) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
-                frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
-            } else {
-                frame.pushCause(player);
-                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
-                frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
-            }
-
-            frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
-            if (!heldItem.isEmpty()) {
-                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
-            }
-            final HandType handType = (HandType) (Object) hand;
-            frame.addContext(EventContextKeys.USED_HAND, handType);
+            SpongeCommonEventFactory.applyCommonInteractContext(player, heldItem, hand, targetBlock, null, frame);
             final InteractBlockEvent.Secondary event = SpongeEventFactory.createInteractBlockEventSecondary(frame.getCurrentCause(),
-                    originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, targetBlock, Optional.ofNullable(hitVec),
+                    Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, targetBlock, hitVec,
                     targetSide);
             SpongeCommon.postEvent(event);
             return event;
+        }
+    }
+
+    public static void applyCommonInteractContext(PlayerEntity player, ItemStack stack, Hand hand, @Nullable BlockSnapshot targetBlock,
+            @Nullable net.minecraft.entity.Entity entity, CauseStackManager.StackFrame frame) {
+        if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
+            frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
+        } else {
+            frame.pushCause(player);
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
+        }
+
+        if (!stack.isEmpty()) {
+            frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
+        }
+        frame.addContext(EventContextKeys.USED_HAND, (HandType) (Object) hand);
+        if (targetBlock != null) {
+            frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
+        }
+        if (entity != null) {
+            frame.addContext(EventContextKeys.ENTITY_HIT, (Entity) entity);
         }
     }
 

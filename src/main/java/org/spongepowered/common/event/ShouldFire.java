@@ -45,6 +45,7 @@ public final class ShouldFire {
     // since SpawnEntityEvent.CUSTOM is not in the hierarchy of DropItemEvent.DISPENSE
 
     public static boolean ANIMATE_HAND_EVENT = false;
+    public static boolean INTERACT_ITEM_EVENT_PRIMARY = false;
 
     public static boolean SPAWN_ENTITY_EVENT = false;
     public static boolean SPAWN_ENTITY_EVENT_CHUNK_LOAD = false;
