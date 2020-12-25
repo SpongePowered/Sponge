@@ -85,7 +85,7 @@ public final class InteractTest implements LoadableModule {
             Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
             Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(),
                     Component.text().append(Component.text("/* Hand: "))
-                            .append(Component.text(event.getContext().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(event.getEntity().getWorld().registries(), h).getFormatted()).orElse("UNKNOWN")))
+                            .append(Component.text(event.getContext().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.getGame().registries(), h).getFormatted()).orElse("UNKNOWN")))
                             .build()
             );
             Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.getCause().all().toString())).build());

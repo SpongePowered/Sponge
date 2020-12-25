@@ -39,6 +39,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CAnimateHandPacket;
+import net.minecraft.network.play.client.CPlayerDiggingPacket;
 import net.minecraft.network.play.client.CPlayerPacket;
 import net.minecraft.network.play.client.CTabCompletePacket;
 import net.minecraft.network.play.client.CUpdateSignPacket;
@@ -49,6 +50,8 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.SharedConstants;
+import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -82,12 +85,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
+import org.spongepowered.common.accessor.server.management.PlayerInteractionManagerAccessor;
 import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
@@ -130,6 +132,8 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     @Shadow protected abstract boolean shadow$isSingleplayerOwner();
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch);
     // @formatter:on
+
+    private int impl$ignorePackets;
 
     @Override
     public NetworkManager bridge$getConnection() {
@@ -350,9 +354,11 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         final Entity entity = p_147340_1.getTarget(this.player.getLevel());
         final ItemStack itemInHand = p_147340_1.getHand() == null ? ItemStack.EMPTY : this.player.getItemInHand(p_147340_1.getHand());
         final InteractEntityEvent.Secondary event = SpongeCommonEventFactory
-                .callInteractEntityEventSecondary(this.player, itemInHand, entity, p_147340_1.getHand(), null);
+                .callInteractEntityEventSecondary(this.player, itemInHand, entity, p_147340_1.getHand(), VecHelper.toVector3d(p_147340_1.getLocation()));
         if (event.isCancelled()) {
             ci.cancel();
+        } else {
+            this.impl$ignorePackets++;
         }
     }
 
@@ -365,9 +371,11 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         final Entity entity = p_147340_1_.getTarget(this.player.getLevel());
 
         final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
-                this.player.getItemInHand(this.player.getUsedItemHand()), entity, this.player.getUsedItemHand(), null);
+                this.player.getItemInHand(this.player.getUsedItemHand()), entity, this.player.getUsedItemHand());
         if (event.isCancelled()) {
             ci.cancel();
+        } else {
+            this.impl$ignorePackets++;
         }
     }
 
@@ -382,6 +390,23 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         }
         SpongeCommonEventFactory.lastAnimationPacketTick = SpongeCommon.getServer().getTickCount();
         SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(this.player);
+
+        if (!((PlayerInteractionManagerAccessor) this.player.gameMode).accessor$isDestroyingBlock()) {
+            if (this.impl$ignorePackets > 0) {
+                this.impl$ignorePackets--;
+            } else {
+                if (ShouldFire.INTERACT_ITEM_EVENT_PRIMARY) {
+                    final Vector3d startPos = this.player.getEyePosition(1);
+                    final Vector3d endPos = startPos.add(this.player.getLookAngle().scale(5d)); // TODO hook for blockReachDistance?
+                    RayTraceResult result = this.player.getLevel().clip(new RayTraceContext(startPos, endPos, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, this.player));
+                    if (result.getType() == RayTraceResult.Type.MISS) {
+                        final ItemStack heldItem = this.player.getItemInHand(packetIn.getHand());
+                        SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, heldItem, packetIn.getHand());
+                    }
+                }
+            }
+        }
+
         if (ShouldFire.ANIMATE_HAND_EVENT) {
             final HandType handType = (HandType) (Object) packetIn.getHand();
             final ItemStack heldItem = this.player.getItemInHand(packetIn.getHand());
@@ -396,6 +421,11 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
                 }
             }
         }
+    }
+
+    @Inject(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;drop(Z)Z"))
+    public void impl$dropItem(final CPlayerDiggingPacket p_147345_1_, final CallbackInfo ci) {
+        this.impl$ignorePackets++;
     }
 
     @Redirect(
