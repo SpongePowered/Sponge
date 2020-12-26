@@ -57,7 +57,7 @@ public class SpongeContextCalculator implements ContextCalculator {
             this.buildAddressCache(Context.LOCAL_IP_KEY, rs -> SpongeContextCalculator.getAddress(rs, RemoteConnection::getVirtualHost));
 
     private static InetAddress getAddress(final RemoteConnection input, final Function<RemoteConnection, InetSocketAddress> func) {
-        InetSocketAddress socket = func.apply(input);
+        final InetSocketAddress socket = func.apply(input);
         if (!socket.isUnresolved()) {
             return socket.getAddress();
         }
@@ -72,13 +72,13 @@ public class SpongeContextCalculator implements ContextCalculator {
         return Caffeine.newBuilder()
             .weakKeys()
             .<RemoteConnection, Set<Context>>build((key) -> {
-                ImmutableSet.Builder<Context> builder = ImmutableSet.builder();
+                final ImmutableSet.Builder<Context> builder = ImmutableSet.builder();
                 final InetAddress addr = function.apply(key);
                 if (addr == null) {
                     return builder.build();
                 }
                 builder.add(new Context(contextKey, addr.getHostAddress()));
-                for (Map.Entry<String, Predicate<InetAddress>> entry : SpongeConfigs.getCommon().get().getIpSets().entrySet()) {
+                for (final Map.Entry<String, Predicate<InetAddress>> entry : SpongeConfigs.getCommon().get().getIpSets().entrySet()) {
                     if (entry.getValue().test(addr)) {
                         builder.add(new Context(contextKey, entry.getKey()));
                     }

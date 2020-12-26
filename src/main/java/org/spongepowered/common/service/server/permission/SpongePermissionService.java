@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import net.minecraft.server.players.ServerOpList;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -41,7 +42,6 @@ import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
-import net.minecraft.server.players.ServerOpList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;

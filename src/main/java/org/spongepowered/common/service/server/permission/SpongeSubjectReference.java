@@ -34,9 +34,9 @@ public class SpongeSubjectReference implements SubjectReference {
     private final SpongePermissionService service;
     private final String collectionId;
     private final String subjectId;
-    private @Nullable SpongeSubject cache = null;
+    private @Nullable SpongeSubject cache;
 
-    public SpongeSubjectReference(SpongePermissionService service, String collectionId, String subjectId) {
+    public SpongeSubjectReference(final SpongePermissionService service, final String collectionId, final String subjectId) {
         this.service = service;
         this.collectionId = collectionId;
         this.subjectId = subjectId;

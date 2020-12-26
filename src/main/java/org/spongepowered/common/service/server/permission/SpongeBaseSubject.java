@@ -67,7 +67,7 @@ public abstract class SpongeBaseSubject implements Subject {
         return this.getDataPermissionValue(this.transientSubjectData(), permission);
     }
 
-    protected Tristate getDataPermissionValue(MemorySubjectData subject, String permission) {
+    protected Tristate getDataPermissionValue(final MemorySubjectData subject, final String permission) {
         Tristate res = subject.nodeTree(SubjectData.GLOBAL_CONTEXT).get(permission);
 
         if (res == Tristate.UNDEFINED) {
@@ -92,11 +92,11 @@ public abstract class SpongeBaseSubject implements Subject {
         return this.subjectData().parents(SubjectData.GLOBAL_CONTEXT);
     }
 
-    protected Optional<String> getDataOptionValue(MemorySubjectData subject, String option) {
+    protected Optional<String> getDataOptionValue(final MemorySubjectData subject, final String option) {
         Optional<String> res = Optional.ofNullable(subject.options(SubjectData.GLOBAL_CONTEXT).get(option));
 
         if (!res.isPresent()) {
-            for (SubjectReference parent : subject.parents(SubjectData.GLOBAL_CONTEXT)) {
+            for (final SubjectReference parent : subject.parents(SubjectData.GLOBAL_CONTEXT)) {
                 res = parent.resolve().join().option(option, null);
                 if (res.isPresent()) {
                     return res;
@@ -108,7 +108,7 @@ public abstract class SpongeBaseSubject implements Subject {
     }
 
     @Override
-    public Optional<String> option(String key, Cause cause) {
+    public Optional<String> option(final String key, final Cause cause) {
         return this.getDataOptionValue(this.transientSubjectData(), key);
     }
 

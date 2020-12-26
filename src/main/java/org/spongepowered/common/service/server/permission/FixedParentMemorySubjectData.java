@@ -43,18 +43,18 @@ public class FixedParentMemorySubjectData extends GlobalMemorySubjectData {
     /**
      * Creates a new subject data instance, using the provided service to request instances of permission subjects.
      */
-    public FixedParentMemorySubjectData(Subject subject, SubjectReference parent) {
+    public FixedParentMemorySubjectData(final Subject subject, final SubjectReference parent) {
         super(subject);
         this.forcedParent = parent;
     }
 
     @Override
-    public List<SubjectReference> parents(Set<Context> contexts) {
+    public List<SubjectReference> parents(final Set<Context> contexts) {
         return ImmutableList.<SubjectReference>builder().add(this.forcedParent).addAll(super.parents(contexts)).build();
     }
 
     @Override
-    public CompletableFuture<Boolean> addParent(Set<Context> contexts, SubjectReference parent) {
+    public CompletableFuture<Boolean> addParent(final Set<Context> contexts, final SubjectReference parent) {
         if (Objects.equal(this.forcedParent, parent) && contexts.isEmpty()) {
             return CompletableFuture.completedFuture(true);
         }
@@ -62,7 +62,7 @@ public class FixedParentMemorySubjectData extends GlobalMemorySubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> removeParent(Set<Context> contexts, SubjectReference parent) {
+    public CompletableFuture<Boolean> removeParent(final Set<Context> contexts, final SubjectReference parent) {
         if (Objects.equal(this.forcedParent, parent)) {
             return CompletableFuture.completedFuture(false);
         }

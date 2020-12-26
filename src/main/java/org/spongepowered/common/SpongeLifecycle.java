@@ -32,13 +32,8 @@ import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
-<<<<<<< HEAD
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-=======
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.advancement.Advancement;
->>>>>>> f5f14fdec8... permissions: Re-implement SpongeContextCalculator
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;

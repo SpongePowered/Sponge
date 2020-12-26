@@ -69,7 +69,7 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
                         SpongeBanService.class))
                 .add(new Service<>(
                         ContextualService.class,
-                        servicePluginSubCategory -> servicePluginSubCategory.contextService
+                        servicePluginSubCategory -> servicePluginSubCategory.contextService,
                         SpongeContextService.class))
                 .add(new Service<>(
                         EconomyService.class,

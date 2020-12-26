@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import com.google.common.collect.ImmutableSet;
 import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -80,8 +79,8 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
-    public Map<? extends Subject, Boolean> assignedSubjects(String identifier) {
-        SubjectCollection subjects = this.permissionService.get(identifier);
+    public Map<? extends Subject, Boolean> assignedSubjects(final String identifier) {
+        final SubjectCollection subjects = this.permissionService.get(identifier);
         return subjects.loadedWithPermission(this.strippedId);
     }
 
@@ -116,8 +115,8 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
-    public CompletableFuture<Map<? extends SubjectReference, Boolean>> findAssignedSubjects(String type) {
-        SubjectCollection subjects = this.permissionService.get(type);
+    public CompletableFuture<Map<? extends SubjectReference, Boolean>> findAssignedSubjects(final String type) {
+        final SubjectCollection subjects = this.permissionService.get(type);
         return subjects.allWithPermission(this.strippedId);
     }
 
@@ -137,18 +136,20 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(final Object other) {
+        if (this == other) {
             return true;
         }
-        if (obj == null) {
+        if (other == null) {
             return false;
         }
-        if (this.getClass() != obj.getClass()) {
+        if (this.getClass() != other.getClass()) {
             return false;
         }
-        SpongePermissionDescription other = (SpongePermissionDescription) obj;
-        return this.id.equals(other.id) && this.owner.equals(other.owner) && this.description.equals(other.description);
+        final SpongePermissionDescription that = (SpongePermissionDescription) other;
+        return this.id.equals(that.id)
+                && this.owner.equals(that.owner)
+                && this.description.equals(that.description);
     }
 
     @Override
@@ -209,8 +210,12 @@ class SpongePermissionDescription implements PermissionDescription {
             }
             final String strippedId = PLACEHOLDER.matcher(this.id).replaceAll("");
 
-            SpongePermissionDescription description =
-                    new SpongePermissionDescription(this.permissionService, this.id, strippedId, this.description, this.owner);
+            final SpongePermissionDescription description = new SpongePermissionDescription(
+                    this.permissionService,
+                    this.id,
+                    strippedId,
+                    this.description,
+                    this.owner);
             this.permissionService.addDescription(description);
 
             // Set default value
@@ -219,9 +224,9 @@ class SpongePermissionDescription implements PermissionDescription {
             }
 
             // Set role-templates
-            SpongeSubjectCollection subjects = this.permissionService.get(PermissionService.SUBJECTS_ROLE_TEMPLATE);
-            for (Entry<String, Tristate> assignment : this.roleAssignments.entrySet()) {
-                Subject subject = subjects.get(assignment.getKey());
+            final SpongeSubjectCollection subjects = this.permissionService.get(PermissionService.SUBJECTS_ROLE_TEMPLATE);
+            for (final Entry<String, Tristate> assignment : this.roleAssignments.entrySet()) {
+                final Subject subject = subjects.get(assignment.getKey());
                 subject.transientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, strippedId, assignment.getValue());
             }
             return description;

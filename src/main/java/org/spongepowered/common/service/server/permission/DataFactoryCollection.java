@@ -44,14 +44,17 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
     private final ConcurrentMap<String, SpongeSubject> subjects = new ConcurrentHashMap<>();
     private final Function<Subject, MemorySubjectData> dataFactory;
 
-    protected DataFactoryCollection(String identifier, SpongePermissionService service, Function<Subject, MemorySubjectData> dataFactory) {
+    protected DataFactoryCollection(
+            final String identifier,
+            final SpongePermissionService service,
+            final Function<Subject, MemorySubjectData> dataFactory) {
         super(identifier, service);
         this.service = service;
         this.dataFactory = dataFactory;
     }
 
     @Override
-    public SpongeSubject get(String identifier) {
+    public SpongeSubject get(final String identifier) {
         checkNotNull(identifier, "identifier");
         if (!this.subjects.containsKey(identifier)) {
             this.subjects.putIfAbsent(identifier, new DataFactorySubject(identifier, this.dataFactory));
@@ -60,7 +63,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
     }
 
     @Override
-    public boolean isRegistered(String identifier) {
+    public boolean isRegistered(final String identifier) {
         return this.subjects.containsKey(identifier);
     }
 
@@ -74,7 +77,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         private final String identifier;
         private final MemorySubjectData data;
 
-        protected DataFactorySubject(String identifier, Function<Subject, MemorySubjectData> dataFactory) {
+        protected DataFactorySubject(final String identifier, final Function<Subject, MemorySubjectData> dataFactory) {
             this.identifier = identifier;
             this.data = dataFactory.apply(this);
         }
@@ -106,7 +109,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public Tristate permissionValue(String permission, Cause cause) {
+        public Tristate permissionValue(final String permission, final Cause cause) {
             Tristate ret = super.permissionValue(permission, cause);
 
             if (ret == Tristate.UNDEFINED) {
@@ -120,7 +123,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public Optional<String> option(String option, Cause cause) {
+        public Optional<String> option(final String option, final Cause cause) {
             Optional<String> ret = super.option(option, cause);
             if (!ret.isPresent()) {
                 ret = this.getDataOptionValue(DataFactoryCollection.this.defaults().subjectData(), option);
