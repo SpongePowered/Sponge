@@ -22,38 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.inventory.container;
+package org.spongepowered.common.bridge.entity.player;
 
-import org.spongepowered.api.event.item.inventory.CraftItemEvent;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 
-import java.util.List;
+import java.util.Collection;
 
-public interface TrackedContainerBridge {
+public interface ServerPlayerEntityHealthScaleBridge {
 
-    void bridge$setShiftCrafting(boolean flag);
+    void bridge$setHealthScale(Double scale);
 
-    boolean bridge$isShiftCrafting();
+    Double bridge$getHealthScale();
 
-    void bridge$setLastCraft(CraftItemEvent.Craft event);
+    float bridge$getInternalScaledHealth();
 
-    CraftItemEvent.Craft bridge$getLastCraft();
+    boolean bridge$isHealthScaled();
 
-    void bridge$setPreviousCursor(net.minecraft.item.ItemStack stack);
+    void bridge$refreshScaledHealth();
 
-    net.minecraft.item.ItemStack bridge$getPreviousCursor();
+    void bridge$injectScaledHealth(Collection<ModifiableAttributeInstance> set);
 
-    void bridge$setFirePreview(boolean firePreview);
-
-    boolean bridge$firePreview();
-
-    List<SlotTransaction> bridge$getPreviewTransactions();
-
-    boolean bridge$capturePossible();
-
-    void bridge$setCapturePossible();
-
-    void bridge$detectAndSendChanges(boolean captureOnly);
-
-    void bridge$trackViewable(Object inventory);
 }

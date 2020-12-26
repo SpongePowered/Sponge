@@ -33,6 +33,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.ServerPlayNetHandler;
@@ -44,6 +45,7 @@ import net.minecraft.network.play.server.SPlaySoundEventPacket;
 import net.minecraft.network.play.server.SPlayerAbilitiesPacket;
 import net.minecraft.network.play.server.SRespawnPacket;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
+import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.network.play.server.SUpdateBossInfoPacket;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.scoreboard.Score;
@@ -55,8 +57,10 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -122,6 +126,7 @@ import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.common.world.portal.PlatformTeleporter;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -129,6 +134,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 // See also: SubjectMixin_API and SubjectMixin
 @Mixin(ServerPlayerEntity.class)
@@ -146,6 +152,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Shadow private int lastSentExp;
     @Shadow private float lastSentHealth;
     @Shadow private int lastSentFood;
+    @Shadow public boolean ignoreSlotUpdateHack;
 
     @Shadow public abstract net.minecraft.world.server.ServerWorld shadow$getLevel();
     @Shadow public abstract void shadow$setCamera(final Entity entity);
@@ -167,6 +174,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     private int impl$viewDistance;
     private int impl$skinPartMask;
     private Set<SkinPart> impl$skinParts = ImmutableSet.of();
+    private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((ServerPlayerEntity) (Object) this);
 
     @Nullable
     @Override
@@ -744,11 +752,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     private User impl$getUserObjectOnConstruction() {
+        final SpongeUserManager manager = (SpongeUserManager) SpongeCommon.getGame().getServer().getUserManager();
         if (this.impl$isFake) {
-            return this.bridge$getUserObject();
+            return manager.getOrCreate(SpongeUserManager.FAKEPLAYER_PROFILE);
         }
         // Ensure that the game profile is up to date.
-        return ((SpongeUserManager) SpongeCommon.getGame().getServer().getUserManager()).forceRecreateUser(SpongeGameProfile.of(this.shadow$getGameProfile()));
+        return manager.forceRecreateUser(SpongeGameProfile.of(this.shadow$getGameProfile()));
     }
 
     @Inject(method = "restoreFrom", at = @At("HEAD"))
@@ -812,6 +821,45 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         this.impl$viewDistance = viewDistance;
         this.impl$language = newLocale;
     }
+
+    @Override
+    public void bridge$restorePacketItem(final Hand hand) {
+        if (this.impl$packetItem.isEmpty()) {
+            return;
+        }
+        this.shadow$setItemInHand(hand, this.impl$packetItem);
+        this.containerMenu.broadcastChanges();
+    }
+
+    /**
+     * Send SlotCrafting updates to client for custom recipes.
+     *
+     * @author Faithcaio - 31.12.2016
+     * @reason Vanilla is not updating the Client when Slot is SlotCrafting - this is an issue when plugins register new recipes
+     */
+    @Inject(method = "slotChanged", at = @At("HEAD"))
+    private void sendSlotContents(
+            final net.minecraft.inventory.container.Container containerToSend, final int slotIn, final ItemStack stack, final CallbackInfo ci) {
+        if (containerToSend.getSlot(slotIn) instanceof CraftingResultSlot) {
+            this.connection.send(new SSetSlotPacket(containerToSend.containerId, slotIn, stack));
+        }
+    }
+
+    @Override
+    public PlayerOwnBorderListener bridge$getWorldBorderListener() {
+        return this.impl$borderListener;
+    }
+
+    @Inject(method = "sendMessage(Lnet/minecraft/util/text/ITextComponent;Lnet/minecraft/util/text/ChatType;Ljava/util/UUID;)V",
+            cancellable = true,
+            at = @At("HEAD"))
+    public void sendMessage(final ITextComponent p_241151_1_, final ChatType p_241151_2_, final UUID p_241151_3_, final CallbackInfo ci) {
+        if (this.impl$isFake) {
+            // Don't bother sending messages to fake players
+            ci.cancel();
+        }
+    }
+
 }
 
 

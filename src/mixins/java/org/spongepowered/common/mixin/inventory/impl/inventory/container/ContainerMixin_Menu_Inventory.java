@@ -51,10 +51,12 @@ import javax.annotation.Nullable;
 @Mixin(Container.class)
 public abstract class ContainerMixin_Menu_Inventory implements MenuBridge {
 
+    // @formatter:off
     @Shadow @Final private List<IContainerListener> containerListeners;
     @Shadow @Final private NonNullList<ItemStack> lastSlots;
-
     @Shadow @Final public List<Slot> slots;
+    // @formatter:on
+
     @Nullable private SpongeInventoryMenu impl$menu;
 
     @Override
@@ -66,28 +68,6 @@ public abstract class ContainerMixin_Menu_Inventory implements MenuBridge {
     public SpongeInventoryMenu bridge$getMenu() {
         return this.impl$menu;
     }
-
-
-    @Nullable private Object impl$viewed;
-
-    private void impl$setViewed(@Nullable Object viewed) {
-        if (viewed == null) {
-            this.impl$unTrackViewable(this.impl$viewed);
-        }
-        this.impl$viewed = viewed;
-    }
-
-    private void impl$unTrackViewable(@Nullable Object inventory) {
-        if (inventory instanceof Carrier) {
-            inventory = ((Carrier) inventory).getInventory();
-        }
-        if (inventory instanceof Inventory) {
-            ((Inventory) inventory).asViewable().ifPresent(i -> ((ViewableInventoryBridge) i).viewableBridge$removeContainer(((Container) (Object) this)));
-        }
-        // TODO else unknown inventory - try to provide wrapper Interactable
-    }
-
-
 
     // Called when clicking in an inventory
     // InventoryMenu Callback
@@ -119,9 +99,7 @@ public abstract class ContainerMixin_Menu_Inventory implements MenuBridge {
         if (menu != null) {
             menu.onClose(player, (org.spongepowered.api.item.inventory.Container) this);
         }
-        this.impl$setViewed(null);
         this.bridge$setMenu(null);
     }
-
 
 }

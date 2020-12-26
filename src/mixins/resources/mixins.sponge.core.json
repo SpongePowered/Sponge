@@ -184,6 +184,7 @@
     "entity.passive.ParrotEntityMixin",
     "entity.passive.WolfEntityMixin",
     "entity.player.ChatVisibilityMixin",
+    "entity.player.ServerPlayerEntityMixin_HealthScale",
     "entity.projectile.EggEntityMixin",
     "entity.projectile.SmallFireballEntityMixin",
     "entity.projectile.SnowballEntityMixin",

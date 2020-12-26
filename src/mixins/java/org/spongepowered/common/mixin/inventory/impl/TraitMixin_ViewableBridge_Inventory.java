@@ -44,8 +44,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * {@link org.spongepowered.common.mixin.inventory.api.TraitMixin_Viewable_Inventory_API}
+ */
 @Mixin(value = {
-        // ChestBlock inline INamedContainerProvider for DoubleSidedInventory
         // INamedContainerProvider impls:
         ContainerMinecartEntity.class,
         LecternTileEntity.class,
@@ -55,7 +57,7 @@ import java.util.stream.Stream;
         // IMerchant impls:
         AbstractVillagerEntity.class,
         NPCMerchant.class,
-        //
+        // ChestBlock - DoubleSidedInventory
         DoubleSidedInventory.class,
 })
 public abstract class TraitMixin_ViewableBridge_Inventory implements ViewableInventoryBridge {

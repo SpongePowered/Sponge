@@ -53,7 +53,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
 
-public interface ServerPlayerEntityBridge {
+public interface ServerPlayerEntityBridge extends ServerPlayerEntityHealthScaleBridge {
 
     default ClientType bridge$getClientType() {
         final ServerPlayerEntity mPlayer = (ServerPlayerEntity) this;
@@ -89,21 +89,8 @@ public interface ServerPlayerEntityBridge {
 
     PlayerOwnBorderListener bridge$getWorldBorderListener();
 
-    void bridge$setHealthScale(double scale);
-
-    double bridge$getHealthScale();
-
-    float bridge$getInternalScaledHealth();
-
-    boolean bridge$isHealthScaled();
-
-    void bridge$refreshScaledHealth();
-
-    void bridge$injectScaledHealth(Collection<ModifiableAttributeInstance> set);
 
     boolean bridge$hasForcedGamemodeOverridePermission();
-
-    void bridge$setContainerDisplay(Component displayName);
 
     Scoreboard bridge$getScoreboard();
 

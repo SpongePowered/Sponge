@@ -86,8 +86,8 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
         return this.shadow$getUses();
     }
 
-    @Override
-    public int getMaxUses() {
+    @Intrinsic
+    public int tradeOffer$getMaxUses() {
         return this.shadow$getMaxUses();
     }
 

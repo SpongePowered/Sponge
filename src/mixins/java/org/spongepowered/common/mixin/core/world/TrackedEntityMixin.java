@@ -25,12 +25,13 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SEntityMetadataPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
 import net.minecraft.world.TrackedEntity;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -40,11 +41,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.data.VanishableBridge;
+import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
-import org.spongepowered.common.accessor.network.datasync.EntityDataManagerAccessor;
-import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -133,25 +132,27 @@ public abstract class TrackedEntityMixin {
         // for any player specific packets to send.
     }
 
-//    @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SEntityPropertiesPacket;<init>(ILjava/util/Collection;)V"))
-//    private Collection<IAttributeInstance> impl$injectScaledHealth(Collection<IAttributeInstance> set) {
-//        if (this.trackedEntity instanceof ServerPlayerEntity) {
-//            if (((ServerPlayerEntityBridge) this.trackedEntity).bridge$isHealthScaled()) {
-//                ((ServerPlayerEntityBridge) this.trackedEntity).bridge$injectScaledHealth(set);
-//            }
-//        }
-//        return set;
-//    }
-//
-//    @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SEntityMetadataPacket;<init>(ILnet/minecraft/network/datasync/EntityDataManager;Z)V"))
-//    private EntityDataManager impl$provideSpoofedDataManagerForScaledHealth(EntityDataManager manager) {
-//        final Entity player = ((EntityDataManagerAccessor) manager).accessor$getEntity();
-//        if (player instanceof ServerPlayerEntityBridge) {
-//            if (((ServerPlayerEntityBridge) player).bridge$isHealthScaled()) {
-//                throw new MissingImplementationException("TrackedEntityMixin", "scaledHealthSendMetadata");
-//            }
-//        }
-//        return manager;
-//    }
+    @ModifyArg(method = "sendDirtyEntityData", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SEntityPropertiesPacket;<init>(ILjava/util/Collection;)V"))
+    private Collection<ModifiableAttributeInstance> impl$injectScaledHealth(Collection<ModifiableAttributeInstance> set) {
+        if (this.entity instanceof ServerPlayerEntity) {
+            if (((ServerPlayerEntityBridge) this.entity).bridge$isHealthScaled()) {
+                ((ServerPlayerEntityBridge) this.entity).bridge$injectScaledHealth(set);
+            }
+        }
+        return set;
+    }
+
+    @Redirect(method = "sendDirtyEntityData", at = @At(value = "NEW", target = "net/minecraft/network/play/server/SEntityMetadataPacket"))
+    private SEntityMetadataPacket impl$createSpoofedPacket(int entityId, EntityDataManager dataManager, boolean p_i46917_3_) {
+        if (!(this.entity instanceof ServerPlayerEntityBridge && ((ServerPlayerEntityBridge) this.entity).bridge$isHealthScaled())) {
+            return new SEntityMetadataPacket(entityId, dataManager, p_i46917_3_);
+        }
+        final float scaledHealth = ((ServerPlayerEntityBridge) this.entity).bridge$getInternalScaledHealth();
+        final Float actualHealth = dataManager.get(LivingEntityAccessor.accessor$DATA_HEALTH_ID());
+        dataManager.set(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), scaledHealth);
+        final SEntityMetadataPacket spoofed = new SEntityMetadataPacket(entityId, dataManager, p_i46917_3_);
+        dataManager.set(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), actualHealth);
+        return spoofed;
+    }
 
 }

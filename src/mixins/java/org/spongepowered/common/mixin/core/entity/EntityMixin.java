@@ -135,6 +135,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public float fallDistance;
     @Shadow protected BlockPos portalEntrancePos;
     @Shadow private net.minecraft.util.math.vector.Vector3d position;
+    @Shadow private BlockPos blockPosition;
+    @Shadow public double xo;
+    @Shadow public double yo;
+    @Shadow public double zo;
 
     @Shadow public abstract void shadow$setPos(double x, double y, double z);
     @Shadow public abstract double shadow$getX();
@@ -188,11 +192,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     // @formatter:on
 
-    @Shadow private BlockPos blockPosition;
-
-    @Shadow public double xo;
-    @Shadow public double yo;
-    @Shadow public double zo;
     private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
     private boolean impl$isVanished = false;
@@ -865,17 +864,15 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      * <p> This makes it easier for other entity mixins to override writeToNBT
      * without having to specify the <code>@Inject</code> annotation. </p>
      *
-     * @param compound The compound vanilla writes to (unused because we write
-     *     to SpongeData)
+     * @param compound The compound vanilla writes to (unused because we write to SpongeData)
      * @param ci (Unused) callback info
-     *//*
-
-    @Inject(method = "writeWithoutTypeId(Lnet/minecraft/nbt/CompoundNBT;)Lnet/minecraft/nbt/CompoundNBT;",
-        at = @At("HEAD"))
+     */
+    @Inject(method = "saveWithoutId", at = @At("HEAD"))
     private void impl$spongeWriteToNBT(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
-        this.impl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
+        this.impl$writeToSpongeCompound(this.data$getSpongeData());
     }
 
+/*
     @Override
     public void bridge$setImplVelocity(final Vector3d velocity) {
         this.motion = VecHelper.toVec3d(velocity);
@@ -1140,11 +1137,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         // If we are in Forge data is already present
         this.data$setCompound(compound); // For vanilla we set the incoming nbt
         if (this.data$hasSpongeData()) {
-            // Deserialize our data...
-            CustomDataHolderBridge.syncTagToCustom(this);
-            this.data$setCompound(null); // For vanilla this will be recreated empty in the next call - for Forge it reuses the existing compound instead
-            // ReSync our data (includes failed data)
-            CustomDataHolderBridge.syncCustomToTag(this);
+            this.impl$readFromSpongeCompound(this.data$getSpongeData());
         } else {
             this.data$setCompound(null); // No data? No need to keep the nbt
         }
@@ -1159,8 +1152,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      *
      * @param compound The SpongeData compound to read from
      */
-
     protected void impl$readFromSpongeCompound(final CompoundNBT compound) {
+        // Deserialize our data...
         CustomDataHolderBridge.syncTagToCustom(this);
 
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.contains(Constants.Sponge.Entity.CAN_GRIEF)) {
@@ -1175,6 +1168,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             this.bridge$setInvisible(compound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE));
         }
 
+        this.data$setCompound(null); // For vanilla this will be recreated empty in the next call - for Forge it reuses the existing compound instead
+        // ReSync our data (includes failed data)
         CustomDataHolderBridge.syncCustomToTag(this);
     }
 

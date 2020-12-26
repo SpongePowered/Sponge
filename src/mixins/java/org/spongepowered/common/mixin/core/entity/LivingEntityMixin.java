@@ -29,6 +29,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifierManager;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -159,6 +160,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow @Nullable public abstract LivingEntity shadow$getKillCredit();
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
     @Shadow  public abstract Collection<EffectInstance> shadow$getActiveEffects();
+    @Shadow public abstract float shadow$getMaxHealth();
+    @Shadow public abstract AttributeModifierManager shadow$getAttributes();
     // @formatter:on
 
     @Nullable private ItemStack impl$activeItemStackCopy;

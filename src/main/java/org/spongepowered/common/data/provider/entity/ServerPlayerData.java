@@ -36,10 +36,9 @@ import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityHealthScaleBridge;
 import org.spongepowered.common.bridge.stats.StatisticsManagerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.LocaleCache;
 
 import java.util.stream.Collectors;
 
@@ -84,7 +83,7 @@ public final class ServerPlayerData {
                     .create(Keys.LOCALE)
                         .get(ServerPlayerEntityBridge::bridge$getLanguage)
                     .create(Keys.HEALTH_SCALE)
-                        .get(h -> h.bridge$isHealthScaled() ? h.bridge$getHealthScale() : null)
+                        .get(ServerPlayerEntityHealthScaleBridge::bridge$getHealthScale)
                         .setAnd((h, v) -> {
                             if (v < 1f || v > Float.MAX_VALUE) {
                                 return false;
@@ -92,7 +91,7 @@ public final class ServerPlayerData {
                             h.bridge$setHealthScale(v);
                             return true;
                         })
-                        .resetOnDelete(Constants.Entity.Player.DEFAULT_HEALTH_SCALE)
+                        .delete(b -> b.bridge$setHealthScale(null))
                     .create(Keys.VIEW_DISTANCE)
                         .get(ServerPlayerEntityBridge::bridge$getViewDistance)
                     .create(Keys.SKIN_PARTS)
