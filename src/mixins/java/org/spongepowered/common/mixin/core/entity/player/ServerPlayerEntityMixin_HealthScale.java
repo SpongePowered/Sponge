@@ -76,26 +76,6 @@ public abstract class ServerPlayerEntityMixin_HealthScale extends PlayerEntityMi
         }
     }
 
-    @Redirect(method = "doTick",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/ServerPlayerEntity;getHealth()F"
-            ),
-            slice =  @Slice(
-                    from = @At(
-                            value = "FIELD",
-                            target = "Lnet/minecraft/entity/player/ServerPlayerEntity;lastSentHealth:F"
-                    ),
-                    to = @At(
-                            value = "INVOKE",
-                            target = "Lnet/minecraft/network/play/server/SUpdateHealthPacket;<init>(FIF)V"
-                    )
-            )
-    )
-    private float spongeGetScaledHealthForPacket(final ServerPlayerEntity entityPlayerMP) {
-        return this.bridge$getInternalScaledHealth();
-    }
-
     @Inject(method = "doTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;getArmorValue()I", ordinal = 1))
     private void updateHealthPriorToArmor(final CallbackInfo ci) {
         this.bridge$refreshScaledHealth();
