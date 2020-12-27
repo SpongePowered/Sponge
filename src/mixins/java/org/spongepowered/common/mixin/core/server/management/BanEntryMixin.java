@@ -22,64 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.server.management;
+package org.spongepowered.common.mixin.core.server.management;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.management.BanEntry;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.management.BanUserListEntryBridge;
-import org.spongepowered.common.mixin.core.server.management.UserListEntryMixin;
-import org.spongepowered.common.text.SpongeTexts;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 @Mixin(BanEntry.class)
 public abstract class BanEntryMixin<T> extends UserListEntryMixin<T> implements BanUserListEntryBridge {
 
+    // @formatter:off
     @Shadow @Final @Nullable protected String reason;
-    @Shadow @Final protected String bannedBy;
+    @Shadow @Final protected String source;
+    // @formatter:on
 
-    @Nullable private Text bridge$reason;
-    @Nullable private Text bridge$source;
-    @Nullable private CommandSource bridge$commandSrc;
+    @Nullable private Component impl$reason;
+    @Nullable private Component impl$source;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     private void bridge$initializeFields(final CallbackInfo ci) { // Prevent this from being overriden in UserListIPBansEntryMixin
-        this.bridge$reason = this.reason == null ? null : SpongeTexts.fromLegacy(this.reason);
-        this.bridge$source = SpongeTexts.fromLegacy(this.bannedBy);
+        this.impl$reason = this.reason == null ? null : SpongeAdventure.legacySection(this.reason);
+        this.impl$source = SpongeAdventure.legacySection(this.source);
 
-        final Optional<Player> user;
-
-        if ("Server".equals(this.bannedBy)) { // There could be a user called Server, but of course Mojang doesn't care...
-            this.bridge$commandSrc = SpongeCommon.getGame().getServer().getConsole();
-        } else if ((user = Sponge.getGame().getServer().getPlayer(this.bannedBy)).isPresent()) {
-            this.bridge$commandSrc = user.get();
-        }
+//        final Optional<Player> user;
+//        if ("Server".equals(this.source)) { // There could be a user called Server, but of course Mojang doesn't care...
+//            this.bridge$commandSrc = SpongeCommon.getGame().getServer().getConsole();
+//        } else if ((user = Sponge.getGame().getServer().getPlayer(this.bannedBy)).isPresent()) {
+//            this.bridge$commandSrc = user.get();
+//        }
     }
 
     @Override
-    public Optional<Text> bridge$getReason() {
-        return Optional.ofNullable(this.bridge$reason);
+    public Optional<Component> bridge$getReason() {
+        return Optional.ofNullable(this.impl$reason);
     }
 
     @Override
-    public Optional<Text> bridge$getSource() {
-        return Optional.ofNullable(this.bridge$source);
-    }
-
-    @Override
-    public Optional<CommandSource> bridge$getCmdSource() {
-        return Optional.ofNullable(this.bridge$commandSrc);
+    public Optional<Component> bridge$getSource() {
+        return Optional.ofNullable(this.impl$source);
     }
 
 }

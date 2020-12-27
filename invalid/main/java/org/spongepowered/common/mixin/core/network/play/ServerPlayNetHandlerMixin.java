@@ -198,49 +198,6 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         }
     }
 
-    /**
-     * @author Zidane
-     *
-     * Invoke before {@code System.arraycopy(packetIn.getLines(), 0, tileentitysign.signText, 0, 4);} (line 1156 in source) to call SignChangeEvent.
-     * @param packetIn Injected packet param
-     * @param ci Info to provide mixin on how to handle the callback
-     * @param worldserver Injected world param
-     * @param blockpos Injected blockpos param
-     * @param tileentity Injected tilentity param
-     * @param tileentitysign Injected tileentitysign param
-     */
-    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CPacketUpdateSign;getLines()[Ljava/lang/String;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    private void impl$callSignChangeEvent(final CUpdateSignPacket packetIn, final CallbackInfo ci, final ServerWorld worldserver, final BlockPos blockpos, final BlockState iblockstate, final TileEntity tileentity, final SignTileEntity tileentitysign) {
-        ci.cancel();
-        final Optional<SignData> existingSignData = ((Sign) tileentitysign).get(SignData.class);
-        if (!existingSignData.isPresent()) {
-            // TODO Unsure if this is the best to do here...
-            throw new RuntimeException("Critical error! Sign data not present on sign!");
-        }
-        final SignData changedSignData = existingSignData.get().copy();
-        final Mutable<Text> lines = changedSignData.lines();
-        for (int i = 0; i < packetIn.getLines().length; i++) {
-            lines.set(i, SpongeTexts.toText(new StringTextComponent(packetIn.getLines()[i])));
-        }
-        changedSignData.set(lines);
-        // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
-        // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
-        Sponge.getCauseStackManager().pushCause(this.player);
-        final ChangeSignEvent event =
-                SpongeEventFactory.createChangeSignEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                    changedSignData.asImmutable(), changedSignData, (Sign) tileentitysign);
-        if (!SpongeCommon.postEvent(event)) {
-            ((Sign) tileentitysign).offer(event.getText());
-        } else {
-            // If cancelled, I set the data back that was fetched from the sign. This means that if its a new sign, the sign will be empty else
-            // it will be the text of the sign that was showing in the world
-            ((Sign) tileentitysign).offer(existingSignData.get());
-        }
-        Sponge.getCauseStackManager().popCause();
-        tileentitysign.markDirty();
-        worldserver.getPlayerChunkMap().markBlockForUpdate(blockpos);
-    }
-
     @Redirect(method = "processChatMessage",
         at = @At(
             value = "INVOKE",
@@ -412,8 +369,6 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
 
         return item;
     }
-
-
 
     @Inject(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayer;dropItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
     private void onProcessPlayerDiggingDropItem(final CPlayerDiggingPacket packetIn, final CallbackInfo ci) {

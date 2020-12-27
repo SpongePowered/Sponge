@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.server.management;
+package org.spongepowered.common.mixin.core.server.management;
 
 import com.google.gson.JsonObject;
 import net.minecraft.server.management.IPBanEntry;
@@ -53,7 +53,7 @@ public abstract class IPBanEntryMixin extends BanEntryMixin<String> implements I
 
     private void setAddress() {
         try {
-            this.impl$address = InetAddress.getByName(this.getValue());
+            this.impl$address = InetAddress.getByName(this.shadow$getUser());
         } catch (UnknownHostException e) {
             throw new IllegalStateException("Error parsing Ban IP address!", e);
         }
