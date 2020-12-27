@@ -28,6 +28,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteReference;
@@ -133,6 +134,20 @@ public class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
     @Override
     public Optional<PaletteReference<T, R>> get(final int id) {
         return Optional.ofNullable(this.ids.get(id));
+    }
+
+    @Override
+    public Optional<T> get(final int id, final RegistryHolder holder) {
+        return this.get(id)
+            .flatMap(ref -> {
+                final Optional<T> byRegistry = this.paletteType.getResolver().apply(ref.value(), this.registry);
+                if (!byRegistry.isPresent()) {
+                    return Objects.requireNonNull(holder,"RegistryHolder cannot be null")
+                        .findRegistry(ref.registry())
+                        .flatMap(reg -> this.getType().getResolver().apply(ref.value(), reg));
+                }
+                return byRegistry;
+            });
     }
 
     public int assign(final T state, final int id) {

@@ -877,13 +877,13 @@ project("SpongeVanilla") {
             }
         }
 
-        reobf {
-            create("vanillaAppLaunchJar")
-            create("vanillaLaunchJar")
-            create("vanillaMixinsJar")
-            create("vanillaAccessorsJar")
-            create("shadowJar")
-        }
+//        reobf {
+//            create("vanillaAppLaunchJar")
+//            create("vanillaLaunchJar")
+//            create("vanillaMixinsJar")
+//            create("vanillaAccessorsJar")
+//            create("shadowJar")
+//        }
     }
 
     license {

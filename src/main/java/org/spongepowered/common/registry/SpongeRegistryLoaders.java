@@ -694,7 +694,7 @@ public final class SpongeRegistryLoaders {
     public static RegistryLoader<PaletteType<?, ?>> paletteType() {
         return RegistryLoader.of(l -> {
             l.add(PaletteTypes.BIOME_PALETTE, k -> new SpongePaletteType<>(
-                    (string, registry) -> registry.value(ResourceKey.resolve(string)),
+                    (string, registry) -> registry.findValue(ResourceKey.resolve(string)),
                     (registry, biome) -> registry.valueKey(biome).toString()
             ));
             l.add(PaletteTypes.BLOCK_STATE_PALETTE, k -> new SpongePaletteType<>(

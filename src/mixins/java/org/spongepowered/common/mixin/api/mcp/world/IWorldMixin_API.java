@@ -28,11 +28,16 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeContainer;
 import net.minecraft.world.chunk.AbstractChunkProvider;
+import net.minecraft.world.chunk.ChunkPrimerWrapper;
 import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.EmptyChunk;
 import net.minecraft.world.chunk.IChunk;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -50,6 +55,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.world.biome.BiomeContainerAccessor;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -83,7 +89,21 @@ public interface IWorldMixin_API {
         if (iChunk == null) {
             return false;
         }
-        return ((ProtoChunk) (Object) iChunk).setBiome(x, y, z, biome);
+        if (iChunk instanceof ProtoChunk) {
+            return ((ProtoChunk) (Object) iChunk).setBiome(x, y, z, biome);
+        } else {
+            final Biome[] biomes = ((BiomeContainerAccessor) iChunk.getBiomes()).accessor$biomes();
+
+            final int maskedX = x & BiomeContainer.HORIZONTAL_MASK;
+            final int maskedY = MathHelper.clamp(y, 0, BiomeContainer.VERTICAL_MASK);
+            final int maskedZ = z & BiomeContainer.HORIZONTAL_MASK;
+
+            final int WIDTH_BITS = BiomeContainerAccessor.accessor$WIDTH_BITS();
+            final int posKey = maskedY << WIDTH_BITS + WIDTH_BITS | maskedZ << WIDTH_BITS | maskedX;
+            biomes[posKey] = (Biome) (Object) biome;
+
+            return true;
+        }
     }
 
     // Volume

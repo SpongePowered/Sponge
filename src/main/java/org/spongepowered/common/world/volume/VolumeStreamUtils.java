@@ -31,6 +31,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkPrimerWrapper;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
@@ -113,6 +114,9 @@ public final class VolumeStreamUtils {
             final @Nullable IChunk ichunk = readerSupplier.get().getChunk(chunkPos.x, chunkPos.z, chunkStatus, shouldGenerate);
             if (shouldGenerate) {
                 Objects.requireNonNull(ichunk, "Chunk was expected to load fully and generate, but somehow got a null chunk!");
+            }
+            if (ichunk instanceof ChunkPrimerWrapper) {
+                return ((ChunkPrimerWrapper) ichunk).getWrapped();
             }
             return (IChunk) ichunk;
         };

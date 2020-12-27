@@ -25,11 +25,13 @@
 package org.spongepowered.common.block.entity;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -39,9 +41,11 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.AbstractArchetype;
+import org.spongepowered.common.data.nbt.validation.RawDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
-import org.spongepowered.common.data.nbt.validation.Validations;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.nbt.validation.ValidationTypes;
+import org.spongepowered.common.data.persistence.NBTTranslator;
+import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
@@ -53,8 +57,8 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     final BlockState blockState;
 
-    SpongeBlockEntityArchetype(SpongeBlockEntityArchetypeBuilder builder) {
-        super(builder.type, NbtTranslator.getInstance().translateData(builder.data));
+    SpongeBlockEntityArchetype(final SpongeBlockEntityArchetypeBuilder builder) {
+        super(builder.type, NBTTranslator.INSTANCE.translate(builder.data));
         this.blockState = builder.blockState;
     }
 
@@ -70,43 +74,43 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     @Override
     public DataContainer getBlockEntityData() {
-        return NbtTranslator.getInstance().translateFrom(this.data);
+        return NBTTranslator.INSTANCE.translateFrom(this.data);
     }
 
     @Override
-    public Optional<BlockEntity> apply(ServerLocation location) {
+    public Optional<BlockEntity> apply(final ServerLocation location) {
         final BlockState currentState = location.getBlock();
         final Block currentBlock = ((net.minecraft.block.BlockState) currentState).getBlock();
         final Block newBlock = ((net.minecraft.block.BlockState) this.blockState).getBlock();
         final World minecraftWorld = (net.minecraft.world.World) location.getWorld();
 
-        BlockPos blockpos = VecHelper.toBlockPos(location);
+        final BlockPos blockpos = VecHelper.toBlockPos(location);
         if (currentBlock != newBlock) {
             ((org.spongepowered.api.world.World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState,
                     BlockChangeFlags.ALL);
         }
         final CompoundNBT compound = this.data.copy();
 
-        TileEntity tileEntity = minecraftWorld.getTileEntity(blockpos);
+        final @Nullable TileEntity tileEntity = minecraftWorld.getBlockEntity(blockpos);
         if (tileEntity == null) {
             return Optional.empty();
         }
-        compound.putInt("x", blockpos.getX());
-        compound.putInt("y", blockpos.getY());
-        compound.putInt("z", blockpos.getZ());
-        tileEntity.read(compound);
-        tileEntity.markDirty();
+        compound.putInt(Constants.TileEntity.X_POS, blockpos.getX());
+        compound.putInt(Constants.TileEntity.Y_POS, blockpos.getY());
+        compound.putInt(Constants.TileEntity.Z_POS, blockpos.getZ());
+        tileEntity.load((net.minecraft.block.BlockState) currentState, compound);
+        tileEntity.clearCache();
         return Optional.of((org.spongepowered.api.block.entity.BlockEntity) tileEntity);
     }
 
     @Override
-    public BlockSnapshot toSnapshot(ServerLocation location) {
+    public BlockSnapshot toSnapshot(final ServerLocation location) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
-        builder.blockState = this.blockState;
-        builder.compound = this.data.copy();
-        builder.worldUuid = location.getWorldUniqueId();
-        builder.coords = location.getBlockPosition();
-        return builder.build();
+        return builder.blockState(this.blockState)
+            .addUnsafeCompound(this.data.copy())
+            .world(location.getWorldKey())
+            .position(location.getBlockPosition())
+            .build();
     }
 
     @Override
@@ -124,26 +128,26 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     }
 
     @Override
-    protected NBTDataType getDataType() {
-        return NBTDataTypes.TILE_ENTITY;
+    public DataProviderLookup getLookup() {
+        return null;
     }
 
     @Override
     protected ValidationType getValidationType() {
-        return Validations.TILE_ENTITY;
+        return ValidationTypes.BLOCK_ENTITY.get();
     }
 
     @Override
     public org.spongepowered.api.block.entity.BlockEntityArchetype copy() {
         final SpongeBlockEntityArchetypeBuilder builder = new SpongeBlockEntityArchetypeBuilder();
         builder.type = this.type;
-        builder.data = NbtTranslator.getInstance().translate(this.data);
+        builder.data = NBTTranslator.INSTANCE.translate(this.data);
         builder.blockState = this.blockState;
         return builder.build();
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -153,8 +157,13 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
         if (!super.equals(o)) {
             return false;
         }
-        SpongeBlockEntityArchetype that = (SpongeBlockEntityArchetype) o;
+        final SpongeBlockEntityArchetype that = (SpongeBlockEntityArchetype) o;
         return this.blockState.equals(that.blockState);
+    }
+
+    @Override
+    protected ImmutableList<RawDataValidator> getValidators() {
+        return null;
     }
 
     @Override

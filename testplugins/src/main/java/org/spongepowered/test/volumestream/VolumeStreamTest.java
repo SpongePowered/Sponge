@@ -38,9 +38,11 @@ import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemTypes;
@@ -126,44 +128,34 @@ public final class VolumeStreamTest implements LoadableModule {
                         player.sendMessage(Identity.nil(), Component.text("You must copy something before pasting", NamedTextColor.RED));
                         return CommandResult.success();
                     }
-                    Sponge.getServer().getCauseStackManager().pushCause(this.plugin);
-                    volume.getBlockStateStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
-                        .apply(VolumeCollectors.of(
-                            player.getWorld(),
-                            VolumePositionTranslators.offsetPosition(
-                                volume.getBlockMin(),
-                                data.getOrigin()
-                            ),
-                            VolumeApplicators.applyBlocks(BlockChangeFlags.ALL)
-                        ));
-                    volume.getBiomeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
-                        .apply(VolumeCollectors.of(
-                            player.getWorld(),
-                            VolumePositionTranslators.offsetPosition(
-                                player.getBlockPosition(),
-                                data.getOrigin()
-                            ),
-                            VolumeApplicators.applyBiomes()
-                        ));
-                    volume.getBlockEntityArchetypeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
-                        .apply(VolumeCollectors.of(
-                            player.getWorld(),
-                            VolumePositionTranslators.offsetPosition(
-                                player.getBlockPosition(),
-                                data.getOrigin()
-                            ),
-                            VolumeApplicators.applyBlockEntityArchetype()
-                        ));
-                    volume.getEntityArchetypeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
-                        .apply(VolumeCollectors.of(
-                            player.getWorld(),
-                            VolumePositionTranslators.offsetPosition(
-                                player.getBlockPosition(),
-                                data.getOrigin()
-                            ),
-                            VolumeApplicators.applyEntityArchetype()
-                        ));
-                    Sponge.getServer().getCauseStackManager().popCause();
+                    try (CauseStackManager.StackFrame frame = Sponge.getServer().getCauseStackManager().pushCauseFrame()) {
+                        frame.pushCause(this.plugin);
+                        volume.getBlockStateStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                            .apply(VolumeCollectors.of(
+                                player.getWorld(),
+                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                VolumeApplicators.applyBlocks(BlockChangeFlags.ALL)
+                            ));
+                        volume.getBiomeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                            .apply(VolumeCollectors.of(
+                                player.getWorld(),
+                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                VolumeApplicators.applyBiomes()
+                            ));
+                        volume.getBlockEntityArchetypeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                            .apply(VolumeCollectors.of(
+                                player.getWorld(),
+                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                VolumeApplicators.applyBlockEntityArchetype()
+                            ));
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT.get());
+                        volume.getEntityArchetypeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                            .apply(VolumeCollectors.of(
+                                player.getWorld(),
+                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                VolumeApplicators.applyEntityArchetype()
+                            ));
+                    }
                     src.sendMessage(Identity.nil(), Component.text("Pasted clipboard into world.", NamedTextColor.GREEN));
                     return CommandResult.success();
                 }).build(),

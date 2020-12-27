@@ -31,6 +31,7 @@ import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
@@ -43,6 +44,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
@@ -151,6 +153,14 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     @Override
     public BlockState getBlock() {
         return (BlockState) this.level.getBlockState(this.shadow$getBlockPos());
+    }
+
+    @Override
+    public BlockEntityArchetype createArchetype() {
+        final BlockEntityArchetype build = new SpongeBlockEntityArchetypeBuilder()
+            .blockEntity(this)
+            .build();
+        return build;
     }
 
     @Override

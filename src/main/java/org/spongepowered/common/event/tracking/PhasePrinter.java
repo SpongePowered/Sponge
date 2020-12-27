@@ -52,6 +52,7 @@ import java.util.function.BiConsumer;
 
 public final class PhasePrinter {
 
+    private static final boolean IN_DEVELOPMENT = Launch.getInstance().isDeveloperEnvironment();
     static final String ASYNC_BLOCK_CHANGE_MESSAGE = "Sponge adapts the vanilla handling of block changes to power events and plugins "
                                                 + "such that it follows the known fact that block changes MUST occur on the server "
                                                 + "thread (even on clients, this exists as the InternalServer thread). It is NOT "
@@ -114,21 +115,25 @@ public final class PhasePrinter {
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             return;
         }
-        new PrettyPrinter(60).add("Unexpected World Change Detected!").centre().hr()
-                .add("Sponge's tracking system is very dependent on knowing when\n"
-                        + "a change to any world takes place, however there are chances\n"
-                        + "where Sponge does not know of changes that mods may perform.\n"
-                        + "In cases like this, it is best to report to Sponge to get this\n"
-                        + "change tracked correctly and accurately.").hr()
-                .add()
-                .add("%s : %s", "World", mixinWorld)
-                .add("%s : %s", "Position", pos)
-                .add("%s : %s", "Current State", currentState)
-                .add("%s : %s", "New State", newState)
-                .add()
-                .add("StackTrace:")
-                .add(new Exception())
-                .trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
+        final PrettyPrinter printer = new PrettyPrinter(60).add("Unexpected World Change Detected!").centre().hr()
+            .add("Sponge's tracking system is very dependent on knowing when\n"
+                + "a change to any world takes place, however there are chances\n"
+                + "where Sponge does not know of changes that mods may perform.\n"
+                + "In cases like this, it is best to report to Sponge to get this\n"
+                + "change tracked correctly and accurately.").hr()
+            .add()
+            .add("%s : %s", "World", mixinWorld)
+            .add("%s : %s", "Position", pos)
+            .add("%s : %s", "Current State", currentState)
+            .add("%s : %s", "New State", newState)
+            .add()
+            .add("StackTrace:")
+            .add(new Exception());
+        if (PhasePrinter.IN_DEVELOPMENT) {
+            printer.print(System.err);
+        } else {
+            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+        }
     }
 
 
@@ -206,7 +211,11 @@ public final class PhasePrinter {
         }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
         PhasePrinter.printPhasestack(tracker, phaseData, e, printer);
-        printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
+        if (PhasePrinter.IN_DEVELOPMENT) {
+            printer.print(System.err);
+        } else {
+            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+        }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             PhasePrinter.printedExceptionsForBlocks.add(phaseState);
         }
@@ -246,7 +255,11 @@ public final class PhasePrinter {
         }
         printer.add();
         PhasePrinter.generateVersionInfo(printer);
-        printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
+        if (PhasePrinter.IN_DEVELOPMENT) {
+            printer.print(System.err);
+        } else {
+            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+        }
     }
 
     static void printExceptionFromPhase(final PhaseStack stack, final Throwable e, final PhaseContext<@NonNull ?> context) {
@@ -267,7 +280,11 @@ public final class PhasePrinter {
         context.printCustom(printer, 4);
         PhasePrinter.printPhaseStackWithException(stack, printer, e);
 
-        printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
+        if (PhasePrinter.IN_DEVELOPMENT) {
+            printer.print(System.err);
+        } else {
+            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+        }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             PhasePrinter.printedExceptionsForState.add(context.state);
         }
@@ -291,7 +308,11 @@ public final class PhasePrinter {
         PhasePrinter.CONTEXT_PRINTER.accept(printer, context);
         printer.addWrapped(60, "%s :", "Phases remaining");
         PhasePrinter.printPhaseStackWithException(stack, printer, new Exception("RunawayPhase"));
-        printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
+        if (PhasePrinter.IN_DEVELOPMENT) {
+            printer.print(System.err);
+        } else {
+            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+        }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && PhasePrinter.printRunawayCount++ > SpongeConfigs.getCommon().get().phaseTracker.maximumPrintedRunawayCounts) {
             PhasePrinter.hasPrintedAboutRunnawayPhases = true;
         }
@@ -311,7 +332,11 @@ public final class PhasePrinter {
         printer.add("%s : %s", "Completing phase", state);
         printer.add(" Phases Remaining:");
         PhasePrinter.printPhaseStackWithException(stack, printer, new Exception("RunawayPhase"));
-        printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
+        if (PhasePrinter.IN_DEVELOPMENT) {
+            printer.print(System.err);
+        } else {
+            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+        }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && PhasePrinter.printRunawayCount++ > 3) {
             PhasePrinter.hasPrintedAboutRunnawayPhases = true;
         }
@@ -347,7 +372,11 @@ public final class PhasePrinter {
                 .add(new Exception());
         printer.add(" Phases Remaining:");
         PhasePrinter.printPhaseStackWithException(stack, printer, new Exception("Incorrect Phase Completion"));
-        printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
+        if (PhasePrinter.IN_DEVELOPMENT) {
+            printer.print(System.err);
+        } else {
+            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+        }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             PhasePrinter.completedIncorrectStates.add(new Tuple<>(prevState, state));
         }
@@ -373,7 +402,11 @@ public final class PhasePrinter {
         PhasePrinter.PHASE_PRINTER.accept(printer, context);
         printer.add();
         PhasePrinter.generateVersionInfo(printer);
-        printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
+        if (PhasePrinter.IN_DEVELOPMENT) {
+            printer.print(System.err);
+        } else {
+            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+        }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             PhasePrinter.hasPrintedEmptyOnce = true;
         }
@@ -387,7 +420,11 @@ public final class PhasePrinter {
         stack.forEach(data -> PhasePrinter.PHASE_PRINTER.accept(printer, data));
         printer.add();
         PhasePrinter.generateVersionInfo(printer);
-        printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
+        if (PhasePrinter.IN_DEVELOPMENT) {
+            printer.print(System.err);
+        } else {
+            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+        }
     }
 
     static void printAsyncBlockChange(final TrackedWorldBridge mixinWorld, final BlockPos pos, final net.minecraft.block.BlockState newState) {
@@ -419,22 +456,26 @@ public final class PhasePrinter {
                 return;
             }
             // Otherwise, let's print out either the first time, or several more times.
-            new PrettyPrinter(60)
-                    .add("Async Entity Spawn Warning").centre().hr()
-                    .add("An entity was attempting to spawn off the \"main\" server thread")
-                    .add()
-                    .add("Details of the spawning are disabled according to the Sponge")
-                    .add("configuration file. A stack trace of the attempted spawn should")
-                    .add("provide information about how it was being spawned. Sponge is")
-                    .add("currently configured to NOT attempt to capture this spawn and")
-                    .add("spawn the entity at an appropriate time, while on the main server")
-                    .add("thread.")
-                    .add()
-                    .add("Details of the spawn:")
-                    .add("%s : %s", "Entity", entity)
-                    .add("Stacktrace")
-                    .add(new Exception("Async entity spawn attempt"))
-                    .trace(SpongeCommon.getLogger(), Level.WARN);
+            final PrettyPrinter printer = new PrettyPrinter(60)
+                .add("Async Entity Spawn Warning").centre().hr()
+                .add("An entity was attempting to spawn off the \"main\" server thread")
+                .add()
+                .add("Details of the spawning are disabled according to the Sponge")
+                .add("configuration file. A stack trace of the attempted spawn should")
+                .add("provide information about how it was being spawned. Sponge is")
+                .add("currently configured to NOT attempt to capture this spawn and")
+                .add("spawn the entity at an appropriate time, while on the main server")
+                .add("thread.")
+                .add()
+                .add("Details of the spawn:")
+                .add("%s : %s", "Entity", entity)
+                .add("Stacktrace")
+                .add(new Exception("Async entity spawn attempt"));
+            if (PhasePrinter.IN_DEVELOPMENT) {
+                printer.print(System.err);
+            } else {
+                printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            }
             PhasePrinter.hasPrintedAsyncEntities = true;
             return;
         }
@@ -450,21 +491,25 @@ public final class PhasePrinter {
             return;
         }
         // Otherwise, let's print out either the first time, or several more times.
-        new PrettyPrinter(60)
-                .add("Async Entity Spawn Warning").centre().hr()
-                .add("An entity was attempting to spawn off the \"main\" server thread")
-                .add()
-                .add("Delayed spawning is ENABLED for Sponge.")
-                .add("The entity is safely captured by Sponge while off the main")
-                .add("server thread, and therefore will be spawned the next tick.")
-                .add("Some cases where a mod is expecting the entity back while")
-                .add("async can cause issues with said mod.")
-                .add()
-                .add("Details of the spawn:")
-                .add("%s : %s", "Entity", entity)
-                .add("Stacktrace")
-                .add(new Exception("Async entity spawn attempt"))
-                .trace(SpongeCommon.getLogger(), Level.WARN);
+        final PrettyPrinter printer = new PrettyPrinter(60)
+            .add("Async Entity Spawn Warning").centre().hr()
+            .add("An entity was attempting to spawn off the \"main\" server thread")
+            .add()
+            .add("Delayed spawning is ENABLED for Sponge.")
+            .add("The entity is safely captured by Sponge while off the main")
+            .add("server thread, and therefore will be spawned the next tick.")
+            .add("Some cases where a mod is expecting the entity back while")
+            .add("async can cause issues with said mod.")
+            .add()
+            .add("Details of the spawn:")
+            .add("%s : %s", "Entity", entity)
+            .add("Stacktrace")
+            .add(new Exception("Async entity spawn attempt"));
+        if (PhasePrinter.IN_DEVELOPMENT) {
+            printer.print(System.err);
+        } else {
+            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+        }
         PhasePrinter.hasPrintedAsyncEntities = true;
     }
 

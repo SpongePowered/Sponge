@@ -26,6 +26,8 @@ package org.spongepowered.common.block.entity;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
@@ -36,22 +38,20 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.data.nbt.validation.Validations;
-import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.bridge.block.BlockStateBridge;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Optional;
 
-@SuppressWarnings("unchecked")
 public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder<BlockEntityArchetype> implements BlockEntityArchetype.Builder {
 
-    BlockState blockState;
-    @Nullable BlockEntityType type;
-    DataContainer data;
+    @MonotonicNonNull BlockState blockState;
+    @MonotonicNonNull BlockEntityType type;
+    @Nullable DataContainer data;
 
     public SpongeBlockEntityArchetypeBuilder() {
         super(BlockEntityArchetype.class, Constants.Sponge.BlockEntityArchetype.BASE_VERSION);
@@ -66,7 +66,12 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     }
 
     @Override
-    public BlockEntityArchetype.Builder from(BlockEntityArchetype value) {
+    public <V> BlockEntityArchetype.Builder add(final Key<? extends Value<V>> key, final V value) {
+        return null;
+    }
+
+    @Override
+    public BlockEntityArchetype.Builder from(final BlockEntityArchetype value) {
         this.type = value.getBlockEntityType();
         this.blockState = value.getState();
         this.data = value.getBlockEntityData();
@@ -74,9 +79,9 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     }
 
     @Override
-    public BlockEntityArchetype.Builder state(BlockState state) {
+    public BlockEntityArchetype.Builder state(final BlockState state) {
         final net.minecraft.block.BlockState blockState = (net.minecraft.block.BlockState) state;
-        if (!SpongeImplHooks.hasBlockTileEntity(blockState)) {
+        if (!((BlockStateBridge) (blockState)).bridge$hasTileEntity()) {
             new IllegalArgumentException("BlockState: "+ state + " does not provide TileEntities!").printStackTrace();
         }
         if (this.blockState != state) {
@@ -87,13 +92,13 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     }
 
     @Override
-    public BlockEntityArchetype.Builder blockEntity(BlockEntityType blockEntityType) {
-        this.type = Preconditions.checkNotNull(blockEntityType);
+    public BlockEntityArchetype.Builder blockEntity(final BlockEntityType blockEntityType) {
+        this.type = Objects.requireNonNull(blockEntityType, "BlockEntityType cannot be null");
         return this;
     }
 
     @Override
-    public BlockEntityArchetype.Builder from(ServerLocation location) {
+    public BlockEntityArchetype.Builder from(final ServerLocation location) {
         final BlockEntity tileEntity = location.getBlockEntity()
                 .orElseThrow(() -> new IllegalArgumentException("There is no block entity available at the provided location: " + location));
 
@@ -101,65 +106,39 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     }
 
     @Override
-    public BlockEntityArchetype.Builder blockEntity(BlockEntity blockEntity) {
-        Preconditions.checkArgument(blockEntity instanceof TileEntity, "BlockEntity is not compatible with this implementation!");
-        CompoundNBT compound = new CompoundNBT();
-        ((TileEntity) blockEntity).write(compound);
-        compound.remove("x");
-        compound.remove("y");
-        compound.remove("z");
-        String tileId = compound.getString("id");
+    public BlockEntityArchetype.Builder blockEntity(final BlockEntity blockEntity) {
+        if (!(Objects.requireNonNull(blockEntity, "BlockEntity cannot be null!") instanceof TileEntity)) {
+            throw new IllegalArgumentException("BlockEntity is not compatible with this implementation!");
+        }
+        final CompoundNBT compound = new CompoundNBT();
+        ((TileEntity) blockEntity).save(compound);
+        compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X);
+        compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y);
+        compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Z);
+        final String tileId = compound.getString(Constants.Item.BLOCK_ENTITY_ID);
         compound.remove("id");
         compound.putString(Constants.Sponge.BlockEntityArchetype.TILE_ENTITY_ID, tileId);
-        this.data = NbtTranslator.getInstance().translate(compound);
+        this.data = NBTTranslator.INSTANCE.translate(compound);
         this.blockState = blockEntity.getBlock();
         this.type = blockEntity.getType();
         return this;
     }
 
     @Override
-    public BlockEntityArchetype.Builder blockEntityData(DataView dataView) {
-        Preconditions.checkNotNull(dataView, "Provided DataView cannot be null!");
-        final DataContainer copy = dataView.copy();
-        DataUtil.getValidators(Validations.TILE_ENTITY).validate(copy);
+    public BlockEntityArchetype.Builder blockEntityData(final DataView dataView) {
+        final DataContainer copy = Objects.requireNonNull(dataView, "DataView cannot be null!").copy();
         this.data = copy;
         return this;
     }
 
     @Override
-    public BlockEntityArchetype.Builder setData(Mutable<?, ?> manipulator) {
-        if (this.data == null) {
-            this.data = DataContainer.createNew();
-        }
-        DataUtil.getRawNbtProcessor(NBTDataTypes.TILE_ENTITY, manipulator.getClass())
-                .ifPresent(processor -> processor.storeToView(this.data, manipulator));
-        return this;
-    }
-
-    @Override
-    public <E, V extends Value<E>> BlockEntityArchetype.Builder set(V value) {
-        if (this.data == null) {
-            this.data = DataContainer.createNew();
-        }
-        DataUtil.getRawNbtProcessor(NBTDataTypes.TILE_ENTITY, value.getKey())
-                .ifPresent(processor -> processor.offer(this.data, value));
-        return this;
-    }
-
-    @Override
-    public <E, V extends Value<E>> BlockEntityArchetype.Builder set(Key<V> key, E value) {
-        if (this.data == null) {
-            this.data = DataContainer.createNew();
-        }
-        DataUtil.getRawNbtProcessor(NBTDataTypes.TILE_ENTITY, key)
-                .ifPresent(processor -> processor.offer(this.data, value));
-        return this;
-    }
-
-    @Override
     public BlockEntityArchetype build() {
-        Preconditions.checkState(this.blockState != null, "BlockState cannot be null!");
-        Preconditions.checkState(this.type != null, "TileEntityType cannot be null!");
+        if (this.blockState == null) {
+            throw new IllegalStateException("BlockState cannot be null!");
+        }
+        if (this.type == null) {
+            throw new IllegalStateException("BlockEntityType cannot be null!");
+        }
         if (this.data == null) {
             this.data = DataContainer.createNew();
         }
@@ -167,12 +146,13 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     }
 
     @Override
-    protected Optional<BlockEntityArchetype> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<BlockEntityArchetype> buildContent(final DataView container) throws InvalidDataException {
         final SpongeBlockEntityArchetypeBuilder builder = new SpongeBlockEntityArchetypeBuilder();
         if (container.contains(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_TYPE, Constants.Sponge.BlockEntityArchetype.BLOCK_STATE)) {
-            builder.blockEntity(container.getCatalogType(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_TYPE, BlockEntityType.class)
+            builder.blockEntity(container.getRegistryValue(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_TYPE,
+                RegistryTypes.BLOCK_ENTITY_TYPE)
                     .orElseThrow(() -> new InvalidDataException("Could not deserialize a BlockEntityType!")));
-            builder.state(container.getCatalogType(Constants.Sponge.BlockEntityArchetype.BLOCK_STATE, BlockState.class)
+            builder.state(container.getSerializable(Constants.Sponge.BlockEntityArchetype.BLOCK_STATE, BlockState.class)
                     .orElseThrow(() -> new InvalidDataException("Could not deserialize a BlockState!")));
         } else {
             throw new InvalidDataException("Missing the BlockEntityType and BlockState! Cannot re-construct a BlockEntityArchetype!");

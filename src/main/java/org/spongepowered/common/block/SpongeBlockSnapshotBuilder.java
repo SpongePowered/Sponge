@@ -205,6 +205,37 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
         return this;
     }
 
+    public BlockState getBlockState() {
+        return this.blockState;
+    }
+
+    public ResourceKey getWorldKey() {
+        return this.worldKey;
+    }
+
+    @Nullable
+    public UUID getCreatorUniqueId() {
+        return this.creatorUniqueId;
+    }
+
+    public Vector3i getCoordinates() {
+        return this.coordinates;
+    }
+
+    @Nullable
+    public List<DataManipulator.Immutable> getManipulators() {
+        return this.manipulators;
+    }
+
+    @Nullable
+    public CompoundNBT getCompound() {
+        return this.compound;
+    }
+
+    public SpongeBlockChangeFlag getFlag() {
+        return this.flag;
+    }
+
     @Override
     @NonNull
     public SpongeBlockSnapshotBuilder reset() {

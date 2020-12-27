@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
@@ -63,6 +64,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.tileentity.TileEntityAccessor;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.biome.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
@@ -380,9 +382,12 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
             // Entity -> UniqueID
             (key, entity) -> entity.getUUID(),
             // Entity Accessor
-            (chunk) -> chunk instanceof Chunk ? Stream.empty() : Arrays.stream(((Chunk) chunk).getEntitySections())
+            (chunk) -> chunk instanceof Chunk ? Arrays.stream(((Chunk) chunk).getEntitySections())
                     .flatMap(Collection::stream)
+                    .filter(entity -> VecHelper.inBounds(entity.blockPosition(), min, max))
+                    .filter(entity -> !(entity instanceof PlayerEntity))
                     .map(entity -> new AbstractMap.SimpleEntry<>(entity.blockPosition(), entity))
+                : Stream.empty()
             ,
             // Filtered Position Entity Accessor
             (entityUuid, world) -> {

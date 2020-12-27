@@ -178,6 +178,10 @@ public final class VecHelper {
         return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
     }
 
+    public static boolean inBounds(final BlockPos pos, final org.spongepowered.math.vector.Vector3i min, final org.spongepowered.math.vector.Vector3i max) {
+        return VecHelper.inBounds(pos.getX(), pos.getY(), pos.getZ(), min, max);
+    }
+
     public static boolean inBounds(final org.spongepowered.math.vector.Vector3d pos, final org.spongepowered.math.vector.Vector3i min,
                                    final org.spongepowered.math.vector.Vector3i max) {
         return VecHelper.inBounds(pos.getX(), pos.getY(), pos.getZ(), min, max);

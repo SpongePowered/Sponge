@@ -568,6 +568,9 @@ public final class Constants {
     public static final class TileEntity {
 
         public static final String SIGN = "Sign";
+        public static final String X_POS = "x";
+        public static final String Y_POS = "y";
+        public static final String Z_POS = "z";
         public static final DataQuery SIGN_LINES = of("SignLines");
         // TileEntities
         public static final DataQuery TILE_TYPE = of("TileType");

@@ -394,27 +394,38 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
         Objects.requireNonNull(min, "Min position cannot be null");
         Objects.requireNonNull(max, "Max position cannot be null");
         Objects.requireNonNull(origin, "Origin cannot be null");
-        final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(min.sub(origin), max.sub(min).add(1, 1, 1), this.registries());
+        final Vector3i rawVolMin = min.min(max);
+        final Vector3i adjustedVolMin = rawVolMin.sub(origin);
+        final Vector3i volMax = max.max(min);
+        final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(adjustedVolMin, volMax.sub(rawVolMin).add(1, 1, 1), this.registries());
 
         this.getBlockStateStream(min, max, StreamOptions.lazily())
-            .apply(VolumeCollectors.of(volume, VolumePositionTranslators.offsetPosition(min, origin), VolumeApplicators.applyBlocks()));
+            .apply(VolumeCollectors.of(
+                volume,
+                VolumePositionTranslators.offset(origin),
+                VolumeApplicators.applyBlocks()
+            ));
 
         this.getBlockEntityStream(min, max, StreamOptions.lazily())
             .map((world, blockEntity, x, y, z) -> blockEntity.get().createArchetype())
             .apply(VolumeCollectors.of(
                 volume,
-                VolumePositionTranslators.offsetPosition(min, origin),
+                VolumePositionTranslators.offset(origin),
                 VolumeApplicators.applyBlockEntityArchetypes()
             ));
 
         this.getBiomeStream(min, max, StreamOptions.lazily())
-            .apply(VolumeCollectors.of(volume, VolumePositionTranslators.offsetPosition(min, origin), VolumeApplicators.applyBiomes()));
+            .apply(VolumeCollectors.of(
+                volume,
+                VolumePositionTranslators.offset(origin),
+                VolumeApplicators.applyBiomes()
+            ));
 
         this.getEntityStream(min, max, StreamOptions.lazily())
             .map((world, entity, x, y, z) -> entity.get().createArchetype())
             .apply(VolumeCollectors.of(
                 volume,
-                VolumePositionTranslators.offsetPosition(min, origin),
+                VolumePositionTranslators.offset(origin),
                 VolumeApplicators.applyEntityArchetypes()
             ));
         return volume;
