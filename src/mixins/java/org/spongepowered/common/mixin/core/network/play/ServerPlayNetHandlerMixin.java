@@ -44,12 +44,17 @@ import net.minecraft.network.play.client.CPlayerPacket;
 import net.minecraft.network.play.client.CTabCompletePacket;
 import net.minecraft.network.play.client.CUpdateSignPacket;
 import net.minecraft.network.play.client.CUseEntityPacket;
+import net.minecraft.network.play.server.SPlayerDiggingPacket;
 import net.minecraft.network.play.server.STabCompletePacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.SignTileEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.SharedConstants;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
@@ -58,6 +63,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.entity.Sign;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
@@ -67,9 +73,11 @@ import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.entity.ChangeSignEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
@@ -108,6 +116,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 @Mixin(ServerPlayNetHandler.class)
@@ -426,6 +435,28 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     @Inject(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;drop(Z)Z"))
     public void impl$dropItem(final CPlayerDiggingPacket p_147345_1_, final CallbackInfo ci) {
         this.impl$ignorePackets++;
+    }
+
+    @Redirect(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;handleBlockBreakAction(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/network/play/client/CPlayerDiggingPacket$Action;Lnet/minecraft/util/Direction;I)V"))
+    public void impl$callInteractBlockPrimaryEvent(final PlayerInteractionManager playerInteractionManager, final BlockPos p_225416_1_,
+            final CPlayerDiggingPacket.Action p_225416_2_, final Direction p_225416_3_, final int p_225416_4_) {
+        final BlockSnapshot snapshot = ((org.spongepowered.api.world.server.ServerWorld) (playerInteractionManager.level)).createSnapshot(VecHelper.toVector3i(p_225416_1_));
+        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(p_225416_2_, this.player, this.player.getItemInHand(
+                Hand.MAIN_HAND), snapshot, Hand.MAIN_HAND, p_225416_3_);
+        if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
+            this.player.connection.send(new SPlayerDiggingPacket(p_225416_1_, playerInteractionManager.level.getBlockState(p_225416_1_), p_225416_2_, false, "block action restricted"));
+            this.impl$ignorePackets++;
+        } else {
+            if (p_225416_2_ == CPlayerDiggingPacket.Action.ABORT_DESTROY_BLOCK) {
+                if (!Objects.equals(((PlayerInteractionManagerAccessor) playerInteractionManager).accessor$destroyPos(), p_225416_1_)) {
+                    return; // prevents Mismatch in destroy block pos warning
+                }
+            }
+            playerInteractionManager.handleBlockBreakAction(p_225416_1_, p_225416_2_, p_225416_3_, p_225416_4_);
+            if (p_225416_2_ == CPlayerDiggingPacket.Action.START_DESTROY_BLOCK) {
+                this.impl$ignorePackets++;
+            }
+        }
     }
 
     @Redirect(

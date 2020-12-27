@@ -25,10 +25,13 @@
 package org.spongepowered.common.accessor.server.management;
 
 import net.minecraft.server.management.PlayerInteractionManager;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(PlayerInteractionManager.class)
 public interface PlayerInteractionManagerAccessor {
     @Accessor("isDestroyingBlock") boolean accessor$isDestroyingBlock();
+    @Accessor("destroyPos") BlockPos accessor$destroyPos();
+
 }

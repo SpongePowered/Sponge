@@ -31,18 +31,14 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
-import net.minecraft.network.play.client.CPlayerDiggingPacket;
-import net.minecraft.network.play.server.SPlayerDiggingPacket;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -55,7 +51,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -85,16 +80,6 @@ public abstract class PlayerInteractionManagerMixin_Tracker {
         final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(player, stack, hand);
         if (event.isCancelled()) {
             cir.setReturnValue(ActionResultType.FAIL);
-        }
-    }
-
-    @Inject(method = "handleBlockBreakAction", cancellable = true, at = @At(value = "HEAD"))
-    public void impl$callInteractBlockPrimaryEvent(final BlockPos p_225416_1_, final CPlayerDiggingPacket.Action p_225416_2_, final Direction p_225416_3_, final int p_225416_4_, final CallbackInfo ci) {
-        final BlockSnapshot snapshot = ((ServerWorld) (this.level)).createSnapshot(VecHelper.toVector3i(p_225416_1_));
-        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(p_225416_2_, this.player, this.player.getItemInHand(Hand.MAIN_HAND), snapshot, Hand.MAIN_HAND, p_225416_3_);
-        if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
-            this.player.connection.send(new SPlayerDiggingPacket(p_225416_1_, this.level.getBlockState(p_225416_1_), p_225416_2_, false, "block action restricted"));
-            ci.cancel();
         }
     }
 
