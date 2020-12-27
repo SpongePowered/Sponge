@@ -41,11 +41,13 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.AbstractArchetype;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.nbt.validation.RawDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderLookup;
+import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
@@ -56,6 +58,11 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
         org.spongepowered.api.block.entity.BlockEntityArchetype {
 
     final BlockState blockState;
+
+    // TODO actually validate stuff
+    public static final ImmutableList<RawDataValidator> VALIDATORS = ImmutableList.of();
+
+    private static final DataProviderLookup lookup = SpongeDataManager.getProviderRegistry().getProviderLookup(SpongeBlockEntityArchetype.class);
 
     SpongeBlockEntityArchetype(final SpongeBlockEntityArchetypeBuilder builder) {
         super(builder.type, NBTTranslator.INSTANCE.translate(builder.data));
@@ -129,7 +136,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     @Override
     public DataProviderLookup getLookup() {
-        return null;
+        return SpongeBlockEntityArchetype.lookup;
     }
 
     @Override
@@ -163,7 +170,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     @Override
     protected ImmutableList<RawDataValidator> getValidators() {
-        return null;
+        return SpongeBlockEntityArchetype.VALIDATORS;
     }
 
     @Override
