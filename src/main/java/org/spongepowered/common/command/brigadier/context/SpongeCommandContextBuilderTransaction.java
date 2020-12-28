@@ -68,7 +68,7 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
     private SpongeCommandContextBuilder copyBuilder;
 
     private final Object2IntOpenHashMap<String> flagCapture = new Object2IntOpenHashMap<>();
-    private final LinkedList<Tuple<String, ParsedArgument<CommandSource, ?>>> withArgumentCapture = new LinkedList<>();
+    private final LinkedList<ArgumentCapture> withArgumentCapture = new LinkedList<>();
     private final LinkedList<CommandSource> withSourceCapture = new LinkedList<>();
     private final LinkedList<Tuple<CommandNode<CommandSource>, StringRange>> withNodeCapture = new LinkedList<>();
     private final LinkedList<Tuple<Parameter.@NonNull Key<?>, ?>> putEntryCapture = new LinkedList<>();
@@ -103,10 +103,10 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
         throw new IllegalStateException("Transaction is not active.");
     }
 
-    public SpongeCommandContextBuilder withArgument(final String name, final ParsedArgument<CommandSource, ?> argument) {
+    public SpongeCommandContextBuilder withArgument(final String name, final ParsedArgument<CommandSource, ?> argument, final boolean addToSpongeMap) {
         final SpongeCommandContextBuilder builder = this.getReference();
-        this.withArgumentCapture.add(Tuple.of(name, argument));
-        this.copyBuilder.withArgument(name, argument);
+        this.withArgumentCapture.add(new ArgumentCapture(name, argument, addToSpongeMap));
+        this.copyBuilder.withArgumentInternal(name, argument, addToSpongeMap);
         return builder;
     }
 
@@ -177,7 +177,7 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
     public void commit() {
         final SpongeCommandContextBuilder builderRef = this.builder.get();
         if (builderRef != null) {
-            this.withArgumentCapture.forEach(x -> builderRef.withArgument(x.getFirst(), x.getSecond()));
+            this.withArgumentCapture.forEach(x -> builderRef.withArgumentInternal(x.name, x.parsedArgument, x.addToSponge));
             this.withSourceCapture.forEach(builderRef::withSource);
             this.withNodeCapture.forEach(x -> builderRef.withNode(x.getFirst(), x.getSecond()));
             this.withChildCapture.forEach(builderRef::withChild);
@@ -204,6 +204,20 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
         this.currentTargetCommandCapture = null;
         this.copyBuilder = null;
         this.builder = null;
+    }
+
+    static final class ArgumentCapture {
+
+        public final String name;
+        public final ParsedArgument<CommandSource, ?> parsedArgument;
+        public final boolean addToSponge;
+
+        ArgumentCapture(final String name, final ParsedArgument<CommandSource, ?> parsedArgument, final boolean addToSponge) {
+            this.name = name;
+            this.parsedArgument = parsedArgument;
+            this.addToSponge = addToSponge;
+        }
+
     }
 
 }

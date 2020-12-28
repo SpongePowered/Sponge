@@ -218,11 +218,10 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         return this.withArgumentInternal(name, argument, true);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> SpongeCommandContextBuilder withArgumentInternal(final String name, final ParsedArgument<CommandSource, T> argument,
             final boolean addToSpongeMap) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
-            return this.transaction.peek().withArgument(name, argument);
+            return this.transaction.peek().withArgument(name, argument, addToSpongeMap);
         }
 
         if (addToSpongeMap) {
