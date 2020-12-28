@@ -196,7 +196,8 @@
         "world.storage.SaveFormat_LevelSaveAccessor",
         "util.registry.DynamicRegistriesAccessor",
         "entity.projectile.ProjectileEntityAccessor",
-        "server.management.PlayerInteractionManagerAccessor"
+        "server.management.PlayerInteractionManagerAccessor",
+        "util.text.ColorAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

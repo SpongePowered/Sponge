@@ -60,6 +60,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.common.accessor.util.text.ColorAccessor;
 import org.spongepowered.common.accessor.util.text.event.HoverEventItemHoverAccessor;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
@@ -221,7 +222,7 @@ public final class SpongeAdventure {
         if (color == null) {
             return null;
         }
-        return TextColor.color(color.getValue());
+        return TextColor.color(((ColorAccessor) (Object) color).accessor$value());
     }
 
     public static @Nullable TextColor asAdventure(final TextFormatting formatting) {
