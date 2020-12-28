@@ -24,17 +24,22 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
+import java.util.Objects;
+
 public final class SpongeFlagLiteralCommandNode extends SpongeLiteralCommandNode {
 
     private final Flag flag;
+    private Command<CommandSource> executor;
 
     public SpongeFlagLiteralCommandNode(final LiteralArgumentBuilder<CommandSource> argumentBuilder, final Flag flag) {
         super(argumentBuilder);
@@ -45,6 +50,43 @@ public final class SpongeFlagLiteralCommandNode extends SpongeLiteralCommandNode
     public void parse(final StringReader reader, final CommandContextBuilder<CommandSource> contextBuilder) throws CommandSyntaxException {
         super.parse(reader, contextBuilder);
         ((SpongeCommandContextBuilder) contextBuilder).addFlagInvocation(this.flag);
+    }
+
+    @Override
+    public void forceExecutor(final Command<CommandSource> forcedExecutor) {
+        this.executor = forcedExecutor;
+    }
+
+    @Override
+    public Command<CommandSource> getCommand() {
+        final Command<CommandSource> command = super.getCommand();
+        if (command != null) {
+            return command;
+        }
+        return this.executor;
+    }
+
+    // Circular references cause problems - this sidesteps the issue.
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final SpongeFlagLiteralCommandNode that = (SpongeFlagLiteralCommandNode) o;
+        return Objects.equals(this.getName(), that.getName()) &&
+                this.getRedirect() == that.getRedirect() && // reference equality is intended
+                this.getChildren().size() == that.getChildren().size() &&
+                this.getChildren().stream().map(CommandNode::getName).allMatch(x -> that.getChild(x) != null) && // make sure all children exist
+                Objects.equals(this.flag, that.flag) &&
+                Objects.equals(this.executor, that.executor);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getName(), this.getChildren().size(), this.flag, this.executor);
     }
 
 }

@@ -404,16 +404,18 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             futures[i++] = future;
         }
 
-        final CompletableFuture<Suggestions> result = new CompletableFuture<>();
-        CompletableFuture.allOf(futures).thenRun(() -> {
+        // Sponge Start: if one future fails, don't leave a dangling future
+        // See https://github.com/Mojang/brigadier/pull/81
+        return CompletableFuture.allOf(futures).handle((voidResult, exception) -> {
             final List<Suggestions> suggestions = new ArrayList<>();
             for (final CompletableFuture<Suggestions> future : futures) {
-                suggestions.add(future.join());
+                if (!future.isCompletedExceptionally()) {
+                    suggestions.add(future.join());
+                }
             }
-            result.complete(Suggestions.merge(fullInput, suggestions));
+            return Suggestions.merge(fullInput, suggestions);
         });
-
-        return result;
+        // Sponge End
     }
 
     private boolean shouldContinueTraversing(final SpongeStringReader reader, final CommandNode<CommandSource> child) {

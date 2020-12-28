@@ -24,119 +24,121 @@
  */
 package org.spongepowered.common.command.brigadier;
 
-import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
-import org.spongepowered.api.command.parameter.managed.ValueCompleter;
-import org.spongepowered.common.command.SpongeParameterizedCommand;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.CustomArgumentParser;
-import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNodeBuilder;
 import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrapper;
 import org.spongepowered.common.command.brigadier.tree.SpongeFlagLiteralCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
+import org.spongepowered.common.command.brigadier.tree.SpongeNode;
 import org.spongepowered.common.command.parameter.SpongeDefaultValueParser;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 import org.spongepowered.common.command.parameter.SpongeParameterValue;
+import org.spongepowered.common.command.parameter.multi.SpongeFirstOfParameter;
 import org.spongepowered.common.command.parameter.multi.SpongeMultiParameter;
-import org.spongepowered.common.command.parameter.multi.SpongeSequenceParameter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.function.Consumer;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public final class SpongeParameterTranslator {
 
-    private static final ValueCompleter EMPTY_COMPLETER = (context, currentInput) -> Collections.emptyList();
+    public static final SpongeParameterTranslator INSTANCE = new SpongeParameterTranslator();
 
-    public static CommandNode<CommandSource> createCommandTreeWithSubcommandsOnly(
-            @NonNull final ArgumentBuilder<CommandSource, ?> rootNode,
-            @NonNull final List<Parameter.Subcommand> subcommands) {
-
-        SpongeParameterTranslator.createSubcommands(rootNode, subcommands);
-        return rootNode.build();
-    }
-
-    @SuppressWarnings({"unchecked"})
-    public static CommandNode<CommandSource> createCommandTree(
-            @NonNull final ArgumentBuilder<CommandSource, ?> rootNode,
-            @NonNull final SpongeParameterizedCommand command) {
-
-        final SpongeCommandExecutorWrapper executorWrapper =
-                command.getExecutor().map(SpongeCommandExecutorWrapper::new).orElse(null);
-        final ListIterator<Parameter> parameterListIterator = command.parameters().listIterator();
-
-        // If we have no parameters, or they are all optional, all literals will get an executor.
-        final boolean terminationInferred = SpongeParameterTranslator.createNode(
-                parameterListIterator, executorWrapper, rootNode::then, null, new ArrayList<>(), true, false, true);
-        final boolean isTerminal = terminationInferred || command.isTerminal();
-        if (isTerminal && executorWrapper != null) {
-            rootNode.executes(executorWrapper);
-        }
-        SpongeParameterTranslator.createSubcommands(rootNode, command.subcommands());
-        final CommandNode<CommandSource> builtNode;
-        if (rootNode instanceof LiteralArgumentBuilder) {
-            builtNode = new SpongeLiteralCommandNode((LiteralArgumentBuilder<CommandSource>) rootNode, command);
-        } else {
-            builtNode = rootNode.build();
-        }
-        SpongeParameterTranslator.createFlags(command.flags(), builtNode, isTerminal ? executorWrapper : null);
-        return builtNode;
+    private SpongeParameterTranslator() {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void createFlags(final List<Flag> flags, final CommandNode<CommandSource> node, @Nullable final SpongeCommandExecutorWrapper wrapper) {
+    public Collection<LiteralCommandNode<CommandSource>> createCommandTree(final Command.Parameterized command, final Collection<String> aliases) {
+        if (aliases.isEmpty()) {
+            throw new IllegalArgumentException("Aliases must not be empty.");
+        }
+        // create the first literal.
+        final Collection<String> sortedAliases = aliases.stream().sorted().collect(Collectors.toList());
+        final Iterator<String> aliasIterator = sortedAliases.iterator();
+
+        final String baseAlias = aliasIterator.next();
+        final SpongeCommandExecutorWrapper executor = command.getExecutor().map(SpongeCommandExecutorWrapper::new).orElse(null);
+
+        // Create the defining characteristics of the node.
+        final LiteralArgumentBuilder<CommandSource> basicNode = LiteralArgumentBuilder.literal(baseAlias);
+
+        basicNode.requires((Predicate) command.getExecutionRequirements());
+        if (command.isTerminal() && executor != null) {
+            basicNode.executes(executor);
+        }
+
+        final SpongeLiteralCommandNode commandNode = new SpongeLiteralCommandNode(basicNode);
+        if (executor != null) {
+            this.createAndAttachNode(Collections.singleton(commandNode), command.parameters(), executor, true, true);
+        }
+
+        for (final Parameter.Subcommand subcommand : command.subcommands()) {
+            final Collection<LiteralCommandNode<CommandSource>> builtSubcommand =
+                    this.createCommandTree(subcommand.getCommand(), subcommand.getAliases());
+            builtSubcommand.forEach(commandNode::addChild);
+        }
+
+        this.createFlags(commandNode, command.flags(), executor);
+
+        final List<LiteralCommandNode<CommandSource>> allCommandNodes = new ArrayList<>();
+        allCommandNodes.add(commandNode);
+        while (aliasIterator.hasNext()) {
+            final LiteralArgumentBuilder<CommandSource> redirectedNode = LiteralArgumentBuilder.literal(aliasIterator.next());
+            redirectedNode.executes(commandNode.getCommand());
+            redirectedNode.requires(commandNode.getRequirement());
+            redirectedNode.redirect(commandNode);
+            allCommandNodes.add(new SpongeLiteralCommandNode(redirectedNode));
+        }
+
+        return Collections.unmodifiableCollection(allCommandNodes);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void createFlags(final LiteralCommandNode<CommandSource> node, final List<Flag> flags,
+            @Nullable final SpongeCommandExecutorWrapper wrapper) {
+        final Collection<CommandNode<CommandSource>> nodesToAddChildrenTo = new ArrayList<>();
         for (final Flag flag : flags) {
             // first create the literal.
             final Iterator<String> aliasIterator = flag.getAliases().iterator();
             final LiteralArgumentBuilder<CommandSource> flagLiteral = LiteralArgumentBuilder.literal(aliasIterator.next());
             flagLiteral.requires((Predicate) flag.getRequirement());
+            final Collection<? extends CommandNode<CommandSource>> toBeRedirected;
+            final SpongeFlagLiteralCommandNode flagNode = new SpongeFlagLiteralCommandNode(flagLiteral, flag);
             if (flag.getAssociatedParameter().isPresent()) {
-                final Parameter parameter = flag.getAssociatedParameter().get();
-                final List<Parameter> parameters;
-                if (parameter instanceof SpongeSequenceParameter) {
-                    parameters = ((SpongeSequenceParameter) parameter).getParameterCandidates();
-                } else {
-                    parameters = Collections.singletonList(parameter);
-                }
-                final boolean isTerminal = SpongeParameterTranslator.createNode(
-                        parameters.listIterator(),
+                toBeRedirected = this.createAndAttachNode(
+                        Collections.singleton(flagNode),
+                        Collections.singletonList(flag.getAssociatedParameter().get()),
                         wrapper,
-                        flagLiteral::then,
-                        builder -> {
-                            if (builder.getArguments().isEmpty()) {
-                                builder.redirect(node);
-                            } else {
-                                node.getChildren().forEach(builder::then);
-                            }
-                        },
-                        new ArrayList<>(),
-                        wrapper != null,
-                        false,
+                        node.getCommand() != null,
                         false
                 );
-                if (isTerminal) {
-                    flagLiteral.executes(wrapper);
-                    flagLiteral.redirect(node);
-                }
             } else {
-                flagLiteral.executes(wrapper);
-                flagLiteral.redirect(node);
+                toBeRedirected = Collections.singletonList(flagNode);
             }
-            final SpongeFlagLiteralCommandNode flagNode = new SpongeFlagLiteralCommandNode(flagLiteral, flag);
+            for (final CommandNode<CommandSource> candidate : toBeRedirected) {
+                if (candidate instanceof SpongeNode && ((SpongeNode) candidate).canForceRedirect()) {
+                    ((SpongeNode) candidate).forceRedirect(node);
+                } else {
+                    nodesToAddChildrenTo.add(candidate);
+                }
+            }
             node.addChild(flagNode);
 
             while (aliasIterator.hasNext()) {
@@ -151,190 +153,161 @@ public final class SpongeParameterTranslator {
                 node.addChild(new SpongeFlagLiteralCommandNode(nextFlag, flag));
             }
         }
+
+        // Make all terminal nodes return to the parent node's children.
+        node.getChildren().forEach(x -> nodesToAddChildrenTo.forEach(y -> y.addChild(x)));
     }
 
-    // Returns true if all elements beyond this node are optional.
-    public static boolean createNode(
-            @NonNull final ListIterator<Parameter> parameters,
-            @Nullable final SpongeCommandExecutorWrapper executorWrapper, // if null, terminal hints will be instead call lastNodeCallback
-            @NonNull final Consumer<CommandNode<CommandSource>> builtNodeConsumer,
-            @Nullable final Consumer<ArgumentBuilder<CommandSource, ?>> lastNodeCallback,
-            final List<CommandNode<CommandSource>> potentialOptionalRedirects,
-            final boolean canBeTerminal,
-            final boolean previousWasOptional,
-            final boolean isContainerAtEnd) {
-        return SpongeParameterTranslator.createNode(parameters, executorWrapper, builtNodeConsumer, lastNodeCallback, potentialOptionalRedirects,
-                canBeTerminal, previousWasOptional, null, isContainerAtEnd);
-    }
+    private Collection<? extends CommandNode<CommandSource>> createAndAttachNode(
+            final Collection<? extends CommandNode<CommandSource>> parents,
+            final List<Parameter> children,
+            @Nullable final SpongeCommandExecutorWrapper executorWrapper,
+            final boolean shouldTerminate,
+            final boolean allowSubcommands) {
 
-    public static boolean createNode(
-            @NonNull final ListIterator<Parameter> parameters,
-            @Nullable final SpongeCommandExecutorWrapper executorWrapper, // if null, terminal hints will be instead call lastNodeCallback
-            @NonNull final Consumer<CommandNode<CommandSource>> builtNodeConsumer,
-            @Nullable final Consumer<ArgumentBuilder<CommandSource, ?>> lastNodeCallback,
-            final List<CommandNode<CommandSource>> potentialOptionalRedirects,
-            final boolean canBeTerminal,
-            final boolean previousWasOptional,
-            @Nullable final String suffix,
-            final boolean isContainerAtEnd) {
+        final Set<CommandNode<CommandSource>> nodesToAttachTo = new HashSet<>(parents);
+        final ListIterator<Parameter> parameterIterator = children.listIterator();
+        while (parameterIterator.hasNext()) {
+            final Parameter parameter = parameterIterator.next();
+            final boolean hasNext = parameterIterator.hasNext();
 
-        // isContainerAtEnd indicates that at the end of this chain, we'll be at the end of the node list. Always true for the base
-        // node chain, if we then place a firstOf or a seq chain in, this will be false if there is not the end of a chain after
-        // (it basically tells us if parameters.hasNext() is true or false)
-
-        if (!parameters.hasNext()) {
-            return canBeTerminal;
-        }
-
-        final Parameter currentParameter = parameters.next();
-        final boolean hasNext = parameters.hasNext();
-        final boolean isDefault = currentParameter instanceof SpongeParameterValue && ((SpongeParameterValue<?>) currentParameter).getDefaultParser() != null;
-
-        // Inferred because it checks to see if everything ahead is optional or terminal.
-        boolean isInferredTermination = canBeTerminal && !hasNext;
-
-        if (currentParameter instanceof Parameter.Subcommand) {
-            SpongeParameterTranslator.createSubcommand((Parameter.Subcommand) currentParameter, builtNodeConsumer);
-            return false; // this is NOT a termination - the subcommand holds that.
-        } else if (currentParameter instanceof SpongeMultiParameter) {
-            final boolean isMultiParameterContainerAtEnd = isContainerAtEnd && !hasNext;
-            final Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback =
-                    isInferredTermination ? lastNodeCallback :
-                            arg -> SpongeParameterTranslator.createNode(
-                                    parameters,
+            if (parameter instanceof Parameter.Subcommand) {
+                final Parameter.Subcommand subcommands = ((Parameter.Subcommand) parameter);
+                if (!allowSubcommands) {
+                    throw new IllegalStateException("Subcommands are not allowed for this element (subcommands were " +
+                            String.join(", ", subcommands.getAliases() + ")!"));
+                }
+                if (hasNext) {
+                    // this is a failure condition because there cannot be a parameter after a subcommand.
+                    throw new IllegalStateException("A parameter cannot be placed after a subcommand parameter!");
+                }
+                // If the child is a subcommand, get the subcommand and attach it. At this point,
+                // we're done with the chain and we break out.
+                final Collection<LiteralCommandNode<CommandSource>> nodes = this.createCommandTree(
+                        subcommands.getCommand(),
+                        subcommands.getAliases()
+                );
+                for (final LiteralCommandNode<CommandSource> node : nodes) {
+                    nodesToAttachTo.forEach(x -> x.addChild(node));
+                }
+                // No further attaching should be done in this scenario
+                return Collections.emptyList();
+            } else {
+                final boolean isOptional;
+                final boolean isTerminal;
+                final Collection<CommandNode<CommandSource>> parametersToAttachTo;
+                if (parameter instanceof SpongeMultiParameter) {
+                    isOptional = parameter.isOptional();
+                    isTerminal = hasNext || parameter.isTerminal();
+                    // In these cases, we delegate to the parameter, which may return here.
+                    if (parameter instanceof SpongeFirstOfParameter) {
+                        // take each parameter in turn and evaluate it, returns the terminal nodes of each block
+                        parametersToAttachTo = new ArrayList<>();
+                        for (final Parameter p : ((SpongeFirstOfParameter) parameter).getParameterCandidates()) {
+                            final Collection<? extends CommandNode<CommandSource>> branchNodesToAttachTo = this.createAndAttachNode(
+                                    nodesToAttachTo,
+                                    Collections.singletonList(p),
                                     executorWrapper,
-                                    arg::then,
-                                    lastNodeCallback,
-                                    potentialOptionalRedirects,
-                                    canBeTerminal,
-                                    currentParameter.isOptional(),
-                                    isMultiParameterContainerAtEnd);
-
-            isInferredTermination = ((SpongeMultiParameter) currentParameter).createNode(
-                    executorWrapper,
-                    builtNodeConsumer,
-                    nodeCallback,
-                    potentialOptionalRedirects,
-                    isInferredTermination,
-                    previousWasOptional,
-                    suffix,
-                    isMultiParameterContainerAtEnd
-            ) || isInferredTermination;
-        } else if (currentParameter instanceof Parameter.Value<?>) {
-
-            final Parameter.Value<?> valueParameter = ((Parameter.Value<?>) currentParameter);
-
-            final boolean isConsumeAll = valueParameter.willConsumeAllRemaining();
-            isInferredTermination |= (valueParameter.isTerminal() || isConsumeAll);
-
-            if (isConsumeAll && hasNext) {
-                // this should not happen.
-                throw new IllegalStateException("A parameter that consumes all must be at the end of a parameter chain.");
-            }
-
-            // Process the next element if it exists
-            final boolean isParameterAtEnd = isContainerAtEnd && !hasNext;
-            final List<? extends SpongeArgumentCommandNodeBuilder<?>> currentNodes = SpongeParameterTranslator
-                    .createNode(valueParameter, suffix, isParameterAtEnd);
-            final SpongeArgumentCommandNodeBuilder<?> currentNode = currentNodes.get(0);
-            if (parameters.hasNext()) {
-                // We still need to execute createNode, so this order matters.
-                isInferredTermination = (SpongeParameterTranslator.createNode(
-                        parameters,
-                        executorWrapper,
-                        currentNode::then,
-                        lastNodeCallback,
-                        potentialOptionalRedirects,
-                        canBeTerminal,
-                        currentParameter.isOptional(),
-                        isContainerAtEnd
-                        ) && canBeTerminal) || isInferredTermination;
-            }
-
-            if (isInferredTermination || valueParameter.isTerminal()) {
-                if (isParameterAtEnd) {
-                    currentNodes.removeIf(SpongeArgumentCommandNodeBuilder::isEmptyOptional);
-                }
-                currentNodes.forEach(x -> x.executes(executorWrapper));
-            }
-
-            if ((executorWrapper == null || !hasNext) && lastNodeCallback != null) {
-                currentNodes.forEach(lastNodeCallback);
-            }
-
-            // Apply the node to the parent.
-            final CommandNode<CommandSource> builtNode = currentNode.build();
-            builtNodeConsumer.accept(builtNode);
-            if (isConsumeAll) {
-                // the built child will return to the previous node, which will allow this to be called again.
-                builtNode.addChild(currentNode.redirect(builtNode).build());
-            }
-
-            // Additional current nodes are all optional/default nodes
-            final ArrayList<CommandNode<CommandSource>> newOptionals = new ArrayList<>();
-            for (int i = 1; i < currentNodes.size(); ++i) {
-                final SpongeArgumentCommandNodeBuilder<?> secondaryBuilder = currentNodes.get(i);
-                if (isParameterAtEnd) {
-                    // If we know we're at the end of a chain, the secondary builder just has an executor - no need to redirect.
-                    secondaryBuilder.executes(executorWrapper);
-                } else if (potentialOptionalRedirects.isEmpty()) {
-                    // If the next node is not optional/defaulted we can redirect to the primary current node
-                    secondaryBuilder.redirect(builtNode);
-                } else {
-                    // If instead the next node is optional/defaulted we must attach them to the secondary current nodes as well
-                    if (secondaryBuilder.getRedirect() == null) {
-                        potentialOptionalRedirects.forEach(secondaryBuilder::then);
-                    } else {
-                        // If the node we're trying to add to is a redirect, we need to go back to the
-                        // parent itself.
-                        CommandNode<CommandSource> nodeToAppendTo = secondaryBuilder.getRedirect();
-                        while (nodeToAppendTo.getRedirect() != null) {
-                            nodeToAppendTo = nodeToAppendTo.getRedirect();
+                                    isTerminal,
+                                    allowSubcommands);
+                            parametersToAttachTo.addAll(branchNodesToAttachTo);
                         }
-                        potentialOptionalRedirects.forEach(nodeToAppendTo::addChild);
+                    } else {
+                        // not so fancy stuff, it's a sequence, returns the terminal nodes of the block
+                        parametersToAttachTo = new ArrayList<>(this.createAndAttachNode(
+                                nodesToAttachTo,
+                                ((SpongeMultiParameter) parameter).getParameterCandidates(),
+                                executorWrapper,
+                                !hasNext || parameter.isTerminal(),
+                                allowSubcommands));
                     }
+                } else {
+                    // We have a Parameter.Value
+                    parametersToAttachTo = new ArrayList<>();
+                    final SpongeParameterValue<?> valueParameter = (SpongeParameterValue<?>) parameter;
+                    final boolean isConsumeAll = valueParameter.willConsumeAllRemaining();
+                    if (isConsumeAll && hasNext) {
+                        // this should not happen.
+                        throw new IllegalStateException("A parameter that consumes all must be at the end of a parameter chain.");
+                    }
+
+                    isOptional = valueParameter.isOptional();
+                    isTerminal = (shouldTerminate && !hasNext) || valueParameter.isTerminal();
+
+                    // Process the next element if it exists
+                    StringBuilder suffix = null;
+                    final Set<String> names = nodesToAttachTo
+                            .stream()
+                            .flatMap(x -> x.getChildren().stream())
+                            .map(CommandNode::getName)
+                            .collect(Collectors.toSet());
+                    String key = valueParameter.getKey().key();
+                    while (names.contains(key)) {
+                        if (suffix == null) {
+                            suffix = new StringBuilder(String.valueOf(names.size()));
+                        } else {
+                            suffix.append("_").append(names.size());
+                        }
+                        // prevents duplication
+                        key = key + suffix;
+                    }
+                    final SpongeArgumentCommandNodeBuilder<?> thisNode = SpongeParameterTranslator
+                            .createArgumentNodeBuilders(valueParameter, suffix == null ? null : suffix.toString(), nodesToAttachTo);
+
+                    if (isTerminal) {
+                        thisNode.executes(executorWrapper);
+                    }
+
+                    // Apply the node to the parent.
+                    final CommandNode<CommandSource> builtNode = thisNode.build();
+                    if (isConsumeAll) {
+                        // the built child will return to the previous node, which will allow this to be called again.
+                        builtNode.addChild(thisNode.redirect(builtNode).build());
+                    }
+
+                    parametersToAttachTo.add(builtNode);
+
+                    // Make sure the nodes we need to attach to have the nodes we need to
+                    nodesToAttachTo.forEach(x -> x.addChild(builtNode));
                 }
-                final CommandNode<CommandSource> secondaryNode = secondaryBuilder.build();
-                newOptionals.add(secondaryNode); // pass all optional/default nodes up
 
-                // Attach optional node to previous primary node (the non-optional variant)
-                builtNodeConsumer.accept(secondaryNode);
+                // If this is not optional, then we clear the "toAttachTo" list because we do not want to skip the parameter.
+                if (!isOptional) {
+                    nodesToAttachTo.clear();
+                }
+
+                nodesToAttachTo.addAll(parametersToAttachTo);
             }
-
-            potentialOptionalRedirects.clear();
-            potentialOptionalRedirects.addAll(newOptionals);
         }
 
-        // Return true if all further arguments are optional and not default.
-        // Meaning the preceding parameter should be treated as a termination,
-        return canBeTerminal && isInferredTermination && currentParameter.isOptional() && !isDefault;
-    }
+        // If we should make any terminal parameters actually terminal, we do that now.
+        if (shouldTerminate) {
+            for (final CommandNode<CommandSource> node : nodesToAttachTo) {
+                // These are therefore terminal.
+                if (node instanceof SpongeNode) { // they should be, but just in case
+                    ((SpongeNode) node).forceExecutor(executorWrapper);
+                }
+            }
+        }
 
-    private static void createSubcommands(
-            final ArgumentBuilder<CommandSource, ?> rootNode,
-            final List<Parameter.Subcommand> parameters) {
-        parameters.forEach(x -> SpongeParameterTranslator.createSubcommand(x, rootNode::then));
-    }
-
-    private static void createSubcommand(
-            final Parameter.@NonNull Subcommand parameter,
-            final Consumer<? super LiteralCommandNode<CommandSource>> nodeConsumer) {
-
-        final Collection<LiteralCommandNode<CommandSource>> builtNodes = ((SpongeParameterizedCommand) parameter.getCommand()).buildWithAliases(
-                parameter.getAliases()
-        );
-        builtNodes.forEach(nodeConsumer);
+        return nodesToAttachTo;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @NonNull
-    private static <T> List<SpongeArgumentCommandNodeBuilder<? extends T>> createNode(final Parameter.@NonNull Value<T> parameter,
-            @Nullable final String suffix, final boolean isEndOfContainer) {
+    private static <T> SpongeArgumentCommandNodeBuilder<? extends T> createArgumentNodeBuilders(
+            final Parameter.@NonNull Value<T> parameter,
+            @Nullable final String suffix,
+            final Set<CommandNode<CommandSource>> nodesToAttachTo) {
 
         ArgumentParser<? extends T> type = null;
+        final SpongeDefaultValueParser<? extends T> defaultValueParser;
         if (parameter instanceof SpongeParameterValue<?>) {
             // If we've got an optional node at the end with no default, don't bother generating it.
             type = ((SpongeParameterValue<T>) parameter).getArgumentTypeIfStandard();
+            defaultValueParser = ((SpongeParameterValue<T>) parameter).getDefaultParser();
+        } else {
+            defaultValueParser = null;
         }
 
         if (type == null) {
@@ -342,53 +315,15 @@ public final class SpongeParameterTranslator {
         }
 
         final SpongeArgumentCommandNodeBuilder<T> argumentBuilder = new SpongeArgumentCommandNodeBuilder<>(
-                        SpongeParameterKey.getSpongeKey(parameter.getKey()),
-                        type,
-                        parameter.getCompleter(),
-                        parameter.getValueUsage().orElse(null),
-                        suffix,
-                        false);
+                SpongeParameterKey.getSpongeKey(parameter.getKey()),
+                type,
+                parameter.getCompleter(),
+                parameter.getValueUsage().orElse(null),
+                suffix,
+                defaultValueParser);
         // CommandCause is mixed into CommandSource, so this is okay.
         argumentBuilder.requires((Predicate) parameter.getRequirement());
-
-        final ArrayList<SpongeArgumentCommandNodeBuilder<? extends T>> nodes = new ArrayList<>();
-        nodes.add(argumentBuilder);
-        if (parameter instanceof SpongeParameterValue) {
-            if (parameter.isOptional()) {
-                final SpongeDefaultValueParser<? extends T> defaultValueParser = ((SpongeParameterValue<T>) parameter).getDefaultParser();
-                final CustomArgumentParser<? extends T> optionalParser;
-                final String suffixSuffix;
-                final boolean isEmptyOptional;
-                if (defaultValueParser != null) {
-                    // Default parser returns the default value
-                    optionalParser =
-                            new CustomArgumentParser<>(Collections.singletonList(defaultValueParser), SpongeParameterTranslator.EMPTY_COMPLETER,
-                                    true);
-                    suffixSuffix = suffix + "_default";
-                    isEmptyOptional = false;
-                } else if (isEndOfContainer) {
-                    // don't do any fancy optional stuff, terminations have already been set.
-                    return nodes;
-                } else {
-                    // Optional parser just returns null but still needs to be processed as a node
-                    // to allow commands optional parameters in front
-                    optionalParser = new CustomArgumentParser<>(Collections.emptyList(), SpongeParameterTranslator.EMPTY_COMPLETER, true);;
-                    suffixSuffix = suffix + "_optional";
-                    isEmptyOptional = true;
-                }
-                final SpongeArgumentCommandNodeBuilder<T> optionalBuilder = new SpongeArgumentCommandNodeBuilder<>(
-                        SpongeParameterKey.getSpongeKey(parameter.getKey()),
-                        optionalParser,
-                        SpongeParameterTranslator.EMPTY_COMPLETER,
-                        parameter.getValueUsage().orElse(null),
-                        suffixSuffix,
-                        isEmptyOptional);
-
-                nodes.add(optionalBuilder);
-            }
-        }
-
-        return nodes;
+        return argumentBuilder;
     }
 
 }

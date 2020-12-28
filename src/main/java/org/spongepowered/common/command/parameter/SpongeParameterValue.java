@@ -50,9 +50,6 @@ import java.util.stream.Collectors;
 
 public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
-   // private final static Text NEW_LINE = Text.of("\n");
-   // private final static Text GENERIC_EXCEPTION_ERROR = t("Could not parse element");
-
     private final ImmutableList<ValueParser<? extends T>> parsers;
     @Nullable private final SpongeDefaultValueParser<? extends T> defaultParser;
     private final ValueCompleter completer;
@@ -211,9 +208,10 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
     @Override
     public boolean isOptional() {
-        return this.isOptional;
+        return !this.hasDefault() && this.isOptional;
     }
 
+    @Nullable
     public SpongeDefaultValueParser<? extends T> getDefaultParser() {
         return this.defaultParser;
     }
@@ -233,6 +231,10 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
             }
         }
         return null;
+    }
+
+    public boolean hasDefault() {
+        return this.defaultParser != null;
     }
 
 }

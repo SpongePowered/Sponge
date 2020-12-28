@@ -72,12 +72,4 @@ public abstract class SpongeMultiParameter implements Parameter {
         return this.isTerminal;
     }
 
-    public abstract boolean createNode(SpongeCommandExecutorWrapper executorWrapper,
-            Consumer<CommandNode<CommandSource>> parentNode,
-            Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback,
-            List<CommandNode<CommandSource>> potentialOptionalRedirects,
-            boolean isTermination,
-            boolean previousWasOptional,
-            String suffix,
-            boolean isContainerAtEnd);
 }
