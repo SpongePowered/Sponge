@@ -44,6 +44,8 @@ import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.exception.ArgumentParseException;
+import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
@@ -51,6 +53,8 @@ import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
+import org.spongepowered.common.command.parameter.SpongeDefaultValueParser;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
@@ -82,25 +86,30 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
 
 
     private final Parameter.Key<? super T> key;
-    private final ArgumentParser<T> parser;
+    private final ArgumentParser<? extends T> parser;
     private final ValueUsage usage;
     private final boolean isComplexSuggestions;
+    @Nullable private final SpongeDefaultValueParser<? extends T> defaultParser;
 
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
+
+    @Nullable private Command<CommandSource> executor;
+    @Nullable private CommandNode<CommandSource> forcedRedirect;
 
     @SuppressWarnings({"unchecked"})
     public SpongeArgumentCommandNode(
             final Parameter.Key<? super T> key,
             final ValueUsage usage,
-            final ArgumentParser<T> parser,
+            final ArgumentParser<? extends T> parser,
             @Nullable final ValueCompleter valueCompleter,
             @Nullable final Command command,
             final Predicate<CommandSource> predicate,
             @Nullable final CommandNode<CommandSource> redirect,
             final RedirectModifier<CommandSource> modifier,
             final boolean forks,
-            final String keyName) {
+            final String keyName,
+            @Nullable final SpongeDefaultValueParser<? extends T> defaultParser) {
         super(keyName,
                 (ArgumentType<T>) Constants.Command.STANDARD_STRING_ARGUMENT_TYPE, // we can abuse generics, we're not actually going to use this.
                 command,
@@ -113,6 +122,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         this.isComplexSuggestions = this.parser instanceof ComplexSuggestionNodeProvider;
         this.key = key;
         this.usage = usage;
+        this.defaultParser = defaultParser;
     }
 
     public final boolean isComplex() {
@@ -190,6 +200,12 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             if (this.getRedirect() != null) {
                 toReturn.forward((CommandNode) this.getRedirect(), (RedirectModifier) this.getRedirectModifier(), this.isFork());
             }
+            if (this.hasDefault()) {
+                // we also add the children of this to the parent
+                for (final CommandNode<ISuggestionProvider> nodeForParent : toReturn.getArguments()) {
+                    rootSuggestionNode.addChild(nodeForParent);
+                }
+            }
             return toReturn;
         }
 
@@ -201,11 +217,53 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         if (this.getCommand() != null) {
             builder.executes(this.getCommand());
         }
+        if (this.hasDefault()) {
+            // we also add the children of this to the parent
+            for (final CommandNode nodeForParent : builder.getArguments()) {
+                rootSuggestionNode.addChild(nodeForParent);
+            }
+        }
         return (ArgumentBuilder) builder;
     }
 
-    public final ArgumentParser<T> getParser() {
+    public final ArgumentParser<? extends T> getParser() {
         return this.parser;
+    }
+
+    @Override
+    public void forceExecutor(final Command<CommandSource> forcedExecutor) {
+        this.executor = forcedExecutor;
+    }
+
+    @Override
+    public boolean canForceRedirect() {
+        return this.getChildren() == null || this.getChildren().isEmpty();
+    }
+
+    @Override
+    public void forceRedirect(final CommandNode<CommandSource> forcedRedirect) {
+        this.forcedRedirect = forcedRedirect;
+    }
+
+    @Override
+    public CommandNode<CommandSource> getRedirect() {
+        final CommandNode<CommandSource> redirect = super.getRedirect();
+        if (redirect != null) {
+            return redirect;
+        }
+        if (this.canForceRedirect()) {
+            return this.forcedRedirect;
+        }
+        return null;
+    }
+
+    @Override
+    public Command<CommandSource> getCommand() {
+        final Command<CommandSource> command = super.getCommand();
+        if (command != null) {
+            return command;
+        }
+        return this.executor;
     }
 
     @Override
@@ -227,13 +285,31 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     public final void parse(final StringReader reader, final CommandContextBuilder<CommandSource> contextBuilder) throws CommandSyntaxException {
         final int start = reader.getCursor();
         final SpongeCommandContextBuilder builder = (SpongeCommandContextBuilder) contextBuilder;
-        final T result = this.parser.parse(this.key, builder, (SpongeStringReader) reader);
+        boolean hasRead = true;
+        @Nullable T result;
+        try {
+             result = this.parser.parse(this.key, builder, (SpongeStringReader) reader);
+        } catch (final CommandSyntaxException e) {
+            if (this.hasDefault()) {
+                hasRead = false;
+                reader.setCursor(start);
+                try {
+                    result = this.defaultParser
+                                    .getValue(this.key, (ArgumentReader.Mutable) reader, (SpongeCommandContextBuilder) contextBuilder).orElse(null);
+                } catch (final ArgumentParseException argumentParseException) {
+                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()
+                            .createWithContext(reader, argumentParseException);
+                }
+            } else {
+                throw e;
+            }
+        }
         if (result != null) {
             builder.putEntry(this.key, result);
             final ParsedArgument<CommandSource, T> parsed = new ParsedArgument<>(start, reader.getCursor(), result);
             builder.withArgumentInternal(this.getName(), parsed, false);
             builder.withNode(this, parsed.getRange());
-        } else if (this.parser.doesNotRead()) {
+        } else if (!hasRead || this.parser.doesNotRead()) {
             // Assume this is a null "optional" parser and add the node as read so that we dont end up with an empty context
             builder.withNode(this, StringRange.at(start));
         }
@@ -258,6 +334,10 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     public void addChild(final CommandNode<CommandSource> node) {
         super.addChild(node);
         this.nodeHolder.add(node);
+    }
+
+    public boolean hasDefault() {
+        return this.defaultParser != null;
     }
 
     @Override

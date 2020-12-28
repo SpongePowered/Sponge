@@ -42,6 +42,9 @@ public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSource> 
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
     private final Command.@Nullable Parameterized subcommandIfApplicable;
+    private CommandNode<CommandSource> forcedRedirect;
+
+    private com.mojang.brigadier.Command<CommandSource> executor;
 
     public SpongeLiteralCommandNode(final LiteralArgumentBuilder<CommandSource> argumentBuilder) {
         this(argumentBuilder, null);
@@ -78,4 +81,41 @@ public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSource> 
             ((SpongeCommandContextBuilder) contextBuilder).setCurrentTargetCommand(this.subcommandIfApplicable);
         }
     }
+
+    @Override
+    public void forceExecutor(final com.mojang.brigadier.Command<CommandSource> forcedExecutor) {
+        this.executor = forcedExecutor;
+    }
+
+    @Override
+    public boolean canForceRedirect() {
+        return this.getChildren() == null || this.getChildren().isEmpty();
+    }
+
+    @Override
+    public void forceRedirect(final CommandNode<CommandSource> forcedRedirect) {
+        this.forcedRedirect = forcedRedirect;
+    }
+
+    @Override
+    public CommandNode<CommandSource> getRedirect() {
+        final CommandNode<CommandSource> redirect = super.getRedirect();
+        if (redirect != null) {
+            return redirect;
+        }
+        if (this.canForceRedirect()) {
+            return this.forcedRedirect;
+        }
+        return null;
+    }
+
+    @Override
+    public com.mojang.brigadier.Command<CommandSource> getCommand() {
+        final com.mojang.brigadier.Command<CommandSource> command = super.getCommand();
+        if (command != null) {
+            return command;
+        }
+        return this.executor;
+    }
+
 }

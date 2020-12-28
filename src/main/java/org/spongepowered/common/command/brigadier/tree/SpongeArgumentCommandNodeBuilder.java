@@ -32,6 +32,7 @@ import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
+import org.spongepowered.common.command.parameter.SpongeDefaultValueParser;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 
 // We use the ArgumentBuilder primarily for setting redirects properly.
@@ -42,16 +43,7 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
     @Nullable private final ValueCompleter completer;
     @Nullable private final String suffix;
     @Nullable private final ValueUsage usage;
-    private final boolean isEmptyOptional;
-
-    public SpongeArgumentCommandNodeBuilder(
-            final SpongeParameterKey<? super T> key,
-            final ArgumentParser<? extends T> type,
-            final ValueCompleter completer,
-            @Nullable final ValueUsage usage,
-            final boolean isEmptyOptional) {
-        this(key, type, completer, usage, null, isEmptyOptional);
-    }
+    @Nullable private final SpongeDefaultValueParser<? extends T> defaultValueParser;
 
     public SpongeArgumentCommandNodeBuilder(
             final SpongeParameterKey<? super T> key,
@@ -59,22 +51,18 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
             final ValueCompleter completer,
             @Nullable final ValueUsage usage,
             @Nullable final String suffix,
-            final boolean isEmptyOptional) {
+            @Nullable final SpongeDefaultValueParser<? extends T> defaultValueParser) {
         this.key = key;
         this.type = type;
         this.completer = type == completer && type instanceof StandardCatalogedArgumentParser ? null : completer;
         this.usage = usage;
         this.suffix = suffix;
-        this.isEmptyOptional = isEmptyOptional;
+        this.defaultValueParser = defaultValueParser;
     }
 
     @Override
     protected SpongeArgumentCommandNodeBuilder<T> getThis() {
         return this;
-    }
-
-    public boolean isEmptyOptional() {
-        return this.isEmptyOptional;
     }
 
     @Override
@@ -89,7 +77,8 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
                 this.getRedirect(),
                 this.getRedirectModifier(),
                 this.isFork(),
-                this.suffix == null ? this.key.key() : this.key.key() + "_" + this.suffix
+                this.suffix == null ? this.key.key() : this.key.key() + "_" + this.suffix,
+                this.defaultValueParser
         );
         for (final CommandNode<CommandSource> child : this.getArguments()) {
             node.addChild(child);

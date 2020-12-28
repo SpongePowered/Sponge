@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -51,4 +52,9 @@ public interface SpongeNode {
         return this.getChildrenForSuggestions();
     }
 
+    void forceExecutor(Command<CommandSource> forcedExecutor);
+
+    boolean canForceRedirect();
+
+    void forceRedirect(CommandNode<CommandSource> forcedRedirect);
 }

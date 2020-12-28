@@ -24,14 +24,18 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Used as a marker to indicate that this root node is not Sponge native.
  */
 public final class SpongePermissionWrappedLiteralCommandNode extends SpongeLiteralCommandNode {
+
+    @Nullable private Command<CommandSource> executor;
 
     public SpongePermissionWrappedLiteralCommandNode(
             final LiteralArgumentBuilder<CommandSource> builder) {
@@ -40,6 +44,20 @@ public final class SpongePermissionWrappedLiteralCommandNode extends SpongeLiter
         for (final CommandNode<CommandSource> argument : builder.getArguments()) {
             this.addChild(argument);
         }
+    }
+
+    @Override
+    public void forceExecutor(final Command<CommandSource> forcedExecutor) {
+        this.executor = forcedExecutor;
+    }
+
+    @Override
+    public Command<CommandSource> getCommand() {
+        final Command<CommandSource> command = super.getCommand();
+        if (command != null) {
+            return command;
+        }
+        return this.executor;
     }
 
 }

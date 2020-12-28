@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.CommandExecutor;
 
 import java.util.Collection;
 
@@ -34,6 +37,7 @@ public final class SpongeRootCommandNode extends RootCommandNode<CommandSource> 
 
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
+    @Nullable private Command<CommandSource> executor;
 
     @Override
     public void addChild(final CommandNode<CommandSource> node) {
@@ -44,6 +48,30 @@ public final class SpongeRootCommandNode extends RootCommandNode<CommandSource> 
     @Override
     public Collection<CommandNode<CommandSource>> getChildrenForSuggestions() {
         return this.nodeHolder.getChildrenForSuggestions();
+    }
+
+    @Override
+    public void forceExecutor(final Command<CommandSource> forcedExecutor) {
+        this.executor = forcedExecutor;
+    }
+
+    @Override
+    public boolean canForceRedirect() {
+        return false;
+    }
+
+    @Override
+    public void forceRedirect(final CommandNode<CommandSource> forcedRedirect) {
+        // no-op
+    }
+
+    @Override
+    public Command<CommandSource> getCommand() {
+        final Command<CommandSource> command = super.getCommand();
+        if (command != null) {
+            return command;
+        }
+        return this.executor;
     }
 
 }

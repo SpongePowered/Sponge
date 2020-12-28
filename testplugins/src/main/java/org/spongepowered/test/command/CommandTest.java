@@ -413,6 +413,38 @@ public final class CommandTest {
                 .parameters(opt1, topt, req1).build(), "optional_toptional_optional");
 
         event.register(this.plugin, builder.build(), "testcommand", "testcmd");
+
+        // Adapted from https://github.com/SpongePowered/Sponge/issues/3238#issuecomment-750456173
+
+        final Command.Parameterized firstSub = Command.builder()
+                .parameter(CommonParameters.BOOLEAN)
+                .setExecutor(c -> {
+                    c.sendMessage(Identity.nil(), Component.text("first"));
+                    return CommandResult.success();
+                })
+                .build();
+        final Command.Parameterized secondSub = Command.builder()
+                .parameter(CommonParameters.BOOLEAN)
+                .setExecutor(c -> {
+                    c.sendMessage(Identity.nil(), Component.text("second"));
+                    return CommandResult.success();
+                })
+                .build();
+        final Command.Parameterized parent = Command.builder()
+                .setExecutor(c -> {
+                    c.sendMessage(Identity.nil(), Component.text("parent"));
+                    return CommandResult.success();
+                })
+                .parameters(CommonParameters.ONLINE_WORLD_PROPERTIES_ONLY_OPTIONAL)
+                .parameters(Parameter.firstOf(
+                        Parameter.subcommand(firstSub, "first"),
+                        Parameter.subcommand(secondSub, "second")
+                ))
+                .setTerminal(true)
+                .build();
+
+        event.register(this.plugin, parent, "testterminal");
+
     }
 
     @Listener

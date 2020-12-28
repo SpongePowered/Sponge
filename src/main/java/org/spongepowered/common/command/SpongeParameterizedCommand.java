@@ -26,7 +26,6 @@ package org.spongepowered.common.command;
 
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.kyori.adventure.text.Component;
@@ -36,19 +35,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandExecutor;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
-import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -167,29 +163,11 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
         return this.cachedDispatcher;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public LiteralCommandNode<CommandSource> buildWithAlias(final String primaryAlias) {
-        final LiteralArgumentBuilder<CommandSource> primary = LiteralArgumentBuilder.literal(primaryAlias);
-        primary.requires((Predicate) this.getExecutionRequirements());
-        if (this.executor == null) {
-            return (LiteralCommandNode<CommandSource>) SpongeParameterTranslator.createCommandTreeWithSubcommandsOnly(primary, this.subcommands);
-        } else {
-            return (LiteralCommandNode<CommandSource>) SpongeParameterTranslator.createCommandTree(primary, this);
-        }
+        return this.buildWithAliases(Collections.singleton(primaryAlias)).iterator().next();
     }
 
-    public Collection<LiteralCommandNode<CommandSource>> buildWithAliases(final Iterable<String> aliases) {
-        final Iterator<String> iterable = aliases.iterator();
-        final LiteralCommandNode<CommandSource> built = this.buildWithAlias(iterable.next());
-        final List<LiteralCommandNode<CommandSource>> nodes = new ArrayList<>();
-        nodes.add(built);
-        while (iterable.hasNext()) {
-            final LiteralArgumentBuilder<CommandSource> secondary = LiteralArgumentBuilder.literal(iterable.next());
-            secondary.executes(built.getCommand());
-            secondary.requires(built.getRequirement());
-            nodes.add(new SpongeLiteralCommandNode(secondary.redirect(built), this));
-        }
-
-        return nodes;
+    public Collection<LiteralCommandNode<CommandSource>> buildWithAliases(final Collection<String> aliases) {
+        return SpongeParameterTranslator.INSTANCE.createCommandTree(this, aliases);
     }
 }
