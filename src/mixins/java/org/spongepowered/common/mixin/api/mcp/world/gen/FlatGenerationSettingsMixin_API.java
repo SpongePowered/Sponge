@@ -62,8 +62,8 @@ public abstract class FlatGenerationSettingsMixin_API implements FlatGeneratorSe
     }
 
     @Override
-    public Optional<LayerSettings> layer(int height) {
-        return Optional.ofNullable((LayerSettings) this.shadow$getLayersInfo().get(height));
+    public Optional<LayerSettings> layer(final int index) {
+        return Optional.ofNullable((LayerSettings) this.shadow$getLayersInfo().get(index));
     }
 
     @Override

@@ -371,7 +371,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
         @Override
         public Builder reset() {
-            this.key = null;
+            super.reset();
             this.effect = WorldTypeEffects.OVERWORLD;
             this.fixedTime = null;
             this.biomeSampler = BiomeSamplers.COLUMN_FUZZED;

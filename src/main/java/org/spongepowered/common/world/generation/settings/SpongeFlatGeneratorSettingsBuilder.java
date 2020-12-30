@@ -27,6 +27,7 @@ package org.spongepowered.common.world.generation.settings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.generation.settings.FlatGeneratorSettings;
+import org.spongepowered.api.world.generation.settings.flat.LayerSettings;
 import org.spongepowered.api.world.generation.settings.structure.StructureGenerationSettings;
 
 public final class SpongeFlatGeneratorSettingsBuilder implements FlatGeneratorSettings.Builder {
@@ -37,12 +38,17 @@ public final class SpongeFlatGeneratorSettingsBuilder implements FlatGeneratorSe
     }
 
     @Override
-    public FlatGeneratorSettings.Builder addLayer(final int height, final BlockState block) {
+    public FlatGeneratorSettings.Builder addLayer(final int index, final LayerSettings settings) {
         return null;
     }
 
     @Override
-    public FlatGeneratorSettings.Builder removeLayer(final int height) {
+    public FlatGeneratorSettings.Builder addLayer(final LayerSettings settings) {
+        return null;
+    }
+
+    @Override
+    public FlatGeneratorSettings.Builder removeLayer(final int index) {
         return null;
     }
 
@@ -53,6 +59,11 @@ public final class SpongeFlatGeneratorSettingsBuilder implements FlatGeneratorSe
 
     @Override
     public FlatGeneratorSettings.Builder populateLakes(final boolean populateLakes) {
+        return null;
+    }
+
+    @Override
+    public FlatGeneratorSettings.Builder reset() {
         return null;
     }
 

@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.world.generation.settings.noise;
 
+import net.minecraft.world.gen.settings.ScalingSettings;
 import org.spongepowered.api.world.generation.settings.noise.SamplingSettings;
 
 public final class SpongeSamplingSettingsFactory implements SamplingSettings.Factory {
 
     @Override
     public SamplingSettings of(final double xzScale, final double xzFactor, final double yScale, final double yFactor) {
-        return null;
+        return (SamplingSettings) new ScalingSettings(xzScale, yScale, xzFactor, yFactor);
     }
 }

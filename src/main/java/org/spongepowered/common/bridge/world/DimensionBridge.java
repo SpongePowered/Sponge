@@ -24,11 +24,16 @@
  */
 package org.spongepowered.common.bridge.world;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.util.ResourceLocation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 
 public interface DimensionBridge {
+
+    @Nullable
+    Component bridge$displayName();
 
     ResourceLocation bridge$gameMode();
 

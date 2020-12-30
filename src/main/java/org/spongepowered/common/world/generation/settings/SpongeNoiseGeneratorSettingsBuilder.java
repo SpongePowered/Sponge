@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.world.generation.settings;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.generation.settings.NoiseGeneratorSettings;
 import org.spongepowered.api.world.generation.settings.noise.NoiseSettings;
 import org.spongepowered.api.world.generation.settings.structure.StructureGenerationSettings;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
-public final class SpongeNoiseGeneratorSettingsBuilder implements NoiseGeneratorSettings.Builder {
+public final class SpongeNoiseGeneratorSettingsBuilder extends AbstractResourceKeyedBuilder<NoiseGeneratorSettings, NoiseGeneratorSettings.Builder> implements NoiseGeneratorSettings.Builder {
 
     @Override
     public NoiseGeneratorSettings.Builder structureSettings(final StructureGenerationSettings settings) {
@@ -68,12 +68,19 @@ public final class SpongeNoiseGeneratorSettingsBuilder implements NoiseGenerator
     }
 
     @Override
+    public NoiseGeneratorSettings.Builder reset() {
+        super.reset();
+
+        return null;
+    }
+
+    @Override
     public NoiseGeneratorSettings.Builder from(final NoiseGeneratorSettings value) {
         return null;
     }
 
     @Override
-    public @NonNull NoiseGeneratorSettings build() {
+    protected NoiseGeneratorSettings build0() {
         return null;
     }
 }

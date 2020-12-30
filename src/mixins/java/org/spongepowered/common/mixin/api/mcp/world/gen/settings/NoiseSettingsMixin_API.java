@@ -47,6 +47,9 @@ public abstract class NoiseSettingsMixin_API implements org.spongepowered.api.wo
     @Shadow public abstract int shadow$noiseSizeVertical();
     @Shadow public abstract double shadow$densityFactor();
     @Shadow public abstract double shadow$densityOffset();
+    @Shadow @Deprecated public abstract boolean shadow$useSimplexSurfaceNoise();
+    @Shadow @Deprecated public abstract boolean shadow$randomDensityOffset();
+    @Shadow @Deprecated public abstract boolean shadow$isAmplified();
     // @formatter:on
 
     @Intrinsic
@@ -87,5 +90,20 @@ public abstract class NoiseSettingsMixin_API implements org.spongepowered.api.wo
     @Intrinsic
     public double noiseSettings$densityOffset() {
         return this.shadow$densityOffset();
+    }
+
+    @Override
+    public boolean simplexForSurface() {
+        return this.shadow$useSimplexSurfaceNoise();
+    }
+
+    @Override
+    public boolean randomizeDensityOffset() {
+        return this.shadow$randomDensityOffset();
+    }
+
+    @Override
+    public boolean amplified() {
+        return this.shadow$isAmplified();
     }
 }

@@ -198,7 +198,8 @@
         "world.DimensionTypeAccessor",
         "entity.projectile.ProjectileEntityAccessor",
         "server.management.PlayerInteractionManagerAccessor",
-        "util.text.ColorAccessor"
+        "util.text.ColorAccessor",
+        "world.gen.FlatLayerInfoAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

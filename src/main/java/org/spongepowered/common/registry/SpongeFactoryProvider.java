@@ -65,6 +65,7 @@ import org.spongepowered.api.world.biome.BiomeProviderTemplate;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.ChunkGeneratorTemplate;
 import org.spongepowered.api.world.generation.settings.NoiseGeneratorSettings;
+import org.spongepowered.api.world.generation.settings.flat.LayerSettings;
 import org.spongepowered.api.world.generation.settings.noise.NoiseSettings;
 import org.spongepowered.api.world.generation.settings.noise.SamplingSettings;
 import org.spongepowered.api.world.generation.settings.noise.SlideSettings;
@@ -111,6 +112,7 @@ import org.spongepowered.common.world.biome.SpongeBiomeProviderTemplate;
 import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
 import org.spongepowered.common.world.generation.SpongeChunkGeneratorTemplate;
 import org.spongepowered.common.world.generation.settings.SpongeNoiseGeneratorSettingsBuilder;
+import org.spongepowered.common.world.generation.settings.flat.SpongeLayerSettingsFactory;
 import org.spongepowered.common.world.generation.settings.noise.SpongeNoiseSettings;
 import org.spongepowered.common.world.generation.settings.noise.SpongeSamplingSettingsFactory;
 import org.spongepowered.common.world.generation.settings.noise.SpongeSlideSettingsFactory;
@@ -204,6 +206,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(WorldTemplate.Factory.class, new SpongeWorldTemplate.FactoryImpl())
                 .registerFactory(BiomeProvider.Factory.class, new SpongeBiomeProviderFactory())
                 .registerFactory(BiomeProviderTemplate.Factory.class, new SpongeBiomeProviderTemplate.FactoryImpl())
+                .registerFactory(LayerSettings.Factory.class, new SpongeLayerSettingsFactory())
                 .registerFactory(NoiseSettings.Factory.class, new SpongeNoiseSettings.FactoryImpl())
                 .registerFactory(SamplingSettings.Factory.class, new SpongeSamplingSettingsFactory())
                 .registerFactory(SlideSettings.Factory.class, new SpongeSlideSettingsFactory())
