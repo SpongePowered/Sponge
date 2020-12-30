@@ -25,6 +25,9 @@
 package org.spongepowered.common.adventure;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.codecs.PrimitiveCodec;
 import io.netty.util.AttributeKey;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
@@ -97,6 +100,22 @@ public final class SpongeAdventure {
         @Override
         public @NonNull String encode(final @NonNull CompoundNBT decoded) {
             return decoded.toString();
+        }
+    };
+    public static final PrimitiveCodec<Component> STRING_CODEC = new PrimitiveCodec<Component>() {
+        @Override
+        public <T> DataResult<Component> read(final DynamicOps<T> ops, final T input) {
+            return ops.getStringValue(input).map(GSON::deserialize);
+        }
+
+        @Override
+        public <T> T write(final DynamicOps<T> ops, final Component value) {
+            return ops.createString(GSON.serialize(value));
+        }
+
+        @Override
+        public String toString() {
+            return "String[Component]";
         }
     };
 

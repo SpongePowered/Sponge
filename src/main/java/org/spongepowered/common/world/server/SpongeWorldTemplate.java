@@ -50,6 +50,7 @@ import org.spongepowered.api.world.generation.settings.WorldGenerationSettings;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.DimensionBridge;
 import org.spongepowered.common.serialization.EnumCodec;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -71,17 +72,11 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
     public final boolean enabled, loadOnStartup, keepSpawnLoaded, generateSpawnOnLoad, hardcore, commands, pvp;
 
-    private static Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
+    private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
             .create(r -> r
                     .group(
                             // Pass in the adventure codec here for the "display_name" field
-                            Codec.STRING.optionalFieldOf("display_name").forGetter(v -> {
-                                if (v.displayName == null) {
-                                    return Optional.empty();
-                                }
-
-                                return Optional.of(v.displayName.toString()); // ??????
-                            }),
+                            SpongeAdventure.STRING_CODEC.optionalFieldOf("display_name").forGetter(v -> Optional.ofNullable(v.displayName)),
                             ResourceLocation.CODEC.optionalFieldOf("game_mode").forGetter(v -> Optional.ofNullable(v.gameMode)),
                             ResourceLocation.CODEC.optionalFieldOf("difficulty").forGetter(v -> Optional.ofNullable(v.difficulty)),
                             EnumCodec.create(SerializationBehavior.class).optionalFieldOf("serialization_behavior").forGetter(v -> Optional.ofNullable(v.serializationBehavior)),
