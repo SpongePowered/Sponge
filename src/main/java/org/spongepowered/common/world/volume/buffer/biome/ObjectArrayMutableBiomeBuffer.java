@@ -26,10 +26,9 @@ package org.spongepowered.common.world.volume.buffer.biome;
 
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.Biome;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.BiomeTypes;
+import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.volume.biome.BiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
@@ -45,21 +44,21 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * Mutable view of a {@link Biome} array.
+ * Mutable view of a {@link net.minecraft.world.biome.Biome} array.
  *
  * <p>Normally, the {@link ByteArrayMutableBiomeBuffer} class uses memory more
- * efficiently, but when the {@link Biome} array is already created (for
+ * efficiently, but when the {@link net.minecraft.world.biome.Biome} array is already created (for
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
 public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements BiomeVolume.Mutable<ObjectArrayMutableBiomeBuffer> {
 
-    private final BiomeType[] biomes;
+    private final Biome[] biomes;
 
     public ObjectArrayMutableBiomeBuffer(final Vector3i start, final Vector3i size) {
         super(start, size);
-        this.biomes = new BiomeType[size.getX() * size.getY() * size.getZ()];
-        Arrays.fill(this.biomes, BiomeTypes.OCEAN);
+        this.biomes = new Biome[size.getX() * size.getY() * size.getZ()];
+        Arrays.fill(this.biomes, Biomes.OCEAN);
     }
 
     /**
@@ -70,13 +69,13 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
      * @param start The start position
      * @param size The size
      */
-    public ObjectArrayMutableBiomeBuffer(final BiomeType[] biomes, final Vector3i start, final Vector3i size) {
+    public ObjectArrayMutableBiomeBuffer(final Biome[] biomes, final Vector3i start, final Vector3i size) {
         super(start, size);
         this.biomes = biomes;
     }
 
     @Override
-    public BiomeType getBiome(final int x, final int y, final int z) {
+    public Biome getBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
         return this.biomes[this.getIndex(x, y, z)];
     }
@@ -91,14 +90,14 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
      * @return The native biome
      */
     @SuppressWarnings("ConstantConditions")
-    public Biome getNativeBiome(final int x, final int y, final int z) {
+    public net.minecraft.world.biome.Biome getNativeBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        final BiomeType type = this.biomes[this.getIndex(x, y, z)];
-        return (Biome) (Object) type;
+        final Biome type = this.biomes[this.getIndex(x, y, z)];
+        return (net.minecraft.world.biome.Biome) (Object) type;
     }
 
     @Override
-    public boolean setBiome(final int x, final int y, final int z, final BiomeType biome) {
+    public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
         Objects.requireNonNull(biome, "biome");
         this.checkRange(x, y, z);
         this.biomes[this.getIndex(x, y, z)] = biome;
@@ -106,11 +105,11 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     }
 
     @SuppressWarnings("ConstantConditions")
-    public boolean setBiome(final BlockPos pos, final Biome biome) {
+    public boolean setBiome(final BlockPos pos, final net.minecraft.world.biome.Biome biome) {
         Objects.requireNonNull(biome, "biome");
         Objects.requireNonNull(pos, "pos");
         this.checkRange(pos.getX(), pos.getY(), pos.getZ());
-        this.biomes[this.getIndex(pos.getX(), pos.getY(), pos.getZ())] = (BiomeType) (Object) biome;
+        this.biomes[this.getIndex(pos.getX(), pos.getY(), pos.getZ())] = (Biome) (Object) biome;
         return true;
     }
 
@@ -137,7 +136,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     }
 
     @Override
-    public VolumeStream<ObjectArrayMutableBiomeBuffer, BiomeType> getBiomeStream(
+    public VolumeStream<ObjectArrayMutableBiomeBuffer, Biome> getBiomeStream(
         final Vector3i min,
         final Vector3i max,
         final StreamOptions options
@@ -145,13 +144,13 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         final Vector3i blockMin = this.getBlockMin();
         final Vector3i blockMax = this.getBlockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
-        final BiomeType[] buffer;
+        final Biome[] buffer;
         if (options.carbonCopy()) {
             buffer = Arrays.copyOf(this.biomes, this.biomes.length);
         } else {
             buffer = this.biomes;
         }
-        final Stream<VolumeElement<ObjectArrayMutableBiomeBuffer, BiomeType>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
+        final Stream<VolumeElement<ObjectArrayMutableBiomeBuffer, Biome>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
             .mapToObj(x -> IntStream.range(blockMin.getZ(), blockMax.getZ() + 1)
                 .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
                     .mapToObj(y -> VolumeElement.of(this, () -> buffer[this.getIndex(x, y, z)], new Vector3i(x, y, z)))

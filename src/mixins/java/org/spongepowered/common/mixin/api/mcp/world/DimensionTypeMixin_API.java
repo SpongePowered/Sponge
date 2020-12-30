@@ -32,7 +32,8 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.biome.BiomeFinder;
+import org.spongepowered.api.world.WorldTypeTemplate;
+import org.spongepowered.api.world.biome.BiomeSampler;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -43,20 +44,21 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
+import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
 import java.util.Optional;
 import java.util.OptionalLong;
 
 @Mixin(DimensionType.class)
-@Implements(@Interface(iface = WorldType.class, prefix = "dimensionType$"))
+@Implements(@Interface(iface = WorldType.class, prefix = "worldType$"))
 public abstract class DimensionTypeMixin_API implements WorldType {
 
     // @formatter:off
     @Shadow @Final private ResourceLocation effectsLocation;
     @Shadow @Final private float ambientLight;
     @Shadow @Final private OptionalLong fixedTime;
-    @Shadow public abstract IBiomeMagnifier shadow$getBiomeZoomer();
 
+    @Shadow public abstract IBiomeMagnifier shadow$getBiomeZoomer();
     @Shadow public abstract boolean shadow$ultraWarm();
     @Shadow public abstract boolean shadow$natural();
     @Shadow public abstract double shadow$coordinateScale();
@@ -92,8 +94,8 @@ public abstract class DimensionTypeMixin_API implements WorldType {
     }
 
     @Override
-    public BiomeFinder biomeFinder() {
-        return (BiomeFinder) (Object) this.shadow$getBiomeZoomer();
+    public BiomeSampler biomeSampler() {
+        return (BiomeSampler) this.shadow$getBiomeZoomer();
     }
 
     @Override
@@ -102,7 +104,7 @@ public abstract class DimensionTypeMixin_API implements WorldType {
     }
 
     @Intrinsic
-    public boolean dimensionType$natural() {
+    public boolean worldType$natural() {
         return this.shadow$natural();
     }
 
@@ -117,7 +119,7 @@ public abstract class DimensionTypeMixin_API implements WorldType {
     }
 
     @Intrinsic
-    public boolean dimensionType$hasCeiling() {
+    public boolean worldType$hasCeiling() {
         return this.shadow$hasCeiling();
     }
 
@@ -136,7 +138,7 @@ public abstract class DimensionTypeMixin_API implements WorldType {
     }
 
     @Intrinsic
-    public boolean dimensionType$piglinSafe() {
+    public boolean worldType$piglinSafe() {
         return this.shadow$piglinSafe();
     }
 
@@ -150,18 +152,23 @@ public abstract class DimensionTypeMixin_API implements WorldType {
         return this.shadow$respawnAnchorWorks();
     }
 
+    @Override
+    public WorldTypeTemplate asTemplate() {
+        return new SpongeWorldTypeTemplate((ResourceKey) (Object) SpongeCommon.getServer().registryAccess().dimensionTypes().getKey((DimensionType) (Object) this), (DimensionType) (Object) this);
+    }
+
     @Intrinsic
-    public boolean dimensionType$hasRaids() {
+    public boolean worldType$hasRaids() {
         return this.shadow$hasRaids();
     }
 
     @Intrinsic
-    public int dimensionType$logicalHeight() {
+    public int worldType$logicalHeight() {
         return this.shadow$logicalHeight();
     }
 
     @Intrinsic
-    public boolean dimensionType$createDragonFight() {
+    public boolean worldType$createDragonFight() {
         return this.shadow$createDragonFight();
     }
 }

@@ -24,58 +24,55 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen;
 
-import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
-import org.spongepowered.api.world.gen.MutableWorldGenerationSettings;
-import org.spongepowered.api.world.gen.WorldGenerationSettings;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.gen.FlatGenerationSettings;
+import net.minecraft.world.gen.FlatLayerInfo;
+import net.minecraft.world.gen.settings.DimensionStructuresSettings;
+import org.spongepowered.api.world.generation.settings.FlatGeneratorSettings;
+import org.spongepowered.api.world.generation.settings.flat.LayerSettings;
+import org.spongepowered.api.world.generation.settings.structure.StructureGenerationSettings;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(DimensionGeneratorSettings.class)
-@Implements(@Interface(iface = WorldGenerationSettings.class, prefix = "worldGenerationSettings$"))
-public abstract class DimensionGeneratorSettingsMixin_API implements MutableWorldGenerationSettings {
+import java.util.List;
+import java.util.Optional;
+
+@Mixin(FlatGenerationSettings.class)
+@Implements(@Interface(iface = FlatGeneratorSettings.class, prefix = "flatGeneratorSettings$"))
+public abstract class FlatGenerationSettingsMixin_API implements FlatGeneratorSettings {
 
     // @formatter:off
-    @Mutable @Shadow @Final private long seed;
-    @Mutable @Shadow @Final private boolean generateFeatures;
-    @Mutable @Shadow @Final private boolean generateBonusChest;
+    @Shadow private boolean decoration;
+    @Shadow private boolean addLakes;
 
-    @Shadow public abstract long shadow$seed();
-    @Shadow public abstract boolean shadow$generateFeatures();
-    @Shadow public abstract boolean shadow$generateBonusChest();
+    @Shadow public abstract DimensionStructuresSettings shadow$structureSettings();
+    @Shadow public abstract List<FlatLayerInfo> shadow$getLayersInfo();
     // @formatter:on
 
     @Intrinsic
-    public long worldGenerationSettings$getSeed() {
-        return this.shadow$seed();
+    public StructureGenerationSettings structureSettings() {
+        return (StructureGenerationSettings) this.shadow$structureSettings();
     }
 
     @Override
-    public void setSeed(long seed) {
-        this.seed = seed;
+    public List<LayerSettings> layers() {
+        return (List<LayerSettings>) (Object) this.shadow$getLayersInfo();
     }
 
     @Override
-    public boolean doFeaturesGenerate() {
-        return this.shadow$generateFeatures();
+    public Optional<LayerSettings> layer(int height) {
+        return Optional.ofNullable((LayerSettings) this.shadow$getLayersInfo().get(height));
     }
 
     @Override
-    public void setFeaturesGenerate(boolean featuresGenerate) {
-        this.generateFeatures = featuresGenerate;
+    public boolean performDecoration() {
+        return this.decoration;
     }
 
     @Override
-    public boolean doesGenerateBonusChest() {
-        return this.shadow$generateBonusChest();
-    }
-
-    @Override
-    public void setGenerateBonusChest(boolean generateBonusChest) {
-        this.generateBonusChest = generateBonusChest;
+    public boolean populateLakes() {
+        return this.addLakes;
     }
 }

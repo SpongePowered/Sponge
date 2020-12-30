@@ -60,11 +60,20 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.biome.BiomeProvider;
+import org.spongepowered.api.world.biome.BiomeProviderTemplate;
+import org.spongepowered.api.world.generation.ChunkGenerator;
+import org.spongepowered.api.world.generation.ChunkGeneratorTemplate;
+import org.spongepowered.api.world.generation.settings.NoiseGeneratorSettings;
+import org.spongepowered.api.world.generation.settings.noise.NoiseSettings;
+import org.spongepowered.api.world.generation.settings.noise.SamplingSettings;
+import org.spongepowered.api.world.generation.settings.noise.SlideSettings;
 import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.biome.BiomeFinder;
+import org.spongepowered.api.world.biome.BiomeSampler;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.server.ServerLocationCreator;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeEntry;
 import org.spongepowered.api.world.volume.block.BlockVolumeFactory;
@@ -97,12 +106,22 @@ import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransform;
 import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
+import org.spongepowered.common.world.biome.SpongeBiomeProviderFactory;
+import org.spongepowered.common.world.biome.SpongeBiomeProviderTemplate;
+import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
+import org.spongepowered.common.world.generation.SpongeChunkGeneratorTemplate;
+import org.spongepowered.common.world.generation.settings.SpongeNoiseGeneratorSettingsBuilder;
+import org.spongepowered.common.world.generation.settings.noise.SpongeNoiseSettings;
+import org.spongepowered.common.world.generation.settings.noise.SpongeSamplingSettingsFactory;
+import org.spongepowered.common.world.generation.settings.noise.SpongeSlideSettingsFactory;
 import org.spongepowered.common.world.server.SpongeServerLocation;
 import org.spongepowered.common.world.biome.SpongeBiomeFinderFactory;
 import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
 import org.spongepowered.common.world.volume.archetype.entity.SpongeEntityArchetypeEntryFactory;
+import org.spongepowered.common.world.biome.SpongeBiomeSamplerFactory;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
-import org.spongepowered.common.world.SpongeWorldTypeTemplate;
+import org.spongepowered.common.world.server.SpongeWorldTemplate;
+import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 import org.spongepowered.common.world.server.SpongeServerLocationCreatorFactory;
 import org.spongepowered.common.world.volume.block.SpongeBlockVolumeFactory;
 
@@ -142,46 +161,54 @@ public final class SpongeFactoryProvider implements FactoryProvider {
 
     public void registerDefaultFactories() {
         this
-            .registerFactory(ResourceKey.Factory.class, new SpongeResourceKeyFactory())
-            .registerFactory(Audiences.Factory.class, new AudiencesFactory())
-            .registerFactory(AABB.Factory.class, new SpongeAABB.FactoryImpl())
-            .registerFactory(AdvancementCriterion.Factory.class, new SpongeAdvancementCriterionFactory())
-            .registerFactory(CommandCause.Factory.class, new SpongeCommandCauseFactory())
-            .registerFactory(CommandTreeNode.NodeFactory.class, new SpongeCommandTreeBuilderFactory())
-            .registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY)
-            .registerFactory(Parameter.Value.Factory.class, new SpongeParameterFactory())
-            .registerFactory(ResourcePack.Factory.class, new SpongeResourcePack.Factory())
-            .registerFactory(ServerLocation.Factory.class, new SpongeServerLocation.Factory())
-            .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory())
-            .registerFactory(TimingsFactory.class, new SpongeTimingsFactory())
-            .registerFactory(Transform.Factory.class, new SpongeTransform.Factory())
-            .registerFactory(VariableValueParameters.Factory.class, new SpongeVariableValueParametersFactory())
-            .registerFactory(ChannelExceptionHandler.Factory.class, new SpongeChannelExceptionHandlerFactory())
-            .registerFactory(Selector.Factory.class, new SpongeSelectorFactory())
-            .registerFactory(Range.Factory.class, new SpongeRange.FactoryImpl())
-            .registerFactory(Value.Factory.class, new SpongeValueFactory())
-            .registerFactory(DataManipulator.Mutable.Factory.class, new MutableDataManipulatorFactory())
-            .registerFactory(DataManipulator.Immutable.Factory.class, new ImmutableDataManipulatorFactory())
-            .registerFactory(BlockChangeFlag.Factory.class, new BlockChangeFlagManager.Factory())
-            .registerFactory(OrCriterion.Factory.class, new SpongeOrCriterion.Factory())
-            .registerFactory(AndCriterion.Factory.class, new SpongeAndCriterion.Factory())
-            .registerFactory(Ticks.Factory.class, new SpongeTicks.Factory())
-            .registerFactory(MinecraftDayTime.Factory.class, new SpongeMinecraftDayTime.Factory())
-            .registerFactory(GameProfile.Factory.class, new SpongeGameProfile.Factory())
-            .registerFactory(ProfileProperty.Factory.class, new SpongeProfilePropertyFactory())
-            .registerFactory(RayTrace.Factory.class, new SpongeRayTraceFactory())
-            .registerFactory(StateMatcher.Factory.class, new SpongeStateMatcherFactory())
-            .registerFactory(RegistryKey.Factory.class, new SpongeRegistryKey.FactoryImpl())
-            .registerFactory(RegistryType.Factory.class, new SpongeRegistryType.FactoryImpl())
-            .registerFactory(DataPackType.Factory.class, new SpongeDataPackType.FactoryImpl())
-            .registerFactory(BlockVolumeFactory.class, new SpongeBlockVolumeFactory())
-            .registerFactory(DamageSource.Factory.class, new SpongeDamageSourceFactory())
-            .registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory())
-            .registerFactory(EntityArchetypeEntry.Factory.class, new SpongeEntityArchetypeEntryFactory())
-            .registerFactory(WorldTypeEffect.Factory.class, new SpongeWorldTypeEffect.FactoryImpl())
-            .registerFactory(WorldTypeTemplate.Factory.class, new SpongeWorldTypeTemplate.FactoryImpl())
-            .registerFactory(BiomeFinder.Factory.class, new SpongeBiomeFinderFactory())
-            .registerFactory(ServerLocationCreator.Factory.class, new SpongeServerLocationCreatorFactory())
+                .registerFactory(ResourceKey.Factory.class, new SpongeResourceKeyFactory())
+                .registerFactory(Audiences.Factory.class, new AudiencesFactory())
+                .registerFactory(AABB.Factory.class, new SpongeAABB.FactoryImpl())
+                .registerFactory(AdvancementCriterion.Factory.class, new SpongeAdvancementCriterionFactory())
+                .registerFactory(CommandCause.Factory.class, new SpongeCommandCauseFactory())
+                .registerFactory(CommandTreeNode.NodeFactory.class, new SpongeCommandTreeBuilderFactory())
+                .registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY)
+                .registerFactory(Parameter.Value.Factory.class, new SpongeParameterFactory())
+                .registerFactory(ResourcePack.Factory.class, new SpongeResourcePack.Factory())
+                .registerFactory(ServerLocation.Factory.class, new SpongeServerLocation.Factory())
+                .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory())
+                .registerFactory(TimingsFactory.class, new SpongeTimingsFactory())
+                .registerFactory(Transform.Factory.class, new SpongeTransform.Factory())
+                .registerFactory(VariableValueParameters.Factory.class, new SpongeVariableValueParametersFactory())
+                .registerFactory(ChannelExceptionHandler.Factory.class, new SpongeChannelExceptionHandlerFactory())
+                .registerFactory(Selector.Factory.class, new SpongeSelectorFactory())
+                .registerFactory(Range.Factory.class, new SpongeRange.FactoryImpl())
+                .registerFactory(Value.Factory.class, new SpongeValueFactory())
+                .registerFactory(DataManipulator.Mutable.Factory.class, new MutableDataManipulatorFactory())
+                .registerFactory(DataManipulator.Immutable.Factory.class, new ImmutableDataManipulatorFactory())
+                .registerFactory(BlockChangeFlag.Factory.class, new BlockChangeFlagManager.Factory())
+                .registerFactory(OrCriterion.Factory.class, new SpongeOrCriterion.Factory())
+                .registerFactory(AndCriterion.Factory.class, new SpongeAndCriterion.Factory())
+                .registerFactory(Ticks.Factory.class, new SpongeTicks.Factory())
+                .registerFactory(MinecraftDayTime.Factory.class, new SpongeMinecraftDayTime.Factory())
+                .registerFactory(GameProfile.Factory.class, new SpongeGameProfile.Factory())
+                .registerFactory(ProfileProperty.Factory.class, new SpongeProfilePropertyFactory())
+                .registerFactory(RayTrace.Factory.class, new SpongeRayTraceFactory())
+                .registerFactory(StateMatcher.Factory.class, new SpongeStateMatcherFactory())
+                .registerFactory(RegistryKey.Factory.class, new SpongeRegistryKey.FactoryImpl())
+                .registerFactory(RegistryType.Factory.class, new SpongeRegistryType.FactoryImpl())
+                .registerFactory(DataPackType.Factory.class, new SpongeDataPackType.FactoryImpl())
+                .registerFactory(BlockVolumeFactory.class, new SpongeBlockVolumeFactory())
+                .registerFactory(DamageSource.Factory.class, new SpongeDamageSourceFactory())
+                .registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory())
+                .registerFactory(EntityArchetypeEntry.Factory.class, new SpongeEntityArchetypeEntryFactory())
+                .registerFactory(ServerLocationCreator.Factory.class, new SpongeServerLocationCreatorFactory())
+                .registerFactory(BiomeSampler.Factory.class, new SpongeBiomeSamplerFactory())
+                .registerFactory(WorldTypeEffect.Factory.class, new SpongeWorldTypeEffect.FactoryImpl())
+                .registerFactory(WorldTypeTemplate.Factory.class, new SpongeWorldTypeTemplate.FactoryImpl())
+                .registerFactory(WorldTemplate.Factory.class, new SpongeWorldTemplate.FactoryImpl())
+                .registerFactory(BiomeProvider.Factory.class, new SpongeBiomeProviderFactory())
+                .registerFactory(BiomeProviderTemplate.Factory.class, new SpongeBiomeProviderTemplate.FactoryImpl())
+                .registerFactory(NoiseSettings.Factory.class, new SpongeNoiseSettings.FactoryImpl())
+                .registerFactory(SamplingSettings.Factory.class, new SpongeSamplingSettingsFactory())
+                .registerFactory(SlideSettings.Factory.class, new SpongeSlideSettingsFactory())
+                .registerFactory(ChunkGenerator.Factory.class, new SpongeChunkGeneratorFactory())
+                .registerFactory(ChunkGeneratorTemplate.Factory.class, new SpongeChunkGeneratorTemplate.FactoryImpl())
         ;
     }
 }

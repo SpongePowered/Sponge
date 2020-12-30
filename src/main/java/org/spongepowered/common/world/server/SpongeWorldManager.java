@@ -33,7 +33,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.common.SpongeCommon;
 
@@ -46,23 +46,6 @@ public interface SpongeWorldManager extends WorldManager {
     Path getDefaultWorldDirectory();
 
     Path getCustomWorldsDirectory();
-
-    default boolean registerPendingWorld(final ResourceKey key, final WorldArchetype archetype) {
-        Objects.requireNonNull(key, "key");
-
-        Path directory;
-
-        if (this.isDefaultWorld(key)) {
-            return false;
-        } else if (this.isVanillaWorld(key)) {
-            directory = this.getDefaultWorldDirectory().resolve(this.getDirectoryName(key));
-        } else {
-            directory = this.getCustomWorldsDirectory().resolve(key.getNamespace()).resolve(key.getValue());
-        }
-        return this.registerPendingWorld0(key, directory, archetype);
-    }
-
-    boolean registerPendingWorld0(ResourceKey key, Path directory, WorldArchetype archetype);
 
     static RegistryKey<World> createRegistryKey(final ResourceKey key) {
         return RegistryKey.create(Registry.DIMENSION_REGISTRY, (ResourceLocation) (Object) key);

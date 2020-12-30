@@ -37,7 +37,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.fluid.FluidState;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
@@ -78,7 +78,7 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     }
 
     @Override
-    public Palette<BiomeType, BiomeType> getBiomePalette() {
+    public Palette<Biome, Biome> getBiomePalette() {
         return this.volume.getBiomePalette();
     }
 
@@ -340,18 +340,18 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     }
 
     @Override
-    public BiomeType getBiome(final int x, final int y, final int z) {
+    public Biome getBiome(final int x, final int y, final int z) {
         return this.getBiome(x, y, z);
     }
 
     @Override
-    public VolumeStream<ArchetypeVolume, BiomeType> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<ArchetypeVolume, Biome> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         return this.volume.getBiomeStream(min, max, options);
     }
 
     @Override
-    public boolean setBiome(final int x, final int y, final int z, final BiomeType biome) {
+    public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
         return this.setBiome(x, y, z, biome);
     }
 }

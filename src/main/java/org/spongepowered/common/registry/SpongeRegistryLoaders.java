@@ -46,13 +46,8 @@ import net.minecraft.command.arguments.Vec2Argument;
 import net.minecraft.command.arguments.Vec3Argument;
 import net.minecraft.item.Items;
 import net.minecraft.item.MusicDiscItem;
-import net.minecraft.util.datafix.codec.DatapackCodec;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.GameType;
-import net.minecraft.world.WorldSettings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -131,7 +126,6 @@ import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.placeholder.PlaceholderParsers;
-import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.service.ban.Ban;
@@ -143,10 +137,6 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Nameable;
 import org.spongepowered.api.world.Locatable;
-import org.spongepowered.api.world.WorldArchetype;
-import org.spongepowered.api.world.WorldArchetypes;
-import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.api.world.schematic.PaletteType;
@@ -161,8 +151,6 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.ban.SpongeBanType;
 import org.spongepowered.common.block.BlockStateSerializerDeserializer;
 import org.spongepowered.common.block.transaction.BlockOperation;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
 import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeBigDecimalValueParameter;
@@ -179,7 +167,7 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeServerL
 import org.spongepowered.common.command.parameter.managed.standard.SpongeTargetBlockValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeTargetEntityValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeUserValueParameter;
-import org.spongepowered.common.command.parameter.managed.standard.SpongeWorldPropertiesValueParameter;
+import org.spongepowered.common.command.parameter.managed.standard.SpongeServerWorldValueParameter;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeCommandRegistrars;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
@@ -366,8 +354,7 @@ public final class SpongeRegistryLoaders {
                     })
             );
             l.add(ResourceKeyedValueParameters.VECTOR3D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition(cause.getSource()))));
-            l.add(ResourceKeyedValueParameters.WORLD_PROPERTIES_ALL, k -> new SpongeWorldPropertiesValueParameter(k, true));
-            l.add(ResourceKeyedValueParameters.WORLD_PROPERTIES_ONLINE_ONLY, k -> new SpongeWorldPropertiesValueParameter(k, false));
+            l.add(ResourceKeyedValueParameters.WORLD, k -> new SpongeServerWorldValueParameter(k));
         });
     }
 
@@ -845,25 +832,6 @@ public final class SpongeRegistryLoaders {
                 Weathers.RAIN,
                 Weathers.THUNDER
         )));
-    }
-
-    public static RegistryLoader<WorldArchetype> worldArchetype() {
-        return RegistryLoader.of(l -> {
-            l.add(WorldArchetypes.OVERWORLD, k -> SpongeRegistryLoaders.newWorldArchetype(k, WorldTypes.OVERWORLD));
-            l.add(WorldArchetypes.THE_END, k -> SpongeRegistryLoaders.newWorldArchetype(k, WorldTypes.THE_END));
-            l.add(WorldArchetypes.THE_NETHER, k -> SpongeRegistryLoaders.newWorldArchetype(k, WorldTypes.THE_NETHER));
-        });
-    }
-
-    private static WorldArchetype newWorldArchetype(final ResourceKey key, final RegistryReference<WorldType> dimensionType) {
-        final WorldSettings archetype = new WorldSettings("", GameType.SURVIVAL, false, Difficulty.NORMAL, true, new GameRules(), DatapackCodec.DEFAULT);
-        ((ResourceKeyBridge) (Object) archetype).bridge$setKey(key);
-        final net.minecraft.world.DimensionType mcType = (net.minecraft.world.DimensionType) dimensionType.get(Sponge.getServer().registries());
-        ((WorldSettingsBridge) (Object) archetype).bridge$setDimensionType(mcType);
-        if (mcType == WorldTypes.OVERWORLD.get(Sponge.getServer().registries())) {
-            ((WorldSettingsBridge) (Object) archetype).bridge$setGenerateSpawnOnLoad(true);
-        }
-        return (WorldArchetype) (Object)  archetype;
     }
 
     public static RegistryLoader<DataFormat> dataFormat() {

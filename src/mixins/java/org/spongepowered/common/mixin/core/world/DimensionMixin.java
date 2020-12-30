@@ -24,25 +24,97 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import com.mojang.datafixers.kinds.App;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.Dimension;
-import net.minecraft.world.DimensionType;
-import org.objectweb.asm.Opcodes;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.SpongeWorldTypeTemplate;
+import org.spongepowered.common.bridge.world.DimensionBridge;
+import org.spongepowered.common.server.BootstrapProperties;
+import org.spongepowered.common.world.server.SpongeWorldTemplate;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 @Mixin(Dimension.class)
-public abstract class DimensionMixin {
+public abstract class DimensionMixin implements DimensionBridge {
 
-    @Redirect(
-            method = "*",
-            at = @At(value = "FIELD", opcode = Opcodes.GETSTATIC, target = "Lnet/minecraft/world/DimensionType;CODEC:Lcom/mojang/serialization/Codec;")
-    )
-    private static Codec<Supplier<DimensionType>> impl$useRegistrationCodec() {
-        return SpongeWorldTypeTemplate.CODEC;
+    private ResourceLocation impl$gameMode = (ResourceLocation) (Object) BootstrapProperties.gameMode.location();
+    private ResourceLocation impl$difficulty = (ResourceLocation) (Object) BootstrapProperties.difficulty.location();
+    private SerializationBehavior impl$serializationBehavior = SerializationBehavior.AUTOMATIC;
+    private boolean impl$enabled = true, impl$loadOnStartup = true, impl$keepSpawnLoaded = true, impl$generateSpawnOnLoad = false,
+            impl$hardcore = BootstrapProperties.hardcore, impl$commands = true, impl$pvp = BootstrapProperties.pvp;
+
+    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec"))
+    private static <T> Codec<Dimension> impl$useTemplateCodec(final Function<RecordCodecBuilder.Instance<Dimension>, ?
+                extends App<RecordCodecBuilder.Mu<Dimension>, Dimension>> func) {
+        return SpongeWorldTemplate.DIRECT_CODEC;
+    }
+
+    @Override
+    public ResourceLocation bridge$gameMode() {
+        return this.impl$gameMode;
+    }
+
+    @Override
+    public ResourceLocation bridge$difficulty() {
+        return this.impl$difficulty;
+    }
+
+    @Override
+    public SerializationBehavior bridge$serializationBehavior() {
+        return this.impl$serializationBehavior;
+    }
+
+    @Override
+    public boolean bridge$enabled() {
+        return this.impl$enabled;
+    }
+
+    @Override
+    public boolean bridge$loadOnStartup() {
+        return this.impl$loadOnStartup;
+    }
+
+    @Override
+    public boolean bridge$keepSpawnLoaded() {
+        return this.impl$keepSpawnLoaded;
+    }
+
+    @Override
+    public boolean bridge$generateSpawnOnLoad() {
+        return this.impl$generateSpawnOnLoad;
+    }
+
+    @Override
+    public boolean bridge$hardcore() {
+        return this.impl$hardcore;
+    }
+
+    @Override
+    public boolean bridge$commands() {
+        return this.impl$commands;
+    }
+
+    @Override
+    public boolean bridge$pvp() {
+        return this.impl$pvp;
+    }
+
+    @Override
+    public void bridge$setSpongeData(final SpongeWorldTemplate.SpongeDataSection spongeData) {
+        this.impl$gameMode = spongeData.gameMode == null ? (ResourceLocation) (Object) BootstrapProperties.gameMode.location() : spongeData.gameMode;
+        this.impl$difficulty = spongeData.difficulty == null ? (ResourceLocation) (Object) BootstrapProperties.difficulty.location() : spongeData.difficulty;
+        this.impl$serializationBehavior = spongeData.serializationBehavior == null ? SerializationBehavior.AUTOMATIC : spongeData.serializationBehavior;
+        this.impl$enabled = spongeData.enabled == null || spongeData.enabled;
+        this.impl$loadOnStartup = spongeData.enabled == null || spongeData.enabled;
+        this.impl$keepSpawnLoaded = spongeData.keepSpawnLoaded != null && spongeData.keepSpawnLoaded;
+        this.impl$generateSpawnOnLoad = spongeData.generateSpawnOnLoad != null && spongeData.generateSpawnOnLoad;
+        this.impl$hardcore = spongeData.hardcore == null ? BootstrapProperties.hardcore : spongeData.hardcore;
+        this.impl$commands = spongeData.commands == null || spongeData.commands;
+        this.impl$pvp = spongeData.pvp == null || spongeData.pvp;
     }
 }

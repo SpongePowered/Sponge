@@ -32,7 +32,7 @@ import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
@@ -71,7 +71,7 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         this.blocks = blocks;
         this.blockEntities = new MutableMapBlockEntityArchetypeBuffer(blocks);
         this.biomes = new ByteArrayMutableBiomeBuffer(
-            PaletteTypes.BIOME_PALETTE.get().create(registries, RegistryTypes.BIOME_TYPE),
+            PaletteTypes.BIOME_PALETTE.get().create(registries, RegistryTypes.BIOME),
             start,
             size
         );
@@ -189,7 +189,7 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         return this.blocks.getPalette();
     }
 
-    public Palette<BiomeType, BiomeType> getBiomePalette() {
+    public Palette<Biome, Biome> getBiomePalette() {
         return this.biomes.getPalette();
     }
 
@@ -199,12 +199,12 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     }
 
     @Override
-    public BiomeType getBiome(final int x, final int y, final int z) {
+    public Biome getBiome(final int x, final int y, final int z) {
         return this.biomes.getBiome(x, y, z);
     }
 
     @Override
-    public VolumeStream<ArchetypeVolume, BiomeType> getBiomeStream(
+    public VolumeStream<ArchetypeVolume, Biome> getBiomeStream(
         final Vector3i min,
         final Vector3i max,
         final StreamOptions options
@@ -212,14 +212,14 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         final Vector3i blockMin = this.getBlockMin();
         final Vector3i blockMax = this.getBlockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
-        final Stream<VolumeElement<ArchetypeVolume, BiomeType>> stateStream = this.biomes.getBiomeStream(min, max, options)
+        final Stream<VolumeElement<ArchetypeVolume, Biome>> stateStream = this.biomes.getBiomeStream(min, max, options)
             .toStream()
             .map(element -> VolumeElement.of(this, element::getType, element.getPosition()));
         return new SpongeVolumeStream<>(stateStream, () -> this);
     }
 
     @Override
-    public boolean setBiome(final int x, final int y, final int z, final BiomeType biome) {
+    public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
         return this.biomes.setBiome(x, y, z, biome);
     }
 }

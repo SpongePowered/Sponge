@@ -1,0 +1,81 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package org.spongepowered.common.mixin.api.mcp.world.gen.settings;
+
+import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
+import org.spongepowered.api.world.generation.MutableWorldGenerationSettings;
+import org.spongepowered.api.world.generation.settings.WorldGenerationSettings;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
+
+@Mixin(DimensionGeneratorSettings.class)
+@Implements(@Interface(iface = WorldGenerationSettings.class, prefix = "worldGenerationSettings$"))
+public abstract class DimensionGeneratorSettingsMixin_API implements MutableWorldGenerationSettings {
+
+    // @formatter:off
+    @Mutable @Shadow @Final private long seed;
+    @Mutable @Shadow @Final private boolean generateFeatures;
+    @Mutable @Shadow @Final private boolean generateBonusChest;
+
+    @Shadow public abstract long shadow$seed();
+    @Shadow public abstract boolean shadow$generateFeatures();
+    @Shadow public abstract boolean shadow$generateBonusChest();
+    // @formatter:on
+
+    @Intrinsic
+    public long worldGenerationSettings$getSeed() {
+        return this.shadow$seed();
+    }
+
+    @Override
+    public void setSeed(long seed) {
+        this.seed = seed;
+    }
+
+    @Override
+    public boolean doFeaturesGenerate() {
+        return this.shadow$generateFeatures();
+    }
+
+    @Override
+    public void setFeaturesGenerate(boolean featuresGenerate) {
+        this.generateFeatures = featuresGenerate;
+    }
+
+    @Override
+    public boolean doesGenerateBonusChest() {
+        return this.shadow$generateBonusChest();
+    }
+
+    @Override
+    public void setGenerateBonusChest(boolean generateBonusChest) {
+        this.generateBonusChest = generateBonusChest;
+    }
+}

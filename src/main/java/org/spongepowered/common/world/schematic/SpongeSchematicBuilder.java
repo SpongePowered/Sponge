@@ -28,7 +28,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.entity.EntityArchetype;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
@@ -85,7 +85,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
     }
 
     @Override
-    public Schematic.Builder biomePalette(final Palette<BiomeType, BiomeType> palette
+    public Schematic.Builder biomePalette(final Palette<Biome, Biome> palette
     ) {
         return null;
     }
@@ -97,7 +97,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
     }
 
     @Override
-    public Schematic.Builder biomePaletteType(final PaletteType<BiomeType, BiomeType> type
+    public Schematic.Builder biomePaletteType(final PaletteType<Biome, Biome> type
     ) {
         return null;
     }

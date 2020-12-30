@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge.world;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.CustomServerBossInfoManager;
+import net.minecraft.world.Dimension;
 import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.explosion.Explosion;

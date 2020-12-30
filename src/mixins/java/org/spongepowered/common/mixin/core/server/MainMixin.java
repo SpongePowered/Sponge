@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.core.server;
 
 import net.minecraft.server.Main;
+import net.minecraft.server.ServerPropertiesProvider;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,11 +34,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
+import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
 
 @Mixin(Main.class)
 public abstract class MainMixin {
+
+    @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/server/ServerPropertiesProvider"))
+    private static ServerPropertiesProvider impl$cacheBootstrapProperties(final DynamicRegistries p_i242100_1_, final Path p_i242100_2_) {
+        final ServerPropertiesProvider provider = new ServerPropertiesProvider(p_i242100_1_, p_i242100_2_);
+        BootstrapProperties.init(provider.getProperties(), p_i242100_1_);
+        return provider;
+    }
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveFormat$LevelSave;getLevelPath(Lnet/minecraft/world/storage/FolderName;)Ljava/nio/file/Path;"))
     private static Path impl$configurePackRepository(final SaveFormat.LevelSave levelSave, final FolderName folderName) {

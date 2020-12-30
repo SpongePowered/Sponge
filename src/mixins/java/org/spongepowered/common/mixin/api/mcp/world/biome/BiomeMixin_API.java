@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.biome;
 
-import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(Biome.class)
-public abstract class BiomeMixin_API implements BiomeType {
+@Mixin(net.minecraft.world.biome.Biome.class)
+public abstract class BiomeMixin_API implements Biome {
 
     //@formatter:off
     @Shadow public abstract float shadow$getBaseTemperature();

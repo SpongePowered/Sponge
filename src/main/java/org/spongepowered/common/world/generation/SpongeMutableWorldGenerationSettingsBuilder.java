@@ -22,14 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.gen;
+package org.spongepowered.common.world.generation;
 
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
-import org.spongepowered.api.world.gen.MutableWorldGenerationSettings;
-import org.spongepowered.api.world.gen.WorldGenerationSettings;
+import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
+import org.spongepowered.api.world.generation.MutableWorldGenerationSettings;
+import org.spongepowered.api.world.generation.settings.WorldGenerationSettings;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
+import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.Optional;
 
@@ -38,11 +40,16 @@ public final class SpongeMutableWorldGenerationSettingsBuilder implements Mutabl
     private long seed;
     private boolean generateFeatures, generateBonusChest;
 
+    public SpongeMutableWorldGenerationSettingsBuilder() {
+        this.reset();
+    }
+
     @Override
     public MutableWorldGenerationSettings.Builder reset() {
-        this.seed = 0L;
-        this.generateFeatures = true;
-        this.generateBonusChest = false;
+        final DimensionGeneratorSettings defaultSettings = BootstrapProperties.dimensionGeneratorSettings;
+        this.seed = defaultSettings.seed();
+        this.generateFeatures = defaultSettings.generateFeatures();
+        this.generateBonusChest = defaultSettings.generateBonusChest();
         return this;
     }
 

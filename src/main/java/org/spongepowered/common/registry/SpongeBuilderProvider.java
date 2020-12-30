@@ -102,12 +102,15 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.generation.settings.FlatGeneratorSettings;
+import org.spongepowered.api.world.generation.settings.NoiseGeneratorSettings;
+import org.spongepowered.api.world.generation.settings.noise.NoiseSettings;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.gen.MutableWorldGenerationSettings;
+import org.spongepowered.api.world.generation.MutableWorldGenerationSettings;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
@@ -184,12 +187,15 @@ import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
+import org.spongepowered.common.world.generation.settings.SpongeFlatGeneratorSettingsBuilder;
+import org.spongepowered.common.world.generation.settings.SpongeNoiseGeneratorSettingsBuilder;
+import org.spongepowered.common.world.generation.settings.noise.SpongeNoiseSettings;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
-import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
-import org.spongepowered.common.world.SpongeWorldTypeTemplate;
-import org.spongepowered.common.world.gen.SpongeMutableWorldGenerationSettingsBuilder;
+import org.spongepowered.common.world.server.SpongeWorldTemplate;
+import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
+import org.spongepowered.common.world.generation.SpongeMutableWorldGenerationSettingsBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.volume.stream.SpongeStreamOptionsBuilder;
 
@@ -230,92 +236,95 @@ public final class SpongeBuilderProvider implements BuilderProvider {
     
     public void registerDefaultBuilders() {
         this
-            .register(ResourceKey.Builder.class, SpongeResourceKeyBuilder::new)
-            .register(ItemStack.Builder.class, SpongeItemStackBuilder::new)
-            .register(TradeOffer.Builder.class, SpongeTradeOfferBuilder::new)
-            .register(FireworkEffect.Builder.class, SpongeFireworkEffectBuilder::new)
-            .register(PotionEffect.Builder.class, SpongePotionBuilder::new)
-            .register(Objective.Builder.class, SpongeObjective.Builder::new)
-            .register(Team.Builder.class, SpongeTeamBuilder::new)
-            .register(Scoreboard.Builder.class, SpongeScoreboardBuilder::new)
-            .register(DamageSource.Builder.class, SpongeDamageSourceBuilder::new)
-            .register(EntityDamageSource.Builder.class, SpongeEntityDamageSourceBuilder::new)
-            .register(IndirectEntityDamageSource.Builder.class, SpongeIndirectEntityDamageSourceBuilder::new)
-            .register(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamgeSourceBuilder::new)
-            .register(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
-            .register(WorldArchetype.Builder.class, SpongeWorldArchetypeBuilder::new)
-            .register(Explosion.Builder.class, SpongeExplosionBuilder::new)
-            .register(BlockState.Builder.class, SpongeBlockStateBuilder::new)
-            .register(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::unpooled)
-            .register(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
-            .register(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
-            .register(RandomWalkingGoal.Builder.class, SpongeRandomWalkingGoalBuilder::new)
-            .register(AvoidLivingGoal.Builder.class, SpongeAvoidLivingGoalBuilder::new)
-            .register(RunAroundLikeCrazyGoal.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
-            .register(SwimGoal.Builder.class, SpongeSwimGoalBuilder::new)
-            .register(LookAtGoal.Builder.class, SpongeWatchClosestAIBuilder::new)
-            .register(FindNearestAttackableTargetGoal.Builder.class, SpongeFindNearestAttackableTargetGoalBuilder::new)
-            .register(AttackLivingGoal.Builder.class, SpongeAttackLivingGoalBuilder::new)
-            .register(RangedAttackAgainstAgentGoal.Builder.class, SpongeRangedAttackAgainstAgentGoalBuilder::new)
-            .register(LookRandomlyGoal.Builder.class, SpongeLookRandomlyGoalBuilder::new)
-            .register(BannerPatternLayer.Builder.class, SpongePatternLayerBuilder::new)
-            .register(Task.Builder.class, SpongeTaskBuilder::new)
-            .register(Ban.Builder.class, SpongeBanBuilder::new)
-            .register(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
-            .register(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
-            .register(TabListEntry.Builder.class, TabListEntryBuilder::new)
-            .register(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
-            .register(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
-            .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
-//            .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
-//            .register(Schematic.Builder.class, SpongeSchematicBuilder::new)
-            .register(Inventory.Builder.class, SpongeInventoryBuilder::new)
-            .register(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)
-            .register(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
-            .register(SoundType.Builder.class, SpongeSoundBuilder::new)
-            .register(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
-            .register(DataRegistration.Builder.class, SpongeDataRegistrationBuilder::new)
-            .register(WorldBorder.Builder.class, SpongeWorldBorderBuilder::new)
-            .register(Ingredient.Builder.class, SpongeIngredientBuilder::new)
-            .register(ShapedCraftingRecipe.Builder.class, SpongeShapedCraftingRecipeBuilder::new)
-            .register(ShapelessCraftingRecipe.Builder.class, SpongeShapelessCraftingRecipeBuilder::new)
-            .register(SpecialCraftingRecipe.Builder.class, SpongeSpecialCraftingRecipeBuilder::new)
-            .register(CookingRecipe.Builder.class, SpongeCookingRecipeBuilder::new)
-            .register(StoneCutterRecipe.Builder.class, SpongeStoneCutterRecipeBuilder::new)
-            .register(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
-            .register(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
-            .register(Enchantment.RandomListBuilder.class, SpongeRandomEnchantmentListBuilder::new)
-            .register(Key.Builder.class, SpongeKeyBuilder::new)
-            .register(Advancement.Builder.class, SpongeAdvancementBuilder::new)
-            .register(DisplayInfo.Builder.class, SpongeDisplayInfoBuilder::new)
-            .register(AdvancementCriterion.Builder.class, SpongeCriterionBuilder::new)
-            .register(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
-            .register(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
-            .register(Trigger.Builder.class, SpongeTriggerBuilder::new)
-            .register(AttributeModifier.Builder.class, SpongeAttributeModifierBuilder::new)
-            .register(Command.Builder.class, SpongeParameterizedCommandBuilder::new)
-            .register(Parameter.FirstOfBuilder.class, SpongeFirstOfParameterBuilder::new)
-            .register(Parameter.SequenceBuilder.class, SpongeSequenceParameterBuilder::new)
-            .register(Parameter.Subcommand.Builder.class, SpongeSubcommandParameterBuilder::new)
-            .register(VariableValueParameters.TextBuilder.class, SpongeTextParameterBuilder::new)
-            .register(CommandResult.Builder.class, SpongeCommandResultBuilder::new)
-            .register(Parameter.Key.Builder.class, SpongeParameterKeyBuilder::new)
-            .register(Flag.Builder.class, SpongeFlagBuilder::new)
-            .register(Selector.Builder.class, SpongeSelectorFactory::createBuilder)
-            .register(DataStore.Builder.class, SpongeDataStoreBuilder::new)
-            .register(KeyValueMatcher.Builder.class, SpongeKeyValueMatcherBuilder::new)
-            .register(PlaceholderParser.Builder.class, SpongePlaceholderParserBuilder::new)
-            .register(PlaceholderContext.Builder.class, SpongePlaceholderContextBuilder::new)
-            .register(PlaceholderComponent.Builder.class, SpongePlaceholderComponentBuilder::new)
-            .register(MutableDataProviderBuilder.class, DataProviderRegistrator.SpongeMutableDataProviderBuilder::new)
-            .register(ImmutableDataProviderBuilder.class, DataProviderRegistrator.SpongeImmutableDataProviderBuilder::new)
-            .register(Query.Builder.class, SpongeQueryBuilder::new)
-            .register(PaletteType.Builder.class, SpongePaletteTypeBuilder::new)
-            .register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new)
-            .register(FluidState.Builder.class, SpongeFluidStateBuilder::new)
-            .register(MutableWorldGenerationSettings.Builder.class, SpongeMutableWorldGenerationSettingsBuilder::new)
-            .register(WorldTypeEffect.Builder.class, SpongeWorldTypeEffect.BuilderImpl::new)
-            .register(WorldTypeTemplate.Builder.class, SpongeWorldTypeTemplate.BuilderImpl::new)
+                .register(ResourceKey.Builder.class, SpongeResourceKeyBuilder::new)
+                .register(ItemStack.Builder.class, SpongeItemStackBuilder::new)
+                .register(TradeOffer.Builder.class, SpongeTradeOfferBuilder::new)
+                .register(FireworkEffect.Builder.class, SpongeFireworkEffectBuilder::new)
+                .register(PotionEffect.Builder.class, SpongePotionBuilder::new)
+                .register(Objective.Builder.class, SpongeObjective.Builder::new)
+                .register(Team.Builder.class, SpongeTeamBuilder::new)
+                .register(Scoreboard.Builder.class, SpongeScoreboardBuilder::new)
+                .register(DamageSource.Builder.class, SpongeDamageSourceBuilder::new)
+                .register(EntityDamageSource.Builder.class, SpongeEntityDamageSourceBuilder::new)
+                .register(IndirectEntityDamageSource.Builder.class, SpongeIndirectEntityDamageSourceBuilder::new)
+                .register(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamgeSourceBuilder::new)
+                .register(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
+                .register(Explosion.Builder.class, SpongeExplosionBuilder::new)
+                .register(BlockState.Builder.class, SpongeBlockStateBuilder::new)
+                .register(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::unpooled)
+                .register(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
+                .register(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
+                .register(RandomWalkingGoal.Builder.class, SpongeRandomWalkingGoalBuilder::new)
+                .register(AvoidLivingGoal.Builder.class, SpongeAvoidLivingGoalBuilder::new)
+                .register(RunAroundLikeCrazyGoal.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
+                .register(SwimGoal.Builder.class, SpongeSwimGoalBuilder::new)
+                .register(LookAtGoal.Builder.class, SpongeWatchClosestAIBuilder::new)
+                .register(FindNearestAttackableTargetGoal.Builder.class, SpongeFindNearestAttackableTargetGoalBuilder::new)
+                .register(AttackLivingGoal.Builder.class, SpongeAttackLivingGoalBuilder::new)
+                .register(RangedAttackAgainstAgentGoal.Builder.class, SpongeRangedAttackAgainstAgentGoalBuilder::new)
+                .register(LookRandomlyGoal.Builder.class, SpongeLookRandomlyGoalBuilder::new)
+                .register(BannerPatternLayer.Builder.class, SpongePatternLayerBuilder::new)
+                .register(Task.Builder.class, SpongeTaskBuilder::new)
+                .register(Ban.Builder.class, SpongeBanBuilder::new)
+                .register(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
+                .register(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
+                .register(TabListEntry.Builder.class, TabListEntryBuilder::new)
+                .register(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
+                .register(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
+                .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
+                //            .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
+                //            .register(Schematic.Builder.class, SpongeSchematicBuilder::new)
+                .register(Inventory.Builder.class, SpongeInventoryBuilder::new)
+                .register(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)
+                .register(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
+                .register(SoundType.Builder.class, SpongeSoundBuilder::new)
+                .register(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
+                .register(DataRegistration.Builder.class, SpongeDataRegistrationBuilder::new)
+                .register(WorldBorder.Builder.class, SpongeWorldBorderBuilder::new)
+                .register(Ingredient.Builder.class, SpongeIngredientBuilder::new)
+                .register(ShapedCraftingRecipe.Builder.class, SpongeShapedCraftingRecipeBuilder::new)
+                .register(ShapelessCraftingRecipe.Builder.class, SpongeShapelessCraftingRecipeBuilder::new)
+                .register(SpecialCraftingRecipe.Builder.class, SpongeSpecialCraftingRecipeBuilder::new)
+                .register(CookingRecipe.Builder.class, SpongeCookingRecipeBuilder::new)
+                .register(StoneCutterRecipe.Builder.class, SpongeStoneCutterRecipeBuilder::new)
+                .register(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
+                .register(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
+                .register(Enchantment.RandomListBuilder.class, SpongeRandomEnchantmentListBuilder::new)
+                .register(Key.Builder.class, SpongeKeyBuilder::new)
+                .register(Advancement.Builder.class, SpongeAdvancementBuilder::new)
+                .register(DisplayInfo.Builder.class, SpongeDisplayInfoBuilder::new)
+                .register(AdvancementCriterion.Builder.class, SpongeCriterionBuilder::new)
+                .register(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
+                .register(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
+                .register(Trigger.Builder.class, SpongeTriggerBuilder::new)
+                .register(AttributeModifier.Builder.class, SpongeAttributeModifierBuilder::new)
+                .register(Command.Builder.class, SpongeParameterizedCommandBuilder::new)
+                .register(Parameter.FirstOfBuilder.class, SpongeFirstOfParameterBuilder::new)
+                .register(Parameter.SequenceBuilder.class, SpongeSequenceParameterBuilder::new)
+                .register(Parameter.Subcommand.Builder.class, SpongeSubcommandParameterBuilder::new)
+                .register(VariableValueParameters.TextBuilder.class, SpongeTextParameterBuilder::new)
+                .register(CommandResult.Builder.class, SpongeCommandResultBuilder::new)
+                .register(Parameter.Key.Builder.class, SpongeParameterKeyBuilder::new)
+                .register(Flag.Builder.class, SpongeFlagBuilder::new)
+                .register(Selector.Builder.class, SpongeSelectorFactory::createBuilder)
+                .register(DataStore.Builder.class, SpongeDataStoreBuilder::new)
+                .register(KeyValueMatcher.Builder.class, SpongeKeyValueMatcherBuilder::new)
+                .register(PlaceholderParser.Builder.class, SpongePlaceholderParserBuilder::new)
+                .register(PlaceholderContext.Builder.class, SpongePlaceholderContextBuilder::new)
+                .register(PlaceholderComponent.Builder.class, SpongePlaceholderComponentBuilder::new)
+                .register(MutableDataProviderBuilder.class, DataProviderRegistrator.SpongeMutableDataProviderBuilder::new)
+                .register(ImmutableDataProviderBuilder.class, DataProviderRegistrator.SpongeImmutableDataProviderBuilder::new)
+                .register(Query.Builder.class, SpongeQueryBuilder::new)
+                .register(PaletteType.Builder.class, SpongePaletteTypeBuilder::new)
+                .register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new)
+                .register(FluidState.Builder.class, SpongeFluidStateBuilder::new)
+                .register(MutableWorldGenerationSettings.Builder.class, SpongeMutableWorldGenerationSettingsBuilder::new)
+                .register(WorldTypeEffect.Builder.class, SpongeWorldTypeEffect.BuilderImpl::new)
+                .register(WorldTypeTemplate.Builder.class, SpongeWorldTypeTemplate.BuilderImpl::new)
+                .register(WorldTemplate.Builder.class, SpongeWorldTemplate.BuilderImpl::new)
+                .register(NoiseSettings.Builder.class, SpongeNoiseSettings.BuilderImpl::new)
+                .register(FlatGeneratorSettings.Builder.class, SpongeFlatGeneratorSettingsBuilder::new)
+                .register(NoiseGeneratorSettings.Builder.class, SpongeNoiseGeneratorSettingsBuilder::new)
         ;
     }
 }

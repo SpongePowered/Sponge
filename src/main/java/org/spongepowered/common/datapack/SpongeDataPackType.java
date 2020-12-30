@@ -38,7 +38,7 @@ import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.accessor.world.DimensionTypeAccessor;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
-import org.spongepowered.common.world.SpongeWorldTypeTemplate;
+import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
 import java.util.OptionalLong;
 import java.util.function.BiFunction;
@@ -91,14 +91,14 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                 false
         );
 
-        private final SpongeDataPackType<@NonNull SpongeWorldTypeTemplate, DataPackSerializedObject> dimensionType = new SpongeDataPackType<>(
+        private final SpongeDataPackType<@NonNull SpongeWorldTypeTemplate, DataPackSerializedObject> worldType = new SpongeDataPackType<>(
                 new DataPackSerializer<>("Dimension Types", "dimension_type"),
                 s -> {
                     final OptionalLong fixedTime = s.fixedTime == null ? OptionalLong.empty() : OptionalLong.of(s.fixedTime.asTicks().getTicks());
                     final DimensionType type =
                             DimensionTypeAccessor.invoker$construct(fixedTime, s.skylight, s.ceiling, s.ultraWarm, s.natural, s.coordinateScale,
                                     s.createDragonFight, s.piglinSafe, s.bedWorks, s.respawnAnchorWorks, s.hasRaids, s.logicalHeight,
-                                    (IBiomeMagnifier) s.biomeFinder, (ResourceLocation) (Object) s.infiniburn,
+                                    (IBiomeMagnifier) s.biomeSampler, (ResourceLocation) (Object) s.infiniburn,
                                     (ResourceLocation) (Object) s.effect.getKey(), s.ambientLight);
                     return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, type).getOrThrow(false, e -> {});
                 },
@@ -117,8 +117,8 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         }
 
         @Override
-        public DataPackType dimensionType() {
-            return this.dimensionType;
+        public DataPackType worldType() {
+            return this.worldType;
         }
     }
 }

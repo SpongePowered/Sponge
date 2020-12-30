@@ -50,6 +50,10 @@ public interface DimensionTypeAccessor {
         throw new UntransformedAccessorError();
     }
 
+    @Accessor("DEFAULT_OVERWORLD_CAVES") static DimensionType accessor$DEFAULT_OVERWORLD_CAVES() {
+        throw new UntransformedAccessorError();
+    }
+
     @Accessor("DEFAULT_NETHER") static DimensionType accessor$DEFAULT_NETHER() {
         throw new UntransformedAccessorError();
     }

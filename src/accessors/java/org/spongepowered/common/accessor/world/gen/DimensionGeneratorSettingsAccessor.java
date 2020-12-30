@@ -28,6 +28,7 @@ import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.Dimension;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
@@ -40,4 +41,6 @@ public interface DimensionGeneratorSettingsAccessor {
         SimpleRegistry<Dimension> dimensionRegistry, Optional<String> legacyCustomOptions) {
         throw new UntransformedInvokerError();
     }
+
+    @Accessor("legacyCustomOptions") Optional<String> accessor$legacyCustomOptions();
 }

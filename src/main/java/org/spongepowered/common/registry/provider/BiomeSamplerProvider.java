@@ -31,29 +31,29 @@ import net.minecraft.world.biome.DefaultBiomeMagnifier;
 import net.minecraft.world.biome.FuzzedBiomeMagnifier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.biome.BiomeFinder;
+import org.spongepowered.api.world.biome.BiomeSampler;
 
-public final class BiomeFinderProvider {
+public final class BiomeSamplerProvider {
 
-    public static BiomeFinderProvider INSTANCE = new BiomeFinderProvider();
+    public static BiomeSamplerProvider INSTANCE = new BiomeSamplerProvider();
 
-    private final BiMap<ResourceKey, BiomeFinder> mappings;
+    private final BiMap<ResourceKey, BiomeSampler> mappings;
 
-    private BiomeFinderProvider() {
+    private BiomeSamplerProvider() {
         this.mappings = HashBiMap.create();
 
-        this.mappings.put(ResourceKey.sponge("column_fuzzed"), (BiomeFinder) (Object) ColumnFuzzedBiomeMagnifier.INSTANCE);
-        this.mappings.put(ResourceKey.sponge("fuzzy"), (BiomeFinder) (Object) FuzzedBiomeMagnifier.INSTANCE);
-        this.mappings.put(ResourceKey.sponge("default"), (BiomeFinder) (Object) DefaultBiomeMagnifier.INSTANCE);
+        this.mappings.put(ResourceKey.sponge("column_fuzzed"), (BiomeSampler) (Object) ColumnFuzzedBiomeMagnifier.INSTANCE);
+        this.mappings.put(ResourceKey.sponge("fuzzy"), (BiomeSampler) (Object) FuzzedBiomeMagnifier.INSTANCE);
+        this.mappings.put(ResourceKey.sponge("default"), (BiomeSampler) (Object) DefaultBiomeMagnifier.INSTANCE);
     }
 
     @Nullable
-    public BiomeFinder get(final ResourceKey key) {
+    public BiomeSampler get(final ResourceKey key) {
         return this.mappings.get(key);
     }
 
     @Nullable
-    public ResourceKey get(final BiomeFinder biomeFinder) {
-        return this.mappings.inverse().get(biomeFinder);
+    public ResourceKey get(final BiomeSampler biomeSampler) {
+        return this.mappings.inverse().get(biomeSampler);
     }
 }

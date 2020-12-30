@@ -22,26 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.biome;
+package org.spongepowered.common.world.generation.settings;
 
-import net.minecraft.world.biome.ColumnFuzzedBiomeMagnifier;
-import net.minecraft.world.biome.DefaultBiomeMagnifier;
-import net.minecraft.world.biome.FuzzedBiomeMagnifier;
-import org.spongepowered.api.world.biome.BiomeFinder;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.world.generation.settings.FlatGeneratorSettings;
+import org.spongepowered.api.world.generation.settings.structure.StructureGenerationSettings;
 
-public final class SpongeBiomeFinderFactory implements BiomeFinder.Factory {
+public final class SpongeFlatGeneratorSettingsBuilder implements FlatGeneratorSettings.Builder {
 
-    public BiomeFinder columnFuzzed() {
-        return (BiomeFinder) (Object) ColumnFuzzedBiomeMagnifier.INSTANCE;
+    @Override
+    public FlatGeneratorSettings.Builder structureSettings(final StructureGenerationSettings settings) {
+        return null;
     }
 
     @Override
-    public BiomeFinder fuzzy() {
-        return (BiomeFinder) (Object) FuzzedBiomeMagnifier.INSTANCE;
+    public FlatGeneratorSettings.Builder addLayer(final int height, final BlockState block) {
+        return null;
     }
 
     @Override
-    public BiomeFinder defaultFinder() {
-        return (BiomeFinder) (Object) DefaultBiomeMagnifier.INSTANCE;
+    public FlatGeneratorSettings.Builder removeLayer(final int height) {
+        return null;
+    }
+
+    @Override
+    public FlatGeneratorSettings.Builder performDecoration(final boolean performDecoration) {
+        return null;
+    }
+
+    @Override
+    public FlatGeneratorSettings.Builder populateLakes(final boolean populateLakes) {
+        return null;
+    }
+
+    @Override
+    public FlatGeneratorSettings.Builder from(final FlatGeneratorSettings value) {
+        return null;
+    }
+
+    @Override
+    public @NonNull FlatGeneratorSettings build() {
+        return null;
     }
 }

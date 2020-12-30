@@ -29,12 +29,12 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.world.server.ServerWorldProperties;
-import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.util.Constants;
@@ -43,23 +43,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class SpongeWorldPropertiesValueParameter extends ResourceKeyedArgumentValueParser<WorldProperties> {
+public final class SpongeServerWorldValueParameter extends ResourceKeyedArgumentValueParser<ServerWorld> {
 
-    private final boolean selectAll;
-
-    public SpongeWorldPropertiesValueParameter(final ResourceKey key, final boolean selectAll) {
+    public SpongeServerWorldValueParameter(final ResourceKey key) {
         super(key);
-
-        this.selectAll = selectAll;
     }
 
     @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
-        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties()
+        return SpongeCommon.getGame().getServer().getWorldManager().getWorldKeys()
                 .stream()
-                .filter(x -> this.selectAll || x.getWorld().isPresent())
-                .map(ServerWorldProperties::getKey)
                 .map(ResourceKey::getFormatted)
                 .filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());
@@ -67,19 +61,16 @@ public final class SpongeWorldPropertiesValueParameter extends ResourceKeyedArgu
 
     @Override
     @NonNull
-    public Optional<? extends WorldProperties> getValue(
-            final Parameter.@NonNull Key<? super WorldProperties> parameterKey,
+    public Optional<? extends ServerWorld> getValue(
+            final Parameter.@NonNull Key<? super ServerWorld> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
 
         final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
-        final Optional<ServerWorldProperties> worldProperties = SpongeWorldPropertiesValueParameter.getWorldProperties(resourceLocation);
+        final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(resourceLocation);
 
-        if (worldProperties.isPresent()) {
-            if (this.selectAll || worldProperties.get().getWorld().isPresent()) {
-                return worldProperties;
-            }
-            throw reader.createException(Component.text("World with identifier \"" + resourceLocation.toString() + "\" is not online."));
+        if (world.isPresent()) {
+            return world;
         }
 
         throw reader.createException(Component.text("Could not find world with identifier \"" + resourceLocation.toString() + "\""));
@@ -88,13 +79,5 @@ public final class SpongeWorldPropertiesValueParameter extends ResourceKeyedArgu
     @Override
     public List<ArgumentType<?>> getClientCompletionArgumentType() {
         return ImmutableList.of(Constants.Command.RESOURCE_LOCATION_TYPE);
-    }
-
-    static Optional<ServerWorldProperties> getWorldProperties(final ResourceKey name) {
-        try {
-            return SpongeCommon.getGame().getServer().getWorldManager().getProperties(name);
-        } catch (final Exception ignored) {
-            return Optional.empty();
-        }
     }
 }

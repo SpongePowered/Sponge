@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world;
 
+import net.minecraft.world.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.common.AbstractResourceKeyed;
@@ -48,19 +49,25 @@ public final class SpongeWorldTypeEffect extends AbstractResourceKeyed implement
 
     public static final class FactoryImpl implements WorldTypeEffect.Factory {
 
+        private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
+
+        private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
+
+        private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.END_EFFECTS);
+
         @Override
         public WorldTypeEffect overworld() {
-            return SpongeWorldTypeEffects.OVERWORLD;
+            return FactoryImpl.OVERWORLD;
         }
 
         @Override
         public WorldTypeEffect nether() {
-            return SpongeWorldTypeEffects.NETHER;
+            return FactoryImpl.NETHER;
         }
 
         @Override
         public WorldTypeEffect end() {
-            return SpongeWorldTypeEffects.END;
+            return FactoryImpl.END;
         }
     }
 }

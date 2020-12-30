@@ -36,7 +36,6 @@ import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.ICollisionReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
@@ -53,7 +52,7 @@ import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.ProtoWorld;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
@@ -98,13 +97,13 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
     @Deprecated @Shadow boolean shadow$hasChunksAt(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
     @Shadow net.minecraft.world.DimensionType shadow$dimensionType();
     @Shadow boolean shadow$containsAnyLiquid(AxisAlignedBB bb);
-    @Shadow Biome shadow$getBiome(BlockPos p_226691_1_);
+    @Shadow net.minecraft.world.biome.Biome shadow$getBiome(BlockPos p_226691_1_);
     // @formatter:on
 
     // Region
 
     @Override
-    default WorldType getDimensionType() {
+    default WorldType getWorldType() {
         return (WorldType) this.shadow$dimensionType();
     }
 
@@ -208,12 +207,12 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
     }
 
     @Override
-    default BiomeType getBiome(final int x, final int y, final int z) {
-        return (BiomeType) (Object) this.shadow$getBiome(new BlockPos(x, y, z));
+    default Biome getBiome(final int x, final int y, final int z) {
+        return (Biome) (Object) this.shadow$getBiome(new BlockPos(x, y, z));
     }
 
     @Override
-    default VolumeStream<R, BiomeType> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
+    default VolumeStream<R, Biome> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(min, max, options);
 
         final boolean shouldCarbonCopy = options.carbonCopy();
@@ -224,7 +223,7 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
         } else {
             backingVolume = null;
         }
-        return VolumeStreamUtils.<R, BiomeType, Biome, IChunk, BlockPos>generateStream(
+        return VolumeStreamUtils.<R, Biome, net.minecraft.world.biome.Biome, IChunk, BlockPos>generateStream(
             min,
             max,
             options,
@@ -245,7 +244,7 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
             ,
             // Filtered Position Entity Accessor
             (blockPos, world) -> {
-                final Biome biome = shouldCarbonCopy
+                final net.minecraft.world.biome.Biome biome = shouldCarbonCopy
                     ? backingVolume.getNativeBiome(blockPos.getX(), blockPos.getY(), blockPos.getZ())
                     : ((IWorldReader) world).getBiome(blockPos);
                 return new Tuple<>(blockPos, biome);

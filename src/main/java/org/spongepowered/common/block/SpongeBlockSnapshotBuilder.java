@@ -42,7 +42,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorldProperties;
+import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DataUtil;

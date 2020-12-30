@@ -22,19 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world;
+package org.spongepowered.common.mixin.api.mcp.world.gen;
 
-import net.minecraft.world.DimensionType;
-import org.spongepowered.api.ResourceKey;
+import net.minecraft.world.gen.FlatChunkGenerator;
+import net.minecraft.world.gen.FlatGenerationSettings;
+import org.spongepowered.api.world.generation.ConfigurableChunkGenerator;
+import org.spongepowered.api.world.generation.settings.FlatGeneratorSettings;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public final class SpongeWorldTypeEffects {
+@Mixin(FlatChunkGenerator.class)
+public abstract class FlatChunkGeneratorMixin_API extends ChunkGeneratorMixin_API implements ConfigurableChunkGenerator<FlatGeneratorSettings> {
 
-    public static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
+    // @formatter:off
+    @Shadow public abstract FlatGenerationSettings shadow$settings();
+    // @formatter:on
 
-    public static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
-
-    public static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.END_EFFECTS);
-
-    private SpongeWorldTypeEffects() {
+    public FlatGeneratorSettings settings() {
+        return (FlatGeneratorSettings) this.shadow$settings();
     }
 }

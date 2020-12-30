@@ -54,7 +54,7 @@ import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
@@ -288,10 +288,10 @@ public final class RecipeTest implements LoadableModule {
                 .where('b', Ingredient.of(ItemTypes.BOOK))
                 .result(grid -> {
                     final Optional<ServerPlayer> player = Sponge.getServer().getCauseStackManager().getCurrentCause().first(ServerPlayer.class);
-                    final Optional<BiomeType> biome = player.map(p -> p.getWorld().getBiome(p.getBlockPosition()));
-                    final String name = biome.map(present -> RegistryTypes.BIOME_TYPE.keyFor(player.get().getWorld().registries(), present)).map(ResourceKey::toString).orElse("Unknown");
-                    final Integer biomeTemperature = biome.map(BiomeType::getTemperature).map(d -> (int) (d*10)).orElse(0);
-                    final Integer biomeHumidity = biome.map(BiomeType::getHumidity).map(d -> (int) (d*10)).orElse(0);
+                    final Optional<Biome> biome = player.map(p -> p.getWorld().getBiome(p.getBlockPosition()));
+                    final String name = biome.map(present -> RegistryTypes.BIOME.keyFor(player.get().getWorld().registries(), present)).map(ResourceKey::toString).orElse("Unknown");
+                    final Integer biomeTemperature = biome.map(Biome::getTemperature).map(d -> (int) (d*10)).orElse(0);
+                    final Integer biomeHumidity = biome.map(Biome::getHumidity).map(d -> (int) (d*10)).orElse(0);
                     final TextComponent temperature = Component.text("Temperature: ").append(Component.text(biomeTemperature));
                     final TextComponent humidity = Component.text("Humidity: ").append(Component.text(biomeHumidity));
                     writtenBook.offer(Keys.DISPLAY_NAME, Component.text("Biome Data: " + name));

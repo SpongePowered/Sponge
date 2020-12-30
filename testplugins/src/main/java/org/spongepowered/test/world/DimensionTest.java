@@ -25,13 +25,30 @@
 package org.spongepowered.test.world;
 
 import com.google.inject.Inject;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
-import org.spongepowered.api.world.biome.BiomeFinders;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.world.biome.BiomeProviderTemplate;
 import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.WorldTypeTemplates;
+import org.spongepowered.api.world.difficulty.Difficulties;
+import org.spongepowered.api.world.generation.ChunkGeneratorTemplate;
+import org.spongepowered.api.world.generation.Structures;
+import org.spongepowered.api.world.generation.settings.NoiseGeneratorSettings;
+import org.spongepowered.api.world.generation.settings.noise.NoiseSettings;
+import org.spongepowered.api.world.generation.settings.noise.SamplingSettings;
+import org.spongepowered.api.world.generation.settings.noise.SlideSettings;
+import org.spongepowered.api.world.generation.settings.structure.SeparatedStructureGenerationSettings;
+import org.spongepowered.api.world.generation.settings.structure.SpacedStructureGenerationSettings;
+import org.spongepowered.api.world.generation.settings.structure.StructureGenerationSettings;
+import org.spongepowered.api.world.server.WorldTemplate;
+import org.spongepowered.api.world.server.WorldTemplates;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
@@ -46,27 +63,49 @@ public final class DimensionTest {
     }
 
     @Listener
-    public void onRegisterDataPackValue(final RegisterDataPackValueEvent event) {
+    public void onRegisterWorldTypeTemplates(final RegisterDataPackValueEvent<@NonNull WorldTypeTemplate> event) {
         event
             .register(WorldTypeTemplate
                 .builder()
-                    .key(ResourceKey.of(this.plugin, "test_one"))
                     .from(WorldTypeTemplates.THE_NETHER)
+                    .key(ResourceKey.of(this.plugin, "test_one"))
                     .effect(WorldTypeEffects.END)
                     .createDragonFight(true)
                     .build()
             )
-            .register(WorldTypeTemplate
-                    .builder()
-                    .from(WorldTypeTemplates.OVERWORLD)
-                    .key(ResourceKey.of(this.plugin, "test_two"))
-                    .effect(WorldTypeEffects.END)
-                    .coordinateMultiplier(2)
-                    .biomeFinder(BiomeFinders.FUZZY) // Overworld is column fuzzed by default...this should be interesting
-                    .createDragonFight(true)
-                    .piglinSafe(true)
-                    .build()
-            )
+        ;
+    }
+
+    @Listener
+    public void onRegisterWorldTemplates(final RegisterDataPackValueEvent<@NonNull WorldTemplate> event) {
+        event
+                .register(WorldTemplate
+                        .builder()
+                        .from(WorldTemplates.OVERWORLD)
+                        .key(ResourceKey.of(this.plugin, "more_difficult_overworld"))
+                        .worldType(RegistryKey.of(RegistryTypes.WORLD_TYPE, ResourceKey.of(this.plugin, "test_one")).asReference())
+                        .name(Component.text("Mean World", NamedTextColor.RED))
+                        .generator(ChunkGeneratorTemplate.noise(
+                                BiomeProviderTemplate.overworld(), NoiseGeneratorSettings.builder()
+                                        .structureSettings(StructureGenerationSettings.builder()
+                                                .stronghold(SpacedStructureGenerationSettings.of(10, 10, 1))
+                                                .structure(Structures.IGLOO, SeparatedStructureGenerationSettings.of(5, 5, 10))
+                                                .build()
+                                        )
+                                        .noiseSettings(NoiseSettings.builder()
+                                                .bottom(SlideSettings.of(1, 1, 1))
+                                                .top(SlideSettings.of(1, 1, 1))
+                                                .sampling(SamplingSettings.of(1, 1, 1, 1))
+                                                .height(128)
+                                                .build()
+                                        )
+                                        .seaLevel(200)
+                                        .build()
+                                )
+                        )
+                        .difficulty(Difficulties.HARD)
+                        .build()
+                )
         ;
     }
 }

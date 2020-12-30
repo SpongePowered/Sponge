@@ -25,9 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.world.chunk;
 
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeContainer;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,8 +41,8 @@ public abstract class ChunkMixin_API implements Chunk {
     //@formatter:on
 
     @Override
-    public boolean setBiome(final int x, final int y, final int z, final BiomeType biome) {
-        final Biome[] biomes = ((BiomeContainerAccessor) this.biomes).accessor$biomes();
+    public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
+        final net.minecraft.world.biome.Biome[] biomes = ((BiomeContainerAccessor) this.biomes).accessor$biomes();
 
         int maskedX = x & BiomeContainer.HORIZONTAL_MASK;
         int maskedY = MathHelper.clamp(y, 0, BiomeContainer.VERTICAL_MASK);
@@ -51,7 +50,7 @@ public abstract class ChunkMixin_API implements Chunk {
 
         final int WIDTH_BITS = BiomeContainerAccessor.accessor$WIDTH_BITS();
         final int posKey = maskedY << WIDTH_BITS + WIDTH_BITS | maskedZ << WIDTH_BITS | maskedX;
-        biomes[posKey] = (Biome) (Object) biome;
+        biomes[posKey] = (net.minecraft.world.biome.Biome) (Object) biome;
 
         return true;
     }

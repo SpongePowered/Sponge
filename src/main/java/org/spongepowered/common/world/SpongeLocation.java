@@ -34,7 +34,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -224,7 +224,7 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
     }
 
     @Override
-    public BiomeType getBiome() {
+    public Biome getBiome() {
         return this.getWorld().getBiome(this.blockPosition);
     }
 

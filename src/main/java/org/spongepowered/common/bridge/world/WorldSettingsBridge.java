@@ -27,7 +27,7 @@ package org.spongepowered.common.bridge.world;
 import net.minecraft.world.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.gen.WorldGenerationSettings;
+import org.spongepowered.api.world.generation.settings.WorldGenerationSettings;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;

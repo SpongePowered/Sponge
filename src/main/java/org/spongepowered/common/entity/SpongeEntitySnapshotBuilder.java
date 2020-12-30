@@ -39,7 +39,7 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.server.ServerWorldProperties;
+import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.holder.SimpleNBTDataHolder;
 import org.spongepowered.common.data.persistence.NBTTranslator;

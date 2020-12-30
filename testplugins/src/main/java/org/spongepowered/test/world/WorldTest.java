@@ -34,19 +34,20 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.api.world.server.ServerWorldProperties;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
@@ -68,8 +69,7 @@ public final class WorldTest {
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ServerPlayer> playerParameter = Parameter.player().optional().setKey("player").build();
-        final Parameter.Value<ServerWorldProperties> worldParameter = Parameter.worldProperties().setKey("world").build();
-        final Parameter.Value<ServerWorldProperties> optWorldParameter = Parameter.worldProperties().optional().setKey("world").build();
+        final Parameter.Value<ServerWorld> optWorldParameter = Parameter.world().optional().setKey("world").build();
         final Parameter.Value<ServerLocation> locationParameter = Parameter.location().setKey("location").build();
         final Parameter.Value<Vector3d> optVector3Parameter = Parameter.vector3d().optional().setKey("position").build();
         final Parameter.Value<PortalType> portalTypeParameter =
@@ -86,24 +86,14 @@ public final class WorldTest {
                 "sponge").setKey("world_type").build();
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
         final Parameter.Value<ResourceKey> copyWorldKeyParameter = Parameter.resourceKey().setKey("copy_world").build();
-        final Parameter.Value<ResourceKey> renameWorldKeyParameter = Parameter.resourceKey().setKey("new_world_name").build();
-        final Parameter.Value<BiomeType> biomeListTypeParameter =
+        final Parameter.Value<ResourceKey> moveWorldKeyParameter = Parameter.resourceKey().setKey("new_world_name").build();
+        final Parameter.Value<Biome> biomeListTypeParameter =
                 Parameter.registryElement(
-                        TypeToken.get(BiomeType.class),
-                        RegistryTypes.BIOME_TYPE,
+                        TypeToken.get(Biome.class),
+                        RegistryTypes.BIOME,
                         "minecraft",
                         "sponge"
                 ).setKey("biome_types").consumeAllRemaining().optional().build();
-
-        final Parameter.Value<ResourceKey> unloadedWorldKeyParameter = Parameter.resourceKey()
-                .setSuggestions((context, currentInput) -> Sponge.getServer().getWorldManager()
-                        .getAllProperties()
-                        .stream()
-                        .filter(x -> !x.getWorld().isPresent())
-                        .map(x -> x.getKey().asString())
-                        .filter(x -> x.startsWith(currentInput))
-                        .collect(Collectors.toList()))
-                .setKey("world").build();
 
         event.register(this.plugin, Command
                     .builder()
@@ -150,12 +140,12 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                         .builder()
-                        .parameters(worldParameter, worldTypeParameter)
+                        .parameters(CommonParameters.WORLD, worldTypeParameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.worldtype.change")
                         .setExecutor(context -> {
-                            final ServerWorldProperties world = context.requireOne(worldParameter);
+                            final ServerWorld world = context.requireOne(CommonParameters.WORLD);
                             final WorldType worldType = context.requireOne(worldTypeParameter);
-                            world.setWorldType(worldType);
+                            world.getProperties().setWorldType(worldType);
                             return CommandResult.success();
                         })
                         .build()
@@ -168,10 +158,10 @@ public final class WorldTest {
                         .setPermission(this.plugin.getMetadata().getId() + ".command.location.change")
                         .setExecutor(context -> {
                             final ServerPlayer player = context.getOne(playerParameter).orElse(this.getSourcePlayer(context));
-                            final ServerWorldProperties properties = context.getOne(optWorldParameter).orElse(player.getWorld().getProperties());
+                            final ServerWorld world = context.getOne(optWorldParameter).orElse(player.getWorld());
                             final Vector3d position =
-                                    context.getOne(optVector3Parameter).orElse(properties.getSpawnPosition().toDouble());
-                            return player.setLocation(ServerLocation.of(properties.getWorld().get(), position)) ? CommandResult.success() :
+                                    context.getOne(optVector3Parameter).orElse(world.getProperties().getSpawnPosition().toDouble());
+                            return player.setLocation(ServerLocation.of(world, position)) ? CommandResult.success() :
                                     CommandResult.error(Component.text("Could not teleport!"));
                         })
                         .build()
@@ -180,10 +170,10 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                         .builder()
-                        .parameter(unloadedWorldKeyParameter)
+                        .parameter(worldKeyParameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.world.load")
                         .setExecutor(context -> {
-                            final ResourceKey key = context.requireOne(unloadedWorldKeyParameter);
+                            final ResourceKey key = context.requireOne(worldKeyParameter);
                             Sponge.getServer().getWorldManager().loadWorld(key).whenComplete(((serverWorld, throwable) -> {
                                 if (throwable != null) {
                                     context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
@@ -195,46 +185,20 @@ public final class WorldTest {
                 , "lw", "loadworld"
         );
 
+        // TODO Minecraft 1.16 - Some biomes for a provider? Maybe other template things?
         event.register(this.plugin, Command
                         .builder()
-                        .parameters(worldKeyParameter, worldTypeParameter, biomeListTypeParameter)
+                        .parameters(worldKeyParameter, worldTypeParameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.world.create")
                         .setExecutor(context -> {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
-                            final WorldType worldType = context.requireOne(worldTypeParameter);
-                            final Collection<? extends BiomeType> biomes = context.getAll(biomeListTypeParameter);
-//                            GeneratorModifierType modifierType = GeneratorModifierTypes.NONE.get();
-//                            if (!biomes.isEmpty()) {
-//                                if (biomes.size() == 1) {
-//                                    settings.set(DataQuery.of("biome_source", "type"), "minecraft:fixed");
-//                                } else {
-//                                    settings.set(DataQuery.of("biome_source", "type"), "minecraft:checkerboard");
-//                                }
-//                                settings.set(DataQuery.of("biome_source", "options", "biomes"), biomes.stream().map(BiomeType::getKey).map(ResourceKey::asString).collect(Collectors.toList()));
-//                                modifierType = Registries.GENERATOR_MODIFIER_TYPE
-//                                        .asReference()
-//                                        .get(Sponge.getGame().registries())
-//                                        .findEntry(ResourceKey.resolve("buffet"))
-//                                        .get()
-//                                        .value();
-//                            }
-                            final WorldArchetype archetype = WorldArchetype.builder()
-                                    .worldType(worldType)
+                            final ResourceKey worldType = Sponge.getServer().registries().registry(RegistryTypes.WORLD_TYPE).valueKey(context.requireOne(worldTypeParameter));
+                            final WorldTemplate template = WorldTemplate.builder()
+                                    .key(key)
+                                    .worldType(RegistryKey.of(RegistryTypes.WORLD_TYPE, worldType).asReference())
                                     .generateSpawnOnLoad(true)
                                     .build();
-                            Sponge.getServer().getWorldManager().createProperties(key, archetype).whenComplete(((worldProperties, throwable) -> {
-                                if (throwable != null) {
-                                    context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
-                                    return;
-                                }
-
-                                Sponge.getServer().getWorldManager().loadWorld(worldProperties).whenComplete(((serverWorld, throwable1) -> {
-                                    if (throwable1 != null) {
-                                        context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable1.getMessage()));
-                                    }
-                                }));
-                            }));
-
+                            Sponge.getServer().getWorldManager().loadWorld(template);
                             return CommandResult.success();
                         })
                         .build()
@@ -243,10 +207,10 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                         .builder()
-                        .parameter(worldParameter)
+                        .parameter(CommonParameters.WORLD)
                         .setExecutor(context -> {
-                            final ServerWorldProperties properties = context.requireOne(worldParameter);
-                            Sponge.getServer().getWorldManager().unloadWorld(properties.getKey()).whenComplete((aBoolean, throwable) -> {
+                            final ServerWorld world = context.requireOne(CommonParameters.WORLD);
+                            Sponge.getServer().getWorldManager().unloadWorld(world.getKey()).whenComplete((aBoolean, throwable) -> {
                                 if (throwable != null) {
                                     context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
                                 }
@@ -279,12 +243,12 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                         .builder()
-                        .parameters(worldKeyParameter, renameWorldKeyParameter)
+                        .parameters(worldKeyParameter, moveWorldKeyParameter)
                         .setExecutor(context -> {
                             final ResourceKey worldKey = context.requireOne(worldKeyParameter);
-                            final ResourceKey renameWorld = context.requireOne(renameWorldKeyParameter);
+                            final ResourceKey moveKey = context.requireOne(moveWorldKeyParameter);
 
-                            Sponge.getServer().getWorldManager().moveWorld(worldKey, renameWorld).whenComplete((aBoolean, throwable) -> {
+                            Sponge.getServer().getWorldManager().moveWorld(worldKey, moveKey).whenComplete((aBoolean, throwable) -> {
                                 if (throwable != null) {
                                     context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
                                 }
@@ -293,7 +257,7 @@ public final class WorldTest {
                             return CommandResult.success();
                         })
                         .build()
-                , "rw", "renameworld"
+                , "mw", "moveworld"
         );
 
         event.register(this.plugin, Command
@@ -336,8 +300,4 @@ public final class WorldTest {
         throw new NoSuchElementException("Source is not a player");
     }
 
-    @Listener
-    public void onRespawnPlayer(final RespawnPlayerEvent event) {
-        this.plugin.getLogger().error(event);
-    }
 }

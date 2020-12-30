@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.world.volume.buffer.biome;
 
-import net.minecraft.world.biome.Biome;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.volume.biome.BiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
@@ -41,16 +40,16 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * Mutable view of a {@link BiomeType} array.
+ * Mutable view of a {@link Biome} array.
  *
  * <p>Normally, the {@link ByteArrayMutableBiomeBuffer} class uses memory more
- * efficiently, but when the {@link Biome} array is already created (for
+ * efficiently, but when the {@link net.minecraft.world.biome.Biome} array is already created (for
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
 public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements BiomeVolume.Immutable {
 
-    private final BiomeType[] biomes;
+    private final Biome[] biomes;
 
     /**
      * Creates a new instance.
@@ -60,13 +59,13 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
      * @param start The start position
      * @param size The size
      */
-    public ObjectArrayImmutableBiomeBuffer(final BiomeType[] biomes, final Vector3i start, final Vector3i size) {
+    public ObjectArrayImmutableBiomeBuffer(final Biome[] biomes, final Vector3i start, final Vector3i size) {
         super(start, size);
         this.biomes = biomes.clone();
     }
 
     @Override
-    public BiomeType getBiome(final int x, final int y, final int z) {
+    public Biome getBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
         return this.biomes[this.getIndex(x, y, z)];
     }
@@ -81,10 +80,10 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
      * @return The native biome
      */
     @SuppressWarnings("ConstantConditions")
-    public Biome getNativeBiome(final int x, final int y, final int z) {
+    public net.minecraft.world.biome.Biome getNativeBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        final BiomeType type = this.biomes[this.getIndex(x, y, z)];
-        return (Biome) (Object) type;
+        final Biome type = this.biomes[this.getIndex(x, y, z)];
+        return (net.minecraft.world.biome.Biome) (Object) type;
     }
 
     @Override
@@ -110,13 +109,13 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     }
 
     @Override
-    public VolumeStream<Immutable, BiomeType> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<Immutable, Biome> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(min, max, options);
-        final Stream<VolumeElement<Immutable, BiomeType>> stateStream = IntStream.range(this.getBlockMin().getX(), this.getBlockMax().getX() + 1)
+        final Stream<VolumeElement<Immutable, Biome>> stateStream = IntStream.range(this.getBlockMin().getX(), this.getBlockMax().getX() + 1)
             .mapToObj(x -> IntStream.range(this.getBlockMin().getZ(), this.getBlockMax().getZ() + 1)
                 .mapToObj(z -> IntStream.range(this.getBlockMin().getY(), this.getBlockMax().getY() + 1)
-                    .mapToObj(y -> VolumeElement.<Immutable, BiomeType>of(this, () -> this.biomes[this.getIndex(x, y, z)], new Vector3i(x, y, z)))
+                    .mapToObj(y -> VolumeElement.<Immutable, Biome>of(this, () -> this.biomes[this.getIndex(x, y, z)], new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);

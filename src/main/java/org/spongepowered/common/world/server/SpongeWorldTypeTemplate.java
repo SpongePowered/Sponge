@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world;
+package org.spongepowered.common.world.server;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -42,16 +42,17 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.util.MinecraftDayTime;
-import org.spongepowered.api.world.biome.BiomeFinder;
-import org.spongepowered.api.world.biome.BiomeFinders;
+import org.spongepowered.api.world.biome.BiomeSampler;
+import org.spongepowered.api.world.biome.BiomeSamplers;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.accessor.world.DimensionTypeAccessor;
-import org.spongepowered.common.registry.provider.BiomeFinderProvider;
+import org.spongepowered.common.registry.provider.BiomeSamplerProvider;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 
 import java.util.Objects;
@@ -62,7 +63,7 @@ import java.util.function.Supplier;
 public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed implements WorldTypeTemplate {
 
     public final WorldTypeEffect effect;
-    public final BiomeFinder biomeFinder;
+    public final BiomeSampler biomeSampler;
     @Nullable public final MinecraftDayTime fixedTime;
     public final ResourceKey infiniburn;
 
@@ -74,7 +75,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
             .create(r -> r
                     .group(
-                            ResourceLocation.CODEC.optionalFieldOf("biome_finder", new ResourceLocation("sponge", "default")).forGetter(v -> v.biomeFinder),
+                            ResourceLocation.CODEC.optionalFieldOf("biome_sampler", new ResourceLocation("sponge", "column_fuzzed")).forGetter(v -> v.biomeSampler),
                             Codec.BOOL.optionalFieldOf("create_dragon_fight", Boolean.FALSE).forGetter(v -> v.createDragonFight)
                     )
                     .apply(r, SpongeDataSection::new)
@@ -103,12 +104,12 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
                             ResourceLocation.CODEC.fieldOf("infiniburn").forGetter(v -> ((ITag.INamedTag<Block>)v.infiniburn()).getName()),
                             ResourceLocation.CODEC.fieldOf("effects").orElse((ResourceLocation) (Object) WorldTypeEffects.OVERWORLD.getKey()).forGetter(v -> ((DimensionTypeAccessor) v).accessor$effectsLocation()),
                             Codec.FLOAT.fieldOf("ambient_light").forGetter(v -> ((DimensionTypeAccessor) v).accessor$ambientLight()),
-                            Codec.optionalField("_sponge", SpongeWorldTypeTemplate.SPONGE_CODEC).forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeFinderProvider.INSTANCE.get((BiomeFinder) v.getBiomeZoomer()), v.createDragonFight())))
+                            SpongeWorldTypeTemplate.SPONGE_CODEC.optionalFieldOf("_sponge").forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeSamplerProvider.INSTANCE.get((BiomeSampler) v.getBiomeZoomer()), v.createDragonFight())))
                     )
                     // *Chuckles* I'm in danger
                     .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15) -> {
-                        final IBiomeMagnifier biomeMagnifier = f15.isPresent() ? (IBiomeMagnifier) BiomeFinderProvider.INSTANCE.get((ResourceKey) (Object) f15.get().biomeFinder) : ColumnFuzzedBiomeMagnifier.INSTANCE;
-                        final boolean createDragonFight = f15.isPresent() ? f15.get().createDragonFight : false;
+                        final IBiomeMagnifier biomeMagnifier = f15.isPresent() ? (IBiomeMagnifier) BiomeSamplerProvider.INSTANCE.get((ResourceKey) (Object) f15.get().biomeSampler) : ColumnFuzzedBiomeMagnifier.INSTANCE;
+                        final boolean createDragonFight = f15.isPresent() && f15.get().createDragonFight;
 
                         return DimensionTypeAccessor.invoker$construct(f1, f2, f3, f4, f5, f6, createDragonFight, f7, f8, f9, f10, f11,
                                 biomeMagnifier, f12, f13, f14);
@@ -136,7 +137,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.coordinateScale = builder.coordinateMultiplier;
 
         // Sponge
-        this.biomeFinder = builder.biomeFinder;
+        this.biomeSampler = builder.biomeSampler;
         this.createDragonFight = builder.createDragonFight;
     }
 
@@ -155,7 +156,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.respawnAnchorWorks = dimensionType.respawnAnchorWorks();
         this.hasRaids = dimensionType.hasRaids();
         this.logicalHeight = dimensionType.logicalHeight();
-        this.biomeFinder = (BiomeFinder) dimensionType.getBiomeZoomer();
+        this.biomeSampler = (BiomeSampler) dimensionType.getBiomeZoomer();
         this.infiniburn = (ResourceKey) (Object) ((ITag.INamedTag<Block>) dimensionType.infiniburn()).getName();
         this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) ((DimensionTypeAccessor) dimensionType).accessor$effectsLocation());
         this.ambientLight = ((DimensionTypeAccessor) dimensionType).accessor$ambientLight();
@@ -164,7 +165,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
     @Override
     public DataPackType type() {
-        return DataPackTypes.DIMENSION_TYPE;
+        return DataPackTypes.WORLD_TYPE;
     }
 
     @Override
@@ -174,8 +175,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
     @Override
     public DataContainer toContainer() {
-        // TODO
-        throw new RuntimeException();
+        throw new MissingImplementationException("SpongeWorldTypeTemplate", "toContainer");
     }
 
     @Override
@@ -184,8 +184,8 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     }
 
     @Override
-    public BiomeFinder biomeFinder() {
-        return this.biomeFinder;
+    public BiomeSampler biomeSampler() {
+        return this.biomeSampler;
     }
 
     @Override
@@ -254,64 +254,40 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     }
 
     private static final class SpongeDataSection {
-        private final ResourceLocation biomeFinder;
+        private final ResourceLocation biomeSampler;
         private final boolean createDragonFight;
 
-        public SpongeDataSection(final ResourceLocation biomeFinder, final boolean createDragonFight) {
-            this.biomeFinder = biomeFinder;
+        public SpongeDataSection(final ResourceLocation biomeSampler, final boolean createDragonFight) {
+            this.biomeSampler = biomeSampler;
             this.createDragonFight = createDragonFight;
-        }
-    }
-
-    public static final class FactoryImpl implements WorldTypeTemplate.Factory {
-
-        private static final SpongeWorldTypeTemplate
-                OVERWORLD = new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld"), DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD());
-
-        private static final SpongeWorldTypeTemplate
-                THE_NETHER = new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_nether"), DimensionTypeAccessor.accessor$DEFAULT_NETHER());
-
-        private static final SpongeWorldTypeTemplate
-                THE_END = new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_end"), DimensionTypeAccessor.accessor$DEFAULT_END());
-
-        @Override
-        public WorldTypeTemplate overworld() {
-            return FactoryImpl.OVERWORLD;
-        }
-
-        @Override
-        public WorldTypeTemplate theNether() {
-            return FactoryImpl.THE_NETHER;
-        }
-
-        @Override
-        public WorldTypeTemplate theEnd() {
-            return FactoryImpl.THE_END;
         }
     }
 
     public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
 
-        protected WorldTypeEffect effect = WorldTypeEffects.OVERWORLD;
-        protected MinecraftDayTime fixedTime;
-        protected BiomeFinder biomeFinder = BiomeFinders.DEFAULT;
-        protected ResourceKey infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.getName();
+        @Nullable protected WorldTypeEffect effect;
+        @Nullable protected MinecraftDayTime fixedTime;
+        @Nullable protected BiomeSampler biomeSampler;
+        @Nullable protected ResourceKey infiniburn;
 
         protected boolean scorching, natural, skylight, ceiling, piglinSafe, bedsUsable, respawnAnchorsUsable, hasRaids, createDragonFight;
         protected float ambientLighting;
         protected int logicalHeight;
         protected double coordinateMultiplier;
 
+        public BuilderImpl() {
+            this.reset();
+        }
+
         @Override
         public WorldTypeTemplate.Builder effect(final WorldTypeEffect effect) {
-            Objects.requireNonNull(effect, "effect");
-            this.effect = effect;
+            this.effect = Objects.requireNonNull(effect, "effect");
             return this;
         }
 
         @Override
-        public Builder biomeFinder(final BiomeFinder biomeFinder) {
-            this.biomeFinder = Objects.requireNonNull(biomeFinder, "biomeFinder");
+        public Builder biomeSampler(final BiomeSampler biomeSampler) {
+            this.biomeSampler = Objects.requireNonNull(biomeSampler, "biomeFinder");
             return this;
         }
 
@@ -394,11 +370,33 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         }
 
         @Override
+        public Builder reset() {
+            this.key = null;
+            this.effect = WorldTypeEffects.OVERWORLD;
+            this.fixedTime = null;
+            this.biomeSampler = BiomeSamplers.COLUMN_FUZZED;
+            this.infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.getName();
+            this.scorching = false;
+            this.natural = true;
+            this.skylight = true;
+            this.ceiling = false;
+            this.piglinSafe = false;
+            this.bedsUsable = true;
+            this.respawnAnchorsUsable = false;
+            this.hasRaids = true;
+            this.ambientLighting = 0.5f;
+            this.logicalHeight = 256;
+            this.coordinateMultiplier = 1;
+            this.createDragonFight = false;
+            return this;
+        }
+
+        @Override
         public WorldTypeTemplate.Builder from(final WorldTypeTemplate value) {
             Objects.requireNonNull(value, "value");
 
             this.effect = value.effect();
-            this.biomeFinder = value.biomeFinder();
+            this.biomeSampler = value.biomeSampler();
             this.fixedTime = value.fixedTime().orElse(null);
             this.infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.getName();
             this.scorching = value.scorching();
@@ -419,6 +417,37 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         @Override
         public @NonNull WorldTypeTemplate build0() {
             return new SpongeWorldTypeTemplate(this);
+        }
+    }
+
+    public static final class FactoryImpl implements WorldTypeTemplate.Factory {
+
+        private static final SpongeWorldTypeTemplate OVERWORLD = new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld"), DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD());
+
+        private static final SpongeWorldTypeTemplate OVERWORLD_CAVES = new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld_caves"), DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD_CAVES());
+
+        private static final SpongeWorldTypeTemplate THE_NETHER = new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_nether"), DimensionTypeAccessor.accessor$DEFAULT_NETHER());
+
+        private static final SpongeWorldTypeTemplate THE_END = new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_end"), DimensionTypeAccessor.accessor$DEFAULT_END());
+
+        @Override
+        public WorldTypeTemplate overworld() {
+            return FactoryImpl.OVERWORLD;
+        }
+
+        @Override
+        public WorldTypeTemplate overworldCaves() {
+            return FactoryImpl.OVERWORLD_CAVES;
+        }
+
+        @Override
+        public WorldTypeTemplate theNether() {
+            return FactoryImpl.THE_NETHER;
+        }
+
+        @Override
+        public WorldTypeTemplate theEnd() {
+            return FactoryImpl.THE_END;
         }
     }
 }

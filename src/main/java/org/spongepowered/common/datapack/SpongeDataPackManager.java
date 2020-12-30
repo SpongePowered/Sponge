@@ -102,6 +102,6 @@ public final class SpongeDataPackManager {
 
         this.serializables.put((SpongeDataPackType) DataPackTypes.ADVANCEMENT, new ArrayList<>());
         this.serializables.put((SpongeDataPackType) DataPackTypes.RECIPE, new ArrayList<>());
-        this.serializables.put((SpongeDataPackType) DataPackTypes.DIMENSION_TYPE, new ArrayList<>());
+        this.serializables.put((SpongeDataPackType) DataPackTypes.WORLD_TYPE, new ArrayList<>());
     }
 }

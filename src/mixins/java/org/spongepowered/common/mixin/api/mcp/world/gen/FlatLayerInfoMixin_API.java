@@ -22,29 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.lifecycle;
+package org.spongepowered.common.mixin.api.mcp.world.gen;
 
-import org.spongepowered.api.Game;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.lifecycle.RegisterWorldEvent;
-import org.spongepowered.api.world.WorldArchetype;
-import org.spongepowered.common.world.server.SpongeWorldManager;
+import net.minecraft.world.gen.FlatLayerInfo;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.world.generation.settings.flat.LayerSettings;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Objects;
+@Mixin(FlatLayerInfo.class)
+public abstract class FlatLayerInfoMixin_API implements LayerSettings {
 
-public final class RegisterWorldEventImpl extends AbstractLifecycleEvent implements RegisterWorldEvent {
+    // @formatter:off
+    @Shadow public abstract int shadow$getHeight();
+    @Shadow public abstract net.minecraft.block.BlockState shadow$getBlockState();
+    // @formatter:on
 
-    private final SpongeWorldManager worldManager;
-
-    public RegisterWorldEventImpl(final Cause cause, final Game game, final SpongeWorldManager worldManager) {
-        super(cause, game);
-
-        this.worldManager = worldManager;
+    @Override
+    public int height() {
+        return this.shadow$getHeight();
     }
 
     @Override
-    public boolean register(final ResourceKey key, final WorldArchetype archetype) {
-        return this.worldManager.registerPendingWorld(Objects.requireNonNull(key, "key"), Objects.requireNonNull(archetype, "archetype"));
+    public BlockState block() {
+        return (BlockState) this.shadow$getBlockState();
     }
 }

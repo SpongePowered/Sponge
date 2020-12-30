@@ -48,7 +48,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ProtoWorld;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -84,7 +84,7 @@ public interface IWorldMixin_API {
     // MutableBiomeVolume
 
     @SuppressWarnings({"rawtypes", "ConstantConditions"})
-    default boolean protoWorld$setBiome(final int x, final int y, final int z, final BiomeType biome) {
+    default boolean protoWorld$setBiome(final int x, final int y, final int z, final Biome biome) {
         final IChunk iChunk = ((IWorldReader) (Object) this).getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
         if (iChunk == null) {
             return false;

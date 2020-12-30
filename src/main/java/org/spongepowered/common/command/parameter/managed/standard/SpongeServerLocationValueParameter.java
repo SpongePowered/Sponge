@@ -44,11 +44,13 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorldProperties;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,10 +77,8 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
     }
 
     private List<String> complete(final String currentInput) {
-        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties()
+        return SpongeCommon.getGame().getServer().getWorldManager().getWorldKeys()
                 .stream()
-                .filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
-                .map(ServerWorldProperties::getKey)
                 .map(ResourceKey::getFormatted)
                 .filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());
@@ -91,11 +91,11 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
         final ArgumentReader.Immutable state = reader.getImmutable();
-        ServerWorldProperties worldProperties;
+        ServerWorld serverWorld;
         try {
             final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
-            worldProperties = SpongeCommon.getGame().getServer().getWorldManager()
-                    .getProperties(resourceLocation).filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
+            serverWorld = SpongeCommon.getGame().getServer().getWorldManager()
+                    .getWorld(resourceLocation)
                     .orElseThrow(() -> reader.createException(
                             Component.text("Could not get world with key \"" + resourceLocation.toString() + "\"")));
         } catch (final ArgumentParseException e) {
@@ -105,7 +105,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
                 if (!SpongeServerLocationValueParameter.STARTS_WITH_NUMBER.matcher(state.getRemaining()).find()) {
                     throw e;
                 }
-                worldProperties = location.get().getWorld().getProperties();
+                serverWorld = location.get().getWorld();
             } else {
                 throw e;
             }
@@ -115,11 +115,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
         try {
             reader.skipWhitespace();
             final Vector3d vec3d = SpongeServerLocationValueParameter.VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context.getCause());
-            final ResourceKey key = worldProperties.getKey();
-            return Optional.of(
-                    worldProperties.getWorld()
-                            .map(x -> x.getLocation(vec3d.x, vec3d.y, vec3d.z))
-                            .orElseGet(() -> ServerLocation.of(key, vec3d.x, vec3d.y, vec3d.z)));
+            return Optional.of(serverWorld.getLocation(VecHelper.toVector3d(vec3d)));
         } catch (final CommandSyntaxException e) {
             throw reader.createException(Component.text(e.getMessage()));
         }

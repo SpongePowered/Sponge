@@ -28,7 +28,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.gen.WorldGenerationSettings;
+import org.spongepowered.api.world.generation.settings.WorldGenerationSettings;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;

@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.world.biome;
 
 import net.minecraft.world.biome.IBiomeMagnifier;
-import org.spongepowered.api.world.biome.BiomeFinder;
+import org.spongepowered.api.world.biome.BiomeSampler;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(IBiomeMagnifier.class)
-public interface IBiomeMagnifier_API extends BiomeFinder {
+public interface IBiomeMagnifier_API extends BiomeSampler {
 
 }
