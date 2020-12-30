@@ -29,7 +29,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.Structure;
 import net.minecraft.world.gen.feature.VillageStructure;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.feature.Feature;
+import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.math.vector.Vector3i;
 
