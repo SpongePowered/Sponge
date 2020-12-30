@@ -24,10 +24,24 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
+import net.kyori.adventure.text.Component;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(GameType.class)
 public abstract class GameTypeMixin_API implements GameMode {
+
+    // @formatter:off
+    @Shadow public abstract ITextComponent getDisplayName();
+    // @formatter:on
+
+    @Override
+    public @NonNull Component asComponent() {
+        return SpongeAdventure.asAdventure(this.getDisplayName());
+    }
 }
