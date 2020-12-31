@@ -41,7 +41,11 @@ public abstract class WorldEntitySpawnerMixin {
     private static boolean impl$usePerWorldSpawnRules(final WorldEntitySpawner.EntityDensityManager manager, final EntityClassification p_234991_1_,
                                                       final ServerWorld p_234979_0_, final Chunk p_234979_1_, final WorldEntitySpawner.EntityDensityManager p_234979_2_,
                                                       final boolean p_234979_3_, final boolean p_234979_4_, final boolean p_234979_5_) {
-        return p_234979_0_.getGameTime() % impl$getSpawningTickRate(p_234991_1_, p_234979_0_) == 0L && ((EntityDensityManagerBridge) manager).bridge$canSpawnForCategoryInWorld(p_234991_1_, p_234979_0_);
+        final int tick = impl$getSpawningTickRate(p_234991_1_, p_234979_0_);
+        if (tick == 0) {
+            return false;
+        }
+        return p_234979_0_.getGameTime() % tick  == 0L && ((EntityDensityManagerBridge) manager).bridge$canSpawnForCategoryInWorld(p_234991_1_, p_234979_0_);
     }
 
     private static int impl$getSpawningTickRate(final EntityClassification p_234991_1_, final ServerWorld world) {
