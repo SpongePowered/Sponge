@@ -43,6 +43,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
+import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
@@ -112,12 +113,12 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
 
     @Override
     public int bridge$getDespawnDelay() {
-        return 6000 - (this.impl$infiniteDespawnDelay ? this.impl$previousDespawnDelay : this.age);
+        return SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate - (this.impl$infiniteDespawnDelay ? this.impl$previousDespawnDelay : this.age);
     }
 
     @Override
     public void bridge$setDespawnDelay(final int delay, final boolean infinite) {
-        this.age = 6000 - delay;
+        this.age = SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate - delay;
         final boolean previous = this.impl$infiniteDespawnDelay;
         this.impl$infiniteDespawnDelay = infinite;
         if (infinite && !previous) {
@@ -197,6 +198,16 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
             final ExpireEntityEvent event = SpongeEventFactory.createExpireEntityEvent(frame.getCurrentCause(), (Item) this);
             SpongeCommon.postEvent(event);
         }
+    }
+
+    @ModifyConstant(method = "isMergable", constant = @Constant(intValue = 6000))
+    private int impl$isMergableUseDespawnRateFromConfig() {
+        return SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate;
+    }
+
+    @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000))
+    private int impl$tickUseDespawnRateFromConfig() {
+        return SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate;
     }
 
 }
