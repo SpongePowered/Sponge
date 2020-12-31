@@ -22,29 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.gen;
+package org.spongepowered.common.mixin.api.mcp.world.gen.settings;
 
-import net.minecraft.world.gen.FlatLayerInfo;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.generation.config.flat.LayerConfig;
+import net.minecraft.world.gen.settings.StructureSpreadSettings;
+import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(FlatLayerInfo.class)
-public abstract class FlatLayerInfoMixin_API implements LayerConfig {
+@Mixin(StructureSpreadSettings.class)
+@Implements(@Interface(iface = SpacedStructureConfig.class, prefix = "spacedStructureConfig$"))
+public abstract class StructureSpreadSettingsMixin_API implements SpacedStructureConfig {
 
     // @formatter:off
-    @Shadow public abstract int shadow$getHeight();
-    @Shadow public abstract net.minecraft.block.BlockState shadow$getBlockState();
+    @Shadow public abstract int shadow$distance();
+    @Shadow public abstract int shadow$spread();
+    @Shadow public abstract int shadow$count();
     // @formatter:on
 
-    @Override
-    public int height() {
-        return this.shadow$getHeight();
+    @Intrinsic
+    public int spacedStructureConfig$distance() {
+        return this.shadow$distance();
     }
 
-    @Override
-    public BlockState block() {
-        return (BlockState) this.shadow$getBlockState();
+    @Intrinsic
+    public int spacedStructureConfig$spread() {
+        return this.shadow$spread();
+    }
+
+    @Intrinsic
+    public int spacedStructureConfig$count() {
+        return this.shadow$count();
     }
 }

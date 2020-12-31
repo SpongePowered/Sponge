@@ -28,6 +28,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.storage.IWorldInfo;
 import org.spongepowered.api.util.MinecraftDayTime;
+import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
@@ -42,6 +43,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Mixin(IWorldInfo.class)
 @Implements(@Interface(iface = WorldProperties.class, prefix = "worldProperties$"))
@@ -51,50 +53,47 @@ public interface IWorldInfoMixin_API extends WorldProperties {
     @Shadow int shadow$getXSpawn();
     @Shadow int shadow$getYSpawn();
     @Shadow int shadow$getZSpawn();
-    @Shadow float shadow$getSpawnAngle();
     @Shadow long shadow$getGameTime();
     @Shadow long shadow$getDayTime();
-    @Shadow boolean shadow$isThundering();
-    @Shadow boolean shadow$isRaining();
-    @Shadow void shadow$setRaining(boolean p_76084_1_);
     @Shadow boolean shadow$isHardcore();
     @Shadow GameRules shadow$getGameRules();
     @Shadow Difficulty shadow$getDifficulty();
     // @formatter:on
 
     @Override
-    default Vector3i getSpawnPosition() {
+    default Vector3i spawnPosition() {
         return new Vector3i(this.shadow$getXSpawn(), this.shadow$getYSpawn(), this.shadow$getZSpawn());
     }
 
     @Override
-    default void setSpawnPosition(final Vector3i position) {
-        throw new UnsupportedOperationException("Only vanilla implemented mutable spawn world properties are supported!");
+    default void spawnPosition(final Vector3i position) {
+        throw new UnsupportedOperationException("Only vanilla implemented spawn world properties are supported!");
     }
 
     @Intrinsic
-    default MinecraftDayTime worldProperties$getGameTime() {
+    default MinecraftDayTime worldProperties$gameTime() {
         return new SpongeMinecraftDayTime(this.shadow$getGameTime());
     }
 
     @Intrinsic
-    default MinecraftDayTime worldProperties$getDayTime() {
+    default MinecraftDayTime worldProperties$dayTime() {
         return new SpongeMinecraftDayTime(this.shadow$getDayTime());
     }
 
     @Intrinsic
-    default boolean worldProperties$isHardcore() {
+    default boolean worldProperties$hardcore() {
         return this.shadow$isHardcore();
     }
 
     @Intrinsic
-    default org.spongepowered.api.world.difficulty.Difficulty worldProperties$getDifficulty() {
+    default org.spongepowered.api.world.difficulty.Difficulty worldProperties$difficulty() {
         return (org.spongepowered.api.world.difficulty.Difficulty) (Object) this.shadow$getDifficulty();
     }
 
     @Override
     default  <V> V getGameRule(final GameRule<V> gameRule) {
-        final GameRules.RuleValue<?> value = this.shadow$getGameRules().getRule((GameRules.RuleKey<?>) (Object) gameRule);
+        final GameRules.RuleValue<?> value = this.shadow$getGameRules().getRule((GameRules.RuleKey<?>) (Object) Objects.requireNonNull(gameRule,
+                "gameRule"));
         if (value instanceof GameRules.BooleanValue) {
             return (V) Boolean.valueOf(((GameRules.BooleanValue) value).get());
         } else if (value instanceof GameRules.IntegerValue) {
@@ -105,6 +104,9 @@ public interface IWorldInfoMixin_API extends WorldProperties {
 
     @Override
     default  <V> void setGameRule(final GameRule<V> gameRule, final V value) {
+        Objects.requireNonNull(gameRule, "gameRule");
+        Objects.requireNonNull(value, "value");
+
         final GameRules.RuleValue<?> mValue = this.shadow$getGameRules().getRule((GameRules.RuleKey<?>) (Object) gameRule);
         ((GameRules_RuleValueAccessor) mValue).invoker$deserialize(value.toString());
     }
@@ -132,5 +134,4 @@ public interface IWorldInfoMixin_API extends WorldProperties {
 
         return apiRules;
     }
-
 }

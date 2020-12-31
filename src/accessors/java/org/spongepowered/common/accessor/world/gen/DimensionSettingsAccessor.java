@@ -22,29 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.gen;
+package org.spongepowered.common.accessor.world.gen;
 
-import net.minecraft.world.gen.FlatLayerInfo;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.generation.config.flat.LayerConfig;
+import net.minecraft.block.BlockState;
+import net.minecraft.world.gen.DimensionSettings;
+import net.minecraft.world.gen.settings.DimensionStructuresSettings;
+import net.minecraft.world.gen.settings.NoiseSettings;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-@Mixin(FlatLayerInfo.class)
-public abstract class FlatLayerInfoMixin_API implements LayerConfig {
+@Mixin(DimensionSettings.class)
+public interface DimensionSettingsAccessor {
 
-    // @formatter:off
-    @Shadow public abstract int shadow$getHeight();
-    @Shadow public abstract net.minecraft.block.BlockState shadow$getBlockState();
-    // @formatter:on
-
-    @Override
-    public int height() {
-        return this.shadow$getHeight();
-    }
-
-    @Override
-    public BlockState block() {
-        return (BlockState) this.shadow$getBlockState();
+    @Invoker("<init>") static DimensionSettings invoker$construct(DimensionStructuresSettings structureSettings, NoiseSettings noiseSettings,
+            BlockState defaultBlock, BlockState defaultFluid, int bedrockRoofY, int bedrockFloorY, int seaLevel, boolean disableMobGeneration) {
+        throw new UntransformedInvokerError();
     }
 }

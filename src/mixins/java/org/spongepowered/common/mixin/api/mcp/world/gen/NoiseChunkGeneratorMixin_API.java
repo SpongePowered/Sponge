@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.world.gen;
 import net.minecraft.world.gen.DimensionSettings;
 import net.minecraft.world.gen.NoiseChunkGenerator;
 import org.spongepowered.api.world.generation.ConfigurableChunkGenerator;
-import org.spongepowered.api.world.generation.settings.NoiseGeneratorSettings;
+import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,14 +35,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.function.Supplier;
 
 @Mixin(NoiseChunkGenerator.class)
-public abstract class NoiseChunkGeneratorMixin_API extends ChunkGeneratorMixin_API implements ConfigurableChunkGenerator<NoiseGeneratorSettings> {
+public abstract class NoiseChunkGeneratorMixin_API extends ChunkGeneratorMixin_API implements ConfigurableChunkGenerator<NoiseGeneratorConfig> {
 
     // @formatter:off
     @Shadow @Final protected Supplier<DimensionSettings> settings;
     // @formatter:on
 
     @Override
-    public NoiseGeneratorSettings settings() {
-        return (NoiseGeneratorSettings) (Object) this.settings.get();
+    public NoiseGeneratorConfig config() {
+        return (NoiseGeneratorConfig) (Object) this.settings.get();
     }
 }

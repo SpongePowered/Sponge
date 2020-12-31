@@ -202,7 +202,8 @@
     "util.math.Vector3iMixin",
     "block.EndPortalBlockMixin",
       "world.DimensionMixin",
-    "util.registry.DynamicRegistriesMixin"
+    "util.registry.DynamicRegistriesMixin",
+      "world.gen.DimensionSettingsMixin"
   ],
   "client": [
     "client.MinecraftMixin",

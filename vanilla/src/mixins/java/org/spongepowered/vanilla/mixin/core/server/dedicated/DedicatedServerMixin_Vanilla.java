@@ -66,9 +66,9 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_
         lifecycle.callLoadedGameEvent();
     }
 
-//    @Override
-//    protected void loadLevel() {
-//        this.shadow$detectBundledResources();
-//        this.getWorldManager().loadLevel();
-//    }
+    @Override
+    protected void loadLevel() {
+        this.shadow$detectBundledResources();
+        this.getWorldManager().loadLevel();
+    }
 }

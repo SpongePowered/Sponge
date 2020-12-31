@@ -68,14 +68,6 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
         PlatformHooks.INSTANCE.setPacketHooks(new VanillaPacketHooks());
     }
 
-    @Redirect(method = "createLevels",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;setLevel(Lnet/minecraft/world/server/ServerWorld;)V"))
-    private void vanilla$onSaveHandlerBeingSetToPlayerList(final PlayerList playerList, final ServerWorld level) {
-        playerList.setLevel(level);
-        ((SpongeUserManager) this.getUserManager()).init();
-    }
-
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
     private void vanilla$callStoppingEngineEvent(CallbackInfo ci) {
         SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);

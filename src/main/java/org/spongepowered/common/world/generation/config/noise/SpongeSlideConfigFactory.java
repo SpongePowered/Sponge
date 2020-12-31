@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.generation.settings.noise;
+package org.spongepowered.common.world.generation.config.noise;
 
-import org.spongepowered.api.world.generation.settings.noise.SlideSettings;
+import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 
-public final class SpongeSlideSettingsFactory implements SlideSettings.Factory {
+public final class SpongeSlideConfigFactory implements SlideConfig.Factory {
 
     @Override
-    public SlideSettings of(final int target, final int size, final int offset) {
-        return (SlideSettings) new net.minecraft.world.gen.settings.SlideSettings(target, size, offset);
+    public SlideConfig of(final int target, final int size, final int offset) {
+        return (SlideConfig) new net.minecraft.world.gen.settings.SlideSettings(target, size, offset);
     }
 }

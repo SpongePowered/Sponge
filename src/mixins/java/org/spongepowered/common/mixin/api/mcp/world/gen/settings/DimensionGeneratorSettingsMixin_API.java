@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.settings;
 
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
-import org.spongepowered.api.world.generation.MutableWorldGenerationSettings;
-import org.spongepowered.api.world.generation.settings.WorldGenerationSettings;
+import org.spongepowered.api.world.generation.MutableWorldGenerationConfig;
+import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -36,8 +36,8 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(DimensionGeneratorSettings.class)
-@Implements(@Interface(iface = WorldGenerationSettings.class, prefix = "worldGenerationSettings$"))
-public abstract class DimensionGeneratorSettingsMixin_API implements MutableWorldGenerationSettings {
+@Implements(@Interface(iface = WorldGenerationConfig.class, prefix = "worldGenerationConfig$"))
+public abstract class DimensionGeneratorSettingsMixin_API implements MutableWorldGenerationConfig {
 
     // @formatter:off
     @Mutable @Shadow @Final private long seed;
@@ -50,32 +50,32 @@ public abstract class DimensionGeneratorSettingsMixin_API implements MutableWorl
     // @formatter:on
 
     @Intrinsic
-    public long worldGenerationSettings$getSeed() {
+    public long worldGenerationConfig$seed() {
         return this.shadow$seed();
     }
 
     @Override
-    public void setSeed(long seed) {
+    public void seed(final long seed) {
         this.seed = seed;
     }
 
-    @Override
-    public boolean doFeaturesGenerate() {
+    @Intrinsic
+    public boolean worldGenerationConfig$generateFeatures() {
         return this.shadow$generateFeatures();
     }
 
     @Override
-    public void setFeaturesGenerate(boolean featuresGenerate) {
-        this.generateFeatures = featuresGenerate;
+    public void generateFeatures(final boolean generateFeatures) {
+        this.generateFeatures = generateFeatures;
     }
 
-    @Override
-    public boolean doesGenerateBonusChest() {
+    @Intrinsic
+    public boolean worldGenerationConfig$generateBonusChest() {
         return this.shadow$generateBonusChest();
     }
 
     @Override
-    public void setGenerateBonusChest(boolean generateBonusChest) {
+    public void generateBonusChest(final boolean generateBonusChest) {
         this.generateBonusChest = generateBonusChest;
     }
 }

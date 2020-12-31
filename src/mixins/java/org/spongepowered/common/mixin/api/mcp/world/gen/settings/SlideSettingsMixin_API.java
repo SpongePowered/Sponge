@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.settings;
 
 import net.minecraft.world.gen.settings.SlideSettings;
+import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -32,8 +33,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(SlideSettings.class)
-@Implements(@Interface(iface = org.spongepowered.api.world.generation.settings.noise.SlideSettings.class, prefix = "slideSettings$"))
-public abstract class SlideSettingsMixin_API implements org.spongepowered.api.world.generation.settings.noise.SlideSettings {
+@Implements(@Interface(iface = SlideConfig.class, prefix = "slideConfig$"))
+public abstract class SlideSettingsMixin_API implements SlideConfig {
 
     // @formatter:off
     @Shadow public abstract int shadow$target();
@@ -42,17 +43,17 @@ public abstract class SlideSettingsMixin_API implements org.spongepowered.api.wo
     // @formatter:on
 
     @Intrinsic
-    public int slideSettings$target() {
+    public int slideConfig$target() {
         return this.shadow$target();
     }
 
     @Intrinsic
-    public int slideSettings$size() {
+    public int slideConfig$size() {
         return this.shadow$size();
     }
 
     @Intrinsic
-    public int slideSettings$offset() {
+    public int slideConfig$offset() {
         return this.shadow$offset();
     }
 }

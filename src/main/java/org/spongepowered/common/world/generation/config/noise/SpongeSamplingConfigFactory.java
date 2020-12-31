@@ -22,29 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.gen;
+package org.spongepowered.common.world.generation.config.noise;
 
-import net.minecraft.world.gen.FlatLayerInfo;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.generation.config.flat.LayerConfig;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import net.minecraft.world.gen.settings.ScalingSettings;
+import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
 
-@Mixin(FlatLayerInfo.class)
-public abstract class FlatLayerInfoMixin_API implements LayerConfig {
-
-    // @formatter:off
-    @Shadow public abstract int shadow$getHeight();
-    @Shadow public abstract net.minecraft.block.BlockState shadow$getBlockState();
-    // @formatter:on
+public final class SpongeSamplingConfigFactory implements SamplingConfig.Factory {
 
     @Override
-    public int height() {
-        return this.shadow$getHeight();
-    }
-
-    @Override
-    public BlockState block() {
-        return (BlockState) this.shadow$getBlockState();
+    public SamplingConfig of(final double xzScale, final double xzFactor, final double yScale, final double yFactor) {
+        return (SamplingConfig) new ScalingSettings(xzScale, yScale, xzFactor, yFactor);
     }
 }

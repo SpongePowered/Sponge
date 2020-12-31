@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.settings;
 
 import net.minecraft.world.gen.settings.ScalingSettings;
-import org.spongepowered.api.world.generation.settings.noise.SamplingSettings;
+import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ScalingSettings.class)
-@Implements(@Interface(iface = SamplingSettings.class, prefix = "samplingSettings$"))
-public abstract class ScalingSettingsMixin_API implements SamplingSettings {
+@Implements(@Interface(iface = SamplingConfig.class, prefix = "samplingConfig$"))
+public abstract class ScalingSettingsMixin_API implements SamplingConfig {
 
     // @formatter:off
     @Shadow public abstract double shadow$xzScale();
@@ -44,22 +44,22 @@ public abstract class ScalingSettingsMixin_API implements SamplingSettings {
     // @formatter:on
 
     @Intrinsic
-    public double samplingSettings$xzScale() {
+    public double samplingConfig$xzScale() {
         return this.shadow$xzScale();
     }
 
     @Intrinsic
-    public double samplingSettings$xzFactor() {
+    public double samplingConfig$xzFactor() {
         return this.shadow$xzFactor();
     }
 
     @Intrinsic
-    public double samplingSettings$yScale() {
+    public double samplingConfig$yScale() {
         return this.shadow$yScale();
     }
 
     @Intrinsic
-    public double samplingSettings$yFactor() {
+    public double samplingConfig$yFactor() {
         return this.shadow$yFactor();
     }
 }

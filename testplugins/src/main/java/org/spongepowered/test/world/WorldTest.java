@@ -145,7 +145,7 @@ public final class WorldTest {
                         .setExecutor(context -> {
                             final ServerWorld world = context.requireOne(CommonParameters.WORLD);
                             final WorldType worldType = context.requireOne(worldTypeParameter);
-                            world.getProperties().setWorldType(worldType);
+                            world.getProperties().worldType(worldType);
                             return CommandResult.success();
                         })
                         .build()
@@ -160,7 +160,7 @@ public final class WorldTest {
                             final ServerPlayer player = context.getOne(playerParameter).orElse(this.getSourcePlayer(context));
                             final ServerWorld world = context.getOne(optWorldParameter).orElse(player.getWorld());
                             final Vector3d position =
-                                    context.getOne(optVector3Parameter).orElse(world.getProperties().getSpawnPosition().toDouble());
+                                    context.getOne(optVector3Parameter).orElse(world.getProperties().spawnPosition().toDouble());
                             return player.setLocation(ServerLocation.of(world, position)) ? CommandResult.success() :
                                     CommandResult.error(Component.text("Could not teleport!"));
                         })

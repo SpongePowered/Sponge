@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.api.mcp.world.gen;
 import net.minecraft.world.gen.DimensionSettings;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.generation.settings.NoiseGeneratorSettings;
-import org.spongepowered.api.world.generation.settings.noise.NoiseSettings;
-import org.spongepowered.api.world.generation.settings.structure.StructureGenerationSettings;
+import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
+import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -37,8 +37,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(DimensionSettings.class)
-@Implements(@Interface(iface = NoiseGeneratorSettings.class, prefix = "noiseGeneratorSettings$"))
-public abstract class DimensionSettingsMixin_API implements NoiseGeneratorSettings {
+@Implements(@Interface(iface = NoiseGeneratorConfig.class, prefix = "noiseGeneratorConfig$"))
+public abstract class DimensionSettingsMixin_API implements NoiseGeneratorConfig {
 
     // @formatter:off
     @Shadow public abstract DimensionStructuresSettings shadow$structureSettings();
@@ -48,23 +48,23 @@ public abstract class DimensionSettingsMixin_API implements NoiseGeneratorSettin
     @Shadow public abstract int shadow$seaLevel();
     // @formatter:on
 
-    @Intrinsic
-    public StructureGenerationSettings noiseGeneratorSettings$structureSettings() {
-        return (StructureGenerationSettings) this.shadow$structureSettings();
+    @Override
+    public StructureGenerationConfig structureConfig() {
+        return (StructureGenerationConfig) this.shadow$structureSettings();
+    }
+
+    @Override
+    public NoiseConfig noiseConfig() {
+        return (NoiseConfig) this.shadow$noiseSettings();
     }
 
     @Intrinsic
-    public NoiseSettings noiseGeneratorSettings$noiseSettings() {
-        return (NoiseSettings) this.shadow$noiseSettings();
-    }
-
-    @Intrinsic
-    public BlockState noiseGeneratorSettings$defaultBlock() {
+    public BlockState noiseGeneratorConfig$defaultBlock() {
         return this.defaultBlock();
     }
 
     @Intrinsic
-    public BlockState noiseGeneratorSettings$defaultFluid() {
+    public BlockState noiseGeneratorConfig$defaultFluid() {
         return this.defaultFluid();
     }
 
@@ -79,7 +79,7 @@ public abstract class DimensionSettingsMixin_API implements NoiseGeneratorSettin
     }
 
     @Intrinsic
-    public int noiseGeneratorSettings$seaLevel() {
+    public int noiseGeneratorConfig$seaLevel() {
         return this.shadow$seaLevel();
     }
 }

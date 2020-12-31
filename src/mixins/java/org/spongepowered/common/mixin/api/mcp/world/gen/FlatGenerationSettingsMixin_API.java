@@ -24,46 +24,55 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen;
 
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.gen.FlatGenerationSettings;
 import net.minecraft.world.gen.FlatLayerInfo;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
-import org.spongepowered.api.world.generation.settings.FlatGeneratorSettings;
-import org.spongepowered.api.world.generation.settings.flat.LayerSettings;
-import org.spongepowered.api.world.generation.settings.structure.StructureGenerationSettings;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
+import org.spongepowered.api.world.generation.config.flat.LayerConfig;
+import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.List;
 import java.util.Optional;
 
 @Mixin(FlatGenerationSettings.class)
-@Implements(@Interface(iface = FlatGeneratorSettings.class, prefix = "flatGeneratorSettings$"))
-public abstract class FlatGenerationSettingsMixin_API implements FlatGeneratorSettings {
+public abstract class FlatGenerationSettingsMixin_API implements FlatGeneratorConfig {
 
     // @formatter:off
     @Shadow private boolean decoration;
     @Shadow private boolean addLakes;
 
+    @Shadow public abstract net.minecraft.world.biome.Biome getBiome();
     @Shadow public abstract DimensionStructuresSettings shadow$structureSettings();
     @Shadow public abstract List<FlatLayerInfo> shadow$getLayersInfo();
     // @formatter:on
 
-    @Intrinsic
-    public StructureGenerationSettings structureSettings() {
-        return (StructureGenerationSettings) this.shadow$structureSettings();
+    @Override
+    public StructureGenerationConfig structureConfig() {
+        return (StructureGenerationConfig) this.shadow$structureSettings();
     }
 
     @Override
-    public List<LayerSettings> layers() {
-        return (List<LayerSettings>) (Object) this.shadow$getLayersInfo();
+    public RegistryReference<Biome> biome() {
+        return RegistryKey.of(RegistryTypes.BIOME, (ResourceKey) (Object) BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.getBiome())).asReference();
     }
 
     @Override
-    public Optional<LayerSettings> layer(final int index) {
-        return Optional.ofNullable((LayerSettings) this.shadow$getLayersInfo().get(index));
+    public List<LayerConfig> layers() {
+        return (List<LayerConfig>) (Object) this.shadow$getLayersInfo();
+    }
+
+    @Override
+    public Optional<LayerConfig> layer(final int index) {
+        return Optional.ofNullable((LayerConfig) this.shadow$getLayersInfo().get(index));
     }
 
     @Override

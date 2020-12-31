@@ -24,21 +24,37 @@
  */
 package org.spongepowered.common.world.generation;
 
+import net.minecraft.world.gen.DimensionSettings;
+import net.minecraft.world.gen.FlatChunkGenerator;
+import net.minecraft.world.gen.FlatGenerationSettings;
+import net.minecraft.world.gen.NoiseChunkGenerator;
 import org.spongepowered.api.world.biome.BiomeProvider;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.ConfigurableChunkGenerator;
-import org.spongepowered.api.world.generation.settings.FlatGeneratorSettings;
-import org.spongepowered.api.world.generation.settings.NoiseGeneratorSettings;
+import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
+import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.common.server.BootstrapProperties;
+
+import java.util.Objects;
 
 public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory {
 
     @Override
-    public <T extends FlatGeneratorSettings> ConfigurableChunkGenerator<T> flat(final BiomeProvider provider, final T settings) {
-        return null;
+    public <T extends FlatGeneratorConfig> ConfigurableChunkGenerator<T> flat(final T config) {
+        return (ConfigurableChunkGenerator<T>) new FlatChunkGenerator((FlatGenerationSettings) config);
     }
 
     @Override
-    public <T extends NoiseGeneratorSettings> ConfigurableChunkGenerator<T> noise(final BiomeProvider provider, final T settings) {
-        return null;
+    public <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noise(final BiomeProvider provider, final T config) {
+        return (ConfigurableChunkGenerator<T>) (Object) new NoiseChunkGenerator((net.minecraft.world.biome.provider.BiomeProvider) Objects
+                .requireNonNull(provider, "provider"), BootstrapProperties.dimensionGeneratorSettings.seed(), () ->
+                (DimensionSettings) (Object) Objects.requireNonNull(config, "config"));
+    }
+
+    @Override
+    public <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noise(final BiomeProvider provider, final long seed, final T config) {
+        return (ConfigurableChunkGenerator<T>) (Object) new NoiseChunkGenerator((net.minecraft.world.biome.provider.BiomeProvider)
+                Objects.requireNonNull(provider, "provider"), seed, () ->
+                (DimensionSettings) (Object) Objects.requireNonNull(config, "config"));
     }
 }

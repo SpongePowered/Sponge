@@ -22,29 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.gen;
+package org.spongepowered.common.world.generation.config.structure;
 
-import net.minecraft.world.gen.FlatLayerInfo;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.generation.config.flat.LayerConfig;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import net.minecraft.world.gen.settings.StructureSpreadSettings;
+import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
 
-@Mixin(FlatLayerInfo.class)
-public abstract class FlatLayerInfoMixin_API implements LayerConfig {
-
-    // @formatter:off
-    @Shadow public abstract int shadow$getHeight();
-    @Shadow public abstract net.minecraft.block.BlockState shadow$getBlockState();
-    // @formatter:on
+public final class SpongeSpacedStructureConfigFactory implements SpacedStructureConfig.Factory {
 
     @Override
-    public int height() {
-        return this.shadow$getHeight();
-    }
-
-    @Override
-    public BlockState block() {
-        return (BlockState) this.shadow$getBlockState();
+    public SpacedStructureConfig of(final int distance, final int spread, final int count) {
+        return (SpacedStructureConfig) new StructureSpreadSettings(distance, spread, count);
     }
 }

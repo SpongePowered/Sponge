@@ -28,9 +28,9 @@ import net.minecraft.world.gen.ChunkGenerator;
 import org.spongepowered.api.world.biome.BiomeProviderTemplate;
 import org.spongepowered.api.world.generation.ChunkGeneratorTemplate;
 import org.spongepowered.api.world.generation.ConfigurableChunkGeneratorTemplate;
-import org.spongepowered.api.world.generation.settings.FlatGeneratorSettings;
-import org.spongepowered.api.world.generation.settings.NoiseGeneratorSettings;
-import org.spongepowered.api.world.generation.settings.structure.StructureGenerationSettings;
+import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
+import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 
 public final class SpongeChunkGeneratorTemplate implements ChunkGeneratorTemplate {
 
@@ -43,7 +43,7 @@ public final class SpongeChunkGeneratorTemplate implements ChunkGeneratorTemplat
     }
 
     @Override
-    public StructureGenerationSettings structureSettings() {
+    public StructureGenerationConfig structureConfig() {
         return null;
     }
 
@@ -54,12 +54,12 @@ public final class SpongeChunkGeneratorTemplate implements ChunkGeneratorTemplat
     public static final class FactoryImpl implements Factory {
 
         @Override
-        public <T extends FlatGeneratorSettings> ConfigurableChunkGeneratorTemplate<T> flat(final BiomeProviderTemplate provider, final T settings) {
+        public <T extends FlatGeneratorConfig> ConfigurableChunkGeneratorTemplate<T> flat(final BiomeProviderTemplate provider, final T settings) {
             return null;
         }
 
         @Override
-        public <T extends NoiseGeneratorSettings> ConfigurableChunkGeneratorTemplate<T> noise(final BiomeProviderTemplate provider, final T settings) {
+        public <T extends NoiseGeneratorConfig> ConfigurableChunkGeneratorTemplate<T> noise(final BiomeProviderTemplate provider, final T settings) {
             return null;
         }
     }

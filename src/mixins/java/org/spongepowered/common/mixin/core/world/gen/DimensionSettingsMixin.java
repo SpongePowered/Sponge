@@ -22,15 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.generation.settings.noise;
+package org.spongepowered.common.mixin.core.world.gen;
 
-import net.minecraft.world.gen.settings.ScalingSettings;
-import org.spongepowered.api.world.generation.settings.noise.SamplingSettings;
+import net.minecraft.world.gen.DimensionSettings;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 
-public final class SpongeSamplingSettingsFactory implements SamplingSettings.Factory {
+@Mixin(DimensionSettings.class)
+public abstract class DimensionSettingsMixin implements ResourceKeyBridge {
+
+    private ResourceKey impl$key;
 
     @Override
-    public SamplingSettings of(final double xzScale, final double xzFactor, final double yScale, final double yFactor) {
-        return (SamplingSettings) new ScalingSettings(xzScale, yScale, xzFactor, yFactor);
+    public ResourceKey bridge$getKey() {
+        return this.impl$key;
+    }
+
+    @Override
+    public void bridge$setKey(final ResourceKey key) {
+        this.impl$key = key;
     }
 }

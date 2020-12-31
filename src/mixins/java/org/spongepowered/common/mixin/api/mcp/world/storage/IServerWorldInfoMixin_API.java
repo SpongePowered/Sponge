@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.storage;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.world.GameType;
 import net.minecraft.world.storage.IServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,7 +36,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.generation.MutableWorldGenerationSettings;
+import org.spongepowered.api.world.generation.MutableWorldGenerationConfig;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
@@ -45,11 +46,10 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -81,141 +81,146 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
 
     @Override
     default ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
-    }
-
-    @Override
-    default Optional<ServerWorld> getWorld() {
-        return Optional.ofNullable((ServerWorld) ((IServerWorldInfoBridge) this).bridge$getWorld());
-    }
-
-    @Override
-    default void setDayTime(final MinecraftDayTime dayTime) {
-        this.shadow$setDayTime(dayTime.asTicks().getTicks());
-    }
-
-    @Override
-    default WorldType getWorldType() {
-        return (WorldType) ((IServerWorldInfoBridge) this).bridge$getDimensionType();
-    }
-
-    @Override
-    default void setWorldType(final WorldType worldType) {
-        ((IServerWorldInfoBridge) this).bridge$setDimensionType((net.minecraft.world.DimensionType) worldType, true);
-    }
-
-    @Override
-    default GameMode getGameMode() {
-        return (GameMode) (Object) this.shadow$getGameType();
-    }
-
-    @Override
-    default void setGameMode(final GameMode gamemode) {
-        this.shadow$setGameType((GameType) (Object) gamemode);
-    }
-
-    @Override
-    default boolean areCommandsEnabled() {
-        return this.shadow$getAllowCommands();
-    }
-
-    @Intrinsic
-    default boolean serverWorldProperties$isInitialized() {
-        return this.shadow$isInitialized();
-    }
-
-    @Override
-    default boolean isPVPEnabled() {
-        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.pvp;
-    }
-
-    @Override
-    default void setPVPEnabled(final boolean state) {
-        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.pvp = state;
-    }
-
-    @Override
-    default UUID getUniqueId() {
-        return ((IServerWorldInfoBridge) this).bridge$getUniqueId();
-    }
-
-    @Override
-    default boolean isEnabled() {
-        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.enabled;
-    }
-
-    @Override
-    default void setEnabled(final boolean state) {
-        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.enabled = state;
-    }
-
-    @Override
-    default boolean doesLoadOnStartup() {
-        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.loadOnStartup;
-    }
-
-    @Override
-    default void setLoadOnStartup(final boolean state) {
-        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.loadOnStartup = state;
-    }
-
-    @Override
-    default boolean doesKeepSpawnLoaded() {
-        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.keepSpawnLoaded;
-    }
-
-    @Override
-    default void setKeepSpawnLoaded(final boolean state) {
-        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.keepSpawnLoaded = state;
-    }
-
-    @Override
-    default boolean doesGenerateSpawnOnLoad() {
-        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.generateSpawnOnLoad;
-    }
-
-    @Override
-    default void setGenerateSpawnOnLoad(final boolean state) {
-        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.generateSpawnOnLoad = state;
-    }
-
-    @Override
-    default MutableWorldGenerationSettings getWorldGenerationSettings() {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
     @Override
-    default SerializationBehavior getSerializationBehavior() {
-        return ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.serializationBehavior;
+    default Optional<ServerWorld> getWorld() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
     @Override
-    default void setSerializationBehavior(final SerializationBehavior behavior) {
-        ((IServerWorldInfoBridge) this).bridge$getConfigAdapter().get().world.serializationBehavior = behavior;
+    default Optional<Component> displayName() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default void displayName(final @Nullable Component name) {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default void dayTime(final MinecraftDayTime dayTime) {
+        this.shadow$setDayTime(dayTime.asTicks().getTicks());
+    }
+
+    @Override
+    default void worldType(final WorldType worldType) {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default GameMode gameMode() {
+        return (GameMode) (Object) this.shadow$getGameType();
+    }
+
+    @Override
+    default void gameMode(final GameMode gamemode) {
+        this.shadow$setGameType((GameType) (Object) gamemode);
+    }
+
+    @Override
+    default boolean commands() {
+        return this.shadow$getAllowCommands();
     }
 
     @Intrinsic
-    default int serverWorldProperties$getWanderingTraderSpawnDelay() {
+    default boolean serverWorldProperties$initialized() {
+        return this.shadow$isInitialized();
+    }
+
+    @Override
+    default boolean pvp() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default void pvp(final boolean pvp) {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default UUID getUniqueId() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default boolean enabled() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default void enabled(final boolean enabled) {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default boolean loadOnStartup() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default void loadOnStartup(final boolean loadOnStartup) {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default boolean keepSpawnLoaded() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default void keepSpawnLoaded(final boolean keepSpawnLoaded) {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default boolean generateSpawnOnLoad() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default void generateSpawnOnLoad(final boolean generateSpawnOnLoad) {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default MutableWorldGenerationConfig worldGenerationSettings() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default SerializationBehavior serializationBehavior() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default void serializationBehavior(final SerializationBehavior behavior) {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default int wanderingTraderSpawnDelay() {
         return this.shadow$getWanderingTraderSpawnDelay();
     }
 
-    @Intrinsic
-    default void serverWorldProperties$setWanderingTraderSpawnDelay(final int delay) {
+    @Override
+    default void wanderingTraderSpawnDelay(final int delay) {
         this.shadow$setWanderingTraderSpawnDelay(delay);
     }
 
-    @Intrinsic
-    default int serverWorldProperties$getWanderingTraderSpawnChance() {
+    @Override
+    default int wanderingTraderSpawnChance() {
         return this.shadow$getWanderingTraderSpawnChance();
     }
 
-    @Intrinsic
-    default void serverWorldProperties$setWanderingTraderSpawnChance(final int chance) {
+    @Override
+    default void wanderingTraderSpawnChance(final int chance) {
         this.shadow$setWanderingTraderSpawnChance(chance);
     }
 
     @Override
-    default void setWanderingTrader(@Nullable final WanderingTrader trader) {
+    default void wanderingTrader(@Nullable final WanderingTrader trader) {
         this.shadow$setWanderingTraderId(trader == null ? null : trader.getUniqueId());
     }
 
@@ -252,11 +257,14 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
 
     @Override
     default void setWeather(final Weather weather) {
-        this.setWeather(weather, new SpongeTicks(6000 / Constants.TickConversions.TICK_DURATION_MS));
+        this.setWeather(Objects.requireNonNull(weather, "weather"), new SpongeTicks(6000 / Constants.TickConversions.TICK_DURATION_MS));
     }
 
     @Override
     default void setWeather(final Weather weather, final Ticks ticks) {
+        Objects.requireNonNull(weather, "weather");
+        Objects.requireNonNull(ticks, "ticks");
+
         if (weather == Weathers.CLEAR.get()) {
             this.shadow$setClearWeatherTime((int) ticks.getTicks());
             ((IServerWorldInfo) this).setRaining(false);
@@ -279,7 +287,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default WorldBorder getWorldBorder() {
+    default WorldBorder worldBorder() {
         final net.minecraft.world.border.WorldBorder.Serializer settings = this.shadow$getWorldBorder();
 
         final net.minecraft.world.border.WorldBorder mcBorder = new net.minecraft.world.border.WorldBorder();

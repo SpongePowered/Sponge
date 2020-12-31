@@ -102,15 +102,16 @@ public final class SpongeAdventure {
             return decoded.toString();
         }
     };
+
     public static final PrimitiveCodec<Component> STRING_CODEC = new PrimitiveCodec<Component>() {
         @Override
         public <T> DataResult<Component> read(final DynamicOps<T> ops, final T input) {
-            return ops.getStringValue(input).map(GSON::deserialize);
+            return ops.getStringValue(input).map(SpongeAdventure.GSON::deserialize);
         }
 
         @Override
         public <T> T write(final DynamicOps<T> ops, final Component value) {
-            return ops.createString(GSON.serialize(value));
+            return ops.createString(SpongeAdventure.GSON.serialize(value));
         }
 
         @Override

@@ -22,29 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.gen;
+package org.spongepowered.common.world.generation.config.flat;
 
+import net.minecraft.block.Block;
 import net.minecraft.world.gen.FlatLayerInfo;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.world.gen.FlatLayerInfoAccessor;
 
-@Mixin(FlatLayerInfo.class)
-public abstract class FlatLayerInfoMixin_API implements LayerConfig {
-
-    // @formatter:off
-    @Shadow public abstract int shadow$getHeight();
-    @Shadow public abstract net.minecraft.block.BlockState shadow$getBlockState();
-    // @formatter:on
+public final class SpongeLayerConfigFactory implements LayerConfig.Factory {
 
     @Override
-    public int height() {
-        return this.shadow$getHeight();
-    }
-
-    @Override
-    public BlockState block() {
-        return (BlockState) this.shadow$getBlockState();
+    public LayerConfig of(final int height, final BlockState block) {
+        final FlatLayerInfo layer = new FlatLayerInfo(height, (Block) block.getType());
+        ((FlatLayerInfoAccessor) layer).accessor$blockState((net.minecraft.block.BlockState) block);
+        return (LayerConfig) layer;
     }
 }

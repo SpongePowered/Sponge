@@ -22,19 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.accessor.world.storage;
+package org.spongepowered.common.mixin.api.mcp.world.gen.settings;
 
-import com.mojang.datafixers.DataFixer;
-import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.world.gen.settings.StructureSeparationSettings;
+import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.nio.file.Path;
+@Mixin(StructureSeparationSettings.class)
+@Implements(@Interface(iface = SeparatedStructureConfig.class, prefix = "separatedStructureConfig$"))
+public abstract class StructureSeparationSettingsMixin_API implements SeparatedStructureConfig {
 
-@Mixin(SaveFormat.class)
-public interface SaveFormatAccessor_Vanilla {
+    // @formatter:off
+    @Shadow public abstract int shadow$spacing();
+    @Shadow public abstract int shadow$separation();
+    @Shadow public abstract int shadow$salt();
+    // @formatter:on
 
-    @Accessor("baseDir") Path accessor$getBaseDir();
+    @Intrinsic
+    public int separatedStructureConfig$spacing() {
+        return this.shadow$spacing();
+    }
 
-    @Accessor("fixerUpper") DataFixer accessor$getFixerUpper();
+    @Intrinsic
+    public int separatedStructureConfig$separation() {
+        return this.shadow$separation();
+    }
+
+    @Override
+    public int seedSalt() {
+        return this.shadow$salt();
+    }
 }

@@ -22,55 +22,70 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.bridge.world.storage;
 
+import net.kyori.adventure.text.Component;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.generation.settings.WorldGenerationSettings;
-import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 
-public interface WorldSettingsBridge {
+import java.util.UUID;
 
-    DimensionType bridge$getDimensionType();
+public interface ServerWorldInfoBridge {
 
-    WorldGenerationSettings bridge$getWorldGenerationSettings();
-    
-    SerializationBehavior bridge$getSerializationBehavior();
+    boolean bridge$valid();
 
-    boolean bridge$doesKeepSpawnLoaded();
+    @Nullable
+    ServerWorld bridge$world();
 
-    boolean bridge$isEnabled();
+    @Nullable
+    DimensionType bridge$dimensionType();
+
+    void bridge$dimensionType(DimensionType dimensionType, boolean updatePlayers);
+
+    @Nullable
+    UUID bridge$uniqueId();
+
+    void bridge$uniqueId(UUID uniqueId);
+
+    boolean bridge$customDifficulty();
+
+    void bridge$forceSetDifficulty(Difficulty difficulty);
+
+    boolean bridge$pvp();
+
+    void bridge$pvp(boolean pvp);
+
+    boolean bridge$enabled();
+
+    void bridge$enabled(boolean enabled);
 
     boolean bridge$loadOnStartup();
 
+    void bridge$loadOnStartup(boolean loadOnStartup);
+
+    boolean bridge$keepSpawnLoaded();
+
+    void bridge$keepSpawnLoaded(boolean keepSpawnLoaded);
+
     boolean bridge$generateSpawnOnLoad();
 
-    boolean bridge$isPVPEnabled();
+    void bridge$generateSpawnOnLoad(boolean generateSpawnOnLoad);
 
-    void bridge$setDimensionType(DimensionType dimensionType);
+    SerializationBehavior bridge$serializationBehavior();
 
-    void bridge$setWorldGenerationSettings(WorldGenerationSettings worldGenerationSettings);
+    void bridge$serializationBehavior(SerializationBehavior behavior);
 
-    void bridge$setSerializationBehavior(SerializationBehavior behavior);
+    @Nullable
+    Component bridge$displayName();
 
-    void bridge$setEnabled(boolean state);
+    void bridge$displayName(@Nullable Component displayName);
 
-    void bridge$setLoadOnStartup(boolean state);
+    InheritableConfigHandle<WorldConfig> bridge$configAdapter();
 
-    void bridge$setKeepSpawnLoaded(@Nullable Boolean state);
-
-    void bridge$setGenerateSpawnOnLoad(boolean state);
-
-    void bridge$setPVPEnabled(boolean state);
-
-    void bridge$setCommandsEnabled(boolean state);
-
-    void bridge$populateInfo(IServerWorldInfoBridge infoBridge);
-
-    void bridge$setInfoConfigAdapter(InheritableConfigHandle<WorldConfig> configAdapter);
-
-    void bridge$setConfigExists(boolean worldConfigExists);
+    void bridge$configAdapter(InheritableConfigHandle<WorldConfig> adapter);
 }

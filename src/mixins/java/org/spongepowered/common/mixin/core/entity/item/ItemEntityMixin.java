@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
@@ -82,7 +82,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
             return originalRadius;
         }
         if (this.impl$cachedRadius == -1) {
-            final double configRadius = ((IServerWorldInfoBridge) this.level.getLevelData()).bridge$getConfigAdapter().get().world.itemMergeRadius;
+            final double configRadius = ((ServerWorldInfoBridge) this.level.getLevelData()).bridge$configAdapter().get().world.itemMergeRadius;
             this.impl$cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
         return this.impl$cachedRadius;

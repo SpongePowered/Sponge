@@ -26,8 +26,9 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.settings;
 
 import net.minecraft.world.gen.settings.NoiseSettings;
 import net.minecraft.world.gen.settings.ScalingSettings;
-import org.spongepowered.api.world.generation.settings.noise.SamplingSettings;
-import org.spongepowered.api.world.generation.settings.noise.SlideSettings;
+import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
+import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
+import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -35,8 +36,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(NoiseSettings.class)
-@Implements(@Interface(iface = org.spongepowered.api.world.generation.settings.noise.NoiseSettings.class, prefix = "noiseSettings$"))
-public abstract class NoiseSettingsMixin_API implements org.spongepowered.api.world.generation.settings.noise.NoiseSettings {
+@Implements(@Interface(iface = NoiseConfig.class, prefix = "noiseConfig$"))
+public abstract class NoiseSettingsMixin_API implements NoiseConfig {
 
     // @formatter:off
     @Shadow public abstract int shadow$height();
@@ -53,23 +54,23 @@ public abstract class NoiseSettingsMixin_API implements org.spongepowered.api.wo
     // @formatter:on
 
     @Intrinsic
-    public int noiseSettings$height() {
+    public int noiseConfig$height() {
         return this.shadow$height();
     }
 
     @Override
-    public SamplingSettings samplingSettings() {
-        return (SamplingSettings) this.shadow$noiseSamplingSettings();
+    public SamplingConfig samplingConfig() {
+        return (SamplingConfig) this.shadow$noiseSamplingSettings();
     }
 
     @Override
-    public SlideSettings topSettings() {
-        return (SlideSettings) this.shadow$topSlideSettings();
+    public SlideConfig topConfig() {
+        return (SlideConfig) this.shadow$topSlideSettings();
     }
 
     @Override
-    public SlideSettings bottomSettings() {
-        return (SlideSettings) this.shadow$bottomSlideSettings();
+    public SlideConfig bottomConfig() {
+        return (SlideConfig) this.shadow$bottomSlideSettings();
     }
 
     @Override
@@ -83,12 +84,12 @@ public abstract class NoiseSettingsMixin_API implements org.spongepowered.api.wo
     }
 
     @Intrinsic
-    public double noiseSettings$densityFactor() {
+    public double noiseConfig$densityFactor() {
         return this.shadow$densityFactor();
     }
 
     @Intrinsic
-    public double noiseSettings$densityOffset() {
+    public double noiseConfig$densityOffset() {
         return this.shadow$densityOffset();
     }
 

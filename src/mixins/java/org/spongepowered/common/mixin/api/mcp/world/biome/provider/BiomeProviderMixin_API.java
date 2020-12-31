@@ -39,7 +39,7 @@ public abstract class BiomeProviderMixin_API implements org.spongepowered.api.wo
 
     // @formatter:off
     @Shadow public abstract List<net.minecraft.world.biome.Biome> shadow$possibleBiomes();
-    @Shadow public abstract Set<net.minecraft.world.biome.Biome> getBiomesWithin(int p_225530_1_, int p_225530_2_, int p_225530_3_, int p_225530_4_);
+    @Shadow public abstract Set<net.minecraft.world.biome.Biome> shadow$getBiomesWithin(int p_225530_1_, int p_225530_2_, int p_225530_3_, int p_225530_4_);
     // @formatter:on
 
     @Override
@@ -49,7 +49,7 @@ public abstract class BiomeProviderMixin_API implements org.spongepowered.api.wo
 
     @Override
     public Set<Biome> within(final int x, final int y, final int z, final int size) {
-        return (Set<Biome>) (Object) this.getBiomesWithin(x, y, z, size);
+        return (Set<Biome>) (Object) this.shadow$getBiomesWithin(x, y, z, size);
     }
 
     @Override

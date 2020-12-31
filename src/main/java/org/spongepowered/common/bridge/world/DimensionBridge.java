@@ -41,6 +41,9 @@ public interface DimensionBridge {
 
     SerializationBehavior bridge$serializationBehavior();
 
+    @Nullable
+    Integer bridge$viewDistance();
+
     boolean bridge$enabled();
 
     boolean bridge$loadOnStartup();

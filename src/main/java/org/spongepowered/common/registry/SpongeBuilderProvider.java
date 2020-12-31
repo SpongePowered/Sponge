@@ -102,15 +102,16 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.generation.settings.FlatGeneratorSettings;
-import org.spongepowered.api.world.generation.settings.NoiseGeneratorSettings;
-import org.spongepowered.api.world.generation.settings.noise.NoiseSettings;
+import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
+import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
+import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.generation.MutableWorldGenerationSettings;
+import org.spongepowered.api.world.generation.MutableWorldGenerationConfig;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
@@ -187,15 +188,16 @@ import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
-import org.spongepowered.common.world.generation.settings.SpongeFlatGeneratorSettingsBuilder;
-import org.spongepowered.common.world.generation.settings.SpongeNoiseGeneratorSettingsBuilder;
-import org.spongepowered.common.world.generation.settings.noise.SpongeNoiseSettings;
+import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfigBuilder;
+import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
+import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
+import org.spongepowered.common.world.generation.config.structure.SpongeStructureGenerationConfigBuilder;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
-import org.spongepowered.common.world.generation.SpongeMutableWorldGenerationSettingsBuilder;
+import org.spongepowered.common.world.generation.SpongeMutableWorldGenerationConfigBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.volume.stream.SpongeStreamOptionsBuilder;
 
@@ -318,13 +320,14 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(PaletteType.Builder.class, SpongePaletteTypeBuilder::new)
                 .register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new)
                 .register(FluidState.Builder.class, SpongeFluidStateBuilder::new)
-                .register(MutableWorldGenerationSettings.Builder.class, SpongeMutableWorldGenerationSettingsBuilder::new)
+                .register(MutableWorldGenerationConfig.Builder.class, SpongeMutableWorldGenerationConfigBuilder::new)
                 .register(WorldTypeEffect.Builder.class, SpongeWorldTypeEffect.BuilderImpl::new)
                 .register(WorldTypeTemplate.Builder.class, SpongeWorldTypeTemplate.BuilderImpl::new)
                 .register(WorldTemplate.Builder.class, SpongeWorldTemplate.BuilderImpl::new)
-                .register(NoiseSettings.Builder.class, SpongeNoiseSettings.BuilderImpl::new)
-                .register(FlatGeneratorSettings.Builder.class, SpongeFlatGeneratorSettingsBuilder::new)
-                .register(NoiseGeneratorSettings.Builder.class, SpongeNoiseGeneratorSettingsBuilder::new)
+                .register(NoiseConfig.Builder.class, SpongeNoiseConfig.BuilderImpl::new)
+                .register(StructureGenerationConfig.Builder.class, SpongeStructureGenerationConfigBuilder::new)
+                .register(FlatGeneratorConfig.Builder.class, SpongeFlatGeneratorConfigBuilder::new)
+                .register(NoiseGeneratorConfig.Builder.class, SpongeNoiseGeneratorConfig.BuilderImpl::new)
         ;
     }
 }

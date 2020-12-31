@@ -42,6 +42,7 @@ public final class BootstrapProperties {
     public static RegistryReference<Difficulty> difficulty;
     public static boolean pvp;
     public static boolean hardcore;
+    public static int viewDistance;
     public static DynamicRegistries registries;
 
     public static void init(final ServerProperties properties, DynamicRegistries registries) {
@@ -50,6 +51,7 @@ public final class BootstrapProperties {
         BootstrapProperties.difficulty = RegistryKey.of(RegistryTypes.DIFFICULTY, ResourceKey.sponge(properties.difficulty.getKey())).asDefaultedReference(() -> Sponge.getGame().registries());
         BootstrapProperties.pvp = properties.pvp;
         BootstrapProperties.hardcore = properties.hardcore;
+        BootstrapProperties.viewDistance = properties.viewDistance;
         BootstrapProperties.registries = registries;
     }
 }

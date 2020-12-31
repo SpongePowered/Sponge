@@ -27,8 +27,10 @@ package org.spongepowered.common.mixin.core.world;
 import com.mojang.datafixers.kinds.App;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.kyori.adventure.text.Component;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.Dimension;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,6 +47,9 @@ public abstract class DimensionMixin implements DimensionBridge {
     private ResourceLocation impl$gameMode = (ResourceLocation) (Object) BootstrapProperties.gameMode.location();
     private ResourceLocation impl$difficulty = (ResourceLocation) (Object) BootstrapProperties.difficulty.location();
     private SerializationBehavior impl$serializationBehavior = SerializationBehavior.AUTOMATIC;
+    @Nullable private Component impl$displayName = null;
+    private Integer impl$viewDistance = BootstrapProperties.viewDistance;
+
     private boolean impl$enabled = true, impl$loadOnStartup = true, impl$keepSpawnLoaded = true, impl$generateSpawnOnLoad = false,
             impl$hardcore = BootstrapProperties.hardcore, impl$commands = true, impl$pvp = BootstrapProperties.pvp;
 
@@ -52,6 +57,11 @@ public abstract class DimensionMixin implements DimensionBridge {
     private static <T> Codec<Dimension> impl$useTemplateCodec(final Function<RecordCodecBuilder.Instance<Dimension>, ?
                 extends App<RecordCodecBuilder.Mu<Dimension>, Dimension>> func) {
         return SpongeWorldTemplate.DIRECT_CODEC;
+    }
+
+    @Override
+    public @Nullable Component bridge$displayName() {
+        return this.impl$displayName;
     }
 
     @Override
@@ -67,6 +77,11 @@ public abstract class DimensionMixin implements DimensionBridge {
     @Override
     public SerializationBehavior bridge$serializationBehavior() {
         return this.impl$serializationBehavior;
+    }
+
+    @Override
+    public @Nullable Integer bridge$viewDistance() {
+        return this.impl$viewDistance;
     }
 
     @Override
@@ -109,6 +124,7 @@ public abstract class DimensionMixin implements DimensionBridge {
         this.impl$gameMode = spongeData.gameMode == null ? (ResourceLocation) (Object) BootstrapProperties.gameMode.location() : spongeData.gameMode;
         this.impl$difficulty = spongeData.difficulty == null ? (ResourceLocation) (Object) BootstrapProperties.difficulty.location() : spongeData.difficulty;
         this.impl$serializationBehavior = spongeData.serializationBehavior == null ? SerializationBehavior.AUTOMATIC : spongeData.serializationBehavior;
+        this.impl$displayName = spongeData.displayName;
         this.impl$enabled = spongeData.enabled == null || spongeData.enabled;
         this.impl$loadOnStartup = spongeData.enabled == null || spongeData.enabled;
         this.impl$keepSpawnLoaded = spongeData.keepSpawnLoaded != null && spongeData.keepSpawnLoaded;
@@ -116,5 +132,6 @@ public abstract class DimensionMixin implements DimensionBridge {
         this.impl$hardcore = spongeData.hardcore == null ? BootstrapProperties.hardcore : spongeData.hardcore;
         this.impl$commands = spongeData.commands == null || spongeData.commands;
         this.impl$pvp = spongeData.pvp == null || spongeData.pvp;
+        this.impl$viewDistance = spongeData.viewDistance == null ? BootstrapProperties.viewDistance : spongeData.viewDistance;
     }
 }

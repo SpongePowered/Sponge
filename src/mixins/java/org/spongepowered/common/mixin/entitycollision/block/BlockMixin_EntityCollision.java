@@ -30,8 +30,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
@@ -72,7 +72,7 @@ public abstract class BlockMixin_EntityCollision implements CollisionCapabilityB
 
     @Override
     public void collision$initializeCollisionState(final net.minecraft.world.World world) {
-        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter();
+        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((ServerWorldInfoBridge) world.getLevelData()).bridge$configAdapter();
         final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
         final EntityCollisionCategory worldCollCat = worldConfigAdapter.get().entityCollision;
 

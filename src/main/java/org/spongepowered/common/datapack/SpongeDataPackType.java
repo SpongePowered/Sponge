@@ -120,5 +120,10 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         public DataPackType worldType() {
             return this.worldType;
         }
+
+        @Override
+        public DataPackType world() {
+            return null;
+        }
     }
 }

@@ -52,7 +52,7 @@ public abstract class DifficultyCommandMixin {
         if (source.getLevel().getDifficulty() == difficulty) {
             throw DifficultyCommandMixin.ERROR_ALREADY_DIFFICULT.create(difficulty.getKey());
         } else {
-            ((ServerWorldProperties)source.getLevel().getLevelData()).setDifficulty((org.spongepowered.api.world.difficulty.Difficulty) (Object) difficulty);
+            ((ServerWorldProperties)source.getLevel().getLevelData()).difficulty((org.spongepowered.api.world.difficulty.Difficulty) (Object) difficulty);
             source.sendSuccess(new TranslationTextComponent("commands.difficulty.success", difficulty.getDisplayName()), true);
             return 0;
         }

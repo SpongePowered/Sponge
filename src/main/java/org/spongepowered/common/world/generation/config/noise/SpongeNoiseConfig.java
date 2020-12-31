@@ -22,105 +22,105 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.generation.settings.noise;
+package org.spongepowered.common.world.generation.config.noise;
 
 import net.minecraft.world.gen.settings.ScalingSettings;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.world.generation.settings.noise.NoiseSettings;
-import org.spongepowered.api.world.generation.settings.noise.SamplingSettings;
-import org.spongepowered.api.world.generation.settings.noise.SlideSettings;
+import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
+import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
+import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 
 import java.util.Objects;
 
-public final class SpongeNoiseSettings {
+public final class SpongeNoiseConfig {
 
-    private SpongeNoiseSettings() {
+    private SpongeNoiseConfig() {
     }
 
-    public static final class BuilderImpl implements NoiseSettings.Builder {
+    public static final class BuilderImpl implements NoiseConfig.Builder {
 
-        public SamplingSettings sampling;
-        public SlideSettings top, bottom;
+        public SamplingConfig sampling;
+        public SlideConfig top, bottom;
         
         public int height, horizontalSize, verticalSize;
         public double densityFactor, densityOffset;
         public boolean simplexForSurface, randomizeDensityOffset, amplified;
 
-        BuilderImpl() {
+        public BuilderImpl() {
             this.reset();
         }
 
         @Override
-        public NoiseSettings.Builder height(final int height) {
+        public NoiseConfig.Builder height(final int height) {
             this.height = height;
             return this;
         }
 
         @Override
-        public NoiseSettings.Builder sampling(final SamplingSettings sampling) {
+        public NoiseConfig.Builder sampling(final SamplingConfig sampling) {
             this.sampling = Objects.requireNonNull(sampling, "sampling");
             return this;
         }
 
         @Override
-        public NoiseSettings.Builder top(final SlideSettings top) {
+        public NoiseConfig.Builder top(final SlideConfig top) {
             this.top = Objects.requireNonNull(top, "top");
             return this;
         }
 
         @Override
-        public NoiseSettings.Builder bottom(final SlideSettings bottom) {
+        public NoiseConfig.Builder bottom(final SlideConfig bottom) {
             this.bottom = Objects.requireNonNull(bottom, "bottom");
             return this;
         }
 
         @Override
-        public NoiseSettings.Builder horizontalSize(final int horizontal) {
+        public NoiseConfig.Builder horizontalSize(final int horizontal) {
             this.horizontalSize = horizontal;
             return this;
         }
 
         @Override
-        public NoiseSettings.Builder verticalSize(final int vertical) {
+        public NoiseConfig.Builder verticalSize(final int vertical) {
             this.verticalSize = vertical;
             return this;
         }
 
         @Override
-        public NoiseSettings.Builder densityFactor(final double densityFactor) {
+        public NoiseConfig.Builder densityFactor(final double densityFactor) {
             this.densityFactor = densityFactor;
             return this;
         }
 
         @Override
-        public NoiseSettings.Builder densityOffset(final double densityOffset) {
+        public NoiseConfig.Builder densityOffset(final double densityOffset) {
             this.densityOffset = densityOffset;
             return this;
         }
 
         @Override
-        public NoiseSettings.Builder simplexForSurface(boolean simplex) {
+        public NoiseConfig.Builder simplexForSurface(boolean simplex) {
             this.simplexForSurface = simplex;
             return this;
         }
 
         @Override
-        public NoiseSettings.Builder randomizeDensityOffset(boolean randomDensityOffset) {
+        public NoiseConfig.Builder randomizeDensityOffset(boolean randomDensityOffset) {
             this.randomizeDensityOffset = randomDensityOffset;
             return this;
         }
 
         @Override
-        public NoiseSettings.Builder amplified(boolean amplified) {
+        public NoiseConfig.Builder amplified(boolean amplified) {
             this.amplified = amplified;
             return this;
         }
 
         @Override
-        public NoiseSettings.Builder reset() {
-            this.sampling = SamplingSettings.of(0.9999999814507745D, 80.0D,0.9999999814507745D, 160.0D);
-            this.top = SlideSettings.of(-10, 3, 0);
-            this.bottom = SlideSettings.of(-30, 0, 0);
+        public NoiseConfig.Builder reset() {
+            this.sampling = SamplingConfig.of(0.9999999814507745D, 80.0D,0.9999999814507745D, 160.0D);
+            this.top = SlideConfig.of(-10, 3, 0);
+            this.bottom = SlideConfig.of(-30, 0, 0);
             this.height = 256;
             this.horizontalSize = 1;
             this.verticalSize = 2;
@@ -133,11 +133,11 @@ public final class SpongeNoiseSettings {
         }
 
         @Override
-        public NoiseSettings.Builder from(final NoiseSettings value) {
+        public NoiseConfig.Builder from(final NoiseConfig value) {
             Objects.requireNonNull(value, "value");
-            this.sampling = value.samplingSettings();
-            this.top = value.topSettings();
-            this.bottom = value.bottomSettings();
+            this.sampling = value.samplingConfig();
+            this.top = value.topConfig();
+            this.bottom = value.bottomConfig();
             this.height = value.height();
             this.horizontalSize = value.horizontalSize();
             this.verticalSize = value.verticalSize();
@@ -150,50 +150,50 @@ public final class SpongeNoiseSettings {
         }
 
         @Override
-        public @NonNull NoiseSettings build() {
+        public @NonNull NoiseConfig build() {
             Objects.requireNonNull(this.sampling, "sampling");
             Objects.requireNonNull(this.top, "top");
             Objects.requireNonNull(this.bottom, "bottom");
 
-            return (NoiseSettings) new net.minecraft.world.gen.settings.NoiseSettings(this.height, (ScalingSettings) this.sampling,
+            return (NoiseConfig) new net.minecraft.world.gen.settings.NoiseSettings(this.height, (ScalingSettings) this.sampling,
                     (net.minecraft.world.gen.settings.SlideSettings) this.top, (net.minecraft.world.gen.settings.SlideSettings) this.bottom,
                     this.horizontalSize, this.verticalSize, this.densityFactor, this.densityOffset, this.simplexForSurface,
                     this.randomizeDensityOffset, false, this.amplified);
         }
     }
 
-    public static final class FactoryImpl implements NoiseSettings.Factory {
+    public static final class FactoryImpl implements NoiseConfig.Factory {
 
-        private static final NoiseSettings OVERWORLD = (NoiseSettings) new net.minecraft.world.gen.settings.NoiseSettings(256,
+        private static final NoiseConfig OVERWORLD = (NoiseConfig) new net.minecraft.world.gen.settings.NoiseSettings(256,
                 new ScalingSettings(0.9999999814507745D, 0.9999999814507745D, 80.0D, 160.0D),
                 new net.minecraft.world.gen.settings.SlideSettings(-10, 3, 0), new net.minecraft.world.gen
                 .settings.SlideSettings(-30, 0, 0), 1, 2, 1.0D,
                 -0.46875D, true, true, false, false);
 
-        private static final NoiseSettings END = (NoiseSettings) new net.minecraft.world.gen.settings.NoiseSettings(128,
-                new ScalingSettings(2.0D, 1.0D, 80.0D, 160.0D), new net.minecraft.world.gen
-                .settings.SlideSettings(-3000, 64, -46), new net.minecraft.world.gen.settings.SlideSettings(
-                        -30, 7, 1), 2, 1, 0.0D, 0.0D,
-                true, false, false, false);
-
-        private static final NoiseSettings NETHER = (NoiseSettings) new net.minecraft.world.gen.settings.NoiseSettings(128,
+        private static final NoiseConfig NETHER = (NoiseConfig) new net.minecraft.world.gen.settings.NoiseSettings(128,
                 new ScalingSettings(1.0D, 3.0D, 80.0D, 60.0D), new net.minecraft.world.gen.settings
                 .SlideSettings(120, 3, 0), new net.minecraft.world.gen.settings.SlideSettings(320,
                 4, -1), 1, 2, 0.0D, 0.019921875D, false,
                 false, false, false);
 
+        private static final NoiseConfig END = (NoiseConfig) new net.minecraft.world.gen.settings.NoiseSettings(128,
+                new ScalingSettings(2.0D, 1.0D, 80.0D, 160.0D), new net.minecraft.world.gen
+                .settings.SlideSettings(-3000, 64, -46), new net.minecraft.world.gen.settings.SlideSettings(
+                -30, 7, 1), 2, 1, 0.0D, 0.0D,
+                true, false, false, false);
+
         @Override
-        public NoiseSettings overworld() {
+        public NoiseConfig overworld() {
             return FactoryImpl.OVERWORLD;
         }
 
         @Override
-        public NoiseSettings nether() {
+        public NoiseConfig nether() {
             return FactoryImpl.NETHER;
         }
 
         @Override
-        public NoiseSettings end() {
+        public NoiseConfig end() {
             return FactoryImpl.END;
         }
     }

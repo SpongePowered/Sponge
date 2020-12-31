@@ -55,13 +55,15 @@ import net.minecraft.world.storage.ServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.storage.SaveFormat_LevelSaveAccessor;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
@@ -466,7 +468,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         world.getChunkSource().removeRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(spawnPoint), 11, registryKey.location());
 
-        ((IServerWorldInfoBridge) world.getLevelData()).bridge$getConfigAdapter().save();
+        ((ServerWorldInfoBridge) world.getLevelData()).bridge$configAdapter().save();
         ((ServerWorldBridge) world).bridge$setManualSave(true);
 
         try {
@@ -496,8 +498,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         if (forceDifficulty) {
             // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
-            if (!((IServerWorldInfoBridge) world.getLevelData()).bridge$hasCustomDifficulty()) {
-                ((IServerWorldInfoBridge) world.getLevelData()).bridge$forceSetDifficulty(newDifficulty);
+            if (!((ServerWorldInfoBridge) world.getLevelData()).bridge$customDifficulty()) {
+                ((ServerWorldInfoBridge) world.getLevelData()).bridge$forceSetDifficulty(newDifficulty);
             }
         } else {
             ((ServerWorldInfo) world.getLevelData()).setDifficulty(newDifficulty);
@@ -507,6 +509,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     @Override
     public void loadLevel() {
 
+        ((SpongeUserManager) Sponge.getServer().getUserManager()).init();
     }
 
     private void loadSpawnChunks(final ServerWorld serverWorld, final IChunkStatusListener chunkStatusListener) {
@@ -545,7 +548,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         serverChunkProvider.getLightEngine().setTaskPerBatch(5);
 
         // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
-        if (!((IServerWorldInfoBridge) serverWorld.getLevelData()).bridge$getConfigAdapter().get().world.keepSpawnLoaded) {
+        if (!((ServerWorldInfoBridge) serverWorld.getLevelData()).bridge$generateSpawnOnLoad()) {
             serverChunkProvider.removeRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, 11, serverWorld.dimension().location());
         }
     }
@@ -599,13 +602,13 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 apiWorld));
 
-        final boolean generateSpawnOnLoad = ((IServerWorldInfoBridge) levelData).bridge$getConfigAdapter().get().world.generateSpawnOnLoad || isDefaultWorld;
+        final boolean generateSpawnOnLoad = ((ServerWorldInfoBridge) levelData).bridge$generateSpawnOnLoad() || isDefaultWorld;
 
         if (generateSpawnOnLoad) {
             this.loadSpawnChunks(serverWorld, listener);
         } else {
-            serverWorld.getChunkSource().addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(apiWorld.getProperties().getSpawnPosition()
-                            .getX(), apiWorld.getProperties().getSpawnPosition().getZ()), 11, (ResourceLocation) (Object) apiWorld.getKey());
+            serverWorld.getChunkSource().addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(apiWorld.getProperties().spawnPosition()
+                            .getX(), apiWorld.getProperties().spawnPosition().getZ()), 11, (ResourceLocation) (Object) apiWorld.getKey());
         }
     }
 }

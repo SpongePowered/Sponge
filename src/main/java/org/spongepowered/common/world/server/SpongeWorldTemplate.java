@@ -46,7 +46,7 @@ import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.generation.ChunkGeneratorTemplate;
-import org.spongepowered.api.world.generation.settings.WorldGenerationSettings;
+import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
@@ -65,21 +65,22 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     @Nullable public final Component displayName;
     public final RegistryReference<WorldType> worldType;
     public final ChunkGeneratorTemplate generator;
-    public final WorldGenerationSettings generationSettings;
+    public final WorldGenerationConfig generationSettings;
     @Nullable public final RegistryReference<GameMode> gameMode;
     @Nullable public final RegistryReference<Difficulty> difficulty;
     public final SerializationBehavior serializationBehavior;
+    @Nullable public final Integer viewDistance;
 
     public final boolean enabled, loadOnStartup, keepSpawnLoaded, generateSpawnOnLoad, hardcore, commands, pvp;
 
     private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
             .create(r -> r
                     .group(
-                            // Pass in the adventure codec here for the "display_name" field
                             SpongeAdventure.STRING_CODEC.optionalFieldOf("display_name").forGetter(v -> Optional.ofNullable(v.displayName)),
                             ResourceLocation.CODEC.optionalFieldOf("game_mode").forGetter(v -> Optional.ofNullable(v.gameMode)),
                             ResourceLocation.CODEC.optionalFieldOf("difficulty").forGetter(v -> Optional.ofNullable(v.difficulty)),
                             EnumCodec.create(SerializationBehavior.class).optionalFieldOf("serialization_behavior").forGetter(v -> Optional.ofNullable(v.serializationBehavior)),
+                            Codec.INT.optionalFieldOf("view_distance").forGetter(v -> Optional.ofNullable(v.viewDistance)),
                             Codec.BOOL.optionalFieldOf("enabled").forGetter(v -> Optional.ofNullable(v.enabled)),
                             Codec.BOOL.optionalFieldOf("load_on_startup").forGetter(v -> Optional.ofNullable(v.loadOnStartup)),
                             Codec.BOOL.optionalFieldOf("keep_spawn_loaded").forGetter(v -> Optional.ofNullable(v.keepSpawnLoaded)),
@@ -89,8 +90,11 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                             Codec.BOOL.optionalFieldOf("pvp").forGetter(v -> Optional.ofNullable(v.pvp))
                     )
                     // *Chuckles* I continue to be in danger...
-                    .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11) ->
-                            new SpongeDataSection(f1.orElse(null), f2.orElse(null), f3.orElse(null), f4.orElse(null), f5.orElse(null), f6.orElse(null), f7.orElse(null), f8.orElse(null), f9.orElse(null), f10.orElse(null)))
+                    .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12) ->
+                            new SpongeDataSection(f1.orElse(null), f2.orElse(null), f3.orElse(null), f4.orElse(null),
+                                    f5.orElse(null), f6.orElse(null), f7.orElse(null), f8.orElse(null), f9.orElse(null),
+                                    f10.orElse(null), f11.orElse(null), f12.orElse(null))
+                    )
             );
 
     public static final Codec<Dimension> DIRECT_CODEC = RecordCodecBuilder
@@ -102,9 +106,10 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                                 final DimensionBridge dimensionBridge = (DimensionBridge) (Object) v;
                                 return Optional.of(new SpongeDataSection(dimensionBridge.bridge$displayName(), dimensionBridge.bridge$gameMode(),
                                         dimensionBridge.bridge$difficulty(), dimensionBridge.bridge$serializationBehavior(),
-                                        dimensionBridge.bridge$enabled(), dimensionBridge.bridge$loadOnStartup(),
-                                        dimensionBridge.bridge$keepSpawnLoaded(), dimensionBridge.bridge$generateSpawnOnLoad(),
-                                        dimensionBridge.bridge$hardcore(), dimensionBridge.bridge$commands(), dimensionBridge.bridge$pvp()));
+                                        dimensionBridge.bridge$viewDistance(), dimensionBridge.bridge$enabled(),
+                                        dimensionBridge.bridge$loadOnStartup(), dimensionBridge.bridge$keepSpawnLoaded(),
+                                        dimensionBridge.bridge$generateSpawnOnLoad(), dimensionBridge.bridge$hardcore(),
+                                        dimensionBridge.bridge$commands(), dimensionBridge.bridge$pvp()));
                             })
                     )
                     .apply(r, (f1, f2, f3) -> {
@@ -123,6 +128,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.gameMode = builder.gameMode;
         this.difficulty = builder.difficulty;
         this.serializationBehavior = builder.serializationBehavior;
+        this.viewDistance = builder.viewDistance;
         this.enabled = builder.enabled;
         this.loadOnStartup = builder.loadOnStartup;
         this.keepSpawnLoaded = builder.keepSpawnLoaded;
@@ -153,7 +159,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     }
 
     @Override
-    public WorldGenerationSettings generationSettings() {
+    public WorldGenerationConfig generationConfig() {
         return this.generationSettings;
     }
 
@@ -208,6 +214,11 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     }
 
     @Override
+    public Optional<Integer> viewDistance() {
+        return Optional.empty();
+    }
+
+    @Override
     public int getContentVersion() {
         return 1;
     }
@@ -223,17 +234,19 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         @Nullable public final ResourceLocation gameMode;
         @Nullable public final ResourceLocation difficulty;
         @Nullable public final SerializationBehavior serializationBehavior;
+        @Nullable public final Integer viewDistance;
         @Nullable public final Boolean enabled, loadOnStartup, keepSpawnLoaded, generateSpawnOnLoad, hardcore, commands, pvp;
 
         public SpongeDataSection(@Nullable final Component displayName, @Nullable final ResourceLocation gameMode,
                 @Nullable final ResourceLocation difficulty, @Nullable final SerializationBehavior serializationBehavior,
-                @Nullable final Boolean enabled, @Nullable final Boolean loadOnStartup, @Nullable final Boolean keepSpawnLoaded,
-                @Nullable final Boolean generateSpawnOnLoad, @Nullable final Boolean hardcore, @Nullable final Boolean commands,
-                @Nullable final Boolean pvp) {
+                @Nullable final Integer viewDistance, @Nullable final Boolean enabled, @Nullable final Boolean loadOnStartup,
+                @Nullable final Boolean keepSpawnLoaded, @Nullable final Boolean generateSpawnOnLoad, @Nullable final Boolean hardcore,
+                @Nullable final Boolean commands, @Nullable final Boolean pvp) {
             this.displayName = displayName;
             this.gameMode = gameMode;
             this.difficulty = difficulty;
             this.serializationBehavior = serializationBehavior;
+            this.viewDistance = viewDistance;
             this.enabled = enabled;
             this.loadOnStartup = loadOnStartup;
             this.keepSpawnLoaded = keepSpawnLoaded;
@@ -249,10 +262,11 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         @Nullable protected Component displayName;
         @Nullable protected RegistryReference<WorldType> worldType;
         @Nullable protected ChunkGeneratorTemplate generator;
-        @Nullable protected WorldGenerationSettings generationSettings;
+        @Nullable protected WorldGenerationConfig generationSettings;
         @Nullable protected RegistryReference<GameMode> gameMode;
         @Nullable protected RegistryReference<Difficulty> difficulty;
         @Nullable protected SerializationBehavior serializationBehavior;
+        @Nullable protected Integer viewDistance;
 
         protected boolean enabled, loadOnStartup, keepSpawnLoaded, generateSpawnOnLoad, hardcore, commands, pvp;
 
@@ -279,8 +293,8 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         }
 
         @Override
-        public Builder generationSettings(final WorldGenerationSettings generationSettings) {
-            this.generationSettings = Objects.requireNonNull(generationSettings, "generationSettings");
+        public Builder generationConfig(final WorldGenerationConfig generationConfig) {
+            this.generationSettings = Objects.requireNonNull(generationConfig, "generationConfig");
             return this;
         }
 
@@ -345,18 +359,25 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         }
 
         @Override
+        public Builder viewDistance(final int distance) {
+            this.viewDistance = distance;
+            return this;
+        }
+
+        @Override
         public Builder reset() {
             super.reset();
             this.displayName = null;
             final DimensionGeneratorSettings generationSettings = BootstrapProperties.dimensionGeneratorSettings;
             this.worldType = WorldTypes.OVERWORLD;
-            this.generationSettings = (WorldGenerationSettings) DimensionGeneratorSettingsAccessor.invoker$construct(generationSettings.seed(),
+            this.generationSettings = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$construct(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
                     new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental()),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());
             this.gameMode = BootstrapProperties.gameMode;
             this.difficulty = BootstrapProperties.difficulty;
             this.serializationBehavior = SerializationBehavior.AUTOMATIC;
+            this.viewDistance = null;
             this.enabled = true;
             this.loadOnStartup = true;
             this.keepSpawnLoaded = false;
@@ -373,14 +394,15 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
             this.displayName = template.displayName().orElse(null);
             this.worldType = template.worldType();
-            final DimensionGeneratorSettings generationSettings = (DimensionGeneratorSettings) template.generationSettings();
-            this.generationSettings = (WorldGenerationSettings) DimensionGeneratorSettingsAccessor.invoker$construct(generationSettings.seed(),
+            final DimensionGeneratorSettings generationSettings = (DimensionGeneratorSettings) template.generationConfig();
+            this.generationSettings = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$construct(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
                     new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental()),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());
             this.gameMode = template.gameMode().orElse(null);
             this.difficulty = template.difficulty().orElse(null);
             this.serializationBehavior = template.serializationBehavior();
+            this.viewDistance = template.viewDistance().orElse(null);
             this.enabled = template.enabled();
             this.loadOnStartup = template.loadOnStartup();
             this.keepSpawnLoaded = template.keepSpawnLoaded();

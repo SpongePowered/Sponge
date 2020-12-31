@@ -27,18 +27,19 @@ package org.spongepowered.common.mixin.api.mcp.world.gen;
 import net.minecraft.world.gen.FlatChunkGenerator;
 import net.minecraft.world.gen.FlatGenerationSettings;
 import org.spongepowered.api.world.generation.ConfigurableChunkGenerator;
-import org.spongepowered.api.world.generation.settings.FlatGeneratorSettings;
+import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(FlatChunkGenerator.class)
-public abstract class FlatChunkGeneratorMixin_API extends ChunkGeneratorMixin_API implements ConfigurableChunkGenerator<FlatGeneratorSettings> {
+public abstract class FlatChunkGeneratorMixin_API extends ChunkGeneratorMixin_API implements ConfigurableChunkGenerator<FlatGeneratorConfig> {
 
     // @formatter:off
     @Shadow public abstract FlatGenerationSettings shadow$settings();
     // @formatter:on
 
-    public FlatGeneratorSettings settings() {
-        return (FlatGeneratorSettings) this.shadow$settings();
+    @Override
+    public FlatGeneratorConfig config() {
+        return (FlatGeneratorConfig) this.shadow$settings();
     }
 }

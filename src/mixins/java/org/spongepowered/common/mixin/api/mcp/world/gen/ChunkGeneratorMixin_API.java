@@ -28,7 +28,7 @@ import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import org.spongepowered.api.world.biome.BiomeProvider;
 import org.spongepowered.api.world.generation.ChunkGeneratorTemplate;
-import org.spongepowered.api.world.generation.settings.structure.StructureGenerationSettings;
+import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.generation.SpongeChunkGeneratorTemplate;
@@ -47,8 +47,8 @@ public abstract class ChunkGeneratorMixin_API implements org.spongepowered.api.w
     }
 
     @Override
-    public StructureGenerationSettings structureSettings() {
-        return (StructureGenerationSettings) this.shadow$getSettings();
+    public StructureGenerationConfig structureConfig() {
+        return (StructureGenerationConfig) this.shadow$getSettings();
     }
 
     @Override

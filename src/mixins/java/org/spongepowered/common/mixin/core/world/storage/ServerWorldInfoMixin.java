@@ -24,14 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
+import net.kyori.adventure.text.Component;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -44,29 +39,21 @@ import net.minecraft.world.storage.ServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.WorldSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.storage.IServerWorldInfoBridge;
-import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
-import org.spongepowered.common.config.inheritable.WorldConfig;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
 
 @Mixin(ServerWorldInfo.class)
-public abstract class ServerWorldInfoMixin implements IServerConfiguration, IServerWorldInfoBridge, ResourceKeyBridge {
+public abstract class ServerWorldInfoMixin implements IServerConfiguration, ServerWorldInfoBridge, ResourceKeyBridge {
 
     // @formatter:off
     @Shadow private WorldSettings settings;
@@ -74,28 +61,29 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, ISer
     // @formatter:on
 
     @Nullable private ResourceKey impl$key;
-    private String impl$rawDimensionType;
     private DimensionType impl$dimensionType;
+    private SerializationBehavior impl$serializationBehavior;
+    @Nullable private Component impl$displayName;
     private UUID impl$uniqueId = UUID.randomUUID();
-    private boolean impl$hasCustomDifficulty = false;
+    private boolean impl$hasCustomDifficulty = false, impl$pvp, impl$enabled, impl$loadOnStartup, impl$keepSpawnLoaded, impl$generateSpawnOnLoad;
 
-    private InheritableConfigHandle<WorldConfig> impl$configAdapter = SpongeGameConfigs.createDetached();
-    private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
-    private final List<UUID> impl$pendingUniqueIds = new ArrayList<>();
-    private int impl$trackedUniqueIdCount = 0;
-
-    // ResourceKeyBridge
-
+    @Override
     public ResourceKey bridge$getKey() {
         return this.impl$key;
     }
 
+    @Override
     public void bridge$setKey(final ResourceKey key) {
         this.impl$key = key;
     }
 
+    @Override
+    public boolean bridge$valid() {
+        return this.impl$key != null;
+    }
+
     @Nullable
-    public ServerWorld bridge$getWorld() {
+    public ServerWorld bridge$world() {
         if (!Sponge.isServerAvailable()) {
             return null;
         }
@@ -114,175 +102,140 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, ISer
     }
 
     @Override
-    public DimensionType bridge$getDimensionType() {
-        if (this.impl$dimensionType == null) {
-            this.impl$dimensionType = SpongeCommon.getServer().registryAccess().dimensionTypes().getOptional(new ResourceLocation(this.impl$rawDimensionType))
-                    .orElseGet(() -> {
-                        SpongeCommon.getLogger().warn("Level data '{}' specifies dimension type '{}' which does not exist, defaulting to '{}'",
-                                ((IServerWorldInfo) this).getLevelName(), this.impl$dimensionType, World.OVERWORLD.location());
-
-                        return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.OVERWORLD_LOCATION);
-                    });
-        }
+    public DimensionType bridge$dimensionType() {
         return this.impl$dimensionType;
     }
 
     @Override
-    public void bridge$setDimensionType(final DimensionType type, boolean updatePlayers) {
+    public void bridge$dimensionType(final DimensionType type, boolean updatePlayers) {
         this.impl$dimensionType = type;
     }
 
-    // WorldInfoBridge
-
-    public UUID bridge$getUniqueId() {
+    @Override
+    public UUID bridge$uniqueId() {
         return this.impl$uniqueId;
     }
 
-    public void bridge$setUniqueId(final UUID uniqueId) {
+    @Override
+    public void bridge$uniqueId(final UUID uniqueId) {
         this.impl$uniqueId = uniqueId;
     }
 
-    public boolean bridge$hasCustomDifficulty() {
+    @Override
+    public boolean bridge$customDifficulty() {
         return this.impl$hasCustomDifficulty;
     }
 
+    @Override
     public void bridge$forceSetDifficulty(final Difficulty difficulty) {
         this.impl$hasCustomDifficulty = true;
         ((WorldSettingsAccessor) (Object) this.settings).accessor$difficulty(difficulty);
-        this.impl$updateWorldForDifficultyChange(this.bridge$getWorld(), this.shadow$isDifficultyLocked());
+        this.impl$updateWorldForDifficultyChange(this.bridge$world(), this.shadow$isDifficultyLocked());
     }
 
-    public InheritableConfigHandle<WorldConfig> bridge$getConfigAdapter() {
-        if (this.impl$configAdapter == null) {
-            if (this.bridge$isValid()) {
-                this.impl$configAdapter = SpongeGameConfigs.createWorld(null, this.bridge$getKey());
-            } else {
-                this.impl$configAdapter = SpongeGameConfigs.createDetached();
-            }
+    @Override
+    public boolean bridge$pvp() {
+        return this.impl$pvp;
+    }
+
+    @Override
+    public void bridge$pvp(final boolean pvp) {
+        this.impl$pvp = pvp;
+    }
+
+    @Override
+    public boolean bridge$enabled() {
+        return this.impl$enabled;
+    }
+
+    @Override
+    public void bridge$enabled(final boolean enabled) {
+        this.impl$enabled = enabled;
+    }
+
+    @Override
+    public boolean bridge$loadOnStartup() {
+        return this.impl$loadOnStartup;
+    }
+
+    @Override
+    public void bridge$loadOnStartup(final boolean loadOnStartup) {
+        this.impl$loadOnStartup = loadOnStartup;
+    }
+
+    @Override
+    public boolean bridge$keepSpawnLoaded() {
+        return this.impl$keepSpawnLoaded;
+    }
+
+    @Override
+    public void bridge$keepSpawnLoaded(final boolean keepSpawnLoaded) {
+        this.impl$keepSpawnLoaded = keepSpawnLoaded;
+    }
+
+    @Override
+    public boolean bridge$generateSpawnOnLoad() {
+        return this.impl$generateSpawnOnLoad;
+    }
+
+    @Override
+    public void bridge$generateSpawnOnLoad(final boolean generateSpawnOnLoad) {
+        this.impl$generateSpawnOnLoad = generateSpawnOnLoad;
+    }
+
+    @Override
+    public SerializationBehavior bridge$serializationBehavior() {
+        return this.impl$serializationBehavior;
+    }
+
+    @Override
+    public void bridge$serializationBehavior(final SerializationBehavior behavior) {
+        this.impl$serializationBehavior = behavior;
+    }
+
+    @Override
+    public @Nullable Component bridge$displayName() {
+        return this.impl$displayName;
+    }
+
+    @Override
+    public void bridge$displayName(Component displayName) {
+        this.impl$displayName = displayName;
+    }
+
+    @Override
+    public IServerWorldInfo overworldData() {
+        if (World.OVERWORLD.location().equals(this.impl$key)) {
+            return (IServerWorldInfo) this;
         }
-        return this.impl$configAdapter;
+
+        return (IServerWorldInfo) SpongeCommon.getServer().getLevel(World.OVERWORLD).getLevelData();
     }
 
-    public void bridge$setConfigAdapter(final InheritableConfigHandle<WorldConfig> adapter) {
-        this.impl$configAdapter = Objects.requireNonNull(adapter, "adapter");
-    }
-
-    public int bridge$getIndexForUniqueId(final UUID uniqueId) {
-        final Integer index = this.impl$playerUniqueIdMap.inverse().get(uniqueId);
-        if (index != null) {
-            return index;
-        }
-
-        this.impl$playerUniqueIdMap.put(this.impl$trackedUniqueIdCount, uniqueId);
-        this.impl$pendingUniqueIds.add(uniqueId);
-        return this.impl$trackedUniqueIdCount++;
-    }
-
-    public Optional<UUID> bridge$getUniqueIdForIndex(final int index) {
-        return Optional.ofNullable(this.impl$playerUniqueIdMap.get(index));
-    }
-
-    public void bridge$writeTrackedPlayerTable(CompoundNBT spongeDataCompound) {
-        final Iterator<UUID> iter = this.impl$pendingUniqueIds.iterator();
-        final ListNBT playerIdList = spongeDataCompound.getList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
-        while (iter.hasNext()) {
-            final CompoundNBT playerIdCompound = new CompoundNBT();
-            playerIdCompound.putUUID(Constants.UUID, iter.next());
-            playerIdList.add(playerIdCompound);
-            iter.remove();
-        }
-    }
-
-    public void bridge$writeSpongeLevelData(final CompoundNBT compound) {
-        if (!this.bridge$isValid()) {
+    void impl$updateWorldForDifficultyChange(final ServerWorld world, final boolean isLocked) {
+        if (world == null) {
             return;
         }
 
-        final CompoundNBT spongeDataCompound = new CompoundNBT();
-        spongeDataCompound.putInt(Constants.Sponge.DATA_VERSION, Constants.Sponge.SPONGE_DATA_VERSION);
-        final DimensionType dimensionType = this.bridge$getDimensionType();
-        final ResourceLocation dimensionTypeKey = SpongeCommon.getServer().registryAccess().dimensionTypes().getKey(this.impl$dimensionType);
-        spongeDataCompound.putString(Constants.Sponge.World.DIMENSION_TYPE, dimensionTypeKey.toString());
-        spongeDataCompound.putUUID(Constants.Sponge.World.UNIQUE_ID, this.bridge$getUniqueId());
-        spongeDataCompound.putBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY, this.bridge$hasCustomDifficulty());
-
-        this.bridge$writeTrackedPlayerTable(spongeDataCompound);
-
-        compound.put(Constants.Sponge.SPONGE_DATA, spongeDataCompound);
-    }
-
-    public void bridge$readSpongeLevelData(final CompoundNBT compound) {
-        if (!compound.contains(Constants.Sponge.SPONGE_DATA)) {
-            // TODO Minecraft 1.16 - Bad Sponge level data...warn/crash?
-            return;
-        }
-
-        // TODO Minecraft 1.16 - Run DataFixer on the SpongeData compound
-
-        final CompoundNBT spongeDataCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
-
-        this.impl$rawDimensionType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
-
-        if (spongeDataCompound.hasUUID(Constants.Sponge.World.UNIQUE_ID)) {
-            this.bridge$setUniqueId(spongeDataCompound.getUUID(Constants.Sponge.World.UNIQUE_ID));
-        } else {
-            this.bridge$setUniqueId(UUID.randomUUID());
-        }
-
-        if (spongeDataCompound.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY)) {
-            this.bridge$forceSetDifficulty(((IWorldInfo) this).getDifficulty());
-        }
-
-        this.impl$trackedUniqueIdCount = 0;
-        if (spongeDataCompound.contains(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
-            final ListNBT playerIdList = spongeDataCompound.getList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
-            final Iterator<INBT> iter = playerIdList.iterator();
-            while (iter.hasNext()) {
-                final CompoundNBT playerIdComponent = (CompoundNBT) iter.next();
-                final UUID playerUuid = playerIdComponent.getUUID(Constants.UUID);
-                final Integer playerIndex = this.impl$playerUniqueIdMap.inverse().get(playerUuid);
-                if (playerIndex == null) {
-                    this.impl$playerUniqueIdMap.put(this.impl$trackedUniqueIdCount++, playerUuid);
-                } else {
-                    iter.remove();
-                }
-            }
-        }
-    }
-
-//    @Override
-//    public IServerWorldInfo overworldData() {
-//        if (World.OVERWORLD.location().equals(this.impl$key)) {
-//            return (IServerWorldInfo) this;
-//        }
-//
-//        return (IServerWorldInfo) SpongeCommon.getServer().getLevel(World.OVERWORLD).getLevelData();
-//    }
-
-    void impl$updateWorldForDifficultyChange(final ServerWorld serverWorld, final boolean isLocked) {
-        if (serverWorld == null) {
-            return;
-        }
-
-        final MinecraftServer server = serverWorld.getServer();
+        final MinecraftServer server = world.getServer();
         final Difficulty difficulty = ((IWorldInfo) this).getDifficulty();
 
         if (difficulty == Difficulty.HARD) {
-            serverWorld.setSpawnSettings(true, true);
+            world.setSpawnSettings(true, true);
         } else if (server.isSingleplayer()) {
-            serverWorld.setSpawnSettings(difficulty != Difficulty.PEACEFUL, true);
+            world.setSpawnSettings(difficulty != Difficulty.PEACEFUL, true);
         } else {
-            serverWorld.setSpawnSettings(((MinecraftServerAccessor) server).invoker$isSpawningMonsters(), server.isSpawningAnimals());
+            world.setSpawnSettings(((MinecraftServerAccessor) server).invoker$isSpawningMonsters(), server.isSpawningAnimals());
         }
 
-        serverWorld.players().forEach(player -> player.connection.send(new SServerDifficultyPacket(difficulty, isLocked)));
+        world.players().forEach(player -> player.connection.send(new SServerDifficultyPacket(difficulty, isLocked)));
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", ServerWorldInfo.class.getSimpleName() + "[", "]")
                 .add("key=" + this.impl$key)
-                .add("dimensionType=" + this.impl$dimensionType)
+                .add("worldType=" + this.impl$dimensionType)
                 .add("uniqueId=" + this.impl$uniqueId)
                 .add("spawnX=" + ((IWorldInfo) this).getXSpawn())
                 .add("spawnY=" + ((IWorldInfo) this).getYSpawn())
