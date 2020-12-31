@@ -149,7 +149,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         final World<?, ?> world = this.location.getWorld();
         final Vector3d origin = this.location.getPosition();
         final net.minecraft.world.Explosion explosion = new net.minecraft.world.Explosion((net.minecraft.world.World) world,
-                (Entity) this.sourceExplosive, origin.getX(), origin.getY(), origin.getZ(), this.radius,
+                (Entity) this.sourceExplosive, null, null, origin.getX(), origin.getY(), origin.getZ(), this.radius,
                 this.canCauseFire, this.shouldSmoke ? net.minecraft.world.Explosion.Mode.DESTROY : net.minecraft.world.Explosion.Mode.NONE);
         ((ExplosionBridge) explosion).bridge$setShouldBreakBlocks(this.shouldBreakBlocks);
         ((ExplosionBridge) explosion).bridge$setShouldDamageEntities(this.shouldDamageEntities);
