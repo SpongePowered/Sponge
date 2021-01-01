@@ -201,12 +201,12 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
     }
 
     @ModifyConstant(method = "isMergable", constant = @Constant(intValue = 6000))
-    private int impl$isMergableUseDespawnRateFromConfig() {
+    private int impl$isMergableUseDespawnRateFromConfig(final int originalValue) {
         return SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate;
     }
 
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000))
-    private int impl$tickUseDespawnRateFromConfig() {
+    private int impl$tickUseDespawnRateFromConfig(final int originalValue) {
         return SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate;
     }
 
