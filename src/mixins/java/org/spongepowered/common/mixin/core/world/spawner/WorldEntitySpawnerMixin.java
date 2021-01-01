@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.spawner.EntityDensityManagerBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.config.inheritable.SpawnerCategory;
 
 @Mixin(value = WorldEntitySpawner.class)
 public abstract class WorldEntitySpawnerMixin {
@@ -49,17 +50,18 @@ public abstract class WorldEntitySpawnerMixin {
     }
 
     private static int impl$getSpawningTickRate(final EntityClassification p_234991_1_, final ServerWorld world) {
+        final SpawnerCategory.TickRatesSubCategory tickRates = SpongeGameConfigs.getForWorld(world).get().spawner.tickRates;
         switch (p_234991_1_) {
             case MONSTER:
-                return SpongeGameConfigs.getForWorld(world).get().spawner.tickRates.monster;
+                return tickRates.monster;
             case CREATURE:
-                return SpongeGameConfigs.getForWorld(world).get().spawner.tickRates.creature;
+                return tickRates.creature;
             case AMBIENT:
-                return SpongeGameConfigs.getForWorld(world).get().spawner.tickRates.ambient;
+                return tickRates.ambient;
             case WATER_CREATURE:
-                return SpongeGameConfigs.getForWorld(world).get().spawner.tickRates.aquaticCreature;
+                return tickRates.aquaticCreature;
             case WATER_AMBIENT:
-                return SpongeGameConfigs.getForWorld(world).get().spawner.tickRates.aquaticAmbient;
+                return tickRates.aquaticAmbient;
             default:
                 throw new IllegalStateException("Unexpected value: " + p_234991_1_);
         }

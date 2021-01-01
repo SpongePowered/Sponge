@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.spawner.WorldEntitySpawnerAccessor;
 import org.spongepowered.common.bridge.world.spawner.EntityDensityManagerBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.config.inheritable.SpawnerCategory;
 
 @Mixin(WorldEntitySpawner.EntityDensityManager.class)
 public abstract class EntityDensityManagerMixin implements EntityDensityManagerBridge {
@@ -43,22 +44,23 @@ public abstract class EntityDensityManagerMixin implements EntityDensityManagerB
 
     @Override
     public boolean bridge$canSpawnForCategoryInWorld(final EntityClassification p_234991_1_, final ServerWorld world) {
+        final SpawnerCategory.SpawnLimitsSubCategory spawnLimits = SpongeGameConfigs.getForWorld(world).get().spawner.spawnLimits;
         final int maxInstancesPerChunk;
         switch (p_234991_1_) {
             case MONSTER:
-                maxInstancesPerChunk = SpongeGameConfigs.getForWorld(world).get().spawner.spawnLimits.monster;
+                maxInstancesPerChunk = spawnLimits.monster;
                 break;
             case CREATURE:
-                maxInstancesPerChunk = SpongeGameConfigs.getForWorld(world).get().spawner.spawnLimits.creature;
+                maxInstancesPerChunk = spawnLimits.creature;
                 break;
             case AMBIENT:
-                maxInstancesPerChunk = SpongeGameConfigs.getForWorld(world).get().spawner.spawnLimits.ambient;
+                maxInstancesPerChunk = spawnLimits.ambient;
                 break;
             case WATER_CREATURE:
-                maxInstancesPerChunk = SpongeGameConfigs.getForWorld(world).get().spawner.spawnLimits.aquaticCreature;
+                maxInstancesPerChunk = spawnLimits.aquaticCreature;
                 break;
             case WATER_AMBIENT:
-                maxInstancesPerChunk = SpongeGameConfigs.getForWorld(world).get().spawner.spawnLimits.aquaticAmbient;
+                maxInstancesPerChunk = spawnLimits.aquaticAmbient;
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + p_234991_1_);
