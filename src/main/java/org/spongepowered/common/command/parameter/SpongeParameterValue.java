@@ -44,14 +44,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
     private final ImmutableList<ValueParser<? extends T>> parsers;
-    @Nullable private final SpongeDefaultValueParser<? extends T> defaultParser;
     private final ValueCompleter completer;
     private final Predicate<CommandCause> requirement;
     @Nullable private final ValueUsage usage;
@@ -62,7 +60,6 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
     public SpongeParameterValue(
             final ImmutableList<ValueParser<? extends T>> parsers,
-            @Nullable final Function<CommandCause, ? extends T> defaultParser,
             final ValueCompleter completer,
             @Nullable final ValueUsage usage,
             final Predicate<CommandCause> requirement,
@@ -71,7 +68,6 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
             final boolean consumeAll,
             final boolean terminal) {
         this.parsers = parsers;
-        this.defaultParser = defaultParser == null ? null : new SpongeDefaultValueParser<>(defaultParser);
         this.completer = completer;
         this.requirement = requirement;
         this.usage = usage;
@@ -125,17 +121,6 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
                 args.setState(state);
                 context.rollback(transaction);
             }
-        }
-
-        try {
-            if (this.defaultParser != null) {
-                this.defaultParser.getValue(this.key, args, context);
-            }
-        } catch (final ArgumentParseException ex) {
-            if (currentExceptions == null) {
-                currentExceptions = new ArrayList<>();
-            }
-            currentExceptions.add(ex);
         }
 
         // If we get this far, we failed to parse, return the exceptions
@@ -208,12 +193,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
     @Override
     public boolean isOptional() {
-        return !this.hasDefault() && this.isOptional;
-    }
-
-    @Nullable
-    public SpongeDefaultValueParser<? extends T> getDefaultParser() {
-        return this.defaultParser;
+        return this.isOptional;
     }
 
     @Override
@@ -231,10 +211,6 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
             }
         }
         return null;
-    }
-
-    public boolean hasDefault() {
-        return this.defaultParser != null;
     }
 
 }

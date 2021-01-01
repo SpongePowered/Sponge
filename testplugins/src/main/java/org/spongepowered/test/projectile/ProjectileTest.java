@@ -87,7 +87,7 @@ public class ProjectileTest implements LoadableModule {
                         "sponge")
                     .setKey("type")
                     .build();
-        final Parameter.Value<Boolean> targetParameter = Parameter.bool().setKey("target").orDefault(false).build();
+        final Parameter.Value<Boolean> targetParameter = Parameter.bool().setKey("target").optional().build();
         final Command.Parameterized launchCommand = Command.builder()
                 .parameters(entityTypeParameter, targetParameter)
                 .setExecutor(context -> {
@@ -95,7 +95,7 @@ public class ProjectileTest implements LoadableModule {
                             .orElseThrow(() -> new CommandException(Component.text("Only a player can execute this command")));
                     final EntityType<?> entityType = context.requireOne(entityTypeParameter);
                     final Optional<Projectile> launched;
-                    if (context.requireOne(targetParameter)) {
+                    if (context.getOne(targetParameter).orElse(false)) {
                         final Collection<? extends Entity> nearbyEntities = player.getNearbyEntities(10,
                                 entity -> entity instanceof Living && entity != player);
                         if (nearbyEntities.isEmpty()) {

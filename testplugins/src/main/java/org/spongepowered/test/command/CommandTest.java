@@ -81,7 +81,7 @@ public final class CommandTest {
 
     @Listener
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<ServerPlayer> playerKey = Parameter.playerOrSource().setKey("player")
+        final Parameter.Value<ServerPlayer> playerKey = Parameter.player().setKey("player")
                 .setUsage(key -> "[any player]")
                 .build();
         event.register(
@@ -89,7 +89,8 @@ public final class CommandTest {
                 Command.builder()
                         .parameter(playerKey)
                         .setExecutor(context -> {
-                            final ServerPlayer player = context.requireOne(playerKey);
+                            final ServerPlayer player = context.getOne(playerKey)
+                                    .orElse(context.getCause().root() instanceof ServerPlayer ? ((ServerPlayer) context.getCause().root()) : null);
                             this.logger.info(player.getName());
                             return CommandResult.success();
                         })
@@ -217,10 +218,10 @@ public final class CommandTest {
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(Parameter.enumValue(TestEnum.class).orDefault(TestEnum.ONE).setKey(enumParameterKey).build())
+                        .parameter(Parameter.enumValue(TestEnum.class).setKey(enumParameterKey).build())
                         .parameter(Parameter.string().setKey(stringKey).setSuggestions((context, currentInput) -> ImmutableList.of("bacon", "eggs", "spam")).build())
                         .setExecutor(x -> {
-                            x.sendMessage(Identity.nil(), Component.text(x.requireOne(enumParameterKey).name()));
+                            x.sendMessage(Identity.nil(), Component.text(x.getOne(enumParameterKey).orElse(TestEnum.ONE).name()));
                             return CommandResult.success();
                         })
                         .build(),
@@ -318,10 +319,8 @@ public final class CommandTest {
         final ValueCompleter stringValueCompleter = (c, s) -> s.isEmpty() ? Collections.singletonList("x") : Arrays.asList(s, s + "bar", "foo_" + s);
 //        final ValueCompleter stringValueCompleter = null;
 
-        final Parameter.Value<String> r_def = Parameter.remainingJoinedStrings().orDefault("r_defaulted").setKey("r_def").build();
+        final Parameter.Value<String> r_opt = Parameter.remainingJoinedStrings().setKey("r_def").optional().build();
         final Parameter.Value<String> r_req = Parameter.remainingJoinedStrings().setKey("r_req").setSuggestions(stringValueCompleter).build();
-        final Parameter.Value<String> def1 = Parameter.string().optional().orDefault("defaulted1").setKey("def1").build();
-        final Parameter.Value<String> def2 = Parameter.string().optional().orDefault("defaulted2").setKey("def2").build();
         final Parameter.Value<String> opt1 = Parameter.string().optional().setKey("opt1").build();
         final Parameter.Value<String> opt2 = Parameter.string().optional().setKey("opt2").build();
         final Parameter.Value<String> topt = Parameter.string().optional().setKey("topt").terminal().build();
@@ -340,19 +339,14 @@ public final class CommandTest {
                         .parameter(req1).build(),"required");
 
         // subcommand|<r_def>
-        builder.child(Command.builder().setExecutor(context -> CommandTest.printParameters(context, r_def))
-                        .parameter(r_def)
-                        .child(Command.builder().setExecutor(c -> CommandTest.printParameters(c)).build(), "subcommand")
+        builder.child(Command.builder().setExecutor(context -> CommandTest.printParameters(context, r_opt))
+                        .parameter(r_opt)
+                        .child(Command.builder().setExecutor(c -> CommandTest.printParameters(c, r_opt)).build(), "subcommand")
                         .build(),
-                "default_or_subcmd");
+                "optional_or_subcmd");
 
 
         // https://bugs.mojang.com/browse/MC-165562 usage does not show up after a space if there are no completions
-
-        // [def1] <r_req>
-        // TODO missing executed command when only providing a single value
-        builder.child(Command.builder().setExecutor(context -> CommandTest.printParameters(context, def1, r_req))
-                .parameters(def1, r_req).build(), "default_r_required");
 
         // [def1] <r_req>
         // TODO missing executed command when only providing a single value
@@ -363,15 +357,6 @@ public final class CommandTest {
         // TODO missing executed command when only providing a single value
         builder.child(Command.builder().setExecutor(context -> CommandTest.printParameters(context, opt1, opt2, r_req))
                 .parameters(opt1, opt2, r_req).build(), "optional_optional_required");
-
-        // [def1] [def2] <r_req>
-        // TODO missing executed command when only providing a single value
-        builder.child(Command.builder().setExecutor(context -> CommandTest.printParameters(context, def1, def2, r_req))
-                .parameters(def1, def2, r_req).build(), "default_default_required");
-
-        // [def1] [def2]
-        builder.child(Command.builder().setExecutor(context -> CommandTest.printParameters(context, def1, def2))
-                .parameters(def1, def2).build(), "default_default");
 
         // [opt1] [opt2]
         // TODO some redundancy in generated nodes because opt1 node can terminate early

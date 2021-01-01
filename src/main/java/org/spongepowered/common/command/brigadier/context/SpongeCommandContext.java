@@ -46,6 +46,7 @@ import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -156,6 +157,26 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
         } else {
             return ImmutableList.copyOf(values);
         }
+    }
+
+    @Override
+    public boolean hasAny(Parameter.Value<?> parameter) {
+        return this.hasAny(parameter.getKey());
+    }
+
+    @Override
+    public <T> Optional<T> getOne(Parameter.Value<T> parameter) throws IllegalArgumentException {
+        return this.getOne(parameter.getKey());
+    }
+
+    @Override
+    public <T> T requireOne(Parameter.Value<T> parameter) throws NoSuchElementException, IllegalArgumentException {
+        return this.requireOne(parameter.getKey());
+    }
+
+    @Override
+    public <T> Collection<? extends T> getAll(Parameter.Value<T> parameter) {
+        return this.getAll(parameter.getKey());
     }
 
     @Override

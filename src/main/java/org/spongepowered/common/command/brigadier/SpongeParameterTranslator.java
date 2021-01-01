@@ -40,7 +40,6 @@ import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrap
 import org.spongepowered.common.command.brigadier.tree.SpongeFlagLiteralCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongeNode;
-import org.spongepowered.common.command.parameter.SpongeDefaultValueParser;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 import org.spongepowered.common.command.parameter.SpongeParameterValue;
 import org.spongepowered.common.command.parameter.multi.SpongeFirstOfParameter;
@@ -252,7 +251,7 @@ public final class SpongeParameterTranslator {
                         key = key + suffix;
                     }
                     final SpongeArgumentCommandNodeBuilder<?> thisNode = SpongeParameterTranslator
-                            .createArgumentNodeBuilders(valueParameter, suffix == null ? null : suffix.toString(), nodesToAttachTo);
+                            .createArgumentNodeBuilders(valueParameter, suffix == null ? null : suffix.toString());
 
                     if (isTerminal) {
                         thisNode.executes(executorWrapper);
@@ -296,19 +295,10 @@ public final class SpongeParameterTranslator {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @NonNull
     private static <T> SpongeArgumentCommandNodeBuilder<? extends T> createArgumentNodeBuilders(
-            final Parameter.@NonNull Value<T> parameter,
-            @Nullable final String suffix,
-            final Set<CommandNode<CommandSource>> nodesToAttachTo) {
+            final SpongeParameterValue<T> parameter,
+            @Nullable final String suffix) {
 
-        ArgumentParser<? extends T> type = null;
-        final SpongeDefaultValueParser<? extends T> defaultValueParser;
-        if (parameter instanceof SpongeParameterValue<?>) {
-            // If we've got an optional node at the end with no default, don't bother generating it.
-            type = ((SpongeParameterValue<T>) parameter).getArgumentTypeIfStandard();
-            defaultValueParser = ((SpongeParameterValue<T>) parameter).getDefaultParser();
-        } else {
-            defaultValueParser = null;
-        }
+        ArgumentParser<? extends T> type = parameter.getArgumentTypeIfStandard();
 
         if (type == null) {
             type = new CustomArgumentParser<>(parameter.getParsers(), parameter.getCompleter(), false);
@@ -319,8 +309,8 @@ public final class SpongeParameterTranslator {
                 type,
                 parameter.getCompleter(),
                 parameter.getValueUsage().orElse(null),
-                suffix,
-                defaultValueParser);
+                suffix
+        );
         // CommandCause is mixed into CommandSource, so this is okay.
         argumentBuilder.requires((Predicate) parameter.getRequirement());
         return argumentBuilder;

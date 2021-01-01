@@ -94,15 +94,15 @@ public final class CustomDataTest {
 
     @Listener
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<Integer> numberKey = Parameter.integerNumber().orDefault(1).setKey("number").build();
-        final Parameter.Value<Type> type = Parameter.enumValue(Type.class).orDefault(Type.ITEMSTACK).setKey("type").build();
+        final Parameter.Value<Integer> numberKey = Parameter.integerNumber().setKey("number").optional().build();
+        final Parameter.Value<Type> type = Parameter.enumValue(Type.class).setKey("type").optional().build();
         final Command.Parameterized myCommand = Command.builder()
                 .parameter(type)
                 .parameter(numberKey)
                 .setExecutor(context -> {
-                    final Integer number = context.requireOne(numberKey);
+                    final Integer number = context.getOne(numberKey).orElse(1);
                     final ServerPlayer player = context.getCause().first(ServerPlayer.class).get();
-                    switch (context.requireOne(type)) {
+                    switch (context.getOne(type).orElse(Type.ITEMSTACK)) {
                         case ITEMSTACK:
                             final ItemStack stack = ItemStack.of(ItemTypes.PAPER);
                             stack.offer(this.myDataKey, number);
