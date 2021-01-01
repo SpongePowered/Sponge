@@ -22,44 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.accessor.world.gen;
 
-import net.kyori.adventure.text.Component;
-import net.minecraft.util.ResourceLocation;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.server.WorldTemplate;
-import org.spongepowered.common.world.server.SpongeWorldTemplate;
+import net.minecraft.world.gen.ChunkGenerator;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface DimensionBridge {
+@Mixin(ChunkGenerator.class)
+public interface ChunkGeneratorAccessor {
 
-    @Nullable
-    Component bridge$displayName();
-
-    ResourceLocation bridge$gameMode();
-
-    ResourceLocation bridge$difficulty();
-
-    SerializationBehavior bridge$serializationBehavior();
-
-    @Nullable
-    Integer bridge$viewDistance();
-
-    boolean bridge$enabled();
-
-    boolean bridge$loadOnStartup();
-
-    boolean bridge$keepSpawnLoaded();
-
-    boolean bridge$generateSpawnOnLoad();
-
-    boolean bridge$hardcore();
-
-    boolean bridge$pvp();
-
-    boolean bridge$commands();
-
-    void bridge$setSpongeData(SpongeWorldTemplate.SpongeDataSection spongeData);
-
-    void bridge$populateFromTemplate(WorldTemplate s);
+    @Accessor("strongholdSeed") long accessor$strongholdSeed();
 }

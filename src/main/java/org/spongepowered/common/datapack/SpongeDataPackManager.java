@@ -26,6 +26,7 @@ package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.datapack.DataPackSerializable;
@@ -40,7 +41,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -57,15 +57,17 @@ public final class SpongeDataPackManager {
         this.serializables = new Object2ObjectOpenHashMap<>();
     }
 
-    public void callRegisterDataPackValueEvent() {
+    @SuppressWarnings("unchecked")
+    public void callRegisterDataPackValueEvents() {
         SpongeIngredient.clearCache();
         ResultUtil.clearCache();
         this.reset();
 
-        final RegisterDataPackValueEventImpl event = new RegisterDataPackValueEventImpl(Cause.of(EventContext.empty(), this.game), this.game);
-        this.game.getEventManager().post(event);
-
-        this.serializables.putAll(event.getSerializables());
+        // Cleaner way to do this, sometime...
+        this.serializables.putAll(this.callRegisterDataPackValueEvent((SpongeDataPackType<@NonNull DataPackSerializable, ? extends DataPackSerializedObject>) DataPackTypes.ADVANCEMENT));
+        this.serializables.putAll(this.callRegisterDataPackValueEvent((SpongeDataPackType<@NonNull DataPackSerializable, ? extends DataPackSerializedObject>) DataPackTypes.RECIPE));
+        this.serializables.putAll(this.callRegisterDataPackValueEvent((SpongeDataPackType<@NonNull DataPackSerializable, ? extends DataPackSerializedObject>) DataPackTypes.WORLD_TYPE));
+        this.serializables.putAll(this.callRegisterDataPackValueEvent((SpongeDataPackType<@NonNull DataPackSerializable, ? extends DataPackSerializedObject>) DataPackTypes.WORLD));
     }
 
     @SuppressWarnings("unchecked")
@@ -97,11 +99,20 @@ public final class SpongeDataPackManager {
         this.reset();
     }
 
+    private <T extends DataPackSerializable, U extends DataPackSerializedObject> Map<SpongeDataPackType<T, U>, List<T>> callRegisterDataPackValueEvent(final SpongeDataPackType<T, U> type) {
+        final RegisterDataPackValueEventImpl<T, U> event = new RegisterDataPackValueEventImpl<>(Cause.of(EventContext.empty(), this.game),
+                this.game, type);
+        this.game.getEventManager().post(event);
+        return event.serializables();
+    }
+
+    @SuppressWarnings("rawtypes")
     private void reset() {
         this.serializables.clear();
 
         this.serializables.put((SpongeDataPackType) DataPackTypes.ADVANCEMENT, new ArrayList<>());
         this.serializables.put((SpongeDataPackType) DataPackTypes.RECIPE, new ArrayList<>());
         this.serializables.put((SpongeDataPackType) DataPackTypes.WORLD_TYPE, new ArrayList<>());
+        this.serializables.put((SpongeDataPackType) DataPackTypes.WORLD, new ArrayList<>());
     }
 }

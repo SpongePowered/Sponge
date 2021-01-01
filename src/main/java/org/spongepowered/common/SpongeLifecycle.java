@@ -120,7 +120,7 @@ public final class SpongeLifecycle {
 
     public void callRegisterDataPackValueEvent(final Path datapackDir) {
 
-        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvent();
+        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents();
         try {
             SpongeDataPackManager.INSTANCE.serialize(datapackDir, new ArrayList<>());
         } catch (final IOException e) {

@@ -131,7 +131,7 @@ public final class WorldTest {
                     .setExecutor(context -> {
                         final ServerPlayer player = context.getOne(playerParameter).orElse(this.getSourcePlayer(context));
                         final WorldType worldType = context.requireOne(worldTypeParameter);
-                        player.sendEnvironment(worldType);
+                        player.sendWorldType(worldType);
                         return CommandResult.success();
                     })
                     .build()

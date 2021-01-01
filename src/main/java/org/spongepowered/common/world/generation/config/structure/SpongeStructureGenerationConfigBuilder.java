@@ -46,32 +46,28 @@ import java.util.Optional;
 public final class SpongeStructureGenerationConfigBuilder implements StructureGenerationConfig.Builder {
 
     @Nullable public SpacedStructureConfig stronghold;
-    public final Map<RegistryReference<Structure>, SeparatedStructureConfig> structures = new Object2ObjectOpenHashMap<>();
-
-    public SpongeStructureGenerationConfigBuilder() {
-        this.reset();
-    }
+    public final Map<Structure, SeparatedStructureConfig> structures = new Object2ObjectOpenHashMap<>();
 
     @Override
-    public StructureGenerationConfig.Builder stronghold(@Nullable SpacedStructureConfig config) {
+    public StructureGenerationConfig.Builder stronghold(@Nullable final SpacedStructureConfig config) {
         this.stronghold = config;
         return this;
     }
 
     @Override
-    public StructureGenerationConfig.Builder addStructure(final RegistryReference<Structure> structure, final SeparatedStructureConfig config) {
+    public StructureGenerationConfig.Builder addStructure(final Structure structure, final SeparatedStructureConfig config) {
         this.structures.put(Objects.requireNonNull(structure, "structure"), Objects.requireNonNull(config, "config"));
         return this;
     }
 
     @Override
-    public StructureGenerationConfig.Builder addStructures(final Map<RegistryReference<Structure>, SeparatedStructureConfig> structures) {
+    public StructureGenerationConfig.Builder addStructures(final Map<Structure, SeparatedStructureConfig> structures) {
         this.structures.putAll(Objects.requireNonNull(structures, "structures"));
         return this;
     }
 
     @Override
-    public StructureGenerationConfig.Builder removeStructure(final RegistryReference<Structure> structure) {
+    public StructureGenerationConfig.Builder removeStructure(final Structure structure) {
         this.structures.remove(Objects.requireNonNull(structure, "structure"));
         return this;
     }
@@ -80,12 +76,7 @@ public final class SpongeStructureGenerationConfigBuilder implements StructureGe
     public StructureGenerationConfig.Builder reset() {
         this.stronghold = (SpacedStructureConfig) DimensionStructuresSettings.DEFAULT_STRONGHOLD;
         this.structures.clear();
-        for (final Map.Entry<net.minecraft.world.gen.feature.structure.Structure<?>, StructureSeparationSettings> entry : DimensionStructuresSettings.DEFAULTS.entrySet()) {
-            final net.minecraft.world.gen.feature.structure.Structure<?> structure = entry.getKey();
-            final StructureSeparationSettings settings = entry.getValue();
-            this.structures.put(RegistryKey.of(RegistryTypes.STRUCTURE, ResourceKey.sponge(structure.getFeatureName())).asReference(),
-                    (SeparatedStructureConfig) settings);
-        }
+        this.structures.putAll((Map<? extends Structure, ? extends SeparatedStructureConfig>) (Object) DimensionStructuresSettings.DEFAULTS);
         return this;
     }
 

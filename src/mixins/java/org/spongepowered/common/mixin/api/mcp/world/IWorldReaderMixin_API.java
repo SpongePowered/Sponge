@@ -114,7 +114,7 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default boolean isInBorder(final Entity entity) {
-        return ((ICollisionReader) this).getWorldBorder().isWithinBounds(((net.minecraft.entity.Entity) entity).getBoundingBox());
+        return ((ICollisionReader) this).getWorldBorder().isWithinBounds(((net.minecraft.entity.Entity) Objects.requireNonNull(entity, "entity")).getBoundingBox());
     }
 
     @Override
@@ -129,7 +129,7 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default boolean containsAnyLiquids(final AABB aabb) {
-        final Vector3d max = aabb.getMax();
+        final Vector3d max = Objects.requireNonNull(aabb, "aabb").getMax();
         final Vector3d min = aabb.getMin();
         return this.shadow$containsAnyLiquid(new AxisAlignedBB(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ()));
     }
@@ -196,6 +196,7 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default boolean hasChunk(final Vector3i position) {
+        Objects.requireNonNull(position, "position");
         return this.shadow$hasChunk(position.getX() >> 4, position.getZ() >> 4);
     }
 
@@ -203,7 +204,7 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default int getHeight(final HeightType type, final int x, final int z) {
-        return this.shadow$getHeight((Heightmap.Type) (Object) type, x, z);
+        return this.shadow$getHeight((Heightmap.Type) (Object) Objects.requireNonNull(type, "type"), x, z);
     }
 
     @Override
@@ -213,7 +214,8 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default VolumeStream<R, Biome> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
-        VolumeStreamUtils.validateStreamArgs(min, max, options);
+        VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
+                Objects.requireNonNull(options, "options"));
 
         final boolean shouldCarbonCopy = options.carbonCopy();
         final Vector3i size = max.sub(min).add(1, 1 ,1);
@@ -254,7 +256,8 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default VolumeStream<R, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
-        VolumeStreamUtils.validateStreamArgs(min, max, options);
+        VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
+                Objects.requireNonNull(options, "options"));
 
         final boolean shouldCarbonCopy = options.carbonCopy();
         final Vector3i size = max.sub(min).add(1, 1 ,1);
@@ -294,7 +297,8 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default VolumeStream<R, BlockEntity> getBlockEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
-        VolumeStreamUtils.validateStreamArgs(min, max, options);
+        VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
+                Objects.requireNonNull(options, "options"));
 
         final boolean shouldCarbonCopy = options.carbonCopy();
         final Vector3i size = max.sub(min).add(1, 1 ,1);
@@ -343,7 +347,8 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default VolumeStream<R, Entity> getEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
-        VolumeStreamUtils.validateStreamArgs(min, max, options);
+        VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
+                Objects.requireNonNull(options, "options"));
 
         final boolean shouldCarbonCopy = options.carbonCopy();
         final Vector3i size = max.sub(min).add(1, 1 ,1);

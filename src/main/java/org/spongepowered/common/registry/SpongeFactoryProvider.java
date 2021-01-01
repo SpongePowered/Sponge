@@ -61,9 +61,8 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.biome.BiomeProvider;
-import org.spongepowered.api.world.biome.BiomeProviderTemplate;
 import org.spongepowered.api.world.generation.ChunkGenerator;
-import org.spongepowered.api.world.generation.ChunkGeneratorTemplate;
+import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
@@ -109,9 +108,8 @@ import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransform;
 import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
 import org.spongepowered.common.world.biome.SpongeBiomeProviderFactory;
-import org.spongepowered.common.world.biome.SpongeBiomeProviderTemplate;
 import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
-import org.spongepowered.common.world.generation.SpongeChunkGeneratorTemplate;
+import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
 import org.spongepowered.common.world.generation.config.flat.SpongeLayerConfigFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
 import org.spongepowered.common.world.generation.config.noise.SpongeSamplingConfigFactory;
@@ -202,20 +200,19 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory())
                 .registerFactory(EntityArchetypeEntry.Factory.class, new SpongeEntityArchetypeEntryFactory())
                 .registerFactory(ServerLocationCreator.Factory.class, new SpongeServerLocationCreatorFactory())
+                .registerFactory(BiomeProvider.Factory.class, new SpongeBiomeProviderFactory())
                 .registerFactory(BiomeSampler.Factory.class, new SpongeBiomeSamplerFactory())
                 .registerFactory(WorldTypeEffect.Factory.class, new SpongeWorldTypeEffect.FactoryImpl())
                 .registerFactory(WorldTypeTemplate.Factory.class, new SpongeWorldTypeTemplate.FactoryImpl())
                 .registerFactory(WorldTemplate.Factory.class, new SpongeWorldTemplate.FactoryImpl())
-                .registerFactory(BiomeProvider.Factory.class, new SpongeBiomeProviderFactory())
-                .registerFactory(BiomeProviderTemplate.Factory.class, new SpongeBiomeProviderTemplate.FactoryImpl())
                 .registerFactory(LayerConfig.Factory.class, new SpongeLayerConfigFactory())
                 .registerFactory(NoiseConfig.Factory.class, new SpongeNoiseConfig.FactoryImpl())
                 .registerFactory(SamplingConfig.Factory.class, new SpongeSamplingConfigFactory())
                 .registerFactory(SlideConfig.Factory.class, new SpongeSlideConfigFactory())
                 .registerFactory(SeparatedStructureConfig.Factory.class, new SpongeSeparatedStructureConfigFactory())
                 .registerFactory(SpacedStructureConfig.Factory.class, new SpongeSpacedStructureConfigFactory())
+                .registerFactory(NoiseGeneratorConfig.Factory.class, new SpongeNoiseGeneratorConfig.FactoryImpl())
                 .registerFactory(ChunkGenerator.Factory.class, new SpongeChunkGeneratorFactory())
-                .registerFactory(ChunkGeneratorTemplate.Factory.class, new SpongeChunkGeneratorTemplate.FactoryImpl())
         ;
     }
 }

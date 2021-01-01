@@ -24,26 +24,20 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.gen.settings;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.gen.settings.StructureSeparationSettings;
 import net.minecraft.world.gen.settings.StructureSpreadSettings;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.registry.RegistryKey;
-import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.generation.Structure;
 import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
 import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -59,29 +53,18 @@ public abstract class DimensionStructuresSettingsMixin_API implements StructureG
     @Shadow public abstract Map<net.minecraft.world.gen.feature.structure.Structure<?>, StructureSeparationSettings> shadow$structureConfig();
     // @formatter:on
 
-    @Shadow @Final private Map<net.minecraft.world.gen.feature.structure.Structure<?>, StructureSeparationSettings> structureConfig;
-
     @Intrinsic
     public Optional<SpacedStructureConfig> structureGenerationConfig$stronghold() {
         return Optional.ofNullable((SpacedStructureConfig) this.shadow$stronghold());
     }
 
     @Override
-    public Optional<SeparatedStructureConfig> structure(final RegistryReference<Structure> structure) {
-        return Optional.ofNullable((SeparatedStructureConfig) this.shadow$structureConfig().get(Objects.requireNonNull(structure, "structure").get(Sponge.getServer().registries())));
+    public Optional<SeparatedStructureConfig> structure(final Structure structure) {
+        return Optional.ofNullable((SeparatedStructureConfig) this.shadow$structureConfig().get(Objects.requireNonNull(structure, "structure")));
     }
 
     @Override
-    public Map<RegistryReference<Structure>, SeparatedStructureConfig> structures() {
-        final Map<RegistryReference<Structure>, SeparatedStructureConfig> structures = new Object2ObjectOpenHashMap<>();
-        for (final Map.Entry<net.minecraft.world.gen.feature.structure.Structure<?>, StructureSeparationSettings> entry : this.structureConfig.entrySet()) {
-            final net.minecraft.world.gen.feature.structure.Structure<?> structure = entry.getKey();
-            final StructureSeparationSettings settings = entry.getValue();
-
-            structures.put(RegistryKey.of(RegistryTypes.STRUCTURE, ResourceKey.minecraft(structure.getFeatureName())).asReference(),
-                    (SeparatedStructureConfig) settings);
-        }
-
-        return structures;
+    public Map<Structure, SeparatedStructureConfig> structures() {
+        return Collections.unmodifiableMap((Map<Structure, SeparatedStructureConfig>) (Object) this.shadow$structureConfig());
     }
 }

@@ -26,10 +26,8 @@ package org.spongepowered.common.mixin.api.mcp.world.biome.provider;
 
 import net.minecraft.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.biome.BiomeProviderTemplate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.world.biome.SpongeBiomeProviderTemplate;
 
 import java.util.List;
 import java.util.Set;
@@ -50,10 +48,5 @@ public abstract class BiomeProviderMixin_API implements org.spongepowered.api.wo
     @Override
     public Set<Biome> within(final int x, final int y, final int z, final int size) {
         return (Set<Biome>) (Object) this.shadow$getBiomesWithin(x, y, z, size);
-    }
-
-    @Override
-    public BiomeProviderTemplate asTemplate() {
-        return new SpongeBiomeProviderTemplate((BiomeProvider) (Object) this);
     }
 }

@@ -154,7 +154,6 @@
     "world.TeleporterMixin",
     "world.TrackedEntityMixin",
     "world.WorldMixin",
-    "world.WorldSettingsMixin",
     "world.biome.BiomeMixin",
     "world.chunk.ChunkMixin",
     "world.gen.feature.structure.LegacyStructureDataUtilMixin",
@@ -201,9 +200,9 @@
     "world.gen.settings.DimensionGeneratorSettingsMixin",
     "util.math.Vector3iMixin",
     "block.EndPortalBlockMixin",
-      "world.DimensionMixin",
+    "world.DimensionMixin",
     "util.registry.DynamicRegistriesMixin",
-      "world.gen.DimensionSettingsMixin"
+    "world.gen.DimensionSettingsMixin"
   ],
   "client": [
     "client.MinecraftMixin",

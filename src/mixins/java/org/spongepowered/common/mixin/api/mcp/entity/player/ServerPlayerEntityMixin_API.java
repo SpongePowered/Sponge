@@ -164,7 +164,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public void sendEnvironment(final WorldType worldType) {
+    public void sendWorldType(final WorldType worldType) {
         ((ServerPlayerEntityBridge) this).bridge$sendViewerEnvironment((net.minecraft.world.DimensionType) worldType);
     }
 

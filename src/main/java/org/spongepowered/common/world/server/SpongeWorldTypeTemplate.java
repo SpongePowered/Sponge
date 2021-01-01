@@ -104,7 +104,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
                             ResourceLocation.CODEC.fieldOf("infiniburn").forGetter(v -> ((ITag.INamedTag<Block>)v.infiniburn()).getName()),
                             ResourceLocation.CODEC.fieldOf("effects").orElse((ResourceLocation) (Object) WorldTypeEffects.OVERWORLD.getKey()).forGetter(v -> ((DimensionTypeAccessor) v).accessor$effectsLocation()),
                             Codec.FLOAT.fieldOf("ambient_light").forGetter(v -> ((DimensionTypeAccessor) v).accessor$ambientLight()),
-                            SpongeWorldTypeTemplate.SPONGE_CODEC.optionalFieldOf("_sponge").forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeSamplerProvider.INSTANCE.get((BiomeSampler) v.getBiomeZoomer()), v.createDragonFight())))
+                            SpongeWorldTypeTemplate.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeSamplerProvider.INSTANCE.get((BiomeSampler) v.getBiomeZoomer()), v.createDragonFight())))
                     )
                     // *Chuckles* I'm in danger
                     .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15) -> {
@@ -275,10 +275,6 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         protected int logicalHeight;
         protected double coordinateMultiplier;
 
-        public BuilderImpl() {
-            this.reset();
-        }
-
         @Override
         public WorldTypeTemplate.Builder effect(final WorldTypeEffect effect) {
             this.effect = Objects.requireNonNull(effect, "effect");
@@ -422,32 +418,24 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
     public static final class FactoryImpl implements WorldTypeTemplate.Factory {
 
-        private static final SpongeWorldTypeTemplate OVERWORLD = new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld"), DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD());
-
-        private static final SpongeWorldTypeTemplate OVERWORLD_CAVES = new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld_caves"), DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD_CAVES());
-
-        private static final SpongeWorldTypeTemplate THE_NETHER = new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_nether"), DimensionTypeAccessor.accessor$DEFAULT_NETHER());
-
-        private static final SpongeWorldTypeTemplate THE_END = new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_end"), DimensionTypeAccessor.accessor$DEFAULT_END());
-
         @Override
         public WorldTypeTemplate overworld() {
-            return FactoryImpl.OVERWORLD;
+            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld"), DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD());
         }
 
         @Override
         public WorldTypeTemplate overworldCaves() {
-            return FactoryImpl.OVERWORLD_CAVES;
+            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld_caves"), DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD_CAVES());
         }
 
         @Override
         public WorldTypeTemplate theNether() {
-            return FactoryImpl.THE_NETHER;
+            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_nether"), DimensionTypeAccessor.accessor$DEFAULT_NETHER());
         }
 
         @Override
         public WorldTypeTemplate theEnd() {
-            return FactoryImpl.THE_END;
+            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_end"), DimensionTypeAccessor.accessor$DEFAULT_END());
         }
     }
 }

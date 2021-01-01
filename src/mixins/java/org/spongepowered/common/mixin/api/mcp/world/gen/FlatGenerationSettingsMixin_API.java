@@ -61,11 +61,6 @@ public abstract class FlatGenerationSettingsMixin_API implements FlatGeneratorCo
     }
 
     @Override
-    public RegistryReference<Biome> biome() {
-        return RegistryKey.of(RegistryTypes.BIOME, (ResourceKey) (Object) BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.getBiome())).asReference();
-    }
-
-    @Override
     public List<LayerConfig> layers() {
         return (List<LayerConfig>) (Object) this.shadow$getLayersInfo();
     }
@@ -75,6 +70,11 @@ public abstract class FlatGenerationSettingsMixin_API implements FlatGeneratorCo
         return Optional.ofNullable((LayerConfig) this.shadow$getLayersInfo().get(index));
     }
 
+    @Override
+    public RegistryReference<Biome> biome() {
+        return RegistryKey.of(RegistryTypes.BIOME, (ResourceKey) (Object) BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.getBiome())).asReference();
+    }
+    
     @Override
     public boolean performDecoration() {
         return this.decoration;

@@ -10,8 +10,7 @@
     ],
     "mixins": [
         "network.login.ServerLoginNetHandlerAccessor_Vanilla",
-        "server.MinecraftServerAccessor_Vanilla",
-        "world.storage.SaveFormatAccessor_Vanilla"
+        "server.MinecraftServerAccessor_Vanilla"
     ],
     "injectors": {
         "defaultRequire": 1

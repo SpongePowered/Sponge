@@ -32,7 +32,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.Dimension;
-import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -44,8 +43,10 @@ import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypes;
+import org.spongepowered.api.world.biome.BiomeProvider;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.generation.ChunkGeneratorTemplate;
+import org.spongepowered.api.world.generation.ChunkGenerator;
+import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
@@ -64,7 +65,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
     @Nullable public final Component displayName;
     public final RegistryReference<WorldType> worldType;
-    public final ChunkGeneratorTemplate generator;
+    public final org.spongepowered.api.world.generation.ChunkGenerator generator;
     public final WorldGenerationConfig generationSettings;
     @Nullable public final RegistryReference<GameMode> gameMode;
     @Nullable public final RegistryReference<Difficulty> difficulty;
@@ -101,8 +102,8 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             .create(r ->  r
                     .group(
                             SpongeWorldTypeTemplate.CODEC.fieldOf("type").forGetter(Dimension::typeSupplier),
-                            ChunkGenerator.CODEC.fieldOf("generator").forGetter(Dimension::generator),
-                            SpongeWorldTemplate.SPONGE_CODEC.optionalFieldOf("_sponge").forGetter(v -> {
+                            net.minecraft.world.gen.ChunkGenerator.CODEC.fieldOf("generator").forGetter(Dimension::generator),
+                            SpongeWorldTemplate.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> {
                                 final DimensionBridge dimensionBridge = (DimensionBridge) (Object) v;
                                 return Optional.of(new SpongeDataSection(dimensionBridge.bridge$displayName(), dimensionBridge.bridge$gameMode(),
                                         dimensionBridge.bridge$difficulty(), dimensionBridge.bridge$serializationBehavior(),
@@ -112,11 +113,15 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                                         dimensionBridge.bridge$commands(), dimensionBridge.bridge$pvp()));
                             })
                     )
-                    .apply(r, (f1, f2, f3) -> {
-                        final Dimension dimension = new Dimension(f1, f2);
-                        f3.ifPresent(((DimensionBridge) (Object) dimension)::bridge$setSpongeData);
-                        return dimension;
-                    })
+                    .apply(r, r
+                        .stable((f1, f2, f3) ->
+                            {
+                                final Dimension dimension = new Dimension(f1, f2);
+                                f3.ifPresent(((DimensionBridge) (Object) dimension)::bridge$setSpongeData);
+                                return dimension;
+                            }
+                        )
+                    )
             );
 
     protected SpongeWorldTemplate(final BuilderImpl builder) {
@@ -154,7 +159,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     }
 
     @Override
-    public ChunkGeneratorTemplate generator() {
+    public org.spongepowered.api.world.generation.ChunkGenerator generator() {
         return this.generator;
     }
 
@@ -261,7 +266,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
         @Nullable protected Component displayName;
         @Nullable protected RegistryReference<WorldType> worldType;
-        @Nullable protected ChunkGeneratorTemplate generator;
+        @Nullable protected ChunkGenerator generator;
         @Nullable protected WorldGenerationConfig generationSettings;
         @Nullable protected RegistryReference<GameMode> gameMode;
         @Nullable protected RegistryReference<Difficulty> difficulty;
@@ -269,10 +274,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         @Nullable protected Integer viewDistance;
 
         protected boolean enabled, loadOnStartup, keepSpawnLoaded, generateSpawnOnLoad, hardcore, commands, pvp;
-
-        public BuilderImpl() {
-            this.reset();
-        }
 
         @Override
         public Builder displayName(final Component displayName) {
@@ -287,7 +288,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         }
 
         @Override
-        public Builder generator(final ChunkGeneratorTemplate generator) {
+        public Builder generator(final ChunkGenerator generator) {
             this.generator = Objects.requireNonNull(generator, "generator");
             return this;
         }
@@ -368,8 +369,9 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         public Builder reset() {
             super.reset();
             this.displayName = null;
-            final DimensionGeneratorSettings generationSettings = BootstrapProperties.dimensionGeneratorSettings;
             this.worldType = WorldTypes.OVERWORLD;
+            this.generator = ChunkGenerator.noise(BiomeProvider.overworld(false), NoiseGeneratorConfig.overworld());
+            final DimensionGeneratorSettings generationSettings = BootstrapProperties.dimensionGeneratorSettings;
             this.generationSettings = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$construct(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
                     new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental()),
@@ -381,9 +383,9 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.enabled = true;
             this.loadOnStartup = true;
             this.keepSpawnLoaded = false;
-            this.generateSpawnOnLoad = true;
+            this.generateSpawnOnLoad = false;
             this.hardcore = false;
-            this.commands = false;
+            this.commands = true;
             this.pvp = BootstrapProperties.pvp;
             return this;
         }
@@ -394,6 +396,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
             this.displayName = template.displayName().orElse(null);
             this.worldType = template.worldType();
+            this.generator = template.generator();
             final DimensionGeneratorSettings generationSettings = (DimensionGeneratorSettings) template.generationConfig();
             this.generationSettings = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$construct(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
@@ -420,34 +423,40 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     }
 
     public static final class FactoryImpl implements WorldTemplate.Factory {
-        private static final WorldTemplate OVERWORLD = new SpongeWorldTemplate.BuilderImpl()
-                .key(ResourceKey.sponge("overworld"))
-                .worldType(WorldTypes.OVERWORLD)
-                .build();
-
-        private static final WorldTemplate THE_NETHER = new SpongeWorldTemplate.BuilderImpl()
-                .key(ResourceKey.sponge("the_nether"))
-                .worldType(WorldTypes.THE_NETHER)
-                .build();
-
-        private static final WorldTemplate THE_END = new SpongeWorldTemplate.BuilderImpl()
-                .key(ResourceKey.sponge("the_end"))
-                .worldType(WorldTypes.THE_END)
-                .build();
 
         @Override
         public WorldTemplate overworld() {
-            return FactoryImpl.OVERWORLD;
+            return new SpongeWorldTemplate.BuilderImpl()
+                    .reset()
+                    .key(ResourceKey.sponge("overworld"))
+                    .worldType(WorldTypes.OVERWORLD)
+                    .generator(ChunkGenerator.noise(BiomeProvider.overworld(false), NoiseGeneratorConfig.overworld()))
+                    .keepSpawnLoaded(true)
+                    .generateSpawnOnLoad(true)
+                    .loadOnStartup(true)
+                    .build();
         }
 
         @Override
         public WorldTemplate theNether() {
-            return FactoryImpl.THE_NETHER;
+            return new SpongeWorldTemplate.BuilderImpl()
+                    .reset()
+                    .key(ResourceKey.sponge("the_nether"))
+                    .worldType(WorldTypes.THE_NETHER)
+                    .generator(ChunkGenerator.noise(BiomeProvider.nether(), NoiseGeneratorConfig.nether()))
+                    .generateSpawnOnLoad(false)
+                    .build();
         }
 
         @Override
         public WorldTemplate theEnd() {
-            return FactoryImpl.THE_END;
+            return new SpongeWorldTemplate.BuilderImpl()
+                    .reset()
+                    .key(ResourceKey.sponge("the_end"))
+                    .worldType(WorldTypes.THE_END)
+                    .generator(ChunkGenerator.noise(BiomeProvider.end(), NoiseGeneratorConfig.end()))
+                    .generateSpawnOnLoad(false)
+                    .build();
         }
     }
 }

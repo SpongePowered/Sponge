@@ -24,8 +24,13 @@
  */
 package org.spongepowered.common.world.generation.config;
 
+import net.minecraft.block.Blocks;
+import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.world.gen.DimensionSettings;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
+import net.minecraft.world.gen.settings.NoiseSettings;
+import net.minecraft.world.gen.settings.ScalingSettings;
+import net.minecraft.world.gen.settings.SlideSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
@@ -33,13 +38,15 @@ import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.common.accessor.world.gen.DimensionSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
+import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.util.Objects;
 
 public final class SpongeNoiseGeneratorConfig {
 
-    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<NoiseGeneratorConfig, NoiseGeneratorConfig.Builder> implements NoiseGeneratorConfig.Builder {
+    public static final class BuilderImpl implements NoiseGeneratorConfig.Builder {
+
         public StructureGenerationConfig structureConfig;
         public NoiseConfig noiseConfig;
         public BlockState defaultBlock, defaultFluid;
@@ -89,7 +96,6 @@ public final class SpongeNoiseGeneratorConfig {
 
         @Override
         public NoiseGeneratorConfig.Builder reset() {
-            super.reset();
             this.structureConfig = (StructureGenerationConfig) new DimensionStructuresSettings(true);
             this.noiseConfig = NoiseConfig.overworld();
             this.defaultBlock = BlockTypes.STONE.get().getDefaultState();
@@ -113,13 +119,44 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
-        protected NoiseGeneratorConfig build0() {
+        public NoiseGeneratorConfig build() {
             final DimensionSettings settings = DimensionSettingsAccessor.invoker$construct((DimensionStructuresSettings) this.structureConfig,
                     (net.minecraft.world.gen.settings.NoiseSettings) this.noiseConfig, (net.minecraft.block.BlockState) this.defaultBlock,
                     (net.minecraft.block.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, false);
-            ((ResourceKeyBridge) (Object) settings).bridge$setKey(this.key);
-
             return (NoiseGeneratorConfig) (Object) settings;
+        }
+    }
+
+    public static final class FactoryImpl implements NoiseGeneratorConfig.Factory {
+
+        @Override
+        public NoiseGeneratorConfig amplified() {
+            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.AMPLIFIED);
+        }
+
+        @Override
+        public NoiseGeneratorConfig overworld() {
+            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.OVERWORLD);
+        }
+
+        @Override
+        public NoiseGeneratorConfig nether() {
+            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.NETHER);
+        }
+
+        @Override
+        public NoiseGeneratorConfig end() {
+            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.END);
+        }
+
+        @Override
+        public NoiseGeneratorConfig caves() {
+            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.CAVES);
+        }
+
+        @Override
+        public NoiseGeneratorConfig floatingIslands() {
+            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.FLOATING_ISLANDS);
         }
     }
 }

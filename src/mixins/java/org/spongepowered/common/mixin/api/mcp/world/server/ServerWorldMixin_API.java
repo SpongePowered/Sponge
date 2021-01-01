@@ -60,6 +60,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
+import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
@@ -136,16 +137,12 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public ServerLocation getLocation(final Vector3i position) {
-        Objects.requireNonNull(position);
-
-        return ServerLocation.of(this, position);
+        return ServerLocation.of(this, Objects.requireNonNull(position, "position"));
     }
 
     @Override
     public ServerLocation getLocation(final Vector3d position) {
-        Objects.requireNonNull(position);
-
-        return ServerLocation.of(this, position);
+        return ServerLocation.of(this, Objects.requireNonNull(position, "position"));
     }
 
     // ServerWorld
@@ -153,6 +150,11 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Override
     public ServerWorldProperties getProperties() {
         return (ServerWorldProperties) this.shadow$getLevelData();
+    }
+
+    @Override
+    public ChunkGenerator getGenerator() {
+        return (ChunkGenerator) this.shadow$getChunkSource().getGenerator();
     }
 
     @Override
@@ -177,7 +179,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
             return BlockSnapshot.empty();
         }
 
-        if (!this.isChunkLoaded(x, y, z, false)) { // TODO bitshift in old impl?
+        if (!this.isChunkLoaded(x, y, z, false)) {
             return BlockSnapshot.empty();
         }
         final BlockPos pos = new BlockPos(x, y, z);

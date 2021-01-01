@@ -155,7 +155,7 @@ public final class AdvancementTest implements LoadableModule {
 
 
     @Listener
-    public void onAdvancementRegistry(final RegisterDataPackValueEvent event) {
+    public void onAdvancementRegistry(final RegisterDataPackValueEvent<Advancement> event) {
 
         if (!this.enabled) {
             return;

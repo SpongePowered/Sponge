@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import com.mojang.datafixers.kinds.App;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.kyori.adventure.text.Component;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.Dimension;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -44,20 +43,14 @@ import java.util.function.Function;
 @Mixin(Dimension.class)
 public abstract class DimensionMixin implements DimensionBridge {
 
-    private ResourceLocation impl$gameMode = (ResourceLocation) (Object) BootstrapProperties.gameMode.location();
-    private ResourceLocation impl$difficulty = (ResourceLocation) (Object) BootstrapProperties.difficulty.location();
+    private ResourceLocation impl$gameMode;
+    private ResourceLocation impl$difficulty;
     private SerializationBehavior impl$serializationBehavior = SerializationBehavior.AUTOMATIC;
     @Nullable private Component impl$displayName = null;
     private Integer impl$viewDistance = BootstrapProperties.viewDistance;
 
     private boolean impl$enabled = true, impl$loadOnStartup = true, impl$keepSpawnLoaded = true, impl$generateSpawnOnLoad = false,
             impl$hardcore = BootstrapProperties.hardcore, impl$commands = true, impl$pvp = BootstrapProperties.pvp;
-
-    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec"))
-    private static <T> Codec<Dimension> impl$useTemplateCodec(final Function<RecordCodecBuilder.Instance<Dimension>, ?
-                extends App<RecordCodecBuilder.Mu<Dimension>, Dimension>> func) {
-        return SpongeWorldTemplate.DIRECT_CODEC;
-    }
 
     @Override
     public @Nullable Component bridge$displayName() {
@@ -133,5 +126,32 @@ public abstract class DimensionMixin implements DimensionBridge {
         this.impl$commands = spongeData.commands == null || spongeData.commands;
         this.impl$pvp = spongeData.pvp == null || spongeData.pvp;
         this.impl$viewDistance = spongeData.viewDistance == null ? BootstrapProperties.viewDistance : spongeData.viewDistance;
+    }
+
+    @Override
+    public void bridge$populateFromTemplate(final WorldTemplate s) {
+        this.impl$gameMode = (ResourceLocation) (Object) s.gameMode().orElseGet(() -> BootstrapProperties.gameMode).location();
+        this.impl$difficulty = (ResourceLocation) (Object) s.difficulty().orElseGet(() -> BootstrapProperties.difficulty).location();
+        this.impl$serializationBehavior = s.serializationBehavior();
+        this.impl$displayName = s.displayName().orElse(null);
+        this.impl$enabled = s.enabled();
+        this.impl$loadOnStartup = s.loadOnStartup();
+        this.impl$keepSpawnLoaded = s.keepSpawnLoaded();
+        this.impl$generateSpawnOnLoad = s.generateSpawnOnLoad();
+        this.impl$hardcore = s.hardcore();
+        this.impl$commands = s.commands();
+        this.impl$pvp = s.pvp();
+        this.impl$viewDistance = s.viewDistance().orElseGet(() -> BootstrapProperties.viewDistance);
+    }
+
+    @Redirect(
+            method = "*",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"
+            )
+    )
+    private static Codec impl$useTemplateCodec(final Function function) {
+        return SpongeWorldTemplate.DIRECT_CODEC;
     }
 }

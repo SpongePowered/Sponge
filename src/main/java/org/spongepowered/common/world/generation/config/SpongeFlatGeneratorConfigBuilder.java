@@ -53,10 +53,6 @@ public final class SpongeFlatGeneratorConfigBuilder implements FlatGeneratorConf
     public RegistryReference<org.spongepowered.api.world.biome.Biome> biome;
     public boolean performDecoration, populateLakes;
 
-    public SpongeFlatGeneratorConfigBuilder() {
-        this.reset();
-    }
-
     @Override
     public FlatGeneratorConfig.Builder structureConfig(final StructureGenerationConfig config) {
         this.structureConfig = Objects.requireNonNull(config, "config");

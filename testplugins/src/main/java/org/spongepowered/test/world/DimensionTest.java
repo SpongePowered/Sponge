@@ -33,12 +33,12 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.world.biome.BiomeProviderTemplate;
 import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
-import org.spongepowered.api.world.WorldTypeTemplates;
+import org.spongepowered.api.world.WorldTypes;
+import org.spongepowered.api.world.biome.BiomeProvider;
 import org.spongepowered.api.world.difficulty.Difficulties;
-import org.spongepowered.api.world.generation.ChunkGeneratorTemplate;
+import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.Structures;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
@@ -48,7 +48,6 @@ import org.spongepowered.api.world.generation.config.structure.SeparatedStructur
 import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.api.world.server.WorldTemplate;
-import org.spongepowered.api.world.server.WorldTemplates;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
@@ -63,11 +62,11 @@ public final class DimensionTest {
     }
 
     @Listener
-    public void onRegisterWorldTypeTemplates(final RegisterDataPackValueEvent<@NonNull WorldTypeTemplate> event) {
+    public void onRegisterWorldTypeTemplates(final RegisterDataPackValueEvent<WorldTypeTemplate> event) {
         event
             .register(WorldTypeTemplate
                 .builder()
-                    .from(WorldTypeTemplates.THE_NETHER)
+                    .from(WorldTypeTemplate.theNether())
                     .key(ResourceKey.of(this.plugin, "test_one"))
                     .effect(WorldTypeEffects.END)
                     .createDragonFight(true)
@@ -77,19 +76,19 @@ public final class DimensionTest {
     }
 
     @Listener
-    public void onRegisterWorldTemplates(final RegisterDataPackValueEvent<@NonNull WorldTemplate> event) {
+    public void onRegisterWorldTemplates(final RegisterDataPackValueEvent<WorldTemplate> event) {
         event
                 .register(WorldTemplate
                         .builder()
-                        .from(WorldTemplates.OVERWORLD)
+                        .from(WorldTemplate.overworld())
                         .key(ResourceKey.of(this.plugin, "more_difficult_overworld"))
-                        .worldType(RegistryKey.of(RegistryTypes.WORLD_TYPE, ResourceKey.of(this.plugin, "test_one")).asReference())
+                        .worldType(WorldTypes.THE_NETHER)
                         .displayName(Component.text("Mean World", NamedTextColor.RED))
-                        .generator(ChunkGeneratorTemplate.noise(
-                                BiomeProviderTemplate.overworld(), NoiseGeneratorConfig.builder()
+                        .generator(ChunkGenerator.noise(
+                                BiomeProvider.overworld(false), NoiseGeneratorConfig.builder()
                                         .structureConfig(StructureGenerationConfig.builder()
                                                 .stronghold(SpacedStructureConfig.of(10, 10, 1))
-                                                .structure(Structures.IGLOO, SeparatedStructureConfig.of(5, 5, 10))
+                                                .addStructure(Structures.IGLOO.get(), SeparatedStructureConfig.of(5, 5, 10))
                                                 .build()
                                         )
                                         .noiseConfig(NoiseConfig.builder()
@@ -104,6 +103,12 @@ public final class DimensionTest {
                                 )
                         )
                         .difficulty(Difficulties.HARD)
+                        .build()
+                )
+                .register(WorldTemplate
+                        .builder()
+                        .from(WorldTemplate.overworld())
+                        .key(ResourceKey.of(this.plugin, "world_1"))
                         .build()
                 )
         ;

@@ -40,10 +40,6 @@ public final class SpongeMutableWorldGenerationConfigBuilder implements MutableW
     private long seed;
     private boolean generateFeatures, generateBonusChest;
 
-    public SpongeMutableWorldGenerationConfigBuilder() {
-        this.reset();
-    }
-
     @Override
     public MutableWorldGenerationConfig.Builder reset() {
         final DimensionGeneratorSettings defaultSettings = BootstrapProperties.dimensionGeneratorSettings;

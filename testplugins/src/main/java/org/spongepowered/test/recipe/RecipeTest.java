@@ -98,7 +98,7 @@ public final class RecipeTest implements LoadableModule {
 
     @Listener
     @SuppressWarnings("unchecked")
-    public void onRecipeRegistry(RegisterDataPackValueEvent event) {
+    public void onRecipeRegistry(RegisterDataPackValueEvent<RecipeRegistration> event) {
 
         if (!this.enabled) {
             return;
