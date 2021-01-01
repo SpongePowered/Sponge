@@ -202,7 +202,7 @@ public final class SpongeParameterTranslator {
                     if (parameter instanceof SpongeFirstOfParameter) {
                         // take each parameter in turn and evaluate it, returns the terminal nodes of each block
                         parametersToAttachTo = new ArrayList<>();
-                        for (final Parameter p : ((SpongeFirstOfParameter) parameter).getParameterCandidates()) {
+                        for (final Parameter p : ((SpongeFirstOfParameter) parameter).getChildParameters()) {
                             final Collection<? extends CommandNode<CommandSource>> branchNodesToAttachTo = this.createAndAttachNode(
                                     nodesToAttachTo,
                                     Collections.singletonList(p),
@@ -215,7 +215,7 @@ public final class SpongeParameterTranslator {
                         // not so fancy stuff, it's a sequence, returns the terminal nodes of the block
                         parametersToAttachTo = new ArrayList<>(this.createAndAttachNode(
                                 nodesToAttachTo,
-                                ((SpongeMultiParameter) parameter).getParameterCandidates(),
+                                ((SpongeMultiParameter) parameter).getChildParameters(),
                                 executorWrapper,
                                 !hasNext || parameter.isTerminal(),
                                 allowSubcommands));
