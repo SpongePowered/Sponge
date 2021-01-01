@@ -273,7 +273,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Override
     public Selector.@NonNull Builder gameMode(@NonNull final GameMode mode) {
         final ResourceKey key = Sponge.getGame().registries().registry(RegistryTypes.GAME_MODE).valueKey(mode);
-        this.api$handle("gamemode", key.asString(), Tristate.FALSE);
+        this.api$handle("gamemode", key.getValue(), Tristate.FALSE);
         return this;
     }
 
@@ -285,7 +285,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Override
     public Selector.@NonNull Builder notGameMode(@NonNull final GameMode mode) {
         final ResourceKey key = Sponge.getGame().registries().registry(RegistryTypes.GAME_MODE).valueKey(mode);
-        this.api$handle("gamemode", key.asString(), Tristate.TRUE);
+        this.api$handle("gamemode", key.getValue(), Tristate.TRUE);
         return this;
     }
 
