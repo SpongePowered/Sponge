@@ -33,6 +33,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -51,6 +52,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
 import java.util.Collection;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Plugin("worldtest")
@@ -65,7 +67,7 @@ public final class WorldTest {
 
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<ServerPlayer> playerParameter = Parameter.playerOrSource().setKey("player").build();
+        final Parameter.Value<ServerPlayer> playerParameter = Parameter.player().optional().setKey("player").build();
         final Parameter.Value<ServerWorldProperties> worldParameter = Parameter.worldProperties().setKey("world").build();
         final Parameter.Value<ServerWorldProperties> optWorldParameter = Parameter.worldProperties().optional().setKey("world").build();
         final Parameter.Value<ServerLocation> locationParameter = Parameter.location().setKey("location").build();
@@ -122,7 +124,7 @@ public final class WorldTest {
                     .parameters(playerParameter, locationParameter, portalTypeParameter)
                     .setPermission(this.plugin.getMetadata().getId() + ".command.portal.use")
                     .setExecutor(context -> {
-                        final ServerPlayer player = context.requireOne(playerParameter);
+                        final ServerPlayer player = context.getOne(playerParameter).orElse(this.getSourcePlayer(context));
                         final ServerLocation location = context.requireOne(locationParameter);
                         final PortalType portalType = context.requireOne(portalTypeParameter);
                         return portalType.teleport(player, location, true) ? CommandResult.success() : CommandResult
@@ -137,7 +139,7 @@ public final class WorldTest {
                     .parameters(playerParameter, dimensionTypeParameter)
                     .setPermission(this.plugin.getMetadata().getId() + ".command.environment.change")
                     .setExecutor(context -> {
-                        final ServerPlayer player = context.requireOne(playerParameter);
+                        final ServerPlayer player = context.getOne(playerParameter).orElse(this.getSourcePlayer(context));
                         final DimensionType dimensionType = context.requireOne(dimensionTypeParameter);
                         player.sendEnvironment(dimensionType);
                         return CommandResult.success();
@@ -165,7 +167,7 @@ public final class WorldTest {
                         .parameters(playerParameter, optWorldParameter, optVector3Parameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.position.change")
                         .setExecutor(context -> {
-                            final ServerPlayer player = context.requireOne(playerParameter);
+                            final ServerPlayer player = context.getOne(playerParameter).orElse(this.getSourcePlayer(context));
                             final ServerWorldProperties properties = context.getOne(optWorldParameter).orElse(player.getWorld().getProperties());
                             final Vector3d position =
                                     context.getOne(optVector3Parameter).orElse(properties.getSpawnPosition().toDouble());
@@ -316,7 +318,7 @@ public final class WorldTest {
                         .builder()
                         .parameter(playerParameter)
                         .setExecutor(context -> {
-                            final ServerPlayer player = context.requireOne(playerParameter);
+                            final ServerPlayer player = context.getOne(playerParameter).orElse(this.getSourcePlayer(context));
                             player.sendMessage(Identity.nil(), Component.text("You are in World ").append(Component.text(player.getWorld().getKey().toString(),
                              NamedTextColor.AQUA)).append(Component.text(" at (" + player.getPosition().getFloorX() + ", " + player.getPosition().getFloorY() +
                                     ", " + player.getPosition().getFloorZ() + ")")));
@@ -325,6 +327,13 @@ public final class WorldTest {
                         .build()
                 , "wai", "whereami"
         );
+    }
+
+    private ServerPlayer getSourcePlayer(CommandContext context) {
+        if (context.getCause().root() instanceof ServerPlayer) {
+            return (ServerPlayer) context.getCause().root();
+        }
+        throw new NoSuchElementException("Source is not a player");
     }
 
     @Listener

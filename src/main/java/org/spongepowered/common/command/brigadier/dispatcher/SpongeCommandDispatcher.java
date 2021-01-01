@@ -240,7 +240,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             nodes = node.getRelevantNodes(originalReader);
         } else { // Reader cannot read anymore so ONLY nodes with parsers that do not read can be processed
             nodes = node.getChildren().stream().filter(n -> n instanceof SpongeArgumentCommandNode &&
-                    ((SpongeArgumentCommandNode<?>) n).getParser().doesNotRead()).collect(Collectors.toList());
+                    (((SpongeArgumentCommandNode<?>) n).getParser().doesNotRead())).collect(Collectors.toList());
         }
 
         for (final CommandNode<CommandSource> child : nodes) {

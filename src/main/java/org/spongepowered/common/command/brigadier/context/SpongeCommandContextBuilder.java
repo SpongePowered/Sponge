@@ -51,6 +51,7 @@ import org.spongepowered.common.command.parameter.SpongeParameterKey;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -355,6 +356,26 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     @SuppressWarnings("unchecked")
     public <T> Collection<? extends T> getAll(final Parameter.@NonNull Key<T> key) {
         return (Collection<? extends T>) this.getFrom(SpongeParameterKey.getSpongeKey(key));
+    }
+
+    @Override
+    public boolean hasAny(Parameter.Value<?> parameter) {
+        return this.hasAny(parameter.getKey());
+    }
+
+    @Override
+    public <T> Optional<T> getOne(Parameter.Value<T> parameter) throws IllegalArgumentException {
+        return this.getOne(parameter.getKey());
+    }
+
+    @Override
+    public <T> T requireOne(Parameter.Value<T> parameter) throws NoSuchElementException, IllegalArgumentException {
+        return this.requireOne(parameter.getKey());
+    }
+
+    @Override
+    public <T> Collection<? extends T> getAll(Parameter.Value<T> parameter) {
+        return this.getAll(parameter.getKey());
     }
 
     @Override
