@@ -56,8 +56,7 @@ public final class SpongeFirstOfParameterBuilder implements Parameter.FirstOfBui
     }
 
     @Override
-    @NonNull
-    public Parameter build() {
+    public Parameter.@NonNull Multi build() {
         Preconditions.checkState(!this.parameterList.isEmpty(), "There must be at least one parameter!");
         return new SpongeFirstOfParameter(this.parameterList, this.isOptional, this.isTerminal);
     }

@@ -56,8 +56,7 @@ public final class SpongeSequenceParameterBuilder implements Parameter.SequenceB
     }
 
     @Override
-    @NonNull
-    public Parameter build() {
+    public Parameter.@NonNull Multi build() {
         Preconditions.checkState(!this.parameterList.isEmpty(), "There must be at least one parameter!");
         return new SpongeSequenceParameter(this.parameterList, this.optional, this.terminal);
     }
