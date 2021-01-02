@@ -176,12 +176,6 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
-    @Override
-    default <T extends Entity> Collection<? extends T> getEntities(final Class<? extends T> entityClass, final AABB box,
-        @Nullable final Predicate<? super T> predicate) {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
-
     // ChunkVolume
 
 
