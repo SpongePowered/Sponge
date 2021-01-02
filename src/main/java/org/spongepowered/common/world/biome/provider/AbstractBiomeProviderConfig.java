@@ -22,30 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.gen;
+package org.spongepowered.common.world.biome.provider;
 
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.settings.DimensionStructuresSettings;
-import org.spongepowered.api.world.biome.provider.BiomeProvider;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.biome.provider.BiomeProviderConfig;
 
-@Mixin(ChunkGenerator.class)
-public abstract class ChunkGeneratorMixin_API implements org.spongepowered.api.world.generation.ChunkGenerator {
+import java.util.Collections;
+import java.util.List;
 
-    // @formatter:off
-    @Shadow public abstract net.minecraft.world.biome.provider.BiomeProvider shadow$getBiomeSource();
-    @Shadow public abstract DimensionStructuresSettings shadow$getSettings();
-    // @formatter:on
+public abstract class AbstractBiomeProviderConfig implements BiomeProviderConfig {
 
-    @Override
-    public BiomeProvider biomeProvider() {
-        return (BiomeProvider) this.shadow$getBiomeSource();
+    private final List<RegistryReference<Biome>> biomes;
+
+    protected AbstractBiomeProviderConfig(final List<RegistryReference<Biome>> biomes) {
+        this.biomes = biomes;
     }
 
     @Override
-    public StructureGenerationConfig structureConfig() {
-        return (StructureGenerationConfig) this.shadow$getSettings();
+    public List<RegistryReference<Biome>> biomes() {
+        return Collections.unmodifiableList(this.biomes);
     }
 }

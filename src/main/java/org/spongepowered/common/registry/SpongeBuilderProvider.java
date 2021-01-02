@@ -102,6 +102,10 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
+import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
+import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
+import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
@@ -188,6 +192,10 @@ import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
+import org.spongepowered.common.world.biome.provider.SpongeCheckerboardBiomeConfig;
+import org.spongepowered.common.world.biome.provider.SpongeEndStyleBiomeConfig;
+import org.spongepowered.common.world.biome.provider.SpongeLayeredBiomeConfg;
+import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
 import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfigBuilder;
 import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
@@ -328,6 +336,10 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(StructureGenerationConfig.Builder.class, SpongeStructureGenerationConfigBuilder::new)
                 .register(FlatGeneratorConfig.Builder.class, SpongeFlatGeneratorConfigBuilder::new)
                 .register(NoiseGeneratorConfig.Builder.class, SpongeNoiseGeneratorConfig.BuilderImpl::new)
+                .register(CheckerboardBiomeConfig.Builder.class, SpongeCheckerboardBiomeConfig.BuilderImpl::new)
+                .register(EndStyleBiomeConfig.Builder.class, SpongeEndStyleBiomeConfig.BuilderImpl::new)
+                .register(LayeredBiomeConfig.Builder.class, SpongeLayeredBiomeConfg.BuilderImpl::new)
+                .register(MultiNoiseBiomeConfig.Builder.class, SpongeMultiNoiseBiomeConfig.BuilderImpl::new)
         ;
     }
 }

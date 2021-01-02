@@ -65,7 +65,7 @@ public class SpongeRegistryKey<T> implements RegistryKey<T> {
 
     @Override
     public <V extends T> DefaultedRegistryReference<V> asDefaultedReference(final Supplier<RegistryHolder> defaultHolder) {
-        return new SpongeDefaultedRegistryReference<V>((RegistryKey<V>) this, defaultHolder);
+        return new SpongeDefaultedRegistryReference<>((RegistryKey<V>) this, defaultHolder);
     }
 
     @Override

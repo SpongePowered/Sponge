@@ -22,30 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.gen;
+package org.spongepowered.common.mixin.api.mcp.world.biome.provider;
 
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.settings.DimensionStructuresSettings;
-import org.spongepowered.api.world.biome.provider.BiomeProvider;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
+import net.minecraft.world.biome.provider.NetherBiomeProvider;
+import org.spongepowered.api.world.biome.provider.ConfigurableBiomeProvider;
+import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ChunkGenerator.class)
-public abstract class ChunkGeneratorMixin_API implements org.spongepowered.api.world.generation.ChunkGenerator {
-
-    // @formatter:off
-    @Shadow public abstract net.minecraft.world.biome.provider.BiomeProvider shadow$getBiomeSource();
-    @Shadow public abstract DimensionStructuresSettings shadow$getSettings();
-    // @formatter:on
+@Mixin(NetherBiomeProvider.class)
+public abstract class NetherBiomeProviderMixin_API extends BiomeProviderMixin_API implements ConfigurableBiomeProvider<MultiNoiseBiomeConfig> {
 
     @Override
-    public BiomeProvider biomeProvider() {
-        return (BiomeProvider) this.shadow$getBiomeSource();
-    }
-
-    @Override
-    public StructureGenerationConfig structureConfig() {
-        return (StructureGenerationConfig) this.shadow$getSettings();
+    public MultiNoiseBiomeConfig config() {
+        return null;
     }
 }

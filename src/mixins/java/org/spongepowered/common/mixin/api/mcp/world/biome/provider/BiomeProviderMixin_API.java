@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 @Mixin(BiomeProvider.class)
-public abstract class BiomeProviderMixin_API implements org.spongepowered.api.world.biome.BiomeProvider {
+public abstract class BiomeProviderMixin_API implements org.spongepowered.api.world.biome.provider.BiomeProvider {
 
     // @formatter:off
     @Shadow public abstract List<net.minecraft.world.biome.Biome> shadow$possibleBiomes();

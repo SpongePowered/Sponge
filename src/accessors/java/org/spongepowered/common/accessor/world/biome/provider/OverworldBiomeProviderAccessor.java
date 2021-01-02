@@ -22,30 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.gen;
+package org.spongepowered.common.accessor.world.biome.provider;
 
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.settings.DimensionStructuresSettings;
-import org.spongepowered.api.world.biome.provider.BiomeProvider;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.provider.OverworldBiomeProvider;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
-@Mixin(ChunkGenerator.class)
-public abstract class ChunkGeneratorMixin_API implements org.spongepowered.api.world.generation.ChunkGenerator {
+import java.util.List;
 
-    // @formatter:off
-    @Shadow public abstract net.minecraft.world.biome.provider.BiomeProvider shadow$getBiomeSource();
-    @Shadow public abstract DimensionStructuresSettings shadow$getSettings();
-    // @formatter:on
+@Mixin(OverworldBiomeProvider.class)
+public interface OverworldBiomeProviderAccessor {
 
-    @Override
-    public BiomeProvider biomeProvider() {
-        return (BiomeProvider) this.shadow$getBiomeSource();
-    }
-
-    @Override
-    public StructureGenerationConfig structureConfig() {
-        return (StructureGenerationConfig) this.shadow$getSettings();
+    @Accessor("POSSIBLE_BIOMES") static List<RegistryKey<Biome>> accessor$POSSIBLE_BIOMES() {
+        throw new UntransformedAccessorError();
     }
 }

@@ -49,8 +49,9 @@ import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.biome.BiomeProvider;
+import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.Biomes;
+import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.Structure;
@@ -138,7 +139,7 @@ public final class DimensionTest {
                 .worldType(WorldTypes.OVERWORLD)
                 .generateSpawnOnLoad(false) // TODO generating spawn on load stalls the server forever after almost fully generating :(
                 .displayName(Component.text("Custom world by " + owner))
-                .generator(ChunkGenerator.noise(BiomeProvider.checkboard(biomes, random.nextInt(5)), noiseGenConfig))
+                .generator(ChunkGenerator.noise(BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().biomes(biomes).scale(random.nextInt(5) + 1).build()), noiseGenConfig))
                 .difficulty(Difficulties.HARD)
                 .build();
 
@@ -198,7 +199,7 @@ public final class DimensionTest {
                         .worldType(WorldTypes.THE_NETHER)
                         .displayName(Component.text("Mean World", NamedTextColor.RED))
                         .generator(ChunkGenerator.noise(
-                                BiomeProvider.checkboard(Lists.newArrayList(Biomes.DARK_FOREST, Biomes.CRIMSON_FOREST, Biomes.BIRCH_FOREST), 2),
+                                BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().biomes(Lists.newArrayList(Biomes.DARK_FOREST, Biomes.CRIMSON_FOREST, Biomes.BIRCH_FOREST)).scale(2).build()),
                                 NoiseGeneratorConfig.builder()
                                         .structureConfig(StructureGenerationConfig.builder()
                                                 .stronghold(SpacedStructureConfig.of(10, 10, 1))

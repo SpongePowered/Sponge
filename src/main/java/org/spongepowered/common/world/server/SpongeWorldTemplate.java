@@ -47,7 +47,10 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypes;
-import org.spongepowered.api.world.biome.BiomeProvider;
+import org.spongepowered.api.world.biome.provider.BiomeProvider;
+import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
+import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
+import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.MutableWorldGenerationConfig;
@@ -450,7 +453,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             super.reset();
             this.displayName = null;
             this.worldType = WorldTypes.OVERWORLD;
-            this.generator = ChunkGenerator.noise(BiomeProvider.overworld(false), NoiseGeneratorConfig.overworld());
+            this.generator = ChunkGenerator.noise(BiomeProvider.layered(LayeredBiomeConfig.builder().build()), NoiseGeneratorConfig.overworld());
             final DimensionGeneratorSettings generationSettings = BootstrapProperties.dimensionGeneratorSettings;
             this.generationSettings = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$construct(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
@@ -506,11 +509,11 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
         @Override
         public WorldTemplate overworld() {
-            return new SpongeWorldTemplate.BuilderImpl()
+            return new BuilderImpl()
                     .reset()
                     .key(ResourceKey.minecraft("overworld"))
                     .worldType(WorldTypes.OVERWORLD)
-                    .generator(ChunkGenerator.noise(BiomeProvider.overworld(false), NoiseGeneratorConfig.overworld()))
+                    .generator(ChunkGenerator.noise(BiomeProvider.layered(LayeredBiomeConfig.builder().build()), NoiseGeneratorConfig.overworld()))
                     .keepSpawnLoaded(true)
                     .generateSpawnOnLoad(true)
                     .build();
@@ -518,21 +521,21 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
         @Override
         public WorldTemplate theNether() {
-            return new SpongeWorldTemplate.BuilderImpl()
+            return new BuilderImpl()
                     .reset()
                     .key(ResourceKey.minecraft("the_nether"))
                     .worldType(WorldTypes.THE_NETHER)
-                    .generator(ChunkGenerator.noise(BiomeProvider.nether(), NoiseGeneratorConfig.nether()))
+                    .generator(ChunkGenerator.noise(BiomeProvider.multiNoise(MultiNoiseBiomeConfig.builder().build()), NoiseGeneratorConfig.nether()))
                     .build();
         }
 
         @Override
         public WorldTemplate theEnd() {
-            return new SpongeWorldTemplate.BuilderImpl()
+            return new BuilderImpl()
                     .reset()
                     .key(ResourceKey.minecraft("the_end"))
                     .worldType(WorldTypes.THE_END)
-                    .generator(ChunkGenerator.noise(BiomeProvider.end(), NoiseGeneratorConfig.end()))
+                    .generator(ChunkGenerator.noise(BiomeProvider.endStyle(EndStyleBiomeConfig.builder().build()), NoiseGeneratorConfig.end()))
                     .build();
         }
     }

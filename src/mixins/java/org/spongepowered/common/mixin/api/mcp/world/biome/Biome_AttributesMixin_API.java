@@ -22,30 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.gen;
+package org.spongepowered.common.mixin.api.mcp.world.biome;
 
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.settings.DimensionStructuresSettings;
-import org.spongepowered.api.world.biome.provider.BiomeProvider;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
+import net.minecraft.world.biome.Biome;
+import org.spongepowered.api.world.biome.BiomeAttributes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ChunkGenerator.class)
-public abstract class ChunkGeneratorMixin_API implements org.spongepowered.api.world.generation.ChunkGenerator {
+@Mixin(Biome.Attributes.class)
+public abstract class Biome_AttributesMixin_API implements BiomeAttributes {
 
     // @formatter:off
-    @Shadow public abstract net.minecraft.world.biome.provider.BiomeProvider shadow$getBiomeSource();
-    @Shadow public abstract DimensionStructuresSettings shadow$getSettings();
+    @Shadow @Final private float temperature;
+    @Shadow @Final private float humidity;
+    @Shadow @Final private float altitude;
+    @Shadow @Final private float weirdness;
+    @Shadow @Final private float offset;
     // @formatter:on
 
     @Override
-    public BiomeProvider biomeProvider() {
-        return (BiomeProvider) this.shadow$getBiomeSource();
+    public float temperature() {
+        return this.temperature;
     }
 
     @Override
-    public StructureGenerationConfig structureConfig() {
-        return (StructureGenerationConfig) this.shadow$getSettings();
+    public float humidity() {
+        return this.humidity;
+    }
+
+    @Override
+    public float altitude() {
+        return this.altitude;
+    }
+
+    @Override
+    public float weirdness() {
+        return this.weirdness;
+    }
+
+    @Override
+    public float offset() {
+        return this.offset;
     }
 }

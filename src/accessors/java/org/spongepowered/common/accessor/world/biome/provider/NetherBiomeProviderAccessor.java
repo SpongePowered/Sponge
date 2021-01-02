@@ -22,30 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.gen;
+package org.spongepowered.common.accessor.world.biome.provider;
 
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.settings.DimensionStructuresSettings;
-import org.spongepowered.api.world.biome.provider.BiomeProvider;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.provider.NetherBiomeProvider;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
+import org.spongepowered.common.UntransformedInvokerError;
 
-@Mixin(ChunkGenerator.class)
-public abstract class ChunkGeneratorMixin_API implements org.spongepowered.api.world.generation.ChunkGenerator {
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-    // @formatter:off
-    @Shadow public abstract net.minecraft.world.biome.provider.BiomeProvider shadow$getBiomeSource();
-    @Shadow public abstract DimensionStructuresSettings shadow$getSettings();
-    // @formatter:on
+@Mixin(NetherBiomeProvider.class)
+public interface NetherBiomeProviderAccessor {
 
-    @Override
-    public BiomeProvider biomeProvider() {
-        return (BiomeProvider) this.shadow$getBiomeSource();
+    @Accessor("DEFAULT_NOISE_PARAMETERS") static NetherBiomeProvider.Noise accessor$DEFAULT_NOISE_PARAMETERS() {
+        throw new UntransformedAccessorError();
     }
 
-    @Override
-    public StructureGenerationConfig structureConfig() {
-        return (StructureGenerationConfig) this.shadow$getSettings();
+    @Invoker("<init>") static NetherBiomeProvider invoker$new(long seed, List<Pair<Biome.Attributes, Supplier<Biome>>> attributedBiomes,
+            NetherBiomeProvider.Noise temperatureConfig, NetherBiomeProvider.Noise humidityConfig, NetherBiomeProvider.Noise altitudeConfig,
+            NetherBiomeProvider.Noise weirdnessConfig, Optional<Pair<Registry<Biome>, NetherBiomeProvider.Preset>> empty) {
+        throw new UntransformedInvokerError();
     }
 }

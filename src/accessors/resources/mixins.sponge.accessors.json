@@ -200,7 +200,11 @@
         "server.management.PlayerInteractionManagerAccessor",
         "util.text.ColorAccessor",
         "world.gen.FlatLayerInfoAccessor",
-        "world.gen.DimensionSettingsAccessor"
+        "world.gen.DimensionSettingsAccessor",
+        "world.biome.provider.OverworldBiomeProviderAccessor",
+        "world.biome.provider.NetherBiomeProviderAccessor",
+        "world.biome.provider.EndBiomeProviderAccessor",
+        "world.biome.provider.BiomeProviderAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

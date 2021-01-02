@@ -22,30 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.gen;
+package org.spongepowered.common.mixin.api.mcp.world.biome.provider;
 
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.settings.DimensionStructuresSettings;
-import org.spongepowered.api.world.biome.provider.BiomeProvider;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
+import net.minecraft.world.biome.provider.NetherBiomeProvider;
+import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ChunkGenerator.class)
-public abstract class ChunkGeneratorMixin_API implements org.spongepowered.api.world.generation.ChunkGenerator {
+import java.util.List;
+
+@Mixin(NetherBiomeProvider.Noise.class)
+@Implements(@Interface(iface = MultiNoiseConfig.class, prefix = "multiNoiseConfig$"))
+public abstract class NetherBiomeProvider_NoiseMixin_API implements MultiNoiseConfig {
 
     // @formatter:off
-    @Shadow public abstract net.minecraft.world.biome.provider.BiomeProvider shadow$getBiomeSource();
-    @Shadow public abstract DimensionStructuresSettings shadow$getSettings();
+    @Shadow public abstract int shadow$firstOctave();
+    @Shadow public abstract DoubleList shadow$amplitudes();
     // @formatter:on
 
-    @Override
-    public BiomeProvider biomeProvider() {
-        return (BiomeProvider) this.shadow$getBiomeSource();
+    @Intrinsic
+    public int multiNoiseConfig$firstOctave() {
+        return this.shadow$firstOctave();
     }
 
-    @Override
-    public StructureGenerationConfig structureConfig() {
-        return (StructureGenerationConfig) this.shadow$getSettings();
+    @Intrinsic
+    public List<Double> multiNoiseConfig$amplitudes() {
+        return this.shadow$amplitudes();
     }
 }
