@@ -44,6 +44,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.util.registry.WorldGenSettingsExport;
 import net.minecraft.util.registry.WorldSettingsImport;
@@ -83,6 +84,7 @@ import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.accessor.world.storage.SaveFormat_LevelSaveAccessor;
 import org.spongepowered.common.accessor.world.storage.ServerWorldInfoAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
@@ -731,10 +733,12 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             ServerWorldInfo levelData;
             boolean newLevelData = false;
+            final boolean isDebugGeneration;
 
             if (isDefaultWorld) {
                 levelData = defaultLevelData;
                 newLevelData = BootstrapProperties.isNewLevel;
+                isDebugGeneration = defaultGenerationSettings.isDebug();
             } else {
                 levelData = (ServerWorldInfo) levelSave.getDataTag((DynamicOps<INBT>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig());
                 if (levelData == null) {
@@ -750,7 +754,14 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                         generationSettings = ((DimensionGeneratorSettingsBridge) defaultLevelData.worldGenSettings()).bridge$copy();
                     }
 
+                    isDebugGeneration = generationSettings.isDebug();
+
+                    ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$dimensions(new SimpleRegistry<>(
+                            net.minecraft.util.registry.Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()));
+
                     levelData = new ServerWorldInfo(levelSettings, generationSettings, Lifecycle.stable());
+                } else {
+                    isDebugGeneration = levelData.worldGenSettings().isDebug();
                 }
             }
 
@@ -764,7 +775,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             ((ServerWorldInfoBridge) levelData).bridge$configAdapter(configAdapter);
 
             levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().isPresent());
-            final boolean isDebugGeneration = levelData.worldGenSettings().isDebug();
             final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
 
             final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(worldKey);

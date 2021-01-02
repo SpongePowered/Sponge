@@ -43,4 +43,6 @@ public interface DimensionGeneratorSettingsAccessor {
     }
 
     @Accessor("legacyCustomOptions") Optional<String> accessor$legacyCustomOptions();
+
+    @Accessor("dimensions") void accessor$dimensions(SimpleRegistry<Dimension> dimensions);
 }
