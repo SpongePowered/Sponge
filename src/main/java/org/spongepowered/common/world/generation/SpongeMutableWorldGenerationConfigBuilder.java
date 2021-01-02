@@ -33,21 +33,13 @@ import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public final class SpongeMutableWorldGenerationConfigBuilder implements MutableWorldGenerationConfig.Builder {
 
     private long seed;
     private boolean generateFeatures, generateBonusChest;
-
-    @Override
-    public MutableWorldGenerationConfig.Builder reset() {
-        final DimensionGeneratorSettings defaultSettings = BootstrapProperties.dimensionGeneratorSettings;
-        this.seed = defaultSettings.seed();
-        this.generateFeatures = defaultSettings.generateFeatures();
-        this.generateBonusChest = defaultSettings.generateBonusChest();
-        return this;
-    }
 
     @Override
     public MutableWorldGenerationConfig.Builder seed(final long seed) {
@@ -64,6 +56,25 @@ public final class SpongeMutableWorldGenerationConfigBuilder implements MutableW
     @Override
     public MutableWorldGenerationConfig.Builder generateBonusChest(final boolean generateBonusChest) {
         this.generateBonusChest = generateBonusChest;
+        return this;
+    }
+
+    @Override
+    public MutableWorldGenerationConfig.Builder reset() {
+        final DimensionGeneratorSettings defaultSettings = BootstrapProperties.dimensionGeneratorSettings;
+        this.seed = defaultSettings.seed();
+        this.generateFeatures = defaultSettings.generateFeatures();
+        this.generateBonusChest = defaultSettings.generateBonusChest();
+        return this;
+    }
+
+    @Override
+    public MutableWorldGenerationConfig.Builder from(final MutableWorldGenerationConfig value) {
+        Objects.requireNonNull(value, "value");
+
+        this.seed = value.seed();
+        this.generateFeatures = value.generateFeatures();
+        this.generateBonusChest = value.generateBonusChest();
         return this;
     }
 

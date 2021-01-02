@@ -151,11 +151,6 @@ public interface IServerWorldInfoMixin extends ServerWorldInfoBridge {
         throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
     }
 
-    @Override
-    default void bridge$uniqueId(final UUID uniqueId) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
     @Nullable
     @Override
     default ServerWorld bridge$world() {

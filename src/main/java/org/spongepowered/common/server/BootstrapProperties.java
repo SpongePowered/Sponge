@@ -26,6 +26,7 @@ package org.spongepowered.common.server;
 
 import net.minecraft.server.dedicated.ServerProperties;
 import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.util.registry.WorldSettingsImport;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -44,6 +45,7 @@ public final class BootstrapProperties {
     public static boolean hardcore;
     public static int viewDistance;
     public static DynamicRegistries registries;
+    public static WorldSettingsImport<?> worldSettingsAdapter;
 
     public static void init(final ServerProperties properties, DynamicRegistries registries) {
         BootstrapProperties.dimensionGeneratorSettings = properties.worldGenSettings;
@@ -53,5 +55,9 @@ public final class BootstrapProperties {
         BootstrapProperties.hardcore = properties.hardcore;
         BootstrapProperties.viewDistance = properties.viewDistance;
         BootstrapProperties.registries = registries;
+    }
+
+    public static <T> void worldSettingsAdapter(final WorldSettingsImport<T> worldSettingsAdapter) {
+        BootstrapProperties.worldSettingsAdapter = worldSettingsAdapter;
     }
 }

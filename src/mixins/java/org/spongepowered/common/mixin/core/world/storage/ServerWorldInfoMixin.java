@@ -28,6 +28,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.Dimension;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
@@ -39,6 +40,7 @@ import net.minecraft.world.storage.ServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -46,7 +48,10 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.WorldSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
+import org.spongepowered.common.bridge.world.DimensionBridge;
 import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
 import java.util.StringJoiner;
@@ -64,8 +69,11 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     private DimensionType impl$dimensionType;
     private SerializationBehavior impl$serializationBehavior;
     @Nullable private Component impl$displayName;
-    private UUID impl$uniqueId = UUID.randomUUID();
-    private boolean impl$hasCustomDifficulty = false, impl$pvp, impl$enabled, impl$loadOnStartup, impl$keepSpawnLoaded, impl$generateSpawnOnLoad;
+    private UUID impl$uniqueId;
+    private InheritableConfigHandle<WorldConfig> impl$configAdapter;
+
+    private boolean impl$hasCustomDifficulty = false, impl$keepLoaded, impl$pvp, impl$enabled, impl$loadOnStartup, impl$keepSpawnLoaded,
+            impl$generateSpawnOnLoad;
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -117,11 +125,6 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public void bridge$uniqueId(final UUID uniqueId) {
-        this.impl$uniqueId = uniqueId;
-    }
-
-    @Override
     public boolean bridge$customDifficulty() {
         return this.impl$hasCustomDifficulty;
     }
@@ -151,6 +154,16 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     @Override
     public void bridge$enabled(final boolean enabled) {
         this.impl$enabled = enabled;
+    }
+
+    @Override
+    public boolean bridge$keepLoaded() {
+        return this.impl$keepLoaded;
+    }
+
+    @Override
+    public void bridge$keepLoaded(final boolean keepLoaded) {
+        this.impl$keepLoaded = keepLoaded;
     }
 
     @Override
@@ -201,6 +214,36 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     @Override
     public void bridge$displayName(Component displayName) {
         this.impl$displayName = displayName;
+    }
+
+    @Override
+    public InheritableConfigHandle<WorldConfig> bridge$configAdapter() {
+        return this.impl$configAdapter;
+    }
+
+    @Override
+    public void bridge$configAdapter(InheritableConfigHandle<WorldConfig> adapter) {
+        this.impl$configAdapter = adapter;
+    }
+
+    @Override
+    public void bridge$populateFromDimension(final Dimension dimension) {
+        final DimensionBridge dimensionBridge = (DimensionBridge) (Object) dimension;
+        this.impl$key = ((ResourceKeyBridge) (Object) dimension).bridge$getKey();
+        this.impl$dimensionType = dimension.type();
+        this.impl$serializationBehavior = dimensionBridge.bridge$serializationBehavior();
+        this.impl$displayName = dimensionBridge.bridge$displayName();
+        this.impl$uniqueId = dimensionBridge.bridge$uniqueId();
+        this.impl$hasCustomDifficulty = dimensionBridge.bridge$difficulty() != null;
+        if (this.impl$hasCustomDifficulty) {
+            ((WorldSettingsAccessor) (Object) this.settings).accessor$difficulty(Sponge.getGame().registries().registry(RegistryTypes.DIFFICULTY).value((ResourceKey) (Object) dimensionBridge.bridge$difficulty()));
+        }
+        this.impl$pvp = dimensionBridge.bridge$pvp();
+        this.impl$enabled = dimensionBridge.bridge$enabled();
+        this.impl$keepLoaded = dimensionBridge.bridge$keepLoaded();
+        this.impl$loadOnStartup = dimensionBridge.bridge$loadOnStartup();
+        this.impl$keepSpawnLoaded = dimensionBridge.bridge$keepSpawnLoaded();
+        this.impl$generateSpawnOnLoad = dimensionBridge.bridge$generateSpawnOnLoad();
     }
 
     @Override

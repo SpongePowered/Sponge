@@ -97,11 +97,13 @@ public class SpongeRegistryKey<T> implements RegistryKey<T> {
     public static final class FactoryImpl implements RegistryKey.Factory {
 
         @Override
-        public <T> RegistryKey<T> create(final RegistryType<T> registry, final ResourceKey location) {
-            Objects.requireNonNull(registry, "registry");
-            Objects.requireNonNull(location, "location");
+        public <T> RegistryKey<T> of(final RegistryType<T> registry, final ResourceKey location) {
+            return new SpongeRegistryKey<>(Objects.requireNonNull(registry, "registry"), Objects.requireNonNull(location, "location"));
+        }
 
-            return new SpongeRegistryKey<>(registry, location);
+        @Override
+        public <T> RegistryKey<T> referenced(final RegistryHolder holder, RegistryType<T> registry, T value) {
+            return new SpongeRegistryKey<>(Objects.requireNonNull(registry, "registry"), Objects.requireNonNull(holder, "holder").registry(registry).valueKey(Objects.requireNonNull(value, "value")));
         }
     }
 }

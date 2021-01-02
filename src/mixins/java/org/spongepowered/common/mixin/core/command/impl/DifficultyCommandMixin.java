@@ -28,13 +28,17 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.impl.DifficultyCommand;
+import net.minecraft.network.play.server.SServerDifficultyPacket;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.storage.IWorldInfo;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 
 @Mixin(DifficultyCommand.class)
 public abstract class DifficultyCommandMixin {
@@ -52,7 +56,11 @@ public abstract class DifficultyCommandMixin {
         if (source.getLevel().getDifficulty() == difficulty) {
             throw DifficultyCommandMixin.ERROR_ALREADY_DIFFICULT.create(difficulty.getKey());
         } else {
-            ((ServerWorldProperties)source.getLevel().getLevelData()).difficulty((org.spongepowered.api.world.difficulty.Difficulty) (Object) difficulty);
+            final IWorldInfo levelData = source.getLevel().getLevelData();
+            ((ServerWorldProperties) levelData).difficulty((org.spongepowered.api.world.difficulty.Difficulty) (Object) difficulty);
+            source.getLevel().setSpawnSettings(((MinecraftServerAccessor) SpongeCommon.getServer()).invoker$isSpawningMonsters(), SpongeCommon.getServer().isSpawningAnimals());
+            source.getLevel().getPlayers(p -> true).forEach(p -> p.connection.send(new SServerDifficultyPacket(levelData.getDifficulty(),
+                    levelData.isDifficultyLocked())));
             source.sendSuccess(new TranslationTextComponent("commands.difficulty.success", difficulty.getDisplayName()), true);
             return 0;
         }

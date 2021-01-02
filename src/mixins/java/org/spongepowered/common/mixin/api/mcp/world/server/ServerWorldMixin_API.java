@@ -36,6 +36,7 @@ import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Dimension;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.raid.Raid;
 import net.minecraft.world.raid.RaidManager;
@@ -62,6 +63,7 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
@@ -74,6 +76,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.raid.RaidManagerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.world.DimensionBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -82,6 +85,7 @@ import org.spongepowered.common.mixin.api.mcp.world.WorldMixin_API;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -155,6 +159,11 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Override
     public ChunkGenerator getGenerator() {
         return (ChunkGenerator) this.shadow$getChunkSource().getGenerator();
+    }
+
+    @Override
+    public WorldTemplate asTemplate() {
+        return new SpongeWorldTemplate((ServerWorld) (Object) this);
     }
 
     @Override

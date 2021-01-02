@@ -24,18 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.World;
 import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.io.File;
 import java.nio.file.Path;
 
 @Mixin(SaveFormat.LevelSave.class)
@@ -49,14 +44,5 @@ public abstract class SaveFormat_LevelSaveMixin {
         at = @At(value = "INVOKE", target = "Ljava/lang/IllegalStateException;<init>(Ljava/lang/String;)V", ordinal = 0, remap = false))
     private String modifyMinecraftExceptionOutputIfNotInitializationTime(final String message) {
         return "Lock for world " + this.levelPath + " is no longer valid!";
-    }
-
-    @Redirect(method = "getDimensionPath", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getStorageFolder(Lnet/minecraft/util/RegistryKey;Ljava/io/File;)Ljava/io/File;"))
-    private File impl$adjustPathIndexIfSubLevel(final RegistryKey<World> key, final File file) {
-        if (key == World.OVERWORLD) {
-            return DimensionType.getStorageFolder(key, file);
-        }
-
-        return DimensionType.getStorageFolder(key, file.getParentFile());
     }
 }

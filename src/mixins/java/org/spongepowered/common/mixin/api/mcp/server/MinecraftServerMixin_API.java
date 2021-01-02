@@ -76,6 +76,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
@@ -338,7 +339,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
         if (this.api$scoreboard == null) {
-            final ServerWorld world = ((SpongeWorldManager) this.getWorldManager()).getDefaultWorld();
+            final ServerWorld world = SpongeCommon.getServer().overworld();
             if (world == null) {
                 return Optional.empty();
             }

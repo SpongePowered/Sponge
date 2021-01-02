@@ -202,7 +202,8 @@
     "block.EndPortalBlockMixin",
     "world.DimensionMixin",
     "util.registry.DynamicRegistriesMixin",
-    "world.gen.DimensionSettingsMixin"
+    "world.gen.DimensionSettingsMixin",
+      "world.DimensionTypeMixin"
   ],
   "client": [
     "client.MinecraftMixin",

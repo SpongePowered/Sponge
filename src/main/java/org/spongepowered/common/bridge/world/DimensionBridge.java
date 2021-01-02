@@ -31,6 +31,8 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 
+import java.util.UUID;
+
 public interface DimensionBridge {
 
     @Nullable
@@ -38,14 +40,20 @@ public interface DimensionBridge {
 
     ResourceLocation bridge$gameMode();
 
+    @Nullable
     ResourceLocation bridge$difficulty();
 
     SerializationBehavior bridge$serializationBehavior();
 
     @Nullable
+    UUID bridge$uniqueId();
+
+    @Nullable
     Integer bridge$viewDistance();
 
     boolean bridge$enabled();
+
+    boolean bridge$keepLoaded();
 
     boolean bridge$loadOnStartup();
 
@@ -55,11 +63,13 @@ public interface DimensionBridge {
 
     boolean bridge$hardcore();
 
-    boolean bridge$pvp();
-
     boolean bridge$commands();
 
-    void bridge$setSpongeData(SpongeWorldTemplate.SpongeDataSection spongeData);
+    boolean bridge$pvp();
 
-    void bridge$populateFromTemplate(WorldTemplate s);
+    void bridge$populateFromData(SpongeWorldTemplate.SpongeDataSection spongeData);
+
+    void bridge$populateFromTemplate(SpongeWorldTemplate s);
+
+    SpongeWorldTemplate bridge$asTemplate();
 }

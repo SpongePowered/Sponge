@@ -42,6 +42,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.world.storage.ServerWorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
@@ -321,7 +322,23 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Overwrite
     public void setDifficulty(final Difficulty difficulty, final boolean forceDifficulty) {
         for (final ServerWorld world : this.shadow$getAllLevels()) {
-            ((SpongeServer) SpongeCommon.getServer()).getWorldManager().adjustWorldForDifficulty(world, difficulty, forceDifficulty);
+            this.bridge$setDifficulty(world, difficulty, forceDifficulty);
+        }
+    }
+
+    @Override
+    public void bridge$setDifficulty(final ServerWorld world, final Difficulty newDifficulty, final boolean forceDifficulty) {
+        if (world.getLevelData().isDifficultyLocked() && !forceDifficulty) {
+            return;
+        }
+
+        if (forceDifficulty) {
+            // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
+            if (!((ServerWorldInfoBridge) world.getLevelData()).bridge$customDifficulty()) {
+                ((ServerWorldInfoBridge) world.getLevelData()).bridge$forceSetDifficulty(newDifficulty);
+            }
+        } else {
+            ((ServerWorldInfo) world.getLevelData()).setDifficulty(newDifficulty);
         }
     }
 

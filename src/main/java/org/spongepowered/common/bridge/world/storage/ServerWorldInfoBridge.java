@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge.world.storage;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.Dimension;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -50,8 +51,6 @@ public interface ServerWorldInfoBridge {
     @Nullable
     UUID bridge$uniqueId();
 
-    void bridge$uniqueId(UUID uniqueId);
-
     boolean bridge$customDifficulty();
 
     void bridge$forceSetDifficulty(Difficulty difficulty);
@@ -63,6 +62,10 @@ public interface ServerWorldInfoBridge {
     boolean bridge$enabled();
 
     void bridge$enabled(boolean enabled);
+
+    boolean bridge$keepLoaded();
+
+    void bridge$keepLoaded(boolean keepLoaded);
 
     boolean bridge$loadOnStartup();
 
@@ -88,4 +91,6 @@ public interface ServerWorldInfoBridge {
     InheritableConfigHandle<WorldConfig> bridge$configAdapter();
 
     void bridge$configAdapter(InheritableConfigHandle<WorldConfig> adapter);
+
+    void bridge$populateFromDimension(Dimension dimension);
 }

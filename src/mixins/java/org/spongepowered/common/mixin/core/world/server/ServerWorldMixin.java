@@ -27,13 +27,16 @@ package org.spongepowered.common.mixin.core.world.server;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.spawner.ISpecialSpawner;
 import net.minecraft.world.storage.IServerConfiguration;
@@ -44,10 +47,12 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -59,6 +64,7 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -74,6 +80,7 @@ import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends WorldMixin implements ServerWorldBridge, PlatformServerWorldBridge, ResourceKeyBridge {
@@ -85,8 +92,9 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
     private SaveFormat.LevelSave impl$levelSave;
     private CustomServerBossInfoManager impl$bossBarManager;
-    private boolean impl$isManualSave = false;
     private SpongeRegistryHolder impl$registerHolder;
+    private IChunkStatusListener impl$chunkStatusListener;
+    private boolean impl$isManualSave = false;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$cacheLevelSave(MinecraftServer p_i241885_1_, Executor p_i241885_2_, SaveFormat.LevelSave p_i241885_3_,
@@ -94,12 +102,18 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             ChunkGenerator p_i241885_8_, boolean p_i241885_9_, long p_i241885_10_, List<ISpecialSpawner> p_i241885_12_, boolean p_i241885_13_,
             CallbackInfo ci) {
         this.impl$levelSave = p_i241885_3_;
+        this.impl$chunkStatusListener = p_i241885_7_;
         this.impl$registerHolder = new SpongeRegistryHolder(((DynamicRegistries.Impl) p_i241885_1_.registryAccess()));
     }
 
     @Override
     public SaveFormat.LevelSave bridge$getLevelSave() {
         return this.impl$levelSave;
+    }
+
+    @Override
+    public IChunkStatusListener bridge$getChunkStatusListener() {
+        return this.impl$chunkStatusListener;
     }
 
     @Override
@@ -269,52 +283,51 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
      * @author zidane - December 17th, 2020 - Minecraft 1.16.4
      * @reason Honor our serialization behavior in performing saves
      */
-//    @Overwrite
-//    public void save(@Nullable IProgressUpdate progress, boolean flush, boolean skipSave) {
-//        final ServerWorld this$ = (ServerWorld) (Object) this;
-//        final ServerWorldInfo levelData = (ServerWorldInfo) this.getLevelData();
-//
-//        ServerChunkProvider serverchunkprovider = this$.getChunkSource();
-//
-//        if (!skipSave) {
-//
-//            final SerializationBehavior behavior = ((IServerWorldInfoBridge) levelData).bridge$getConfigAdapter().get().world.serializationBehavior;
-//
-//            if (progress != null) {
-//                progress.progressStartNoAbort(new TranslationTextComponent("menu.savingLevel"));
-//            }
-//
-//            // We always save the metadata unless it is NONE
-//            if (behavior != SerializationBehavior.NONE) {
-//
-//                this.shadow$saveLevelData();
-//
-//                // Sponge Start - We do per-world WorldInfo/WorldBorders/BossBars
-//
-//                levelData.setWorldBorder(this.getWorldBorder().createSettings());
-//
-//                levelData.setCustomBossEvents(((ServerWorldBridge) this$).bridge$getBossBarManager().save());
-//
-//                ((ServerWorldBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.getServer().registryAccess()
-//                    , (ServerWorldInfo) this.getLevelData(), this.shadow$dimension() == World.OVERWORLD ? SpongeCommon.getServer().getPlayerList()
-//                        .getSingleplayerData() : null);
-//
-//                // Sponge End
-//            }
-//            if (progress != null) {
-//                progress.progressStage(new TranslationTextComponent("menu.savingChunks"));
-//            }
-//
-//            final boolean canAutomaticallySave = !this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC;
-//            final boolean canManuallySave = this.impl$isManualSave && behavior == SerializationBehavior.MANUAL;
-//
-//            if (canAutomaticallySave || canManuallySave) {
-//                serverchunkprovider.save(flush);
-//            }
-//        }
-//
-//        this.impl$isManualSave = false;
-//    }
+    @Overwrite
+    public void save(@Nullable IProgressUpdate progress, boolean flush, boolean skipSave) {
+        final ServerWorldInfo levelData = (ServerWorldInfo) this.getLevelData();
+
+        final ServerChunkProvider chunkProvider = ((ServerWorld) (Object) this).getChunkSource();
+
+        if (!skipSave) {
+
+            final SerializationBehavior behavior = ((ServerWorldInfoBridge) levelData).bridge$serializationBehavior();
+
+            if (progress != null) {
+                progress.progressStartNoAbort(new TranslationTextComponent("menu.savingLevel"));
+            }
+
+            // We always save the metadata unless it is NONE
+            if (behavior != SerializationBehavior.NONE) {
+
+                this.shadow$saveLevelData();
+
+                // Sponge Start - We do per-world WorldInfo/WorldBorders/BossBars
+
+                levelData.setWorldBorder(this.getWorldBorder().createSettings());
+
+                levelData.setCustomBossEvents(((ServerWorldBridge) this).bridge$getBossBarManager().save());
+
+                ((ServerWorldBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.getServer().registryAccess()
+                    , (ServerWorldInfo) this.getLevelData(), this.shadow$dimension() == World.OVERWORLD ? SpongeCommon.getServer().getPlayerList()
+                        .getSingleplayerData() : null);
+
+                // Sponge End
+            }
+            if (progress != null) {
+                progress.progressStage(new TranslationTextComponent("menu.savingChunks"));
+            }
+
+            final boolean canAutomaticallySave = !this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC;
+            final boolean canManuallySave = this.impl$isManualSave && behavior == SerializationBehavior.MANUAL;
+
+            if (canAutomaticallySave || canManuallySave) {
+                chunkProvider.save(flush);
+            }
+        }
+
+        this.impl$isManualSave = false;
+    }
 
     @Override
     public String toString() {

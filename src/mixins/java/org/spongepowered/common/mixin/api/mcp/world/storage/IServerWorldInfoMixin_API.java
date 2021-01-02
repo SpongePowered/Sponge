@@ -155,6 +155,16 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
+    default boolean keepLoaded() {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
+    default void keepLoaded(final boolean keepLoaded) {
+        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
+    }
+
+    @Override
     default boolean loadOnStartup() {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }

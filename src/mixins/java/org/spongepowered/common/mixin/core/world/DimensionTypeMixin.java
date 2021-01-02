@@ -22,11 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.api;
+package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 
-public interface LocationBridge {
+import java.io.File;
 
-    BlockPos bridge$getBlockPos();
+@Mixin(DimensionType.class)
+public abstract class DimensionTypeMixin {
+
+    /**
+     * @author zidane - - January 1st, 2021 - Minecraft 1.16.4
+     * @reason Compensate for our per-world level save adapters
+     */
+    @Overwrite
+    public static File getStorageFolder(RegistryKey<World> worldKey, File defaultLevelDirectory) {
+        // Sponge Start - The directory is already set to be at this location
+        return defaultLevelDirectory;
+    }
 }

@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.mojang.serialization.DynamicOps;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.Main;
 import net.minecraft.server.ServerPropertiesProvider;
 import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.util.registry.WorldSettingsImport;
 import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,6 +49,14 @@ public abstract class MainMixin {
         final ServerPropertiesProvider provider = new ServerPropertiesProvider(p_i242100_1_, p_i242100_2_);
         BootstrapProperties.init(provider.getProperties(), p_i242100_1_);
         return provider;
+    }
+
+    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/WorldSettingsImport;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/resources/IResourceManager;Lnet/minecraft/util/registry/DynamicRegistries$Impl;)Lnet/minecraft/util/registry/WorldSettingsImport;"))
+    private static <T> WorldSettingsImport<T> impl$cacheWorldSettingsAdapter(DynamicOps<T> p_244335_0_, IResourceManager p_244335_1_,
+            DynamicRegistries.Impl p_244335_2_) {
+        final WorldSettingsImport<T> worldSettingsAdapter = WorldSettingsImport.create(p_244335_0_, p_244335_1_, p_244335_2_);
+        BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
+        return worldSettingsAdapter;
     }
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveFormat$LevelSave;getLevelPath(Lnet/minecraft/world/storage/FolderName;)Ljava/nio/file/Path;"))

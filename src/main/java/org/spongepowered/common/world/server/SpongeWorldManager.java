@@ -45,18 +45,13 @@ public interface SpongeWorldManager extends WorldManager {
 
     Path getDefaultWorldDirectory();
 
-    Path getCustomWorldsDirectory();
+    Path getDimensionDataPackDirectory();
 
     static RegistryKey<World> createRegistryKey(final ResourceKey key) {
         return RegistryKey.create(Registry.DIMENSION_REGISTRY, (ResourceLocation) (Object) key);
     }
 
     void unloadWorld0(final ServerWorld world) throws IOException;
-
-    @Nullable
-    ServerWorld getDefaultWorld();
-
-    void adjustWorldForDifficulty(ServerWorld world, Difficulty newDifficulty, boolean forceDifficulty);
 
     void loadLevel();
 
@@ -88,21 +83,7 @@ public interface SpongeWorldManager extends WorldManager {
         return World.OVERWORLD.equals(registryKey);
     }
 
-    default DimensionType getVanillaDimensionType(final ResourceKey key) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
-
-        if (World.OVERWORLD.equals(registryKey)) {
-            return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.OVERWORLD_LOCATION);
-        } else if (World.NETHER.equals(registryKey)) {
-            return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.NETHER_LOCATION);
-        } else if (World.END.equals(registryKey)) {
-            return SpongeCommon.getServer().registryAccess().dimensionTypes().get(DimensionType.END_LOCATION);
-        }
-
-        throw new RuntimeException(String.format("Should be impossible, a non-Vanilla fresh world '%s' was hit!", key));
-    }
-
-    default boolean isDefaultWorld(final String directoryName) {
-        return SpongeCommon.getServer().getWorldData().getLevelName().equals(directoryName);
+    default Path getDataPackFile(final ResourceKey key) {
+        return this.getDimensionDataPackDirectory().resolve(key.getNamespace()).resolve("dimension").resolve(key.getValue() + ".json");
     }
 }

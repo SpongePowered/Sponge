@@ -172,7 +172,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     public void initialize() {
         SpongeUser.initializedUsers.add(this);
         this.compound = new CompoundNBT();
-        final ServerWorld world = ((SpongeWorldManager) Sponge.getServer().getWorldManager()).getDefaultWorld();
+        final ServerWorld world = SpongeCommon.getServer().overworld();
         if (world == null) {
             return;
         }

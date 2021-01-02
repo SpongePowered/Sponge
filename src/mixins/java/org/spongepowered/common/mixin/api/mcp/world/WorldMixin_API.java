@@ -52,6 +52,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.chunk.AbstractChunkProvider;
@@ -123,6 +124,8 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
     @Shadow public abstract DifficultyInstance shadow$getCurrentDifficultyAt(BlockPos p_175649_1_);
     @Shadow public abstract RegistryKey<net.minecraft.world.World> shadow$dimension();
     // @formatter:on
+
+    @Shadow public abstract DimensionType dimensionType();
 
     private Context impl$context;
 

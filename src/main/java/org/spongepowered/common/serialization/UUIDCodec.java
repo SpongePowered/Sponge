@@ -22,15 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.api.text;
+package org.spongepowered.common.serialization;
 
-import net.minecraft.util.text.ITextComponent;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.codecs.PrimitiveCodec;
 
-public interface TextBridge {
+import java.util.UUID;
 
-    ITextComponent bridge$toComponent();
+public final class UUIDCodec implements PrimitiveCodec<UUID> {
 
-    String bridge$toJson();
+    public static UUIDCodec create() {
+        return new UUIDCodec();
+    }
 
-    String bridge$toLegacy(char code);
+    @Override
+    public <T> DataResult<UUID> read(final DynamicOps<T> ops, final T input) {
+        return ops.getStringValue(input).map(UUID::fromString);
+    }
+
+    @Override
+    public <T> T write(final DynamicOps<T> ops, final UUID value) {
+        return ops.createString(value.toString());
+    }
 }

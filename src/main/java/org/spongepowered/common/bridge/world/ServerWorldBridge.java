@@ -27,6 +27,7 @@ package org.spongepowered.common.bridge.world;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.world.Dimension;
+import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -37,6 +38,8 @@ import org.spongepowered.math.vector.Vector3d;
 public interface ServerWorldBridge {
 
     SaveFormat.LevelSave bridge$getLevelSave();
+
+    IChunkStatusListener bridge$getChunkStatusListener();
 
     boolean bridge$isLoaded();
 

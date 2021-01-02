@@ -24,19 +24,19 @@
  */
 package org.spongepowered.vanilla.mixin.core.util.registry;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.util.registry.RegistryBridge;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Mixin(Registry.class)
 public abstract class RegistryMixin_Vanilla<T> implements RegistryBridge<T> {
 
-    private final Map<ResourceKey, RegistryEntry<T>> vanilla$entries = new Object2ObjectOpenHashMap<>();
+    private final Map<ResourceKey, RegistryEntry<T>> vanilla$entries = new LinkedHashMap<>();
 
     @Override
     public Map<ResourceKey, RegistryEntry<T>> bridge$getEntries() {

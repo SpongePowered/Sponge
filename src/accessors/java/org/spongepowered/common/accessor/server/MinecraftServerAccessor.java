@@ -84,4 +84,6 @@ public interface MinecraftServerAccessor {
     }
 
     @Invoker("setupDebugLevel") void invoker$setDebugLevel(IServerConfiguration serverConfiguration);
+
+    @Invoker("forceDifficulty") void invoker$forceDifficulty();
 }

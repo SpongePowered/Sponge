@@ -24,6 +24,7 @@
  */
 package org.spongepowered.test.world;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -37,6 +38,7 @@ import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.BiomeProvider;
+import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.Structures;
@@ -81,24 +83,24 @@ public final class DimensionTest {
                 .register(WorldTemplate
                         .builder()
                         .from(WorldTemplate.overworld())
-                        .key(ResourceKey.of(this.plugin, "more_difficult_overworld"))
+                        .key(ResourceKey.of(this.plugin, "world_1"))
                         .worldType(WorldTypes.THE_NETHER)
                         .displayName(Component.text("Mean World", NamedTextColor.RED))
                         .generator(ChunkGenerator.noise(
-                                BiomeProvider.overworld(false), NoiseGeneratorConfig.builder()
+                                BiomeProvider.checkboard(Lists.newArrayList(Biomes.DARK_FOREST, Biomes.CRIMSON_FOREST, Biomes.BIRCH_FOREST), 2),
+                                NoiseGeneratorConfig.builder()
                                         .structureConfig(StructureGenerationConfig.builder()
                                                 .stronghold(SpacedStructureConfig.of(10, 10, 1))
-                                                .addStructure(Structures.IGLOO.get(), SeparatedStructureConfig.of(5, 5, 10))
+                                                .addStructure(Structures.IGLOO.get(), SeparatedStructureConfig.of(10, 5, 10))
                                                 .build()
                                         )
                                         .noiseConfig(NoiseConfig.builder()
-                                                .bottom(SlideConfig.of(1, 1, 1))
-                                                .top(SlideConfig.of(1, 1, 1))
-                                                .sampling(SamplingConfig.of(1, 1, 1, 1))
-                                                .height(128)
+                                                .sampling(SamplingConfig.of(1, 120, 1, 180))
+                                                .top(SlideConfig.of(-5, 5, 0))
+                                                .bottom(SlideConfig.of(-15, 0, 0))
                                                 .build()
                                         )
-                                        .seaLevel(200)
+                                        .seaLevel(64)
                                         .build()
                                 )
                         )
@@ -108,7 +110,7 @@ public final class DimensionTest {
                 .register(WorldTemplate
                         .builder()
                         .from(WorldTemplate.overworld())
-                        .key(ResourceKey.of(this.plugin, "world_1"))
+                        .key(ResourceKey.of(this.plugin, "world_2"))
                         .build()
                 )
         ;

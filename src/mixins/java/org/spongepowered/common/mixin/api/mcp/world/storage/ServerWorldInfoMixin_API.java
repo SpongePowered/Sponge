@@ -133,6 +133,16 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
+    public boolean keepLoaded() {
+        return ((ServerWorldInfoBridge) this).bridge$keepLoaded();
+    }
+
+    @Override
+    public void keepLoaded(final boolean keepLoaded) {
+        ((ServerWorldInfoBridge) this).bridge$keepLoaded(keepLoaded);
+    }
+
+    @Override
     public boolean loadOnStartup() {
         return ((ServerWorldInfoBridge) this).bridge$loadOnStartup();
     }
