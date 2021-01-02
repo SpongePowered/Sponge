@@ -252,7 +252,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     public Optional<ServerWorld> getServerWorld() {
         @Nullable ServerWorld world = this.world != null ? this.world.get() : null;
         if (world == null) {
-            world = (ServerWorld) Sponge.getServer().getWorldManager().getWorld(this.worldKey).orElse(null);
+            world = (ServerWorld) Sponge.getServer().getWorldManager().world(this.worldKey).orElse(null);
             if (world != null) {
                 this.world = new WeakReference<>(world);
             }

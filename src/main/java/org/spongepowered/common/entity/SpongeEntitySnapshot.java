@@ -113,7 +113,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @Override
     public Optional<ServerLocation> getLocation() {
-        final Optional<ServerWorld> optional = SpongeCommon.getGame().getServer().getWorldManager().getWorld(this.worldKey);
+        final Optional<ServerWorld> optional = SpongeCommon.getGame().getServer().getWorldManager().world(this.worldKey);
         if (optional.isPresent()) {
             final ServerLocation location = ServerLocation.of(optional.get(), this.position);
             return Optional.of(location);
@@ -214,7 +214,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
                 return Optional.of(entity);
             }
         }
-        final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(this.worldKey);
+        final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().world(this.worldKey);
         if (!world.isPresent()) {
             return Optional.empty();
         }

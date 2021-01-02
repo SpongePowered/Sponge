@@ -68,7 +68,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public Optional<ServerWorld> getWorld() {
+    public Optional<ServerWorld> world() {
         return Optional.ofNullable((ServerWorld) ((ServerWorldInfoBridge) this).bridge$world());
     }
 
@@ -78,7 +78,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public void displayName(final Component displayName) {
+    public void setDisplayName(final Component displayName) {
         ((ServerWorldInfoBridge) this).bridge$displayName(Objects.requireNonNull(displayName, "displayName"));
     }
 
@@ -88,7 +88,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public void worldType(final WorldType worldType) {
+    public void setWorldType(final WorldType worldType) {
         ((ServerWorldInfoBridge) this).bridge$dimensionType((DimensionType) Objects.requireNonNull(worldType, "worldType"), true);
     }
 
@@ -103,7 +103,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public void hardcore(final boolean hardcore) {
+    public void setHardcore(final boolean hardcore) {
         ((WorldSettingsAccessor) (Object) this.settings).accessor$hardcode(hardcore);
     }
 
@@ -113,7 +113,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public void pvp(final boolean pvp) {
+    public void setPvp(final boolean pvp) {
         ((ServerWorldInfoBridge) this).bridge$pvp(pvp);
     }
 
@@ -128,7 +128,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public void enabled(final boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         ((ServerWorldInfoBridge) this).bridge$enabled(enabled);
     }
 
@@ -138,7 +138,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public void keepLoaded(final boolean keepLoaded) {
+    public void setKeepLoaded(final boolean keepLoaded) {
         ((ServerWorldInfoBridge) this).bridge$keepLoaded(keepLoaded);
     }
 
@@ -148,7 +148,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public void loadOnStartup(final boolean loadOnStartup) {
+    public void setLoadOnStartup(final boolean loadOnStartup) {
         ((ServerWorldInfoBridge) this).bridge$loadOnStartup(loadOnStartup);
     }
 
@@ -158,7 +158,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public void keepSpawnLoaded(final boolean keepSpawnLoaded) {
+    public void setKeepSpawnLoaded(final boolean keepSpawnLoaded) {
         ((ServerWorldInfoBridge) this).bridge$keepSpawnLoaded(keepSpawnLoaded);
     }
 
@@ -168,17 +168,17 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public void generateSpawnOnLoad(final boolean generateSpawnOnLoad) {
+    public void setGenerateSpawnOnLoad(final boolean generateSpawnOnLoad) {
         ((ServerWorldInfoBridge) this).bridge$generateSpawnOnLoad(generateSpawnOnLoad);
     }
 
     @Override
-    public void commands(final boolean commands) {
+    public void setCommands(final boolean commands) {
         ((WorldSettingsAccessor) (Object) this.settings).accessor$allowCommands(commands);
     }
 
     @Override
-    public void difficulty(final org.spongepowered.api.world.difficulty.Difficulty difficulty) {
+    public void setDifficulty(final org.spongepowered.api.world.difficulty.Difficulty difficulty) {
         this.shadow$setDifficulty((Difficulty) (Object) difficulty);
     }
 
@@ -188,7 +188,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public void serializationBehavior(final SerializationBehavior behavior) {
+    public void setSerializationBehavior(final SerializationBehavior behavior) {
         ((ServerWorldInfoBridge) this).bridge$serializationBehavior(behavior);
     }
 

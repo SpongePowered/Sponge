@@ -66,7 +66,7 @@ public interface IWorldInfoMixin_API extends WorldProperties {
     }
 
     @Override
-    default void spawnPosition(final Vector3i position) {
+    default void setSpawnPosition(final Vector3i position) {
         throw new UnsupportedOperationException("Only vanilla implemented spawn world properties are supported!");
     }
 

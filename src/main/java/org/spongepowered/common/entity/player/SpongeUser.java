@@ -79,7 +79,6 @@ import org.spongepowered.common.service.server.permission.BridgeSubject;
 import org.spongepowered.common.service.server.permission.SubjectHelper;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.io.File;
@@ -584,7 +583,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
         final Optional<ServerPlayer> player = this.getPlayer();
         if (player.isPresent()) {
-            final Optional<org.spongepowered.api.world.server.ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(key);
+            final Optional<org.spongepowered.api.world.server.ServerWorld> world = Sponge.getServer().getWorldManager().world(key);
             return world.filter(serverWorld -> player.get().setLocation(ServerLocation.of(serverWorld, position))).isPresent();
         }
 

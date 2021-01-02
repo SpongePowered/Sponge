@@ -85,7 +85,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default Optional<ServerWorld> getWorld() {
+    default Optional<ServerWorld> world() {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
@@ -95,17 +95,17 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default void displayName(final @Nullable Component name) {
+    default void setDisplayName(final @Nullable Component name) {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
     @Override
-    default void dayTime(final MinecraftDayTime dayTime) {
+    default void setDayTime(final MinecraftDayTime dayTime) {
         this.shadow$setDayTime(dayTime.asTicks().getTicks());
     }
 
     @Override
-    default void worldType(final WorldType worldType) {
+    default void setWorldType(final WorldType worldType) {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
@@ -115,7 +115,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default void gameMode(final GameMode gamemode) {
+    default void setGameMode(final GameMode gamemode) {
         this.shadow$setGameType((GameType) (Object) gamemode);
     }
 
@@ -135,7 +135,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default void pvp(final boolean pvp) {
+    default void setPvp(final boolean pvp) {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
@@ -150,7 +150,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default void enabled(final boolean enabled) {
+    default void setEnabled(final boolean enabled) {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
@@ -160,7 +160,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default void keepLoaded(final boolean keepLoaded) {
+    default void setKeepLoaded(final boolean keepLoaded) {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
@@ -170,7 +170,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default void loadOnStartup(final boolean loadOnStartup) {
+    default void setLoadOnStartup(final boolean loadOnStartup) {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
@@ -180,7 +180,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default void keepSpawnLoaded(final boolean keepSpawnLoaded) {
+    default void setKeepSpawnLoaded(final boolean keepSpawnLoaded) {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
@@ -190,7 +190,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default void generateSpawnOnLoad(final boolean generateSpawnOnLoad) {
+    default void setGenerateSpawnOnLoad(final boolean generateSpawnOnLoad) {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
@@ -205,7 +205,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default void serializationBehavior(final SerializationBehavior behavior) {
+    default void setSerializationBehavior(final SerializationBehavior behavior) {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
@@ -215,7 +215,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default void wanderingTraderSpawnDelay(final int delay) {
+    default void setWanderingTraderSpawnDelay(final int delay) {
         this.shadow$setWanderingTraderSpawnDelay(delay);
     }
 
@@ -225,12 +225,12 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default void wanderingTraderSpawnChance(final int chance) {
+    default void setWanderingTraderSpawnChance(final int chance) {
         this.shadow$setWanderingTraderSpawnChance(chance);
     }
 
     @Override
-    default void wanderingTrader(@Nullable final WanderingTrader trader) {
+    default void setWanderingTrader(@Nullable final WanderingTrader trader) {
         this.shadow$setWanderingTraderId(trader == null ? null : trader.getUniqueId());
     }
 

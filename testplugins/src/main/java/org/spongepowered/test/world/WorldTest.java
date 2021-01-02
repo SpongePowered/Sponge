@@ -145,7 +145,7 @@ public final class WorldTest {
                         .setExecutor(context -> {
                             final ServerWorld world = context.requireOne(CommonParameters.WORLD);
                             final WorldType worldType = context.requireOne(worldTypeParameter);
-                            world.getProperties().worldType(worldType);
+                            world.getProperties().setWorldType(worldType);
                             return CommandResult.success();
                         })
                         .build()

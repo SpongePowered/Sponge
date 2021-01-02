@@ -44,10 +44,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.util.registry.WorldGenSettingsExport;
-import net.minecraft.util.registry.WorldSettingsImport;
 import net.minecraft.village.VillageSiege;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.Dimension;
@@ -95,6 +93,7 @@ import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.datapack.DataPackSerializer;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.user.SpongeUserManager;
@@ -149,11 +148,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public Server getServer() {
-        return (Server) this.server;
-    }
-
-    @Override
     public Path getDefaultWorldDirectory() {
         return this.defaultWorldDirectory;
     }
@@ -164,17 +158,31 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public Optional<org.spongepowered.api.world.server.ServerWorld> getWorld(final ResourceKey key) {
+    public Server server() {
+        return (Server) this.server;
+    }
+
+    @Override
+    public org.spongepowered.api.world.server.ServerWorld defaultWorld() {
+        final ServerWorld world = this.server.overworld();
+        if (world == null) {
+            throw new IllegalStateException("The default world has not been loaded yet! (Did you call this too early in the lifecycle?");
+        }
+        return (org.spongepowered.api.world.server.ServerWorld) world;
+    }
+
+    @Override
+    public Optional<org.spongepowered.api.world.server.ServerWorld> world(final ResourceKey key) {
         return Optional.ofNullable((org.spongepowered.api.world.server.ServerWorld) this.worlds.get(SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"))));
     }
 
     @Override
-    public Collection<org.spongepowered.api.world.server.ServerWorld> getWorlds() {
+    public Collection<org.spongepowered.api.world.server.ServerWorld> worlds() {
         return Collections.unmodifiableCollection((Collection<org.spongepowered.api.world.server.ServerWorld>) (Object) this.worlds.values());
     }
 
     @Override
-    public List<ResourceKey> getWorldKeys() {
+    public List<ResourceKey> worldKeys() {
         final List<ResourceKey> worldKeys = new ArrayList<>();
         worldKeys.add((ResourceKey) (Object) Dimension.OVERWORLD.location());
         worldKeys.add((ResourceKey) (Object) Dimension.NETHER.location());
@@ -198,7 +206,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public Optional<ResourceKey> getWorldKey(final UUID uniqueId) {
+    public Optional<ResourceKey> worldKey(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         return this.worlds
                 .values()
@@ -235,7 +243,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
         }
 
-        WorldTemplate template = this.getTemplate(key).orElse(null);
+        WorldTemplate template = this.loadTemplate(key).orElse(null);
         if (template == null) {
             if (this.isVanillaWorld(key)) {
                 template = World.NETHER.equals(registryKey) ? WorldTemplate.theNether() : WorldTemplate.theEnd();
@@ -366,8 +374,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     public boolean saveTemplate(final WorldTemplate template) {
         final Dimension scratch = ((SpongeWorldTemplate) Objects.requireNonNull(template, "template")).asDimension();
         try {
-            SpongeWorldTemplate.DIRECT_CODEC.encodeStart(WorldGenSettingsExport.create(JsonOps.INSTANCE, BootstrapProperties.registries), scratch)
-                    .getOrThrow(true, s -> {});
+            final JsonElement element = SpongeWorldTemplate.DIRECT_CODEC
+                    .encodeStart(WorldGenSettingsExport.create(JsonOps.INSTANCE, BootstrapProperties.registries), scratch)
+                    .getOrThrow(true, s -> {
+                    });
+            DataPackSerializer.writeFile(this.getDataPackFile(template.getKey()), element);
         } catch (final Exception ex) {
             ex.printStackTrace();
             return false;
@@ -376,7 +387,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public Optional<WorldTemplate> getTemplate(final ResourceKey key) {
+    public Optional<WorldTemplate> loadTemplate(final ResourceKey key) {
         Objects.requireNonNull(key, "key");
         final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
         // TODO Maybe this should be from file always?

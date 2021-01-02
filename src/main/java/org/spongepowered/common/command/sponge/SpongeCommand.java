@@ -37,7 +37,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.CommonParameters;
@@ -45,7 +44,6 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeEventManager;
@@ -225,7 +223,7 @@ public class SpongeCommand {
     private Command.Parameterized chunksSubcommand() {
         final Command.Parameterized globalCommand = Command.builder()
                 .setExecutor(context -> {
-                    for (final ServerWorld world : SpongeCommon.getGame().getServer().getWorldManager().getWorlds()) {
+                    for (final ServerWorld world : SpongeCommon.getGame().getServer().getWorldManager().worlds()) {
                         context.sendMessage(Identity.nil(), Component.text().content("World ")
                                         .append(Component.text(world.getKey().toString(), Style.style(TextDecoration.BOLD)))
                                         .append(this.getChunksInfo(world))

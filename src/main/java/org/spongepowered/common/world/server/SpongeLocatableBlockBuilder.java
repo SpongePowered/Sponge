@@ -142,7 +142,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
                 .orElseThrow(() -> new InvalidDataException("Could not locate an \"z\" coordinate in the container!"));
         final BlockState blockState = container.getSerializable(Constants.Block.BLOCK_STATE, BlockState.class)
                 .orElseThrow(() -> new InvalidDataException("Could not locate a BlockState"));
-        return Sponge.getServer().getWorldManager().getWorld(worldKey)
+        return Sponge.getServer().getWorldManager().world(worldKey)
                 .map(world -> new SpongeLocatableBlockBuilder()
                         .position(x, y, z)
                         .world(world)

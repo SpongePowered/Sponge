@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.datapack;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.util.SharedConstants;
 import org.apache.commons.io.FileUtils;
@@ -63,7 +64,7 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
             final Path objectFile = namespacedDataDirectory.resolve(this.typeDirectoryName).resolve(object.getKey().getValue() + ".json");
             Files.createDirectories(objectFile.getParent());
 
-            this.writeFile(objectFile, object.getObject());
+            DataPackSerializer.writeFile(objectFile, object.getObject());
 
             this.serializeAdditional(namespacedDataDirectory, object);
         }
@@ -76,14 +77,14 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
         packData.addProperty("pack_format", SharedConstants.getCurrentVersion().getPackVersion());
         packData.addProperty("description", "Sponge plugin provided " + this.token);
 
-        this.writeFile(packMeta, packDataRoot);
+        DataPackSerializer.writeFile(packMeta, packDataRoot);
         return true;
     }
 
     protected void serializeAdditional(Path dataDirectory, T object) throws IOException {
     }
 
-    protected final void writeFile(final Path file, final JsonObject object) throws IOException {
+    public static void writeFile(final Path file, final JsonElement object) throws IOException {
         Files.deleteIfExists(file);
 
         try (BufferedWriter bufferedwriter = Files.newBufferedWriter(file)) {

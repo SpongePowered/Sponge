@@ -57,7 +57,7 @@ public abstract class DifficultyCommandMixin {
             throw DifficultyCommandMixin.ERROR_ALREADY_DIFFICULT.create(difficulty.getKey());
         } else {
             final IWorldInfo levelData = source.getLevel().getLevelData();
-            ((ServerWorldProperties) levelData).difficulty((org.spongepowered.api.world.difficulty.Difficulty) (Object) difficulty);
+            ((ServerWorldProperties) levelData).setDifficulty((org.spongepowered.api.world.difficulty.Difficulty) (Object) difficulty);
             source.getLevel().setSpawnSettings(((MinecraftServerAccessor) SpongeCommon.getServer()).invoker$isSpawningMonsters(), SpongeCommon.getServer().isSpawningAnimals());
             source.getLevel().getPlayers(p -> true).forEach(p -> p.connection.send(new SServerDifficultyPacket(levelData.getDifficulty(),
                     levelData.isDifficultyLocked())));

@@ -45,7 +45,7 @@ public interface ISpawnWorldInfoMixin_API extends WorldProperties {
     // @formatter:on
 
     @Override
-    default void spawnPosition(final Vector3i position) {
+    default void setSpawnPosition(final Vector3i position) {
         this.shadow$setSpawn(VecHelper.toBlockPos(Objects.requireNonNull(position, "position")), ((ISpawnWorldInfo) (Object) this).getSpawnAngle());
     }
 }

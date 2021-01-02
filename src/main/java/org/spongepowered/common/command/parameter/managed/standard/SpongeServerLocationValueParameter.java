@@ -45,7 +45,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
@@ -77,7 +76,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
     }
 
     private List<String> complete(final String currentInput) {
-        return SpongeCommon.getGame().getServer().getWorldManager().getWorldKeys()
+        return SpongeCommon.getGame().getServer().getWorldManager().worldKeys()
                 .stream()
                 .map(ResourceKey::getFormatted)
                 .filter(x -> x.startsWith(currentInput))
@@ -95,7 +94,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
         try {
             final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
             serverWorld = SpongeCommon.getGame().getServer().getWorldManager()
-                    .getWorld(resourceLocation)
+                    .world(resourceLocation)
                     .orElseThrow(() -> reader.createException(
                             Component.text("Could not get world with key \"" + resourceLocation.toString() + "\"")));
         } catch (final ArgumentParseException e) {

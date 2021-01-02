@@ -52,7 +52,7 @@ public final class SpongeServerWorldValueParameter extends ResourceKeyedArgument
     @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
-        return SpongeCommon.getGame().getServer().getWorldManager().getWorldKeys()
+        return SpongeCommon.getGame().getServer().getWorldManager().worldKeys()
                 .stream()
                 .map(ResourceKey::getFormatted)
                 .filter(x -> x.startsWith(currentInput))
@@ -67,7 +67,7 @@ public final class SpongeServerWorldValueParameter extends ResourceKeyedArgument
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
 
         final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
-        final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(resourceLocation);
+        final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().world(resourceLocation);
 
         if (world.isPresent()) {
             return world;

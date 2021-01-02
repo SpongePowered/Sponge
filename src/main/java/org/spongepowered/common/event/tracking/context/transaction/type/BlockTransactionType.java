@@ -63,7 +63,7 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
         changeBlockEvents.forEach(event -> eventsByWorld.put(event.getWorld().getKey(), event));
 
         eventsByWorld.asMap().forEach((key, events) -> {
-            final Optional<ServerWorld> serverWorld = ((SpongeServer) SpongeCommon.getServer()).getWorldManager().getWorld(key);
+            final Optional<ServerWorld> serverWorld = ((SpongeServer) SpongeCommon.getServer()).getWorldManager().world(key);
             if (!serverWorld.isPresent()) {
                 return;
             }

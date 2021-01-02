@@ -169,7 +169,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
             throw new IllegalStateException("The start and end must be two different vectors");
         }
 
-        final ServerWorld serverWorld = Sponge.getServer().getWorldManager().getWorld(this.world)
+        final ServerWorld serverWorld = Sponge.getServer().getWorldManager().world(this.world)
                 .orElseThrow(() -> new IllegalStateException("World with key " + this.world.getFormatted() + " is not loaded!"));
 
         Vector3i currentBlock = this.initialBlock(direction);

@@ -123,7 +123,7 @@ public abstract class AbstractRegisterRegistryValueEvent extends AbstractLifecyc
 
         @Override
         protected RegistryHolder getHolder() {
-            return Sponge.getServer().getWorldManager().getWorld(this.worldKey).orElse(null).registries();
+            return Sponge.getServer().getWorldManager().world(this.worldKey).orElse(null).registries();
         }
     }
 }

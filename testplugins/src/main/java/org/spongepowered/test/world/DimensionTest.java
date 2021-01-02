@@ -30,7 +30,6 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
@@ -52,7 +51,6 @@ import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeProvider;
 import org.spongepowered.api.world.biome.Biomes;
-import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.Structure;
@@ -72,10 +70,8 @@ import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -93,7 +89,7 @@ public final class DimensionTest {
 
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        event.register(this.plugin, Command.builder().setExecutor(this::createRandomWorld).build(), "createrandomworld");
+        event.register(this.plugin, Command.builder().setExecutor(this::createRandomWorld).build(), "createrandomworld", "crw");
     }
 
     private CommandResult createRandomWorld(CommandContext context) {
@@ -107,13 +103,13 @@ public final class DimensionTest {
                 .streamEntries().map(RegistryEntry::key)
                 .map(location -> RegistryKey.of(RegistryTypes.BIOME, location).asReference())
                 .collect(Collectors.toList());
-        final List<RegistryReference<Biome>> biomes = IntStream.range(0, random.nextInt(8) + 2)
+        final List<RegistryReference<Biome>> biomes = IntStream.range(0, random.nextInt(allBiomes.size()))
                 .mapToObj(i -> allBiomes.get(random.nextInt(allBiomes.size())))
                 .collect(Collectors.toList());
 
         final List<Structure> allStructures = Sponge.getGame().registries().registry(RegistryTypes.STRUCTURE).stream().collect(Collectors.toList());
 
-        final Map<Structure, SeparatedStructureConfig> abundantStructures = IntStream.range(0, random.nextInt(2) + 1)
+        final Map<Structure, SeparatedStructureConfig> abundantStructures = IntStream.range(0, random.nextInt(allStructures.size()))
                 .mapToObj(i -> allStructures.get(random.nextInt(allStructures.size())))
                 .distinct()
                 .collect(Collectors.toMap(s -> s, s -> SeparatedStructureConfig.of(random.nextInt(3) + 2, 1, random.nextInt(10))));
@@ -132,26 +128,26 @@ public final class DimensionTest {
         final NoiseGeneratorConfig noiseGenConfig = NoiseGeneratorConfig.builder()
                 .structureConfig(structureConfig)
                 .noiseConfig(noiseConfig)
-                .seaLevel(random.nextInt(60) + 30)
+                .seaLevel(random.nextInt(60) + random.nextInt(30)) // 2 rolls
                 .build();
 
         final ResourceKey worldKey = ResourceKey.of(this.plugin, owner.toLowerCase());
-        final WorldTemplate customTemplate = WorldTemplate.builder().from(WorldTemplate.overworld())
+        final WorldTemplate customTemplate = WorldTemplate.builder()
+                .from(WorldTemplate.overworld())
                 .key(worldKey)
                 .worldType(WorldTypes.OVERWORLD)
                 .generateSpawnOnLoad(false) // TODO generating spawn on load stalls the server forever after almost fully generating :(
                 .displayName(Component.text("Custom world by " + owner))
-                .generator(ChunkGenerator.noise(BiomeProvider.checkboard(biomes, random.nextInt(3)), noiseGenConfig))
+                .generator(ChunkGenerator.noise(BiomeProvider.checkboard(biomes, random.nextInt(5)), noiseGenConfig))
                 .difficulty(Difficulties.HARD)
                 .build();
 
         if (player.getWorld().getKey().equals(worldKey)) {
-            final ServerWorld defaultWorld = wm.getWorld(ResourceKey.minecraft("overworld")).get();
-            player.setLocation(defaultWorld.getLocation(defaultWorld.getProperties().spawnPosition()));
+            player.setLocation(ServerLocation.of(wm.defaultWorld(), wm.defaultWorld().getProperties().spawnPosition()));
         }
         context.sendMessage(Identity.nil(), Component.text("Generating your world..."));
         CompletableFuture<Boolean> worldDeletedFuture = CompletableFuture.completedFuture(true);
-        if (wm.getWorld(worldKey).isPresent()) {
+        if (wm.world(worldKey).isPresent()) {
             worldDeletedFuture = wm.unloadWorld(worldKey).thenCompose(b -> wm.deleteWorld(worldKey));
         }
         worldDeletedFuture.thenCompose(b -> {

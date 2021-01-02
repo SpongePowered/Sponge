@@ -464,7 +464,7 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
             Objects.requireNonNull(worldKey);
             Objects.requireNonNull(position);
 
-            final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(worldKey);
+            final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().world(worldKey);
             if (!world.isPresent()) {
                 throw new IllegalStateException("Unknown world for key: " + worldKey.toString());
             }
@@ -476,7 +476,7 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
             Objects.requireNonNull(worldKey);
             Objects.requireNonNull(blockPosition);
 
-            final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(worldKey);
+            final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().world(worldKey);
             if (!world.isPresent()) {
                 throw new IllegalStateException("Unknown world for key: " + worldKey.toString());
             }
