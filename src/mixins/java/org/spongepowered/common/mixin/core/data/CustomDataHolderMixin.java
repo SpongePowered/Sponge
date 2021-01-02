@@ -31,6 +31,7 @@ import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.holder.SimpleNBTDataHolder;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
@@ -42,6 +43,7 @@ import java.util.List;
 @Mixin({TileEntity.class, Entity.class, SpongeUser.class, ItemStack.class,
         SpongeEntityArchetype.class,
         SpongeEntitySnapshot.class,
+        SpongeBlockSnapshot.class,
         SimpleNBTDataHolder.class})
 public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
 

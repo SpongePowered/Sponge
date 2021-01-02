@@ -39,15 +39,18 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
-import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.MergeFunction;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.DataContainerHolder;
+import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
+import org.spongepowered.common.data.persistence.NBTTranslator;
+import org.spongepowered.common.data.provider.nbt.NBTDataType;
+import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -61,13 +64,11 @@ import org.spongepowered.math.vector.Vector3i;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.StringJoiner;
 import java.util.UUID;
-import java.util.function.Function;
 
 @DefaultQualifier(NonNull.class)
-public final class SpongeBlockSnapshot implements BlockSnapshot {
+public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutableDataHolder<BlockSnapshot>, DataContainerHolder.Immutable<BlockSnapshot>, DataCompoundHolder {
 
     private final BlockState blockState;
     private final ResourceKey worldKey;
@@ -123,7 +124,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public BlockSnapshot withLocation(final ServerLocation location) {
-        return null;
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
 
     @Override
@@ -239,31 +240,6 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public <E> Optional<BlockSnapshot> transform(final Key<? extends Value<E>> key, final Function<E, E> function) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public <E> Optional<BlockSnapshot> with(final Key<? extends Value<E>> key, final E value) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public Optional<BlockSnapshot> with(final Value<?> value) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public Optional<BlockSnapshot> without(final Key<?> key) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public BlockSnapshot mergeWith(final BlockSnapshot that, final MergeFunction function) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
     public int getContentVersion() {
         throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
@@ -273,31 +249,6 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
         throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
 
-    @Override
-    public <E> Optional<E> get(final Key<? extends Value<E>> key) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public boolean supports(final Key<?> key) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public Set<Key<?>> getKeys() {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public Set<Value.Immutable<?>> getValues() {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-  
     public Optional<ServerWorld> getServerWorld() {
         @Nullable ServerWorld world = this.world != null ? this.world.get() : null;
         if (world == null) {
@@ -326,6 +277,36 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
             builder.addUnsafeCompound(this.compound);
         }
         return builder;
+    }
+
+    @Override
+    public DataContainer data$getDataContainer() {
+        if (this.compound == null) {
+            return DataContainer.createNew();
+        }
+        return NBTTranslator.INSTANCE.translate(this.compound);
+    }
+
+    @Override
+    public BlockSnapshot data$withDataContainer(DataContainer container) {
+        final SpongeBlockSnapshotBuilder builder = this.createBuilder();
+        builder.compound = NBTTranslator.INSTANCE.translate(container);;
+        return builder.build();
+    }
+
+    @Override
+    public CompoundNBT data$getCompound() {
+        return this.compound == null ? new CompoundNBT() : this.compound.copy();
+    }
+
+    @Override
+    public void data$setCompound(CompoundNBT nbt) {
+        // do nothing this is immutable
+    }
+
+    @Override
+    public NBTDataType data$getNBTDataType() {
+        return NBTDataTypes.BLOCK_ENTITY;
     }
 
     // Used internally for restores
