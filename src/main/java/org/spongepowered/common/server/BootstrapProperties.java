@@ -46,6 +46,7 @@ public final class BootstrapProperties {
     public static int viewDistance;
     public static DynamicRegistries registries;
     public static WorldSettingsImport<?> worldSettingsAdapter;
+    public static boolean isNewLevel = false;
 
     public static void init(final ServerProperties properties, DynamicRegistries registries) {
         BootstrapProperties.dimensionGeneratorSettings = properties.worldGenSettings;
@@ -59,5 +60,9 @@ public final class BootstrapProperties {
 
     public static <T> void worldSettingsAdapter(final WorldSettingsImport<T> worldSettingsAdapter) {
         BootstrapProperties.worldSettingsAdapter = worldSettingsAdapter;
+    }
+
+    public static void setIsNewLevel(final boolean isNewLevel) {
+        BootstrapProperties.isNewLevel = isNewLevel;
     }
 }

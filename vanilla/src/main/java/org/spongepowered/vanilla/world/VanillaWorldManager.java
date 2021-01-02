@@ -734,6 +734,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             if (isDefaultWorld) {
                 levelData = defaultLevelData;
+                newLevelData = BootstrapProperties.isNewLevel;
             } else {
                 levelData = (ServerWorldInfo) levelSave.getDataTag((DynamicOps<INBT>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig());
                 if (levelData == null) {

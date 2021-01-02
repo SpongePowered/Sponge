@@ -25,13 +25,17 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Lifecycle;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.Main;
 import net.minecraft.server.ServerPropertiesProvider;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.WorldSettingsImport;
+import net.minecraft.world.WorldSettings;
+import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.world.storage.ServerWorldInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -68,5 +72,12 @@ public abstract class MainMixin {
         lifecycle.callRegisterDataEvent();
         lifecycle.callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
+    }
+
+    @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/world/storage/ServerWorldInfo"))
+    private static ServerWorldInfo impl$setIsNewLevel(final WorldSettings settings, final DimensionGeneratorSettings generationSettings, final
+            Lifecycle lifecycle) {
+        BootstrapProperties.setIsNewLevel(true);
+        return new ServerWorldInfo(settings, generationSettings, lifecycle);
     }
 }
