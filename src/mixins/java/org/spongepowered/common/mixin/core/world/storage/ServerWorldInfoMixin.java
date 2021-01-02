@@ -24,38 +24,52 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Lifecycle;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.Dimension;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
+import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.IWorldInfo;
 import net.minecraft.world.storage.ServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.units.qual.A;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.WorldSettingsAccessor;
+import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.DimensionBridge;
+import org.spongepowered.common.bridge.world.gen.DimensionGeneratorSettingsBridge;
 import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
 import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Mixin(ServerWorldInfo.class)
 public abstract class ServerWorldInfoMixin implements IServerConfiguration, ServerWorldInfoBridge, ResourceKeyBridge {
@@ -272,6 +286,24 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
         }
 
         world.players().forEach(player -> player.connection.send(new SServerDifficultyPacket(difficulty, isLocked)));
+    }
+
+    @Redirect(method = "setTagData", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", ordinal = 0))
+    private DataResult<Object> impl$ignorePluginDimensionsWhenWritingWorldGenSettings(Codec codec, DynamicOps<Object> ops, Object input) {
+        DimensionGeneratorSettings dimensionGeneratorSettings = (DimensionGeneratorSettings) input;
+        // Sub levels will have an empty dimensions registry so it is an easy toggle off
+        if (dimensionGeneratorSettings.dimensions().entrySet().size() == 0) {
+            return codec.encodeStart(ops, dimensionGeneratorSettings);
+        }
+        dimensionGeneratorSettings = ((DimensionGeneratorSettingsBridge) input).bridge$copy();
+        final SimpleRegistry<Dimension> registry = new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
+        ((org.spongepowered.api.registry.Registry<Dimension>) (Object) dimensionGeneratorSettings.dimensions()).streamEntries().forEach(entry -> {
+            if (Constants.MINECRAFT.equals(entry.key().getNamespace())) {
+                ((org.spongepowered.api.registry.Registry<Dimension>) (Object) registry).register(entry.key(), entry.value());
+            }
+        });
+        ((DimensionGeneratorSettingsAccessor) dimensionGeneratorSettings).accessor$dimensions(registry);
+        return codec.encodeStart(ops, dimensionGeneratorSettings);
     }
 
     @Override
