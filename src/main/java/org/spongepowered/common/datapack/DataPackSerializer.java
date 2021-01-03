@@ -69,19 +69,24 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
             this.serializeAdditional(namespacedDataDirectory, object);
         }
 
-        // Write our pack metadata
-        final Path packMeta = datapackDir.resolve("pack.mcmeta");
-        final JsonObject packDataRoot = new JsonObject();
-        final JsonObject packData = new JsonObject();
-        packDataRoot.add("pack", packData);
-        packData.addProperty("pack_format", SharedConstants.getCurrentVersion().getPackVersion());
-        packData.addProperty("description", "Sponge plugin provided " + this.token);
-
-        DataPackSerializer.writeFile(packMeta, packDataRoot);
+        DataPackSerializer.writePackMetadata(type, dataPackDirectory);
         return true;
     }
 
     protected void serializeAdditional(Path dataDirectory, T object) throws IOException {
+    }
+
+    public static void writePackMetadata(final SpongeDataPackType<?, ?> type, final Path directory) throws IOException {
+        // Write our pack metadata
+        final Path packMeta = directory.resolve("pack.mcmeta");
+        Files.deleteIfExists(packMeta);
+        final JsonObject packDataRoot = new JsonObject();
+        final JsonObject packData = new JsonObject();
+        packDataRoot.add("pack", packData);
+        packData.addProperty("pack_format", SharedConstants.getCurrentVersion().getPackVersion());
+        packData.addProperty("description", "Sponge plugin provided " + type.type());
+
+        DataPackSerializer.writeFile(packMeta, packDataRoot);
     }
 
     public static void writeFile(final Path file, final JsonElement object) throws IOException {

@@ -47,7 +47,11 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Axis;
+<<<<<<< Updated upstream
 import org.spongepowered.api.world.SerializationBehavior;
+=======
+import org.spongepowered.api.util.Ticks;
+>>>>>>> Stashed changes
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
@@ -317,8 +321,8 @@ public final class WorldTest {
         final Random random = player.getWorld().getRandom();
 
         final List<RegistryReference<Biome>> allBiomes = Sponge.getServer().registries().registry(RegistryTypes.BIOME)
-                .streamEntries().map(RegistryEntry::key)
-                .map(location -> RegistryKey.of(RegistryTypes.BIOME, location).asReference())
+                .streamEntries()
+                .map(RegistryEntry::asReference)
                 .collect(Collectors.toList());
         final List<RegistryReference<Biome>> biomes = IntStream.range(0, random.nextInt(allBiomes.size()))
                 .mapToObj(i -> allBiomes.get(random.nextInt(allBiomes.size())))
@@ -355,9 +359,9 @@ public final class WorldTest {
                 .worldType(WorldTypes.OVERWORLD)
                 .serializationBehavior(SerializationBehavior.NONE)
                 .loadOnStartup(false)
+                .generateSpawnOnLoad(true)
                 .displayName(Component.text("Custom world by " + owner))
-                .generator(ChunkGenerator
-                        .noise(BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().biomes(biomes).scale(random.nextInt(5) + 1).build()), noiseGenConfig))
+                .generator(ChunkGenerator.noise(BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().biomes(biomes).scale(random.nextInt(5) + 1).build()), noiseGenConfig))
                 .difficulty(Difficulties.HARD)
                 .build();
 
@@ -370,12 +374,7 @@ public final class WorldTest {
             worldDeletedFuture = wm.unloadWorld(worldKey)
                     .thenCompose(b -> wm.deleteWorld(worldKey));
         }
-        worldDeletedFuture.thenCompose(b -> {
-            wm.saveTemplate(customTemplate);
-            return wm.loadWorld(customTemplate);
-        }).thenAccept(w -> {
-            scheduler.submit(Task.builder().plugin(plugin).execute(() -> this.transportToWorld(player, w)).build());
-        }).exceptionally(e -> {
+        worldDeletedFuture.thenCompose(b -> wm.loadWorld(customTemplate)).thenAccept(w -> scheduler.submit(Task.builder().delay(Ticks.of(5)).plugin(plugin).execute(() -> this.transportToWorld(player, w)).build())).exceptionally(e -> {
             context.sendMessage(Identity.nil(), Component.text("OH NO! " + e.getMessage(), NamedTextColor.DARK_RED));
             e.printStackTrace();
             return null;

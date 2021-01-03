@@ -26,16 +26,21 @@ package org.spongepowered.common.registry;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.registry.RegistryType;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
 public final class SpongeRegistryEntry<T> implements RegistryEntry<T> {
 
+    private final RegistryType<T> registryType;
     private final ResourceKey key;
     private final T value;
 
-    public SpongeRegistryEntry(final ResourceKey key, final T value) {
+    public SpongeRegistryEntry(final RegistryType<T> registryType, final ResourceKey key, final T value) {
+        this.registryType = registryType;
         this.key = Objects.requireNonNull(key, "key");
         this.value = Objects.requireNonNull(value, "value");
     }
@@ -48,6 +53,11 @@ public final class SpongeRegistryEntry<T> implements RegistryEntry<T> {
     @Override
     public T value() {
         return this.value;
+    }
+
+    @Override
+    public RegistryReference<T> asReference() {
+        return RegistryKey.of(this.registryType, this.key).asReference();
     }
 
     @Override

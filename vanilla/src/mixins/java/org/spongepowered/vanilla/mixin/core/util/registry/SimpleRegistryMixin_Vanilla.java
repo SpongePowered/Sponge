@@ -26,13 +26,18 @@ package org.spongepowered.vanilla.mixin.core.util.registry;
 
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.accessor.util.RegistryKeyAccessor;
 import org.spongepowered.common.registry.SpongeRegistryEntry;
+import org.spongepowered.common.registry.SpongeRegistryKey;
+import org.spongepowered.common.registry.SpongeRegistryType;
 
 @Mixin(SimpleRegistry.class)
 public abstract class SimpleRegistryMixin_Vanilla<T> extends MutableRegistryMixin_Vanilla<T> {
@@ -41,7 +46,10 @@ public abstract class SimpleRegistryMixin_Vanilla<T> extends MutableRegistryMixi
     private void vanilla$cacheRegistryEntry(int p_243537_1_, RegistryKey<T> p_243537_2_, T p_243537_3_, Lifecycle p_243537_4_, boolean p_243537_5_,
             CallbackInfoReturnable<T> cir) {
 
-        this.bridge$getEntries().put((ResourceKey) (Object) p_243537_2_.location(),
-                new SpongeRegistryEntry<>((ResourceKey) (Object) p_243537_2_.location(), p_243537_3_));
+        final RegistryKey<? extends Registry<T>> registryKey = this.shadow$key();
+        final ResourceKey root = (ResourceKey) (Object) ((RegistryKeyAccessor) registryKey).accessor$registryName();
+        final ResourceKey location = (ResourceKey) (Object) registryKey.location();
+        this.bridge$getEntries().put((ResourceKey) (Object) p_243537_2_.location(), new SpongeRegistryEntry<>(new SpongeRegistryType<>(root, location),
+                (ResourceKey) (Object) p_243537_2_.location(), p_243537_3_));
     }
 }

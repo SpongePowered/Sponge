@@ -75,6 +75,7 @@ import net.minecraft.world.storage.ServerWorldInfo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
@@ -96,6 +97,7 @@ import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.DataPackSerializer;
+import org.spongepowered.common.datapack.SpongeDataPackType;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.user.SpongeUserManager;
@@ -281,6 +283,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             if (template == null) {
                 CompletableFuture.completedFuture(null);
+            } else {
+                this.saveTemplate(template);
             }
         }
 
@@ -365,7 +369,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
 
         if (World.OVERWORLD.equals(registryKey)) {
-            return FutureUtil.completedWithException(new IOException("The default world can not be unloaded"));
+            return CompletableFuture.completedFuture(false);
         }
 
         final ServerWorld world = this.worlds.get(registryKey);
@@ -381,12 +385,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(world, "world").getKey());
 
         if (World.OVERWORLD.equals(registryKey)) {
-            return FutureUtil.completedWithException(new IOException("The default world can not be unloaded."));
+            return CompletableFuture.completedFuture(false);
         }
 
         if (world != this.worlds.get(registryKey)) {
-            return FutureUtil.completedWithException(new IOException(String.format("World '%s' was told to unload but does not match the actual "
-                    + "world loaded.", world.getKey())));
+            return CompletableFuture.completedFuture(false);
         }
 
         try {
@@ -411,6 +414,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final Path dataPackFile = this.getDataPackFile(template.getKey());
             Files.createDirectories(dataPackFile.getParent());
             DataPackSerializer.writeFile(dataPackFile, element);
+            DataPackSerializer.writePackMetadata((SpongeDataPackType<?, ?>) DataPackTypes.WORLD, this.dimensionsDataPackDirectory.getParent());
         } catch (final Exception ex) {
             ex.printStackTrace();
             return false;
@@ -700,8 +704,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             throw new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location()));
         }
 
-        SpongeCommon.getLogger().info("Unloading World '{}' ({})", registryKey.location(), SpongeCommon.getServer().registryAccess()
-                .dimensionTypes().getKey(world.dimensionType()));
+        SpongeCommon.getLogger().info("Unloading World '{}' ({})", registryKey.location(), SpongeCommon.getServer().registryAccess().dimensionTypes().getKey(world.dimensionType()));
 
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         world.getChunkSource().removeRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(spawnPoint), 11, registryKey.location());
