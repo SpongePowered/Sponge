@@ -43,12 +43,14 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.command.arguments.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
+import org.spongepowered.common.bridge.command.arguments.CompletionsArgumentTypeBridge;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
@@ -155,7 +157,15 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             final CommandNode<ISuggestionProvider> rootSuggestionNode,
             final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode
     ) {
-        ArgumentType<?> type = this.getType();
+        ArgumentType<?> type;
+        final boolean forceCustomSuggestions;
+        if (this.getType() instanceof CompletionsArgumentTypeBridge) {
+            type = ((CompletionsArgumentTypeBridge<?>) this.getType()).bridge$clientSideCompletionType();
+            forceCustomSuggestions = true;
+        } else {
+            type = this.getType();
+            forceCustomSuggestions = false;
+        }
         CommandNode<ISuggestionProvider> previousNode = rootSuggestionNode;
         if (!this.parser.getClientCompletionArgumentType().isEmpty()) {
             // create multiple entries, return the last one
@@ -191,7 +201,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             if (this.getCommand() != null) {
                 toReturn.executes(x -> 0);
             }
-            if (this.getCustomSuggestions() != null) {
+            if (forceCustomSuggestions) {
+                toReturn.suggests(SuggestionProviders.ASK_SERVER);
+            } else if (this.getCustomSuggestions() != null) {
                 toReturn.suggests((SuggestionProvider) this.getCustomSuggestions());
             }
             if (this.getRedirect() != null) {

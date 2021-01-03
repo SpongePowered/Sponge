@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
@@ -52,6 +54,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.command.arguments.CompletionsArgumentTypeBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDispatcher;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeNodePermissionCache;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
@@ -67,6 +70,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.stream.Collectors;
 
 @Mixin(Commands.class)
 public abstract class CommandsMixin {
@@ -124,6 +128,7 @@ public abstract class CommandsMixin {
         return this.impl$getChildrenFromNode(commandNode);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Redirect(method = "fillUsableCommands",
             at = @At(value = "INVOKE",
                     target = "Lcom/mojang/brigadier/tree/CommandNode;createBuilder()Lcom/mojang/brigadier/builder/ArgumentBuilder;",
@@ -138,6 +143,18 @@ public abstract class CommandsMixin {
             return ((SpongeArgumentCommandNode<?>) commandNode).createBuilderForSuggestions(rootSuggestion, commandNodeToSuggestionNode);
         }
 
+        if (commandNode instanceof ArgumentCommandNode && ((ArgumentCommandNode<?, ?>) commandNode).getType() instanceof CompletionsArgumentTypeBridge<?>) {
+            final ArgumentCommandNode<?, ?> argNode = (ArgumentCommandNode<?, ?>) commandNode;
+            final RequiredArgumentBuilder<?, ?> builder = RequiredArgumentBuilder.argument(argNode.getName(),
+                    ((CompletionsArgumentTypeBridge<?>) ((ArgumentCommandNode<?, ?>) commandNode).getType()).bridge$clientSideCompletionType());
+            builder.executes((Command) argNode.getCommand())
+                    .forward(argNode.getRedirect(), argNode.getRedirectModifier(), argNode.isFork())
+                    .requires(argNode.getRequirement());
+            if (!this.impl$alreadyHasCustomSuggestionsOnNode(rootSuggestion)) {
+                builder.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
+            }
+            return builder;
+        }
         return commandNode.createBuilder();
     }
 
@@ -308,10 +325,13 @@ public abstract class CommandsMixin {
     }
 
     private Collection<CommandNode<CommandSource>> impl$getChildrenFromNode(final CommandNode<CommandSource> parentNode) {
+        final Collection<CommandNode<CommandSource>> nodes;
         if (parentNode instanceof SpongeNode) {
-            return ((SpongeNode) parentNode).getChildrenForSuggestions();
+            nodes = ((SpongeNode) parentNode).getChildrenForSuggestions();
+        } else {
+            nodes = parentNode.getChildren();
         }
-        return parentNode.getChildren();
+        return nodes;
     }
 
     private ArgumentCommandNode<ISuggestionProvider, ?> impl$cloneArgumentCommandNodeWithoutSuggestions(final ArgumentCommandNode<ISuggestionProvider, ?> toClone) {

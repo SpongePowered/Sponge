@@ -203,7 +203,8 @@
     "world.DimensionMixin",
     "util.registry.DynamicRegistriesMixin",
     "world.gen.DimensionSettingsMixin",
-      "world.DimensionTypeMixin"
+    "world.DimensionTypeMixin",
+    "command.arguments.DimensionArgumentMixin"
   ],
   "client": [
     "client.MinecraftMixin",
