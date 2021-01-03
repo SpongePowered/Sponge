@@ -99,7 +99,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer, MinecraftServerBridge,
+public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge,
         CommandSourceProviderBridge, SubjectProxy, ICommandSourceBridge {
 
     // @formatter:off
@@ -119,10 +119,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
     @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
     @Nullable private ResourcePack impl$resourcePack;
-
-    public MinecraftServerMixin(final String name) {
-        super(name);
-    }
 
     @Override
     public Subject getSubject() {

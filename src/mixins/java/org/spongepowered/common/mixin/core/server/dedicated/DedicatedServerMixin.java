@@ -48,10 +48,6 @@ import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
-    public DedicatedServerMixin(final String name) {
-        super(name);
-    }
-
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$setServerOnGame(Thread p_i232601_1_, DynamicRegistries.Impl p_i232601_2_, SaveFormat.LevelSave p_i232601_3_,
             ResourcePackList p_i232601_4_, DataPackRegistries p_i232601_5_, IServerConfiguration p_i232601_6_, ServerPropertiesProvider p_i232601_7_,
