@@ -38,7 +38,7 @@ import org.spongepowered.common.config.inheritable.SpawnerCategory;
 @Mixin(value = WorldEntitySpawner.class)
 public abstract class WorldEntitySpawnerMixin {
 
-    @Redirect(method = "spawnForChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/spawner/WorldEntitySpawner$EntityDensityManager;access$100(Lnet/minecraft/world/spawner/WorldEntitySpawner$EntityDensityManager;Lnet/minecraft/entity/EntityClassification;)Z"))
+    @Redirect(method = "spawnForChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/spawner/WorldEntitySpawner$EntityDensityManager;access$300(Lnet/minecraft/world/spawner/WorldEntitySpawner$EntityDensityManager;Lnet/minecraft/entity/EntityClassification;)Z"))
     private static boolean impl$usePerWorldSpawnRules(final WorldEntitySpawner.EntityDensityManager manager, final EntityClassification p_234991_1_,
                                                       final ServerWorld p_234979_0_, final Chunk p_234979_1_, final WorldEntitySpawner.EntityDensityManager p_234979_2_,
                                                       final boolean p_234979_3_, final boolean p_234979_4_, final boolean p_234979_5_) {
