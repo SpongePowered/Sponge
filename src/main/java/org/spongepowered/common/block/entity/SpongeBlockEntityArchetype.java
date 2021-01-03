@@ -38,7 +38,7 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.AbstractArchetype;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -47,7 +47,6 @@ import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderLookup;
-import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 

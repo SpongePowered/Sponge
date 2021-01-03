@@ -420,7 +420,7 @@ public final class CommandTest {
                     c.sendMessage(Identity.nil(), Component.text("parent"));
                     return CommandResult.success();
                 })
-                .parameters(CommonParameters.ONLINE_WORLD_PROPERTIES_ONLY_OPTIONAL)
+                .parameters(CommonParameters.WORLD)
                 .parameters(Parameter.firstOf(
                         Parameter.subcommand(firstSub, "first"),
                         Parameter.subcommand(secondSub, "second")

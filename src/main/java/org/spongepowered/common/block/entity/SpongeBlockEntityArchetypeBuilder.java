@@ -39,7 +39,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;

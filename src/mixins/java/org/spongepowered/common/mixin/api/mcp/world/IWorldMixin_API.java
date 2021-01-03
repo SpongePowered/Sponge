@@ -35,9 +35,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeContainer;
 import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.chunk.ChunkPrimerWrapper;
 import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.EmptyChunk;
 import net.minecraft.world.chunk.IChunk;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,7 +46,6 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ProtoWorld;
-import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -84,7 +81,7 @@ public interface IWorldMixin_API {
     // MutableBiomeVolume
 
     @SuppressWarnings({"rawtypes", "ConstantConditions"})
-    default boolean protoWorld$setBiome(final int x, final int y, final int z, final Biome biome) {
+    default boolean protoWorld$setBiome(final int x, final int y, final int z, final org.spongepowered.api.world.biome.Biome biome) {
         final IChunk iChunk = ((IWorldReader) (Object) this).getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
         if (iChunk == null) {
             return false;

@@ -123,7 +123,6 @@ import org.spongepowered.common.world.generation.config.noise.SpongeSlideConfigF
 import org.spongepowered.common.world.generation.config.structure.SpongeSeparatedStructureConfigFactory;
 import org.spongepowered.common.world.generation.config.structure.SpongeSpacedStructureConfigFactory;
 import org.spongepowered.common.world.server.SpongeServerLocation;
-import org.spongepowered.common.world.biome.SpongeBiomeFinderFactory;
 import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
 import org.spongepowered.common.world.volume.archetype.entity.SpongeEntityArchetypeEntryFactory;
 import org.spongepowered.common.world.biome.SpongeBiomeSamplerFactory;
