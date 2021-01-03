@@ -127,6 +127,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public final class VanillaWorldManager implements SpongeWorldManager {
@@ -356,9 +357,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         this.prepareWorld(world, isDebugGeneration);
         ((MinecraftServerAccessor) this.server).invoker$forceDifficulty();
-        this.postWorldLoad(world);
-
-        return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
+        return this.postWorldLoad(world, false).thenApply(w -> (org.spongepowered.api.world.server.ServerWorld) w);
     }
 
     @Override
@@ -846,7 +845,13 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         ((MinecraftServerAccessor) this.server).invoker$forceDifficulty();
 
-        this.worlds.forEach((k, v) -> this.postWorldLoad(v));
+        for (Map.Entry<RegistryKey<World>, ServerWorld> entry : this.worlds.entrySet()) {
+            try {
+                this.postWorldLoad(entry.getValue(), true).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new IllegalStateException(e);
+            }
+        }
 
         ((SpongeUserManager) Sponge.getServer().getUserManager()).init();
         ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().load();
@@ -895,22 +900,73 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
     }
 
-    private void postWorldLoad(final ServerWorld world) {
+    private CompletableFuture<ServerWorld> postWorldLoad(final ServerWorld world, final boolean blocking) {
         SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.world.server.ServerWorld) world));
 
         final ServerWorldInfo levelData = (ServerWorldInfo) world.getLevelData();
         final ServerWorldInfoBridge levelBridge = (ServerWorldInfoBridge) levelData;
         final boolean isDefaultWorld = this.isDefaultWorld((ResourceKey) (Object) world.dimension().location());
         if (isDefaultWorld || levelBridge.bridge$generateSpawnOnLoad()) {
-            this.loadSpawnChunks(world);
+            MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for world '{}' ({})", world.dimension().location(),
+                    SpongeCommon.getServer().registryAccess().dimensionTypes().getKey(world.dimensionType()));
+            if (blocking) {
+                this.loadSpawnChunks(world);
+                return CompletableFuture.completedFuture(world); // Chunk are generated
+            } else {
+                return this.loadSpawnChunksAsync(world); // Chunks are NOT generated yet BUT will be when the future returns
+            }
         } else if (levelBridge.bridge$keepSpawnLoaded()) {
             world.getChunkSource().addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(world.getSharedSpawnPos()), 11, world.dimension().location());
+            return CompletableFuture.completedFuture(world); // Chunks are NOT generated yet BUT will be some time in the future
+        }
+        return CompletableFuture.completedFuture(world); // Chunks are NOT generated AND will not generate unless prompted
+    }
+
+    private CompletableFuture<ServerWorld> loadSpawnChunksAsync(final ServerWorld world) {
+
+        final BlockPos spawnPoint = world.getSharedSpawnPos();
+        final ChunkPos chunkPos = new ChunkPos(spawnPoint);
+        final ServerChunkProvider serverChunkProvider = world.getChunkSource();
+        serverChunkProvider.getLightEngine().setTaskPerBatch(500);
+
+        final int borderRadius = 11;
+        final int diameter = ((borderRadius - 1) * 2) + 1;
+        final int spawnChunks = diameter * diameter;
+
+        serverChunkProvider.addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, borderRadius, world.dimension().location());
+        return CompletableFuture.runAsync(() -> {
+            while (serverChunkProvider.getTickingGenerated() < spawnChunks) {
+                // wait a 10 millis
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }).thenApply(v -> {
+            this.updateForcedChunks(world, serverChunkProvider);
+            serverChunkProvider.getLightEngine().setTaskPerBatch(5);
+
+            // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
+            this.removeSpawnChunkTicket(world, chunkPos, serverChunkProvider);
+            return world;
+        });
+    }
+
+    private void updateForcedChunks(ServerWorld world, ServerChunkProvider serverChunkProvider) {
+        final ForcedChunksSaveData forcedChunksSaveData = world.getDataStorage().get(ForcedChunksSaveData::new, "chunks");
+        if (forcedChunksSaveData != null) {
+            final LongIterator longIterator = forcedChunksSaveData.getChunks().iterator();
+
+            while (longIterator.hasNext()) {
+                final long i = longIterator.nextLong();
+                final ChunkPos forceChunkPos = new ChunkPos(i);
+                serverChunkProvider.updateChunkForced(forceChunkPos, true);
+            }
         }
     }
 
     private void loadSpawnChunks(final ServerWorld world) {
-        MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for world '{}' ({})", world.dimension().location(),
-                SpongeCommon.getServer().registryAccess().dimensionTypes().getKey(world.dimensionType()));
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         final ChunkPos chunkPos = new ChunkPos(spawnPoint);
         final IChunkStatusListener chunkStatusListener = ((ServerWorldBridge) world).bridge$getChunkStatusListener();
@@ -928,16 +984,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setNextTickTime(Util.getMillis() + 10L);
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$waitUntilNextTick();
 
-        final ForcedChunksSaveData forcedChunksSaveData = world.getDataStorage().get(ForcedChunksSaveData::new, "chunks");
-        if (forcedChunksSaveData != null) {
-            final LongIterator longIterator = forcedChunksSaveData.getChunks().iterator();
-
-            while (longIterator.hasNext()) {
-                final long i = longIterator.nextLong();
-                final ChunkPos forceChunkPos = new ChunkPos(i);
-                serverChunkProvider.updateChunkForced(forceChunkPos, true);
-            }
-        }
+        this.updateForcedChunks(world, serverChunkProvider);
 
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setNextTickTime(Util.getMillis() + 10L);
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$waitUntilNextTick();
@@ -945,6 +992,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         serverChunkProvider.getLightEngine().setTaskPerBatch(5);
 
         // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
+        this.removeSpawnChunkTicket(world, chunkPos, serverChunkProvider);
+    }
+
+    private void removeSpawnChunkTicket(ServerWorld world, ChunkPos chunkPos, ServerChunkProvider serverChunkProvider) {
         if (!((ServerWorldInfoBridge) world.getLevelData()).bridge$keepSpawnLoaded()) {
             serverChunkProvider.removeRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, 11, world.dimension().location());
         }

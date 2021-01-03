@@ -47,6 +47,7 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Axis;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
@@ -352,7 +353,8 @@ public final class WorldTest {
                 .from(WorldTemplate.overworld())
                 .key(worldKey)
                 .worldType(WorldTypes.OVERWORLD)
-                .generateSpawnOnLoad(false) // TODO generating spawn on load stalls the server forever after almost fully generating :(
+                .serializationBehavior(SerializationBehavior.NONE)
+                .loadOnStartup(false)
                 .displayName(Component.text("Custom world by " + owner))
                 .generator(ChunkGenerator
                         .noise(BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().biomes(biomes).scale(random.nextInt(5) + 1).build()), noiseGenConfig))
@@ -365,7 +367,8 @@ public final class WorldTest {
         context.sendMessage(Identity.nil(), Component.text("Generating your world..."));
         CompletableFuture<Boolean> worldDeletedFuture = CompletableFuture.completedFuture(true);
         if (wm.world(worldKey).isPresent()) {
-            worldDeletedFuture = wm.unloadWorld(worldKey).thenCompose(b -> wm.deleteWorld(worldKey));
+            worldDeletedFuture = wm.unloadWorld(worldKey)
+                    .thenCompose(b -> wm.deleteWorld(worldKey));
         }
         worldDeletedFuture.thenCompose(b -> {
             wm.saveTemplate(customTemplate);
