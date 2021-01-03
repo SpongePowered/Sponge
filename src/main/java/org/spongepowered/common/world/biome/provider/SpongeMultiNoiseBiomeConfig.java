@@ -165,11 +165,6 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         public Builder reset() {
             this.biomes.clear();
             this.seed = BootstrapProperties.dimensionGeneratorSettings.seed();
-            this.biomes.add(AttributedBiome.of(Biomes.NETHER_WASTES, BiomeAttributes.of(0, 0, 0, 0, 0)));
-            this.biomes.add(AttributedBiome.of(Biomes.SOUL_SAND_VALLEY, BiomeAttributes.of(0, -0.5F, 0, 0, 0)));
-            this.biomes.add(AttributedBiome.of(Biomes.CRIMSON_FOREST, BiomeAttributes.of(0.4F, 0, 0, 0, 0)));
-            this.biomes.add(AttributedBiome.of(Biomes.WARPED_FOREST, BiomeAttributes.of(0, 0.5F, 0, 0, 0.375F)));
-            this.biomes.add(AttributedBiome.of(Biomes.BASALT_DELTAS, BiomeAttributes.of(-0.5F, 0, 0, 0, 0.175F)));
             final NetherBiomeProvider.Noise defaultNoise = NetherBiomeProviderAccessor.accessor$DEFAULT_NOISE_PARAMETERS();
             this.temperatureConfig = (MultiNoiseConfig) defaultNoise;
             this.humidityConfig = (MultiNoiseConfig) defaultNoise;
