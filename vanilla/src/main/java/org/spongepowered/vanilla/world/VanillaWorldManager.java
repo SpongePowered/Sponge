@@ -206,6 +206,30 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
+    public boolean worldExists(final ResourceKey key) {
+        Objects.requireNonNull(key, "key");
+
+        if (World.OVERWORLD.equals(key)) {
+            return true;
+        }
+
+        if (World.NETHER.equals(key)) {
+            return true;
+        }
+
+        if (World.END.equals(key)) {
+            return true;
+        }
+
+        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
+        if (this.worlds.get(registryKey) != null) {
+            return true;
+        }
+
+        return Files.exists(this.customWorldsDirectory.resolve(key.getNamespace()).resolve(key.getValue()));
+    }
+
+    @Override
     public Optional<ResourceKey> worldKey(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         return this.worlds
@@ -368,6 +392,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
 
         return CompletableFuture.completedFuture(true);
+    }
+
+    @Override
+    public boolean templateExists(final ResourceKey key) {
+        return Files.exists(this.getDataPackFile(Objects.requireNonNull(key, "key")));
     }
 
     @Override

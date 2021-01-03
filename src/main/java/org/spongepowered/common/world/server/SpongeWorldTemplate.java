@@ -476,6 +476,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
         @Override
         public Builder from(final WorldTemplate template) {
+            this.key = template.getKey();
             this.displayName = Objects.requireNonNull(template, "template").displayName().orElse(null);
             this.worldType = template.worldType();
             this.generator = template.generator();
