@@ -29,7 +29,6 @@ import com.google.gson.JsonObject;
 import net.minecraft.util.SharedConstants;
 import org.apache.commons.io.FileUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.datapack.DataPackType;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -39,16 +38,16 @@ import java.util.List;
 
 public class DataPackSerializer<T extends DataPackSerializedObject> {
 
-    private final String token;
+    private final String name;
     private final String typeDirectoryName;
 
     public DataPackSerializer(final String token, final String typeDirectoryName) {
-        this.token = token;
+        this.name = token;
         this.typeDirectoryName = typeDirectoryName;
     }
 
-    protected boolean serialize(final SpongeDataPackType<@NonNull ?, T> type, final Path dataPackDirectory, final List<T> objects) throws IOException {
-        final Path datapackDir = dataPackDirectory.resolve(this.getPackName());
+    protected boolean serialize(final SpongeDataPackType<@NonNull ?, T> type, final Path datapacksDir, final List<T> objects) throws IOException {
+        final Path datapackDir = datapacksDir.resolve(this.getPackName());
 
         if (!type.persistent()) {
             FileUtils.deleteDirectory(datapackDir.toFile());
@@ -69,14 +68,14 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
             this.serializeAdditional(namespacedDataDirectory, object);
         }
 
-        DataPackSerializer.writePackMetadata(type, dataPackDirectory);
+        DataPackSerializer.writePackMetadata(this.name, datapackDir);
         return true;
     }
 
     protected void serializeAdditional(Path dataDirectory, T object) throws IOException {
     }
 
-    public static void writePackMetadata(final SpongeDataPackType<?, ?> type, final Path directory) throws IOException {
+    public static void writePackMetadata(final String token, final Path directory) throws IOException {
         // Write our pack metadata
         final Path packMeta = directory.resolve("pack.mcmeta");
         Files.deleteIfExists(packMeta);
@@ -84,7 +83,7 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
         final JsonObject packData = new JsonObject();
         packDataRoot.add("pack", packData);
         packData.addProperty("pack_format", SharedConstants.getCurrentVersion().getPackVersion());
-        packData.addProperty("description", "Sponge plugin provided " + type.type());
+        packData.addProperty("description", "Sponge plugin provided " + token);
 
         DataPackSerializer.writeFile(packMeta, packDataRoot);
     }

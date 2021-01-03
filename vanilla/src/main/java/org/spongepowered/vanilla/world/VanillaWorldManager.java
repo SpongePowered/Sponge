@@ -414,7 +414,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final Path dataPackFile = this.getDataPackFile(template.getKey());
             Files.createDirectories(dataPackFile.getParent());
             DataPackSerializer.writeFile(dataPackFile, element);
-            DataPackSerializer.writePackMetadata((SpongeDataPackType<?, ?>) DataPackTypes.WORLD, this.dimensionsDataPackDirectory.getParent());
+            DataPackSerializer.writePackMetadata("World", this.dimensionsDataPackDirectory.getParent());
         } catch (final Exception ex) {
             ex.printStackTrace();
             return false;
