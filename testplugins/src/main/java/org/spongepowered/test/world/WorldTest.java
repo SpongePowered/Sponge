@@ -47,11 +47,8 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Axis;
-<<<<<<< Updated upstream
 import org.spongepowered.api.world.SerializationBehavior;
-=======
 import org.spongepowered.api.util.Ticks;
->>>>>>> Stashed changes
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
