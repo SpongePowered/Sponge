@@ -49,6 +49,7 @@ import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.FactoryProvider;
 import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.TypeNotFoundException;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -199,6 +200,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(StateMatcher.Factory.class, new SpongeStateMatcherFactory())
                 .registerFactory(RegistryKey.Factory.class, new SpongeRegistryKey.FactoryImpl())
                 .registerFactory(RegistryType.Factory.class, new SpongeRegistryType.FactoryImpl())
+                .registerFactory(RegistryReference.Factory.class, new SpongeRegistryReference.FactoryImpl())
                 .registerFactory(DataPackType.Factory.class, new SpongeDataPackType.FactoryImpl())
                 .registerFactory(BlockVolumeFactory.class, new SpongeBlockVolumeFactory())
                 .registerFactory(DamageSource.Factory.class, new SpongeDamageSourceFactory())

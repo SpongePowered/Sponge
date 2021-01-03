@@ -30,6 +30,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
@@ -44,8 +45,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.util.registry.WorldGenSettingsExport;
+import net.minecraft.util.registry.WorldSettingsImport;
 import net.minecraft.village.VillageSiege;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.Dimension;
@@ -122,6 +125,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -403,11 +407,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     public boolean saveTemplate(final WorldTemplate template) {
         final Dimension scratch = ((SpongeWorldTemplate) Objects.requireNonNull(template, "template")).asDimension();
         try {
-            final JsonElement element = SpongeWorldTemplate.DIRECT_CODEC
-                    .encodeStart(WorldGenSettingsExport.create(JsonOps.INSTANCE, BootstrapProperties.registries), scratch)
-                    .getOrThrow(true, s -> {
-                    });
-            DataPackSerializer.writeFile(this.getDataPackFile(template.getKey()), element);
+            final JsonElement element = SpongeWorldTemplate.DIRECT_CODEC.encodeStart(WorldGenSettingsExport.create(JsonOps.INSTANCE, BootstrapProperties.registries), scratch).getOrThrow(true, s -> { });
+            final Path dataPackFile = this.getDataPackFile(template.getKey());
+            Files.createDirectories(dataPackFile.getParent());
+            DataPackSerializer.writeFile(dataPackFile, element);
         } catch (final Exception ex) {
             ex.printStackTrace();
             return false;
@@ -428,7 +431,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         if (!this.isVanillaWorld(key)) {
             final Path dataPackFile = this.getDataPackFile(key);
             try {
-                final Dimension dimension = this.loadDimension(dataPackFile);
+                final Dimension dimension = this.loadDimension(SpongeWorldManager.createRegistryKey(key), dataPackFile);
                 ((ResourceKeyBridge) (Object) dimension).bridge$setKey(key);
                 return Optional.of(((DimensionBridge) (Object) dimension).bridge$asTemplate());
             } catch (final IOException e) {
@@ -650,8 +653,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final boolean isVanillaWorld = this.isVanillaWorld(key);
         final String directoryName = this.getDirectoryName(key);
 
-        final Path directory = isVanillaWorld ? this.defaultWorldDirectory.resolve(directoryName) : this.customWorldsDirectory.resolve(key
-                .getNamespace()).resolve(key.getValue());
+        final Path directory = isVanillaWorld ? this.defaultWorldDirectory.resolve(directoryName) : this.customWorldsDirectory.resolve(key.getNamespace()).resolve(key.getValue());
 
         try {
             Files.walk(directory)
@@ -662,8 +664,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return FutureUtil.completedWithException(e);
         }
 
-        final Path configFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds").resolve(key
-                .getNamespace()).resolve(key.getValue() + ".conf");
+        final Path configFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds").resolve(key.getNamespace()).resolve(key.getValue() + ".conf");
 
         try {
             Files.deleteIfExists(configFile);
@@ -939,15 +940,42 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
     }
 
-    private Dimension loadDimension(final Path file) throws IOException {
+    private Dimension loadDimension(final RegistryKey<World> registryKey, final Path file) throws IOException {
         try (final InputStream stream = Files.newInputStream(file); final InputStreamReader reader = new InputStreamReader(stream)) {
             final JsonParser parser = new JsonParser();
             final JsonElement element = parser.parse(reader);
+            final SingleTemplateAccess singleTemplateAccess = new SingleTemplateAccess(registryKey, element);
+            final WorldSettingsImport<JsonElement> settingsAdapter = WorldSettingsImport.create(JsonOps.INSTANCE, singleTemplateAccess, (DynamicRegistries.Impl) BootstrapProperties.registries);
+            final SimpleRegistry<Dimension> registry = new SimpleRegistry<>(net.minecraft.util.registry.Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
+            settingsAdapter.decodeElements(registry, net.minecraft.util.registry.Registry.LEVEL_STEM_REGISTRY, Dimension.CODEC);
+            final Dimension dimension = registry.stream().findAny().orElse(null);
+            return dimension;
+        }
+    }
 
-            final Dynamic<JsonElement> dynamic = new Dynamic<>(JsonOps.INSTANCE, element);
-            final DataResult<Pair<Dimension, JsonElement>> result = Dimension.CODEC.decode(dynamic);
-            final Pair<Dimension, JsonElement> value = result.getOrThrow(true, s -> { });
-            return value.getFirst();
+    private static final class SingleTemplateAccess implements WorldSettingsImport.IResourceAccess {
+
+        private final RegistryKey<?> key;
+        private final JsonElement element;
+
+        public SingleTemplateAccess(final RegistryKey<?> key, final JsonElement element) {
+            this.key = key;
+            this.element = element;
+        }
+
+        @Override
+        public Collection<ResourceLocation> listResources(final RegistryKey<? extends net.minecraft.util.registry.Registry<?>> registryKey) {
+            if (this.key.isFor(registryKey)) {
+                return Collections.singletonList(new ResourceLocation(this.key.location().getNamespace(),
+                        registryKey.location().getPath() + "/" + this.key.location().getPath() + ".json"));
+            }
+            return Collections.emptyList();
+        }
+
+        @Override
+        public <E> DataResult<Pair<E, OptionalInt>> parseElement(final DynamicOps<JsonElement> ops, final RegistryKey<? extends net.minecraft.util.registry.Registry<E>> registryKey, final RegistryKey<E> elementKey, final Decoder<E> decoder) {
+            final DataResult<E> result = decoder.parse(ops, this.element);
+            return result.map(t -> Pair.of(t, OptionalInt.empty()));
         }
     }
 }

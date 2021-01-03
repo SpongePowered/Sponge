@@ -25,10 +25,12 @@
 package org.spongepowered.common.registry;
 
 import org.spongepowered.api.Engine;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeCommon;
@@ -96,5 +98,14 @@ public class SpongeRegistryReference<T> extends SpongeRegistryKey<T> implements 
     private T getFromHolder(final RegistryHolder holder) {
         final Optional<Registry<T>> regOpt = holder.findRegistry(this.registry());
         return regOpt.flatMap(entries -> entries.findValue(this.location())).orElse(null);
+    }
+
+    public static final class FactoryImpl implements RegistryReference.Factory {
+
+        @Override
+        public <T> RegistryReference<T> referenced(final RegistryHolder holder, final RegistryType<T> registry, final T value) {
+            final ResourceKey key = Objects.requireNonNull(holder, "holder").registry(Objects.requireNonNull(registry, "registry")).valueKey(Objects.requireNonNull(value, "value"));
+            return new SpongeRegistryReference<>(new SpongeRegistryKey<>(registry, key));
+        }
     }
 }
