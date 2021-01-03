@@ -65,12 +65,12 @@ public final class SpawnerCategory {
     public static final class TickRatesSubCategory {
 
         @Setting
-        @Comment("The ambient spawning tick rate. Default: 400")
-        public int ambient = 400;
+        @Comment("The ambient spawning tick rate. Default: 1")
+        public int ambient = 1;
 
         @Setting
-        @Comment("The creature spawning tick rate. Default: 400")
-        public int creature = 400;
+        @Comment("The creature spawning tick rate. Default: 1")
+        public int creature = 1;
 
         @Setting("aquatic-creature")
         @Comment("The aquatic creature spawning tick rate. Default: 1")

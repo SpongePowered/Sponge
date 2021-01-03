@@ -178,6 +178,7 @@
         "world.server.ServerChunkProviderAccessor",
         "world.server.ServerWorldAccessor",
         "world.spawner.AbstractSpawnerAccessor",
+        "world.spawner.WorldEntitySpawnerAccessor",
         "world.storage.PlayerDataAccessor",
         "entity.item.BoatEntityAccessor",
         "entity.EntityTypeAccessor",

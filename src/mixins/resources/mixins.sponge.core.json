@@ -163,6 +163,8 @@
     "world.server.ServerChunkProviderMixin",
     "world.server.ServerWorldMixin",
     "world.spawner.AbstractSpawnerMixin",
+    "world.spawner.EntityDensityManagerMixin",
+    "world.spawner.WorldEntitySpawnerMixin",
     "world.storage.SaveFormat_LevelSaveMixin",
     "world.storage.PlayerDataMixin",
     "block.CommandBlockMixin",
