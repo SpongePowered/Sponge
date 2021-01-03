@@ -31,7 +31,6 @@ import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Decoder;
-import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
@@ -257,6 +256,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) serverWorld);
         }
 
+        this.saveTemplate(template);
+
         return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template).asDimension());
     }
 
@@ -431,9 +432,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         if (!this.isVanillaWorld(key)) {
             final Path dataPackFile = this.getDataPackFile(key);
             try {
-                final Dimension dimension = this.loadDimension(SpongeWorldManager.createRegistryKey(key), dataPackFile);
-                ((ResourceKeyBridge) (Object) dimension).bridge$setKey(key);
-                return Optional.of(((DimensionBridge) (Object) dimension).bridge$asTemplate());
+                final Dimension template = this.loadTemplate0(SpongeWorldManager.createRegistryKey(key), dataPackFile);
+                ((ResourceKeyBridge) (Object) template).bridge$setKey(key);
+                return Optional.of(((DimensionBridge) (Object) template).bridge$asTemplate());
             } catch (final IOException e) {
                 e.printStackTrace();
             }
@@ -448,12 +449,15 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final RegistryKey<World> copyRegistryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(copyKey, "copyKey"));
 
         if (World.OVERWORLD.equals(copyRegistryKey)) {
-            throw new IllegalArgumentException(String.format("The copy key '%s' cannot be the default world!", copyKey));
+            return CompletableFuture.completedFuture(false);
         }
 
-        if (this.worlds.containsKey(copyRegistryKey)) {
-            return FutureUtil.completedWithException(new IllegalStateException(String.format("The copy key '%s' is a currently loaded world!",
-                    copyKey)));
+        if (!this.worldExists(key)) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        if (this.worldExists(copyKey)) {
+            return CompletableFuture.completedFuture(false);
         }
 
         final ServerWorld loadedWorld = this.worlds.get(registryKey);
@@ -566,14 +570,17 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     @Override
     public CompletableFuture<Boolean> moveWorld(final ResourceKey key, final ResourceKey movedKey) {
         final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
-        final RegistryKey<World> copyRegistryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(movedKey, "movedKey"));
 
         if (World.OVERWORLD.equals(registryKey)) {
-            return CompletableFuture.completedFuture(null);
+            return CompletableFuture.completedFuture(false);
         }
 
-        if (this.worlds.containsKey(copyRegistryKey)) {
-            return CompletableFuture.completedFuture(null);
+        if (!this.worldExists(key)) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        if (this.worldExists(movedKey)) {
+            return CompletableFuture.completedFuture(false);
         }
 
         ServerWorld loadedWorld = this.worlds.get(registryKey);
@@ -635,6 +642,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
 
         if (World.OVERWORLD.equals(registryKey)) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        if (!this.worldExists(key)) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -939,7 +950,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
     }
 
-    private Dimension loadDimension(final RegistryKey<World> registryKey, final Path file) throws IOException {
+    private Dimension loadTemplate0(final RegistryKey<World> registryKey, final Path file) throws IOException {
         try (final InputStream stream = Files.newInputStream(file); final InputStreamReader reader = new InputStreamReader(stream)) {
             final JsonParser parser = new JsonParser();
             final JsonElement element = parser.parse(reader);
