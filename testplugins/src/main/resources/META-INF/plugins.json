@@ -440,27 +440,6 @@
                 "id": "spongeapi",
                 "version": "8.0.0"
             }]
-        },
-        {
-            "loader": "java_plain",
-            "id": "dimensiontest",
-            "name": "Dimension Test",
-            "version": "8.0.0",
-            "main-class": "org.spongepowered.test.world.DimensionTest",
-            "description": "Testing Dimension Data Pack Functionality",
-            "links": {
-                "homepage": "https://www.spongepowered.org",
-                "source": "https://www.spongepowered.org/source",
-                "issues": "https://www.spongepowered.org/issues"
-            },
-            "contributors": [{
-                "name": "SpongePowered",
-                "description": "Lead Developer"
-            }],
-            "dependencies": [{
-                "id": "spongeapi",
-                "version": "8.0.0"
-            }]
         }
     ]
 }
