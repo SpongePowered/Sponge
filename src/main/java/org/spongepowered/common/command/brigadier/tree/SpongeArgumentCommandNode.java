@@ -45,8 +45,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.exception.ArgumentParseException;
-import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
@@ -55,8 +53,7 @@ import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
-import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
-import org.spongepowered.common.command.parameter.SpongeDefaultValueParser;
+import org.spongepowered.common.util.CommandUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
@@ -152,30 +149,33 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         return this.nodeHolder.getChildrenForSuggestions();
     }
 
+    private ArgumentType<?> switchTypeIfRequired(final ArgumentType<?> type) {
+        if (type instanceof CompletionsArgumentTypeBridge) {
+            return ((CompletionsArgumentTypeBridge<?>) type).bridge$clientSideCompletionType();
+        }
+        return type;
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     public final ArgumentBuilder<ISuggestionProvider, ?> createBuilderForSuggestions(
             final CommandNode<ISuggestionProvider> rootSuggestionNode,
             final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode
     ) {
-        ArgumentType<?> type;
-        final boolean forceCustomSuggestions;
-        if (this.getType() instanceof CompletionsArgumentTypeBridge) {
-            type = ((CompletionsArgumentTypeBridge<?>) this.getType()).bridge$clientSideCompletionType();
-            forceCustomSuggestions = true;
-        } else {
-            type = this.getType();
-            forceCustomSuggestions = false;
-        }
+        ArgumentType<?> type = this.switchTypeIfRequired(this.getType());
         CommandNode<ISuggestionProvider> previousNode = rootSuggestionNode;
         if (!this.parser.getClientCompletionArgumentType().isEmpty()) {
             // create multiple entries, return the last one
+            final boolean forceCustomSuggestions;
             final Collection<ArgumentType<?>> types = this.parser.getClientCompletionArgumentType().stream()
                     .filter(Objects::nonNull).collect(Collectors.toList());
             if (types.size() > 1) {
+                forceCustomSuggestions = false; // handled in here
                 final Iterator<ArgumentType<?>> clientCompletionTypeIterator = this.parser.getClientCompletionArgumentType().iterator();
                 boolean isFirst = true;
                 while (clientCompletionTypeIterator.hasNext()) {
-                    type = clientCompletionTypeIterator.next();
+                    final ArgumentType<?> originalType = clientCompletionTypeIterator.next();
+                    type = this.switchTypeIfRequired(originalType);
+                    final boolean forceCustomSuggestionsInner = type != this.getType() && !CommandUtil.checkForCustomSuggestions(previousNode);
                     if (clientCompletionTypeIterator.hasNext()) {
                         // create node
                         final RequiredArgumentBuilder<ISuggestionProvider, ?> arg = RequiredArgumentBuilder.argument(this.getName(), type);
@@ -183,6 +183,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                         // if the first node is a string argument type, send the completions.
                         if (isFirst && type instanceof StringArgumentType) {
                             arg.suggests(this.parser::listSuggestions);
+                        }
+                        if (forceCustomSuggestionsInner) {
+                            arg.suggests(SuggestionProviders.ASK_SERVER);
                         }
                         final CommandNode<ISuggestionProvider> built = arg.build();
                         previousNode.addChild(built);
@@ -194,14 +197,16 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                     }
                 }
             } else {
-                type = this.parser.getClientCompletionArgumentType().get(0);
+                final ArgumentType<?> originalType = this.parser.getClientCompletionArgumentType().get(0);
+                type = this.switchTypeIfRequired(originalType);
+                forceCustomSuggestions = type != originalType;
             }
 
             final RequiredArgumentBuilder<ISuggestionProvider, ?> toReturn = RequiredArgumentBuilder.argument(this.getUsageTextForClient(), type);
             if (this.getCommand() != null) {
                 toReturn.executes(x -> 0);
             }
-            if (forceCustomSuggestions) {
+            if (forceCustomSuggestions && !CommandUtil.checkForCustomSuggestions(previousNode)) {
                 toReturn.suggests(SuggestionProviders.ASK_SERVER);
             } else if (this.getCustomSuggestions() != null) {
                 toReturn.suggests((SuggestionProvider) this.getCustomSuggestions());
@@ -216,7 +221,13 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         final RequiredArgumentBuilder<CommandSource, ?> builder = RequiredArgumentBuilder.argument(this.getUsageTextForClient(), type);
         builder.requires(this.getRequirement());
         builder.forward(this.getRedirect(), this.getRedirectModifier(), this.isFork());
-        builder.suggests(this.getCustomSuggestions());
+        if (!CommandUtil.checkForCustomSuggestions(rootSuggestionNode)) {
+            if (type != this.getType()) {
+                builder.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
+            } else {
+                builder.suggests(this.getCustomSuggestions());
+            }
+        }
         if (this.getCommand() != null) {
             builder.executes(this.getCommand());
         }

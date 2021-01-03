@@ -35,6 +35,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.arguments.BlockStateArgument;
 import net.minecraft.command.arguments.ComponentArgument;
+import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.EntitySelectorParser;
 import net.minecraft.command.arguments.GameProfileArgument;
@@ -147,6 +148,7 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.accessor.command.arguments.ArgumentSerializerAccessor;
 import org.spongepowered.common.accessor.command.arguments.ArgumentTypesAccessor;
+import org.spongepowered.common.accessor.command.arguments.DimensionArgumentAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.ban.SpongeBanType;
 import org.spongepowered.common.block.BlockStateSerializerDeserializer;
@@ -167,7 +169,6 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeServerL
 import org.spongepowered.common.command.parameter.managed.standard.SpongeTargetBlockValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeTargetEntityValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeUserValueParameter;
-import org.spongepowered.common.command.parameter.managed.standard.SpongeServerWorldValueParameter;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeCommandRegistrars;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
@@ -290,6 +291,7 @@ public final class SpongeRegistryLoaders {
         )));
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static RegistryLoader<ValueParameter<?>> valueParameter() {
         return RegistryLoader.of(l -> {
             l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
@@ -354,7 +356,11 @@ public final class SpongeRegistryLoaders {
                     })
             );
             l.add(ResourceKeyedValueParameters.VECTOR3D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition(cause.getSource()))));
-            l.add(ResourceKeyedValueParameters.WORLD, k -> new SpongeServerWorldValueParameter(k));
+            l.add(ResourceKeyedValueParameters.WORLD, k -> StandardCatalogedArgumentParser.createConverter(k,
+                    DimensionArgument.dimension(),
+                    (reader, cause, result) -> Sponge.getServer().getWorldManager().world((ResourceKey) (Object) result)
+                            .orElseThrow(() -> DimensionArgumentAccessor.accessor$ERROR_INVALID_VALUE().createWithContext(reader, result))
+                    ));
         });
     }
 

@@ -204,7 +204,8 @@
         "world.biome.provider.OverworldBiomeProviderAccessor",
         "world.biome.provider.NetherBiomeProviderAccessor",
         "world.biome.provider.EndBiomeProviderAccessor",
-        "world.biome.provider.BiomeProviderAccessor"
+        "world.biome.provider.BiomeProviderAccessor",
+        "command.arguments.DimensionArgumentAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

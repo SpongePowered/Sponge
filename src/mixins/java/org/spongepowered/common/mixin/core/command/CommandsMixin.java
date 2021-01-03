@@ -63,6 +63,7 @@ import org.spongepowered.common.command.brigadier.tree.SuggestionArgumentNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.util.CommandUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -150,7 +151,7 @@ public abstract class CommandsMixin {
             builder.executes((Command) argNode.getCommand())
                     .forward(argNode.getRedirect(), argNode.getRedirectModifier(), argNode.isFork())
                     .requires(argNode.getRequirement());
-            if (!this.impl$alreadyHasCustomSuggestionsOnNode(rootSuggestion)) {
+            if (!CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
                 builder.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
             }
             return builder;
@@ -180,7 +181,7 @@ public abstract class CommandsMixin {
 
             // If the current root suggestion has already got a custom suggestion and this node has a custom suggestion,
             // we need to swap it out.
-            if (value instanceof ArgumentCommandNode && this.impl$alreadyHasCustomSuggestionsOnNode(rootSuggestion)) {
+            if (value instanceof ArgumentCommandNode && CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
                 rootSuggestion.addChild(this.impl$cloneArgumentCommandNodeWithoutSuggestions((ArgumentCommandNode<ISuggestionProvider, ?>) value));
             } else {
                 rootSuggestion.addChild((CommandNode<ISuggestionProvider>) value);
@@ -215,7 +216,7 @@ public abstract class CommandsMixin {
             if (commandNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) commandNode).isComplex()) {
                 shouldContinue = false;
                 final ServerPlayerEntity e = (ServerPlayerEntity) sourceButTyped.getEntity();
-                final boolean hasCustomSuggestionsAlready = this.impl$alreadyHasCustomSuggestionsOnNode(rootSuggestion);
+                final boolean hasCustomSuggestionsAlready = CommandUtil.checkForCustomSuggestions(rootSuggestion);
                 final CommandNode<ISuggestionProvider> finalCommandNode = ((SpongeArgumentCommandNode<?>) commandNode).getComplexSuggestions(
                         rootSuggestion,
                         commandNodeToSuggestionNode,
@@ -233,7 +234,7 @@ public abstract class CommandsMixin {
                 final List<CommandNode<ISuggestionProvider>> suggestionProviderCommandNode = this.impl$playerNodeCache.get(e).get(commandNode);
                 if (suggestionProviderCommandNode != null) {
                     shouldContinue = false;
-                    boolean hasCustomSuggestionsAlready = this.impl$alreadyHasCustomSuggestionsOnNode(rootSuggestion);
+                    boolean hasCustomSuggestionsAlready = CommandUtil.checkForCustomSuggestions(rootSuggestion);
                     for (final CommandNode<ISuggestionProvider> node : suggestionProviderCommandNode) {
                         // If we have custom suggestions, we need to limit it to one node, otherwise we trigger a bug
                         // in the client where it'll send more than one custom suggestion request - which is fine, except
@@ -282,7 +283,7 @@ public abstract class CommandsMixin {
         // meaning thenRun(...) does not run, which is how displaying the suggestions works...
         //
         // Because we don't control the client, we have to work around it here.
-        if (provider != SuggestionProviders.ASK_SERVER || !this.impl$alreadyHasCustomSuggestionsOnNode(rootSuggestion)) {
+        if (provider != SuggestionProviders.ASK_SERVER || !CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
             requiredArgumentBuilder.suggests(provider);
         }
         return requiredArgumentBuilder;
@@ -341,13 +342,6 @@ public abstract class CommandsMixin {
             builder.then(node);
         }
         return new SuggestionArgumentNode<>(builder);
-    }
-
-    private boolean impl$alreadyHasCustomSuggestionsOnNode(final CommandNode<ISuggestionProvider> rootSuggestion) {
-        return rootSuggestion.getChildren()
-                .stream()
-                .filter(x -> x instanceof ArgumentCommandNode)
-                .anyMatch(x -> ((ArgumentCommandNode<?, ?>) x).getCustomSuggestions() != null);
     }
 
 }
