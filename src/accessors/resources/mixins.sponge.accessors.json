@@ -206,7 +206,8 @@
         "world.biome.provider.NetherBiomeProviderAccessor",
         "world.biome.provider.EndBiomeProviderAccessor",
         "world.biome.provider.BiomeProviderAccessor",
-        "command.arguments.DimensionArgumentAccessor"
+        "command.arguments.DimensionArgumentAccessor",
+        "world.spawner.WorldEntitySpawner_EntityDensityManagerAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

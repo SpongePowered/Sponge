@@ -27,7 +27,7 @@ package org.spongepowered.common.bridge.world.spawner;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.world.server.ServerWorld;
 
-public interface EntityDensityManagerBridge {
+public interface WorldEntitySpawner_EntityDensityManagerBridge {
 
     boolean bridge$canSpawnForCategoryInWorld(EntityClassification p_234991_1_, ServerWorld world);
 

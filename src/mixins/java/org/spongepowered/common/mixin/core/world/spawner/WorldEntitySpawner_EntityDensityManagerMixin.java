@@ -32,21 +32,23 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.spawner.WorldEntitySpawnerAccessor;
-import org.spongepowered.common.bridge.world.spawner.EntityDensityManagerBridge;
+import org.spongepowered.common.bridge.world.spawner.WorldEntitySpawner_EntityDensityManagerBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.SpawnerCategory;
 
 @Mixin(WorldEntitySpawner.EntityDensityManager.class)
-public abstract class EntityDensityManagerMixin implements EntityDensityManagerBridge {
+public abstract class WorldEntitySpawner_EntityDensityManagerMixin implements WorldEntitySpawner_EntityDensityManagerBridge {
 
+    // @formatter:off
     @Shadow @Final private int spawnableChunkCount;
     @Shadow @Final private Object2IntOpenHashMap<EntityClassification> mobCategoryCounts;
+    // @formatter:on
 
     @Override
-    public boolean bridge$canSpawnForCategoryInWorld(final EntityClassification p_234991_1_, final ServerWorld world) {
+    public boolean bridge$canSpawnForCategoryInWorld(final EntityClassification classification, final ServerWorld world) {
         final SpawnerCategory.SpawnLimitsSubCategory spawnLimits = SpongeGameConfigs.getForWorld(world).get().spawner.spawnLimits;
         final int maxInstancesPerChunk;
-        switch (p_234991_1_) {
+        switch (classification) {
             case MONSTER:
                 maxInstancesPerChunk = spawnLimits.monster;
                 break;
@@ -63,9 +65,9 @@ public abstract class EntityDensityManagerMixin implements EntityDensityManagerB
                 maxInstancesPerChunk = spawnLimits.aquaticAmbient;
                 break;
             default:
-                throw new IllegalStateException("Unexpected value: " + p_234991_1_);
+                throw new IllegalStateException("Unexpected value: " + classification);
         }
         final int i = maxInstancesPerChunk * this.spawnableChunkCount / WorldEntitySpawnerAccessor.accessor$MAGIC_NUMBER();
-        return this.mobCategoryCounts.getInt(p_234991_1_) < i;
+        return this.mobCategoryCounts.getInt(classification) < i;
     }
 }

@@ -28,30 +28,56 @@ import net.minecraft.entity.EntityClassification;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.spawner.WorldEntitySpawner;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.spawner.EntityDensityManagerBridge;
-import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.world.spawner.WorldEntitySpawner_EntityDensityManagerAccessor;
+import org.spongepowered.common.bridge.world.spawner.WorldEntitySpawner_EntityDensityManagerBridge;
+import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.SpawnerCategory;
 
-@Mixin(value = WorldEntitySpawner.class)
+@Mixin(WorldEntitySpawner.class)
 public abstract class WorldEntitySpawnerMixin {
 
-    @Redirect(method = "spawnForChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/spawner/WorldEntitySpawner$EntityDensityManager;access$300(Lnet/minecraft/world/spawner/WorldEntitySpawner$EntityDensityManager;Lnet/minecraft/entity/EntityClassification;)Z"))
-    private static boolean impl$usePerWorldSpawnRules(final WorldEntitySpawner.EntityDensityManager manager, final EntityClassification p_234991_1_,
-                                                      final ServerWorld p_234979_0_, final Chunk p_234979_1_, final WorldEntitySpawner.EntityDensityManager p_234979_2_,
-                                                      final boolean p_234979_3_, final boolean p_234979_4_, final boolean p_234979_5_) {
-        final int tick = impl$getSpawningTickRate(p_234991_1_, p_234979_0_);
+    // @formatter:off
+    @Shadow @Final private static EntityClassification[] SPAWNING_CATEGORIES;
+    @Shadow static public void spawnCategoryForChunk(EntityClassification p_234967_0_, ServerWorld p_234967_1_, Chunk p_234967_2_,
+            WorldEntitySpawner.IDensityCheck p_234967_3_, WorldEntitySpawner.IOnSpawnDensityAdder p_234967_4_) {
+    }
+    // @formatter:on
+
+    /**
+     * @author morph - January 3rd, 2021 - Minecraft 1.16.4
+     * @reason Use world configured spawn limits
+     */
+    @Overwrite
+    public static void spawnForChunk(ServerWorld world, Chunk chunk, WorldEntitySpawner.EntityDensityManager manager, boolean spawnFriendlies, boolean spawnEnemies, boolean doMobSpawning) {
+        world.getProfiler().push("spawner");
+
+        for (final EntityClassification entityclassification : SPAWNING_CATEGORIES) {
+            if ((spawnFriendlies || !entityclassification.isFriendly()) && (spawnEnemies || entityclassification.isFriendly()) && (doMobSpawning || !entityclassification.isPersistent()) && WorldEntitySpawnerMixin.impl$usePerWorldSpawnRules(manager, entityclassification, world)) {
+                WorldEntitySpawnerMixin.spawnCategoryForChunk(entityclassification, world, chunk,
+                        (p_234969_1_, p_234969_2_, p_234969_3_) -> ((WorldEntitySpawner_EntityDensityManagerAccessor) manager).invoker$canSpawn(p_234969_1_, p_234969_2_, p_234969_3_),
+                        (p_234970_1_, p_234970_2_) -> ((WorldEntitySpawner_EntityDensityManagerAccessor) manager).invoker$afterSpawn(p_234970_1_, p_234970_2_)
+                );
+            }
+        }
+
+        world.getProfiler().pop();
+    }
+
+    private static boolean impl$usePerWorldSpawnRules(final WorldEntitySpawner.EntityDensityManager manager, final EntityClassification classification, final ServerWorld world) {
+        final int tick = WorldEntitySpawnerMixin.impl$getSpawningTickRate(classification, world);
         if (tick == 0) {
             return false;
         }
-        return p_234979_0_.getGameTime() % tick  == 0L && ((EntityDensityManagerBridge) manager).bridge$canSpawnForCategoryInWorld(p_234991_1_, p_234979_0_);
+        return world.getGameTime() % tick  == 0L && ((WorldEntitySpawner_EntityDensityManagerBridge) manager).bridge$canSpawnForCategoryInWorld(classification, world);
     }
 
-    private static int impl$getSpawningTickRate(final EntityClassification p_234991_1_, final ServerWorld world) {
-        final SpawnerCategory.TickRatesSubCategory tickRates = SpongeGameConfigs.getForWorld(world).get().spawner.tickRates;
-        switch (p_234991_1_) {
+    private static int impl$getSpawningTickRate(final EntityClassification classification, final ServerWorld world) {
+        final SpawnerCategory.TickRatesSubCategory tickRates = ((ServerWorldInfoBridge) world.getLevelData()).bridge$configAdapter().get().spawner.tickRates;
+        switch (classification) {
             case MONSTER:
                 return tickRates.monster;
             case CREATURE:
@@ -63,7 +89,7 @@ public abstract class WorldEntitySpawnerMixin {
             case WATER_AMBIENT:
                 return tickRates.aquaticAmbient;
             default:
-                throw new IllegalStateException("Unexpected value: " + p_234991_1_);
+                throw new IllegalStateException("Unexpected value: " + classification);
         }
     }
 }
