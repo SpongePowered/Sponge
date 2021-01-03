@@ -71,6 +71,7 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin
         lifecycle.establishServerFeatures();
         lifecycle.establishCommands();
 
+        lifecycle.establishServerRegistries(this);
         lifecycle.callStartingEngineEvent(this);
     }
 
@@ -82,8 +83,7 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin
 
     @Override
     public void loadLevel() {
-        SpongeBootstrap.getLifecycle().establishServerRegistries(this);
-
+        this.shadow$detectBundledResources();
         this.getWorldManager().loadLevel();
     }
 

@@ -27,8 +27,14 @@ package org.spongepowered.common.mixin.core.world.gen.settings;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.util.RegistryKey;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.Dimension;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.DimensionSettings;
+import net.minecraft.world.gen.NoiseChunkGenerator;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,6 +45,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.gen.DimensionGeneratorSettingsBridge;
 import org.spongepowered.common.server.BootstrapProperties;
 
+import java.util.Random;
+
 @Mixin(DimensionGeneratorSettings.class)
 public abstract class DimensionGeneratorSettingsMixin implements DimensionGeneratorSettingsBridge {
 
@@ -47,6 +55,15 @@ public abstract class DimensionGeneratorSettingsMixin implements DimensionGenera
     @Shadow @Final private boolean generateFeatures;
     @Shadow @Final private boolean generateBonusChest;
     @Shadow @Final private SimpleRegistry<Dimension> dimensions;
+
+    @Shadow public static SimpleRegistry<Dimension> withOverworld(Registry<DimensionType> p_242749_0_,
+            SimpleRegistry<Dimension> p_242749_1_, ChunkGenerator p_242749_2_) {
+        return null;
+    }
+    @Shadow public static NoiseChunkGenerator makeDefaultOverworld(
+            Registry<Biome> p_242750_0_, Registry<DimensionSettings> p_242750_1_, long p_242750_2_) {
+        return null;
+    }
     // @formatter:on
 
     @Override
@@ -70,5 +87,19 @@ public abstract class DimensionGeneratorSettingsMixin implements DimensionGenera
         }
 
         return BootstrapProperties.dimensionGeneratorSettings.dimensions().get(registryKey);
+    }
+
+    /**
+     * @author zidane - January 3rd, 2021 - Minecraft 1.16.4
+     * @reason Cache the default generator settings as early as possible if a defaulted one
+     */
+    @Overwrite
+    public static DimensionGeneratorSettings makeDefault(Registry<DimensionType> p_242751_0_, Registry<Biome> p_242751_1_, Registry<DimensionSettings> p_242751_2_) {
+        long i = (new Random()).nextLong();
+        final DimensionGeneratorSettings dimensionGeneratorSettings =
+                new DimensionGeneratorSettings(i, true, false, withOverworld(p_242751_0_, DimensionType.defaultDimensions(p_242751_0_, p_242751_1_,
+                        p_242751_2_, i), makeDefaultOverworld(p_242751_1_, p_242751_2_, i)));
+        BootstrapProperties.dimensionGeneratorSettings = dimensionGeneratorSettings;
+        return dimensionGeneratorSettings;
     }
 }

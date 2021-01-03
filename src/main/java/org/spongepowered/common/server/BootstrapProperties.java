@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.server;
 
-import net.minecraft.server.dedicated.ServerProperties;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.WorldSettingsImport;
+import net.minecraft.world.GameType;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -48,13 +48,14 @@ public final class BootstrapProperties {
     public static WorldSettingsImport<?> worldSettingsAdapter;
     public static boolean isNewLevel = false;
 
-    public static void init(final ServerProperties properties, DynamicRegistries registries) {
-        BootstrapProperties.dimensionGeneratorSettings = properties.worldGenSettings;
-        BootstrapProperties.gameMode = RegistryKey.of(RegistryTypes.GAME_MODE, ResourceKey.sponge(properties.gamemode.getName())).asDefaultedReference(() -> Sponge.getGame().registries());
-        BootstrapProperties.difficulty = RegistryKey.of(RegistryTypes.DIFFICULTY, ResourceKey.sponge(properties.difficulty.getKey())).asDefaultedReference(() -> Sponge.getGame().registries());
-        BootstrapProperties.pvp = properties.pvp;
-        BootstrapProperties.hardcore = properties.hardcore;
-        BootstrapProperties.viewDistance = properties.viewDistance;
+    public static void init(final DimensionGeneratorSettings dimensionGeneratorSettings, final GameType gameType, final net.minecraft.world.Difficulty difficulty,
+            final boolean pvp, final boolean hardcore, final int viewDistance, final DynamicRegistries registries) {
+        BootstrapProperties.dimensionGeneratorSettings = dimensionGeneratorSettings;
+        BootstrapProperties.gameMode = RegistryKey.of(RegistryTypes.GAME_MODE, ResourceKey.sponge(gameType.getName())).asDefaultedReference(() -> Sponge.getGame().registries());
+        BootstrapProperties.difficulty = RegistryKey.of(RegistryTypes.DIFFICULTY, ResourceKey.sponge(difficulty.getKey())).asDefaultedReference(() -> Sponge.getGame().registries());
+        BootstrapProperties.pvp = pvp;
+        BootstrapProperties.hardcore = hardcore;
+        BootstrapProperties.viewDistance = viewDistance;
         BootstrapProperties.registries = registries;
     }
 

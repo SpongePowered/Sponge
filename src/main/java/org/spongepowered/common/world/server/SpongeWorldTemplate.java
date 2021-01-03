@@ -457,7 +457,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             final DimensionGeneratorSettings generationSettings = BootstrapProperties.dimensionGeneratorSettings;
             this.generationSettings = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$construct(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
-                    new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental()),
+                    new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());
             this.gameMode = BootstrapProperties.gameMode;
             this.difficulty = BootstrapProperties.difficulty;
@@ -483,7 +483,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             final DimensionGeneratorSettings generationSettings = (DimensionGeneratorSettings) template.generationConfig();
             this.generationSettings = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$construct(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
-                    new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental()),
+                    new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());
             this.gameMode = template.gameMode().orElse(null);
             this.difficulty = template.difficulty().orElse(null);

@@ -29,6 +29,7 @@ import com.mojang.serialization.Lifecycle;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.Main;
 import net.minecraft.server.ServerPropertiesProvider;
+import net.minecraft.server.dedicated.ServerProperties;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.WorldSettingsImport;
 import net.minecraft.world.WorldSettings;
@@ -51,7 +52,9 @@ public abstract class MainMixin {
     @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/server/ServerPropertiesProvider"))
     private static ServerPropertiesProvider impl$cacheBootstrapProperties(final DynamicRegistries p_i242100_1_, final Path p_i242100_2_) {
         final ServerPropertiesProvider provider = new ServerPropertiesProvider(p_i242100_1_, p_i242100_2_);
-        BootstrapProperties.init(provider.getProperties(), p_i242100_1_);
+        final ServerProperties properties = provider.getProperties();
+        BootstrapProperties.init(properties.worldGenSettings, properties.gamemode, properties.difficulty, properties.pvp, properties.hardcore,
+                properties.viewDistance, p_i242100_1_);
         return provider;
     }
 

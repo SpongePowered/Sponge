@@ -81,6 +81,6 @@ public final class SpongeMutableWorldGenerationConfigBuilder implements MutableW
     @Override
     public MutableWorldGenerationConfig build() {
         return (MutableWorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$construct(this.seed, this.generateFeatures,
-            this.generateBonusChest, new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental()), Optional.empty());
+            this.generateBonusChest, new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()), Optional.empty());
     }
 }
