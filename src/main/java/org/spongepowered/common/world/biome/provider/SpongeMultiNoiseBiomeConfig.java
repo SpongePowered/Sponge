@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.biome.provider;
 
+import com.google.common.collect.Lists;
 import net.minecraft.world.biome.provider.NetherBiomeProvider;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.registry.RegistryReference;
@@ -179,6 +180,22 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
                 throw new IllegalStateException("MultiNoise biome config requires at least one biome!");
             }
             return new SpongeMultiNoiseBiomeConfig(this);
+        }
+    }
+
+    public static final class FactoryImpl implements Factory {
+
+        @Override
+        public MultiNoiseBiomeConfig nether() {
+            return new BuilderImpl()
+                    .biomes(Lists.newArrayList(
+                            AttributedBiome.of(Biomes.NETHER_WASTES, BiomeAttributes.of(0, 0, 0, 0, 0)),
+                            AttributedBiome.of(Biomes.SOUL_SAND_VALLEY, BiomeAttributes.of(0, -0.5F, 0, 0, 0)),
+                            AttributedBiome.of(Biomes.CRIMSON_FOREST, BiomeAttributes.of(0.4F, 0, 0, 0, 0)),
+                            AttributedBiome.of(Biomes.WARPED_FOREST, BiomeAttributes.of(0, 0.5F, 0, 0, 0.375F)),
+                            AttributedBiome.of(Biomes.BASALT_DELTAS, BiomeAttributes.of(-0.5F, 0, 0, 0, 0.175F))
+                    ))
+                    .build();
         }
     }
 }

@@ -656,10 +656,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final Path directory = isVanillaWorld ? this.defaultWorldDirectory.resolve(directoryName) : this.customWorldsDirectory.resolve(key.getNamespace()).resolve(key.getValue());
 
         try {
-            Files.walk(directory)
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
+            for (final Path path : Files.walk(directory).sorted(Comparator.reverseOrder()).collect(Collectors.toList())) {
+                Files.deleteIfExists(path);
+            }
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
         }

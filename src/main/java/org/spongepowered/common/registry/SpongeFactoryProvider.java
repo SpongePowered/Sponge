@@ -64,6 +64,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
+import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
@@ -114,6 +115,7 @@ import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
 import org.spongepowered.common.world.biome.SpongeAttributedBiome;
 import org.spongepowered.common.world.biome.SpongeBiomeAttributesFactory;
 import org.spongepowered.common.world.biome.SpongeBiomeProviderFactory;
+import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
 import org.spongepowered.common.world.biome.provider.multinoise.SpongeMultiNoiseConfigFactory;
 import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
 import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
@@ -209,6 +211,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(ServerLocationCreator.Factory.class, new SpongeServerLocationCreatorFactory())
                 .registerFactory(MultiNoiseConfig.Factory.class, new SpongeMultiNoiseConfigFactory())
                 .registerFactory(AttributedBiome.Factory.class, new SpongeAttributedBiome.FactoryImpl())
+                .registerFactory(MultiNoiseBiomeConfig.Factory.class, new SpongeMultiNoiseBiomeConfig.FactoryImpl())
                 .registerFactory(BiomeAttributes.Factory.class, new SpongeBiomeAttributesFactory())
                 .registerFactory(BiomeProvider.Factory.class, new SpongeBiomeProviderFactory())
                 .registerFactory(BiomeSampler.Factory.class, new SpongeBiomeSamplerFactory())
