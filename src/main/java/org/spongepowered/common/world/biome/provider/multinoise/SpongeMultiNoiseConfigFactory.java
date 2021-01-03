@@ -26,11 +26,17 @@ package org.spongepowered.common.world.biome.provider.multinoise;
 
 import net.minecraft.world.biome.provider.NetherBiomeProvider;
 import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
+import org.spongepowered.common.accessor.world.biome.provider.NetherBiomeProviderAccessor;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class SpongeMultiNoiseConfigFactory implements MultiNoiseConfig.Factory {
+
+    @Override
+    public MultiNoiseConfig nether() {
+        return (MultiNoiseConfig) NetherBiomeProviderAccessor.accessor$DEFAULT_NOISE_PARAMETERS();
+    }
 
     @Override
     public MultiNoiseConfig of(final int firstOctave, final List<Double> amplitudes) {
