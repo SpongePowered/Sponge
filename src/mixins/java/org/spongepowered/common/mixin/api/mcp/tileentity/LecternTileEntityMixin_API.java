@@ -27,12 +27,14 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 import net.minecraft.tileentity.LecternTileEntity;
 import org.spongepowered.api.block.entity.Lectern;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Mixin(LecternTileEntity.class)
-public abstract class LecternTileEntityMixin_API extends TileEntityMixin_API implements Lectern {
+public abstract class LecternTileEntityMixin_API extends TileEntityMixin_API implements Lectern, ViewableInventory {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
@@ -43,4 +45,8 @@ public abstract class LecternTileEntityMixin_API extends TileEntityMixin_API imp
         return values;
     }
 
+    @Override
+    public Optional<ViewableInventory> asViewable() {
+        return Optional.empty();
+    }
 }
