@@ -183,6 +183,13 @@ public final class ServerUserProvider {
             resolvedProfile = p == null ? SpongeGameProfile.toMcProfile(profile) : p;
         } else {
             resolvedProfile = SpongeGameProfile.toMcProfile(profile);
+            final User currentUser = this.userCache.getIfPresent(profile.getUniqueId());
+            if (currentUser != null) {
+                if (SpongeUser.dirtyUsers.contains(currentUser)) {
+                    ((SpongeUser) currentUser).save();
+                    ((SpongeUser) currentUser).invalidate();
+                }
+            }
         }
 
         this.pollFilesystemWatcher();

@@ -74,6 +74,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.PerWorldBorderListener;
 import org.spongepowered.common.util.Constants;
@@ -119,6 +120,14 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         )
     )
     private CompoundNBT impl$setPlayerDataForNewPlayers(final PlayerList playerList, final ServerPlayerEntity playerIn) {
+        final SpongeUser user = (SpongeUser) ((ServerPlayerEntityBridge) playerIn).bridge$getUserObject();
+        if (user != null) {
+            if (SpongeUser.dirtyUsers.contains(user)) {
+                user.save();
+            }
+            user.invalidate();
+        }
+
         final CompoundNBT compound = this.shadow$load(playerIn);
         if (compound == null) {
             ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().setPlayerInfo(playerIn.getUUID(), Instant.now(), Instant.now());
@@ -378,6 +387,17 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             netManager.disconnect(reason);
         } catch (final Exception exception) {
             PlayerListMixin.LOGGER.error("Error whilst disconnecting player", exception);
+        }
+    }
+
+    @Inject(method = "saveAll()V", at = @At("RETURN"))
+    private void onSaveAllPlayerData(final CallbackInfo ci) {
+        for (final SpongeUser user : SpongeUser.initializedUsers) {
+            if (SpongeUser.dirtyUsers.contains(user)) {
+                user.save();
+            } else {
+                user.invalidate();
+            }
         }
     }
 }
