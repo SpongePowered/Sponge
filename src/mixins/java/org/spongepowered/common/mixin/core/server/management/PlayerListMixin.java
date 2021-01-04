@@ -391,7 +391,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Inject(method = "saveAll()V", at = @At("RETURN"))
-    private void onSaveAllPlayerData(final CallbackInfo ci) {
+    private void impl$saveOrInvalidateUserDuringSaveAll(final CallbackInfo ci) {
         for (final SpongeUser user : SpongeUser.initializedUsers) {
             if (SpongeUser.dirtyUsers.contains(user)) {
                 user.save();

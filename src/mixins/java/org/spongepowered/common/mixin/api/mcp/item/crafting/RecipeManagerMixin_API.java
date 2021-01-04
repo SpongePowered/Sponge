@@ -68,9 +68,9 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
     @Shadow protected abstract <C extends IInventory, T extends IRecipe<C>> Map<ResourceLocation, IRecipe<C>> shadow$byType(IRecipeType<T> recipeTypeIn);
     @Shadow public abstract Collection<IRecipe<?>> shadow$getRecipes();
     @Shadow public abstract <C extends IInventory, T extends IRecipe<C>> Optional<T> shadow$getRecipeFor(IRecipeType<T> recipeTypeIn, C inventoryIn, net.minecraft.world.World worldIn);
-    // @formatter:on
 
     @Shadow private Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> recipes;
+    // @formatter:on
 
     @Override
     public Optional<Recipe> getByKey(ResourceKey key) {
