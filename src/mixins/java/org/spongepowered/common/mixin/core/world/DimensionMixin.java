@@ -147,7 +147,7 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
         this.impl$viewDistance = spongeData.viewDistance == null ? BootstrapProperties.viewDistance : spongeData.viewDistance;
         this.impl$enabled = spongeData.enabled == null || spongeData.enabled;
         this.impl$keepLoaded = spongeData.keepLoaded == null || spongeData.keepLoaded;
-        this.impl$loadOnStartup = spongeData.enabled == null || spongeData.enabled;
+        this.impl$loadOnStartup = spongeData.loadOnStartup == null || spongeData.loadOnStartup;
         this.impl$keepSpawnLoaded = spongeData.keepSpawnLoaded != null && spongeData.keepSpawnLoaded;
         this.impl$generateSpawnOnLoad = spongeData.generateSpawnOnLoad != null && spongeData.generateSpawnOnLoad;
         this.impl$hardcore = spongeData.hardcore == null ? BootstrapProperties.hardcore : spongeData.hardcore;
