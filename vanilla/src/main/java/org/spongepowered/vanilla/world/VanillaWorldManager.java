@@ -99,6 +99,7 @@ import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.DataPackSerializer;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
@@ -649,7 +650,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return CompletableFuture.completedFuture(false);
         }
 
-        final ServerWorld loadedWorld = this.worlds.get(key);
+        final ServerWorld loadedWorld = this.worlds.get(registryKey);
         if (loadedWorld != null) {
             boolean disableLevelSaving = loadedWorld.noSave;
             loadedWorld.noSave = true;
@@ -666,12 +667,14 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final Path directory = isVanillaWorld ? this.defaultWorldDirectory.resolve(directoryName) : this.customWorldsDirectory.resolve(key.getNamespace()).resolve(key.getValue());
 
-        try {
-            for (final Path path : Files.walk(directory).sorted(Comparator.reverseOrder()).collect(Collectors.toList())) {
-                Files.deleteIfExists(path);
+        if (Files.exists(directory)) {
+            try {
+                for (final Path path : Files.walk(directory).sorted(Comparator.reverseOrder()).collect(Collectors.toList())) {
+                    Files.deleteIfExists(path);
+                }
+            } catch (final IOException e) {
+                return FutureUtil.completedWithException(e);
             }
-        } catch (final IOException e) {
-            return FutureUtil.completedWithException(e);
         }
 
         final Path configFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds").resolve(key.getNamespace()).resolve(key.getValue() + ".conf");
@@ -935,10 +938,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         serverChunkProvider.addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, borderRadius, world.dimension().location());
         final CompletableFuture<ServerWorld> generationFuture = new CompletableFuture<>();
         Sponge.getAsyncScheduler().submit(
-                Task.builder().plugin(Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION))
+                Task.builder().plugin(Launch.getInstance().getPlatformPlugin())
                         .execute(task -> {
                             if (serverChunkProvider.getTickingGenerated() >= spawnChunks) {
-                                generationFuture.complete(world); // Notify the future that we are done
+                                Sponge.getServer().getScheduler().submit(Task.builder().plugin(Launch.getInstance().getPlatformPlugin()).execute(() -> generationFuture.complete(world)).build());
+                                // Notify the future that we are done
                                 task.cancel(); // And cancel this task
                                 MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for world '{}' ({})", world.dimension().location(),
                                         SpongeCommon.getServer().registryAccess().dimensionTypes().getKey(world.dimensionType()));
@@ -1013,8 +1017,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final WorldSettingsImport<JsonElement> settingsAdapter = WorldSettingsImport.create(JsonOps.INSTANCE, singleTemplateAccess, (DynamicRegistries.Impl) BootstrapProperties.registries);
             final SimpleRegistry<Dimension> registry = new SimpleRegistry<>(net.minecraft.util.registry.Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
             settingsAdapter.decodeElements(registry, net.minecraft.util.registry.Registry.LEVEL_STEM_REGISTRY, Dimension.CODEC);
-            final Dimension dimension = registry.stream().findAny().orElse(null);
-            return dimension;
+            return registry.stream().findAny().orElse(null);
         }
     }
 

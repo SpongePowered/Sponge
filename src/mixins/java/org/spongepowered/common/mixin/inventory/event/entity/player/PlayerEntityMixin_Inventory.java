@@ -79,7 +79,7 @@ public class PlayerEntityMixin_Inventory {
 
     @Redirect(method = "remove", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/inventory/container/Container;removed(Lnet/minecraft/entity/player/PlayerEntity;)V"))
-    private void onOnContainerClosed(final Container container, final PlayerEntity player) {
+    private void inventory$switchToCloseWindowState(final Container container, final PlayerEntity player) {
 
         // TODO Minecraft 1.14 - Know if the server is shutting down
 
