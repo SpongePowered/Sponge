@@ -44,10 +44,18 @@ public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> ex
     }
 
     @Override
-    public CommandMapping register(final PluginContainer container, final C command, final String alias, final String... aliases)
+    public CommandMapping registerMapping(final PluginContainer container, final C command, final String alias, final String... aliases)
             throws CommandFailedRegistrationException {
         return this.registrar.register(Objects.requireNonNull(container, "container"), Objects.requireNonNull(command, "command"),
                 Objects.requireNonNull(alias, "alias"), Objects.requireNonNull(aliases, "aliases"));
+    }
+
+    @Override
+    public RegisterCommandEvent<C> register(final PluginContainer container, final C command, final String alias, final String... aliases)
+            throws CommandFailedRegistrationException {
+        this.registrar.register(Objects.requireNonNull(container, "container"), Objects.requireNonNull(command, "command"),
+                Objects.requireNonNull(alias, "alias"), Objects.requireNonNull(aliases, "aliases"));
+        return this;
     }
 
     @Override

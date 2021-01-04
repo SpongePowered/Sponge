@@ -26,54 +26,29 @@ package org.spongepowered.common.registry;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryType;
 
 import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.Optional;
 import java.util.function.Supplier;
 
-public class SpongeRegistryType<T> implements RegistryType<T> {
+public final class SpongeDefaultedRegistryType<T> extends SpongeRegistryType<T> implements DefaultedRegistryType<T> {
 
-    private final ResourceKey root;
-    private final ResourceKey location;
+    private final Supplier<RegistryHolder> defaultHolder;
 
-    public SpongeRegistryType(final ResourceKey root, final ResourceKey location) {
-        this.root = Objects.requireNonNull(root, "root");
-        this.location = Objects.requireNonNull(location, "location");
+    public SpongeDefaultedRegistryType(final ResourceKey root, final ResourceKey location, final Supplier<RegistryHolder> defaultHolder) {
+        super(root, location);
+        this.defaultHolder = Objects.requireNonNull(defaultHolder, "defaultHolder");
     }
 
     @Override
-    public final ResourceKey root() {
-        return this.root;
+    public Registry<T> get() {
+        return this.defaultHolder.get().registry(this);
     }
 
     @Override
-    public final ResourceKey location() {
-        return this.location;
-    }
-
-    @Override
-    public final <V extends T> DefaultedRegistryType<V> asDefaultedType(final Supplier<RegistryHolder> defaultHolder) {
-        return new SpongeDefaultedRegistryType<>(this.root, this.location, Objects.requireNonNull(defaultHolder, "defaultHolder"));
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]")
-                .add("root=" + this.root)
-                .add("location='" + this.location + "'")
-                .toString();
-    }
-
-    public static final class FactoryImpl implements Factory {
-
-        @Override
-        public <T> RegistryType<T> create(final ResourceKey root, final ResourceKey location) {
-            Objects.requireNonNull(root, "root");
-            Objects.requireNonNull(location, "location");
-
-            return new SpongeRegistryType<T>(root, location);
-        }
+    public Optional<Registry<T>> find() {
+        return this.defaultHolder.get().findRegistry(this);
     }
 }

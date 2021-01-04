@@ -45,6 +45,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.gen.DimensionGeneratorSettingsBridge;
 import org.spongepowered.common.server.BootstrapProperties;
 
+import java.util.Objects;
 import java.util.Random;
 
 @Mixin(DimensionGeneratorSettings.class)
@@ -73,6 +74,10 @@ public abstract class DimensionGeneratorSettingsMixin implements DimensionGenera
 
     @Redirect(method = "guardExperimental", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/SimpleRegistry;get(Lnet/minecraft/util/RegistryKey;)Ljava/lang/Object;"))
     private Object impl$useBootstrapDimensionRegistryForGuard(SimpleRegistry registry, RegistryKey<Dimension> registryKey) {
+        if (BootstrapProperties.dimensionGeneratorSettings == null) {
+            BootstrapProperties.dimensionGeneratorSettings = (DimensionGeneratorSettings) (Object) this;
+        }
+
         if (BootstrapProperties.dimensionGeneratorSettings == (Object) this) {
             return registry.get(registryKey);
         }

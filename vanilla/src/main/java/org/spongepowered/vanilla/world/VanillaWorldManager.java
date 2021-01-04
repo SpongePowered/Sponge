@@ -75,7 +75,6 @@ import net.minecraft.world.storage.ServerWorldInfo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
@@ -97,7 +96,6 @@ import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.DataPackSerializer;
-import org.spongepowered.common.datapack.SpongeDataPackType;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.user.SpongeUserManager;
@@ -213,26 +211,20 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public boolean worldExists(final ResourceKey key) {
-        Objects.requireNonNull(key, "key");
+        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
 
-        if (World.OVERWORLD.equals(key)) {
+        if (World.OVERWORLD.equals(registryKey)) {
             return true;
         }
 
-        if (World.NETHER.equals(key)) {
-            return true;
-        }
-
-        if (World.END.equals(key)) {
-            return true;
-        }
-
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
         if (this.worlds.get(registryKey) != null) {
             return true;
         }
 
-        return Files.exists(this.customWorldsDirectory.resolve(key.getNamespace()).resolve(key.getValue()));
+        final boolean isVanillaSubLevel = World.NETHER.equals(registryKey) || World.END.equals(registryKey);
+        final Path levelDirectory = isVanillaSubLevel ? this.defaultWorldDirectory.resolve(this.getDirectoryName(key)) :
+                this.customWorldsDirectory.resolve(key.getNamespace()).resolve(key.getValue());
+        return Files.exists(levelDirectory);
     }
 
     @Override

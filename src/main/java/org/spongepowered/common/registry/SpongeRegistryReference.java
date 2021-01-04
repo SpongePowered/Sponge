@@ -45,14 +45,12 @@ import javax.annotation.Nullable;
 public class SpongeRegistryReference<T> extends SpongeRegistryKey<T> implements RegistryReference<T> {
 
     public SpongeRegistryReference(final RegistryKey<T> key) {
-        super(key.registry(), key.location());
+        super(Objects.requireNonNull(key, "key").registry(), key.location());
     }
 
     @Override
     public T get(final RegistryHolder holder) {
-        Objects.requireNonNull(holder, "holder");
-
-        T found = this.getFromHolder(holder);
+        T found = this.getFromHolder(Objects.requireNonNull(holder, "holder"));
         if (found == null) {
             if (holder instanceof Engine) {
                 found = this.getFromHolder(SpongeCommon.getGame().registries());

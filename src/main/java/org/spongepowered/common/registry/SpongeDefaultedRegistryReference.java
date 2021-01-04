@@ -29,6 +29,7 @@ import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryKey;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -38,7 +39,7 @@ public final class SpongeDefaultedRegistryReference<T> extends SpongeRegistryRef
 
     public SpongeDefaultedRegistryReference(final RegistryKey<T> key, final Supplier<RegistryHolder> defaultHolder) {
         super(key);
-        this.defaultHolder = defaultHolder;
+        this.defaultHolder = Objects.requireNonNull(defaultHolder, "defaultHolder");
     }
 
 

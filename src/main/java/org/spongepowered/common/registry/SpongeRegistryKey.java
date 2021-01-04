@@ -41,30 +41,27 @@ public class SpongeRegistryKey<T> implements RegistryKey<T> {
     private final ResourceKey location;
 
     public SpongeRegistryKey(final RegistryType<T> registry, final ResourceKey location) {
-        Objects.requireNonNull(registry, "registry");
-        Objects.requireNonNull(location, "location");
-
-        this.registry = registry;
-        this.location = location;
+        this.registry = Objects.requireNonNull(registry, "registry");
+        this.location = Objects.requireNonNull(location, "location");
     }
 
     @Override
-    public RegistryType<T> registry() {
+    public final RegistryType<T> registry() {
         return this.registry;
     }
 
     @Override
-    public ResourceKey location() {
+    public final ResourceKey location() {
         return this.location;
     }
 
     @Override
-    public RegistryReference<T> asReference() {
+    public final RegistryReference<T> asReference() {
         return new SpongeRegistryReference<>(this);
     }
 
     @Override
-    public <V extends T> DefaultedRegistryReference<V> asDefaultedReference(final Supplier<RegistryHolder> defaultHolder) {
+    public final <V extends T> DefaultedRegistryReference<V> asDefaultedReference(final Supplier<RegistryHolder> defaultHolder) {
         return new SpongeDefaultedRegistryReference<>((RegistryKey<V>) this, defaultHolder);
     }
 

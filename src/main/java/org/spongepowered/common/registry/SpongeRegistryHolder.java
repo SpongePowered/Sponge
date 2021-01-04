@@ -54,7 +54,6 @@ import javax.annotation.Nullable;
 public final class SpongeRegistryHolder implements RegistryHolder {
 
     private final Map<ResourceKey, net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>>> roots = new Object2ObjectOpenHashMap<>();
-    private DynamicRegistries.Impl dynamicAccess;
 
     public SpongeRegistryHolder() {
         this.roots.put(
