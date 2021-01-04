@@ -72,12 +72,14 @@ import net.minecraft.world.storage.CommandStorage;
 import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.SaveFormat;
 import net.minecraft.world.storage.ServerWorldInfo;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
@@ -128,6 +130,7 @@ import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public final class VanillaWorldManager implements SpongeWorldManager {
@@ -351,9 +354,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 registryKey, (DimensionType) worldType, chunkStatusListener, template.generator(), isDebugGeneration, seed, ImmutableList.of(), true);
         this.worlds.put(registryKey, world);
 
-        this.prepareWorld(world, isDebugGeneration);
-        ((MinecraftServerAccessor) this.server).invoker$forceDifficulty();
-        return this.postWorldLoad(world, false).thenApply(w -> (org.spongepowered.api.world.server.ServerWorld) w);
+        return SpongeCommon.getAsyncScheduler().submit(() -> this.prepareWorld(world, isDebugGeneration)).thenApply(w -> {
+            ((MinecraftServerAccessor) this.server).invoker$forceDifficulty();
+            return w;
+        }).thenCompose(w -> this.postWorldLoad(w, false))
+          .thenApply(w -> (org.spongepowered.api.world.server.ServerWorld) w);
     }
 
     @Override
@@ -852,8 +857,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().load();
     }
 
-    private void prepareWorld(final ServerWorld world, final boolean isDebugGeneration) {
-
+    private ServerWorld prepareWorld(final ServerWorld world, final boolean isDebugGeneration) {
         final boolean isDefaultWorld = World.OVERWORLD.equals(world.dimension());
         final ServerWorldInfo levelData = (ServerWorldInfo) world.getLevelData();
 
@@ -867,15 +871,13 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         world.getWorldBorder().applySettings(levelData.getWorldBorder());
         if (!levelData.isInitialized()) {
             try {
-                MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(),
-                        isDebugGeneration, true);
+                MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(), isDebugGeneration, true);
                 levelData.setInitialized(true);
                 if (isDebugGeneration) {
                     ((MinecraftServerAccessor) this.server).invoker$setDebugLevel(levelData);
                 }
             } catch (final Throwable throwable) {
-                final CrashReport crashReport = CrashReport.forThrowable(throwable, "Exception initializing world '" + world.dimension().location()
-                        + "'");
+                final CrashReport crashReport = CrashReport.forThrowable(throwable, "Exception initializing world '" + world.dimension().location()  + "'");
                 try {
                     world.fillReportDetails(crashReport);
                 } catch (Throwable ignore) {
@@ -893,6 +895,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         if (levelData.getCustomBossEvents() != null) {
             ((ServerWorldBridge) world).bridge$getBossBarManager().load(levelData.getCustomBossEvents());
         }
+
+        return world;
     }
 
     private CompletableFuture<ServerWorld> postWorldLoad(final ServerWorld world, final boolean blocking) {
@@ -929,16 +933,21 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final int spawnChunks = diameter * diameter;
 
         serverChunkProvider.addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, borderRadius, world.dimension().location());
-        return CompletableFuture.runAsync(() -> {
-            while (serverChunkProvider.getTickingGenerated() < spawnChunks) {
-                // wait a 10 millis
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    throw new IllegalStateException(e);
-                }
-            }
-        }).thenApply(v -> {
+        final CompletableFuture<ServerWorld> generationFuture = new CompletableFuture<>();
+        Sponge.getAsyncScheduler().submit(
+                Task.builder().plugin(Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION))
+                        .execute(task -> {
+                            if (serverChunkProvider.getTickingGenerated() >= spawnChunks) {
+                                generationFuture.complete(world); // Notify the future that we are done
+                                task.cancel(); // And cancel this task
+                                MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for world '{}' ({})", world.dimension().location(),
+                                        SpongeCommon.getServer().registryAccess().dimensionTypes().getKey(world.dimensionType()));
+                            }
+                        })
+                        .interval(10, TimeUnit.MILLISECONDS)
+                        .build()
+        );
+        return generationFuture.thenApply(v -> {
             this.updateForcedChunks(world, serverChunkProvider);
             serverChunkProvider.getLightEngine().setTaskPerBatch(5);
 
