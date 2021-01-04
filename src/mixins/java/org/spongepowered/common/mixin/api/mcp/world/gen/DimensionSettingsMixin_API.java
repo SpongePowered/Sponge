@@ -46,6 +46,8 @@ public abstract class DimensionSettingsMixin_API implements NoiseGeneratorConfig
     @Shadow public abstract int shadow$getBedrockRoofPosition();
     @Shadow public abstract int shadow$getBedrockFloorPosition();
     @Shadow public abstract int shadow$seaLevel();
+    @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultBlock();
+    @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultFluid();
     // @formatter:on
 
     @Override
@@ -58,14 +60,14 @@ public abstract class DimensionSettingsMixin_API implements NoiseGeneratorConfig
         return (NoiseConfig) this.shadow$noiseSettings();
     }
 
-    @Intrinsic
-    public BlockState noiseGeneratorConfig$defaultBlock() {
-        return this.defaultBlock();
+    @Override
+    public BlockState defaultBlock() {
+        return (BlockState) this.shadow$getDefaultBlock();
     }
 
-    @Intrinsic
-    public BlockState noiseGeneratorConfig$defaultFluid() {
-        return this.defaultFluid();
+    @Override
+    public BlockState defaultFluid() {
+        return (BlockState) this.shadow$getDefaultFluid();
     }
 
     @Override
