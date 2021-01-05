@@ -189,9 +189,9 @@ public final class SpongeBanService implements BanService {
 
     @Override
     public boolean hasBan(final Ban ban) {
-        if (ban.getType().equals(BanTypes.PROFILE)) {
+        if (ban.getType().equals(BanTypes.PROFILE.get())) {
             return this.isBanned(((Ban.Profile) ban).getProfile());
-        } else if (ban.getType().equals(BanTypes.IP)) {
+        } else if (ban.getType().equals(BanTypes.IP.get())) {
             return this.isBanned(((Ban.IP) ban).getAddress());
         }
         throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
