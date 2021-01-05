@@ -505,12 +505,15 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             newLines.add(Component.text(SharedConstants.filterText(line)));
         }
 
-        final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES, newLines);
-        final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                originalLinesValue.asImmutable(), newLinesValue,
-                (Sign) blockEntity);
-        final ListValue<Component> toApply = SpongeCommon.postEvent(event) ? originalLinesValue : newLinesValue;
-        ((Sign) blockEntity).offer(toApply);
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this.player);
+            final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES, newLines);
+            final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                    originalLinesValue.asImmutable(), newLinesValue,
+                    (Sign) blockEntity);
+            final ListValue<Component> toApply = SpongeCommon.postEvent(event) ? originalLinesValue : newLinesValue;
+            ((Sign) blockEntity).offer(toApply);
+        }
 
         return 0;
     }
