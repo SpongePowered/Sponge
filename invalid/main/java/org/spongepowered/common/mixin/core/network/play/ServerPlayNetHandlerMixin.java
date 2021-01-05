@@ -323,33 +323,6 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         return ridingEntity;
     }
 
-
-    @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;sendMessage(Lnet/minecraft/util/text/ITextComponent;)V"))
-    public void onDisconnectHandler(final PlayerList this$0, final ITextComponent component) {
-        // If this happens, the connection has not been fully established yet so we've kicked them during ClientConnectionEvent.Login,
-        // but FML has created this handler earlier to send their handshake. No message should be sent, no disconnection event should
-        // be fired either.
-        if (this.player.connection == null) {
-            return;
-        }
-        final Player player = ((Player) this.player);
-        final Text message = SpongeTexts.toText(component);
-        final MessageChannel originalChannel = player.getMessageChannel();
-        Sponge.getCauseStackManager().pushCause(player);
-        final ServerSideConnectionEvent.Disconnect event = SpongeEventFactory.createClientConnectionEventDisconnect(
-                Sponge.getCauseStackManager().getCurrentCause(), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(message),
-                player, false
-        );
-        SpongeCommon.postEvent(event);
-        Sponge.getCauseStackManager().popCause();
-        if (!event.isMessageCancelled()) {
-            event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
-        }
-        ((ServerPlayerEntityBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
-    }
-
-
     @Nullable
     @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
     private ItemEntity impl$performDropThroughPhase(final ServerPlayerEntity player, final boolean dropAll) {

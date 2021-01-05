@@ -30,6 +30,7 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
@@ -58,6 +59,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.ChatType;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -84,6 +87,8 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -98,6 +103,8 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
 import org.spongepowered.common.accessor.server.management.PlayerInteractionManagerAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
@@ -109,6 +116,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.mixin.api.mcp.network.play.ServerPlayNetHandlerMixin_API;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
@@ -118,6 +126,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Mixin(ServerPlayNetHandler.class)
 public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderBridge {
@@ -526,5 +535,30 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             return commandString.substring(1).split(" ", 2);
         }
         return commandString.split(" ", 2);
+    }
+
+    @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/PlayerList;broadcastMessage(Lnet/minecraft/util/text/ITextComponent;Lnet/minecraft/util/text/ChatType;Ljava/util/UUID;)V"))
+    public void impl$handlePlayerDisconnect(final PlayerList playerList, final ITextComponent component, final ChatType chatType, UUID uuid) {
+        // If this happens, the connection has not been fully established yet so we've kicked them during ClientConnectionEvent.Login,
+        // but FML has created this handler earlier to send their handshake. No message should be sent, no disconnection event should
+        // be fired either.
+        if (this.player.connection == null) {
+            return;
+        }
+        final ServerPlayer spongePlayer = (ServerPlayer) this.player;
+
+        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            final Component message = SpongeAdventure.asAdventure(component);
+            frame.pushCause(this.player);
+            Audience audience = Sponge.getServer().getBroadcastAudience();
+            final ServerSideConnectionEvent.Disconnect event = SpongeEventFactory.createServerSideConnectionEventDisconnect(
+                    PhaseTracker.getCauseStackManager().getCurrentCause(), audience, Optional.of(audience), message, message,
+                    spongePlayer.getConnection(), spongePlayer);
+            SpongeCommon.postEvent(event);
+            event.getAudience().ifPresent(a -> a.sendMessage(spongePlayer, event.getMessage()));
+        }
+
+        ((ServerPlayerEntityBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
     }
 }
