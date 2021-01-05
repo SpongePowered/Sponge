@@ -51,4 +51,9 @@ public final class SpongeDefaultedRegistryType<T> extends SpongeRegistryType<T> 
     public Optional<Registry<T>> find() {
         return this.defaultHolder.get().findRegistry(this);
     }
+
+    @Override
+    public Supplier<RegistryHolder> defaultHolder() {
+        return this.defaultHolder;
+    }
 }

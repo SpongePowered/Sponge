@@ -53,4 +53,9 @@ public final class SpongeDefaultedRegistryReference<T> extends SpongeRegistryRef
         final Optional<Registry<T>> registry = this.defaultHolder.get().findRegistry(this.registry());
         return registry.flatMap(r -> r.findValue(this.location()));
     }
+
+    @Override
+    public Supplier<RegistryHolder> defaultHolder() {
+        return this.defaultHolder;
+    }
 }

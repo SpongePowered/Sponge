@@ -72,7 +72,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -319,13 +318,13 @@ public final class WorldTest {
                 , "wai", "whereami")
                 .register(this.plugin, Command
                         .builder()
-                        .setExecutor(this::createRandomWorld)
+                        .setExecutor(this::createRandomCheckerboardWorld)
                         .build()
                 , "createrandomworld", "crw"
         );
     }
 
-    private CommandResult createRandomWorld(final CommandContext context) {
+    private CommandResult createRandomCheckerboardWorld(final CommandContext context) {
         final WorldManager wm = Sponge.getServer().getWorldManager();
         final ServerPlayer player = (ServerPlayer) context.getCause().root();
         final String owner = player.getName();
@@ -372,7 +371,8 @@ public final class WorldTest {
                 .loadOnStartup(false)
                 .generateSpawnOnLoad(true)
                 .displayName(Component.text("Custom world by " + owner))
-                .generator(ChunkGenerator.noise(BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().biomes(biomes).scale(random.nextInt(5) + 1).build()), noiseGenConfig))
+                .generator(ChunkGenerator.noise(BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().biomes(biomes).scale(2).build()),
+                    noiseGenConfig))
                 .difficulty(Difficulties.HARD)
                 .build();
 
