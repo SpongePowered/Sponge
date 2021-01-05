@@ -22,37 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api.inventory.container;
+package org.spongepowered.common.accessor.tileentity;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.LecternContainer;
 import net.minecraft.tileentity.LecternTileEntity;
-import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.tileentity.LecternTileEntity_IInventoryAccessor;
-import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(LecternContainer.class)
-public abstract class LecternContainerMixin_BlockCarrier_Inventory_API implements DefaultSingleBlockCarrier {
+@Mixin(targets = "net.minecraft.tileentity.LecternTileEntity$1")
+public interface LecternTileEntity_IInventoryAccessor {
 
-    @Shadow @Final private IInventory lectern;
-    private LecternTileEntity impl$lectern;
-
-    @Override
-    public ServerLocation getLocation() {
-        if (this.impl$lectern == null) {
-            this.impl$lectern = ((LecternTileEntity_IInventoryAccessor) this.lectern).accessor$this$0();
-        }
-        return ((BlockEntity) this.impl$lectern).getServerLocation();
-    }
-
-    @Override
-    public World<?, ?> getWorld() {
-        return ((BlockEntity) this.lectern).getWorld();
-    }
+    @Accessor("this$0") LecternTileEntity accessor$this$0();
 
 }
