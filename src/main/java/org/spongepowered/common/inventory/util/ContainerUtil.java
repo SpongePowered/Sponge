@@ -292,7 +292,7 @@ public final class ContainerUtil {
         } else if (container instanceof BrewingStandContainerAccessor) {
             return ContainerUtil.carrierOrNull(((BrewingStandContainerAccessor) container).accessor$brewingStand());
         } else if (container instanceof BeaconContainer) {
-            return (Carrier) ((BeaconContainerAccessor) container).accessor$access().evaluate(World::getBlockEntity).orElse(null);
+            return new SpongeBlockEntityCarrier(((BeaconContainerAccessor) container).accessor$access().evaluate(World::getBlockEntity).orElse(null), container);
         } else if (container instanceof HorseInventoryContainerAccessor) {
             return (Carrier) ((HorseInventoryContainerAccessor) container).accessor$horse();
         } else if (container instanceof MerchantContainerAccessor && ((MerchantContainerAccessor) container).accessor$trader() instanceof Carrier) {

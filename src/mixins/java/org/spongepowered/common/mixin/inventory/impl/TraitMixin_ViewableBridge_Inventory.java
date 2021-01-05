@@ -52,7 +52,6 @@ import java.util.stream.Stream;
         ContainerMinecartEntity.class,
         LecternTileEntity.class,
         LockableTileEntity.class,
-        BeaconTileEntity.class,
         ViewableCustomInventory.class,
         // IMerchant impls:
         AbstractVillagerEntity.class,
