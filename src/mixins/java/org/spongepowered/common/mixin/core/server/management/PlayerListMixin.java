@@ -400,4 +400,13 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             }
         }
     }
+
+    @Inject(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;save(Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
+    private void impl$invalidateUserOnSave(final ServerPlayerEntity player, final CallbackInfo ci) {
+        // Just to be safe ignore dirty users that exist on online player
+        final User user = ((ServerPlayerEntityBridge) player).bridge$getUser();
+        SpongeUser.dirtyUsers.remove(user);
+        ((SpongeUser) user).invalidate();
+    }
+
 }
