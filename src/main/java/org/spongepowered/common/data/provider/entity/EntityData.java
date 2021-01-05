@@ -160,8 +160,8 @@ public final class EntityData {
                     .create(Keys.PASSENGERS)
                         .get(h -> h.getPassengers().stream().map(org.spongepowered.api.entity.Entity.class::cast).collect(Collectors.toList()))
                         .set((h, v) -> {
-                            h.getPassengers().clear();
-                            v.forEach(v1 -> h.getPassengers().add((Entity) v1));
+                            ((EntityAccessor) h).accessor$passengers().clear();
+                            v.forEach(v1 -> ((EntityAccessor) h).accessor$passengers().add((Entity) v1));
                         })
                     .create(Keys.SCALE)
                         .get(h -> 1d)

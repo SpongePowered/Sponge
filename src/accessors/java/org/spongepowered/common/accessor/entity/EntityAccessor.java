@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedAccessorError;
 
+import java.util.List;
 import java.util.Random;
 
 @Mixin(Entity.class)
@@ -87,6 +88,8 @@ public interface EntityAccessor {
     @Accessor("portalEntrancePos") BlockPos accessor$portalEntrancePos();
 
     @Accessor("portalEntrancePos") void accessor$portalEntrancePos(final BlockPos portalEntrancePos);
+
+    @Accessor("passengers") List<Entity> accessor$passengers();
 
     @Invoker("setRot") void invoker$setRot(final float yRot, final float xRot);
 
