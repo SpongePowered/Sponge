@@ -337,7 +337,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public Weather getWeather() {
-        return (Weather) (this.shadow$isThundering() ? Weathers.THUNDER : this.shadow$isRaining() ? Weathers.RAIN.get() : Weathers.CLEAR.get());
+        return this.shadow$isThundering() ? Weathers.THUNDER.get() : this.shadow$isRaining() ? Weathers.RAIN.get() : Weathers.CLEAR.get();
     }
 
     @Override

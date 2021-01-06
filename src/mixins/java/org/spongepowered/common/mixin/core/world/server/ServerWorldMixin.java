@@ -95,6 +95,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     private SpongeRegistryHolder impl$registerHolder;
     private IChunkStatusListener impl$chunkStatusListener;
     private boolean impl$isManualSave = false;
+    private Weather impl$previousWeather;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$cacheLevelSave(MinecraftServer p_i241885_1_, Executor p_i241885_2_, SaveFormat.LevelSave p_i241885_3_,
@@ -170,6 +171,11 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             entityIn.yRot = (float) rotationUpdate.getY();
         }
         this.impl$rotationUpdates.remove(entityIn);
+    }
+
+    @Override
+    public void bridge$setPreviousWeather(Weather weather) {
+        this.impl$previousWeather = weather;
     }
 
     @Override
