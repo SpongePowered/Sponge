@@ -24,67 +24,76 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKey;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
+
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public class CauseStackFrameImpl implements CauseStackManager.StackFrame {
+public final class SpongeCauseStackFrame implements CauseStackManager.StackFrame {
 
-    private final Map<EventContextKey<?>, Object> stored_ctx_values = new HashMap<>();
-    private final PhaseTracker createdTracker;
+    private final PhaseTracker tracker;
+    private final Map<EventContextKey<?>, Object> storedContextValues;
+    private final Map<EventContextKey<?>, Object> storedContext;
     int old_min_depth;
     int lastCauseSize;
-    private final Map<EventContextKey<?>, Object> storedContext = new HashMap<>();
 
-    @Nullable Exception stack_debug = null;
+    @Nullable Exception stackDebug = null;
 
     // for pooling
-    CauseStackFrameImpl(PhaseTracker phaseTracker) {
-        this.createdTracker = phaseTracker;
+    SpongeCauseStackFrame(final PhaseTracker tracker) {
+        this.tracker = tracker;
+        this.storedContextValues = new Object2ObjectOpenHashMap<>();
+        this.storedContext = new Object2ObjectOpenHashMap<>();
     }
 
     public void clear() {
-        this.stored_ctx_values.clear();
+        this.storedContextValues.clear();
         this.storedContext.clear();
         this.lastCauseSize = -1;
         this.old_min_depth = -1;
-        this.stack_debug = null;
+        this.stackDebug = null;
     }
 
     // used in chaining.
-    public CauseStackFrameImpl set(int old_depth, int size) {
-        this.old_min_depth = old_depth;
+    public SpongeCauseStackFrame set(final int oldDepth, final int size) {
+        this.old_min_depth = oldDepth;
         this.lastCauseSize = size;
         return this;
     }
 
     public boolean isStored(final EventContextKey<?> key) {
-        return this.stored_ctx_values != null && this.stored_ctx_values.containsKey(key);
+        return this.storedContextValues.containsKey(key);
     }
 
     public Set<Map.Entry<EventContextKey<?>, Object>> getStoredValues() {
-        return this.stored_ctx_values.entrySet();
+        return this.storedContextValues.entrySet();
     }
 
     public boolean hasStoredValues() {
-        return !this.stored_ctx_values.isEmpty();
+        return !this.storedContextValues.isEmpty();
     }
 
     public void store(EventContextKey<?> key, Object existing) {
-        this.stored_ctx_values.put(key, existing);
+        this.storedContextValues.put(key, existing);
     }
 
     // Note that a null object indicates that the context should be removed
-    void storeOriginalContext(EventContextKey<?> key, @Nullable Object object) {
+    void storeOriginalContext(final EventContextKey<?> key, @Nullable final Object value) {
+        if (value == null) {
+            this.storedContext.remove(key);
+            return;
+        }
+
         if (!this.storedContext.containsKey(key)) {
-            this.storedContext.put(key, object);
+            this.storedContext.put(key, value);
         }
     }
 
@@ -94,39 +103,38 @@ public class CauseStackFrameImpl implements CauseStackManager.StackFrame {
 
     @Override
     public Cause getCurrentCause() {
-        return PhaseTracker.getCauseStackManager().getCurrentCause();
+        return this.tracker.getCurrentCause();
     }
 
     @Override
     public EventContext getCurrentContext() {
-        return PhaseTracker.getCauseStackManager().getCurrentContext();
+        return this.tracker.getCurrentContext();
     }
 
     @Override
-    public CauseStackManager.StackFrame pushCause(final Object obj) {
-        PhaseTracker.getCauseStackManager().pushCause(obj);
+    public CauseStackManager.StackFrame pushCause(final Object value) {
+        this.tracker.pushCause(Objects.requireNonNull(value, "value"));
         return this;
     }
 
     @Override
     public Object popCause() {
-        return PhaseTracker.getCauseStackManager().popCause();
+        return this.tracker.popCause();
     }
 
     @Override
     public <T> CauseStackManager.StackFrame addContext(final EventContextKey<T> key, final T value) {
-        PhaseTracker.getCauseStackManager().addContext(key, value);
+        this.tracker.addContext(Objects.requireNonNull(key, "key"), Objects.requireNonNull(value, "value"));
         return this;
     }
 
     @Override
     public <T> Optional<T> removeContext(final EventContextKey<T> key) {
-        return PhaseTracker.getCauseStackManager().removeContext(key);
+        return this.tracker.removeContext(Objects.requireNonNull(key, "key"));
     }
 
     @Override
     public void close() {
-        PhaseTracker.getCauseStackManager().popCauseFrame(this);
+        this.tracker.popCauseFrame(this);
     }
-
 }

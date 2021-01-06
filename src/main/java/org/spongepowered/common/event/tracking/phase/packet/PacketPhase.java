@@ -97,7 +97,6 @@ import org.spongepowered.common.event.tracking.phase.packet.player.PlaceBlockPac
 import org.spongepowered.common.event.tracking.phase.packet.player.ResourcePackState;
 import org.spongepowered.common.event.tracking.phase.packet.player.StopSleepingPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.UnknownPacketState;
-import org.spongepowered.common.event.tracking.phase.packet.player.UpdateSignState;
 import org.spongepowered.common.event.tracking.phase.packet.player.UseItemPacketState;
 import org.spongepowered.common.util.Constants;
 
@@ -106,7 +105,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 public final class PacketPhase {
-
 
     public static final class General {
 
@@ -129,8 +127,9 @@ public final class PacketPhase {
         static final IPhaseState<BasicPacketContext> START_SPRINTING = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> STOP_SPRINTING = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> STOP_SLEEPING = new StopSleepingPacketState();
+        static final IPhaseState<BasicPacketContext> TAB_COMPLETE = new BasicPacketState();
         public static final IPhaseState<BasicPacketContext> CLOSE_WINDOW = new CloseWindowState();
-        static final IPhaseState<BasicPacketContext> UPDATE_SIGN = new UpdateSignState();
+        public static final IPhaseState<BasicPacketContext> UPDATE_SIGN = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> RESOURCE_PACK = new ResourcePackState();
         static final IPhaseState<BasicPacketContext> STOP_RIDING_JUMP = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> HANDLED_EXTERNALLY = new UnknownPacketState();
@@ -143,10 +142,10 @@ public final class PacketPhase {
         public static final BasicInventoryPacketState SECONDARY_INVENTORY_CLICK = new SecondaryInventoryClickState();
         public static final BasicInventoryPacketState MIDDLE_INVENTORY_CLICK = new MiddleInventoryClickState();
         public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState(
-            Constants.Networking.MODE_CLICK | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_OUTSIDE_WINDOW);
+                Constants.Networking.MODE_CLICK | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_OUTSIDE_WINDOW);
         public static final BasicInventoryPacketState DROP_ITEM_WITH_HOTKEY = new DropItemWithHotkeyState();
         public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW_NOOP = new DropItemOutsideWindowState(
-            Constants.Networking.MODE_DROP | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_OUTSIDE_WINDOW);
+                Constants.Networking.MODE_DROP | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_OUTSIDE_WINDOW);
         public static final BasicInventoryPacketState DROP_ITEMS = new BasicInventoryPacketState();
         static final BasicInventoryPacketState DROP_INVENTORY = new DropInventoryState();
         public static final BasicInventoryPacketState SWITCH_HOTBAR_NUMBER_PRESS = new SwitchHotbarNumberPressState();
@@ -216,7 +215,6 @@ public final class PacketPhase {
         return ((PacketState<?>) packetState).isPacketIgnored(packetIn, packetPlayer);
     }
 
-    @SuppressWarnings({"SuspiciousMethodCalls"})
     IPhaseState<? extends PacketContext<?>> getStateForPacket(final IPacket<?> packet) {
         final Function<IPacket<?>, IPhaseState<? extends PacketContext<?>>> packetStateFunction = this.packetTranslationMap.get(packet.getClass());
         if (packetStateFunction != null) {
@@ -251,7 +249,7 @@ public final class PacketPhase {
     private static int clickType(final int slotId) {
         return (slotId == Constants.Networking.MAGIC_CLICK_OUTSIDE_SURVIVAL
                 || slotId == Constants.Networking.MAGIC_CLICK_OUTSIDE_CREATIVE)
-               ? Constants.Networking.CLICK_OUTSIDE_WINDOW : Constants.Networking.CLICK_INSIDE_WINDOW;
+                ? Constants.Networking.CLICK_OUTSIDE_WINDOW : Constants.Networking.CLICK_INSIDE_WINDOW;
     }
 
 
@@ -333,7 +331,7 @@ public final class PacketPhase {
         this.packetTranslationMap.put(CEnchantItemPacket.class, packet -> PacketPhase.Inventory.ENCHANT_ITEM);
         this.packetTranslationMap.put(CUpdateSignPacket.class, packet -> PacketPhase.General.UPDATE_SIGN);
         this.packetTranslationMap.put(CPlayerAbilitiesPacket.class, packet -> PacketPhase.General.IGNORED);
-        this.packetTranslationMap.put(CTabCompletePacket.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CTabCompletePacket.class, packet -> PacketPhase.General.TAB_COMPLETE);
         this.packetTranslationMap.put(CClientStatusPacket.class, packet -> {
             final CClientStatusPacket clientStatus = (CClientStatusPacket) packet;
             final CClientStatusPacket.State status = clientStatus.getAction();
@@ -359,6 +357,7 @@ public final class PacketPhase {
             .put(CEntityActionPacket.Action.OPEN_INVENTORY, PacketPhase.Inventory.OPEN_INVENTORY)
             .put(CEntityActionPacket.Action.START_FALL_FLYING, PacketPhase.General.START_FALL_FLYING)
             .build();
+
     private static final ImmutableMap<CPlayerDiggingPacket.Action, IPhaseState<? extends PacketContext<?>>> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<CPlayerDiggingPacket.Action, IPhaseState<? extends PacketContext<?>>>builder()
             .put(CPlayerDiggingPacket.Action.DROP_ITEM, PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY)
             .put(CPlayerDiggingPacket.Action.DROP_ALL_ITEMS, PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY)

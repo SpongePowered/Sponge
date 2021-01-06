@@ -204,9 +204,9 @@ public final class PhaseTracker implements CauseStackManager {
 
     private final Deque<Object> cause = Queues.newArrayDeque();
     // Frames in use
-    private final Deque<CauseStackFrameImpl> frames = Queues.newArrayDeque();
+    private final Deque<SpongeCauseStackFrame> frames = Queues.newArrayDeque();
     // Frames not currently in use
-    private final Deque<CauseStackFrameImpl> framePool = new ArrayDeque<>(PhaseTracker.MAX_POOL_SIZE);
+    private final Deque<SpongeCauseStackFrame> framePool = new ArrayDeque<>(PhaseTracker.MAX_POOL_SIZE);
     private final Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
     private int min_depth = 0;
     private int[] duplicateCauses = new int[100];
@@ -226,7 +226,7 @@ public final class PhaseTracker implements CauseStackManager {
 
     PhaseTracker() {
         for (int i = 0; i < PhaseTracker.INITIAL_POOL_SIZE; i++) {
-            this.framePool.push(new CauseStackFrameImpl(this));
+            this.framePool.push(new SpongeCauseStackFrame(this));
         }
     }
 
@@ -577,9 +577,9 @@ public final class PhaseTracker implements CauseStackManager {
             this.duplicateCauses = Arrays.copyOf(this.duplicateCauses, (int) (size * 1.5));
         }
 
-        final CauseStackFrameImpl frame;
+        final SpongeCauseStackFrame frame;
         if (this.framePool.isEmpty()) {
-            frame = new CauseStackFrameImpl(this).set(this.min_depth, this.duplicateCauses[size]);
+            frame = new SpongeCauseStackFrame(this).set(this.min_depth, this.duplicateCauses[size]);
         } else {
             frame = this.framePool.pop();
 
@@ -596,7 +596,7 @@ public final class PhaseTracker implements CauseStackManager {
             // Attach an exception to the frame so that if there is any frame
             // corruption we can print out the stack trace of when the frames
             // were created.
-            frame.stack_debug = new Exception();
+            frame.stackDebug = new Exception();
         }
         return frame;
     }
@@ -605,7 +605,7 @@ public final class PhaseTracker implements CauseStackManager {
     public void popCauseFrame(final StackFrame oldFrame) {
         checkNotNull(oldFrame, "oldFrame");
         this.enforceMainThread();
-        @Nullable final CauseStackFrameImpl frame = this.frames.peek();
+        @Nullable final SpongeCauseStackFrame frame = this.frames.peek();
         if (frame != oldFrame) {
             // If the given frame is not the top frame then some form of
             // corruption of the stack has occurred and we do our best to correct
@@ -616,7 +616,7 @@ public final class PhaseTracker implements CauseStackManager {
             // to simply throw an error.
             int offset = -1;
             int i = 0;
-            for (final CauseStackFrameImpl f : this.frames) {
+            for (final SpongeCauseStackFrame f : this.frames) {
                 if (f == oldFrame) {
                     offset = i;
                     break;
@@ -638,17 +638,17 @@ public final class PhaseTracker implements CauseStackManager {
             } else {
                 printer.add()
                     .add("Attempting to pop frame:")
-                    .add(frame.stack_debug)
+                    .add(frame.stackDebug)
                     .add()
                     .add("Frames being popped are:")
-                    .add(((CauseStackFrameImpl) oldFrame).stack_debug);
+                    .add(((SpongeCauseStackFrame) oldFrame).stackDebug);
             }
 
             while (offset >= 0) {
-                @Nullable final CauseStackFrameImpl f = this.frames.peek();
+                @Nullable final SpongeCauseStackFrame f = this.frames.peek();
                 if (PhaseTracker.DEBUG_CAUSE_FRAMES && offset > 0) {
                     printer.add("   Stack frame in position %n :", offset);
-                    printer.add(f.stack_debug);
+                    printer.add(f.stackDebug);
                 }
                 this.popCauseFrame(f);
                 offset--;

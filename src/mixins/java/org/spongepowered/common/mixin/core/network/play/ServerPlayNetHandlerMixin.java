@@ -88,7 +88,6 @@ import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
-import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -114,9 +113,10 @@ import org.spongepowered.common.data.value.ImmutableSpongeListValue;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.api.mcp.network.play.ServerPlayNetHandlerMixin_API;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
@@ -127,11 +127,11 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @Mixin(ServerPlayNetHandler.class)
 public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderBridge {
 
-    private static final String[] IMPL$ZERO_LENGTH_STRING_ARRAY = new String[0];
     private static final String[] IMPL$EMPTY_COMMAND_ARRAY = new String[] { "" };
 
     // @formatter:off
@@ -149,6 +149,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
     @Shadow protected abstract boolean shadow$isSingleplayerOwner();
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch);
+    @Shadow protected abstract void shadow$filterTextPacket(List<String> p_244537_1_, Consumer<List<String>> p_244537_2_);
     // @formatter:on
 
     private int impl$ignorePackets;
@@ -160,50 +161,48 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
     @Inject(method = "handleCustomCommandSuggestions", at = @At(value = "NEW", target = "com/mojang/brigadier/StringReader", remap = false),
             cancellable = true)
-    private void impl$getSuggestionsFromNonBrigCommand(final CTabCompletePacket p_195518_1_, final CallbackInfo ci) {
-        final String rawCommand = p_195518_1_.getCommand();
+    private void impl$getSuggestionsFromNonBrigCommand(final CTabCompletePacket packet, final CallbackInfo ci) {
+        final String rawCommand = packet.getCommand();
         final String[] command = this.impl$extractCommandString(rawCommand);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(this.player);
-            final CommandCause cause = CommandCause.create();
-            final SpongeCommandManager manager = ((SpongeCommandManager) Sponge.getCommandManager());
-            if (!rawCommand.contains(" ")) {
-                final SuggestionsBuilder builder = new SuggestionsBuilder(command[0], 0);
-                if (command[0].isEmpty()) {
-                    manager.getAliasesForCause(cause).forEach(builder::suggest);
-                } else {
-                    manager.getAliasesThatStartWithForCause(cause, command[0]).forEach(builder::suggest);
-                }
-                this.connection.send(new STabCompletePacket(p_195518_1_.getId(), builder.build()));
-                ci.cancel();
+        final CommandCause cause = CommandCause.create();
+        final SpongeCommandManager manager = ((SpongeCommandManager) Sponge.getCommandManager());
+        if (!rawCommand.contains(" ")) {
+            final SuggestionsBuilder builder = new SuggestionsBuilder(command[0], 0);
+            if (command[0].isEmpty()) {
+                manager.getAliasesForCause(cause).forEach(builder::suggest);
             } else {
-                final Optional<CommandMapping> mappingOptional =
-                        manager.getCommandMapping(command[0].toLowerCase(Locale.ROOT)).filter(x -> !(x.getRegistrar() instanceof BrigadierBasedRegistrar));
-                if (mappingOptional.isPresent()) {
-                    final CommandMapping mapping = mappingOptional.get();
-                    if (mapping.getRegistrar().canExecute(cause, mapping)) {
-                        try {
-                            final SuggestionsBuilder builder = new SuggestionsBuilder(rawCommand, rawCommand.lastIndexOf(" ") + 1);
-                            mapping.getRegistrar().suggestions(cause, mapping, command[0], command[1]).forEach(builder::suggest);
-                            this.connection.send(new STabCompletePacket(p_195518_1_.getId(), builder.build()));
-                        } catch (final CommandException e) {
-                            cause.sendMessage(Identity.nil(), Component.text("Unable to create suggestions for your tab completion"));
-                            this.connection.send(new STabCompletePacket(p_195518_1_.getId(), Suggestions.empty().join()));
-                        }
-                    } else {
-                        this.connection.send(new STabCompletePacket(p_195518_1_.getId(), Suggestions.empty().join()));
+                manager.getAliasesThatStartWithForCause(cause, command[0]).forEach(builder::suggest);
+            }
+            this.connection.send(new STabCompletePacket(packet.getId(), builder.build()));
+            ci.cancel();
+        } else {
+            final Optional<CommandMapping> mappingOptional =
+                    manager.getCommandMapping(command[0].toLowerCase(Locale.ROOT))
+                            .filter(x -> !(x.getRegistrar() instanceof BrigadierBasedRegistrar));
+            if (mappingOptional.isPresent()) {
+                final CommandMapping mapping = mappingOptional.get();
+                if (mapping.getRegistrar().canExecute(cause, mapping)) {
+                    try {
+                        final SuggestionsBuilder builder = new SuggestionsBuilder(rawCommand, rawCommand.lastIndexOf(" ") + 1);
+                        mapping.getRegistrar().suggestions(cause, mapping, command[0], command[1]).forEach(builder::suggest);
+                        this.connection.send(new STabCompletePacket(packet.getId(), builder.build()));
+                    } catch (final CommandException e) {
+                        cause.sendMessage(Identity.nil(), Component.text("Unable to create suggestions for your tab completion"));
+                        this.connection.send(new STabCompletePacket(packet.getId(), Suggestions.empty().join()));
                     }
-                    ci.cancel();
+                } else {
+                    this.connection.send(new STabCompletePacket(packet.getId(), Suggestions.empty().join()));
                 }
+                ci.cancel();
             }
         }
     }
 
     @Redirect(method = "handleCustomCommandSuggestions",
-        at = @At(value = "INVOKE",
-            target = "Lcom/mojang/brigadier/CommandDispatcher;parse(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/ParseResults;",
-            remap = false
-        )
+            at = @At(value = "INVOKE",
+                    target = "Lcom/mojang/brigadier/CommandDispatcher;parse(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/ParseResults;",
+                    remap = false
+            )
     )
     private ParseResults<CommandSource> impl$informParserThisIsASuggestionCheck(final CommandDispatcher<CommandSource> commandDispatcher,
             final StringReader command,
@@ -215,8 +214,8 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
      * Specifically hooks the reach distance to use the forge hook.
      */
     @ModifyConstant(
-        method = "handleInteract",
-        constant = @Constant(doubleValue = 36.0D)
+            method = "handleInteract",
+            constant = @Constant(doubleValue = 36.0D)
     )
     private double impl$getPlatformReach(final double thirtySix, CUseEntityPacket p_147340_1_) {
         return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, p_147340_1_.getTarget(this.player.level));
@@ -241,23 +240,23 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
      * @param packetIn The movement packet
      */
     @Inject(method = "handleMovePlayer",
-        at = @At(
-            value = "FIELD",
-            opcode = Opcodes.GETFIELD,
-            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;awaitingPositionFromClient:Lnet/minecraft/util/math/vector/Vector3d;"
-        ),
-        slice = @Slice(
-            from = @At(
-                value = "FIELD",
-                target = "Lnet/minecraft/entity/player/ServerPlayerEntity;wonGame:Z"
+            at = @At(
+                    value = "FIELD",
+                    opcode = Opcodes.GETFIELD,
+                    target = "Lnet/minecraft/network/play/ServerPlayNetHandler;awaitingPositionFromClient:Lnet/minecraft/util/math/vector/Vector3d;"
             ),
-            to = @At(
-                value = "FIELD",
-                target = "Lnet/minecraft/network/play/ServerPlayNetHandler;tickCount:I",
-                ordinal = 1
-            )
-        ),
-        cancellable = true
+            slice = @Slice(
+                    from = @At(
+                            value = "FIELD",
+                            target = "Lnet/minecraft/entity/player/ServerPlayerEntity;wonGame:Z"
+                    ),
+                    to = @At(
+                            value = "FIELD",
+                            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;tickCount:I",
+                            ordinal = 1
+                    )
+            ),
+            cancellable = true
     )
     private void impl$callMoveEntityEvent(final CPlayerPacket packetIn, final CallbackInfo ci) {
 
@@ -361,12 +360,12 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     }
 
     @Inject(
-        method = "handleInteract",
-        cancellable = true,
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;interactAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/vector/Vector3d;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResultType;"
-        )
+            method = "handleInteract",
+            cancellable = true,
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/Entity;interactAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/vector/Vector3d;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResultType;"
+            )
     )
     public void impl$onRightClickAtEntity(final CUseEntityPacket p_147340_1, final CallbackInfo ci) {
         final Entity entity = p_147340_1.getTarget(this.player.getLevel());
@@ -381,9 +380,9 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     }
 
     @Inject(
-        method = "handleInteract",
-        cancellable = true,
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;attack(Lnet/minecraft/entity/Entity;)V")
+            method = "handleInteract",
+            cancellable = true,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;attack(Lnet/minecraft/entity/Entity;)V")
     )
     public void impl$onLeftClickEntity(final CUseEntityPacket p_147340_1_, final CallbackInfo ci) {
         final Entity entity = p_147340_1_.getTarget(this.player.getLevel());
@@ -469,11 +468,11 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     }
 
     @Redirect(
-        method = "handleClientCommand",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;respawn(Lnet/minecraft/entity/player/ServerPlayerEntity;Z)Lnet/minecraft/entity/player/ServerPlayerEntity;"
-        )
+            method = "handleClientCommand",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/management/PlayerList;respawn(Lnet/minecraft/entity/player/ServerPlayerEntity;Z)Lnet/minecraft/entity/player/ServerPlayerEntity;"
+            )
     )
     private ServerPlayerEntity impl$usePlayerDimensionForRespawn(final PlayerList playerList, final ServerPlayerEntity player,
             final boolean keepAllPlayerData) {
@@ -499,6 +498,42 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         ((PlayerListBridge) this.server.getPlayerList()).bridge$setNewDestinationDimension(((ServerWorld) event.getDestinationWorld()).dimension());
         // The key is reset to null in the overwrite
         return playerList.respawn(player, keepAllPlayerData);
+    }
+
+    @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/PlayerList;broadcastMessage(Lnet/minecraft/util/text/ITextComponent;Lnet/minecraft/util/text/ChatType;Ljava/util/UUID;)V"))
+    public void impl$handlePlayerDisconnect(final PlayerList playerList, final ITextComponent component, final ChatType chatType, UUID uuid) {
+        // If this happens, the connection has not been fully established yet so we've kicked them during ClientConnectionEvent.Login,
+        // but FML has created this handler earlier to send their handshake. No message should be sent, no disconnection event should
+        // be fired either.
+        if (this.player.connection == null) {
+            return;
+        }
+        final ServerPlayer spongePlayer = (ServerPlayer) this.player;
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this.player);
+            final Component message = SpongeAdventure.asAdventure(component);
+            Audience audience = Sponge.getServer().getBroadcastAudience();
+            final ServerSideConnectionEvent.Disconnect event = SpongeEventFactory.createServerSideConnectionEventDisconnect(
+                    PhaseTracker.getCauseStackManager().getCurrentCause(), audience, Optional.of(audience), message, message,
+                    spongePlayer.getConnection(), spongePlayer);
+            SpongeCommon.postEvent(event);
+            event.getAudience().ifPresent(a -> a.sendMessage(spongePlayer, event.getMessage()));
+        }
+
+        ((ServerPlayerEntityBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
+    }
+
+    @Redirect(method = "handleSignUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;filterTextPacket(Ljava/util/List;Ljava/util/function/Consumer;)V"))
+    private void impl$switchToSignPhaseState(ServerPlayNetHandler serverPlayNetHandler, List<String> p_244537_1_, Consumer<List<String>> p_244537_2_) {
+        try (final BasicPacketContext context = PacketPhase.General.UPDATE_SIGN.createPhaseContext(PhaseTracker.getInstance())
+                .packetPlayer(this.player)
+                .buildAndSwitch()
+        ) {
+
+            this.shadow$filterTextPacket(p_244537_1_, p_244537_2_);
+        }
     }
 
     @Redirect(method = "updateSignText", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
@@ -535,30 +570,5 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             return commandString.substring(1).split(" ", 2);
         }
         return commandString.split(" ", 2);
-    }
-
-    @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;broadcastMessage(Lnet/minecraft/util/text/ITextComponent;Lnet/minecraft/util/text/ChatType;Ljava/util/UUID;)V"))
-    public void impl$handlePlayerDisconnect(final PlayerList playerList, final ITextComponent component, final ChatType chatType, UUID uuid) {
-        // If this happens, the connection has not been fully established yet so we've kicked them during ClientConnectionEvent.Login,
-        // but FML has created this handler earlier to send their handshake. No message should be sent, no disconnection event should
-        // be fired either.
-        if (this.player.connection == null) {
-            return;
-        }
-        final ServerPlayer spongePlayer = (ServerPlayer) this.player;
-
-        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final Component message = SpongeAdventure.asAdventure(component);
-            frame.pushCause(this.player);
-            Audience audience = Sponge.getServer().getBroadcastAudience();
-            final ServerSideConnectionEvent.Disconnect event = SpongeEventFactory.createServerSideConnectionEventDisconnect(
-                    PhaseTracker.getCauseStackManager().getCurrentCause(), audience, Optional.of(audience), message, message,
-                    spongePlayer.getConnection(), spongePlayer);
-            SpongeCommon.postEvent(event);
-            event.getAudience().ifPresent(a -> a.sendMessage(spongePlayer, event.getMessage()));
-        }
-
-        ((ServerPlayerEntityBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
     }
 }

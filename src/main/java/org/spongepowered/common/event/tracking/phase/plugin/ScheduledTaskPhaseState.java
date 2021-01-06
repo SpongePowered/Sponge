@@ -27,13 +27,14 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.bridge.util.concurrent.TrackedTickDelayedTaskBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Objects;
 
 /**
  * Used for tasks scheduled with both the Sponge scheduler, and the built-in 'scheduled task' system in MinecraftServer
  */
-public class ScheduledTaskPhaseState extends BasicPluginState {
+public final class ScheduledTaskPhaseState extends BasicPluginState {
 
     @Override
     public void unwind(final BasicPluginContext phaseContext) {
@@ -44,15 +45,17 @@ public class ScheduledTaskPhaseState extends BasicPluginState {
 
     @Override
     public void foldContextForThread(
-        final BasicPluginContext context,
-        final TrackedTickDelayedTaskBridge returnValue
+            final BasicPluginContext context,
+            final TrackedTickDelayedTaskBridge returnValue
     ) {
+        @Nullable final Object source = context.getSource();
+        final PluginContainer plugin = Objects.requireNonNull(context.container, "Scheduled Task has a null plugin!");
+
         returnValue.bridge$contextShift(((context1, stackFrame) -> {
-            @Nullable final Object source = context.getSource();
             if (source != null) {
                 stackFrame.pushCause(source);
             }
-            stackFrame.pushCause(Objects.requireNonNull(context.container, "Scheduled Task has a null PluginContainer"));
+            stackFrame.pushCause(plugin);
         }));
     }
 }
