@@ -22,35 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world;
+package org.spongepowered.common.mixin.api.world.gen;
 
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.gen.IWorldGenerationBaseReader;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.util.BlockReaderAwareMatcher;
 import org.spongepowered.api.world.HeightType;
-import org.spongepowered.api.world.volume.game.GenerationVolume;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.function.Predicate;
 
-@Mixin(IWorldGenerationBaseReader.class)
-public interface IWorldGenerationBaseReaderMixin_API extends GenerationVolume {
+@Mixin(value = Heightmap.Type.class)
+public abstract class Heightmap_TypeMixin_API implements HeightType {
 
-    //@formatter:off
-    @Shadow boolean shadow$isStateAtPosition(BlockPos p_217375_1_, Predicate<net.minecraft.block.BlockState> p_217375_2_);
-    @Shadow BlockPos shadow$getHeightmapPos(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
-    //@formatter:on
+    // @formatter:off
+    @Shadow @Final private Predicate<net.minecraft.block.BlockState> isOpaque;
+    // @formatter:on
 
     @Override
-    default boolean hasBlockState(final int x, final int y, final int z, final Predicate<? super BlockState> predicate) {
-        return this.shadow$isStateAtPosition(new BlockPos(x, y, z), state -> predicate.test((BlockState) state));
+    public BlockReaderAwareMatcher<BlockState> getMatcher() {
+        return (state, volume, position) -> this.isOpaque.test((net.minecraft.block.BlockState) state);
     }
-
-// TODO this conflicts with IWorldReaderMixin_API#getHeight
-//    @Override
-//    default int getHeight(final HeightType type, final int x, final int z) {
-//        return this.shadow$getHeightmapPos((Heightmap.Type) (Object) type, new BlockPos(x, 0, z)).getY();
-//    }
 }

@@ -61,6 +61,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
+import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.raid.Raid;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -189,6 +190,7 @@ final class VanillaRegistryLoader {
         this.knownName(RegistryTypes.ADVANCEMENT_TYPE, FrameType.values(), FrameType::getName);
         this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFishEntity.Type.values());
+        this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Type.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {
