@@ -86,11 +86,9 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
 
         final ItemStackSnapshot sourceSnapshot = ItemStackUtil.snapshotOf(sourceSlot.getItem());
         final ItemStackSnapshot targetSnapshot = ItemStackUtil.snapshotOf(targetSlot.getItem());
-        final org.spongepowered.api.item.inventory.Slot slotPrev = ((InventoryAdapter) inventoryContainer).inventoryAdapter$getSlot(
-            previousSlot + preHotbarSize).get();
+        final org.spongepowered.api.item.inventory.Slot slotPrev = (org.spongepowered.api.item.inventory.Slot) inventoryContainer.getSlot(previousSlot + preHotbarSize);
         final SlotTransaction sourceTransaction = new SlotTransaction(slotPrev, sourceSnapshot, sourceSnapshot);
-        final org.spongepowered.api.item.inventory.Slot slotNew = ((InventoryAdapter) inventoryContainer).inventoryAdapter$getSlot(
-            itemChange.getSlot() + preHotbarSize).get();
+        final org.spongepowered.api.item.inventory.Slot slotNew = (org.spongepowered.api.item.inventory.Slot) inventoryContainer.getSlot(itemChange.getSlot() + preHotbarSize);
         final SlotTransaction targetTransaction = new SlotTransaction(slotNew, targetSnapshot, targetSnapshot);
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
