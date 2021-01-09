@@ -53,6 +53,7 @@ import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
+import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.plugin.PluginContainer;
@@ -392,6 +393,30 @@ public final class RecipeTest implements LoadableModule {
                 .build();
 
         event.register(squeezeSpongeRecipe);
+
+        // Smithing recipes
+
+        final RecipeRegistration ironToGoldIngot = SmithingRecipe.builder()
+                .base(ItemTypes.IRON_INGOT)
+                .addition(ItemTypes.NETHERITE_INGOT)
+                .result(ItemStack.of(ItemTypes.GOLD_INGOT))
+                .key(ResourceKey.of(this.plugin, "iron_to_gold_ingot"))
+                .build();
+
+        event.register(ironToGoldIngot);
+
+        final ItemStack chainMail = ItemStack.of(ItemTypes.CHAINMAIL_CHESTPLATE);
+        chainMail.offer(Keys.CUSTOM_NAME, Component.text("Heavy Chainmail", NamedTextColor.DARK_GRAY));
+        chainMail.offer(Keys.LORE, Arrays.asList(Component.text("Smithing occured", NamedTextColor.DARK_GRAY)));
+        final RecipeRegistration smithChainmail = SmithingRecipe.builder()
+                .base(ItemTypes.IRON_CHESTPLATE)
+                .addition(ItemTypes.FIRE_CHARGE)
+                .result(chainMail)
+                .key(ResourceKey.of(this.plugin, "smith_chainmail"))
+                .build();
+
+        event.register(smithChainmail);
+
 
     }
 }

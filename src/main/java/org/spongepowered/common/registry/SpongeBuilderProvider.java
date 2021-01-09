@@ -89,6 +89,7 @@ import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
+import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
 import org.spongepowered.api.placeholder.PlaceholderComponent;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
@@ -183,6 +184,7 @@ import org.spongepowered.common.item.recipe.crafting.custom.SpongeSpecialCraftin
 import org.spongepowered.common.item.recipe.crafting.shaped.SpongeShapedCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.crafting.shapeless.SpongeShapelessCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredientBuilder;
+import org.spongepowered.common.item.recipe.smithing.SpongeSmithingRecipeBuilder;
 import org.spongepowered.common.item.recipe.stonecutting.SpongeStoneCutterRecipeBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderComponentBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderContextBuilder;
@@ -297,6 +299,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(SpecialCraftingRecipe.Builder.class, SpongeSpecialCraftingRecipeBuilder::new)
                 .register(CookingRecipe.Builder.class, SpongeCookingRecipeBuilder::new)
                 .register(StoneCutterRecipe.Builder.class, SpongeStoneCutterRecipeBuilder::new)
+                .register(SmithingRecipe.Builder.class, SpongeSmithingRecipeBuilder::new)
                 .register(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
                 .register(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
                 .register(Enchantment.RandomListBuilder.class, SpongeRandomEnchantmentListBuilder::new)

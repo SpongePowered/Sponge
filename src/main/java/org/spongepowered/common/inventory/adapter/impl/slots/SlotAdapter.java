@@ -40,6 +40,7 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Base SlotAdapter implementation for {@link net.minecraft.item.ItemStack} based Inventories.
@@ -217,5 +218,12 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
             return (Slot)((Container) fabric).getSlot(this.ordinal);
         }
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SlotAdapter.class.getSimpleName() + "[", "]")
+                .add("ordinal=" + this.ordinal)
+                .toString();
     }
 }

@@ -560,6 +560,8 @@ public final class Constants {
 
         public static final String COOKING_INGREDIENT = "ingredient";
         public static final String STONECUTTING_INGREDIENT = "ingredient";
+        public static final String SMITHING_BASE_INGREDIENT = "base";
+        public static final String SMITHING_ADDITION_INGREDIENT = "addition";
         public static final String SHAPED_PATTERN = "pattern";
         public static final String SHAPED_INGREDIENTS = "key";
         public static final String SHAPELESS_INGREDIENTS = "ingredients";
