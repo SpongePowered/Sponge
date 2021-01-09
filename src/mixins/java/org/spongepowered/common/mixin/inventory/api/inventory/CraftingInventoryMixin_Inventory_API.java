@@ -22,36 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory.adapter.impl.comp;
+package org.spongepowered.common.mixin.inventory.api.inventory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 
 import java.util.Optional;
 
-public class CraftingGridInventoryAdapter extends GridInventoryAdapter implements CraftingGridInventory {
+@Mixin(CraftingInventory.class)
+public abstract class CraftingInventoryMixin_Inventory_API implements CraftingGridInventory {
 
-    protected final CraftingGridInventoryLens craftingLens;
+    // @formatter:off
+    @Shadow @Final private Container menu;
+    // @formatter:on
 
-    public CraftingGridInventoryAdapter(Fabric fabric, CraftingGridInventoryLens root) {
-        this(fabric, root, null);
-    }
-
-    public CraftingGridInventoryAdapter(Fabric fabric, CraftingGridInventoryLens root, Inventory parent) {
-        super(fabric, root, parent);
-        this.craftingLens = root;
-    }
+    private GridInventory gridAdapter;
 
     @Override
     public Optional<CraftingRecipe> getRecipe(ServerWorld world) {
-        return Sponge.getRegistry().getRecipeRegistry().findMatchingRecipe(this, checkNotNull(world, "world")).map(CraftingRecipe.class::cast);
+        return Sponge.getRegistry().getRecipeRegistry().findMatchingRecipe((Inventory) this.menu, checkNotNull(world, "world")).map(CraftingRecipe.class::cast);
+    }
+
+    @Override
+    public GridInventory asGrid() {
+        final CraftingGridInventoryLens lens = (CraftingGridInventoryLens) ((InventoryAdapter) this).inventoryAdapter$getRootLens();
+        if (this.gridAdapter == null) {
+            this.gridAdapter = (GridInventory) lens.getGrid().getAdapter(((Fabric) this), ((Inventory) this.menu));
+        }
+        return this.gridAdapter;
     }
 
 }

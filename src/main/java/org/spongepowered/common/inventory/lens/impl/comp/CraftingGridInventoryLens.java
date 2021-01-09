@@ -24,19 +24,50 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
+import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.container.WorkbenchContainer;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
+import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import org.spongepowered.common.accessor.inventory.container.WorkbenchContainerAccessor;
 import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.property.KeyValuePair;
 
-public class CraftingGridInventoryLens extends GridInventoryLens {
+public class CraftingGridInventoryLens extends AbstractLens {
+
+    private GridInventoryLens grid;
 
     public CraftingGridInventoryLens(int base, int width, int height, SlotLensProvider slots) {
-        super(base, width, height, slots);
+        super(base, width * height, CraftingGridInventory.class);
+        this.init(slots, width, height);
+    }
+
+    private void init(SlotLensProvider slots, int width, int height) {
+        // Adding slots
+        for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
+            this.addChild(slots.getSlotLens(slot), KeyValuePair.slotIndex(ord));
+        }
+
+        this.grid = new GridInventoryLens(this.base, width, height, slots);
+        this.addSpanningChild(this.grid);
+    }
+
+    public GridInventoryLens getGrid() {
+        return grid;
     }
 
     @Override
     public Inventory getAdapter(Fabric fabric, Inventory parent) {
-        return new CraftingGridInventoryAdapter(fabric, this, parent);
+        if (fabric instanceof CraftingGridInventory) {
+            return ((CraftingGridInventory) fabric);
+        }
+        if (fabric instanceof PlayerContainer) {
+            return ((CraftingGridInventory) ((PlayerContainer) fabric).getCraftSlots());
+        }
+        if (fabric instanceof WorkbenchContainer) {
+            return ((CraftingGridInventory) ((WorkbenchContainerAccessor) fabric).accessor$craftSlots());
+        }
+        throw new IllegalStateException(fabric.getClass().getName() + " is not a known CraftingGridInventory.");
     }
 }

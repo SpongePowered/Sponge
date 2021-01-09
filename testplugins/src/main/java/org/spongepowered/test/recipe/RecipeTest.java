@@ -346,20 +346,20 @@ public final class RecipeTest implements LoadableModule {
                     if (inv.capacity() != 9) {
                         return false;
                     }
-                    final ItemType stick = inv.peek(2,1).get().getType();
+                    final ItemType stick = inv.asGrid().peek(2,1).get().getType();
                     if (!stick.isAnyOf(ItemTypes.STICK)) {
                         return false;
                     }
 
                     final ItemStack middleItem = inv.peekAt(1).get();
 
-                    final ItemType type00 = inv.peek(0,0).get().getType();
-                    final ItemType type10 = inv.peek(0,1).get().getType();
-                    final ItemType type20 = inv.peek(0,2).get().getType();
+                    final ItemType type00 = inv.asGrid().peek(0,0).get().getType();
+                    final ItemType type10 = inv.asGrid().peek(0,1).get().getType();
+                    final ItemType type20 = inv.asGrid().peek(0,2).get().getType();
 
-                    final ItemType type01 = inv.peek(1,0).get().getType();
-                    final ItemType type11 = inv.peek(1,1).get().getType();
-                    final ItemType type21 = inv.peek(1,2).get().getType();
+                    final ItemType type01 = inv.asGrid().peek(1,0).get().getType();
+                    final ItemType type11 = inv.asGrid().peek(1,1).get().getType();
+                    final ItemType type21 = inv.asGrid().peek(1,2).get().getType();
 
                     if (type00 == type01 && type01 == type20 && type20 == type21 && type10 == type11) {
                         if (type00.isAnyOf(ItemTypes.WHITE_WOOL)) {

@@ -169,7 +169,7 @@ public final class ContainerUtil {
         final Map<Optional<IInventory>, List<Slot>> viewed = container.slots.stream()
                 .collect(Collectors.groupingBy(i -> Optional.<IInventory>ofNullable(i.container), LinkedHashMap::new, Collectors.toList()));
         int index = 0; // Count the index
-        final org.spongepowered.common.inventory.util.ContainerUtil.CraftingInventoryData crafting = new org.spongepowered.common.inventory.util.ContainerUtil.CraftingInventoryData();
+        final CraftingInventoryData crafting = new CraftingInventoryData();
         int chestHeight = 0;
         final List<Lens> lenses = new ArrayList<>();
         for (final Map.Entry<Optional<IInventory>, List<Slot>> entry : viewed.entrySet()) {

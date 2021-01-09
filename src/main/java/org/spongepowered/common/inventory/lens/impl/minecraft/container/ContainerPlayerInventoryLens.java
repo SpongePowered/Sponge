@@ -43,7 +43,6 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
 
     public ContainerPlayerInventoryLens(int size, Class<? extends Inventory> adapter, SlotLensProvider slots) {
         super(size, adapter, slots, ContainerPlayerInventoryLens.lenses(size, slots));
-        this.init(slots);
     }
 
     private static List<Lens> lenses(int size, SlotLensProvider slots) {

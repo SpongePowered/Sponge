@@ -27,9 +27,8 @@ package org.spongepowered.common.mixin.inventory.impl.inventory.container;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,6 +44,7 @@ import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -53,7 +53,7 @@ import javax.annotation.Nullable;
 @Mixin(Container.class)
 public abstract class ContainerMixin_Adapter_Inventory implements InventoryBridge, LensGeneratorBridge, InventoryAdapter, ContainerBridge {
 
-    @Shadow public abstract NonNullList<ItemStack> shadow$getItems();
+    @Shadow @Final public List<Slot> slots;
 
     private boolean impl$isLensInitialized;
     private boolean impl$spectatorChest;
@@ -65,7 +65,7 @@ public abstract class ContainerMixin_Adapter_Inventory implements InventoryBridg
 
     @Override
     public SlotLensProvider lensGeneratorBridge$generateSlotLensProvider() {
-        return new LensRegistrar.BasicSlotLensProvider(this.shadow$getItems().size());
+        return new LensRegistrar.BasicSlotLensProvider(this.slots.size());
     }
 
     @Inject(method = "addSlot", at = @At(value = "HEAD"))
@@ -89,7 +89,7 @@ public abstract class ContainerMixin_Adapter_Inventory implements InventoryBridg
             return null;
         }
 
-        return LensRegistrar.getLens(this, slotLensProvider, this.shadow$getItems().size());
+        return LensRegistrar.getLens(this, slotLensProvider, this.slots.size());
     }
 
     private final Map<Integer, org.spongepowered.api.item.inventory.Slot> impl$slots = new Int2ObjectArrayMap<>();

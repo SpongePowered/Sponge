@@ -37,6 +37,7 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.carrier.chest.Chest;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -46,12 +47,8 @@ import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridg
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
 import org.spongepowered.common.inventory.custom.CustomInventory;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -64,31 +61,24 @@ public final class InventoryUtil {
     private InventoryUtil() {}
 
     public static CraftingGridInventory toSpongeInventory(final CraftingInventory inv) {
-        final CraftingGridInventoryLens lens = new CraftingGridInventoryLens(0, inv.getWidth(), inv.getHeight(), BasicSlotLens::new);
-
-        return new CraftingGridInventoryAdapter((Fabric) inv, lens);
+        return (CraftingGridInventory) inv;
     }
 
     @SuppressWarnings("unchecked")
     public static <C extends IInventory> C toNativeInventory(final Inventory inv) {
-        final Fabric fabric = ((CraftingGridInventoryAdapter) inv).inventoryAdapter$getFabric();
-        for (final Object inventory : fabric.fabric$allInventories()) {
-            if (inventory instanceof CraftingInventory) {
-                return (C) inventory;
+        if (inv instanceof CraftingInventory) {
+            return (C) inv;
+        }
+        if (inv instanceof Container) {
+            for (final Object inventory : ((InventoryAdapter) inv).inventoryAdapter$getFabric().fabric$allInventories()) {
+                if (inventory instanceof CraftingInventory) {
+                    return (C) inventory;
+                }
             }
         }
 
         // Gather Debug Info...
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Invalid CraftingGridInventory. Could not find InventoryCrafting.\n")
-          .append("Fabric was: ")
-          .append(fabric.getClass().getSimpleName()).append(" Name: ")
-          .append("Viewed:");
-        for (final Object iInventory : fabric.fabric$allInventories()) {
-            sb.append("\n").append(iInventory.getClass().getName());
-        }
-
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("Invalid CraftingGridInventory. Could not find CraftingInventory.\nInventory was: " + inv.getClass().getSimpleName());
     }
 
     public static Optional<Inventory> getDoubleChestInventory(final ChestTileEntity chest) {

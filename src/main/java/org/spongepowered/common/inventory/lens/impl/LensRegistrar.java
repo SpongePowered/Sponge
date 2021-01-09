@@ -53,6 +53,7 @@ import net.minecraft.tileentity.TrappedChestTileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
@@ -98,11 +99,10 @@ public class LensRegistrar {
 
         LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensGrid(inv, size, 3,3, slp),
                 DispenserTileEntity.class,
-                DropperTileEntity.class,
-                CraftingInventory.class);
+                DropperTileEntity.class);
 
-        LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensGrid(inv, size, 2, 2, slp),
-                CraftingInventory.class);
+        LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensCraftingInventory(size, 2, 2, slp), CraftingInventory.class);
+        LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensCraftingInventory(size, 3, 3, slp), CraftingInventory.class);
 
         LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensGrid(inv, size, 5, 1, slp),
                 HopperTileEntity.class);
@@ -121,7 +121,7 @@ public class LensRegistrar {
         LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensRepairContainer, s -> s == 2 + 1 + 9 * 3), RepairContainer.class);
         LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensWorkbenchContainer,s -> s == 1 + 3 * 3 + 9 * 3), WorkbenchContainer.class);
 
-        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensPlayerContainer, s -> s == 1+ 4 + 4 + 9*3 + 1), PlayerContainer.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensPlayerContainer, s -> s == 1+ 4 + 4 + 9*4 + 1), PlayerContainer.class);
 
         LensRegistrar.register(
             LensRegistrar.restricted(LensRegistrar::generateLens, s -> s == 8),
@@ -180,7 +180,7 @@ public class LensRegistrar {
         }
 
         if (inventory instanceof CraftingInventory) {
-            lens = LensRegistrar.lensGrid(inventory, size, ((CraftingInventory) inventory).getWidth(), ((CraftingInventory) inventory).getHeight(), slotLensProvider);
+            lens = LensRegistrar.lensCraftingInventory(size, ((CraftingInventory) inventory).getWidth(), ((CraftingInventory) inventory).getHeight(), slotLensProvider);
         }
         else if (inventory instanceof Container) {
             lens = ContainerUtil.generateLens(((Container) inventory), slotLensProvider);
@@ -191,6 +191,15 @@ public class LensRegistrar {
             return lens;
         }
         return new SingleIndexedLens(0, size, (Class<? extends Inventory>) inventory.getClass(), slotLensProvider);
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    private static Lens lensCraftingInventory(int size, int width, int height, SlotLensProvider slotLensProvider) {
+        if (size != width * height) {
+            return null; // Wrong size
+        }
+        return new CraftingGridInventoryLens(0, width, height, slotLensProvider);
     }
 
     @Nullable
