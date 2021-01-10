@@ -875,6 +875,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             try {
                 if (isDefaultWorld || ((ServerWorldProperties) world.getLevelData()).generateSpawnOnLoad()) {
                     MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(), isDebugGeneration, true);
+                } else if (World.END.equals(world.dimension())) {
+                    ((ServerWorldInfo) world.getLevelData()).setSpawn(ServerWorld.END_SPAWN_POINT, 0);
                 }
                 levelData.setInitialized(true);
                 if (isDebugGeneration) {
