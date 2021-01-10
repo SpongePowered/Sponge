@@ -873,7 +873,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         world.getWorldBorder().applySettings(levelData.getWorldBorder());
         if (!levelData.isInitialized()) {
             try {
-                MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(), isDebugGeneration, true);
+                if (isDefaultWorld || ((ServerWorldProperties) world.getLevelData()).generateSpawnOnLoad()) {
+                    MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(), isDebugGeneration, true);
+                }
                 levelData.setInitialized(true);
                 if (isDebugGeneration) {
                     ((MinecraftServerAccessor) this.server).invoker$setDebugLevel(levelData);
@@ -960,19 +962,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         });
     }
 
-    private void updateForcedChunks(ServerWorld world, ServerChunkProvider serverChunkProvider) {
-        final ForcedChunksSaveData forcedChunksSaveData = world.getDataStorage().get(ForcedChunksSaveData::new, "chunks");
-        if (forcedChunksSaveData != null) {
-            final LongIterator longIterator = forcedChunksSaveData.getChunks().iterator();
-
-            while (longIterator.hasNext()) {
-                final long i = longIterator.nextLong();
-                final ChunkPos forceChunkPos = new ChunkPos(i);
-                serverChunkProvider.updateChunkForced(forceChunkPos, true);
-            }
-        }
-    }
-
     private void loadSpawnChunks(final ServerWorld world) {
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         final ChunkPos chunkPos = new ChunkPos(spawnPoint);
@@ -1000,6 +989,19 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
         this.removeSpawnChunkTicket(world, chunkPos, serverChunkProvider);
+    }
+
+    private void updateForcedChunks(ServerWorld world, ServerChunkProvider serverChunkProvider) {
+        final ForcedChunksSaveData forcedChunksSaveData = world.getDataStorage().get(ForcedChunksSaveData::new, "chunks");
+        if (forcedChunksSaveData != null) {
+            final LongIterator longIterator = forcedChunksSaveData.getChunks().iterator();
+
+            while (longIterator.hasNext()) {
+                final long i = longIterator.nextLong();
+                final ChunkPos forceChunkPos = new ChunkPos(i);
+                serverChunkProvider.updateChunkForced(forceChunkPos, true);
+            }
+        }
     }
 
     private void removeSpawnChunkTicket(ServerWorld world, ChunkPos chunkPos, ServerChunkProvider serverChunkProvider) {

@@ -66,8 +66,6 @@ public interface MinecraftServerAccessor {
 
     @Accessor("progressListenerFactory") IChunkStatusListenerFactory accessor$getProgressListenerFactory();
 
-    @Accessor("levels") Map<RegistryKey<World>, ServerWorld> accessor$getLevels();
-
     @Accessor("nextTickTime") void accessor$setNextTickTime(long nextTickTime);
 
     @Invoker("isSpawningMonsters") boolean invoker$isSpawningMonsters();
@@ -75,8 +73,6 @@ public interface MinecraftServerAccessor {
     @Invoker("setupDebugLevel") void invoker$setDebugLevel(IServerConfiguration serverConfiguration);
 
     @Invoker("forceDifficulty") void invoker$forceDifficulty();
-
-    @Invoker("detectBundledResources") void accessor$detectBundledResources();
 
     @Invoker("readScoreboard") void accessor$readScoreboard(DimensionSavedDataManager manager);
 
