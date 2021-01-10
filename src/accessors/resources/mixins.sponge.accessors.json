@@ -114,6 +114,7 @@
         "network.handshake.client.CHandshakePacketAccessor",
         "network.login.client.CCustomPayloadLoginPacketAccessor",
         "network.login.server.SCustomPayloadLoginPacketAccessor",
+        "network.login.ServerLoginNetHandlerAccessor",
         "network.play.client.CClientSettingsPacketAccessor",
         "network.play.client.CCustomPayloadPacketAccessor",
         "network.play.client.CPlayerPacketAccessor",
