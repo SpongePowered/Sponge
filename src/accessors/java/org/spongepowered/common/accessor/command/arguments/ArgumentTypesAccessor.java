@@ -35,8 +35,7 @@ import java.util.Map;
 @Mixin(ArgumentTypes.class)
 public interface ArgumentTypesAccessor {
 
-    @Accessor("BY_NAME")
-    static Map<ResourceLocation, ArgumentTypes_EntryAccessor> accessor$BY_NAME() {
+    @Accessor("BY_NAME") static Map<ResourceLocation, ArgumentTypes_EntryAccessor> accessor$BY_NAME() {
         throw new UntransformedAccessorError();
     }
 

@@ -33,8 +33,7 @@ import org.spongepowered.common.UntransformedAccessorError;
 @Mixin(AbstractRaiderEntity.class)
 public interface AbstractRaiderEntityAccessor {
 
-    @Accessor("IS_CELEBRATING")
-    static DataParameter<Boolean> accessor$IS_CELEBRATING() {
+    @Accessor("IS_CELEBRATING") static DataParameter<Boolean> accessor$IS_CELEBRATING() {
         throw new UntransformedAccessorError();
     }
 

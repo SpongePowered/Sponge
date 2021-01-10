@@ -34,8 +34,8 @@ import org.spongepowered.common.UntransformedInvokerError;
 @Mixin(EndBiomeProvider.class)
 public interface EndBiomeProviderAccessor {
 
-    @Invoker("<init>") static EndBiomeProvider invoker$new(Registry<Biome> registry, long seed, Biome endBiome, Biome highlandsBiome,
-            Biome midlandsBiome, Biome islandsBiome, Biome barrenBiome) {
+    @Invoker("<init>") static EndBiomeProvider invoker$new(final Registry<Biome> registry, final long seed, final Biome endBiome, final Biome highlandsBiome,
+            final Biome midlandsBiome, final Biome islandsBiome, final Biome barrenBiome) {
         throw new UntransformedInvokerError();
     }
 }

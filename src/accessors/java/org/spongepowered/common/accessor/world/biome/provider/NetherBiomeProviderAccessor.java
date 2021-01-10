@@ -45,9 +45,9 @@ public interface NetherBiomeProviderAccessor {
         throw new UntransformedAccessorError();
     }
 
-    @Invoker("<init>") static NetherBiomeProvider invoker$new(long seed, List<Pair<Biome.Attributes, Supplier<Biome>>> attributedBiomes,
-            NetherBiomeProvider.Noise temperatureConfig, NetherBiomeProvider.Noise humidityConfig, NetherBiomeProvider.Noise altitudeConfig,
-            NetherBiomeProvider.Noise weirdnessConfig, Optional<Pair<Registry<Biome>, NetherBiomeProvider.Preset>> empty) {
+    @Invoker("<init>") static NetherBiomeProvider invoker$new(final long seed, final List<Pair<Biome.Attributes, Supplier<Biome>>> attributedBiomes,
+            final NetherBiomeProvider.Noise temperatureConfig, final NetherBiomeProvider.Noise humidityConfig, final NetherBiomeProvider.Noise altitudeConfig,
+            final NetherBiomeProvider.Noise weirdnessConfig, final Optional<Pair<Registry<Biome>, NetherBiomeProvider.Preset>> empty) {
         throw new UntransformedInvokerError();
     }
 }

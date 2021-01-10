@@ -33,7 +33,7 @@ import net.minecraft.world.storage.ServerWorldInfo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.generation.MutableWorldGenerationConfig;
+import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Implements;
@@ -98,8 +98,8 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public MutableWorldGenerationConfig worldGenerationSettings() {
-        return (MutableWorldGenerationConfig) this.shadow$worldGenSettings();
+    public WorldGenerationConfig.Mutable worldGenerationConfig() {
+        return (WorldGenerationConfig.Mutable) this.shadow$worldGenSettings();
     }
 
     @Override

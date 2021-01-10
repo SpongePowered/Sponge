@@ -29,21 +29,19 @@ import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Optional;
 import java.util.UUID;
-import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(FoxEntity.class)
 public interface FoxEntityAccessor {
 
-    @Accessor("DATA_TRUSTED_ID_0")
-    static DataParameter<Optional<UUID>> accessor$DATA_TRUSTED_ID_0() {
+    @Accessor("DATA_TRUSTED_ID_0") static DataParameter<Optional<UUID>> accessor$DATA_TRUSTED_ID_0() {
         throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_TRUSTED_ID_1")
-    static DataParameter<Optional<UUID>> accessor$DATA_TRUSTED_ID_1() {
+    @Accessor("DATA_TRUSTED_ID_1") static DataParameter<Optional<UUID>> accessor$DATA_TRUSTED_ID_1() {
         throw new UntransformedAccessorError();
     }
 

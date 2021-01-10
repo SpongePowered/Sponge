@@ -53,7 +53,6 @@ import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.generation.ChunkGenerator;
-import org.spongepowered.api.world.generation.MutableWorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -78,7 +77,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     @Nullable public final Component displayName;
     public final RegistryReference<WorldType> worldType;
     public final org.spongepowered.api.world.generation.ChunkGenerator generator;
-    public final WorldGenerationConfig generationSettings;
+    public final WorldGenerationConfig generationConfig;
     public final SerializationBehavior serializationBehavior;
     @Nullable public final UUID uniqueId;
     @Nullable public final RegistryReference<GameMode> gameMode;
@@ -144,7 +143,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.displayName = builder.displayName;
         this.worldType = builder.worldType;
         this.generator = builder.generator;
-        this.generationSettings = builder.generationSettings;
+        this.generationConfig = builder.generationConfig;
         this.uniqueId = UUID.randomUUID();
         this.gameMode = builder.gameMode;
         this.difficulty = builder.difficulty;
@@ -166,7 +165,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.displayName = levelData.displayName().orElse(null);
         this.worldType = RegistryReference.referenced(Sponge.getServer().registries(), RegistryTypes.WORLD_TYPE, (WorldType) world.dimensionType());
         this.generator = (ChunkGenerator) world.getChunkSource().getGenerator();
-        this.generationSettings = MutableWorldGenerationConfig.builder().from(levelData.worldGenerationSettings()).build();
+        this.generationConfig = WorldGenerationConfig.Mutable.builder().from(levelData.worldGenerationConfig()).build();
         this.uniqueId = levelData.getUniqueId();
         this.gameMode = RegistryReference.referenced(Sponge.getGame().registries(), RegistryTypes.GAME_MODE, levelData.gameMode());
         this.difficulty = RegistryReference.referenced(Sponge.getGame().registries(), RegistryTypes.DIFFICULTY, levelData.difficulty());
@@ -188,7 +187,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.displayName = templateBridge.bridge$displayName();
         this.worldType = RegistryReference.referenced(Sponge.getServer().registries(), RegistryTypes.WORLD_TYPE, (WorldType) template.type());
         this.generator = (ChunkGenerator) template.generator();
-        this.generationSettings = MutableWorldGenerationConfig.builder().from((MutableWorldGenerationConfig) BootstrapProperties.dimensionGeneratorSettings).build();
+        this.generationConfig = WorldGenerationConfig.Mutable.builder().from((WorldGenerationConfig.Mutable) BootstrapProperties.dimensionGeneratorSettings).build();
         this.uniqueId = templateBridge.bridge$uniqueId();
         this.gameMode = RegistryKey.of(RegistryTypes.GAME_MODE, (ResourceKey) (Object) templateBridge.bridge$gameMode()).asReference();
         this.difficulty = RegistryKey.of(RegistryTypes.DIFFICULTY, (ResourceKey) (Object) templateBridge.bridge$difficulty()).asReference();
@@ -226,7 +225,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
     @Override
     public WorldGenerationConfig generationConfig() {
-        return this.generationSettings;
+        return this.generationConfig;
     }
 
     @Override
@@ -344,7 +343,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         @Nullable protected Component displayName;
         @Nullable protected RegistryReference<WorldType> worldType;
         @Nullable protected ChunkGenerator generator;
-        @Nullable protected WorldGenerationConfig generationSettings;
+        @Nullable protected WorldGenerationConfig generationConfig;
         @Nullable protected RegistryReference<GameMode> gameMode;
         @Nullable protected RegistryReference<Difficulty> difficulty;
         @Nullable protected SerializationBehavior serializationBehavior;
@@ -372,7 +371,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
         @Override
         public Builder generationConfig(final WorldGenerationConfig generationConfig) {
-            this.generationSettings = Objects.requireNonNull(generationConfig, "generationConfig");
+            this.generationConfig = Objects.requireNonNull(generationConfig, "generationConfig");
             return this;
         }
 
@@ -455,7 +454,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.worldType = WorldTypes.OVERWORLD;
             this.generator = ChunkGenerator.noise(BiomeProvider.layered(LayeredBiomeConfig.builder().build()), NoiseGeneratorConfig.overworld());
             final DimensionGeneratorSettings generationSettings = BootstrapProperties.dimensionGeneratorSettings;
-            this.generationSettings = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$construct(generationSettings.seed(),
+            this.generationConfig = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
                     new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());
@@ -481,7 +480,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.worldType = template.worldType();
             this.generator = template.generator();
             final DimensionGeneratorSettings generationSettings = (DimensionGeneratorSettings) template.generationConfig();
-            this.generationSettings = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$construct(generationSettings.seed(),
+            this.generationConfig = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
                     new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());

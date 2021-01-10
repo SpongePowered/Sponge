@@ -32,9 +32,9 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Queue;
-import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(ServerWorld.class)
 public interface ServerWorldAccessor {

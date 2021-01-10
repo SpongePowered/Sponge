@@ -30,5 +30,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(Color.class)
 public interface ColorAccessor {
+
     @Accessor("value") int accessor$value();
+
 }

@@ -47,8 +47,6 @@ public interface StructureBlockTileEntityAccessor {
 
     @Accessor("mode") StructureMode accessor$mode();
 
-    @Accessor("mode") void accessor$mode(final StructureMode mode);
-
     @Accessor("ignoreEntities") boolean accessor$ignoreEntities();
 
     @Accessor("showAir") boolean accessor$showAir();

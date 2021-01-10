@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.server;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.RegistryKey;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -44,13 +45,15 @@ import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.SaveFormat;
 import net.minecraft.world.storage.ServerWorldInfo;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -58,22 +61,24 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -94,16 +99,18 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     private CustomServerBossInfoManager impl$bossBarManager;
     private SpongeRegistryHolder impl$registerHolder;
     private IChunkStatusListener impl$chunkStatusListener;
+    private Map<Entity, Vector3d> impl$rotationUpdates;
+
     private boolean impl$isManualSave = false;
-    private Weather impl$previousWeather;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$cacheLevelSave(MinecraftServer p_i241885_1_, Executor p_i241885_2_, SaveFormat.LevelSave p_i241885_3_,
-            IServerWorldInfo p_i241885_4_, RegistryKey<World> p_i241885_5_, DimensionType p_i241885_6_, IChunkStatusListener p_i241885_7_,
-            ChunkGenerator p_i241885_8_, boolean p_i241885_9_, long p_i241885_10_, List<ISpecialSpawner> p_i241885_12_, boolean p_i241885_13_,
-            CallbackInfo ci) {
+    private void impl$cacheLevelSave(final MinecraftServer p_i241885_1_, final Executor p_i241885_2_, final SaveFormat.LevelSave p_i241885_3_,
+            final IServerWorldInfo p_i241885_4_, final RegistryKey<World> p_i241885_5_, final DimensionType p_i241885_6_, final IChunkStatusListener p_i241885_7_,
+            final ChunkGenerator p_i241885_8_, final boolean p_i241885_9_, final long p_i241885_10_, final List<ISpecialSpawner> p_i241885_12_, final boolean p_i241885_13_,
+            final CallbackInfo ci) {
         this.impl$levelSave = p_i241885_3_;
         this.impl$chunkStatusListener = p_i241885_7_;
+        this.impl$rotationUpdates = new Object2ObjectOpenHashMap<>();
         this.impl$registerHolder = new SpongeRegistryHolder(((DynamicRegistries.Impl) p_i241885_1_.registryAccess()));
     }
 
@@ -123,7 +130,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             return false;
         }
 
-        final ServerWorld world = SpongeCommon.getServer().getLevel(this.shadow$dimension());
+        final ServerWorld world = this.shadow$getServer().getLevel(this.shadow$dimension());
         if (world == null) {
             return false;
         }
@@ -156,8 +163,6 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         return this.impl$bossBarManager;
     }
 
-    private final Map<Entity, Vector3d> impl$rotationUpdates = new HashMap<>();
-
     @Override
     public void bridge$addEntityRotationUpdate(final net.minecraft.entity.Entity entity, final Vector3d rotation) {
         this.impl$rotationUpdates.put(entity, rotation);
@@ -174,52 +179,6 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     @Override
-    public void bridge$setPreviousWeather(Weather weather) {
-        this.impl$previousWeather = weather;
-    }
-
-    @Override
-    public void bridge$setWeather(final Weather weather, final long ticks) {
-        final ServerWorldInfo levelData = (ServerWorldInfo) this.getLevelData();
-
-        if (weather == Weathers.CLEAR.get()) {
-            levelData.setClearWeatherTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            levelData.setRainTime(0);
-            levelData.setThunderTime(0);
-            levelData.setRaining(false);
-            levelData.setThundering(false);
-        } else if (weather == Weathers.RAIN.get()) {
-            levelData.setClearWeatherTime(0);
-            levelData.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            levelData.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            levelData.setRaining(true);
-            levelData.setThundering(false);
-        } else if (weather == Weathers.THUNDER.get()) {
-            levelData.setClearWeatherTime(0);
-            levelData.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            levelData.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
-            levelData.setRaining(true);
-            levelData.setThundering(true);
-        }
-    }
-
-    @Override
-    public long bridge$getDurationInTicks() {
-        final ServerWorldInfo levelData = (ServerWorldInfo) this.getLevelData();
-
-        if (this.shadow$isThundering()) {
-            return levelData.getThunderTime();
-        }
-        if (this.shadow$isRaining()) {
-            return levelData.getRainTime();
-        }
-        if (levelData.getClearWeatherTime() > 0) {
-            return levelData.getClearWeatherTime();
-        }
-        return Math.min(levelData.getThunderTime(), levelData.getRainTime());
-    }
-
-    @Override
     public void bridge$triggerExplosion(Explosion explosion) {
         // Sponge start
         // Set up the pre event
@@ -233,18 +192,8 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             }
             explosion = event.getExplosion();
         }
-        final net.minecraft.world.Explosion mcExplosion;
-        try {
-            // Since we already have the API created implementation Explosion, let's use it.
-            mcExplosion = (net.minecraft.world.Explosion) explosion;
-        } catch (final Exception e) {
-            new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
-                    .add("An explosion that was expected to be used for this implementation does not")
-                    .add("originate from this implementation.")
-                    .add(e)
-                    .trace();
-            return;
-        }
+
+        final net.minecraft.world.Explosion mcExplosion = (net.minecraft.world.Explosion) explosion;
 
         try (final PhaseContext<?> ignored = GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER)
                 .explosion((net.minecraft.world.Explosion) explosion)
@@ -266,13 +215,40 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     @Override
-    public void bridge$setManualSave(boolean state) {
+    public void bridge$setManualSave(final boolean state) {
         this.impl$isManualSave = state;
     }
 
     @Override
     public RegistryHolder bridge$registries() {
         return this.impl$registerHolder;
+    }
+
+    @Override
+    public BlockSnapshot bridge$createSnapshot(final int x, final int y, final int z) {
+        final BlockPos pos = new BlockPos(x, y, z);
+
+        if (!World.isInWorldBounds(pos)) {
+            return BlockSnapshot.empty();
+        }
+
+        if (!this.hasChunk(x >> 4, z >> 4)) {
+            return BlockSnapshot.empty();
+        }
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
+        builder.world((ServerWorld) (Object) this).position(new Vector3i(x, y, z));
+        final net.minecraft.world.chunk.Chunk chunk = this.shadow$getChunkAt(pos);
+        final net.minecraft.block.BlockState state = chunk.getBlockState(pos);
+        builder.blockState(state);
+        final net.minecraft.tileentity.TileEntity blockEntity = chunk.getBlockEntity(pos, net.minecraft.world.chunk.Chunk.CreateEntityType.CHECK);
+        if (blockEntity != null) {
+            TrackingUtil.addTileEntityToBuilder(blockEntity, builder);
+        }
+        ((ChunkBridge) chunk).bridge$getBlockCreatorUUID(pos).ifPresent(builder::creator);
+        ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos).ifPresent(builder::notifier);
+
+        builder.flag(BlockChangeFlags.NONE);
+        return builder.build();
     }
 
     @Override
@@ -290,7 +266,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
      * @reason Honor our serialization behavior in performing saves
      */
     @Overwrite
-    public void save(@Nullable IProgressUpdate progress, boolean flush, boolean skipSave) {
+    public void save(@Nullable final IProgressUpdate progress, final boolean flush, final boolean skipSave) {
         final ServerWorldInfo levelData = (ServerWorldInfo) this.getLevelData();
 
         final ServerChunkProvider chunkProvider = ((ServerWorld) (Object) this).getChunkSource();
@@ -339,7 +315,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     public String toString() {
         return new StringJoiner(",", ServerWorld.class.getSimpleName() + "[", "]")
                 .add("key=" + this.shadow$dimension())
-                .add("dimensionType=" + this.shadow$dimensionType())
+                .add("worldType=" + ((WorldType) this.shadow$dimensionType()).key(RegistryTypes.WORLD_TYPE))
                 .toString();
     }
 }

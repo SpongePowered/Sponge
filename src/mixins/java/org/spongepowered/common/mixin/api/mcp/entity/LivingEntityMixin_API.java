@@ -30,6 +30,7 @@ import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.potion.EffectInstance;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -52,6 +53,8 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
     @Shadow public abstract float shadow$getHealth();
     @Shadow public abstract ModifiableAttributeInstance shadow$getAttribute(net.minecraft.entity.ai.attributes.Attribute attribute);
     // @formatter:on
+
+    @Shadow public abstract boolean addEffect(EffectInstance p_195064_1_);
 
     @Override
     public Component getTeamRepresentation() {

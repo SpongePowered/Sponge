@@ -24,29 +24,14 @@
  */
 package org.spongepowered.common.accessor.server.management;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.PlayerData;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(PlayerList.class)
 public interface PlayerListAccessor {
 
-    @Accessor("LOGGER")
-    static Logger accessor$LOGGER() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("server") MinecraftServer accessor$server();
-
     @Accessor("playerIo") PlayerData accessor$playerIo();
-
-    @Invoker("updatePlayerGameMode") void invoker$updatePlayerGameMode(final ServerPlayerEntity target, final ServerPlayerEntity source, final ServerWorld world);
 
 }

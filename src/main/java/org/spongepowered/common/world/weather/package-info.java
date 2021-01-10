@@ -22,16 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.server;
-
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.server.ServerChunkProvider;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-
-@Mixin(ServerChunkProvider.class)
-public interface ServerChunkProviderAccessor {
-
-    @Accessor("generator") void accessor$generator(final ChunkGenerator generator);
-
-}
+@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
+package org.spongepowered.common.world.weather;

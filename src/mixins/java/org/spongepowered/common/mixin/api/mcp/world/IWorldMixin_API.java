@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockState;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IWorld;
@@ -34,9 +32,9 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeContainer;
-import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.storage.IWorldInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -47,6 +45,7 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ProtoWorld;
 import org.spongepowered.api.world.chunk.ProtoChunk;
+import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -61,7 +60,9 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -75,19 +76,21 @@ public interface IWorldMixin_API {
     //@formatter:off
     @Shadow boolean shadow$hasChunk(int p_217354_1_, int p_217354_2_);
     @Shadow Random shadow$getRandom();
-    @Shadow AbstractChunkProvider shadow$getChunkSource();
+    @Shadow IWorldInfo shadow$getLevelData();
     //@formatter:on
 
     // MutableBiomeVolume
 
     @SuppressWarnings({"rawtypes", "ConstantConditions"})
     default boolean protoWorld$setBiome(final int x, final int y, final int z, final org.spongepowered.api.world.biome.Biome biome) {
-        final IChunk iChunk = ((IWorldReader) (Object) this).getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
+        Objects.requireNonNull(biome, "biome");
+
+        final IChunk iChunk = ((IWorldReader) this).getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
         if (iChunk == null) {
             return false;
         }
         if (iChunk instanceof ProtoChunk) {
-            return ((ProtoChunk) (Object) iChunk).setBiome(x, y, z, biome);
+            return ((ProtoChunk) iChunk).setBiome(x, y, z, biome);
         } else {
             final Biome[] biomes = ((BiomeContainerAccessor) iChunk.getBiomes()).accessor$biomes();
 
@@ -128,7 +131,7 @@ public interface IWorldMixin_API {
     // EntityVolume
 
     default Optional<Entity> protoWorld$getEntity(final UUID uuid) {
-        return Optional.empty();
+        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
     // RandomProvider
@@ -140,35 +143,34 @@ public interface IWorldMixin_API {
 
     // ProtoWorld
 
+    default Difficulty protoWorld$getDifficulty() {
+        return (Difficulty) (Object) this.shadow$getLevelData().getDifficulty();
+    }
+
     default Collection<Entity> protoWorld$spawnEntities(final Iterable<? extends Entity> entities) {
-        final List<Entity> entitiesToSpawn = NonNullList.create();
+        Objects.requireNonNull(entities, "entities");
+
+        final List<Entity> entitiesToSpawn = new ArrayList<>();
         entities.forEach(entitiesToSpawn::add);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory
-                .createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().getCurrentCause(), entitiesToSpawn);
+        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().getCurrentCause(), entitiesToSpawn);
         if (Sponge.getEventManager().post(event)) {
-            return ImmutableList.of();
+            return Collections.emptyList();
         }
         for (final Entity entity : event.getEntities()) {
             EntityUtil.processEntitySpawn(entity, Optional::empty);
         }
-
-        final ImmutableList.Builder<Entity> builder = ImmutableList.builder();
-        for (final Entity entity : event.getEntities()) {
-            builder.add(entity);
-        }
-        return builder.build();
+        return Collections.unmodifiableCollection(new ArrayList<>(event.getEntities()));
     }
 
     default boolean protoWorld$spawnEntity(final Entity entity) {
-        Objects.requireNonNull(entity, "entity");
-
-        return ((IWorld) this).addFreshEntity((net.minecraft.entity.Entity) entity);
+        return ((IWorld) this).addFreshEntity((net.minecraft.entity.Entity) Objects.requireNonNull(entity, "entity"));
     }
 
     // MutableBlockVolume
 
-    default boolean protoWorld$setBlock(
-        final int x, final int y, final int z, final org.spongepowered.api.block.BlockState blockState, final BlockChangeFlag flag) {
+    default boolean protoWorld$setBlock(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState blockState, final BlockChangeFlag flag) {
+        Objects.requireNonNull(blockState, "blockState");
+        Objects.requireNonNull(flag, "flag");
 
         if (!World.isInWorldBounds(new BlockPos(x, y, z))) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);

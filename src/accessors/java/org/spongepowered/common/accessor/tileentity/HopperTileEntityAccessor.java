@@ -42,13 +42,8 @@ public interface HopperTileEntityAccessor {
     @Accessor("cooldownTime") void accessor$cooldownTime(final int cooldownTime);
 
     @Invoker("tryMoveInItem")
-    static ItemStack invoker$tryMoveInItem(
-            final @Nullable IInventory source,
-            final IInventory destination,
-            final ItemStack stack,
-            final int index,
-            final @Nullable Direction direction
-    ) {
+    static ItemStack invoker$tryMoveInItem(final @Nullable IInventory source, final IInventory destination, final ItemStack stack, final int index,
+            final @Nullable Direction direction) {
         throw new UntransformedInvokerError();
     }
 

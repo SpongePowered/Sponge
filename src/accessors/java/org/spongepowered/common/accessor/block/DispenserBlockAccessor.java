@@ -36,8 +36,7 @@ import java.util.Map;
 @Mixin(DispenserBlock.class)
 public interface DispenserBlockAccessor {
 
-    @Accessor("DISPENSER_REGISTRY")
-    static Map<Item, IDispenseItemBehavior> accessor$DISPENSER_REGISTRY() {
+    @Accessor("DISPENSER_REGISTRY") static Map<Item, IDispenseItemBehavior> accessor$DISPENSER_REGISTRY() {
         throw new UntransformedAccessorError();
     }
 

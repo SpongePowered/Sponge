@@ -26,12 +26,12 @@ package org.spongepowered.common.bridge.world;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.CustomServerBossInfoManager;
-import net.minecraft.world.Dimension;
 import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.storage.SaveFormat;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -45,8 +45,6 @@ public interface ServerWorldBridge {
 
     CustomServerBossInfoManager bridge$getBossBarManager();
 
-    void bridge$setPreviousWeather(Weather weather);
-
     void bridge$updateRotation(Entity entityIn);
 
     void bridge$addEntityRotationUpdate(Entity entity, Vector3d rotation);
@@ -57,19 +55,11 @@ public interface ServerWorldBridge {
 
     void bridge$incrementChunkLoadCount();
 
-    void bridge$updateConfigCache();
-
-    long bridge$getWeatherStartTime();
-
-    void bridge$setWeatherStartTime(long start);
-
-    void bridge$setWeather(Weather weather, long ticks);
-
-    long bridge$getDurationInTicks();
-
     void bridge$triggerExplosion(Explosion explosion);
 
     void bridge$setManualSave(boolean state);
 
     RegistryHolder bridge$registries();
+
+    BlockSnapshot bridge$createSnapshot(int x, int y, int z);
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.server;
 
-import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -36,7 +35,7 @@ import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Dimension;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.raid.Raid;
 import net.minecraft.world.raid.RaidManager;
@@ -59,7 +58,6 @@ import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -67,7 +65,7 @@ import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.api.world.weather.Weathers;
+import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -75,15 +73,10 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.raid.RaidManagerAccessor;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.world.DimensionBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.mixin.api.mcp.world.WorldMixin_API;
 import org.spongepowered.common.util.MissingImplementationException;
-import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3d;
@@ -112,7 +105,6 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
 
     @Shadow public abstract void shadow$save(@Nullable IProgressUpdate p_217445_1_, boolean p_217445_2_, boolean p_217445_3_);
-    @Shadow protected abstract boolean shadow$addEntity(Entity p_217376_1_);
     @Shadow public abstract void shadow$unload(Chunk p_217466_1_);
     @Shadow public abstract void shadow$playSound(@Nullable PlayerEntity p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow public abstract ServerChunkProvider shadow$getChunkSource();
@@ -122,7 +114,6 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Shadow public abstract RaidManager shadow$getRaids();
     @Nullable @Shadow public abstract Raid shadow$getRaidAt(BlockPos p_217475_1_);
     @Shadow public abstract long shadow$getSeed();
-
     // @formatter:on
 
     @Intrinsic
@@ -177,47 +168,23 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     }
 
     @Override
-    public Optional<org.spongepowered.api.world.chunk.Chunk> regenerateChunk(final int cx, final int cy, final int cz,
-            final ChunkRegenerateFlag flag) {
+    public Optional<org.spongepowered.api.world.chunk.Chunk> regenerateChunk(final int cx, final int cy, final int cz, final ChunkRegenerateFlag flag) {
         throw new MissingImplementationException("ServerWorld", "regenerateChunk");
     }
 
     @Override
     public BlockSnapshot createSnapshot(final int x, final int y, final int z) {
-        if (!this.containsBlock(x, y, z)) {
-            return BlockSnapshot.empty();
-        }
-
-        if (!this.isChunkLoaded(x, y, z, false)) {
-            return BlockSnapshot.empty();
-        }
-        final BlockPos pos = new BlockPos(x, y, z);
-        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
-        builder.world((ServerWorld) (Object) this)
-                .position(new Vector3i(x, y, z));
-        final net.minecraft.world.chunk.Chunk chunk = this.shadow$getChunkAt(pos);
-        final net.minecraft.block.BlockState state = chunk.getBlockState(pos);
-        builder.blockState(state);
-        final net.minecraft.tileentity.TileEntity tile = chunk.getBlockEntity(pos, net.minecraft.world.chunk.Chunk.CreateEntityType.CHECK);
-        if (tile != null) {
-            TrackingUtil.addTileEntityToBuilder(tile, builder);
-        }
-        ((ChunkBridge) chunk).bridge$getBlockCreatorUUID(pos).ifPresent(builder::creator);
-        ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos).ifPresent(builder::notifier);
-
-        builder.flag(BlockChangeFlags.NONE);
-        return builder.build();
+        return ((ServerWorldBridge) this).bridge$createSnapshot(x, y, z);
     }
 
     @Override
     public boolean restoreSnapshot(final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
-        return snapshot.restore(force, flag);
+        return snapshot.restore(force, Objects.requireNonNull(flag, "flag"));
     }
 
     @Override
-    public boolean restoreSnapshot(
-            final int x, final int y, final int z, final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
-        return snapshot.withLocation(this.getLocation(x, y, z)).restore(force, flag);
+    public boolean restoreSnapshot(final int x, final int y, final int z, final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
+        return Objects.requireNonNull(snapshot, "snapshot").withLocation(this.getLocation(x, y, z)).restore(force, Objects.requireNonNull(flag, "flag"));
     }
 
     @Override
@@ -233,28 +200,24 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Override
     public boolean save() throws IOException {
         ((ServerWorldBridge) this).bridge$setManualSave(true);
-        this.shadow$save((IProgressUpdate) null, false, true);
+        this.shadow$save(null, false, true);
         return true;
     }
 
     @Override
     public boolean unloadChunk(final org.spongepowered.api.world.chunk.Chunk chunk) {
-        Objects.requireNonNull(chunk);
-
-        this.shadow$unload((Chunk) chunk);
+        this.shadow$unload((Chunk) Objects.requireNonNull(chunk, "chunk"));
         return true;
     }
 
     @Override
     public void triggerExplosion(final org.spongepowered.api.world.explosion.Explosion explosion) {
-        Objects.requireNonNull(explosion);
-
-        ((ServerWorldBridge) this).bridge$triggerExplosion(explosion);
+        ((ServerWorldBridge) this).bridge$triggerExplosion(Objects.requireNonNull(explosion, "explosion"));
     }
 
     @Override
     public Collection<ServerPlayer> getPlayers() {
-        return ImmutableList.copyOf((Collection<ServerPlayer>) (Collection<?>) this.shadow$players());
+        return Collections.unmodifiableCollection((Collection<ServerPlayer>) (Collection<?>) this.shadow$players());
     }
 
     @Override
@@ -264,31 +227,32 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public Collection<org.spongepowered.api.raid.Raid> getRaids() {
-        final RaidManagerAccessor raidManager = (RaidManagerAccessor) this.shadow$getRaids();
-        return (Collection<org.spongepowered.api.raid.Raid>) (Collection) raidManager.accessor$raidMap().values();
+        return (Collection<org.spongepowered.api.raid.Raid>) (Collection) ((RaidManagerAccessor) this.shadow$getRaids()).accessor$raidMap().values();
     }
 
     @Override
     public Optional<org.spongepowered.api.raid.Raid> getRaidAt(final Vector3i blockPosition) {
-        Objects.requireNonNull(blockPosition);
+        return Optional.ofNullable((org.spongepowered.api.raid.Raid) this.shadow$getRaidAt(VecHelper.toBlockPos(Objects.requireNonNull(blockPosition, "blockPosition"))));
+    }
 
-        final org.spongepowered.api.raid.Raid raid = (org.spongepowered.api.raid.Raid) this.shadow$getRaidAt(VecHelper.toBlockPos(blockPosition));
-        return Optional.ofNullable(raid);
+    // Volume
+
+    @Override
+    public boolean containsBlock(final int x, final int y, final int z) {
+        return World.isInWorldBounds(new BlockPos(x, y, z));
     }
 
     // EntityVolume
 
     @Override
     public Optional<org.spongepowered.api.entity.Entity> getEntity(final UUID uniqueId) {
-        Objects.requireNonNull(uniqueId);
-
-        return Optional.ofNullable((org.spongepowered.api.entity.Entity) this.shadow$getEntity(uniqueId));
+        return Optional.ofNullable((org.spongepowered.api.entity.Entity) this.shadow$getEntity(Objects.requireNonNull(uniqueId, "uniqueId")));
     }
 
     // MutableBlockEntityVolume
 
     @Override
-    public void removeBlockEntity(int x, int y, int z) {
+    public void removeBlockEntity(final int x, final int y, final int z) {
         this.shadow$removeBlockEntity(new BlockPos(x, y, z));
     }
 
@@ -306,19 +270,15 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public <E> DataTransactionResult offer(final int x, final int y, final int z, final Key<? extends Value<E>> key, final E value) {
-        Objects.requireNonNull(key);
-        Objects.requireNonNull(value);
+        Objects.requireNonNull(value, "value");
 
-        final DataProvider<? extends Value<E>, E> dataProvider = SpongeDataManager.getProviderRegistry().getProvider(key, ServerLocation.class);
+        final DataProvider<? extends Value<E>, E> dataProvider = SpongeDataManager.getProviderRegistry().getProvider(Objects.requireNonNull(key, "key"), ServerLocation.class);
         return dataProvider.offer(ServerLocation.of(this, new Vector3d(x, y, z)), value);
     }
 
     @Override
     public <E> Optional<E> get(final int x, final int y, final int z, final Key<? extends Value<E>> key) {
-        Objects.requireNonNull(key);
-
-        final DataProvider<? extends Value<E>, E> dataProvider = SpongeDataManager.getProviderRegistry().getProvider(key, ServerLocation.class);
-        final Optional<E> value = dataProvider.get(ServerLocation.of(this, new Vector3d(x, y, z)));
+        final Optional<E> value = SpongeDataManager.getProviderRegistry().getProvider(Objects.requireNonNull(key, "key"), ServerLocation.class).get(ServerLocation.of(this, new Vector3d(x, y, z)));
         if (value.isPresent()) {
             return value;
         }
@@ -327,43 +287,24 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public DataTransactionResult remove(final int x, final int y, final int z, final Key<?> key) {
-        Objects.requireNonNull(key);
-
-        final DataProvider dataProvider = SpongeDataManager.getProviderRegistry().getProvider((Key) key, ServerLocation.class);
-        return dataProvider.remove(ServerLocation.of(this, new Vector3d(x, y, z)));
+        return SpongeDataManager.getProviderRegistry().getProvider((Key) Objects.requireNonNull(key, "key"), ServerLocation.class).remove(ServerLocation.of(this, new Vector3d(x, y, z)));
     }
 
     // WeatherUniverse
 
     @Override
-    public Weather getWeather() {
-        return this.shadow$isThundering() ? Weathers.THUNDER.get() : this.shadow$isRaining() ? Weathers.RAIN.get() : Weathers.CLEAR.get();
+    public Weather weather() {
+        return ((ServerWorldProperties) this.shadow$getLevelData()).weather();
     }
 
     @Override
-    public Ticks getRemainingWeatherDuration() {
-        return new SpongeTicks(((ServerWorldBridge) this).bridge$getDurationInTicks());
+    public void setWeather(final WeatherType type) {
+        ((ServerWorldProperties) this.shadow$getLevelData()).setWeather(Objects.requireNonNull(type, "type"));
     }
 
     @Override
-    public Ticks getRunningWeatherDuration() {
-        return new SpongeTicks(this.shadow$getLevelData().getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime());
-    }
-
-    @Override
-    public void setWeather(final Weather weather) {
-        Objects.requireNonNull(weather);
-
-        ((ServerWorldBridge) this).bridge$setWeather(weather, (300 + this.random.nextInt(600)) * 20);
-    }
-
-    @Override
-    public void setWeather(final Weather weather, final Ticks ticks) {
-        Objects.requireNonNull(weather);
-        Objects.requireNonNull(ticks);
-
-        ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
-        ((ServerWorldBridge) this).bridge$setWeather(weather, ticks.getTicks());
+    public void setWeather(final WeatherType type, final Ticks ticks) {
+        ((ServerWorldProperties) this.shadow$getLevelData()).setWeather(Objects.requireNonNull(type, "type"), Objects.requireNonNull(ticks, "ticks"));
     }
 
     @Override

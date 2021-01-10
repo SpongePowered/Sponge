@@ -33,8 +33,7 @@ import org.spongepowered.common.UntransformedAccessorError;
 @Mixin(WolfEntity.class)
 public interface WolfEntityAccessor {
 
-    @Accessor("DATA_COLLAR_COLOR")
-    static DataParameter<Integer> accessor$DATA_COLLAR_COLOR() {
+    @Accessor("DATA_COLLAR_COLOR") static DataParameter<Integer> accessor$DATA_COLLAR_COLOR() {
         throw new UntransformedAccessorError();
     }
 

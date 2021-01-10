@@ -109,6 +109,7 @@ import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -116,7 +117,6 @@ import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.generation.MutableWorldGenerationConfig;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
@@ -207,7 +207,7 @@ import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
-import org.spongepowered.common.world.generation.SpongeMutableWorldGenerationConfigBuilder;
+import org.spongepowered.common.world.generation.SpongeWorldGenerationConfigMutableBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.volume.stream.SpongeStreamOptionsBuilder;
 
@@ -331,7 +331,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(PaletteType.Builder.class, SpongePaletteTypeBuilder::new)
                 .register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new)
                 .register(FluidState.Builder.class, SpongeFluidStateBuilder::new)
-                .register(MutableWorldGenerationConfig.Builder.class, SpongeMutableWorldGenerationConfigBuilder::new)
+                .register(WorldGenerationConfig.Mutable.Builder.class, SpongeWorldGenerationConfigMutableBuilder::new)
                 .register(WorldTypeEffect.Builder.class, SpongeWorldTypeEffect.BuilderImpl::new)
                 .register(WorldTypeTemplate.Builder.class, SpongeWorldTypeTemplate.BuilderImpl::new)
                 .register(WorldTemplate.Builder.class, SpongeWorldTemplate.BuilderImpl::new)

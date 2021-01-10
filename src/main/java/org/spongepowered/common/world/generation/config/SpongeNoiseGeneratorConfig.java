@@ -24,22 +24,15 @@
  */
 package org.spongepowered.common.world.generation.config;
 
-import net.minecraft.block.Blocks;
 import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.world.gen.DimensionSettings;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
-import net.minecraft.world.gen.settings.NoiseSettings;
-import net.minecraft.world.gen.settings.ScalingSettings;
-import net.minecraft.world.gen.settings.SlideSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.common.accessor.world.gen.DimensionSettingsAccessor;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.server.BootstrapProperties;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.util.Objects;
 
@@ -120,7 +113,7 @@ public final class SpongeNoiseGeneratorConfig {
 
         @Override
         public NoiseGeneratorConfig build() {
-            final DimensionSettings settings = DimensionSettingsAccessor.invoker$construct((DimensionStructuresSettings) this.structureConfig,
+            final DimensionSettings settings = DimensionSettingsAccessor.invoker$new((DimensionStructuresSettings) this.structureConfig,
                     (net.minecraft.world.gen.settings.NoiseSettings) this.noiseConfig, (net.minecraft.block.BlockState) this.defaultBlock,
                     (net.minecraft.block.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, false);
             return (NoiseGeneratorConfig) (Object) settings;

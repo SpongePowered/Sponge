@@ -33,8 +33,7 @@ import org.spongepowered.common.UntransformedAccessorError;
 @Mixin(PillagerEntity.class)
 public interface PillagerEntityAccessor {
 
-    @Accessor("IS_CHARGING_CROSSBOW")
-    static DataParameter<Boolean> accessor$IS_CHARGING_CROSSBOW() {
+    @Accessor("IS_CHARGING_CROSSBOW") static DataParameter<Boolean> accessor$IS_CHARGING_CROSSBOW() {
         throw new UntransformedAccessorError();
     }
 }

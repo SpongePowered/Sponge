@@ -37,8 +37,8 @@ import java.util.Optional;
 @Mixin(DimensionGeneratorSettings.class)
 public interface DimensionGeneratorSettingsAccessor {
 
-    @Invoker("<init>") static DimensionGeneratorSettings invoker$construct(long seed, boolean generateFeatures, boolean generateBonusChest,
-        SimpleRegistry<Dimension> dimensionRegistry, Optional<String> legacyCustomOptions) {
+    @Invoker("<init>") static DimensionGeneratorSettings invoker$new(final long seed, final boolean generateFeatures, final boolean generateBonusChest,
+            final SimpleRegistry<Dimension> dimensionRegistry, final Optional<String> legacyCustomOptions) {
         throw new UntransformedInvokerError();
     }
 

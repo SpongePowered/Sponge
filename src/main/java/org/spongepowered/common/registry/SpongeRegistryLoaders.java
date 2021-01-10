@@ -144,8 +144,8 @@ import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
-import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.api.world.weather.Weathers;
+import org.spongepowered.api.world.weather.WeatherType;
+import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.common.accessor.command.arguments.ArgumentSerializerAccessor;
 import org.spongepowered.common.accessor.command.arguments.ArgumentTypesAccessor;
 import org.spongepowered.common.accessor.command.arguments.DimensionArgumentAccessor;
@@ -239,7 +239,7 @@ import org.spongepowered.common.world.teleport.DefaultTeleportHelperFilter;
 import org.spongepowered.common.world.teleport.FlyingTeleportHelperFilter;
 import org.spongepowered.common.world.teleport.NoPortalTeleportHelperFilter;
 import org.spongepowered.common.world.teleport.SurfaceOnlyTeleportHelperFilter;
-import org.spongepowered.common.world.weather.SpongeWeather;
+import org.spongepowered.common.world.weather.SpongeWeatherType;
 import org.spongepowered.math.vector.Vector2d;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -832,11 +832,11 @@ public final class SpongeRegistryLoaders {
         )));
     }
 
-    public static RegistryLoader<Weather> weather() {
-        return RegistryLoader.of(l -> l.mapping(SpongeWeather::new, m -> m.add(
-                Weathers.CLEAR,
-                Weathers.RAIN,
-                Weathers.THUNDER
+    public static RegistryLoader<WeatherType> weather() {
+        return RegistryLoader.of(l -> l.mapping(SpongeWeatherType::new, m -> m.add(
+                WeatherTypes.CLEAR,
+                WeatherTypes.RAIN,
+                WeatherTypes.THUNDER
         )));
     }
 

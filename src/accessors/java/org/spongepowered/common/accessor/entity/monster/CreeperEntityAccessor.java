@@ -33,8 +33,7 @@ import org.spongepowered.common.UntransformedAccessorError;
 @Mixin(CreeperEntity.class)
 public interface CreeperEntityAccessor {
 
-    @Accessor("DATA_IS_POWERED")
-    static DataParameter<Boolean> accessor$DATA_IS_POWERED() {
+    @Accessor("DATA_IS_POWERED") static DataParameter<Boolean> accessor$DATA_IS_POWERED() {
         throw new UntransformedAccessorError();
     }
 

@@ -25,24 +25,22 @@
 package org.spongepowered.common.mixin.api.mcp.world.gen.settings;
 
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
-import org.spongepowered.api.world.generation.MutableWorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(DimensionGeneratorSettings.class)
 @Implements(@Interface(iface = WorldGenerationConfig.class, prefix = "worldGenerationConfig$"))
-public abstract class DimensionGeneratorSettingsMixin_API implements MutableWorldGenerationConfig {
+public abstract class DimensionGeneratorSettingsMixin_API implements WorldGenerationConfig.Mutable {
 
     // @formatter:off
-    @Mutable @Shadow @Final private long seed;
-    @Mutable @Shadow @Final private boolean generateFeatures;
-    @Mutable @Shadow @Final private boolean generateBonusChest;
+    @org.spongepowered.asm.mixin.Mutable @Shadow @Final private long seed;
+    @org.spongepowered.asm.mixin.Mutable @Shadow @Final private boolean generateFeatures;
+    @org.spongepowered.asm.mixin.Mutable @Shadow @Final private boolean generateBonusChest;
 
     @Shadow public abstract long shadow$seed();
     @Shadow public abstract boolean shadow$generateFeatures();

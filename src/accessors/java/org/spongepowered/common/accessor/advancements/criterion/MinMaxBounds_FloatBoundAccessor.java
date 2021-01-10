@@ -33,8 +33,7 @@ import org.spongepowered.common.UntransformedInvokerError;
 @Mixin(MinMaxBounds.FloatBound.class)
 public interface MinMaxBounds_FloatBoundAccessor {
 
-    @Invoker("<init>")
-    static MinMaxBounds.FloatBound invoker$new(final @Nullable Float min, final @Nullable Float max) {
+    @Invoker("<init>") static MinMaxBounds.FloatBound invoker$new(final @Nullable Float min, final @Nullable Float max) {
         throw new UntransformedInvokerError();
     }
 

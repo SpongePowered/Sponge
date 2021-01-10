@@ -38,10 +38,10 @@ import java.util.OptionalLong;
 @Mixin(DimensionType.class)
 public interface DimensionTypeAccessor {
 
-    @Invoker("<init>") static DimensionType invoker$construct(OptionalLong p_i241973_1_, boolean p_i241973_2_, boolean p_i241973_3_,
-            boolean p_i241973_4_, boolean p_i241973_5_, double p_i241973_6_, boolean p_i241973_8_, boolean p_i241973_9_, boolean p_i241973_10_,
-            boolean p_i241973_11_, boolean p_i241973_12_, int p_i241973_13_, IBiomeMagnifier p_i241973_14_, ResourceLocation p_i241973_15_,
-            ResourceLocation p_i241973_16_, float p_i241973_17_
+    @Invoker("<init>") static DimensionType invoker$new(final OptionalLong p_i241973_1_, final boolean p_i241973_2_, final boolean p_i241973_3_,
+            final boolean p_i241973_4_, final boolean p_i241973_5_, final double p_i241973_6_, final boolean p_i241973_8_, final boolean p_i241973_9_, final boolean p_i241973_10_,
+            final boolean p_i241973_11_, final boolean p_i241973_12_, final int p_i241973_13_, final IBiomeMagnifier p_i241973_14_, final ResourceLocation p_i241973_15_,
+            final ResourceLocation p_i241973_16_, final float p_i241973_17_
     ) {
         throw new UntransformedInvokerError();
     }

@@ -31,7 +31,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(PlayerInteractionManager.class)
 public interface PlayerInteractionManagerAccessor {
+
     @Accessor("isDestroyingBlock") boolean accessor$isDestroyingBlock();
+
     @Accessor("destroyPos") BlockPos accessor$destroyPos();
 
 }

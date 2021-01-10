@@ -34,33 +34,27 @@ import org.spongepowered.common.UntransformedAccessorError;
 @Mixin(PlayerEntity.class)
 public interface PlayerEntityAccessor {
 
-    @Accessor("DATA_PLAYER_ABSORPTION_ID")
-    static DataParameter<Float> accessor$DATA_PLAYER_ABSORPTION_ID() {
+    @Accessor("DATA_PLAYER_ABSORPTION_ID") static DataParameter<Float> accessor$DATA_PLAYER_ABSORPTION_ID() {
         throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_SCORE_ID")
-    static DataParameter<Integer> accessor$DATA_SCORE_ID() {
+    @Accessor("DATA_SCORE_ID") static DataParameter<Integer> accessor$DATA_SCORE_ID() {
         throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_PLAYER_MODE_CUSTOMISATION")
-    static DataParameter<Byte> accessor$DATA_PLAYER_MODE_CUSTOMISATION() {
+    @Accessor("DATA_PLAYER_MODE_CUSTOMISATION") static DataParameter<Byte> accessor$DATA_PLAYER_MODE_CUSTOMISATION() {
         throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_PLAYER_MAIN_HAND")
-    static DataParameter<Byte> accessor$DATA_PLAYER_MAIN_HAND() {
+    @Accessor("DATA_PLAYER_MAIN_HAND") static DataParameter<Byte> accessor$DATA_PLAYER_MAIN_HAND() {
         throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_SHOULDER_LEFT")
-    static DataParameter<CompoundNBT> accessor$DATA_SHOULDER_LEFT() {
+    @Accessor("DATA_SHOULDER_LEFT") static DataParameter<CompoundNBT> accessor$DATA_SHOULDER_LEFT() {
         throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_SHOULDER_RIGHT")
-    static DataParameter<CompoundNBT> accessor$DATA_SHOULDER_RIGHT() {
+    @Accessor("DATA_SHOULDER_RIGHT") static DataParameter<CompoundNBT> accessor$DATA_SHOULDER_RIGHT() {
         throw new UntransformedAccessorError();
     }
 

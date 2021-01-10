@@ -33,6 +33,4 @@ public interface LockCodeAccessor {
 
     @Accessor("key") String accessor$key();
 
-    @Accessor("key") void accessor$key(final String key);
-
 }

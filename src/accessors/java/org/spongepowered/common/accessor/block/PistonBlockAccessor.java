@@ -26,14 +26,11 @@ package org.spongepowered.common.accessor.block;
 
 import net.minecraft.block.PistonBlock;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(PistonBlock.class)
 public interface PistonBlockAccessor {
 
     @Accessor("isSticky") boolean accessor$isSticky();
-
-    @Mutable @Accessor("isSticky") void accessor$isSticky(final boolean isSticky);
 
 }

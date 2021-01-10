@@ -39,18 +39,10 @@ import org.spongepowered.common.UntransformedInvokerError;
 public interface StyleAccessor {
 
     @Invoker("<init>")
-    static Style invoker$new(
-            final @Nullable Color color,
-            final @Nullable Boolean bold,
-            final @Nullable Boolean italic,
-            final @Nullable Boolean underlined,
-            final @Nullable Boolean strikethrough,
-            final @Nullable Boolean obfuscated,
-            final @Nullable ClickEvent clickEvent,
-            final @Nullable HoverEvent hoverEvent,
-            final @Nullable String insertion,
-            final @Nullable ResourceLocation font
-    ) {
+    static Style invoker$new(final @Nullable Color color, final @Nullable Boolean bold, final @Nullable Boolean italic,
+            final @Nullable Boolean underlined, final @Nullable Boolean strikethrough, final @Nullable Boolean obfuscated,
+            final @Nullable ClickEvent clickEvent, final @Nullable HoverEvent hoverEvent, final @Nullable String insertion,
+            final @Nullable ResourceLocation font) {
         throw new UntransformedInvokerError();
     }
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.accessor.world.spawner;
 
-import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.util.math.BlockPos;
@@ -39,6 +38,4 @@ public interface WorldEntitySpawner_EntityDensityManagerAccessor {
     @Invoker("canSpawn") boolean invoker$canSpawn(EntityType<?> p_234969_1_, BlockPos p_234969_2_, IChunk p_234969_3_);
 
     @Invoker("afterSpawn") void invoker$afterSpawn(MobEntity p_234970_1_, IChunk p_234970_2_);
-
-    @Invoker("canSpawnForCategory") boolean invoker$canSpawnForCategory(EntityClassification classification);
 }

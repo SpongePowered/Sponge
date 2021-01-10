@@ -30,5 +30,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ArmorMaterial.class)
 public interface ArmorMaterialAccessor {
+
     @Accessor("name") String accessor$name();
+
 }

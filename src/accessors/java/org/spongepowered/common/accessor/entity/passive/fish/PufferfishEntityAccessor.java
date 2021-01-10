@@ -32,8 +32,7 @@ import org.spongepowered.common.UntransformedInvokerError;
 @Mixin(PufferfishEntity.class)
 public interface PufferfishEntityAccessor {
 
-    @Invoker("getScale")
-    static float invoker$getScale(final int scale) {
+    @Invoker("getScale") static float invoker$getScale(final int scale) {
         throw new UntransformedInvokerError();
     }
 

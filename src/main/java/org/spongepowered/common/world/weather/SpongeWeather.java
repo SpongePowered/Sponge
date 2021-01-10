@@ -24,8 +24,51 @@
  */
 package org.spongepowered.common.world.weather;
 
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.api.world.weather.WeatherType;
+import org.spongepowered.common.util.Constants;
 
 public final class SpongeWeather implements Weather {
 
+    private final SpongeWeatherType type;
+    private final Ticks remainingDuration, runningDuration;
+
+    public SpongeWeather(final SpongeWeatherType type, final Ticks remainingDuration, final Ticks runningDuration) {
+        this.type = type;
+        this.remainingDuration = remainingDuration;
+        this.runningDuration = runningDuration;
+    }
+
+    @Override
+    public WeatherType type() {
+        return this.type;
+    }
+
+    @Override
+    public Ticks remainingDuration() {
+        return this.remainingDuration;
+    }
+
+    @Override
+    public Ticks runningDuration() {
+        return this.runningDuration;
+    }
+
+    @Override
+    public int getContentVersion() {
+        return 0;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return DataContainer.createNew()
+                .set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(Constants.Universe.Weather.TYPE, this.type.key(RegistryTypes.WEATHER_TYPE))
+                .set(Constants.Universe.Weather.REMAINING_DURATION, this.remainingDuration.getTicks())
+                .set(Constants.Universe.Weather.RUNNING_DURATION, this.runningDuration.getTicks());
+    }
 }

@@ -26,6 +26,9 @@ package org.spongepowered.common.bridge.world;
 
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.math.vector.Vector3d;
 
 public interface WorldBridge {
 
@@ -44,7 +47,7 @@ public interface WorldBridge {
      */
     boolean bridge$isFake();
 
-    void bridge$clearFakeCheck();
-
     void bridge$adjustDimensionLogic(DimensionType dimensionType);
+
+    <E extends Entity> E bridge$createEntity(EntityType<E> type, Vector3d position, boolean naturally);
 }

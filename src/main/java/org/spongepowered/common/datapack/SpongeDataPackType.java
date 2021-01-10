@@ -112,7 +112,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                 s -> {
                     final OptionalLong fixedTime = !s.fixedTime().isPresent() ? OptionalLong.empty() : OptionalLong.of(s.fixedTime().get().asTicks().getTicks());
                     final DimensionType type =
-                            DimensionTypeAccessor.invoker$construct(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
+                            DimensionTypeAccessor.invoker$new(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
                                     s.coordinateMultiplier(),
                                     s.createDragonFight(), s.piglinSafe(), s.bedsUsable(), s.respawnAnchorsUsable(), s.hasRaids(), s.logicalHeight(),
                                     (IBiomeMagnifier) s.biomeSampler(), (ResourceLocation) (Object) ((SpongeWorldTypeTemplate) s).infiniburn,

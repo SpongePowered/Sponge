@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.world.gen.settings;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.gen.settings.StructureSeparationSettings;
 import net.minecraft.world.gen.settings.StructureSpreadSettings;
-import org.spongepowered.api.world.generation.Structure;
+import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
 import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;

@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.accessor.state;
 
-import java.util.Collection;
 import net.minecraft.state.StateHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
+import java.util.Collection;
+
 @Mixin(StateHolder.class)
 public interface StateHolderAccessor {
-  @Invoker("findNextInCollection")
-  static <T> T invoker$findNextInCollection(final Collection<T> collection, final T element) {
-    throw new UntransformedInvokerError();
-  }
+
+    @Invoker("findNextInCollection") static <T> T invoker$findNextInCollection(final Collection<T> collection, final T element) {
+        throw new UntransformedInvokerError();
+    }
 }

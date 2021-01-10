@@ -42,20 +42,9 @@ import org.spongepowered.common.UntransformedInvokerError;
 public interface CommandSourceAccessor {
 
     @Invoker("<init>")
-    static CommandSource invoker$new(
-            final ICommandSource source,
-            final Vector3d worldPosition,
-            final Vector2f rotation, // in X and Z only
-            final ServerWorld level,
-            final int permissionLevel,
-            final String textName,
-            final ITextComponent displayName,
-            final MinecraftServer server,
-            final Entity entity,
-            final boolean silent,
-            final ResultConsumer<CommandSource> consumer,
-            final EntityAnchorArgument.Type anchor
-    ) {
+    static CommandSource invoker$new(final ICommandSource source, final Vector3d worldPosition, final Vector2f rotation, final ServerWorld level,
+            final int permissionLevel, final String textName, final ITextComponent displayName, final MinecraftServer server, final Entity entity,
+            final boolean silent, final ResultConsumer<CommandSource> consumer, final EntityAnchorArgument.Type anchor) {
         throw new UntransformedInvokerError();
     }
 

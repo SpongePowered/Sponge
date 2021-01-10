@@ -25,16 +25,11 @@
 package org.spongepowered.common.accessor.world;
 
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.List;
-
-import javax.annotation.Nullable;
-import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(World.class)
 public interface WorldAccessor {
@@ -42,17 +37,5 @@ public interface WorldAccessor {
     @Accessor("pendingBlockEntities") List<TileEntity> accessor$pendingBlockEntities();
 
     @Accessor("updatingBlockEntities") boolean accessor$updatingBlockEntities();
-
-    @Invoker("isInWorldBounds")
-    static boolean invoker$isInWorldBounds(final BlockPos pos) {
-        throw new UntransformedInvokerError();
-    }
-
-    @Invoker("isOutsideBuildHeight")
-    static boolean invoker$isOutsideBuildHeight(final BlockPos pos) {
-        throw new UntransformedInvokerError();
-    }
-
-    @Invoker("getPendingBlockEntityAt") @Nullable TileEntity invoker$getPendingBlockEntityAt(final BlockPos pos);
 
 }

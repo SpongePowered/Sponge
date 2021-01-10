@@ -28,6 +28,6 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(Structure.class)
-public abstract class StructureMixin_API implements org.spongepowered.api.world.generation.Structure {
+public abstract class StructureMixin_API implements org.spongepowered.api.world.generation.structure.Structure {
 
 }

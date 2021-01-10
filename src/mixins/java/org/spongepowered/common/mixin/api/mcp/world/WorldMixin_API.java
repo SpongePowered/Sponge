@@ -24,23 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Preconditions;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.effect.LightningBoltEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.item.EnderPearlEntity;
-import net.minecraft.entity.item.FallingBlockEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.item.PaintingEntity;
-import net.minecraft.entity.item.PaintingType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SChangeBlockPacket;
 import net.minecraft.network.play.server.SPlaySoundPacket;
 import net.minecraft.server.MinecraftServer;
@@ -51,8 +38,6 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.chunk.AbstractChunkProvider;
@@ -60,15 +45,12 @@ import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.storage.IWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.Location;
@@ -82,14 +64,13 @@ import org.spongepowered.api.world.volume.stream.VolumePositionTranslators;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.entity.MobEntityAccessor;
-import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
-import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.volume.buffer.archetype.SpongeArchetypeVolume;
 import org.spongepowered.math.vector.Vector3d;
@@ -103,7 +84,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 @Mixin(net.minecraft.world.World.class)
 public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W, L>> implements World<W, L>, AutoCloseable {
@@ -113,19 +93,13 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
     @Shadow @Final public List<TileEntity> blockEntityList;
 
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
-    @Shadow public abstract net.minecraft.world.chunk.Chunk shadow$getChunkAt(BlockPos p_175726_1_);
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos p_180495_1_);
     @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable PlayerEntity p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow public abstract IWorldInfo shadow$getLevelData();
-    @Shadow public abstract boolean shadow$isThundering();
-    @Shadow public abstract boolean shadow$isRaining();
     @Shadow public abstract void shadow$setBlockEntity(BlockPos pos, @javax.annotation.Nullable TileEntity tileEntityIn);
     @Shadow public abstract void shadow$removeBlockEntity(BlockPos pos);
-    @Shadow public abstract DifficultyInstance shadow$getCurrentDifficultyAt(BlockPos p_175649_1_);
     @Shadow public abstract RegistryKey<net.minecraft.world.World> shadow$dimension();
     // @formatter:on
-
-    @Shadow public abstract DimensionType dimensionType();
 
     private Context impl$context;
 
@@ -133,8 +107,7 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Optional<? extends Player> getClosestPlayer(final int x, final int y, final int z, final double distance, final Predicate<? super Player> predicate) {
-        final PlayerEntity player = ((net.minecraft.world.World) (Object) this).getNearestPlayer(x, y, z, distance, (Predicate) predicate);
-        return Optional.ofNullable((Player) player);
+        return Optional.ofNullable((Player) ((net.minecraft.world.World) (Object) this).getNearestPlayer(x, y, z, distance, (Predicate) Objects.requireNonNull(predicate, "predicate")));
     }
 
     @Override
@@ -144,7 +117,7 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Optional<Chunk> loadChunk(final int cx, final int cy, final int cz, final boolean shouldGenerate) {
-        if (!SpongeChunkLayout.instance.isValidChunk(cx, cy, cz)) {
+        if (!SpongeChunkLayout.INSTANCE.isValidChunk(cx, cy, cz)) {
             return Optional.empty();
         }
         final AbstractChunkProvider chunkProvider = ((IWorld) this).getChunkSource();
@@ -198,8 +171,7 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
     @Override
     public Context getContext() {
         if (this.impl$context == null) {
-            final RegistryKey<net.minecraft.world.World> worldKey = this.shadow$dimension();
-            this.impl$context = new Context(Context.WORLD_KEY, worldKey.location().toString());
+            this.impl$context = new Context(Context.WORLD_KEY, this.shadow$dimension().location().toString());
         }
         return this.impl$context;
     }
@@ -208,42 +180,33 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position, final int radius) {
-        Preconditions.checkNotNull(particleEffect, "The particle effect cannot be null!");
-        Preconditions.checkNotNull(position, "The position cannot be null");
-        Preconditions.checkArgument(radius > 0, "The radius has to be greater then zero!");
+        Objects.requireNonNull(particleEffect, "particleEffect");
+        Objects.requireNonNull(position, "position");
+        if (radius <= 0) {
+            throw new IllegalArgumentException("The radius has to be greater then zero!");
+        }
 
-        SpongeParticleHelper.sendPackets(particleEffect, position, radius,
-                this.shadow$dimension(), this.shadow$getServer().getPlayerList());
-    }
-
-    private void api$playRecord(final Vector3i position, @javax.annotation.Nullable final MusicDisc recordType) {
-        this.shadow$getServer().getPlayerList().broadcastAll(
-                SpongeMusicDisc.createPacket(position, recordType), this.shadow$dimension());
+        SpongeParticleHelper.sendPackets(particleEffect, position, radius, this.shadow$dimension(), this.shadow$getServer().getPlayerList());
     }
 
     @Override
-    public void playMusicDisc(final Vector3i position, final MusicDisc musicDiscType) {
-        this.api$playRecord(position, Preconditions.checkNotNull(musicDiscType, "recordType"));
-    }
-
-    @Override
-    public void playMusicDisc(final Vector3i position, final Supplier<? extends MusicDisc> musicDiscType) {
-        this.playMusicDisc(position, musicDiscType.get());
+    public void playMusicDisc(final Vector3i position, final MusicDisc musicDisc) {
+        this.api$playRecord(Objects.requireNonNull(position, "position"), Objects.requireNonNull(musicDisc, "musicDisc"));
     }
 
     @Override
     public void stopMusicDisc(final Vector3i position) {
-        this.api$playRecord(position, null);
+        this.api$playRecord(Objects.requireNonNull(position, "position"), null);
     }
 
     @Override
     public void sendBlockChange(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState state) {
-        Preconditions.checkNotNull(state, "state");
-        final SChangeBlockPacket packet = new SChangeBlockPacket();
-        ((SChangeBlockPacketAccessor) packet).accessor$pos(new BlockPos(x, y, z));
-        ((SChangeBlockPacketAccessor) packet).accessor$blockState((BlockState) state);
+        Objects.requireNonNull(state, "state");
 
-        ((net.minecraft.world.World) (Object) this).players().stream()
+        final SChangeBlockPacket packet = new SChangeBlockPacket(new BlockPos(x, y, z), (BlockState) state);
+
+        ((net.minecraft.world.World) (Object) this).players()
+                .stream()
                 .filter(ServerPlayerEntity.class::isInstance)
                 .map(ServerPlayerEntity.class::cast)
                 .forEach(p -> p.connection.send(packet));
@@ -282,123 +245,40 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Collection<? extends BlockEntity> getBlockEntities() {
-        return (Collection) this.blockEntityList;
+        return (Collection) Collections.unmodifiableCollection(this.blockEntityList);
     }
 
     @Override
     public void addBlockEntity(final int x, final int y, final int z, final BlockEntity blockEntity) {
-        Objects.requireNonNull(blockEntity, "BlockEntity cannot be null!");
-        final TileEntity tileEntity = (TileEntity) blockEntity;
-        this.shadow$setBlockEntity(new BlockPos(x, y, z), tileEntity);
+        this.shadow$setBlockEntity(new BlockPos(x, y, z), (TileEntity) Objects.requireNonNull(blockEntity, "blockEntity"));
     }
 
     // MutableEntityVolume
 
     @Override
-    public <E extends org.spongepowered.api.entity.Entity> E createEntity(final EntityType<E> type, final Vector3d position) throws IllegalArgumentException,
-            IllegalStateException {
-        return this.impl$createEntity(type, position, false);
+    public <E extends org.spongepowered.api.entity.Entity> E createEntity(final EntityType<E> type, final Vector3d position) throws IllegalArgumentException, IllegalStateException {
+        return ((WorldBridge) this).bridge$createEntity(Objects.requireNonNull(type, "type"), Objects.requireNonNull(position, "position"), false);
     }
 
     @Override
-    public <E extends org.spongepowered.api.entity.Entity> E createEntityNaturally(final EntityType<E> type, final Vector3d position) throws IllegalArgumentException,
-            IllegalStateException {
-        return this.impl$createEntity(type, position, true);
+    public <E extends org.spongepowered.api.entity.Entity> E createEntityNaturally(final EntityType<E> type, final Vector3d position) throws IllegalArgumentException, IllegalStateException {
+        return ((WorldBridge) this).bridge$createEntity(Objects.requireNonNull(type, "type"), Objects.requireNonNull(position, "position"), true);
     }
 
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> createEntity(final DataContainer entityContainer) {
-        throw new UnsupportedOperationException("Implement me"); // TODO implement me
+    public Optional<org.spongepowered.api.entity.Entity> createEntity(final DataContainer container) {
+        throw new MissingImplementationException("World", "createEntity(container)");
     }
 
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> createEntity(final DataContainer entityContainer, final Vector3d position) {
-        throw new UnsupportedOperationException("Implement me"); // TODO implement me
-    }
-
-    @SuppressWarnings("unchecked")
-    public <E extends org.spongepowered.api.entity.Entity> E impl$createEntity(final EntityType<E> type, final Vector3d position, final boolean naturally) throws IllegalArgumentException,
-            IllegalStateException {
-        checkNotNull(type, "The entity type cannot be null!");
-        checkNotNull(position, "The position cannot be null!");
-
-        if (type == net.minecraft.entity.EntityType.PLAYER) {
-            // Unable to construct these
-            throw new IllegalArgumentException("A Player cannot be created by the API!");
-        }
-
-        net.minecraft.entity.Entity entity = null;
-        final double x = position.getX();
-        final double y = position.getY();
-        final double z = position.getZ();
-        final net.minecraft.world.World thisWorld = (net.minecraft.world.World) (Object) this;
-        // Not all entities have a single World parameter as their constructor
-        if (type == net.minecraft.entity.EntityType.LIGHTNING_BOLT) {
-            entity = net.minecraft.entity.EntityType.LIGHTNING_BOLT.create(thisWorld);
-            entity.moveTo(x, y, z);
-            ((LightningBoltEntity) entity).setVisualOnly(false);
-        }
-        // TODO - archetypes should solve the problem of calling the correct constructor
-        if (type == net.minecraft.entity.EntityType.ENDER_PEARL) {
-            final ArmorStandEntity tempEntity = new ArmorStandEntity(thisWorld, x, y, z);
-            tempEntity.setPos(tempEntity.getX(), tempEntity.getY() - tempEntity.getEyeHeight(), tempEntity.getZ());
-            entity = new EnderPearlEntity(thisWorld, tempEntity);
-            ((EnderPearl) entity).offer(Keys.SHOOTER, UnknownProjectileSource.UNKNOWN);
-        }
-        // Some entities need to have non-null fields (and the easiest way to
-        // set them is to use the more specialised constructor).
-        if (type == net.minecraft.entity.EntityType.FALLING_BLOCK) {
-            entity = new FallingBlockEntity(thisWorld, x, y, z, Blocks.SAND.defaultBlockState());
-        }
-        if (type == net.minecraft.entity.EntityType.ITEM) {
-            entity = new ItemEntity(thisWorld, x, y, z, new ItemStack(Blocks.STONE));
-        }
-
-        if (entity == null) {
-            final ResourceKey key = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.entity.EntityType<?>) type);
-            try {
-                entity = ((net.minecraft.entity.EntityType) type).create(thisWorld);
-                entity.moveTo(x, y, z);
-            } catch (final Exception e) {
-                throw new RuntimeException("There was an issue attempting to construct " + key, e);
-            }
-        }
-
-        // TODO - replace this with an actual check
-        /*
-        if (entity instanceof EntityHanging) {
-            if (((EntityHanging) entity).facingDirection == null) {
-                // TODO Some sort of detection of a valid direction?
-                // i.e scan immediate blocks for something to attach onto.
-                ((EntityHanging) entity).facingDirection = EnumFacing.NORTH;
-            }
-            if (!((EntityHanging) entity).onValidSurface()) {
-                return Optional.empty();
-            }
-        }*/
-
-        if (naturally && entity instanceof MobEntity) {
-            // Adding the default equipment
-            final DifficultyInstance difficulty = this.shadow$getCurrentDifficultyAt(new BlockPos(x, y, z));
-            ((MobEntityAccessor)entity).invoker$populateDefaultEquipmentSlots(difficulty);
-        }
-
-        if (entity instanceof PaintingEntity) {
-            // This is default when art is null when reading from NBT, could
-            // choose a random art instead?
-            ((PaintingEntity) entity).motive = PaintingType.KEBAB;
-        }
-
-        return (E) entity;
+    public Optional<org.spongepowered.api.entity.Entity> createEntity(final DataContainer container, final Vector3d position) {
+        throw new MissingImplementationException("World", "createEntity(container, position)");
     }
 
     @Override
     public ArchetypeVolume createArchetypeVolume(final Vector3i min, final Vector3i max, final Vector3i origin) {
-        Objects.requireNonNull(min, "Min position cannot be null");
-        Objects.requireNonNull(max, "Max position cannot be null");
-        Objects.requireNonNull(origin, "Origin cannot be null");
-        final Vector3i rawVolMin = min.min(max);
-        final Vector3i adjustedVolMin = rawVolMin.sub(origin);
+        final Vector3i rawVolMin = Objects.requireNonNull(Objects.requireNonNull(max, "max"), "min").min(max);
+        final Vector3i adjustedVolMin = rawVolMin.sub(Objects.requireNonNull(origin, "origin"));
         final Vector3i volMax = max.max(min);
         final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(adjustedVolMin, volMax.sub(rawVolMin).add(1, 1, 1), this.registries());
 
@@ -432,5 +312,9 @@ public abstract class WorldMixin_API<W extends World<W, L>, L extends Location<W
                 VolumeApplicators.applyEntityArchetypes()
             ));
         return volume;
+    }
+
+    private void api$playRecord(final Vector3i position, @javax.annotation.Nullable final MusicDisc recordType) {
+        this.shadow$getServer().getPlayerList().broadcastAll(SpongeMusicDisc.createPacket(position, recordType), this.shadow$dimension());
     }
 }

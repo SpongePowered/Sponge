@@ -34,8 +34,7 @@ import org.spongepowered.common.UntransformedAccessorError;
 @Mixin(PigEntity.class)
 public interface PigEntityAccessor {
 
-    @Accessor("DATA_SADDLE_ID")
-    static DataParameter<Boolean> accessor$DATA_SADDLE_ID() {
+    @Accessor("DATA_SADDLE_ID") static DataParameter<Boolean> accessor$DATA_SADDLE_ID() {
         throw new UntransformedAccessorError();
     }
 

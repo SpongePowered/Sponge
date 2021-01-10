@@ -30,5 +30,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(MooshroomEntity.Type.class)
 public interface MooshroomEntity_TypeAccessor {
+
     @Accessor("type") String accessor$type();
+
 }

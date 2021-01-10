@@ -43,16 +43,6 @@ public interface CPlayerPacketAccessor {
 
     @Accessor("z") void accessor$z(final double z);
 
-    @Accessor("yRot") float accessor$yRot();
-
-    @Accessor("yRot") void accessor$yRot(final float yRot);
-
-    @Accessor("xRot") float accessor$xRot();
-
-    @Accessor("xRot") void accessor$xRot(final float xRot);
-
-    @Accessor("onGround") boolean accessor$onGround();
-
     @Accessor("hasPos") boolean accessor$hasPos();
 
     @Accessor("hasPos") void accessor$hasPos(final boolean hasPos);

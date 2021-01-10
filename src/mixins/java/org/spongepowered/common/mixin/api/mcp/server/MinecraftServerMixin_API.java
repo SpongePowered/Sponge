@@ -86,7 +86,6 @@ import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.UsernameCache;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
@@ -161,7 +160,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public ChunkLayout getChunkLayout() {
-        return SpongeChunkLayout.instance;
+        return SpongeChunkLayout.INSTANCE;
     }
 
     @Override

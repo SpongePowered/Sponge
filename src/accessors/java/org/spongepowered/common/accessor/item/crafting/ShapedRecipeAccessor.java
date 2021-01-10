@@ -25,25 +25,22 @@
 package org.spongepowered.common.accessor.item.crafting;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 import java.util.Map;
-import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(ShapedRecipe.class)
 public interface ShapedRecipeAccessor {
 
-    @Accessor("group") String accessor$group();
-
     @Invoker("dissolvePattern")
     static NonNullList<Ingredient> invoker$dissolvePattern(final String[] pattern, final Map<String, Ingredient> keys,
-                                                           final int width, final int height) {
+            final int width, final int height) {
         throw new UntransformedInvokerError();
     }
 
@@ -57,9 +54,6 @@ public interface ShapedRecipeAccessor {
         throw new UntransformedInvokerError();
     }
 
-    @Invoker("keyFromJson")
-    static Map<String, Ingredient> invoker$keyFromJson(final JsonObject json) {
-        throw new UntransformedInvokerError();
-    }
+    @Accessor("group") String accessor$group();
 
 }

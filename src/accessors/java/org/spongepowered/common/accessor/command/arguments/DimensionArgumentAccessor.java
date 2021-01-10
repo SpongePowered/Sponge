@@ -33,8 +33,7 @@ import org.spongepowered.common.UntransformedAccessorError;
 @Mixin(DimensionArgument.class)
 public interface DimensionArgumentAccessor {
 
-    @Accessor("ERROR_INVALID_VALUE")
-    static DynamicCommandExceptionType accessor$ERROR_INVALID_VALUE() {
+    @Accessor("ERROR_INVALID_VALUE") static DynamicCommandExceptionType accessor$ERROR_INVALID_VALUE() {
         throw new UntransformedAccessorError();
     }
 

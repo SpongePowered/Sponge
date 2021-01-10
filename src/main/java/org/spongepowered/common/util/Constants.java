@@ -1400,4 +1400,15 @@ public final class Constants {
         public static final int MINECRAFT_EPOCH_OFFSET = 6000;
 
     }
+
+    public static final class Universe {
+
+        public static final class Weather {
+
+            public static final DataQuery TYPE = DataQuery.of("Type");
+            public static final DataQuery REMAINING_DURATION = DataQuery.of("RemainingDuration");
+
+            public static final DataQuery RUNNING_DURATION = DataQuery.of("RunningDuration");
+        }
+    }
 }

@@ -34,8 +34,7 @@ import org.spongepowered.common.UntransformedAccessorError;
 @Mixin(FireworkRocketEntity.class)
 public interface FireworkRocketEntityAccessor {
 
-    @Accessor("DATA_ID_FIREWORKS_ITEM")
-    static DataParameter<ItemStack> accessor$DATA_ID_FIREWORKS_ITEM() {
+    @Accessor("DATA_ID_FIREWORKS_ITEM") static DataParameter<ItemStack> accessor$DATA_ID_FIREWORKS_ITEM() {
         throw new UntransformedAccessorError();
     }
 

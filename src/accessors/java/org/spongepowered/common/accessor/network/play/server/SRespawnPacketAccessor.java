@@ -38,6 +38,4 @@ public interface SRespawnPacketAccessor {
 
     @Accessor("seed") long accessor$seed();
 
-    @Accessor("playerGameType") GameType accessor$playerGameType();
-
 }

@@ -31,8 +31,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.UUID;
-
 @Mixin(ShulkerBulletEntity.class)
 public interface ShulkerBulletEntityAccessor {
 
@@ -43,7 +41,5 @@ public interface ShulkerBulletEntityAccessor {
     @Accessor("currentMoveDirection") @Nullable Direction accessor$currentMoveDirection();
 
     @Accessor("currentMoveDirection") void accessor$currentMoveDirection(final @Nullable Direction currentMoveDirection);
-
-    @Accessor("targetId") void accessor$targetId(final @Nullable UUID targetId);
 
 }

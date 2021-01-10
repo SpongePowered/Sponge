@@ -22,15 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.crash;
+package org.spongepowered.common.world.weather;
 
-import net.minecraft.crash.CrashReport;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.api.world.weather.WeatherType;
 
-@Mixin(CrashReport.class)
-public interface CrashReportAccessor {
-
-    @Accessor("exception") Throwable accessor$exception();
+public final class SpongeWeatherType implements WeatherType {
 
 }

@@ -25,11 +25,9 @@
 package org.spongepowered.common.accessor.world.gen;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.DimensionSettings;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.gen.settings.NoiseSettings;
-import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
@@ -37,8 +35,8 @@ import org.spongepowered.common.UntransformedInvokerError;
 @Mixin(DimensionSettings.class)
 public interface DimensionSettingsAccessor {
 
-    @Invoker("<init>") static DimensionSettings invoker$construct(DimensionStructuresSettings structureSettings, NoiseSettings noiseSettings,
-            BlockState defaultBlock, BlockState defaultFluid, int bedrockRoofY, int bedrockFloorY, int seaLevel, boolean disableMobGeneration) {
+    @Invoker("<init>") static DimensionSettings invoker$new(final DimensionStructuresSettings structureSettings, final NoiseSettings noiseSettings,
+            final BlockState defaultBlock, final BlockState defaultFluid, final int bedrockRoofY, final int bedrockFloorY, final int seaLevel, final boolean disableMobGeneration) {
         throw new UntransformedInvokerError();
     }
 }

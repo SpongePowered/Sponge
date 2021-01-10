@@ -30,28 +30,19 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.IItemProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Map;
-import org.spongepowered.common.UntransformedAccessorError;
-import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(SheepEntity.class)
 public interface SheepEntityAccessor {
 
-    @Accessor("DATA_WOOL_ID")
-    static DataParameter<Byte> accessor$DATA_WOOL_ID() {
+    @Accessor("DATA_WOOL_ID") static DataParameter<Byte> accessor$DATA_WOOL_ID() {
         throw new UntransformedAccessorError();
     }
 
-    @Accessor("ITEM_BY_DYE")
-    static Map<DyeColor, IItemProvider> accessor$ITEM_BY_DYE() {
+    @Accessor("ITEM_BY_DYE") static Map<DyeColor, IItemProvider> accessor$ITEM_BY_DYE() {
         throw new UntransformedAccessorError();
-    }
-
-    @Invoker("createSheepColor")
-    static float[] invoker$createSheepColor(final DyeColor color) {
-        throw new UntransformedInvokerError();
     }
 
 }

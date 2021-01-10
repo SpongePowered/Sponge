@@ -30,40 +30,9 @@ import net.minecraft.util.math.Rotations;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(ArmorStandEntity.class)
 public interface ArmorStandEntityAccessor {
-
-    @Accessor("DEFAULT_HEAD_POSE")
-    static Rotations accessor$DEFAULT_HEAD_POSE() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("DEFAULT_BODY_POSE")
-    static Rotations accessor$DEFAULT_BODY_POSE() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("DEFAULT_LEFT_ARM_POSE")
-    static Rotations accessor$DEFAULT_LEFT_ARM_POSE() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("DEFAULT_RIGHT_ARM_POSE")
-    static Rotations accessor$DEFAULT_RIGHT_ARM_POSE() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("DEFAULT_LEFT_LEG_POSE")
-    static Rotations accessor$DEFAULT_LEFT_LEG_POSE() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("DEFAULT_RIGHT_LEG_POSE")
-    static Rotations accessor$DEFAULT_RIGHT_LEG_POSE() {
-        throw new UntransformedAccessorError();
-    }
 
     @Accessor("disabledSlots") int accessor$disabledSlots();
 

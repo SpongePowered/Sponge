@@ -25,7 +25,6 @@
 package org.spongepowered.common.accessor.entity.player;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -42,13 +41,9 @@ public interface ServerPlayerEntityAccessor {
 
     @Accessor("canChatColor") boolean accessor$canChatColor();
 
-    @Accessor("isChangingDimension") void accessor$isChangingDimension(final boolean isChangingDimension);
-
     @Accessor("seenCredits") boolean accessor$seenCredits();
 
     @Accessor("seenCredits") void accessor$seenCredits(final boolean seenCredits);
-
-    @Accessor("enteredNetherPosition") void accessor$enteredNetherPosition(final Vector3d enteredNetherPosition);
 
     @Invoker("triggerDimensionChangeTriggers") void invoker$triggerDimensionChangeTriggers(final ServerWorld world);
 

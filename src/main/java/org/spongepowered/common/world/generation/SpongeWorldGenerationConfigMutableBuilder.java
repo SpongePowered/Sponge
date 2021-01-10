@@ -28,7 +28,6 @@ import com.mojang.serialization.Lifecycle;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
-import org.spongepowered.api.world.generation.MutableWorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
@@ -36,31 +35,31 @@ import org.spongepowered.common.server.BootstrapProperties;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class SpongeMutableWorldGenerationConfigBuilder implements MutableWorldGenerationConfig.Builder {
+public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGenerationConfig.Mutable.Builder {
 
     private long seed;
     private boolean generateFeatures, generateBonusChest;
 
     @Override
-    public MutableWorldGenerationConfig.Builder seed(final long seed) {
+    public WorldGenerationConfig.Mutable.Builder seed(final long seed) {
         this.seed = seed;
         return this;
     }
 
     @Override
-    public MutableWorldGenerationConfig.Builder generateFeatures(final boolean generateFeatures) {
+    public WorldGenerationConfig.Mutable.Builder generateFeatures(final boolean generateFeatures) {
         this.generateFeatures = generateFeatures;
         return this;
     }
 
     @Override
-    public MutableWorldGenerationConfig.Builder generateBonusChest(final boolean generateBonusChest) {
+    public WorldGenerationConfig.Mutable.Builder generateBonusChest(final boolean generateBonusChest) {
         this.generateBonusChest = generateBonusChest;
         return this;
     }
 
     @Override
-    public MutableWorldGenerationConfig.Builder reset() {
+    public WorldGenerationConfig.Mutable.Builder reset() {
         final DimensionGeneratorSettings defaultSettings = BootstrapProperties.dimensionGeneratorSettings;
         this.seed = defaultSettings.seed();
         this.generateFeatures = defaultSettings.generateFeatures();
@@ -69,18 +68,16 @@ public final class SpongeMutableWorldGenerationConfigBuilder implements MutableW
     }
 
     @Override
-    public MutableWorldGenerationConfig.Builder from(final MutableWorldGenerationConfig value) {
-        Objects.requireNonNull(value, "value");
-
-        this.seed = value.seed();
+    public WorldGenerationConfig.Mutable.Builder from(final WorldGenerationConfig value) {
+        this.seed = Objects.requireNonNull(value, "value").seed();
         this.generateFeatures = value.generateFeatures();
         this.generateBonusChest = value.generateBonusChest();
         return this;
     }
 
     @Override
-    public MutableWorldGenerationConfig build() {
-        return (MutableWorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$construct(this.seed, this.generateFeatures,
+    public WorldGenerationConfig.Mutable build() {
+        return (WorldGenerationConfig.Mutable) DimensionGeneratorSettingsAccessor.invoker$new(this.seed, this.generateFeatures,
             this.generateBonusChest, new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()), Optional.empty());
     }
 }

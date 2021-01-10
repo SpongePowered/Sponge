@@ -471,20 +471,14 @@ public final class TrackingUtil {
         });
     }
 
-    public static void addTileEntityToBuilder(@Nullable final TileEntity existing, final SpongeBlockSnapshotBuilder builder) {
-        // We MUST only check to see if a TE exists to avoid creating a new one.
-        final BlockEntity tile = (BlockEntity) existing;
-        if (existing == null) {
-            return;
-        }
+    public static void addTileEntityToBuilder(final TileEntity existing, final SpongeBlockSnapshotBuilder builder) {
         // TODO - gather custom data.
-        final CompoundNBT nbt = new CompoundNBT();
-        // Some mods like OpenComputers assert if attempting to save robot while moving
+        final CompoundNBT compound = new CompoundNBT();
         try {
-            existing.save(nbt);
-            builder.addUnsafeCompound(nbt);
+            existing.save(compound);
+            builder.addUnsafeCompound(compound);
         }
-        catch(final Throwable t) {
+        catch (final Throwable t) {
             // ignore
         }
     }
@@ -509,7 +503,7 @@ public final class TrackingUtil {
     }
 
     public static SpongeBlockSnapshot createPooledSnapshot(final net.minecraft.block.BlockState state, final BlockPos pos,
-        final BlockChangeFlag updateFlag, final int limit, @Nullable final TileEntity existing,
+        final BlockChangeFlag updateFlag, final int limit, @Nullable final TileEntity blockEntity,
         final Supplier<ServerWorld> worldSupplier,
         final Supplier<Optional<UUID>> creatorSupplier,
         final Supplier<Optional<UUID>> notifierSupplier
@@ -521,8 +515,8 @@ public final class TrackingUtil {
                 .position(VecHelper.toVector3i(pos));
         creatorSupplier.get().ifPresent(builder::creator);
         notifierSupplier.get().ifPresent(builder::notifier);
-        if (existing != null) {
-            TrackingUtil.addTileEntityToBuilder(existing, builder);
+        if (blockEntity != null) {
+            TrackingUtil.addTileEntityToBuilder(blockEntity, builder);
         }
         builder.flag(updateFlag);
         return builder.build();

@@ -84,7 +84,7 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"RedundantTypeArguments", "unchecked", "RedundantCast"})
 @Mixin(IWorldReader.class)
-@Implements(@Interface(iface = Region.class, prefix = "readable$"))
+@Implements(@Interface(iface = Region.class, prefix = "region$"))
 public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     // @formatter:off
@@ -140,7 +140,7 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
     }
 
     @Intrinsic
-    default int readable$getSeaLevel() {
+    default int region$getSeaLevel() {
         return this.shadow$getSeaLevel();
     }
 
@@ -152,12 +152,6 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     // RandomProvider
 
-    /**
-     * Generates a random for usage, specific cases where randoms are being stored,
-     * will override this appropriately.
-     *
-     * @return A generated Random
-     */
     @Override
     default Random getRandom() {
         return new Random();
@@ -176,7 +170,6 @@ public interface IWorldReaderMixin_API<R extends Region<R>> extends Region<R> {
     }
 
     // ChunkVolume
-
 
     @SuppressWarnings("ConstantConditions")
     @Override

@@ -29,12 +29,13 @@ import org.spongepowered.math.vector.Vector3i;
 
 public final class SpongeChunkLayout implements ChunkLayout {
 
+    public static final SpongeChunkLayout INSTANCE = new SpongeChunkLayout();
+
     public static final Vector3i CHUNK_SIZE = new Vector3i(16, 256, 16);
     private static final Vector3i CHUNK_MASK = SpongeChunkLayout.CHUNK_SIZE.sub(1, 1, 1);
     private static final Vector3i SPACE_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1).div(SpongeChunkLayout.CHUNK_SIZE);
     private static final Vector3i SPACE_MIN = new Vector3i(-30000000, 0, -30000000).div(SpongeChunkLayout.CHUNK_SIZE);
     private static final Vector3i SPACE_SIZE = SpongeChunkLayout.SPACE_MAX.sub(SpongeChunkLayout.SPACE_MIN).add(1, 1, 1);
-    public static final SpongeChunkLayout instance = new SpongeChunkLayout();
 
     private SpongeChunkLayout() {
     }
@@ -65,24 +66,24 @@ public final class SpongeChunkLayout implements ChunkLayout {
     }
 
     @Override
-    public boolean isInChunk(int x, int y, int z) {
+    public boolean isInChunk(final int x, final int y, final int z) {
         // no bits allowed outside the mask!
         return (x & ~SpongeChunkLayout.CHUNK_MASK.getX()) == 0 && (y & ~SpongeChunkLayout.CHUNK_MASK.getY()) == 0 && (z & ~SpongeChunkLayout.CHUNK_MASK
             .getZ()) == 0;
     }
 
     @Override
-    public boolean isInChunk(int wx, int wy, int wz, int cx, int cy, int cz) {
+    public boolean isInChunk(final int wx, final int wy, final int wz, final int cx, final int cy, final int cz) {
         return this.isInChunk(wx - (cx << 4), wy - (cy << 8), wz - (cz << 4));
     }
 
     @Override
-    public Vector3i forceToChunk(int x, int y, int z) {
+    public Vector3i forceToChunk(final int x, final int y, final int z) {
         return new Vector3i(x >> 4, y >> 8, z >> 4);
     }
 
     @Override
-    public Vector3i forceToWorld(int x, int y, int z) {
+    public Vector3i forceToWorld(final int x, final int y, final int z) {
         return new Vector3i(x << 4, y << 8, z << 4);
     }
 

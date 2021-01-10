@@ -52,7 +52,7 @@ import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.generation.ChunkGenerator;
-import org.spongepowered.api.world.generation.Structure;
+import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;

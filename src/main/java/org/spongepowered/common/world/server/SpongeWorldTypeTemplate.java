@@ -111,7 +111,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
                         final IBiomeMagnifier biomeMagnifier = f15.isPresent() ? (IBiomeMagnifier) BiomeSamplerProvider.INSTANCE.get((ResourceKey) (Object) f15.get().biomeSampler) : ColumnFuzzedBiomeMagnifier.INSTANCE;
                         final boolean createDragonFight = f15.isPresent() && f15.get().createDragonFight;
 
-                        return DimensionTypeAccessor.invoker$construct(f1, f2, f3, f4, f5, f6, createDragonFight, f7, f8, f9, f10, f11,
+                        return DimensionTypeAccessor.invoker$new(f1, f2, f3, f4, f5, f6, createDragonFight, f7, f8, f9, f10, f11,
                                 biomeMagnifier, f12, f13, f14);
                     })
             );

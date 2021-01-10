@@ -36,11 +36,12 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.generation.MutableWorldGenerationConfig;
+import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.api.world.weather.Weathers;
+import org.spongepowered.api.world.weather.WeatherType;
+import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -48,6 +49,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
+import org.spongepowered.common.world.weather.SpongeWeather;
+import org.spongepowered.common.world.weather.SpongeWeatherType;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -195,7 +198,7 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default MutableWorldGenerationConfig worldGenerationSettings() {
+    default WorldGenerationConfig.Mutable worldGenerationConfig() {
         throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
@@ -235,63 +238,42 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default Weather getWeather() {
-        if (((IServerWorldInfo) (Object) this).isRaining()) {
-            return Weathers.RAIN.get();
-        } else if (((IServerWorldInfo) (Object) this).isThundering()) {
-            return Weathers.THUNDER.get();
+    default Weather weather() {
+        if (((IServerWorldInfo) this).isRaining()) {
+            return new SpongeWeather((SpongeWeatherType) WeatherTypes.RAIN.get(), new SpongeTicks(this.shadow$getRainTime()), new SpongeTicks(6000 - this.shadow$getRainTime()));
+        } else if (((IServerWorldInfo) this).isThundering()) {
+            return new SpongeWeather((SpongeWeatherType) WeatherTypes.THUNDER.get(), new SpongeTicks(this.shadow$getThunderTime()), new SpongeTicks(6000 - this.shadow$getThunderTime()));
         }
-        return Weathers.CLEAR.get();
+        return new SpongeWeather((SpongeWeatherType) WeatherTypes.CLEAR.get(), new SpongeTicks(this.shadow$getClearWeatherTime()), new SpongeTicks(6000 - this.shadow$getClearWeatherTime()));
     }
 
     @Override
-    default Ticks getRemainingWeatherDuration() {
-        if (((IServerWorldInfo) (Object) this).isRaining()) {
-            return new SpongeTicks(this.shadow$getRainTime());
-        } else if (((IServerWorldInfo) (Object) this).isRaining()) {
-            return new SpongeTicks(this.shadow$getThunderTime());
-        }
-        return new SpongeTicks(this.shadow$getClearWeatherTime());
+    default void setWeather(final WeatherType type) {
+        this.setWeather(Objects.requireNonNull(type, "type"), new SpongeTicks(6000 / Constants.TickConversions.TICK_DURATION_MS));
     }
 
     @Override
-    default Ticks getRunningWeatherDuration() {
-        if (((IServerWorldInfo) (Object) this).isRaining()) {
-            return new SpongeTicks(6000 - this.shadow$getRainTime());
-        } else if (((IServerWorldInfo) (Object) this).isRaining()) {
-            return new SpongeTicks(6000 - this.shadow$getThunderTime());
-        } else {
-            return new SpongeTicks(6000 - this.shadow$getClearWeatherTime());
-        }
-    }
+    default void setWeather(final WeatherType type, final Ticks ticks) {
+        Objects.requireNonNull(type, "type");
+        final long time = Objects.requireNonNull(ticks, "ticks").getTicks();
 
-    @Override
-    default void setWeather(final Weather weather) {
-        this.setWeather(Objects.requireNonNull(weather, "weather"), new SpongeTicks(6000 / Constants.TickConversions.TICK_DURATION_MS));
-    }
-
-    @Override
-    default void setWeather(final Weather weather, final Ticks ticks) {
-        Objects.requireNonNull(weather, "weather");
-        Objects.requireNonNull(ticks, "ticks");
-
-        if (weather == Weathers.CLEAR.get()) {
-            this.shadow$setClearWeatherTime((int) ticks.getTicks());
+        if (type == WeatherTypes.CLEAR.get()) {
+            this.shadow$setClearWeatherTime((int) time);
             ((IServerWorldInfo) this).setRaining(false);
             this.shadow$setRainTime(0);
             this.shadow$setThundering(false);
             this.shadow$setThunderTime(0);
-        } else if (weather == Weathers.RAIN.get()) {
+        } else if (type == WeatherTypes.RAIN.get()) {
             ((IServerWorldInfo) this).setRaining(true);
-            this.shadow$setRainTime((int) ticks.getTicks());
+            this.shadow$setRainTime((int) time);
             this.shadow$setThundering(false);
             this.shadow$setThunderTime(0);
             this.shadow$setClearWeatherTime(0);
-        } else if (weather == Weathers.THUNDER.get()) {
+        } else if (type == WeatherTypes.THUNDER.get()) {
             ((IServerWorldInfo) this).setRaining(true);
-            this.shadow$setRainTime((int) ticks.getTicks());
+            this.shadow$setRainTime((int) time);
             this.shadow$setThundering(true);
-            this.shadow$setThunderTime((int) ticks.getTicks());
+            this.shadow$setThunderTime((int) time);
             this.shadow$setClearWeatherTime(0);
         }
     }
