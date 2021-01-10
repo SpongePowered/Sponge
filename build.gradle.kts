@@ -560,19 +560,10 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaMain, implProject = vanillaProject, dependencyConfigName = vanillaMain.implementationConfigurationName)
     }
-    val vanillaAccessors by sourceSets.register("accessors") {
-        // implementation (compile) dependencies
-        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
-        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
-        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
-        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaMain, implProject = vanillaProject, dependencyConfigName = vanillaMain.implementationConfigurationName)
-        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
-    }
     val vanillaMixins by sourceSets.register("mixins") {
         // implementation (compile) dependencies
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = mixins.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
-        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaAccessors, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
@@ -587,16 +578,12 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaLaunch, implProject = vanillaProject, dependencyConfigName = vanillaLaunch.implementationConfigurationName)
         // runtime dependencies - literally add the rest of the project, because we want to launch the game
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMixins, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
-        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaAccessors, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = mixins.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMain, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
     }
-
-    val vanillaAccessorsAnnotationProcessor by configurations.named(vanillaAccessors.annotationProcessorConfigurationName)
-    val vanillaAccessorsImplementation by configurations.named(vanillaAccessors.implementationConfigurationName)
     val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
         extendsFrom(vanillaMinecraftConfig)
     }
@@ -716,15 +703,10 @@ project("SpongeVanilla") {
         vanillaAppLaunchImplementation(vanillaAppLaunchConfig)
         vanillaMixinsImplementation(vanillaAppLaunchConfig)
         vanillaMixinsImplementation(vanillaMinecraftConfig)
-        vanillaAccessorsImplementation(vanillaAppLaunchConfig)
-        vanillaAccessorsImplementation(vanillaMinecraftConfig)
 
         // Annotation Processor
-        vanillaAccessorsAnnotationProcessor(vanillaAppLaunchImplementation)
         vanillaMixinsAnnotationProcessor(vanillaAppLaunchImplementation)
-        vanillaAccessorsAnnotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
         vanillaMixinsAnnotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
-        vanillaAccessorsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion")
         vanillaMixinsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion")
 
         testplugins?.apply {
@@ -736,7 +718,6 @@ project("SpongeVanilla") {
 
     mixin {
         add(vanillaMixins, "spongevanilla.mixins.refmap.json")
-        add(vanillaAccessors, "spongevanilla.accessors.refmap.json")
     }
 
     tasks {
@@ -808,20 +789,6 @@ project("SpongeVanilla") {
             }
             from(vanillaMixins.output)
         }
-        val vanillaAccessorsJar by registering(Jar::class) {
-            getArchiveClassifier().set("accessors")
-            manifest {
-                attributes(mapOf(
-                        "Specification-Title" to "Sponge",
-                        "Specification-Vendor" to "SpongePowered",
-                        "Specification-Version" to apiProject.version,
-                        "Implementation-Title" to project.name,
-                        "Implementation-Version" to generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
-                        "Implementation-Vendor" to "SpongePowered"
-                ))
-            }
-            from(vanillaAccessors.output)
-        }
 
         val installerResources = vanillaProject.layout.buildDirectory.dir("generated/resources/installer")
         vanillaInstaller.resources.srcDir(installerResources)
@@ -869,7 +836,6 @@ project("SpongeVanilla") {
             from(vanillaAppLaunchJar)
             from(vanillaLaunchJar)
             from(vanillaMixinsJar)
-            from(vanillaAccessorsJar)
             from(vanillaInstallerConfig)
             dependencies {
                 include(project(":"))
@@ -881,7 +847,6 @@ project("SpongeVanilla") {
             create("vanillaAppLaunchJar")
             create("vanillaLaunchJar")
             create("vanillaMixinsJar")
-            create("vanillaAccessorsJar")
             create("shadowJar")
         }
     }
@@ -903,7 +868,6 @@ project("SpongeVanilla") {
     val vanillaAppLaunchJar by tasks.existing
     val vanillaLaunchJar by tasks.existing
     val vanillaMixinsJar by tasks.existing
-    val vanillaAccessorsJar by tasks.existing
 
     publishing {
         publications {
@@ -914,11 +878,9 @@ project("SpongeVanilla") {
                 artifact(vanillaAppLaunchJar.get())
                 artifact(vanillaLaunchJar.get())
                 artifact(vanillaMixinsJar.get())
-                artifact(vanillaAccessorsJar.get())
                 artifact(tasks["applaunchSourceJar"])
                 artifact(tasks["launchSourceJar"])
                 artifact(tasks["mixinsSourceJar"])
-                artifact(tasks["accessorsSourceJar"])
                 pom {
                     artifactId = project.name.toLowerCase()
                     this.name.set(project.name)

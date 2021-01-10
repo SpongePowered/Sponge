@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.accessor.network.login;
+package org.spongepowered.common.accessor.network.login;
 
 import net.minecraft.network.login.ServerLoginNetHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ServerLoginNetHandler.class)
-public interface ServerLoginNetHandlerAccessor_Vanilla {
+public interface ServerLoginNetHandlerAccessor {
 
     @Accessor("state") ServerLoginNetHandler.State accessor$getState();
 

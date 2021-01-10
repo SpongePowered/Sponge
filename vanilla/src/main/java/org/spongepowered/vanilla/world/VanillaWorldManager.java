@@ -106,7 +106,6 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.FutureUtil;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
-import org.spongepowered.vanilla.accessor.server.MinecraftServerAccessor_Vanilla;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -349,7 +348,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final boolean isDebugGeneration = levelData.worldGenSettings().isDebug();
         final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
 
-        final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getProgressListenerFactory().create(11);
+        final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$getProgressListenerFactory().create(11);
 
         final ServerWorld world = new ServerWorld(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), levelSave, levelData,
                 registryKey, (DimensionType) worldType, chunkStatusListener, template.generator(), isDebugGeneration, seed, ImmutableList.of(), true);
@@ -831,7 +830,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
 
             final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(worldKey);
-            final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getProgressListenerFactory().create(11);
+            final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$getProgressListenerFactory().create(11);
             final List<ISpecialSpawner> spawners;
             if (isDefaultWorld) {
                 spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(levelData));
@@ -866,7 +865,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         if (isDefaultWorld) {
             // Initialize scoreboard data. This will hook to the ServerScoreboard, needs to be made multi-world aware
-            ((MinecraftServerAccessor_Vanilla) this.server).accessor$readScoreboard(world.getDataStorage());
+            ((MinecraftServerAccessor) this.server).accessor$readScoreboard(world.getDataStorage());
 
             ((MinecraftServerAccessor) this.server).accessor$commandStorage(new CommandStorage(world.getDataStorage()));
         }
@@ -981,21 +980,21 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         chunkStatusListener.updateSpawnPos(chunkPos);
         final ServerChunkProvider serverChunkProvider = world.getChunkSource();
         serverChunkProvider.getLightEngine().setTaskPerBatch(500);
-        ((MinecraftServerAccessor_Vanilla) this.server).accessor$setNextTickTime(Util.getMillis());
+        ((MinecraftServerAccessor) this.server).accessor$setNextTickTime(Util.getMillis());
         serverChunkProvider.addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, 11, world.dimension().location());
 
         while (serverChunkProvider.getTickingGenerated() != 441) {
-            ((MinecraftServerAccessor_Vanilla) this.server).accessor$setNextTickTime(Util.getMillis() + 10L);
-            ((MinecraftServerAccessor_Vanilla) this.server).accessor$waitUntilNextTick();
+            ((MinecraftServerAccessor) this.server).accessor$setNextTickTime(Util.getMillis() + 10L);
+            ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
         }
 
-        ((MinecraftServerAccessor_Vanilla) this.server).accessor$setNextTickTime(Util.getMillis() + 10L);
-        ((MinecraftServerAccessor_Vanilla) this.server).accessor$waitUntilNextTick();
+        ((MinecraftServerAccessor) this.server).accessor$setNextTickTime(Util.getMillis() + 10L);
+        ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
 
         this.updateForcedChunks(world, serverChunkProvider);
 
-        ((MinecraftServerAccessor_Vanilla) this.server).accessor$setNextTickTime(Util.getMillis() + 10L);
-        ((MinecraftServerAccessor_Vanilla) this.server).accessor$waitUntilNextTick();
+        ((MinecraftServerAccessor) this.server).accessor$setNextTickTime(Util.getMillis() + 10L);
+        ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
         chunkStatusListener.stop();
         serverChunkProvider.getLightEngine().setTaskPerBatch(5);
 

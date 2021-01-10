@@ -31,18 +31,18 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.vanilla.accessor.network.login.ServerLoginNetHandlerAccessor_Vanilla;
+import org.spongepowered.common.accessor.network.login.ServerLoginNetHandlerAccessor;
 
 @Mixin(targets = "net/minecraft/network/login/ServerLoginNetHandler$1")
 public abstract class ServerLoginNetHandler_1Mixin_Vanilla extends Thread {
 
-    @Shadow(aliases = {"this$0", "field_151292_a"}, remap = false)
-    @Final
-    private ServerLoginNetHandler handler;
+    // @formatter:off
+    @Shadow(aliases = {"this$0", "field_151292_a"}, remap = false) @Final private ServerLoginNetHandler handler;
+    // @formatter:on
 
     @Inject(method = "run()V", at = @At(value = "RETURN"), remap = false)
     private void impl$onReadyToAccept(final CallbackInfo ci) {
-        final ServerLoginNetHandlerAccessor_Vanilla accessor = (ServerLoginNetHandlerAccessor_Vanilla) this.handler;
+        final ServerLoginNetHandlerAccessor accessor = (ServerLoginNetHandlerAccessor) this.handler;
         if (accessor.accessor$getState() == ServerLoginNetHandler.State.READY_TO_ACCEPT) {
             accessor.accessor$setState(ServerLoginNetHandler.State.NEGOTIATING);
         }

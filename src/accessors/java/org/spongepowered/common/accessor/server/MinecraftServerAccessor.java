@@ -27,8 +27,10 @@ package org.spongepowered.common.accessor.server;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.CommandStorage;
+import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.SaveFormat;
@@ -45,8 +47,7 @@ import java.util.concurrent.Executor;
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor {
 
-    @Accessor("LOGGER")
-    static Logger accessor$LOGGER() {
+    @Accessor("LOGGER") static Logger accessor$LOGGER() {
         throw new UntransformedAccessorError();
     }
 
@@ -63,9 +64,21 @@ public interface MinecraftServerAccessor {
 
     @Accessor("executor") Executor accessor$executor();
 
+    @Accessor("progressListenerFactory") IChunkStatusListenerFactory accessor$getProgressListenerFactory();
+
+    @Accessor("levels") Map<RegistryKey<World>, ServerWorld> accessor$getLevels();
+
+    @Accessor("nextTickTime") void accessor$setNextTickTime(long nextTickTime);
+
     @Invoker("isSpawningMonsters") boolean invoker$isSpawningMonsters();
 
     @Invoker("setupDebugLevel") void invoker$setDebugLevel(IServerConfiguration serverConfiguration);
 
     @Invoker("forceDifficulty") void invoker$forceDifficulty();
+
+    @Invoker("detectBundledResources") void accessor$detectBundledResources();
+
+    @Invoker("readScoreboard") void accessor$readScoreboard(DimensionSavedDataManager manager);
+
+    @Invoker("waitUntilNextTick") void accessor$waitUntilNextTick();
 }
