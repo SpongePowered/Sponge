@@ -54,7 +54,7 @@ public class CraftingGridInventoryLens extends AbstractLens {
     }
 
     public GridInventoryLens getGrid() {
-        return grid;
+        return this.grid;
     }
 
     @Override

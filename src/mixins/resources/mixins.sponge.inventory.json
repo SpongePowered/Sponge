@@ -30,6 +30,7 @@
     "api.inventory.IInventoryMixin_Inventory_API",
     "api.inventory.container.ContainerMixin_Inventory_API",
     "api.inventory.container.ContainerTypeMixin_Inventory_API",
+    "api.inventory.CraftingInventoryMixin_Inventory_API",
     "api.inventory.container.EnchantmentContainerMixin_BlockCarrier_Inventory_API",
     "api.inventory.container.LecternContainerMixin_BlockCarrier_Inventory_API",
     "api.inventory.container.LoomContainerMixin_BlockCarrier_Inventory_API",
@@ -71,7 +72,6 @@
     "impl.inventory.container.ContainerMixin_Menu_Inventory",
     "impl.inventory.container.PlayerContainerMixin_Bridge_Inventory",
     "impl.inventory.container.SlotMixin_Fabric_Inventory",
-    "impl.inventory.container.SlotMixin_Lens_Inventory",
-      "api.inventory.CraftingInventoryMixin_Inventory_API"
+    "impl.inventory.container.SlotMixin_Lens_Inventory"
   ]
 }
