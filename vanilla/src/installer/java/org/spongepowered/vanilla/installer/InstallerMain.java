@@ -108,6 +108,13 @@ public final class InstallerMain {
 
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
         final Process process = processBuilder.inheritIO().start();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                process.waitFor();
+            } catch (InterruptedException e) {
+                installer.getLogger().error("Waiting for server termination failed!", e);
+            }
+        }));
         process.waitFor();
     }
 
