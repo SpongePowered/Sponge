@@ -51,15 +51,15 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
         this.impl$interactBlockRightClickEventCancelled = cancelled;
     }
 
-    @Override
-    public boolean bridge$isLastInteractItemOnBlockCancelled() {
-        return this.impl$lastInteractItemOnBlockCancelled;
-    }
-
-    @Override
-    public void bridge$setLastInteractItemOnBlockCancelled(final boolean lastInteractItemOnBlockCancelled) {
-        this.impl$lastInteractItemOnBlockCancelled = lastInteractItemOnBlockCancelled;
-    }
+//    @Override
+//    public boolean bridge$isLastInteractItemOnBlockCancelled() {
+//        return this.impl$lastInteractItemOnBlockCancelled;
+//    }
+//
+//    @Override
+//    public void bridge$setLastInteractItemOnBlockCancelled(final boolean lastInteractItemOnBlockCancelled) {
+//        this.impl$lastInteractItemOnBlockCancelled = lastInteractItemOnBlockCancelled;
+//    }
 
     /**
      * We have to check for cancelled left click events because they occur from different packets
