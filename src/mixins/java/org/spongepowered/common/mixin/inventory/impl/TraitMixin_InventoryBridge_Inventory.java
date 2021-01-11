@@ -36,6 +36,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.MerchantInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.tileentity.CampfireTileEntity;
 import net.minecraft.tileentity.LockableTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
@@ -66,7 +67,8 @@ import javax.annotation.Nullable;
         ContainerMinecartEntity.class,
         ArmorStandEntity.class,
         MobEntity.class,
-        MerchantInventory.class
+        MerchantInventory.class,
+        CampfireTileEntity.class
 }, targets = "net.minecraft.tileentity.LecternTileEntity$1", priority = 999)
 public abstract class TraitMixin_InventoryBridge_Inventory implements InventoryAdapter, InventoryBridge {
 

@@ -22,16 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api;
+package org.spongepowered.common.mixin.inventory.api.tileentity;
 
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.tileentity.CampfireTileEntity;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.type.BlockEntityInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 
-@Mixin({ArmorStandEntity.class, MobEntity.class, PlayerEntity.class, CampfireTileEntity.class})
-public abstract class TraitMixin_AdapterInventory_API implements DefaultImplementedAdapterInventory.WithClear {
+import java.util.Optional;
+
+@Mixin(CampfireTileEntity.class)
+public abstract class CampfireTileEntityMixin_Carried_Inventory_API<T extends BlockEntity & Carrier> implements BlockEntityInventory<T> {
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Optional<T> getCarrier() {
+        return Optional.of((T) this);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Optional<T> getBlockEntity() {
+        return Optional.of((T) this);
+    }
 
 }

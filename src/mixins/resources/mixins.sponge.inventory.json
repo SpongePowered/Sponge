@@ -39,6 +39,8 @@
     "api.inventory.container.StonecutterContainerMixin_BlockCarrier_Inventory_API",
     "api.inventory.container.WorkbenchContainerMixin_BlockCarrier_Inventory_API",
     "api.tileentity.ChestTileEntityMixin_Inventory_API",
+    "api.tileentity.CampfireTileEntityMixin_Carrier_Inventory_API",
+    "api.tileentity.CampfireTileEntityMixin_Carried_Inventory_API",
     "api.tileentity.LockableTileEntityMixin_Carried_Inventory_API",
     "api.tileentity.LockableTileEntityMixin_Carrier_Inventory_API",
     "event.block.DropperBlockMixin_Inventory",
@@ -72,6 +74,7 @@
     "impl.inventory.container.ContainerMixin_Menu_Inventory",
     "impl.inventory.container.PlayerContainerMixin_Bridge_Inventory",
     "impl.inventory.container.SlotMixin_Fabric_Inventory",
-    "impl.inventory.container.SlotMixin_Lens_Inventory"
+    "impl.inventory.container.SlotMixin_Lens_Inventory",
+    "impl.tileentity.CampfireMixin_Fabric_Inventory"
   ]
 }

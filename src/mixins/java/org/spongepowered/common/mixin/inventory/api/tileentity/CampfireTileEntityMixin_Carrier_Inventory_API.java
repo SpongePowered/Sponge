@@ -22,16 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api;
+package org.spongepowered.common.mixin.inventory.api.tileentity;
 
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.tileentity.CampfireTileEntity;
+import org.spongepowered.api.block.entity.carrier.CarrierBlockEntity;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.type.BlockEntityInventory;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
+import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
 
-@Mixin({ArmorStandEntity.class, MobEntity.class, PlayerEntity.class, CampfireTileEntity.class})
-public abstract class TraitMixin_AdapterInventory_API implements DefaultImplementedAdapterInventory.WithClear {
+@Mixin(CampfireTileEntity.class)
+public abstract class CampfireTileEntityMixin_Carrier_Inventory_API implements CarrierBlockEntity {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public BlockEntityInventory<CarrierBlockEntity> getInventory() {
+        return (BlockEntityInventory<CarrierBlockEntity>) this;
+    }
+
+    @Override
+    public Inventory getInventory(final Direction from) {
+        return DefaultSingleBlockCarrier.getInventory(from, this);
+    }
 
 }
