@@ -125,16 +125,6 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
     }
 
     @Override
-    public boolean enabled() {
-        return ((ServerWorldInfoBridge) this).bridge$enabled();
-    }
-
-    @Override
-    public void setEnabled(final boolean enabled) {
-        ((ServerWorldInfoBridge) this).bridge$setEnabled(enabled);
-    }
-
-    @Override
     public boolean loadOnStartup() {
         return ((ServerWorldInfoBridge) this).bridge$loadOnStartup();
     }

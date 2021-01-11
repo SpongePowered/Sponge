@@ -65,10 +65,6 @@ public interface ServerWorldInfoBridge {
 
     void bridge$setPvp(@Nullable Boolean pvp);
 
-    boolean bridge$enabled();
-
-    void bridge$setEnabled(boolean enabled);
-
     boolean bridge$loadOnStartup();
 
     void bridge$setLoadOnStartup(boolean loadOnStartup);

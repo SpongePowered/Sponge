@@ -51,8 +51,6 @@ public interface DimensionBridge {
 
     Optional<Vector3i> bridge$spawnPosition();
 
-    boolean bridge$enabled();
-
     boolean bridge$loadOnStartup();
 
     boolean bridge$performsSpawnLogic();

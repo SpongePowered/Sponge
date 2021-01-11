@@ -302,10 +302,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final WorldType worldType = (WorldType) template.type();
         final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.type());
 
-        if (!templateBridge.bridge$enabled()) {
-            return FutureUtil.completedWithException(new IllegalStateException(String.format("World '%s' has been disabled. Skipping...", worldKey)));
-        }
-
         MinecraftServerAccessor.accessor$LOGGER().info("Loading World '{}' ({})", worldKey, worldTypeKey);
         final String directoryName = this.getDirectoryName(worldKey);
         final boolean isVanillaSubLevel = this.isVanillaSubWorld(directoryName);
@@ -851,17 +847,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.type());
 
             MinecraftServerAccessor.accessor$LOGGER().info("Loading World '{}' ({})", worldKey, worldTypeKey);
-            if (!isDefaultWorld) {
-                if (!templateBridge.bridge$enabled()) {
-                    SpongeCommon.getLogger().warn("World '{}' has been disabled. Skipping...", worldKey);
-                    continue;
-                }
-                if (!templateBridge.bridge$loadOnStartup()) {
-                    SpongeCommon.getLogger().warn("World '{}' has been disabled from loading at startup. Skipping...", worldKey);
-                    continue;
-                }
+            if (!isDefaultWorld && !templateBridge.bridge$loadOnStartup()) {
+                SpongeCommon.getLogger().warn("World '{}' has been disabled from loading at startup. Skipping...", worldKey);
+                continue;
             }
-
 
             final String directoryName = this.getDirectoryName(worldKey);
             final boolean isVanillaSubLevel = this.isVanillaSubWorld(directoryName);

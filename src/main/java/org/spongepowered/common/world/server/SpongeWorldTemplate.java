@@ -84,7 +84,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     @Nullable public final Integer viewDistance;
     @Nullable public final Vector3i spawnPosition;
 
-    public final boolean enabled, loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
+    public final boolean loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
 
     private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
             .create(r -> r
@@ -95,7 +95,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                             EnumCodec.create(SerializationBehavior.class).optionalFieldOf("serialization_behavior").forGetter(v -> Optional.ofNullable(v.serializationBehavior)),
                             Codec.INT.optionalFieldOf("view_distance").forGetter(v -> Optional.ofNullable(v.viewDistance)),
                             MathCodecs.VECTOR_3i.optionalFieldOf("spawn_position").forGetter(v -> Optional.ofNullable(v.spawnPosition)),
-                            Codec.BOOL.optionalFieldOf("enabled").forGetter(v -> Optional.ofNullable(v.enabled)),
                             Codec.BOOL.optionalFieldOf("load_on_startup").forGetter(v -> Optional.ofNullable(v.loadOnStartup)),
                             Codec.BOOL.optionalFieldOf("performs_spawn_logic").forGetter(v -> Optional.ofNullable(v.performsSpawnLogic)),
                             Codec.BOOL.optionalFieldOf("hardcore").forGetter(v -> Optional.ofNullable(v.hardcore)),
@@ -103,10 +102,10 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                             Codec.BOOL.optionalFieldOf("pvp").forGetter(v -> Optional.ofNullable(v.pvp))
                     )
                     // *Chuckles* I continue to be in danger...
-                    .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12) ->
+                    .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11) ->
                             new SpongeDataSection(f1.orElse(null), f2.orElse(null), f3.orElse(null), f4.orElse(null),
                                     f5.orElse(null), f6.orElse(null), f7.orElse(null), f8.orElse(null), f9.orElse(null),
-                                    f10.orElse(null), f11.orElse(null), f12.orElse(null))
+                                    f10.orElse(null), f11.orElse(null))
                     )
             );
 
@@ -118,12 +117,12 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                             SpongeWorldTemplate.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> {
                                 final DimensionBridge dimensionBridge = (DimensionBridge) (Object) v;
                                 return Optional.of(new SpongeDataSection(dimensionBridge.bridge$displayName().orElse(null),
-                                        dimensionBridge.bridge$gameMode().orElse(null), dimensionBridge.bridge$difficulty().orElse(null),
-                                        dimensionBridge.bridge$serializationBehavior().orElse(null),
-                                        dimensionBridge.bridge$viewDistance().orElse(null), dimensionBridge.bridge$spawnPosition().orElse(null),
-                                        dimensionBridge.bridge$enabled(), dimensionBridge.bridge$loadOnStartup(),
-                                        dimensionBridge.bridge$performsSpawnLogic(), dimensionBridge.bridge$hardcore().orElse(null),
-                                        dimensionBridge.bridge$commands(), dimensionBridge.bridge$pvp().orElse(null)));
+                                    dimensionBridge.bridge$gameMode().orElse(null), dimensionBridge.bridge$difficulty().orElse(null),
+                                    dimensionBridge.bridge$serializationBehavior().orElse(null),
+                                    dimensionBridge.bridge$viewDistance().orElse(null), dimensionBridge.bridge$spawnPosition().orElse(null),
+                                    dimensionBridge.bridge$loadOnStartup(),dimensionBridge.bridge$performsSpawnLogic(),
+                                    dimensionBridge.bridge$hardcore().orElse(null), dimensionBridge.bridge$commands(),
+                                    dimensionBridge.bridge$pvp().orElse(null)));
                             })
                     )
                     .apply(r, r
@@ -148,7 +147,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.serializationBehavior = builder.serializationBehavior;
         this.viewDistance = builder.viewDistance;
         this.spawnPosition = builder.spawnPosition;
-        this.enabled = builder.enabled;
         this.loadOnStartup = builder.loadOnStartup;
         this.performsSpawnLogic = builder.performsSpawnLogic;
         this.hardcore = builder.hardcore;
@@ -170,7 +168,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.serializationBehavior = levelBridge.bridge$serializationBehavior().orElse(null);
         this.viewDistance = levelBridge.bridge$viewDistance().orElse(null);
         this.spawnPosition = levelBridge.bridge$customSpawnPosition() ? levelData.spawnPosition() : null;
-        this.enabled = levelData.enabled();
         this.loadOnStartup = levelData.loadOnStartup();
         this.performsSpawnLogic = levelData.performsSpawnLogic();
         this.hardcore = levelData.hardcore();
@@ -190,7 +187,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.serializationBehavior = templateBridge.bridge$serializationBehavior().orElse(null);
         this.viewDistance = templateBridge.bridge$viewDistance().orElse(null);
         this.spawnPosition = templateBridge.bridge$spawnPosition().orElse(null);
-        this.enabled = templateBridge.bridge$enabled();
         this.loadOnStartup = templateBridge.bridge$loadOnStartup();
         this.performsSpawnLogic = templateBridge.bridge$performsSpawnLogic();
         this.hardcore = templateBridge.bridge$hardcore().orElse(null);
@@ -236,11 +232,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     @Override
     public Optional<SerializationBehavior> serializationBehavior() {
         return Optional.ofNullable(this.serializationBehavior);
-    }
-
-    @Override
-    public boolean enabled() {
-        return this.enabled;
     }
 
     @Override
@@ -304,20 +295,20 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         @Nullable public final SerializationBehavior serializationBehavior;
         @Nullable public final Integer viewDistance;
         @Nullable public final Vector3i spawnPosition;
-        @Nullable public final Boolean enabled, loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
+        @Nullable public final Boolean loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
 
         public SpongeDataSection(@Nullable final Component displayName, @Nullable final ResourceLocation gameMode,
-                @Nullable final ResourceLocation difficulty, @Nullable final SerializationBehavior serializationBehavior,
-                @Nullable final Integer viewDistance, @Nullable final Vector3i spawnPosition, @Nullable final Boolean enabled,
-                @Nullable final Boolean loadOnStartup, @Nullable final Boolean performsSpawnLogic, @Nullable final Boolean hardcore,
-                @Nullable final Boolean commands, @Nullable final Boolean pvp) {
+            @Nullable final ResourceLocation difficulty, @Nullable final SerializationBehavior serializationBehavior,
+            @Nullable final Integer viewDistance, @Nullable final Vector3i spawnPosition, @Nullable final Boolean loadOnStartup,
+            @Nullable final Boolean performsSpawnLogic, @Nullable final Boolean hardcore, @Nullable final Boolean commands,
+            @Nullable final Boolean pvp)
+        {
             this.displayName = displayName;
             this.gameMode = gameMode;
             this.difficulty = difficulty;
             this.serializationBehavior = serializationBehavior;
             this.viewDistance = viewDistance;
             this.spawnPosition = spawnPosition;
-            this.enabled = enabled;
             this.loadOnStartup = loadOnStartup;
             this.performsSpawnLogic = performsSpawnLogic;
             this.hardcore = hardcore;
@@ -338,7 +329,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         @Nullable protected Integer viewDistance;
         @Nullable protected Vector3i spawnPosition;
 
-        protected boolean enabled, loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
+        protected boolean loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
 
         @Override
         public Builder displayName(@Nullable final Component displayName) {
@@ -379,12 +370,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         @Override
         public Builder serializationBehavior(@Nullable final SerializationBehavior serializationBehavior) {
             this.serializationBehavior = serializationBehavior;
-            return this;
-        }
-
-        @Override
-        public Builder enabled(final boolean enabled) {
-            this.enabled = enabled;
             return this;
         }
 
@@ -446,7 +431,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.serializationBehavior = null;
             this.viewDistance = null;
             this.spawnPosition = null;
-            this.enabled = true;
             this.loadOnStartup = true;
             this.performsSpawnLogic = false;
             this.hardcore = false;
@@ -471,7 +455,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.serializationBehavior = template.serializationBehavior().orElse(null);
             this.viewDistance = template.viewDistance().orElse(null);
             this.spawnPosition = template.spawnPosition().orElse(null);
-            this.enabled = template.enabled();
             this.loadOnStartup = template.loadOnStartup();
             this.performsSpawnLogic = template.performsSpawnLogic();
             this.hardcore = template.hardcore();

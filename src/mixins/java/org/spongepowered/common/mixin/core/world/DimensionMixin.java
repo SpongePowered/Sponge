@@ -59,7 +59,7 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     @Nullable private Vector3i impl$spawnPosition;
     @Nullable private Boolean impl$hardcore, impl$pvp;
 
-    private boolean impl$enabled = true, impl$loadOnStartup = true, impl$performsSpawnLogic = false, impl$commands = true;
+    private boolean impl$loadOnStartup = true, impl$performsSpawnLogic = false, impl$commands = true;
 
 
     @Override
@@ -103,11 +103,6 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     }
 
     @Override
-    public boolean bridge$enabled() {
-        return this.impl$enabled;
-    }
-
-    @Override
     public boolean bridge$loadOnStartup() {
         return this.impl$loadOnStartup;
     }
@@ -140,7 +135,6 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
         this.impl$displayName = spongeData.displayName;
         this.impl$viewDistance = spongeData.viewDistance;
         this.impl$spawnPosition = spongeData.spawnPosition;
-        this.impl$enabled = spongeData.enabled == null || spongeData.enabled;
         this.impl$loadOnStartup = spongeData.loadOnStartup == null || spongeData.loadOnStartup;
         this.impl$performsSpawnLogic = spongeData.performsSpawnLogic != null && spongeData.performsSpawnLogic;
         this.impl$hardcore = spongeData.hardcore;
@@ -157,7 +151,6 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
         this.impl$displayName = s.displayName == null ? null : s.displayName;
         this.impl$viewDistance = s.viewDistance == null ? null : s.viewDistance;
         this.impl$spawnPosition = s.spawnPosition == null ? null : s.spawnPosition;
-        this.impl$enabled = s.enabled;
         this.impl$loadOnStartup = s.loadOnStartup;
         this.impl$performsSpawnLogic = s.performsSpawnLogic;
         this.impl$hardcore = s.hardcore;
@@ -174,7 +167,6 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
         this.impl$displayName = levelDataBridge.bridge$displayName().orElse(null);
         this.impl$viewDistance = levelDataBridge.bridge$viewDistance().orElse(null);
         this.impl$spawnPosition = new Vector3i(levelData.getXSpawn(), levelData.getYSpawn(), levelData.getZSpawn());
-        this.impl$enabled = levelDataBridge.bridge$enabled();
         this.impl$loadOnStartup = levelDataBridge.bridge$loadOnStartup();
         this.impl$performsSpawnLogic = levelDataBridge.bridge$performsSpawnLogic();
         this.impl$hardcore = levelData.isHardcore();

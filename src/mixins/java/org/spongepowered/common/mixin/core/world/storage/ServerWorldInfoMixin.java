@@ -99,8 +99,8 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     private Boolean impl$pvp;
     private InheritableConfigHandle<WorldConfig> impl$configAdapter;
 
-    private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$enabled,
-            impl$loadOnStartup, impl$performsSpawnLogic;
+    private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$loadOnStartup,
+        impl$performsSpawnLogic;
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -186,16 +186,6 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     @Override
     public void bridge$setPvp(@Nullable final Boolean pvp) {
         this.impl$pvp = pvp;
-    }
-
-    @Override
-    public boolean bridge$enabled() {
-        return this.impl$enabled;
-    }
-
-    @Override
-    public void bridge$setEnabled(final boolean enabled) {
-        this.impl$enabled = enabled;
     }
 
     @Override
@@ -288,7 +278,6 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
         dimensionBridge.bridge$hardcore().ifPresent(v -> ((WorldSettingsAccessor) (Object) this.settings).accessor$hardcode(v));
         this.impl$serializationBehavior = dimensionBridge.bridge$serializationBehavior().orElse(null);
         this.impl$pvp = dimensionBridge.bridge$pvp().orElse(null);
-        this.impl$enabled = dimensionBridge.bridge$enabled();
         this.impl$loadOnStartup = dimensionBridge.bridge$loadOnStartup();
         this.impl$performsSpawnLogic = dimensionBridge.bridge$performsSpawnLogic();
         this.impl$viewDistance = dimensionBridge.bridge$viewDistance().orElse(null);
