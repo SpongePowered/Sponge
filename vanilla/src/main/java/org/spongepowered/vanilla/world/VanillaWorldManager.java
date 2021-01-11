@@ -264,28 +264,32 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     @Override
     public CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld(final ResourceKey key) {
         final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
+
         if (World.OVERWORLD.equals(registryKey)) {
             FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
         }
+
         final ServerWorld world = this.worlds.get(registryKey);
         if (world != null) {
             return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
         }
 
-        WorldTemplate template = this.loadTemplate(key).orElse(null);
-        if (template == null) {
-            if (this.isVanillaWorld(key)) {
-                template = World.NETHER.equals(registryKey) ? WorldTemplate.theNether() : WorldTemplate.theEnd();
+        return this.loadTemplate(key).thenCompose(r -> {
+            WorldTemplate loadedTemplate = r.orElse(null);
+            if (loadedTemplate == null) {
+                if (this.isVanillaWorld(key)) {
+                    loadedTemplate = World.NETHER.equals(registryKey) ? WorldTemplate.theNether() : WorldTemplate.theEnd();
+                }
+
+                if (loadedTemplate == null) {
+                    return CompletableFuture.completedFuture(null);
+                }
+
+                this.saveTemplate(loadedTemplate);
             }
 
-            if (template == null) {
-                CompletableFuture.completedFuture(null);
-            } else {
-                this.saveTemplate(template);
-            }
-        }
-
-        return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template).asDimension());
+            return this.loadWorld0(registryKey, ((SpongeWorldTemplate) loadedTemplate).asDimension());
+        });
     }
 
     private CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld0(final RegistryKey<World> registryKey,
@@ -408,7 +412,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public boolean saveTemplate(final WorldTemplate template) {
+    public CompletableFuture<Boolean> saveTemplate(final WorldTemplate template) {
         final Dimension scratch = ((SpongeWorldTemplate) Objects.requireNonNull(template, "template")).asDimension();
         try {
             final JsonElement element = SpongeWorldTemplate.DIRECT_CODEC.encodeStart(WorldGenSettingsExport.create(JsonOps.INSTANCE, BootstrapProperties.registries), scratch).getOrThrow(true, s -> { });
@@ -417,20 +421,19 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             DataPackSerializer.writeFile(dataPackFile, element);
             DataPackSerializer.writePackMetadata("World", this.dimensionsDataPackDirectory.getParent());
         } catch (final Exception ex) {
-            ex.printStackTrace();
-            return false;
+            FutureUtil.completedWithException(ex);
         }
-        return true;
+        return CompletableFuture.completedFuture(true);
     }
 
     @Override
-    public Optional<WorldTemplate> loadTemplate(final ResourceKey key) {
+    public CompletableFuture<Optional<WorldTemplate>> loadTemplate(final ResourceKey key) {
         Objects.requireNonNull(key, "key");
         final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
         // TODO Maybe this should be from file always?
         final ServerWorld world = this.worlds.get(registryKey);
         if (world != null) {
-            return Optional.of(((org.spongepowered.api.world.server.ServerWorld) world).asTemplate());
+            return CompletableFuture.completedFuture(Optional.of(((org.spongepowered.api.world.server.ServerWorld) world).asTemplate()));
         }
         // TODO Support getting Vanilla sub level templates from unloaded worlds
         if (!this.isVanillaWorld(key)) {
@@ -438,13 +441,13 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             try {
                 final Dimension template = this.loadTemplate0(SpongeWorldManager.createRegistryKey(key), dataPackFile);
                 ((ResourceKeyBridge) (Object) template).bridge$setKey(key);
-                return Optional.of(((DimensionBridge) (Object) template).bridge$asTemplate());
+                return CompletableFuture.completedFuture(Optional.of(((DimensionBridge) (Object) template).bridge$asTemplate()));
             } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
 
-        return Optional.empty();
+        return CompletableFuture.completedFuture(Optional.empty());
     }
 
     @Override
