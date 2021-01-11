@@ -329,7 +329,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 levelSettings = MinecraftServer.DEMO_SETTINGS;
                 generationSettings = DimensionGeneratorSettings.demoSettings(BootstrapProperties.registries);
             } else {
-                levelSettings = new WorldSettings(directoryName, (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.getGame().registries()), templateBridge.bridge$hardcore(), (Difficulty) (Object) BootstrapProperties.difficulty.get(Sponge.getGame().registries()), templateBridge.bridge$commands(), new GameRules(), defaultLevelData.getDataPackConfig());
+                levelSettings = new WorldSettings(directoryName, (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.getGame().registries()),
+                        templateBridge.bridge$hardcore().orElse(BootstrapProperties.hardcore), (Difficulty) (Object) BootstrapProperties.difficulty
+                        .get(Sponge.getGame().registries()), templateBridge.bridge$commands(), new GameRules(), defaultLevelData.getDataPackConfig());
                 generationSettings = ((DimensionGeneratorSettingsBridge) defaultLevelData.worldGenSettings()).bridge$copy();
             }
 
@@ -802,7 +804,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                         levelSettings = MinecraftServer.DEMO_SETTINGS;
                         generationSettings = DimensionGeneratorSettings.demoSettings(BootstrapProperties.registries);
                     } else {
-                        levelSettings = new WorldSettings(directoryName, (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.getGame().registries()), templateBridge.bridge$hardcore(), (Difficulty) (Object) BootstrapProperties.difficulty.get(Sponge.getGame().registries()), templateBridge.bridge$commands(), new GameRules(), defaultLevelData.getDataPackConfig());
+                        levelSettings = new WorldSettings(directoryName,
+                                (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.getGame().registries()),
+                                templateBridge.bridge$hardcore().orElse(BootstrapProperties.hardcore),
+                                (Difficulty) (Object) BootstrapProperties.difficulty.get(Sponge.getGame().registries()),
+                                templateBridge.bridge$commands(), new GameRules(), defaultLevelData.getDataPackConfig());
                         generationSettings = ((DimensionGeneratorSettingsBridge) defaultLevelData.worldGenSettings()).bridge$copy();
                     }
 
@@ -873,10 +879,13 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         world.getWorldBorder().applySettings(levelData.getWorldBorder());
         if (!levelData.isInitialized()) {
             try {
-                if (isDefaultWorld || ((ServerWorldProperties) world.getLevelData()).performsSpawnLogic()) {
-                    MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(), isDebugGeneration, true);
-                } else if (World.END.equals(world.dimension())) {
-                    ((ServerWorldInfo) world.getLevelData()).setSpawn(ServerWorld.END_SPAWN_POINT, 0);
+                boolean hasSpawnAlready = ((ServerWorldInfoBridge) world.getLevelData()).bridge$customSpawnPosition();
+                if (!hasSpawnAlready) {
+                    if (isDefaultWorld || ((ServerWorldProperties) world.getLevelData()).performsSpawnLogic()) {
+                        MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(), isDebugGeneration, !isDebugGeneration);
+                    } else if (World.END.equals(world.dimension())) {
+                        ((ServerWorldInfo) world.getLevelData()).setSpawn(ServerWorld.END_SPAWN_POINT, 0);
+                    }
                 }
                 levelData.setInitialized(true);
                 if (isDebugGeneration) {

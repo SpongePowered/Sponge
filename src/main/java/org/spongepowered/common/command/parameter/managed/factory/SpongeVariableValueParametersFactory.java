@@ -33,6 +33,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
+import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
@@ -94,8 +95,8 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public <T> VariableValueParameters.CatalogedTypeBuilder<T> createRegistryEntryBuilder(final RegistryType<T> reference) {
-        return new SpongeCatalogedElementParameterBuilder<>(in -> Sponge.getGame().registries().registry(reference));
+    public <T> VariableValueParameters.CatalogedTypeBuilder<T> createRegistryEntryBuilder(final DefaultedRegistryType<T> type) {
+        return new SpongeCatalogedElementParameterBuilder<>(in -> type.get());
     }
 
     @Override

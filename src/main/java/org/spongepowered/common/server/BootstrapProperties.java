@@ -34,6 +34,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
 
 public final class BootstrapProperties {
@@ -41,6 +42,7 @@ public final class BootstrapProperties {
     public static DimensionGeneratorSettings dimensionGeneratorSettings;
     public static RegistryReference<GameMode> gameMode;
     public static RegistryReference<Difficulty> difficulty;
+    public static SerializationBehavior serializationBehavior;
     public static boolean pvp;
     public static boolean hardcore;
     public static int viewDistance;
@@ -57,6 +59,7 @@ public final class BootstrapProperties {
         BootstrapProperties.hardcore = hardcore;
         BootstrapProperties.viewDistance = viewDistance;
         BootstrapProperties.registries = registries;
+        BootstrapProperties.serializationBehavior = SerializationBehavior.AUTOMATIC;
     }
 
     public static <T> void worldSettingsAdapter(final WorldSettingsImport<T> worldSettingsAdapter) {

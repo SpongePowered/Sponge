@@ -44,6 +44,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.WorldSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -75,7 +76,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
 
     @Override
     public Optional<Component> displayName() {
-        return Optional.ofNullable(((ServerWorldInfoBridge) this).bridge$displayName());
+        return ((ServerWorldInfoBridge) this).bridge$displayName();
     }
 
     @Override
@@ -160,7 +161,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
 
     @Override
     public int viewDistance() {
-        return ((ServerWorldInfoBridge) this).bridge$viewDistance();
+        return ((ServerWorldInfoBridge) this).bridge$viewDistance().orElse(BootstrapProperties.viewDistance);
     }
 
     @Override

@@ -29,10 +29,9 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.Difficulty;
@@ -54,9 +53,7 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.WorldSettingsAccessor;
@@ -69,9 +66,11 @@ import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -87,6 +86,9 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     @Shadow public abstract boolean shadow$isDifficultyLocked();
     // @formatter:on
 
+    @Shadow public abstract void setSpawn(BlockPos p_176143_1_, float p_176143_2_);
+
+    @Shadow private float spawnAngle;
     @Nullable private ResourceKey impl$key;
     private DimensionType impl$dimensionType;
     private SerializationBehavior impl$serializationBehavior;
@@ -95,7 +97,8 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     private UUID impl$uniqueId = UUID.randomUUID();
     private InheritableConfigHandle<WorldConfig> impl$configAdapter;
 
-    private boolean impl$hasCustomDifficulty = false, impl$pvp, impl$enabled, impl$loadOnStartup, impl$performsSpawnLogic;
+    private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$pvp, impl$enabled,
+            impl$loadOnStartup, impl$performsSpawnLogic;
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -153,12 +156,22 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
 
     @Override
     public boolean bridge$customDifficulty() {
-        return this.impl$hasCustomDifficulty;
+        return this.impl$customDifficulty;
+    }
+
+    @Override
+    public boolean bridge$customGameType() {
+        return this.impl$customGameType;
+    }
+
+    @Override
+    public boolean bridge$customSpawnPosition() {
+        return this.impl$customSpawnPosition;
     }
 
     @Override
     public void bridge$forceSetDifficulty(final Difficulty difficulty) {
-        this.impl$hasCustomDifficulty = true;
+        this.impl$customDifficulty = true;
         ((WorldSettingsAccessor) (Object) this.settings).accessor$difficulty(difficulty);
         this.impl$updateWorldForDifficultyChange(this.bridge$world(), this.shadow$isDifficultyLocked());
     }
@@ -214,8 +227,8 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public @Nullable Component bridge$displayName() {
-        return this.impl$displayName;
+    public Optional<Component> bridge$displayName() {
+        return Optional.ofNullable(this.impl$displayName);
     }
 
     @Override
@@ -224,13 +237,13 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public int bridge$viewDistance() {
-        return this.impl$viewDistance;
+    public Optional<Integer> bridge$viewDistance() {
+        return Optional.ofNullable(this.impl$viewDistance);
     }
 
     @Override
     public void bridge$setViewDistance(@Nullable final Integer viewDistance) {
-        this.impl$viewDistance = viewDistance == null ? BootstrapProperties.viewDistance : viewDistance;
+        this.impl$viewDistance = viewDistance;
     }
 
     @Override
@@ -248,17 +261,26 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
         final DimensionBridge dimensionBridge = (DimensionBridge) (Object) dimension;
         this.impl$key = ((ResourceKeyBridge) (Object) dimension).bridge$getKey();
         this.impl$dimensionType = dimension.type();
-        this.impl$serializationBehavior = dimensionBridge.bridge$serializationBehavior();
-        this.impl$displayName = dimensionBridge.bridge$displayName();
-        this.impl$hasCustomDifficulty = dimensionBridge.bridge$difficulty() != null;
-        if (this.impl$hasCustomDifficulty) {
-            ((WorldSettingsAccessor) (Object) this.settings).accessor$difficulty(RegistryTypes.DIFFICULTY.get().value((ResourceKey) (Object) dimensionBridge.bridge$difficulty()));
-        }
-        this.impl$pvp = dimensionBridge.bridge$pvp();
+        this.impl$displayName = dimensionBridge.bridge$displayName().orElse(null);
+        dimensionBridge.bridge$difficulty().ifPresent(v -> {
+            ((WorldSettingsAccessor) (Object) this.settings).accessor$difficulty(RegistryTypes.DIFFICULTY.get().value((ResourceKey) (Object) v));
+            this.impl$customDifficulty = true;
+        });
+        dimensionBridge.bridge$gameMode().ifPresent(v -> {
+            ((WorldSettingsAccessor) (Object) this.settings).accessor$gameType(RegistryTypes.GAME_MODE.get().value((ResourceKey) (Object) v));
+            this.impl$customGameType = true;
+        });
+        dimensionBridge.bridge$spawnPosition().ifPresent(v -> {
+            this.setSpawn(VecHelper.toBlockPos(v), this.spawnAngle);
+            this.impl$customSpawnPosition = true;
+        });
+        dimensionBridge.bridge$hardcore().ifPresent(v -> ((WorldSettingsAccessor) (Object) this.settings).accessor$hardcode(v));
+        this.impl$serializationBehavior = dimensionBridge.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
+        dimensionBridge.bridge$pvp().ifPresent(v -> this.impl$pvp = v);
         this.impl$enabled = dimensionBridge.bridge$enabled();
         this.impl$loadOnStartup = dimensionBridge.bridge$loadOnStartup();
         this.impl$performsSpawnLogic = dimensionBridge.bridge$performsSpawnLogic();
-        this.impl$viewDistance = dimensionBridge.bridge$viewDistance();
+        this.impl$viewDistance = dimensionBridge.bridge$viewDistance().orElse(BootstrapProperties.viewDistance);
     }
 
     @Override

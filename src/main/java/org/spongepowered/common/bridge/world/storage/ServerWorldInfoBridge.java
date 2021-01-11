@@ -34,6 +34,7 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ServerWorldInfoBridge {
@@ -53,6 +54,10 @@ public interface ServerWorldInfoBridge {
     void bridge$setUniqueId(UUID uniqueId);
 
     boolean bridge$customDifficulty();
+
+    boolean bridge$customGameType();
+
+    boolean bridge$customSpawnPosition();
 
     void bridge$forceSetDifficulty(Difficulty difficulty);
 
@@ -76,12 +81,11 @@ public interface ServerWorldInfoBridge {
 
     void bridge$setSerializationBehavior(SerializationBehavior behavior);
 
-    @Nullable
-    Component bridge$displayName();
+    Optional<Component> bridge$displayName();
 
     void bridge$setDisplayName(@Nullable Component displayName);
 
-    int bridge$viewDistance();
+    Optional<Integer> bridge$viewDistance();
 
     void bridge$setViewDistance(@Nullable Integer viewDistance);
 

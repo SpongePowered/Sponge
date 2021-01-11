@@ -22,22 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world;
+package org.spongepowered.common.serialization;
 
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.GameType;
-import net.minecraft.world.WorldSettings;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import com.mojang.serialization.Codec;
+import net.minecraft.util.Util;
+import org.spongepowered.math.vector.Vector3i;
 
-@Mixin(WorldSettings.class)
-public interface WorldSettingsAccessor {
+import java.util.stream.IntStream;
 
-    @Accessor("hardcore") void accessor$hardcode(boolean hardcode);
+public final class MathCodecs {
 
-    @Accessor("allowCommands") void accessor$allowCommands(boolean allowCommands);
+    // TODO DFU compliment lib for Math?
 
-    @Accessor("difficulty") void accessor$difficulty(Difficulty difficulty);
+    public static final Codec<Vector3i> VECTOR_3i = Codec.INT_STREAM.comapFlatMap(f -> Util.fixedSize(f, 3).map((f1) ->
+            new Vector3i(f1[0], f1[1], f1[2])), v -> IntStream.of(v.getX(), v.getY(), v.getZ())).stable();
 
-    @Accessor("gameType") void accessor$gameType(GameType gameType);
+    private MathCodecs() {
+    }
 }

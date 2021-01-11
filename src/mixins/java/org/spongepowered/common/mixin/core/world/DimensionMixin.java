@@ -36,10 +36,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.DimensionBridge;
-import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
+import org.spongepowered.math.vector.Vector3i;
 
-import java.util.UUID;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Mixin(Dimension.class)
@@ -48,12 +48,14 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     private ResourceKey impl$key;
     private ResourceLocation impl$gameMode;
     @Nullable private ResourceLocation impl$difficulty;
-    private SerializationBehavior impl$serializationBehavior = SerializationBehavior.AUTOMATIC;
+    private SerializationBehavior impl$serializationBehavior = null;
     @Nullable private Component impl$displayName = null;
-    private Integer impl$viewDistance = BootstrapProperties.viewDistance;
+    private Integer impl$viewDistance = null;
+    @Nullable private Vector3i impl$spawnPosition;
+    @Nullable private Boolean impl$hardcore, impl$pvp;
 
-    private boolean impl$enabled = true, impl$loadOnStartup = true, impl$performsSpawnLogic = false,impl$hardcore = BootstrapProperties.hardcore,
-            impl$commands = true, impl$pvp = BootstrapProperties.pvp;
+    private boolean impl$enabled = true, impl$loadOnStartup = true, impl$performsSpawnLogic = false, impl$commands = true;
+
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -66,29 +68,33 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     }
 
     @Override
-    public @Nullable Component bridge$displayName() {
-        return this.impl$displayName;
+    public Optional<Component> bridge$displayName() {
+        return Optional.ofNullable(this.impl$displayName);
     }
 
     @Override
-    public ResourceLocation bridge$gameMode() {
-        return this.impl$gameMode;
-    }
-
-    @Nullable
-    @Override
-    public ResourceLocation bridge$difficulty() {
-        return this.impl$difficulty;
+    public Optional<ResourceLocation> bridge$gameMode() {
+        return Optional.ofNullable(this.impl$gameMode);
     }
 
     @Override
-    public SerializationBehavior bridge$serializationBehavior() {
-        return this.impl$serializationBehavior;
+    public Optional<ResourceLocation> bridge$difficulty() {
+        return Optional.ofNullable(this.impl$difficulty);
     }
 
     @Override
-    public @Nullable Integer bridge$viewDistance() {
-        return this.impl$viewDistance;
+    public Optional<SerializationBehavior> bridge$serializationBehavior() {
+        return Optional.ofNullable(this.impl$serializationBehavior);
+    }
+
+    @Override
+    public Optional<Integer> bridge$viewDistance() {
+        return Optional.ofNullable(this.impl$viewDistance);
+    }
+
+    @Override
+    public Optional<Vector3i> bridge$spawnPosition() {
+        return Optional.ofNullable(this.impl$spawnPosition);
     }
 
     @Override
@@ -107,8 +113,8 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     }
 
     @Override
-    public boolean bridge$hardcore() {
-        return this.impl$hardcore;
+    public Optional<Boolean> bridge$hardcore() {
+        return Optional.ofNullable(this.impl$hardcore);
     }
 
     @Override
@@ -117,39 +123,41 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     }
 
     @Override
-    public boolean bridge$pvp() {
-        return this.impl$pvp;
+    public Optional<Boolean> bridge$pvp() {
+        return Optional.ofNullable(this.impl$pvp);
     }
 
     @Override
     public void bridge$populateFromData(final SpongeWorldTemplate.SpongeDataSection spongeData) {
         this.impl$gameMode = spongeData.gameMode;
         this.impl$difficulty = spongeData.difficulty;
-        this.impl$serializationBehavior = spongeData.serializationBehavior == null ? SerializationBehavior.AUTOMATIC : spongeData.serializationBehavior;
+        this.impl$serializationBehavior = spongeData.serializationBehavior;
         this.impl$displayName = spongeData.displayName;
-        this.impl$viewDistance = spongeData.viewDistance == null ? BootstrapProperties.viewDistance : spongeData.viewDistance;
+        this.impl$viewDistance = spongeData.viewDistance;
+        this.impl$spawnPosition = spongeData.spawnPosition;
         this.impl$enabled = spongeData.enabled == null || spongeData.enabled;
         this.impl$loadOnStartup = spongeData.loadOnStartup == null || spongeData.loadOnStartup;
         this.impl$performsSpawnLogic = spongeData.performsSpawnLogic != null && spongeData.performsSpawnLogic;
-        this.impl$hardcore = spongeData.hardcore == null ? BootstrapProperties.hardcore : spongeData.hardcore;
+        this.impl$hardcore = spongeData.hardcore;
         this.impl$commands = spongeData.commands == null || spongeData.commands;
-        this.impl$pvp = spongeData.pvp == null || spongeData.pvp;
+        this.impl$pvp = spongeData.pvp;
     }
 
     @Override
     public void bridge$populateFromTemplate(final SpongeWorldTemplate s) {
         this.impl$key = s.getKey();
-        this.impl$gameMode = (ResourceLocation) s.gameMode().orElse(null);
-        this.impl$difficulty = (ResourceLocation) s.difficulty().orElse(null);
-        this.impl$serializationBehavior = s.serializationBehavior();
-        this.impl$displayName = s.displayName().orElse(null);
-        this.impl$viewDistance = s.viewDistance().orElse(null);
-        this.impl$enabled = s.enabled();
-        this.impl$loadOnStartup = s.loadOnStartup();
-        this.impl$performsSpawnLogic = s.performsSpawnLogic();
-        this.impl$hardcore = s.hardcore();
-        this.impl$commands = s.commands();
-        this.impl$pvp = s.pvp();
+        this.impl$gameMode = s.gameMode == null ? null : (ResourceLocation) (Object) s.gameMode.location();
+        this.impl$difficulty = s.difficulty == null ? null : (ResourceLocation) (Object) s.difficulty.location();
+        this.impl$serializationBehavior = s.serializationBehavior().orElse(null);
+        this.impl$displayName = s.displayName == null ? null : s.displayName;
+        this.impl$viewDistance = s.viewDistance == null ? null : s.viewDistance;
+        this.impl$spawnPosition = s.spawnPosition == null ? null : s.spawnPosition;
+        this.impl$enabled = s.enabled;
+        this.impl$loadOnStartup = s.loadOnStartup;
+        this.impl$performsSpawnLogic = s.performsSpawnLogic;
+        this.impl$hardcore = s.hardcore;
+        this.impl$commands = s.commands;
+        this.impl$pvp = s.pvp;
     }
 
     @Override

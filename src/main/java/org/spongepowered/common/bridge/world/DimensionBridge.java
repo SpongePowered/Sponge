@@ -30,23 +30,24 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
+import org.spongepowered.math.vector.Vector3i;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface DimensionBridge {
 
-    @Nullable
-    Component bridge$displayName();
+    Optional<Component> bridge$displayName();
 
-    ResourceLocation bridge$gameMode();
+    Optional<ResourceLocation> bridge$gameMode();
 
-    @Nullable
-    ResourceLocation bridge$difficulty();
+    Optional<ResourceLocation> bridge$difficulty();
 
-    SerializationBehavior bridge$serializationBehavior();
+    Optional<SerializationBehavior> bridge$serializationBehavior();
 
-    @Nullable
-    Integer bridge$viewDistance();
+    Optional<Integer> bridge$viewDistance();
+
+    Optional<Vector3i> bridge$spawnPosition();
 
     boolean bridge$enabled();
 
@@ -54,11 +55,11 @@ public interface DimensionBridge {
 
     boolean bridge$performsSpawnLogic();
 
-    boolean bridge$hardcore();
+    Optional<Boolean> bridge$hardcore();
 
     boolean bridge$commands();
 
-    boolean bridge$pvp();
+    Optional<Boolean> bridge$pvp();
 
     void bridge$populateFromData(SpongeWorldTemplate.SpongeDataSection spongeData);
 
