@@ -50,11 +50,10 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     @Nullable private ResourceLocation impl$difficulty;
     private SerializationBehavior impl$serializationBehavior = SerializationBehavior.AUTOMATIC;
     @Nullable private Component impl$displayName = null;
-    @Nullable private UUID impl$uniqueId;
     private Integer impl$viewDistance = BootstrapProperties.viewDistance;
 
-    private boolean impl$enabled = true, impl$keepLoaded = true, impl$loadOnStartup = true, impl$keepSpawnLoaded = false, impl$generateSpawnOnLoad =
-            false, impl$hardcore = BootstrapProperties.hardcore, impl$commands = true, impl$pvp = BootstrapProperties.pvp;
+    private boolean impl$enabled = true, impl$loadOnStartup = true, impl$performsSpawnLogic = false,impl$hardcore = BootstrapProperties.hardcore,
+            impl$commands = true, impl$pvp = BootstrapProperties.pvp;
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -88,11 +87,6 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     }
 
     @Override
-    public @Nullable UUID bridge$uniqueId() {
-        return this.impl$uniqueId;
-    }
-
-    @Override
     public @Nullable Integer bridge$viewDistance() {
         return this.impl$viewDistance;
     }
@@ -103,23 +97,13 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     }
 
     @Override
-    public boolean bridge$keepLoaded() {
-        return this.impl$keepLoaded;
-    }
-
-    @Override
     public boolean bridge$loadOnStartup() {
         return this.impl$loadOnStartup;
     }
 
     @Override
-    public boolean bridge$keepSpawnLoaded() {
-        return this.impl$keepSpawnLoaded;
-    }
-
-    @Override
-    public boolean bridge$generateSpawnOnLoad() {
-        return this.impl$generateSpawnOnLoad;
+    public boolean bridge$performsSpawnLogic() {
+        return this.impl$performsSpawnLogic;
     }
 
     @Override
@@ -139,17 +123,14 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
 
     @Override
     public void bridge$populateFromData(final SpongeWorldTemplate.SpongeDataSection spongeData) {
-        this.impl$gameMode = spongeData.gameMode == null ? (ResourceLocation) (Object) BootstrapProperties.gameMode.location() : spongeData.gameMode;
+        this.impl$gameMode = spongeData.gameMode;
         this.impl$difficulty = spongeData.difficulty;
         this.impl$serializationBehavior = spongeData.serializationBehavior == null ? SerializationBehavior.AUTOMATIC : spongeData.serializationBehavior;
         this.impl$displayName = spongeData.displayName;
-        this.impl$uniqueId = spongeData.uniqueId == null ? UUID.randomUUID() : spongeData.uniqueId;
         this.impl$viewDistance = spongeData.viewDistance == null ? BootstrapProperties.viewDistance : spongeData.viewDistance;
         this.impl$enabled = spongeData.enabled == null || spongeData.enabled;
-        this.impl$keepLoaded = spongeData.keepLoaded == null || spongeData.keepLoaded;
         this.impl$loadOnStartup = spongeData.loadOnStartup == null || spongeData.loadOnStartup;
-        this.impl$keepSpawnLoaded = spongeData.keepSpawnLoaded != null && spongeData.keepSpawnLoaded;
-        this.impl$generateSpawnOnLoad = spongeData.generateSpawnOnLoad != null && spongeData.generateSpawnOnLoad;
+        this.impl$performsSpawnLogic = spongeData.performsSpawnLogic != null && spongeData.performsSpawnLogic;
         this.impl$hardcore = spongeData.hardcore == null ? BootstrapProperties.hardcore : spongeData.hardcore;
         this.impl$commands = spongeData.commands == null || spongeData.commands;
         this.impl$pvp = spongeData.pvp == null || spongeData.pvp;
@@ -158,17 +139,14 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     @Override
     public void bridge$populateFromTemplate(final SpongeWorldTemplate s) {
         this.impl$key = s.getKey();
-        this.impl$gameMode = (ResourceLocation) (Object) s.gameMode().orElseGet(() -> BootstrapProperties.gameMode).location();
-        this.impl$difficulty = !s.difficulty().isPresent() ? null : (ResourceLocation) (Object) s.difficulty.location();
+        this.impl$gameMode = (ResourceLocation) s.gameMode().orElse(null);
+        this.impl$difficulty = (ResourceLocation) s.difficulty().orElse(null);
         this.impl$serializationBehavior = s.serializationBehavior();
         this.impl$displayName = s.displayName().orElse(null);
-        this.impl$uniqueId = s.uniqueId;
-        this.impl$viewDistance = s.viewDistance().orElseGet(() -> BootstrapProperties.viewDistance);
+        this.impl$viewDistance = s.viewDistance().orElse(null);
         this.impl$enabled = s.enabled();
-        this.impl$keepLoaded = s.keepLoaded();
         this.impl$loadOnStartup = s.loadOnStartup();
-        this.impl$keepSpawnLoaded = s.keepSpawnLoaded();
-        this.impl$generateSpawnOnLoad = s.generateSpawnOnLoad();
+        this.impl$performsSpawnLogic = s.performsSpawnLogic();
         this.impl$hardcore = s.hardcore();
         this.impl$commands = s.commands();
         this.impl$pvp = s.pvp();

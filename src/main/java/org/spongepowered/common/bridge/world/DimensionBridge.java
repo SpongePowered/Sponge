@@ -46,20 +46,13 @@ public interface DimensionBridge {
     SerializationBehavior bridge$serializationBehavior();
 
     @Nullable
-    UUID bridge$uniqueId();
-
-    @Nullable
     Integer bridge$viewDistance();
 
     boolean bridge$enabled();
 
-    boolean bridge$keepLoaded();
-
     boolean bridge$loadOnStartup();
 
-    boolean bridge$keepSpawnLoaded();
-
-    boolean bridge$generateSpawnOnLoad();
+    boolean bridge$performsSpawnLogic();
 
     boolean bridge$hardcore();
 

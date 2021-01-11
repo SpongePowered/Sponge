@@ -24,12 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.nio.file.Path;
 
@@ -44,5 +51,22 @@ public abstract class SaveFormat_LevelSaveMixin {
         at = @At(value = "INVOKE", target = "Ljava/lang/IllegalStateException;<init>(Ljava/lang/String;)V", ordinal = 0, remap = false))
     private String modifyMinecraftExceptionOutputIfNotInitializationTime(final String message) {
         return "Lock for world " + this.levelPath + " is no longer valid!";
+    }
+
+    @Redirect(
+            method = "saveDataTag(Lnet/minecraft/util/registry/DynamicRegistries;Lnet/minecraft/world/storage/IServerConfiguration;Lnet/minecraft/"
+                    + "nbt/CompoundNBT;)V",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/nbt/CompoundNBT;put(Ljava/lang/String;Lnet/minecraft/nbt/INBT;)Lnet/minecraft/nbt/INBT;"
+            )
+    )
+    private INBT impl$saveSpongeLevelData(final CompoundNBT root, final String path, final INBT data, final DynamicRegistries p_237288_1_,
+            final IServerConfiguration levelData) {
+        final CompoundNBT spongeLevelData = new CompoundNBT();
+        root.put(Constants.Sponge.SPONGE_DATA, spongeLevelData);
+        spongeLevelData.putUUID(Constants.Sponge.World.UNIQUE_ID, ((ServerWorldInfoBridge) levelData).bridge$uniqueId());
+
+        return root.put(path, data);
     }
 }

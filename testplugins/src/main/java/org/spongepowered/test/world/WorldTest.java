@@ -192,7 +192,7 @@ public final class WorldTest {
                             final WorldTemplate template = WorldTemplate.builder()
                                     .key(key)
                                     .worldType(RegistryKey.of(RegistryTypes.WORLD_TYPE, worldType).asReference())
-                                    .generateSpawnOnLoad(true)
+                                    .performsSpawnLogic(true)
                                     .build();
 
                             this.game.getServer().getWorldManager().loadWorld(template).whenComplete((r, t) -> {
@@ -369,7 +369,7 @@ public final class WorldTest {
                 .worldType(WorldTypes.OVERWORLD)
                 .serializationBehavior(SerializationBehavior.NONE)
                 .loadOnStartup(false)
-                .generateSpawnOnLoad(true)
+                .performsSpawnLogic(true)
                 .displayName(Component.text("Custom world by " + owner))
                 .generator(ChunkGenerator.noise(BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().biomes(biomes).scale(2).build()),
                     noiseGenConfig))

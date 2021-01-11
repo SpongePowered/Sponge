@@ -53,7 +53,7 @@ public abstract class DimensionGeneratorSettingsMixin_API implements WorldGenera
     }
 
     @Override
-    public void seed(final long seed) {
+    public void setSeed(final long seed) {
         this.seed = seed;
     }
 
@@ -63,7 +63,7 @@ public abstract class DimensionGeneratorSettingsMixin_API implements WorldGenera
     }
 
     @Override
-    public void generateFeatures(final boolean generateFeatures) {
+    public void setGenerateFeatures(final boolean generateFeatures) {
         this.generateFeatures = generateFeatures;
     }
 
@@ -73,7 +73,7 @@ public abstract class DimensionGeneratorSettingsMixin_API implements WorldGenera
     }
 
     @Override
-    public void generateBonusChest(final boolean generateBonusChest) {
+    public void setGenerateBonusChest(final boolean generateBonusChest) {
         this.generateBonusChest = generateBonusChest;
     }
 }

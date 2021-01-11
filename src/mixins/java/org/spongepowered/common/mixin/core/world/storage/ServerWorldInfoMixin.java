@@ -29,8 +29,10 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import net.kyori.adventure.text.Component;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.Difficulty;
@@ -45,7 +47,6 @@ import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.IWorldInfo;
 import net.minecraft.world.storage.ServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.units.qual.A;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -53,7 +54,9 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.WorldSettingsAccessor;
@@ -64,18 +67,23 @@ import org.spongepowered.common.bridge.world.gen.DimensionGeneratorSettingsBridg
 import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.server.SpongeWorldManager;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.StringJoiner;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Mixin(ServerWorldInfo.class)
 public abstract class ServerWorldInfoMixin implements IServerConfiguration, ServerWorldInfoBridge, ResourceKeyBridge {
 
     // @formatter:off
     @Shadow private WorldSettings settings;
+    @Shadow private int xSpawn;
+    @Shadow private int ySpawn;
+    @Shadow private int zSpawn;
+
     @Shadow public abstract boolean shadow$isDifficultyLocked();
     // @formatter:on
 
@@ -83,11 +91,11 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     private DimensionType impl$dimensionType;
     private SerializationBehavior impl$serializationBehavior;
     @Nullable private Component impl$displayName;
-    private UUID impl$uniqueId;
+    @Nullable private Integer impl$viewDistance;
+    private UUID impl$uniqueId = UUID.randomUUID();
     private InheritableConfigHandle<WorldConfig> impl$configAdapter;
 
-    private boolean impl$hasCustomDifficulty = false, impl$keepLoaded, impl$pvp, impl$enabled, impl$loadOnStartup, impl$keepSpawnLoaded,
-            impl$generateSpawnOnLoad;
+    private boolean impl$hasCustomDifficulty = false, impl$pvp, impl$enabled, impl$loadOnStartup, impl$performsSpawnLogic;
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -129,13 +137,18 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public void bridge$dimensionType(final DimensionType type, boolean updatePlayers) {
+    public void bridge$dimensionType(final DimensionType type, final boolean updatePlayers) {
         this.impl$dimensionType = type;
     }
 
     @Override
     public UUID bridge$uniqueId() {
         return this.impl$uniqueId;
+    }
+
+    @Override
+    public void bridge$setUniqueId(final UUID uniqueId) {
+        this.impl$uniqueId = uniqueId;
     }
 
     @Override
@@ -156,7 +169,7 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public void bridge$pvp(final boolean pvp) {
+    public void bridge$setPvp(final boolean pvp) {
         this.impl$pvp = pvp;
     }
 
@@ -166,18 +179,18 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public void bridge$enabled(final boolean enabled) {
+    public void bridge$setEnabled(final boolean enabled) {
         this.impl$enabled = enabled;
     }
 
     @Override
-    public boolean bridge$keepLoaded() {
-        return this.impl$keepLoaded;
+    public boolean bridge$performsSpawnLogic() {
+        return this.impl$performsSpawnLogic;
     }
 
     @Override
-    public void bridge$keepLoaded(final boolean keepLoaded) {
-        this.impl$keepLoaded = keepLoaded;
+    public void bridge$setPerformsSpawnLogic(final boolean performsSpawnLogic) {
+        this.impl$performsSpawnLogic = performsSpawnLogic;
     }
 
     @Override
@@ -186,28 +199,8 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public void bridge$loadOnStartup(final boolean loadOnStartup) {
+    public void bridge$setLoadOnStartup(final boolean loadOnStartup) {
         this.impl$loadOnStartup = loadOnStartup;
-    }
-
-    @Override
-    public boolean bridge$keepSpawnLoaded() {
-        return this.impl$keepSpawnLoaded;
-    }
-
-    @Override
-    public void bridge$keepSpawnLoaded(final boolean keepSpawnLoaded) {
-        this.impl$keepSpawnLoaded = keepSpawnLoaded;
-    }
-
-    @Override
-    public boolean bridge$generateSpawnOnLoad() {
-        return this.impl$generateSpawnOnLoad;
-    }
-
-    @Override
-    public void bridge$generateSpawnOnLoad(final boolean generateSpawnOnLoad) {
-        this.impl$generateSpawnOnLoad = generateSpawnOnLoad;
     }
 
     @Override
@@ -216,7 +209,7 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public void bridge$serializationBehavior(final SerializationBehavior behavior) {
+    public void bridge$setSerializationBehavior(final SerializationBehavior behavior) {
         this.impl$serializationBehavior = behavior;
     }
 
@@ -226,8 +219,18 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public void bridge$displayName(Component displayName) {
+    public void bridge$setDisplayName(@Nullable final Component displayName) {
         this.impl$displayName = displayName;
+    }
+
+    @Override
+    public int bridge$viewDistance() {
+        return this.impl$viewDistance;
+    }
+
+    @Override
+    public void bridge$setViewDistance(@Nullable final Integer viewDistance) {
+        this.impl$viewDistance = viewDistance == null ? BootstrapProperties.viewDistance : viewDistance;
     }
 
     @Override
@@ -236,7 +239,7 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public void bridge$configAdapter(InheritableConfigHandle<WorldConfig> adapter) {
+    public void bridge$configAdapter(final InheritableConfigHandle<WorldConfig> adapter) {
         this.impl$configAdapter = adapter;
     }
 
@@ -247,17 +250,15 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
         this.impl$dimensionType = dimension.type();
         this.impl$serializationBehavior = dimensionBridge.bridge$serializationBehavior();
         this.impl$displayName = dimensionBridge.bridge$displayName();
-        this.impl$uniqueId = dimensionBridge.bridge$uniqueId();
         this.impl$hasCustomDifficulty = dimensionBridge.bridge$difficulty() != null;
         if (this.impl$hasCustomDifficulty) {
-            ((WorldSettingsAccessor) (Object) this.settings).accessor$difficulty(Sponge.getGame().registries().registry(RegistryTypes.DIFFICULTY).value((ResourceKey) (Object) dimensionBridge.bridge$difficulty()));
+            ((WorldSettingsAccessor) (Object) this.settings).accessor$difficulty(RegistryTypes.DIFFICULTY.get().value((ResourceKey) (Object) dimensionBridge.bridge$difficulty()));
         }
         this.impl$pvp = dimensionBridge.bridge$pvp();
         this.impl$enabled = dimensionBridge.bridge$enabled();
-        this.impl$keepLoaded = dimensionBridge.bridge$keepLoaded();
         this.impl$loadOnStartup = dimensionBridge.bridge$loadOnStartup();
-        this.impl$keepSpawnLoaded = dimensionBridge.bridge$keepSpawnLoaded();
-        this.impl$generateSpawnOnLoad = dimensionBridge.bridge$generateSpawnOnLoad();
+        this.impl$performsSpawnLogic = dimensionBridge.bridge$performsSpawnLogic();
+        this.impl$viewDistance = dimensionBridge.bridge$viewDistance();
     }
 
     @Override
@@ -267,6 +268,24 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
         }
 
         return (IServerWorldInfo) SpongeCommon.getServer().getLevel(World.OVERWORLD).getLevelData();
+    }
+
+    @Redirect(method = "setTagData", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", ordinal = 0))
+    private DataResult<Object> impl$ignorePluginDimensionsWhenWritingWorldGenSettings(final Codec codec, final DynamicOps<Object> ops, final Object input) {
+        DimensionGeneratorSettings dimensionGeneratorSettings = (DimensionGeneratorSettings) input;
+        // Sub levels will have an empty dimensions registry so it is an easy toggle off
+        if (dimensionGeneratorSettings.dimensions().entrySet().size() == 0) {
+            return codec.encodeStart(ops, dimensionGeneratorSettings);
+        }
+        dimensionGeneratorSettings = ((DimensionGeneratorSettingsBridge) input).bridge$copy();
+        final SimpleRegistry<Dimension> registry = new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
+        ((org.spongepowered.api.registry.Registry<Dimension>) (Object) dimensionGeneratorSettings.dimensions()).streamEntries().forEach(entry -> {
+            if (Constants.MINECRAFT.equals(entry.key().getNamespace())) {
+                ((org.spongepowered.api.registry.Registry<Dimension>) (Object) registry).register(entry.key(), entry.value());
+            }
+        });
+        ((DimensionGeneratorSettingsAccessor) dimensionGeneratorSettings).accessor$dimensions(registry);
+        return codec.encodeStart(ops, dimensionGeneratorSettings);
     }
 
     void impl$updateWorldForDifficultyChange(final ServerWorld world, final boolean isLocked) {
@@ -288,33 +307,13 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
         world.players().forEach(player -> player.connection.send(new SServerDifficultyPacket(difficulty, isLocked)));
     }
 
-    @Redirect(method = "setTagData", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", ordinal = 0))
-    private DataResult<Object> impl$ignorePluginDimensionsWhenWritingWorldGenSettings(Codec codec, DynamicOps<Object> ops, Object input) {
-        DimensionGeneratorSettings dimensionGeneratorSettings = (DimensionGeneratorSettings) input;
-        // Sub levels will have an empty dimensions registry so it is an easy toggle off
-        if (dimensionGeneratorSettings.dimensions().entrySet().size() == 0) {
-            return codec.encodeStart(ops, dimensionGeneratorSettings);
-        }
-        dimensionGeneratorSettings = ((DimensionGeneratorSettingsBridge) input).bridge$copy();
-        final SimpleRegistry<Dimension> registry = new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
-        ((org.spongepowered.api.registry.Registry<Dimension>) (Object) dimensionGeneratorSettings.dimensions()).streamEntries().forEach(entry -> {
-            if (Constants.MINECRAFT.equals(entry.key().getNamespace())) {
-                ((org.spongepowered.api.registry.Registry<Dimension>) (Object) registry).register(entry.key(), entry.value());
-            }
-        });
-        ((DimensionGeneratorSettingsAccessor) dimensionGeneratorSettings).accessor$dimensions(registry);
-        return codec.encodeStart(ops, dimensionGeneratorSettings);
-    }
-
     @Override
     public String toString() {
         return new StringJoiner(", ", ServerWorldInfo.class.getSimpleName() + "[", "]")
                 .add("key=" + this.impl$key)
                 .add("worldType=" + this.impl$dimensionType)
                 .add("uniqueId=" + this.impl$uniqueId)
-                .add("spawnX=" + ((IWorldInfo) this).getXSpawn())
-                .add("spawnY=" + ((IWorldInfo) this).getYSpawn())
-                .add("spawnZ=" + ((IWorldInfo) this).getZSpawn())
+                .add("spawn=" + new Vector3i(this.xSpawn, this.ySpawn, this.zSpawn))
                 .add("gameType=" + ((IServerWorldInfo) this).getGameType())
                 .add("hardcore=" + ((IWorldInfo) this).isHardcore())
                 .add("difficulty=" + ((IWorldInfo) this).getDifficulty())

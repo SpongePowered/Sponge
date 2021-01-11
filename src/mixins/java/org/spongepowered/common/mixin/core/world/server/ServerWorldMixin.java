@@ -31,6 +31,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.DimensionType;
@@ -39,6 +40,7 @@ import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.server.TicketType;
 import net.minecraft.world.spawner.ISpecialSpawner;
 import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.IServerWorldInfo;
@@ -54,6 +56,7 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -258,7 +261,15 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
     @Redirect(method = "saveLevelData", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorldData()Lnet/minecraft/world/storage/IServerConfiguration;"))
     private IServerConfiguration impl$usePerWorldLevelDataForDragonFight(final MinecraftServer server) {
-        return (IServerConfiguration) this.getLevelData();
+        return (IServerConfiguration) this.shadow$getLevelData();
+    }
+
+    @Redirect(method = "setDefaultSpawnPos", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerChunkProvider;addRegionTicket(Lnet/minecraft/world/server/TicketType;Lnet/minecraft/util/math/ChunkPos;ILjava/lang/Object;)V"))
+    private void impl$respectKeepSpawnLoaded(final ServerChunkProvider serverChunkProvider, final TicketType<Object> p_217228_1_, final ChunkPos p_217228_2_,
+            final int p_217228_3_, final Object p_217228_4_) {
+        if ((((ServerWorldProperties) this.shadow$getLevelData()).performsSpawnLogic())) {
+            serverChunkProvider.addRegionTicket(p_217228_1_, p_217228_2_, p_217228_3_, p_217228_4_);
+        }
     }
 
     /**
@@ -267,7 +278,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
      */
     @Overwrite
     public void save(@Nullable final IProgressUpdate progress, final boolean flush, final boolean skipSave) {
-        final ServerWorldInfo levelData = (ServerWorldInfo) this.getLevelData();
+        final ServerWorldInfo levelData = (ServerWorldInfo) this.shadow$getLevelData();
 
         final ServerChunkProvider chunkProvider = ((ServerWorld) (Object) this).getChunkSource();
 
@@ -291,7 +302,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                 levelData.setCustomBossEvents(((ServerWorldBridge) this).bridge$getBossBarManager().save());
 
                 ((ServerWorldBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.getServer().registryAccess()
-                    , (ServerWorldInfo) this.getLevelData(), this.shadow$dimension() == World.OVERWORLD ? SpongeCommon.getServer().getPlayerList()
+                    , (ServerWorldInfo) this.shadow$getLevelData(), this.shadow$dimension() == World.OVERWORLD ? SpongeCommon.getServer().getPlayerList()
                         .getSingleplayerData() : null);
 
                 // Sponge End

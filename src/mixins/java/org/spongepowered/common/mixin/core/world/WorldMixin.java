@@ -42,6 +42,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.storage.IWorldInfo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityType;
@@ -61,6 +62,7 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
     // @formatter: off
     @Mutable @Shadow @Final private DimensionType dimensionType;
 
+    @Shadow public abstract IWorldInfo shadow$getLevelData();
     @Shadow public abstract void shadow$updateSkyBrightness();
     @Shadow public abstract RegistryKey<World> shadow$dimension();
     @Shadow public abstract DimensionType shadow$dimensionType();

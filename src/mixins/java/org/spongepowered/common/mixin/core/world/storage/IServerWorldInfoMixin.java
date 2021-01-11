@@ -24,19 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
-import net.kyori.adventure.text.Component;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.IServerWorldInfo;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
-import org.spongepowered.common.config.inheritable.WorldConfig;
-
-import java.util.UUID;
 
 @Mixin(IServerWorldInfo.class)
 public interface IServerWorldInfoMixin extends ServerWorldInfoBridge {
@@ -44,116 +34,5 @@ public interface IServerWorldInfoMixin extends ServerWorldInfoBridge {
     @Override
     default boolean bridge$valid() {
         return false;
-    }
-
-    @Override
-    default boolean bridge$customDifficulty() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default void bridge$forceSetDifficulty(final Difficulty difficulty) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default boolean bridge$pvp() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default void bridge$pvp(final boolean pvp) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default boolean bridge$enabled() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default void bridge$enabled(final boolean enabled) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default boolean bridge$loadOnStartup() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default void bridge$loadOnStartup(final boolean loadOnStartup) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default boolean bridge$keepSpawnLoaded() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default void bridge$keepSpawnLoaded(final boolean keepSpawnLoaded) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default boolean bridge$generateSpawnOnLoad() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default void bridge$generateSpawnOnLoad(final boolean generateSpawnOnLoad) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default SerializationBehavior bridge$serializationBehavior() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default void bridge$serializationBehavior(final SerializationBehavior behavior) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default @Nullable Component bridge$displayName() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default void bridge$displayName(final @Nullable Component displayName) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default InheritableConfigHandle<WorldConfig> bridge$configAdapter() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default void bridge$configAdapter(final InheritableConfigHandle<WorldConfig> adapter) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default DimensionType bridge$dimensionType() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default void bridge$dimensionType(final DimensionType type, final boolean updatePlayers) {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Override
-    default UUID bridge$uniqueId() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
-    }
-
-    @Nullable
-    @Override
-    default ServerWorld bridge$world() {
-        throw new UnsupportedOperationException("Only Vanilla implementation server world properties are supported!");
     }
 }

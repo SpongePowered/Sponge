@@ -30,6 +30,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import net.minecraft.world.storage.ServerWorldInfo;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
@@ -79,7 +80,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
 
     @Override
     public void setDisplayName(final Component displayName) {
-        ((ServerWorldInfoBridge) this).bridge$displayName(Objects.requireNonNull(displayName, "displayName"));
+        ((ServerWorldInfoBridge) this).bridge$setDisplayName(Objects.requireNonNull(displayName, "displayName"));
     }
 
     @Override
@@ -114,7 +115,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
 
     @Override
     public void setPvp(final boolean pvp) {
-        ((ServerWorldInfoBridge) this).bridge$pvp(pvp);
+        ((ServerWorldInfoBridge) this).bridge$setPvp(pvp);
     }
 
     @Override
@@ -129,17 +130,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
 
     @Override
     public void setEnabled(final boolean enabled) {
-        ((ServerWorldInfoBridge) this).bridge$enabled(enabled);
-    }
-
-    @Override
-    public boolean keepLoaded() {
-        return ((ServerWorldInfoBridge) this).bridge$keepLoaded();
-    }
-
-    @Override
-    public void setKeepLoaded(final boolean keepLoaded) {
-        ((ServerWorldInfoBridge) this).bridge$keepLoaded(keepLoaded);
+        ((ServerWorldInfoBridge) this).bridge$setEnabled(enabled);
     }
 
     @Override
@@ -149,32 +140,32 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
 
     @Override
     public void setLoadOnStartup(final boolean loadOnStartup) {
-        ((ServerWorldInfoBridge) this).bridge$loadOnStartup(loadOnStartup);
+        ((ServerWorldInfoBridge) this).bridge$setLoadOnStartup(loadOnStartup);
     }
 
     @Override
-    public boolean keepSpawnLoaded() {
-        return ((ServerWorldInfoBridge) this).bridge$keepSpawnLoaded();
+    public boolean performsSpawnLogic() {
+        return ((ServerWorldInfoBridge) this).bridge$performsSpawnLogic();
     }
 
     @Override
-    public void setKeepSpawnLoaded(final boolean keepSpawnLoaded) {
-        ((ServerWorldInfoBridge) this).bridge$keepSpawnLoaded(keepSpawnLoaded);
-    }
-
-    @Override
-    public boolean generateSpawnOnLoad() {
-        return ((ServerWorldInfoBridge) this).bridge$generateSpawnOnLoad();
-    }
-
-    @Override
-    public void setGenerateSpawnOnLoad(final boolean generateSpawnOnLoad) {
-        ((ServerWorldInfoBridge) this).bridge$generateSpawnOnLoad(generateSpawnOnLoad);
+    public void setPerformsSpawnLogic(final boolean keepLoaded) {
+        ((ServerWorldInfoBridge) this).bridge$setPerformsSpawnLogic(keepLoaded);
     }
 
     @Override
     public void setCommands(final boolean commands) {
         ((WorldSettingsAccessor) (Object) this.settings).accessor$allowCommands(commands);
+    }
+
+    @Override
+    public int viewDistance() {
+        return ((ServerWorldInfoBridge) this).bridge$viewDistance();
+    }
+
+    @Override
+    public void setViewDistance(@Nullable Integer viewDistance) {
+        ((ServerWorldInfoBridge) this).bridge$setViewDistance(viewDistance);
     }
 
     @Override
@@ -189,7 +180,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
 
     @Override
     public void setSerializationBehavior(final SerializationBehavior behavior) {
-        ((ServerWorldInfoBridge) this).bridge$serializationBehavior(behavior);
+        ((ServerWorldInfoBridge) this).bridge$setSerializationBehavior(behavior);
     }
 
     @Override

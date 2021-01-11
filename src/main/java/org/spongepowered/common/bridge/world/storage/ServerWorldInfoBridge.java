@@ -48,8 +48,9 @@ public interface ServerWorldInfoBridge {
 
     void bridge$dimensionType(DimensionType dimensionType, boolean updatePlayers);
 
-    @Nullable
     UUID bridge$uniqueId();
+
+    void bridge$setUniqueId(UUID uniqueId);
 
     boolean bridge$customDifficulty();
 
@@ -57,36 +58,32 @@ public interface ServerWorldInfoBridge {
 
     boolean bridge$pvp();
 
-    void bridge$pvp(boolean pvp);
+    void bridge$setPvp(boolean pvp);
 
     boolean bridge$enabled();
 
-    void bridge$enabled(boolean enabled);
-
-    boolean bridge$keepLoaded();
-
-    void bridge$keepLoaded(boolean keepLoaded);
+    void bridge$setEnabled(boolean enabled);
 
     boolean bridge$loadOnStartup();
 
-    void bridge$loadOnStartup(boolean loadOnStartup);
+    void bridge$setLoadOnStartup(boolean loadOnStartup);
 
-    boolean bridge$keepSpawnLoaded();
+    boolean bridge$performsSpawnLogic();
 
-    void bridge$keepSpawnLoaded(boolean keepSpawnLoaded);
-
-    boolean bridge$generateSpawnOnLoad();
-
-    void bridge$generateSpawnOnLoad(boolean generateSpawnOnLoad);
+    void bridge$setPerformsSpawnLogic(boolean keepLoaded);
 
     SerializationBehavior bridge$serializationBehavior();
 
-    void bridge$serializationBehavior(SerializationBehavior behavior);
+    void bridge$setSerializationBehavior(SerializationBehavior behavior);
 
     @Nullable
     Component bridge$displayName();
 
-    void bridge$displayName(@Nullable Component displayName);
+    void bridge$setDisplayName(@Nullable Component displayName);
+
+    int bridge$viewDistance();
+
+    void bridge$setViewDistance(@Nullable Integer viewDistance);
 
     InheritableConfigHandle<WorldConfig> bridge$configAdapter();
 
