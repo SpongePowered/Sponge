@@ -91,13 +91,14 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     @Shadow private float spawnAngle;
     @Nullable private ResourceKey impl$key;
     private DimensionType impl$dimensionType;
-    private SerializationBehavior impl$serializationBehavior;
+    @Nullable private SerializationBehavior impl$serializationBehavior;
     @Nullable private Component impl$displayName;
     @Nullable private Integer impl$viewDistance;
     private UUID impl$uniqueId = UUID.randomUUID();
+    private Boolean impl$pvp;
     private InheritableConfigHandle<WorldConfig> impl$configAdapter;
 
-    private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$pvp, impl$enabled,
+    private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$enabled,
             impl$loadOnStartup, impl$performsSpawnLogic;
 
     @Override
@@ -177,12 +178,12 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public boolean bridge$pvp() {
-        return this.impl$pvp;
+    public Optional<Boolean> bridge$pvp() {
+        return Optional.ofNullable(this.impl$pvp);
     }
 
     @Override
-    public void bridge$setPvp(final boolean pvp) {
+    public void bridge$setPvp(@Nullable final Boolean pvp) {
         this.impl$pvp = pvp;
     }
 
@@ -217,12 +218,12 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     }
 
     @Override
-    public SerializationBehavior bridge$serializationBehavior() {
-        return this.impl$serializationBehavior;
+    public Optional<SerializationBehavior> bridge$serializationBehavior() {
+        return Optional.ofNullable(this.impl$serializationBehavior);
     }
 
     @Override
-    public void bridge$setSerializationBehavior(final SerializationBehavior behavior) {
+    public void bridge$setSerializationBehavior(@Nullable final SerializationBehavior behavior) {
         this.impl$serializationBehavior = behavior;
     }
 
@@ -275,12 +276,12 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
             this.impl$customSpawnPosition = true;
         });
         dimensionBridge.bridge$hardcore().ifPresent(v -> ((WorldSettingsAccessor) (Object) this.settings).accessor$hardcode(v));
-        this.impl$serializationBehavior = dimensionBridge.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
-        dimensionBridge.bridge$pvp().ifPresent(v -> this.impl$pvp = v);
+        this.impl$serializationBehavior = dimensionBridge.bridge$serializationBehavior().orElse(null);
+        this.impl$pvp = dimensionBridge.bridge$pvp().orElse(null);
         this.impl$enabled = dimensionBridge.bridge$enabled();
         this.impl$loadOnStartup = dimensionBridge.bridge$loadOnStartup();
         this.impl$performsSpawnLogic = dimensionBridge.bridge$performsSpawnLogic();
-        this.impl$viewDistance = dimensionBridge.bridge$viewDistance().orElse(BootstrapProperties.viewDistance);
+        this.impl$viewDistance = dimensionBridge.bridge$viewDistance().orElse(null);
     }
 
     @Override

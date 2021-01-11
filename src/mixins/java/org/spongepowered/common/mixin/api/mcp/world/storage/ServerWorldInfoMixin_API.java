@@ -111,7 +111,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
 
     @Override
     public boolean pvp() {
-        return ((ServerWorldInfoBridge) this).bridge$pvp();
+        return ((ServerWorldInfoBridge) this).bridge$pvp().orElse(BootstrapProperties.pvp);
     }
 
     @Override
@@ -176,7 +176,7 @@ public abstract class ServerWorldInfoMixin_API implements ServerWorldProperties 
 
     @Override
     public SerializationBehavior serializationBehavior() {
-        return ((ServerWorldInfoBridge) this).bridge$serializationBehavior();
+        return ((ServerWorldInfoBridge) this).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
     }
 
     @Override

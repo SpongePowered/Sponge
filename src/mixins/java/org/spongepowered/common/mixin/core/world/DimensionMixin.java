@@ -28,14 +28,19 @@ import com.mojang.serialization.Codec;
 import net.kyori.adventure.text.Component;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.Dimension;
+import net.minecraft.world.storage.ServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.DimensionBridge;
+import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -158,6 +163,23 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
         this.impl$hardcore = s.hardcore;
         this.impl$commands = s.commands;
         this.impl$pvp = s.pvp;
+    }
+
+    @Override
+    public void bridge$populateFromLevelData(final ServerWorldInfo levelData) {
+        final ServerWorldInfoBridge levelDataBridge = (ServerWorldInfoBridge) levelData;
+        this.impl$gameMode = (ResourceLocation) (Object) RegistryTypes.GAME_MODE.get().valueKey((GameMode) (Object) levelData.getGameType());
+        this.impl$difficulty = (ResourceLocation) (Object) RegistryTypes.DIFFICULTY.get().valueKey((Difficulty) (Object) levelData.getDifficulty());
+        this.impl$serializationBehavior = levelDataBridge.bridge$serializationBehavior().orElse(null);
+        this.impl$displayName = levelDataBridge.bridge$displayName().orElse(null);
+        this.impl$viewDistance = levelDataBridge.bridge$viewDistance().orElse(null);
+        this.impl$spawnPosition = new Vector3i(levelData.getXSpawn(), levelData.getYSpawn(), levelData.getZSpawn());
+        this.impl$enabled = levelDataBridge.bridge$enabled();
+        this.impl$loadOnStartup = levelDataBridge.bridge$loadOnStartup();
+        this.impl$performsSpawnLogic = levelDataBridge.bridge$performsSpawnLogic();
+        this.impl$hardcore = levelData.isHardcore();
+        this.impl$commands = levelData.getAllowCommands();
+        this.impl$pvp = levelDataBridge.bridge$pvp().orElse(null);
     }
 
     @Override

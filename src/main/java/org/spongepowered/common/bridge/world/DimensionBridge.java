@@ -26,9 +26,11 @@ package org.spongepowered.common.bridge.world;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.storage.ServerWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.server.WorldTemplate;
+import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -64,6 +66,8 @@ public interface DimensionBridge {
     void bridge$populateFromData(SpongeWorldTemplate.SpongeDataSection spongeData);
 
     void bridge$populateFromTemplate(SpongeWorldTemplate s);
+
+    void bridge$populateFromLevelData(ServerWorldInfo levelData);
 
     SpongeWorldTemplate bridge$asTemplate();
 }

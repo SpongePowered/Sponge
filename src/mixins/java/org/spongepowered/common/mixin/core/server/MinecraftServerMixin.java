@@ -244,7 +244,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Overwrite
     public boolean saveAllChunks(final boolean suppressLog, final boolean flush, final boolean isForced) {
         for (final ServerWorld world : this.shadow$getAllLevels()) {
-            final SerializationBehavior serializationBehavior = ((ServerWorldInfoBridge) world.getLevelData()).bridge$serializationBehavior();
+            final SerializationBehavior serializationBehavior = ((ServerWorldInfoBridge) world.getLevelData()).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
             boolean log = !suppressLog;
 
             // Not forced happens during ticks and when shutting down

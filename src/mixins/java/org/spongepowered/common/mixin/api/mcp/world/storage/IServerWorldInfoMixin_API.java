@@ -83,33 +83,8 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     // @formatter:on
 
     @Override
-    default ResourceKey getKey() {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default Optional<ServerWorld> world() {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default Optional<Component> displayName() {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default void setDisplayName(final @Nullable Component name) {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
     default void setDayTime(final MinecraftDayTime dayTime) {
         this.shadow$setDayTime(dayTime.asTicks().getTicks());
-    }
-
-    @Override
-    default void setWorldType(final WorldType worldType) {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
     @Override
@@ -130,66 +105,6 @@ public interface IServerWorldInfoMixin_API extends ServerWorldProperties {
     @Intrinsic
     default boolean serverWorldProperties$initialized() {
         return this.shadow$isInitialized();
-    }
-
-    @Override
-    default boolean pvp() {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default void setPvp(final boolean pvp) {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default UUID getUniqueId() {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default boolean enabled() {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default void setEnabled(final boolean enabled) {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default boolean loadOnStartup() {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default void setLoadOnStartup(final boolean loadOnStartup) {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default boolean performsSpawnLogic() {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default void setPerformsSpawnLogic(final boolean performsSpawnLogic) {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default WorldGenerationConfig.Mutable worldGenerationConfig() {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default SerializationBehavior serializationBehavior() {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
-    }
-
-    @Override
-    default void setSerializationBehavior(final SerializationBehavior behavior) {
-        throw new UnsupportedOperationException("Only vanilla implemented server world properties are supported!");
     }
 
     @Override

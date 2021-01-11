@@ -284,7 +284,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
         if (!skipSave) {
 
-            final SerializationBehavior behavior = ((ServerWorldInfoBridge) levelData).bridge$serializationBehavior();
+            final SerializationBehavior behavior = ((ServerWorldInfoBridge) levelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
 
             if (progress != null) {
                 progress.progressStartNoAbort(new TranslationTextComponent("menu.savingLevel"));

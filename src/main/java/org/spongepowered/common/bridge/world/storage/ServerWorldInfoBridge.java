@@ -61,9 +61,9 @@ public interface ServerWorldInfoBridge {
 
     void bridge$forceSetDifficulty(Difficulty difficulty);
 
-    boolean bridge$pvp();
+    Optional<Boolean> bridge$pvp();
 
-    void bridge$setPvp(boolean pvp);
+    void bridge$setPvp(@Nullable Boolean pvp);
 
     boolean bridge$enabled();
 
@@ -77,9 +77,9 @@ public interface ServerWorldInfoBridge {
 
     void bridge$setPerformsSpawnLogic(boolean keepLoaded);
 
-    SerializationBehavior bridge$serializationBehavior();
+    Optional<SerializationBehavior> bridge$serializationBehavior();
 
-    void bridge$setSerializationBehavior(SerializationBehavior behavior);
+    void bridge$setSerializationBehavior(@Nullable SerializationBehavior behavior);
 
     Optional<Component> bridge$displayName();
 

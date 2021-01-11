@@ -65,11 +65,6 @@ public interface IWorldInfoMixin_API extends WorldProperties {
         return new Vector3i(this.shadow$getXSpawn(), this.shadow$getYSpawn(), this.shadow$getZSpawn());
     }
 
-    @Override
-    default void setSpawnPosition(final Vector3i position) {
-        throw new UnsupportedOperationException("Only vanilla implemented spawn world properties are supported!");
-    }
-
     @Intrinsic
     default MinecraftDayTime worldProperties$gameTime() {
         return new SpongeMinecraftDayTime(this.shadow$getGameTime());
