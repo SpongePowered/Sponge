@@ -249,7 +249,7 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
 
         final ServerWorld world = this.bridge$world();
         if (world != null) {
-            final int actual = viewDistance == null ? world.getServer().getPlayerList().getViewDistance() : viewDistance;
+            final int actual = viewDistance == null ? BootstrapProperties.viewDistance: viewDistance;
             world.getChunkSource().setViewDistance(actual);
             final SUpdateViewDistancePacket packet = new SUpdateViewDistancePacket(actual);
 
