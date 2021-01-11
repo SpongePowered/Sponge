@@ -71,6 +71,12 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     }
 
     @Override
+    public ConfigurableBiomeProvider<LayeredBiomeConfig> overworld() {
+        return (ConfigurableBiomeProvider<LayeredBiomeConfig>) new OverworldBiomeProvider(BootstrapProperties.dimensionGeneratorSettings.seed(), false, false,
+            BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY));
+    }
+
+    @Override
     public <T extends MultiNoiseBiomeConfig> ConfigurableBiomeProvider<T> multiNoise(final T config) {
         final MutableRegistry<net.minecraft.world.biome.Biome> biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
         final List<Pair<net.minecraft.world.biome.Biome.Attributes, Supplier<net.minecraft.world.biome.Biome>>> attributedBiomes = new ArrayList<>();
@@ -84,6 +90,11 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     }
 
     @Override
+    public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> nether() {
+        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) NetherBiomeProvider.Preset.NETHER.biomeSource(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY), BootstrapProperties.dimensionGeneratorSettings.seed());
+    }
+
+    @Override
     public <T extends EndStyleBiomeConfig> ConfigurableBiomeProvider<T> endStyle(final T config) {
         final MutableRegistry<net.minecraft.world.biome.Biome> registry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
         return (ConfigurableBiomeProvider<T>) EndBiomeProviderAccessor.invoker$new(registry,
@@ -94,6 +105,11 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
                 registry.get((ResourceLocation) (Object) config.islandsBiome().location()),
                 registry.get((ResourceLocation) (Object) config.barrensBiome().location())
         );
+    }
+
+    @Override
+    public ConfigurableBiomeProvider<EndStyleBiomeConfig> end() {
+        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) new EndBiomeProvider(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY), BootstrapProperties.dimensionGeneratorSettings.seed());
     }
 
     @Override

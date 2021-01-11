@@ -24,19 +24,23 @@
  */
 package org.spongepowered.common.world.generation;
 
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.gen.DimensionSettings;
 import net.minecraft.world.gen.FlatChunkGenerator;
 import net.minecraft.world.gen.FlatGenerationSettings;
 import net.minecraft.world.gen.NoiseChunkGenerator;
+import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.ConfigurableChunkGenerator;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.common.accessor.world.DimensionTypeAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.Objects;
 
+@SuppressWarnings("unchecked")
 public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory {
 
     @Override
@@ -54,7 +58,28 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
     @Override
     public <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noise(final BiomeProvider provider, final long seed, final T config) {
         return (ConfigurableChunkGenerator<T>) (Object) new NoiseChunkGenerator((net.minecraft.world.biome.provider.BiomeProvider)
-                Objects.requireNonNull(provider, "provider"), seed, () ->
-                (DimensionSettings) (Object) Objects.requireNonNull(config, "config"));
+                Objects.requireNonNull(provider, "provider"), seed, () -> (DimensionSettings) (Object) Objects.requireNonNull(config,
+            "config"));
+    }
+
+    @Override
+    public ConfigurableChunkGenerator<NoiseGeneratorConfig> overworld() {
+        return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) (Object) DimensionGeneratorSettings.makeDefaultOverworld(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
+            BootstrapProperties.registries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY),
+            BootstrapProperties.dimensionGeneratorSettings.seed());
+    }
+
+    @Override
+    public ConfigurableChunkGenerator<NoiseGeneratorConfig> theNether() {
+        return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) DimensionTypeAccessor.invoker$defaultNetherGenerator(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
+            BootstrapProperties.registries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY),
+            BootstrapProperties.dimensionGeneratorSettings.seed());
+    }
+
+    @Override
+    public ConfigurableChunkGenerator<NoiseGeneratorConfig> theEnd() {
+        return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) DimensionTypeAccessor.invoker$defaultEndGenerator(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
+            BootstrapProperties.registries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY),
+            BootstrapProperties.dimensionGeneratorSettings.seed());
     }
 }

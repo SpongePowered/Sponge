@@ -25,8 +25,12 @@
 package org.spongepowered.common.accessor.world;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.IBiomeMagnifier;
+import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.DimensionSettings;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -67,4 +71,14 @@ public interface DimensionTypeAccessor {
     @Accessor("effectsLocation") ResourceLocation accessor$effectsLocation();
 
     @Accessor("ambientLight") float accessor$ambientLight();
+
+    @Invoker("defaultEndGenerator") static ChunkGenerator invoker$defaultEndGenerator(final Registry<Biome> p_242717_0_,
+        final Registry<DimensionSettings> p_242717_1_, final long p_242717_2_) {
+        throw new UntransformedInvokerError();
+    }
+
+    @Invoker("defaultNetherGenerator") static ChunkGenerator invoker$defaultNetherGenerator(final Registry<Biome> p_242717_0_,
+        final Registry<DimensionSettings> p_242717_1_, final long p_242717_2_) {
+        throw new UntransformedInvokerError();
+    }
 }

@@ -24,14 +24,10 @@
  */
 package org.spongepowered.common.world.biome.provider;
 
-import net.minecraft.util.RegistryKey;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
-import org.spongepowered.common.accessor.world.biome.provider.OverworldBiomeProviderAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.ArrayList;
@@ -114,9 +110,6 @@ public final class SpongeLayeredBiomeConfg extends AbstractBiomeProviderConfig i
         public Builder reset() {
             this.seed = BootstrapProperties.dimensionGeneratorSettings.seed();
             this.biomes.clear();
-            for (final RegistryKey<net.minecraft.world.biome.Biome> key : OverworldBiomeProviderAccessor.accessor$POSSIBLE_BIOMES()) {
-                this.biomes.add(org.spongepowered.api.registry.RegistryKey.of(RegistryTypes.BIOME, (ResourceKey) (Object) key.location()).asReference());
-            }
             this.largeBiomes = false;
             return this;
         }
