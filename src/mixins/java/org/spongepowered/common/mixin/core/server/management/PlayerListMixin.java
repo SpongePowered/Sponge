@@ -33,14 +33,19 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.server.SDisconnectPacket;
+import net.minecraft.network.play.server.SJoinGamePacket;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.OpList;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
@@ -74,6 +79,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.PerWorldBorderListener;
@@ -84,6 +90,7 @@ import org.spongepowered.math.vector.Vector3d;
 import java.net.SocketAddress;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -94,6 +101,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     // @formatter:off
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final private MinecraftServer server;
+    @Shadow private int viewDistance;
 
     @Shadow public abstract ITextComponent shadow$canPlayerLogin(SocketAddress socketAddress, com.mojang.authlib.GameProfile gameProfile);
     @Shadow public abstract MinecraftServer shadow$getServer();
@@ -248,11 +256,34 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final ITextComponent message,
         final ChatType p_232641_2_,
         final UUID p_232641_3_,
-        NetworkManager manager,
-        ServerPlayerEntity playerIn
+        final NetworkManager manager,
+        final ServerPlayerEntity playerIn
     ) {
         // Don't send here, will be done later. We cache the expected message.
         ((ServerPlayerEntityBridge) playerIn).bridge$setConnectionMessageToSend(message);
+    }
+
+    @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "net/minecraft/network/play/server/SJoinGamePacket"))
+    private SJoinGamePacket impl$usePerWorldViewDistance(final int p_i242082_1_, final GameType p_i242082_2_, final GameType p_i242082_3_,
+            final long p_i242082_4_, final boolean p_i242082_6_, final Set<RegistryKey<World>> p_i242082_7_,
+            final DynamicRegistries.Impl p_i242082_8_, final DimensionType p_i242082_9_, final RegistryKey<World> p_i242082_10_,
+            final int p_i242082_11_, final int p_i242082_12_, final boolean p_i242082_13_, final boolean p_i242082_14_,
+            final boolean p_i242082_15_, final boolean p_i242082_16_, NetworkManager p_72355_1_, ServerPlayerEntity player) {
+
+        return new SJoinGamePacket(p_i242082_1_, p_i242082_2_, p_i242082_3_, p_i242082_4_, p_i242082_6_, p_i242082_7_, p_i242082_8_, p_i242082_9_,
+                p_i242082_10_, p_i242082_11_, ((ServerWorldInfoBridge) player.getLevel().getLevelData()).bridge$viewDistance().orElse(this.viewDistance),
+                p_i242082_13_, p_i242082_14_, p_i242082_15_, p_i242082_16_);
+    }
+
+    @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
+    private CustomServerBossInfoManager impl$getPerWorldBossBarManager(
+            final MinecraftServer minecraftServer, final NetworkManager netManager, final ServerPlayerEntity playerIn) {
+        return ((ServerWorldBridge) playerIn.getLevel()).bridge$getBossBarManager();
+    }
+
+    @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;updateEntireScoreboard(Lnet/minecraft/scoreboard/ServerScoreboard;Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
+    private void impl$sendScoreboard(final PlayerList playerList, final ServerScoreboard scoreboardIn, final ServerPlayerEntity playerIn) {
+        ((ServerPlayerEntityBridge)playerIn).bridge$initScoreboard();
     }
 
     @Inject(method = "placeNewPlayer", at = @At(value = "RETURN"))
@@ -273,20 +304,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((ServerPlayerEntityBridge) mcPlayer).bridge$setConnectionMessageToSend(null);
     }
 
-    @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
-    private CustomServerBossInfoManager impl$getPerWorldBossBarManager(
-            final MinecraftServer minecraftServer, final NetworkManager netManager, final ServerPlayerEntity playerIn) {
-        return ((ServerWorldBridge) playerIn.getLevel()).bridge$getBossBarManager();
-    }
-
     @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
     private CustomServerBossInfoManager impl$getPerWorldBossBarManager(final MinecraftServer minecraftServer, final ServerPlayerEntity playerIn) {
         return ((ServerWorldBridge) playerIn.getLevel()).bridge$getBossBarManager();
-    }
-
-    @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;updateEntireScoreboard(Lnet/minecraft/scoreboard/ServerScoreboard;Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
-    private void impl$sendScoreboard(final PlayerList playerList, final ServerScoreboard scoreboardIn, final ServerPlayerEntity playerIn) {
-        ((ServerPlayerEntityBridge)playerIn).bridge$initScoreboard();
     }
 
     @Inject(method = "remove", at = @At("HEAD"))

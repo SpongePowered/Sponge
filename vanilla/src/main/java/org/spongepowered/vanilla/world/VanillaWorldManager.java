@@ -973,6 +973,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             ((MinecraftServerAccessor) this.server).accessor$commandStorage(new CommandStorage(world.getDataStorage()));
         }
 
+        // Set the view distance back on it's self to trigger the logic
+        ((ServerWorldInfoBridge) world.getLevelData()).bridge$viewDistance().ifPresent(v -> ((ServerWorldInfoBridge) world.getLevelData()).bridge$setViewDistance(v));
+
         world.getWorldBorder().applySettings(levelData.getWorldBorder());
         if (!levelData.isInitialized()) {
             try {

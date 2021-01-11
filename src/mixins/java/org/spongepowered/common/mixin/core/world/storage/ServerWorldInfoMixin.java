@@ -30,6 +30,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
+import net.minecraft.network.play.server.SUpdateViewDistancePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -245,6 +246,15 @@ public abstract class ServerWorldInfoMixin implements IServerConfiguration, Serv
     @Override
     public void bridge$setViewDistance(@Nullable final Integer viewDistance) {
         this.impl$viewDistance = viewDistance;
+
+        final ServerWorld world = this.bridge$world();
+        if (world != null) {
+            final int actual = viewDistance == null ? world.getServer().getPlayerList().getViewDistance() : viewDistance;
+            world.getChunkSource().setViewDistance(actual);
+            final SUpdateViewDistancePacket packet = new SUpdateViewDistancePacket(actual);
+
+            world.players().forEach(p -> p.connection.send(packet));
+        }
     }
 
     @Override
