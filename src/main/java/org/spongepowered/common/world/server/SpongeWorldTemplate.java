@@ -34,6 +34,7 @@ import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.Dimension;
 import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.ISpawnWorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -60,6 +61,7 @@ import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAcc
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.DimensionBridge;
+import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.serialization.EnumCodec;
 import org.spongepowered.common.serialization.MathCodecs;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -76,7 +78,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     public final RegistryReference<WorldType> worldType;
     public final org.spongepowered.api.world.generation.ChunkGenerator generator;
     public final WorldGenerationConfig generationConfig;
-    public final SerializationBehavior serializationBehavior;
+    @Nullable public final SerializationBehavior serializationBehavior;
     @Nullable public final RegistryReference<GameMode> gameMode;
     @Nullable public final RegistryReference<Difficulty> difficulty;
     @Nullable public final Integer viewDistance;
@@ -157,15 +159,17 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     public SpongeWorldTemplate(final ServerWorld world) {
         super((ResourceKey) (Object) world.dimension().location());
         final ServerWorldProperties levelData = (ServerWorldProperties) world.getLevelData();
-        this.displayName = levelData.displayName().orElse(null);
+        final ServerWorldInfoBridge levelBridge = (ServerWorldInfoBridge) world.getLevelData();
+
+        this.displayName = levelBridge.bridge$displayName().orElse(null);
         this.worldType = ((WorldType) world.dimensionType()).asDefaultedReference(RegistryTypes.WORLD_TYPE);
         this.generator = (ChunkGenerator) world.getChunkSource().getGenerator();
         this.generationConfig = WorldGenerationConfig.Mutable.builder().from(levelData.worldGenerationConfig()).build();
-        this.gameMode = RegistryTypes.GAME_MODE.referenced((ResourceKey) levelData.gameMode());
-        this.difficulty = RegistryTypes.DIFFICULTY.referenced((ResourceKey) levelData.difficulty());
-        this.serializationBehavior = levelData.serializationBehavior();
-        this.viewDistance = levelData.viewDistance();
-        this.spawnPosition = levelData.spawnPosition();
+        this.gameMode = levelBridge.bridge$customGameType() ? levelData.gameMode().asDefaultedReference(RegistryTypes.GAME_MODE) : null;
+        this.difficulty = levelBridge.bridge$customDifficulty() ? levelData.difficulty().asDefaultedReference(RegistryTypes.DIFFICULTY) : null;
+        this.serializationBehavior = levelBridge.bridge$serializationBehavior().orElse(null);
+        this.viewDistance = levelBridge.bridge$viewDistance().orElse(null);
+        this.spawnPosition = levelBridge.bridge$customSpawnPosition() ? levelData.spawnPosition() : null;
         this.enabled = levelData.enabled();
         this.loadOnStartup = levelData.loadOnStartup();
         this.performsSpawnLogic = levelData.performsSpawnLogic();

@@ -54,7 +54,7 @@ public final class SpongeLayeredBiomeProviderHelper {
             .create(r -> r
                     .group(
                             Codec.LONG.fieldOf("seed").stable().forGetter(v -> ((OverworldBiomeProviderAccessor) v).accessor$seed()),
-                            Codec.BOOL.optionalFieldOf("legacy_biome_init_layer", Boolean.valueOf(false), Lifecycle.stable()).forGetter(v -> ((OverworldBiomeProviderAccessor) v).accessor$legacyBiomeInitLayer()),
+                            Codec.BOOL.optionalFieldOf("legacy_biome_init_layer", Boolean.FALSE, Lifecycle.stable()).forGetter(v -> ((OverworldBiomeProviderAccessor) v).accessor$legacyBiomeInitLayer()),
                             Codec.BOOL.fieldOf("large_biomes").orElse(false).stable().forGetter(v -> ((OverworldBiomeProviderAccessor) v).accessor$largeBiomes()),
                             RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(v -> ((OverworldBiomeProviderAccessor) v).accessor$biomes()),
                             SpongeLayeredBiomeProviderHelper.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> {
