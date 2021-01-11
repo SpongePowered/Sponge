@@ -87,11 +87,6 @@ public final class SpongeCauseStackFrame implements CauseStackManager.StackFrame
 
     // Note that a null object indicates that the context should be removed
     void storeOriginalContext(final EventContextKey<?> key, @Nullable final Object value) {
-        if (value == null) {
-            this.storedContext.remove(key);
-            return;
-        }
-
         if (!this.storedContext.containsKey(key)) {
             this.storedContext.put(key, value);
         }
