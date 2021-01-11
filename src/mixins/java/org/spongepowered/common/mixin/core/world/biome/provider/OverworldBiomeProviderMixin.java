@@ -22,11 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server.management;
+package org.spongepowered.common.mixin.core.world.biome.provider;
 
-public interface PlayerInteractionManagerBridge {
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.provider.BiomeProvider;
+import net.minecraft.world.biome.provider.OverworldBiomeProvider;
+import org.spongepowered.asm.mixin.Mixin;
 
-    boolean bridge$isInteractBlockRightClickCancelled();
+import java.util.List;
 
-    void bridge$setInteractBlockRightClickCancelled(boolean cancelled);
+@Mixin(OverworldBiomeProvider.class)
+public abstract class OverworldBiomeProviderMixin extends BiomeProvider {
+
+    protected OverworldBiomeProviderMixin(final List<Biome> p_i231634_1_) {
+        super(p_i231634_1_);
+    }
 }

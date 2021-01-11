@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.biome.provider;
 
 import net.minecraft.util.RegistryKey;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.provider.OverworldBiomeProvider;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,4 +40,12 @@ public interface OverworldBiomeProviderAccessor {
     @Accessor("POSSIBLE_BIOMES") static List<RegistryKey<Biome>> accessor$POSSIBLE_BIOMES() {
         throw new UntransformedAccessorError();
     }
+
+    @Accessor("seed") long accessor$seed();
+
+    @Accessor("legacyBiomeInitLayer") boolean accessor$legacyBiomeInitLayer();
+
+    @Accessor("largeBiomes") boolean accessor$largeBiomes();
+
+    @Accessor("biomes") Registry<Biome> accessor$biomes();
 }

@@ -34,5 +34,7 @@ import java.util.List;
 @Mixin(BiomeProvider.class)
 public interface BiomeProviderAccessor {
 
+    @Accessor("possibleBiomes") List<Biome> accessor$possibleBiomes();
+
     @Accessor("possibleBiomes") void accessor$possibleBiomes(List<Biome> possibleBiomes);
 }

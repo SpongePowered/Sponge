@@ -29,8 +29,6 @@ import net.minecraft.world.World;
 
 public interface PlayerListBridge {
 
-    void bridge$reloadAdvancementProgress();
-
     void bridge$setNewDestinationDimension(RegistryKey<World> dimension);
 
     void bridge$setOriginalDestinationDimension(RegistryKey<World> dimension);

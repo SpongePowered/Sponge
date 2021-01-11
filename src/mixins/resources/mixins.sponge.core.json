@@ -207,7 +207,8 @@
     "world.gen.DimensionSettingsMixin",
     "world.DimensionTypeMixin",
     "command.arguments.DimensionArgumentMixin",
-      "world.storage.SaveFormatMixin"
+      "world.storage.SaveFormatMixin",
+    "world.biome.provider.OverworldBiomeProviderMixin"
   ],
   "client": [
     "client.MinecraftMixin",
