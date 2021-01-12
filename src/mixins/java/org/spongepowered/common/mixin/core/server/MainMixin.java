@@ -54,7 +54,7 @@ public abstract class MainMixin {
         final ServerPropertiesProvider provider = new ServerPropertiesProvider(p_i242100_1_, p_i242100_2_);
         final ServerProperties properties = provider.getProperties();
         BootstrapProperties.init(properties.worldGenSettings, properties.gamemode, properties.difficulty, properties.pvp, properties.hardcore,
-                properties.viewDistance, p_i242100_1_);
+                true, properties.viewDistance, p_i242100_1_);
         return provider;
     }
 

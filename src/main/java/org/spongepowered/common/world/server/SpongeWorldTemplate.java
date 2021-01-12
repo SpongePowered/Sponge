@@ -83,8 +83,9 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     @Nullable public final RegistryReference<Difficulty> difficulty;
     @Nullable public final Integer viewDistance;
     @Nullable public final Vector3i spawnPosition;
+    @Nullable public final Boolean hardcore, pvp, commands;
 
-    public final boolean loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
+    public final boolean loadOnStartup, performsSpawnLogic;
 
     private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
             .create(r -> r
@@ -121,7 +122,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                                     dimensionBridge.bridge$serializationBehavior().orElse(null),
                                     dimensionBridge.bridge$viewDistance().orElse(null), dimensionBridge.bridge$spawnPosition().orElse(null),
                                     dimensionBridge.bridge$loadOnStartup(),dimensionBridge.bridge$performsSpawnLogic(),
-                                    dimensionBridge.bridge$hardcore().orElse(null), dimensionBridge.bridge$commands(),
+                                    dimensionBridge.bridge$hardcore().orElse(null), dimensionBridge.bridge$commands().orElse(null),
                                     dimensionBridge.bridge$pvp().orElse(null)));
                             })
                     )
@@ -190,7 +191,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.loadOnStartup = templateBridge.bridge$loadOnStartup();
         this.performsSpawnLogic = templateBridge.bridge$performsSpawnLogic();
         this.hardcore = templateBridge.bridge$hardcore().orElse(null);
-        this.commands = templateBridge.bridge$commands();
+        this.commands = templateBridge.bridge$commands().orElse(null);
         this.pvp = templateBridge.bridge$pvp().orElse(null);
     }
 
@@ -245,18 +246,18 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     }
 
     @Override
-    public boolean hardcore() {
-        return this.hardcore;
+    public Optional<Boolean> hardcore() {
+        return Optional.ofNullable(this.hardcore);
     }
 
     @Override
-    public boolean commands() {
-        return this.commands;
+    public Optional<Boolean> commands() {
+        return Optional.ofNullable(this.commands);
     }
 
     @Override
-    public boolean pvp() {
-        return this.pvp;
+    public Optional<Boolean> pvp() {
+        return Optional.ofNullable(this.pvp);
     }
 
     @Override
@@ -328,8 +329,9 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         @Nullable protected SerializationBehavior serializationBehavior;
         @Nullable protected Integer viewDistance;
         @Nullable protected Vector3i spawnPosition;
+        @Nullable protected Boolean hardcore, pvp, commands;
 
-        protected boolean loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
+        protected boolean loadOnStartup, performsSpawnLogic;
 
         @Override
         public Builder displayName(@Nullable final Component displayName) {
@@ -386,19 +388,19 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         }
 
         @Override
-        public Builder hardcore(final boolean hardcore) {
+        public Builder hardcore(@Nullable final Boolean hardcore) {
             this.hardcore = hardcore;
             return this;
         }
 
         @Override
-        public Builder commands(final boolean commands) {
+        public Builder commands(@Nullable Boolean commands) {
             this.commands = commands;
             return this;
         }
 
         @Override
-        public Builder pvp(final boolean pvp) {
+        public Builder pvp(@Nullable final Boolean pvp) {
             this.pvp = pvp;
             return this;
         }
@@ -433,9 +435,9 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.spawnPosition = null;
             this.loadOnStartup = true;
             this.performsSpawnLogic = false;
-            this.hardcore = false;
-            this.commands = true;
-            this.pvp = false;
+            this.hardcore = null;
+            this.commands = null;
+            this.pvp = null;
             return this;
         }
 
@@ -457,9 +459,9 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.spawnPosition = template.spawnPosition().orElse(null);
             this.loadOnStartup = template.loadOnStartup();
             this.performsSpawnLogic = template.performsSpawnLogic();
-            this.hardcore = template.hardcore();
-            this.commands = template.commands();
-            this.pvp = template.pvp();
+            this.hardcore = template.hardcore().orElse(null);
+            this.commands = template.commands().orElse(null);
+            this.pvp = template.pvp().orElse(null);
             return this;
         }
 

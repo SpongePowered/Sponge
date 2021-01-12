@@ -65,11 +65,6 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
     // @formatter:off
     @Shadow private Thread gameThread;
-
-    @Shadow public abstract Minecraft.PackManager shadow$makeServerStem(DynamicRegistries.Impl p_238189_1_,
-            Function<SaveFormat.LevelSave, DatapackCodec> p_238189_2_,
-            Function4<SaveFormat.LevelSave, DynamicRegistries.Impl, IResourceManager, DatapackCodec, IServerConfiguration> p_238189_3_,
-            boolean p_238189_4_, SaveFormat.LevelSave p_238189_5_) throws InterruptedException, ExecutionException;
     // @formatter:on
 
     private IntegratedServer impl$temporaryIntegratedServer;
@@ -123,14 +118,16 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveFormat$LevelSave;getDataTag(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/util/datafix/codec/DatapackCodec;)Lnet/minecraft/world/storage/IServerConfiguration;"))
     private static IServerConfiguration impl$setBootstrapProperties(final SaveFormat.LevelSave levelSave, final DynamicOps<INBT> p_237284_1_, final DatapackCodec p_237284_2_, final SaveFormat.LevelSave p_238181_0_, final DynamicRegistries.Impl p_238181_1_) {
         final IServerConfiguration saveData = levelSave.getDataTag(p_237284_1_, p_237284_2_);
-        BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(), saveData.getDifficulty(), true, saveData.isHardcore(), 10, p_238181_1_);
+        BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(), saveData.getDifficulty(), true, saveData.isHardcore(),
+            saveData.getAllowCommands(), 10, p_238181_1_);
         return saveData;
     }
 
     @Inject(method = "createLevel", at = @At("HEAD"))
     private void impl$setBootstrapProperties(String levelName, WorldSettings settings, DynamicRegistries.Impl registries,
             DimensionGeneratorSettings dimensionGeneratorSettings, CallbackInfo ci) {
-        BootstrapProperties.init(dimensionGeneratorSettings, settings.gameType(), settings.difficulty(), true, settings.hardcore(), 10, registries);
+        BootstrapProperties.init(dimensionGeneratorSettings, settings.gameType(), settings.difficulty(), true, settings.hardcore(),
+            settings.allowCommands(), 10, registries);
         BootstrapProperties.setIsNewLevel(true);
     }
 

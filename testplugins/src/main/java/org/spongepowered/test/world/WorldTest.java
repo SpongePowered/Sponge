@@ -50,6 +50,7 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
+import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
@@ -189,7 +190,7 @@ public final class WorldTest {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
                             final ResourceKey worldType = RegistryTypes.WORLD_TYPE.get().valueKey(context.requireOne(worldTypeParameter));
                             final WorldTemplate template = WorldTemplate.builder()
-                                    .from(WorldTemplate.overworldCaves())
+                                    .from(WorldTemplate.overworld())
                                     .key(key)
                                     .worldType(RegistryKey.of(RegistryTypes.WORLD_TYPE, worldType).asReference())
                                     .performsSpawnLogic(true)
@@ -371,7 +372,7 @@ public final class WorldTest {
                 .loadOnStartup(false)
                 .performsSpawnLogic(true)
                 .displayName(Component.text("Custom world by " + owner))
-                .generator(ChunkGenerator.noise(BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().biomes(biomes).scale(random.nextInt(16 - 2) + 2).build()),
+                .generator(ChunkGenerator.noise(BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().addBiomes(biomes).scale(random.nextInt(16 - 2) + 2).build()),
                     noiseGenConfig))
                 .build();
 

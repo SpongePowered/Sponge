@@ -57,7 +57,7 @@ public interface DimensionBridge {
 
     Optional<Boolean> bridge$hardcore();
 
-    boolean bridge$commands();
+    Optional<Boolean> bridge$commands();
 
     Optional<Boolean> bridge$pvp();
 

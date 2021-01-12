@@ -42,7 +42,7 @@ import java.util.function.Supplier;
 
 public final class SpongeLayeredBiomeProviderHelper {
 
-    public static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
+    private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
             .create(r -> r
                     .group(
                             Biome.LIST_CODEC.optionalFieldOf("biomes").forGetter(v -> Optional.of(v.biomes))
@@ -60,9 +60,7 @@ public final class SpongeLayeredBiomeProviderHelper {
                             SpongeLayeredBiomeProviderHelper.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> {
                                 final List<Biome> biomes = ((BiomeProviderAccessor) v).accessor$possibleBiomes();
                                 final List<Supplier<Biome>> supplied = new ArrayList<>();
-                                biomes.forEach(biome -> {
-                                    supplied.add(() -> biome);
-                                });
+                                biomes.forEach(biome -> supplied.add(() -> biome));
 
                                 return Optional.of(new SpongeDataSection(supplied));
                             })

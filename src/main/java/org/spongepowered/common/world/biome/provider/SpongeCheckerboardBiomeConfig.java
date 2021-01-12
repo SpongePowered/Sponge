@@ -66,7 +66,7 @@ public final class SpongeCheckerboardBiomeConfig extends AbstractBiomeProviderCo
         }
 
         @Override
-        public Builder biomes(final List<RegistryReference<Biome>> biomes) {
+        public Builder addBiomes(final List<RegistryReference<Biome>> biomes) {
             this.biomes.addAll(Objects.requireNonNull(biomes, "biomes"));
             return this;
         }

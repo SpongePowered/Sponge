@@ -45,18 +45,20 @@ public final class BootstrapProperties {
     public static SerializationBehavior serializationBehavior;
     public static boolean pvp;
     public static boolean hardcore;
+    public static boolean commands;
     public static int viewDistance;
     public static DynamicRegistries registries;
     public static WorldSettingsImport<?> worldSettingsAdapter;
     public static boolean isNewLevel = false;
 
     public static void init(final DimensionGeneratorSettings dimensionGeneratorSettings, final GameType gameType, final net.minecraft.world.Difficulty difficulty,
-            final boolean pvp, final boolean hardcore, final int viewDistance, final DynamicRegistries registries) {
+            final boolean pvp, final boolean hardcore, final boolean commands, final int viewDistance, final DynamicRegistries registries) {
         BootstrapProperties.dimensionGeneratorSettings = dimensionGeneratorSettings;
         BootstrapProperties.gameMode = RegistryKey.of(RegistryTypes.GAME_MODE, ResourceKey.sponge(gameType.getName())).asDefaultedReference(() -> Sponge.getGame().registries());
         BootstrapProperties.difficulty = RegistryKey.of(RegistryTypes.DIFFICULTY, ResourceKey.sponge(difficulty.getKey())).asDefaultedReference(() -> Sponge.getGame().registries());
         BootstrapProperties.pvp = pvp;
         BootstrapProperties.hardcore = hardcore;
+        BootstrapProperties.commands = commands;
         BootstrapProperties.viewDistance = viewDistance;
         BootstrapProperties.registries = registries;
         BootstrapProperties.serializationBehavior = SerializationBehavior.AUTOMATIC;

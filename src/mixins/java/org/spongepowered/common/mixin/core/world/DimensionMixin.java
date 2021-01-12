@@ -57,10 +57,9 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     @Nullable private Component impl$displayName = null;
     private Integer impl$viewDistance = null;
     @Nullable private Vector3i impl$spawnPosition;
-    @Nullable private Boolean impl$hardcore, impl$pvp;
+    @Nullable private Boolean impl$hardcore, impl$pvp, impl$commands;
 
-    private boolean impl$loadOnStartup = true, impl$performsSpawnLogic = false, impl$commands = true;
-
+    private boolean impl$loadOnStartup = true, impl$performsSpawnLogic = false;
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -118,8 +117,8 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     }
 
     @Override
-    public boolean bridge$commands() {
-        return this.impl$commands;
+    public Optional<Boolean> bridge$commands() {
+        return Optional.ofNullable(this.impl$commands);
     }
 
     @Override
@@ -138,7 +137,7 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
         this.impl$loadOnStartup = spongeData.loadOnStartup == null || spongeData.loadOnStartup;
         this.impl$performsSpawnLogic = spongeData.performsSpawnLogic != null && spongeData.performsSpawnLogic;
         this.impl$hardcore = spongeData.hardcore;
-        this.impl$commands = spongeData.commands == null || spongeData.commands;
+        this.impl$commands = spongeData.commands;
         this.impl$pvp = spongeData.pvp;
     }
 
@@ -147,10 +146,10 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
         this.impl$key = s.getKey();
         this.impl$gameMode = s.gameMode == null ? null : (ResourceLocation) (Object) s.gameMode.location();
         this.impl$difficulty = s.difficulty == null ? null : (ResourceLocation) (Object) s.difficulty.location();
-        this.impl$serializationBehavior = s.serializationBehavior().orElse(null);
-        this.impl$displayName = s.displayName == null ? null : s.displayName;
-        this.impl$viewDistance = s.viewDistance == null ? null : s.viewDistance;
-        this.impl$spawnPosition = s.spawnPosition == null ? null : s.spawnPosition;
+        this.impl$serializationBehavior = s.serializationBehavior;
+        this.impl$displayName = s.displayName;
+        this.impl$viewDistance = s.viewDistance;
+        this.impl$spawnPosition = s.spawnPosition;
         this.impl$loadOnStartup = s.loadOnStartup;
         this.impl$performsSpawnLogic = s.performsSpawnLogic;
         this.impl$hardcore = s.hardcore;
@@ -180,11 +179,11 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     }
 
     @Redirect(
-            method = "*",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"
-            )
+        method = "*",
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"
+        )
     )
     private static Codec impl$useTemplateCodec(final Function function) {
         return SpongeWorldTemplate.DIRECT_CODEC;

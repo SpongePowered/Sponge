@@ -107,7 +107,7 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         }
 
         @Override
-        public Builder biomes(final List<AttributedBiome> biomes) {
+        public Builder addBiomes(final List<AttributedBiome> biomes) {
             this.biomes.addAll(Objects.requireNonNull(biomes, "biomes"));
             return this;
         }
@@ -188,7 +188,7 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         @Override
         public MultiNoiseBiomeConfig nether() {
             return new BuilderImpl()
-                    .biomes(Lists.newArrayList(
+                    .addBiomes(Lists.newArrayList(
                             AttributedBiome.of(Biomes.NETHER_WASTES, BiomeAttributes.of(0, 0, 0, 0, 0)),
                             AttributedBiome.of(Biomes.SOUL_SAND_VALLEY, BiomeAttributes.of(0, -0.5F, 0, 0, 0)),
                             AttributedBiome.of(Biomes.CRIMSON_FOREST, BiomeAttributes.of(0.4F, 0, 0, 0, 0)),

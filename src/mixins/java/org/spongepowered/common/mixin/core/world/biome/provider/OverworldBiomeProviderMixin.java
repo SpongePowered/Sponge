@@ -24,15 +24,31 @@
  */
 package org.spongepowered.common.mixin.core.world.biome.provider;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.biome.provider.OverworldBiomeProvider;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.world.biome.provider.SpongeLayeredBiomeProviderHelper;
 
 import java.util.List;
+import java.util.function.Function;
 
 @Mixin(OverworldBiomeProvider.class)
 public abstract class OverworldBiomeProviderMixin extends BiomeProvider {
+
+    @Redirect(
+        method = "*",
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"
+        )
+    )
+    private static Codec impl$useEnhancedCodec(final Function function) {
+        return SpongeLayeredBiomeProviderHelper.DIRECT_CODEC;
+    }
 
     protected OverworldBiomeProviderMixin(final List<Biome> p_i231634_1_) {
         super(p_i231634_1_);

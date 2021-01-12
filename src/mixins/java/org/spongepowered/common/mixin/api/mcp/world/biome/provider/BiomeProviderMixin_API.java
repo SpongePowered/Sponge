@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.biome.provider;
 
+import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,12 +34,17 @@ import java.util.List;
 import java.util.Set;
 
 @Mixin(BiomeProvider.class)
-public abstract class BiomeProviderMixin_API implements org.spongepowered.api.world.biome.provider.BiomeProvider {
+public abstract class BiomeProviderMixin_API implements org.spongepowered.api.world.biome.provider.BiomeProvider, BiomeManager.IBiomeReader {
 
     // @formatter:off
     @Shadow public abstract List<net.minecraft.world.biome.Biome> shadow$possibleBiomes();
     @Shadow public abstract Set<net.minecraft.world.biome.Biome> shadow$getBiomesWithin(int p_225530_1_, int p_225530_2_, int p_225530_3_, int p_225530_4_);
     // @formatter:on
+
+    @Override
+    public Biome find(final int x, final int y, final int z) {
+        return (Biome) (Object) this.getNoiseBiome(x, y, z);
+    }
 
     @Override
     public List<Biome> choices() {
