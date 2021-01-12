@@ -27,16 +27,30 @@ package org.spongepowered.common.mixin.core.block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CampfireCookingRecipe;
+import net.minecraft.tileentity.CampfireTileEntity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.bridge.tileentity.CampfireTileEntityBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;
+
+import java.util.Optional;
 
 @Mixin(CampfireBlock.class)
 public abstract class CampfireBlockMixin extends BlockMixin {
@@ -62,6 +76,13 @@ public abstract class CampfireBlockMixin extends BlockMixin {
             // Since "source" is already the DamageSource.IN_FIRE object, we can re-use it to re-assign.
             ((DamageSourceBridge) source).bridge$setFireSource();
         }
-
     }
+
+    @Inject(method = "use", locals = LocalCapture.CAPTURE_FAILEXCEPTION, at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/CampfireTileEntity;placeFood(Lnet/minecraft/item/ItemStack;I)Z"))
+    public void impl$placeFood(BlockState p_225533_1_, World p_225533_2_, BlockPos p_225533_3_, PlayerEntity p_225533_4_, Hand p_225533_5_,
+            BlockRayTraceResult p_225533_6_, CallbackInfoReturnable<ActionResultType> cir,
+            TileEntity tileEntity, CampfireTileEntity campfire, ItemStack itemStack, Optional<CampfireCookingRecipe> optional) {
+        ((CampfireTileEntityBridge) campfire).bridge$placeRecipe(optional.get());
+    }
+
 }

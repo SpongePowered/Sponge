@@ -127,6 +127,7 @@
     "service.permission.SubjectMixin",
     "tileentity.AbstractFurnaceTileEntityMixin",
     "tileentity.BannerTileEntityMixin",
+    "tileentity.CampfireTileEntityMixin",
     "tileentity.CommandBlockTileEntity_1Mixin",
     "tileentity.CommandBlockTileEntityMixin",
     "tileentity.EnchantingTableTileEntityMixin",
@@ -207,7 +208,7 @@
     "world.gen.DimensionSettingsMixin",
     "world.DimensionTypeMixin",
     "command.arguments.DimensionArgumentMixin",
-      "world.storage.SaveFormatMixin",
+    "world.storage.SaveFormatMixin",
     "world.biome.provider.OverworldBiomeProviderMixin"
   ],
   "client": [
