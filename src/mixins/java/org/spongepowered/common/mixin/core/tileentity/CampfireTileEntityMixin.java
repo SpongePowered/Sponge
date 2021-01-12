@@ -41,7 +41,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
@@ -57,9 +56,9 @@ public abstract class CampfireTileEntityMixin implements CampfireTileEntityBridg
 
     // @Formatter:off
     @Shadow @Final private NonNullList<ItemStack> items;
+    @Shadow @Final private int[] cookingProgress;
     // @Formatter:on
 
-    @Shadow @Final private int[] cookingProgress;
     private final CampfireCookingRecipe[] impl$cookingRecipe = new CampfireCookingRecipe[4];
 
     // Tick up

@@ -121,10 +121,11 @@ public final class LivingData {
                                 return false;
                             }
 
-                            h.setHealth(v.floatValue());
                             if (v == 0) {
-                                h.hurt((DamageSource) SpongeDamageSources.IGNORED, 1000F);
+                                // Cause DestructEntityEvent to fire first
+                                h.hurt((DamageSource) SpongeDamageSources.IGNORED, Float.MAX_VALUE);
                             }
+                            h.setHealth(v.floatValue());
                             return true;
                         })
                     .create(Keys.IS_ELYTRA_FLYING)

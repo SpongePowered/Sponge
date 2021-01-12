@@ -33,7 +33,15 @@ public final class SpongeDamageSources {
 
     // SORTFIELDS:ON
 
-    public static final DamageSource IGNORED = (DamageSource) DamageSourceAccessor.invoker$new("ignored");
+    public static final DamageSource IGNORED;
+
+    static {
+        DamageSourceAccessor damageSource = ((DamageSourceAccessor)DamageSourceAccessor.invoker$new("ignored"));
+        damageSource.invoker$bypassInvul();
+        damageSource.invoker$bypassArmor();
+        damageSource.invoker$bypassMagic();
+        IGNORED = (DamageSource) damageSource;
+    }
 
     // SORTFIELDS:OFF
 
