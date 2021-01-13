@@ -708,7 +708,7 @@ public final class SpongeRegistryLoaders {
             l.add(PlaceholderParsers.CURRENT_WORLD, k -> new SpongePlaceholderParserBuilder()
                     .parser(placeholderText -> Component.text(placeholderText.getAssociatedObject().filter(x -> x instanceof Locatable)
                             .map(x -> ((Locatable) x).getServerLocation().getWorldKey())
-                            .orElseGet(() -> Sponge.getServer().getDefaultWorldKey()).toString()))
+                            .orElseGet(() -> Sponge.getServer().getWorldManager().defaultWorld().getKey()).toString()))
                     .build());
             l.add(PlaceholderParsers.NAME, k -> new SpongePlaceholderParserBuilder()
                     .parser(placeholderText -> placeholderText.getAssociatedObject()

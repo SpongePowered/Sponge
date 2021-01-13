@@ -153,6 +153,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
         this.defaultWorldDirectory = ((SaveFormat_LevelSaveAccessor) ((MinecraftServerAccessor) this.server).accessor$storageSource()).accessor$levelPath();
         this.customWorldsDirectory = this.defaultWorldDirectory.resolve("dimensions");
+        try {
+            Files.createDirectories(this.customWorldsDirectory);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
         this.worlds = ((MinecraftServerAccessor) this.server).accessor$levels();
     }
 
@@ -194,19 +199,27 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     public List<ResourceKey> worldKeys() {
         final List<ResourceKey> worldKeys = new ArrayList<>();
         worldKeys.add((ResourceKey) (Object) World.OVERWORLD.location());
-        worldKeys.add((ResourceKey) (Object) World.NETHER.location());
-        worldKeys.add((ResourceKey) (Object) World.END.location());
 
-        // TODO May be wise to consider looking at other data packs to grab their keys as well
+        if (Files.exists(this.defaultWorldDirectory.resolve(this.getDirectoryName((ResourceKey) (Object) World.NETHER.location())))) {
+            worldKeys.add((ResourceKey) (Object) World.NETHER.location());
+        }
+
+        if (Files.exists(this.defaultWorldDirectory.resolve(this.getDirectoryName((ResourceKey) (Object) World.END.location())))) {
+            worldKeys.add((ResourceKey) (Object) World.END.location());
+        }
+
         try {
-            for (final Path namespacedDirectory : Files.walk(this.dimensionsDataPackDirectory, 1).collect(Collectors.toList())) {
-                final Path dimensionDirectory = namespacedDirectory.resolve("dimension");
-                if (Files.exists(dimensionDirectory)) {
-                    for (final Path valueDirectory : Files.walk(dimensionDirectory, 1).collect(Collectors.toList())) {
-                        final String rawPath = valueDirectory.getFileName().toString();
-                        final int endIndex = rawPath.indexOf(".");
-                        worldKeys.add(ResourceKey.of(namespacedDirectory.getFileName().toString(), rawPath.substring(endIndex)));
+            for (final Path namespacedDirectory : Files.walk(this.customWorldsDirectory, 1).collect(Collectors.toList())) {
+                if (this.customWorldsDirectory.equals(namespacedDirectory)) {
+                    continue;
+                }
+
+                for (final Path valueDirectory : Files.walk(namespacedDirectory, 1).collect(Collectors.toList())) {
+                    if (namespacedDirectory.equals(valueDirectory)) {
+                        continue;
                     }
+                    
+                    worldKeys.add(ResourceKey.of(namespacedDirectory.getFileName().toString(), valueDirectory.getFileName().toString()));
                 }
             }
         } catch (final IOException e) {
@@ -230,7 +243,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final boolean isVanillaSubLevel = World.NETHER.equals(registryKey) || World.END.equals(registryKey);
         final Path levelDirectory = isVanillaSubLevel ? this.defaultWorldDirectory.resolve(this.getDirectoryName(key)) :
-                this.customWorldsDirectory.resolve(key.getNamespace()).resolve(key.getValue());
+            this.customWorldsDirectory.resolve(key.getNamespace()).resolve(key.getValue());
         return Files.exists(levelDirectory);
     }
 
@@ -238,12 +251,12 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     public Optional<ResourceKey> worldKey(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         return this.worlds
-                .values()
-                .stream()
-                .filter(w -> ((org.spongepowered.api.world.server.ServerWorld) w).getUniqueId().equals(uniqueId))
-                .map(w -> (org.spongepowered.api.world.server.ServerWorld) w)
-                .map(org.spongepowered.api.world.server.ServerWorld::getKey)
-                .findAny();
+            .values()
+            .stream()
+            .filter(w -> ((org.spongepowered.api.world.server.ServerWorld) w).getUniqueId().equals(uniqueId))
+            .map(w -> (org.spongepowered.api.world.server.ServerWorld) w)
+            .map(org.spongepowered.api.world.server.ServerWorld::getKey)
+            .findAny();
     }
 
     @Override
@@ -287,7 +300,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 }
 
                 if (loadedTemplate == null) {
-                    return CompletableFuture.completedFuture(null);
+                    return FutureUtil.completedWithException(new IOException(String.format("Failed to load a template for '%s'!", key)));
                 }
 
                 this.saveTemplate(loadedTemplate);
