@@ -62,11 +62,9 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
 
     private static final Vec3Argument VEC_3_ARGUMENT = Vec3Argument.vec3(false);
     private static final Pattern STARTS_WITH_NUMBER = Pattern.compile("^\\s*((-)?[0-9]|~|\\^)");
-    private final boolean selectAllWorlds;
 
-    public SpongeServerLocationValueParameter(final ResourceKey key, final boolean selectAllWorlds) {
+    public SpongeServerLocationValueParameter(final ResourceKey key) {
         super(key);
-        this.selectAllWorlds = selectAllWorlds;
     }
 
     @Override
@@ -76,8 +74,9 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
     }
 
     private List<String> complete(final String currentInput) {
-        return SpongeCommon.getGame().getServer().getWorldManager().worldKeys()
+        return SpongeCommon.getGame().getServer().getWorldManager().worlds()
                 .stream()
+                .map(ServerWorld::getKey)
                 .map(ResourceKey::getFormatted)
                 .filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());

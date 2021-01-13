@@ -203,7 +203,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 final Path dimensionDirectory = namespacedDirectory.resolve("dimension");
                 if (Files.exists(dimensionDirectory)) {
                     for (final Path valueDirectory : Files.walk(dimensionDirectory, 1).collect(Collectors.toList())) {
-                        worldKeys.add(ResourceKey.of(namespacedDirectory.getFileName().toString(), valueDirectory.getFileName().toString()));
+                        final String rawPath = valueDirectory.getFileName().toString();
+                        final int endIndex = rawPath.indexOf(".");
+                        worldKeys.add(ResourceKey.of(namespacedDirectory.getFileName().toString(), rawPath.substring(endIndex)));
                     }
                 }
             }
