@@ -193,9 +193,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     @Override
     public List<ResourceKey> worldKeys() {
         final List<ResourceKey> worldKeys = new ArrayList<>();
-        worldKeys.add((ResourceKey) (Object) Dimension.OVERWORLD.location());
-        worldKeys.add((ResourceKey) (Object) Dimension.NETHER.location());
-        worldKeys.add((ResourceKey) (Object) Dimension.END.location());
+        worldKeys.add((ResourceKey) (Object) World.OVERWORLD.location());
+        worldKeys.add((ResourceKey) (Object) World.NETHER.location());
+        worldKeys.add((ResourceKey) (Object) World.END.location());
 
         // TODO May be wise to consider looking at other data packs to grab their keys as well
         try {
