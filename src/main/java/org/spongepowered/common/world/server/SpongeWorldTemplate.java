@@ -129,9 +129,9 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                     .apply(r, r
                         .stable((f1, f2, f3) ->
                             {
-                                final Dimension dimension = new Dimension(f1, f2);
-                                f3.ifPresent(((DimensionBridge) (Object) dimension)::bridge$populateFromData);
-                                return dimension;
+                                final Dimension template = new Dimension(f1, f2);
+                                f3.ifPresent(((DimensionBridge) (Object) template)::bridge$populateFromData);
+                                return template;
                             }
                         )
                     )
@@ -284,6 +284,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         final Dimension scratch =
                 new Dimension(() -> BootstrapProperties.registries.dimensionTypes().get((ResourceLocation) (Object) this.worldType.location()),
                         (net.minecraft.world.gen.ChunkGenerator) this.generator);
+        ((DimensionBridge) (Object) scratch).bridge$setFromSettings(false);
         ((DimensionBridge) (Object) scratch).bridge$populateFromTemplate(this);
         return scratch;
     }

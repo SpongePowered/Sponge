@@ -61,6 +61,10 @@ public interface DimensionBridge {
 
     Optional<Boolean> bridge$pvp();
 
+    boolean bridge$fromSettings();
+
+    void bridge$setFromSettings(boolean fromSettings);
+
     void bridge$populateFromData(SpongeWorldTemplate.SpongeDataSection spongeData);
 
     void bridge$populateFromTemplate(SpongeWorldTemplate s);

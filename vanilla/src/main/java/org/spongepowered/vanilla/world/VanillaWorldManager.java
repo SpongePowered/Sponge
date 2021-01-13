@@ -1105,7 +1105,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final WorldSettingsImport<JsonElement> settingsAdapter = WorldSettingsImport.create(JsonOps.INSTANCE, singleTemplateAccess, (DynamicRegistries.Impl) BootstrapProperties.registries);
             final SimpleRegistry<Dimension> registry = new SimpleRegistry<>(net.minecraft.util.registry.Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
             settingsAdapter.decodeElements(registry, net.minecraft.util.registry.Registry.LEVEL_STEM_REGISTRY, Dimension.CODEC);
-            return registry.stream().findAny().orElse(null);
+            final Dimension template = registry.stream().findAny().orElse(null);
+            if (template != null) {
+                ((DimensionBridge) (Object) template).bridge$setFromSettings(false);
+            }
+            return template;
         }
     }
 

@@ -59,7 +59,7 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     @Nullable private Vector3i impl$spawnPosition;
     @Nullable private Boolean impl$hardcore, impl$pvp, impl$commands;
 
-    private boolean impl$loadOnStartup = true, impl$performsSpawnLogic = false;
+    private boolean impl$loadOnStartup = true, impl$performsSpawnLogic = false, impl$fromSettings = true;
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -124,6 +124,16 @@ public abstract class DimensionMixin implements DimensionBridge, ResourceKeyBrid
     @Override
     public Optional<Boolean> bridge$pvp() {
         return Optional.ofNullable(this.impl$pvp);
+    }
+
+    @Override
+    public boolean bridge$fromSettings() {
+        return this.impl$fromSettings;
+    }
+
+    @Override
+    public void bridge$setFromSettings(final boolean fromSettings) {
+        this.impl$fromSettings = fromSettings;
     }
 
     @Override

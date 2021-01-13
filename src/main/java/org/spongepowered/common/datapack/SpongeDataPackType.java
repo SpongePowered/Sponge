@@ -126,9 +126,10 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         private final SpongeDataPackType<@NonNull WorldTemplate, DataPackSerializedObject> world = new SpongeDataPackType<>(TypeToken.get(WorldTemplate.class),
                 new DataPackSerializer<>("Dimensions", "dimension"),
                 s -> {
-                    final Dimension dimension = new Dimension(() -> BootstrapProperties.registries.dimensionTypes().get((ResourceLocation) (Object) s.worldType().location()), (ChunkGenerator) s.generator());
-                    ((DimensionBridge) (Object) dimension).bridge$populateFromTemplate((SpongeWorldTemplate) s);
-                    return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(WorldGenSettingsExport.create(JsonOps.INSTANCE, BootstrapProperties.registries), dimension).getOrThrow(false, e -> {});
+                    final Dimension template = new Dimension(() -> BootstrapProperties.registries.dimensionTypes().get((ResourceLocation) (Object) s.worldType().location()), (ChunkGenerator) s.generator());
+                    ((DimensionBridge) (Object) template).bridge$setFromSettings(false);
+                    ((DimensionBridge) (Object) template).bridge$populateFromTemplate((SpongeWorldTemplate) s);
+                    return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(WorldGenSettingsExport.create(JsonOps.INSTANCE, BootstrapProperties.registries), template).getOrThrow(false, e -> {});
                 },
                 (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
                 true
