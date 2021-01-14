@@ -37,17 +37,29 @@ import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
 import org.spongepowered.plugin.jvm.locator.ResourceType;
 import org.spongepowered.vanilla.applaunch.Main;
 
+import java.io.IOException;
+import java.net.JarURLConnection;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.jar.Manifest;
 
 /**
  * The common Sponge {@link ILaunchHandlerService launch handler} for development
@@ -86,7 +98,8 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
 
     @Override
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
-        builder.setClassBytesLocator(this.getResourceLocator());
+        builder.setResourceEnumeratorLocator(this.getResourceLocator());
+        builder.setManifestLocator(this.getManifestLocator());
     }
 
     @Override
@@ -113,30 +126,105 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
         };
     }
 
-    protected Function<String, Optional<URL>> getResourceLocator() {
+    protected Function<String, Enumeration<URL>> getResourceLocator() {
         return s -> {
-            for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> serviceCandidates :
-                    Main.getInstance().getPluginEngine().getCandidates().entrySet()) {
-                for (final PluginCandidate<PluginResource> candidate : serviceCandidates.getValue()) {
-                    final PluginResource resource = candidate.getResource();
+            // Save unnecessary searches of plugin classes for things that are definitely not plugins
+            // In this case: MC and fastutil
+            if (s.startsWith("net/minecraft") || s.startsWith("it/unimi")) {
+                return Collections.emptyEnumeration();
+            }
 
-                    if (resource instanceof JVMPluginResource) {
-                        if (((JVMPluginResource) resource).getType() != ResourceType.JAR) {
-                            continue;
-                        }
+            return new Enumeration<URL>() {
+                final Iterator<Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>>> serviceCandidates =
+                        Main.getInstance().getPluginEngine().getCandidates().entrySet().iterator();
+                Iterator<PluginCandidate<PluginResource>> candidates;
+                URL next = this.computeNext();
+
+                @Override
+                public boolean hasMoreElements() {
+                    return this.next != null;
+                }
+
+                @Override
+                public URL nextElement() {
+                    final URL next = this.next;
+                    if (next == null) {
+                        throw new NoSuchElementException();
                     }
+                    this.next = this.computeNext();
+                    return next;
+                }
 
-                    final Path resolved = resource.getFileSystem().getPath(s);
-                    if (Files.exists(resolved)) {
-                        try {
-                            return Optional.of(resolved.toUri().toURL());
-                        } catch (final MalformedURLException ex) {
-                            throw new RuntimeException(ex);
+                private URL computeNext() {
+                    while (true) {
+                        if (this.candidates != null && !this.candidates.hasNext()) {
+                            this.candidates = null;
+                        }
+                        if (this.candidates == null) {
+                            if (!this.serviceCandidates.hasNext()) {
+                                return null;
+                            }
+                            this.candidates = this.serviceCandidates.next().getValue().iterator();
+                        }
+
+                        if (this.candidates.hasNext()) {
+                            final PluginResource resource = this.candidates.next().getResource();
+                            if (resource instanceof JVMPluginResource) {
+                                if (((JVMPluginResource) resource).getType() != ResourceType.JAR) {
+                                    continue;
+                                }
+                            }
+
+                            final Path resolved = resource.getFileSystem().getPath(s);
+                            if (Files.exists(resolved)) {
+                                try {
+                                    return resolved.toUri().toURL();
+                                } catch (final MalformedURLException ex) {
+                                    throw new RuntimeException(ex);
+                                }
+                            }
                         }
                     }
                 }
-            }
+            };
+        };
+    }
 
+    private final ConcurrentMap<URL, Optional<Manifest>> manifestCache = new ConcurrentHashMap<>();
+    private static final Optional<Manifest> UNKNOWN_MANIFEST = Optional.of(new Manifest());
+
+    private Function<URLConnection, Optional<Manifest>> getManifestLocator() {
+        return connection -> {
+            if (connection instanceof JarURLConnection) {
+                final URL jarFileUrl = ((JarURLConnection) connection).getJarFileURL();
+                final Optional<Manifest> manifest =  this.manifestCache.computeIfAbsent(jarFileUrl, key -> {
+                    for (final List<PluginResource> resources : Main.getInstance().getPluginEngine().getResources().values()) {
+                        for (final PluginResource resource : resources) {
+                            if (resource instanceof JVMPluginResource) {
+                                final JVMPluginResource jvmResource = (JVMPluginResource) resource;
+                                try {
+                                    if (jvmResource.getType() == ResourceType.JAR && resource.getPath().toAbsolutePath().normalize().equals(Paths.get(key.toURI()).toAbsolutePath().normalize())) {
+                                        return jvmResource.getManifest();
+                                    }
+                                } catch (final URISyntaxException ex) {
+                                    this.logger.error("Failed to load manifest from jar {}: ", key, ex);
+                                }
+                            }
+                        }
+                    }
+                    return AbstractVanillaLaunchHandler.UNKNOWN_MANIFEST;
+                });
+
+                try {
+                    if (manifest == AbstractVanillaLaunchHandler.UNKNOWN_MANIFEST) {
+                        return Optional.ofNullable(((JarURLConnection) connection).getManifest());
+                    } else {
+                        return manifest;
+                    }
+                } catch (final IOException ex) {
+                    this.logger.error("Failed to load manifest from jar {}: ", jarFileUrl, ex);
+                }
+            }
             return Optional.empty();
         };
     }

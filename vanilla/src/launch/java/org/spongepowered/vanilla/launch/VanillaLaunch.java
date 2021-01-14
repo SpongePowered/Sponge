@@ -37,8 +37,14 @@ import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLStreamHandler;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Enumeration;
 
 public abstract class VanillaLaunch extends Launch {
 
@@ -84,12 +90,44 @@ public abstract class VanillaLaunch extends Launch {
                 .orElseThrow(() -> new RuntimeException("The game directory has not been added to the environment!"));
 
         try {
-            final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(VanillaLaunch.class.getResourceAsStream(
-                    "/META-INF/" + JVMPluginResourceLocatorService.DEFAULT_METADATA_FILENAME));
+            // This is a bit nasty, but allows Sponge to detect builtin platform plugins when it's not the first entry on the classpath.
+            final URL classUrl = VanillaLaunch.class.getResource("/" + VanillaLaunch.class.getName().replace('.', '/') + ".class");
+
+            Collection<PluginMetadata> read = null;
+            if (classUrl.getProtocol().equals("file")) { // In development environment, we aren't even discovered by ModLauncher for some reason
+                read = PluginMetadataHelper.builder().build().read(VanillaLaunch.class.getResourceAsStream(
+                        "/META-INF/" + JVMPluginResourceLocatorService.DEFAULT_METADATA_FILENAME));
+            } else if (classUrl.getProtocol().equals("jar")) { // In production
+                // Extract the path of the underlying jar file, and parse it as a path to normalize it
+                final String[] classUrlSplit = classUrl.getPath().split("!");
+                final Path expectedFile = Paths.get(new URI(classUrlSplit[0]));
+
+                // Then go through every possible resource
+                final Enumeration<URL> manifests =
+                        VanillaLaunch.class.getClassLoader().getResources("/META-INF/" + JVMPluginResourceLocatorService.DEFAULT_METADATA_FILENAME);
+                while (manifests.hasMoreElements()) {
+                    final URL next = manifests.nextElement();
+                    if (!next.getProtocol().equals("jar")) {
+                        continue;
+                    }
+
+                    // And stop when the normalized jar in that resource matches the URL of the jar that loaded VanillaLaunch?
+                    final String[] pathSplit = next.getPath().split("!");
+                    if (pathSplit.length == 2) {
+                        if (Paths.get(new URI(pathSplit[0])).equals(expectedFile)) {
+                            read = PluginMetadataHelper.builder().build().read(next.openStream());
+                            break;
+                        }
+                    }
+                }
+            }
+            if (read == null) {
+                throw new RuntimeException("Could not determine location for implementation metadata!");
+            }
             for (final PluginMetadata metadata : read) {
                 this.getPluginManager().addDummyPlugin(new DummyPluginContainer(metadata, gameDirectory, this.getLogger(), this));
             }
-        } catch (final IOException e) {
+        } catch (final IOException | URISyntaxException e) {
             throw new RuntimeException("Could not load metadata information for the implementation! This should be impossible!");
         }
     }
