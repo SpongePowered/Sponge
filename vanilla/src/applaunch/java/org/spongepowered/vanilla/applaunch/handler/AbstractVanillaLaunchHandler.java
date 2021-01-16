@@ -30,8 +30,6 @@ import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
 import org.spongepowered.plugin.jvm.locator.ResourceType;
@@ -51,7 +49,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -135,9 +132,9 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             }
 
             return new Enumeration<URL>() {
-                final Iterator<Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>>> serviceCandidates =
-                        Main.getInstance().getPluginEngine().getCandidates().entrySet().iterator();
-                Iterator<PluginCandidate<PluginResource>> candidates;
+                final Iterator<List<PluginResource>> serviceResources =
+                        Main.getInstance().getPluginEngine().getResources().values().iterator();
+                Iterator<PluginResource> resources;
                 URL next = this.computeNext();
 
                 @Override
@@ -157,18 +154,18 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
 
                 private URL computeNext() {
                     while (true) {
-                        if (this.candidates != null && !this.candidates.hasNext()) {
-                            this.candidates = null;
+                        if (this.resources != null && !this.resources.hasNext()) {
+                            this.resources = null;
                         }
-                        if (this.candidates == null) {
-                            if (!this.serviceCandidates.hasNext()) {
+                        if (this.resources == null) {
+                            if (!this.serviceResources.hasNext()) {
                                 return null;
                             }
-                            this.candidates = this.serviceCandidates.next().getValue().iterator();
+                            this.resources = this.serviceResources.next().iterator();
                         }
 
-                        if (this.candidates.hasNext()) {
-                            final PluginResource resource = this.candidates.next().getResource();
+                        if (this.resources.hasNext()) {
+                            final PluginResource resource = this.resources.next();
                             if (resource instanceof JVMPluginResource) {
                                 if (((JVMPluginResource) resource).getType() != ResourceType.JAR) {
                                     continue;
