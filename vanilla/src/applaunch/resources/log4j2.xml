@@ -21,7 +21,7 @@
     </RollingRandomAccessFile>
   </Appenders>
   <Loggers>
-    <Root level="all">
+    <Root level="DEBUG">
       <AppenderRef ref="SysOut" level="INFO"/>
       <AppenderRef ref="File" level="INFO"/>
       <AppenderRef ref="DebugFile" level="DEBUG"/>

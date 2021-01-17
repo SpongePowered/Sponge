@@ -48,9 +48,12 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public final class InstallerMain {
+
+    private static final Pattern CLASSPATH_SPLITTER = Pattern.compile(";", Pattern.LITERAL);
 
     static {
         System.setProperty("log4j.configurationFile", "log4j2_launcher.xml");
@@ -88,9 +91,11 @@ public final class InstallerMain {
         }
         final String depsClasspath = this.installer.getLibraryManager().getAll().values().stream().map(LibraryManager.Library::getFile).
             map(Path::toAbsolutePath).map(Path::normalize).map(Path::toString).collect(Collectors.joining(File.pathSeparator));
-        final String classpath = Paths.get(System.getProperty("java.class.path")).toAbsolutePath() + File.pathSeparator +
-                depsClasspath + File.pathSeparator +
-            minecraftJar.toAbsolutePath().normalize().toString();
+        final String launchClasspath = CLASSPATH_SPLITTER.splitAsStream(System.getProperty("java.class.path"))
+                .map(it -> Paths.get(it).toAbsolutePath().toString())
+                .collect(Collectors.joining(File.pathSeparator));
+        final String classpath = launchClasspath + File.pathSeparator + depsClasspath +
+                File.pathSeparator + minecraftJar.toAbsolutePath().normalize().toString();
         final List<String> gameArgs = Arrays.asList(this.installer.getLauncherConfig().args.split(" "));
 
         this.installer.getLogger().debug("Setting classpath to: " + classpath);

@@ -25,6 +25,9 @@
       <AppenderRef ref="SysOut" level="INFO"/>
       <AppenderRef ref="File" level="INFO"/>
       <AppenderRef ref="DebugFile" level="TRACE"/>
+      <filters>
+        <MarkerFilter marker="CLASSDUMP" onMatch="DENY" onMismatch="NEUTRAL"/>
+      </filters>
     </Root>
   </Loggers>
 </Configuration>
