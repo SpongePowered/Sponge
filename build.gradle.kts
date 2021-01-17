@@ -658,8 +658,18 @@ project("SpongeVanilla") {
         vanillaInstallerConfig("net.sf.jopt-simple:jopt-simple:5.0.3")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-core:2.11.2")
-        vanillaInstallerConfig("org.cadixdev:atlas:0.2.0")
-        vanillaInstallerConfig("org.cadixdev:lorenz-asm:0.5.4")
+        // Override ASM versions, and explicitly declare dependencies so ASM is excluded from the manifest.
+        val asmExclusions = sequenceOf("-commons", "-tree", "-analysis", "")
+                .map { "asm$it" }
+                .onEach {
+            vanillaInstallerConfig("org.ow2.asm:$it:$asmVersion")
+        }.toSet()
+        vanillaInstallerConfig("org.cadixdev:atlas:0.2.0") {
+            asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
+        }
+        vanillaInstallerConfig("org.cadixdev:lorenz-asm:0.5.4") {
+            asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
+        }
         vanillaInstallerImplementation(vanillaInstallerConfig)
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
