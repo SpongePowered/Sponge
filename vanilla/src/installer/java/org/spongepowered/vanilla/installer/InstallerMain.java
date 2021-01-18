@@ -56,7 +56,10 @@ public final class InstallerMain {
     private static final Pattern CLASSPATH_SPLITTER = Pattern.compile(";", Pattern.LITERAL);
 
     static {
-        System.setProperty("log4j.configurationFile", "log4j2_launcher.xml");
+        final String log4jConfig = System.getProperty("log4j.configurationFile");
+        if (log4jConfig == null || log4jConfig.isEmpty()) {
+            System.setProperty("log4j.configurationFile", "log4j2_launcher.xml");
+        }
     }
 
     private final Installer installer;
