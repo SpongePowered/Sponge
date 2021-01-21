@@ -331,6 +331,8 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         final Collection<?> collection = this.getFrom(spongeParameterKey);
         if (collection.size() > 1) {
             throw new IllegalArgumentException("More than one entry was found for " + spongeParameterKey.toString());
+        } else if (collection.isEmpty()) {
+            return Optional.empty();
         }
 
         return Optional.ofNullable((T) collection.iterator().next());
