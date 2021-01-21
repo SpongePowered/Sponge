@@ -445,7 +445,7 @@ public final class SpongeRegistryLoaders {
     public static RegistryLoader<ClientCompletionType> clientCompletionType() {
         return RegistryLoader.of(l -> {
             l.add(ClientCompletionTypes.DECIMAL_NUMBER, k -> new SpongeClientCompletionType(DoubleArgumentType.doubleArg()));
-            l.add(ClientCompletionTypes.JSON, k -> new SpongeClientCompletionType(NBTCompoundTagArgument.compoundTag()));
+            l.add(ClientCompletionTypes.SNBT, k -> new SpongeClientCompletionType(NBTCompoundTagArgument.compoundTag()));
             l.add(ClientCompletionTypes.NONE, k -> SpongeClientCompletionType.NONE);
             l.add(ClientCompletionTypes.RESOURCE_KEY, k -> new SpongeClientCompletionType(ResourceLocationArgument.id()));
             l.add(ClientCompletionTypes.STRING, k -> new SpongeClientCompletionType(StringArgumentType.string()));
