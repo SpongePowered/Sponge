@@ -37,13 +37,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-public final class SpongeCatalogedElementParameterBuilder<T>
+public final class SpongeRegistryEntryParameterBuilder<T>
         implements VariableValueParameters.CatalogedTypeBuilder<T> {
 
     private final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction;
     private final List<String> prefixes = new ArrayList<>();
 
-    public SpongeCatalogedElementParameterBuilder(final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction) {
+    public SpongeRegistryEntryParameterBuilder(final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction) {
         this.registryFunction = registryFunction;
     }
 

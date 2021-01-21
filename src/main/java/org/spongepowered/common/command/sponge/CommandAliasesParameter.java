@@ -31,7 +31,6 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
@@ -42,7 +41,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class CommandAliasesParameter implements ValueParameter<CommandMapping>, ValueCompleter {
+public final class CommandAliasesParameter implements ValueParameter<CommandMapping> {
 
     @Override
     public List<String> complete(final CommandContext context, final String input) {

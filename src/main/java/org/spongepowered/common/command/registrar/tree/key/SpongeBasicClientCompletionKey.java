@@ -30,7 +30,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.AbstractResourceKeyed;
-import org.spongepowered.common.command.registrar.tree.builder.EmptyCommandTreeNode;
+import org.spongepowered.common.command.registrar.tree.builder.BasicCommandTreeNode;
 
 public final class SpongeBasicClientCompletionKey extends AbstractResourceKeyed implements ClientCompletionKey<CommandTreeNode.@NonNull Basic> {
 
@@ -44,6 +44,6 @@ public final class SpongeBasicClientCompletionKey extends AbstractResourceKeyed 
 
     @Override
     public CommandTreeNode.@NonNull Basic createNode() {
-        return new EmptyCommandTreeNode(this, this.argumentType);
+        return new BasicCommandTreeNode(this, this.argumentType);
     }
 }
