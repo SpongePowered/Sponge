@@ -130,8 +130,8 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
         this.shadow$setAllowFriendlyFire(allowFriendlyFire);
     }
 
-    @Override
-    public boolean canSeeFriendlyInvisibles() {
+    @Intrinsic
+    public boolean team$canSeeFriendlyInvisibles() {
         return this.shadow$canSeeFriendlyInvisibles();
     }
 
