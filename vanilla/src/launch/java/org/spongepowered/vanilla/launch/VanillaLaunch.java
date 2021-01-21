@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLStreamHandler;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -94,10 +93,9 @@ public abstract class VanillaLaunch extends Launch {
             final URL classUrl = VanillaLaunch.class.getResource("/" + VanillaLaunch.class.getName().replace('.', '/') + ".class");
 
             Collection<PluginMetadata> read = null;
-            if (classUrl.getProtocol().equals("file")) { // In development environment, we aren't even discovered by ModLauncher for some reason
-                read = PluginMetadataHelper.builder().build().read(VanillaLaunch.class.getResourceAsStream(
-                        "/META-INF/" + JVMPluginResourceLocatorService.DEFAULT_METADATA_FILENAME));
-            } else if (classUrl.getProtocol().equals("jar")) { // In production
+
+            // In production, let's try to ensure we can find our descriptor even if we're not first on the classpath
+            if (classUrl.getProtocol().equals("jar")) {
                 // Extract the path of the underlying jar file, and parse it as a path to normalize it
                 final String[] classUrlSplit = classUrl.getPath().split("!");
                 final Path expectedFile = Paths.get(new URI(classUrlSplit[0]));
@@ -121,9 +119,15 @@ public abstract class VanillaLaunch extends Launch {
                     }
                 }
             }
+
+            if (read == null) { // other measures failed, fall back to directly querying the classpath
+                read = PluginMetadataHelper.builder().build().read(VanillaLaunch.class.getResourceAsStream(
+                        "/META-INF/" + JVMPluginResourceLocatorService.DEFAULT_METADATA_FILENAME));
+            }
             if (read == null) {
                 throw new RuntimeException("Could not determine location for implementation metadata!");
             }
+
             for (final PluginMetadata metadata : read) {
                 this.getPluginManager().addDummyPlugin(new DummyPluginContainer(metadata, gameDirectory, this.getLogger(), this));
             }
