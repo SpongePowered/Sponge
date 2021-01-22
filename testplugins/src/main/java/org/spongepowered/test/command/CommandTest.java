@@ -38,6 +38,7 @@ import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -430,6 +431,20 @@ public final class CommandTest {
 
         event.register(this.plugin, parent, "testterminal");
 
+        // exceptions
+
+        event.register(this.plugin, Command.builder()
+                      .setShortDescription(Component.text("test throwing execptions"))
+                      .child(Command.builder()
+                            .setExecutor(ctx -> {
+                                throw new CommandException(Component.text("Exit via exception"));
+                            })
+                            .build(), "exception")
+                      .child(Command.builder()
+                            .setExecutor(ctx -> {
+                                return CommandResult.error(Component.text("Exit via failed result"));
+                            }).build(), "failedresult")
+                      .build(), "testfailure");
     }
 
     @Listener

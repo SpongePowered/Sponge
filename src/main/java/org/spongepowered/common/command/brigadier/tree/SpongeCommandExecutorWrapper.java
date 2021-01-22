@@ -27,8 +27,10 @@ package org.spongepowered.common.command.brigadier.tree;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.CommandExecutor;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
@@ -47,8 +49,15 @@ public final class SpongeCommandExecutorWrapper implements Command<CommandSource
     public int run(final CommandContext<CommandSource> context) throws CommandSyntaxException {
         final SpongeCommandContext spongeCommandContext = (SpongeCommandContext) context;
         try {
-            return Objects.requireNonNull(this.executor.execute(spongeCommandContext),
-                    "A CommandResult was expected, but the command returned null instead. Report this to the plugin author!").getResult();
+            final CommandResult result = Objects.requireNonNull(this.executor.execute(spongeCommandContext),
+                    "A CommandResult was expected, but the command returned null instead. Report this to the plugin author!");
+            if (!result.isSuccess()) {
+                final Component errorMessage = result.getErrorMessage().orElse(
+                        Component.text("An unknown error occurred while executing the command ")
+                        .append(Component.text(context.getInput())));
+                throw new SpongeCommandSyntaxException(new CommandException(errorMessage), spongeCommandContext);
+            }
+            return result.getResult();
         } catch (final CommandException e) {
             throw new SpongeCommandSyntaxException(e, spongeCommandContext);
         }
