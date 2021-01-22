@@ -64,10 +64,6 @@ public final class SpongeDataContainerValueParameter extends ResourceKeyedArgume
     public Optional<? extends DataContainer> getValue(final Parameter.@NonNull Key<? super DataContainer> parameterKey,
                                                       final ArgumentReader.@NonNull Mutable reader,
                                                       final CommandContext.@NonNull Builder context) throws ArgumentParseException {
-        try {
-            return Optional.of(DataFormats.JSON.get().read(reader.parseJson()));
-        } catch (final IOException e) {
-            throw reader.createException(Component.text(e.getMessage()));
-        }
+        return Optional.of(reader.parseDataContainer());
     }
 }
