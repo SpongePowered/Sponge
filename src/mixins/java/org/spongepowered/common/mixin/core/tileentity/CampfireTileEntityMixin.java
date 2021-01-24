@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
@@ -83,7 +84,12 @@ public abstract class CampfireTileEntityMixin implements CampfireTileEntityBridg
             target = "Lnet/minecraft/inventory/InventoryHelper;dropItemStack(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V"))
     private void impl$assembleCampfireResult(final CallbackInfo ci, final int i, final ItemStack itemStack, final int j,
             final IInventory iInventory, final ItemStack itemStack1) {
+        this.impl$assembleCampfireResult(ci, i, itemStack, iInventory, itemStack1);
+    }
 
+    @Surrogate
+    private void impl$assembleCampfireResult(final CallbackInfo ci, final int i, final ItemStack itemStack,
+            final IInventory iInventory, final ItemStack itemStack1) {
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack1);
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, (Campfire) this,
