@@ -32,6 +32,7 @@ import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.Validate;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.adventure.Audiences;
+import org.spongepowered.common.server.ServerConsoleSystemSubject;
 
 import java.util.List;
 
@@ -75,14 +76,14 @@ public final class TimingsReportListener {
     public void addConsoleIfNeeded(List<Audience> channels) {
         boolean hasConsole = false;
         for (Audience channel: channels) {
-            if (channel instanceof Server) {
+            if (channel instanceof ServerConsoleSystemSubject) {
                 hasConsole = true;
                 break;
             }
         }
 
         if (!hasConsole) {
-            channels.add(Audiences.server());
+            channels.add(Audiences.system());
         }
     }
 
