@@ -85,10 +85,12 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
                     blockTransaction.getOriginalSnapshot()
                 );
             }
-            positions.put(
-                blockTransaction.affectedPosition,
-                blockTransaction.getResultingSnapshot()
-            );
+            if (blockTransaction.getResultingSnapshot() != null) {
+                positions.put(
+                        blockTransaction.affectedPosition,
+                        blockTransaction.getResultingSnapshot()
+                );
+            }
         }
 
         final ImmutableList<BlockTransaction> eventTransactions = positions.asMap().values()

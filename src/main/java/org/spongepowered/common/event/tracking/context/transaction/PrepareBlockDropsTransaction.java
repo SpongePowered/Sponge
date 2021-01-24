@@ -51,7 +51,7 @@ public final class PrepareBlockDropsTransaction extends BlockEventBasedTransacti
 
     @Override
     protected SpongeBlockSnapshot getResultingSnapshot() {
-        return this.originalState;
+        return null;
     }
 
     @Override
