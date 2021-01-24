@@ -29,6 +29,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CampfireCookingRecipe;
 import net.minecraft.tileentity.CampfireTileEntity;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.entity.carrier.Campfire;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
@@ -83,13 +84,13 @@ public abstract class CampfireTileEntityMixin implements CampfireTileEntityBridg
     @Inject(method = "cook", locals = LocalCapture.CAPTURE_FAILEXCEPTION, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/inventory/InventoryHelper;dropItemStack(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V"))
     private void impl$assembleCampfireResult(final CallbackInfo ci, final int i, final ItemStack itemStack, final int j,
-            final IInventory iInventory, final ItemStack itemStack1) {
-        this.impl$assembleCampfireResult(ci, i, itemStack, iInventory, itemStack1);
+            final IInventory iInventory, final ItemStack itemStack1, final BlockPos blockPos) {
+        this.impl$assembleCampfireResult(ci, i, itemStack, iInventory, itemStack1, blockPos);
     }
 
     @Surrogate
     private void impl$assembleCampfireResult(final CallbackInfo ci, final int i, final ItemStack itemStack,
-            final IInventory iInventory, final ItemStack itemStack1) {
+            final IInventory iInventory, final ItemStack itemStack1, final BlockPos blockPos) {
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack1);
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, (Campfire) this,
