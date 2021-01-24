@@ -126,7 +126,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
             } else if (keyType == String.class) {
                 keyDeserializer = key -> Optional.of(key.toString());
             } else if (keyType == UUID.class) {
-                keyDeserializer = key -> Optional.of(key.toString());
+                keyDeserializer = key -> Optional.of(UUID.fromString(key.toString()));
             } else {
                 throw new UnsupportedOperationException("Unsupported map-key type " + keyType);
             }
