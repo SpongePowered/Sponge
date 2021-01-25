@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
@@ -39,7 +38,6 @@ import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.SuggestionProviders;
 import net.minecraft.command.impl.AdvancementCommand;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -51,9 +49,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.command.CommandsBridge;
 import org.spongepowered.common.bridge.command.arguments.CompletionsArgumentTypeBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDispatcher;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeNodePermissionCache;
@@ -71,10 +69,9 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 
 @Mixin(Commands.class)
-public abstract class CommandsMixin {
+public abstract class CommandsMixin implements CommandsBridge {
 
     // @formatter:off
     @Shadow public abstract CommandDispatcher<CommandSource> shadow$getDispatcher();
@@ -89,21 +86,23 @@ public abstract class CommandsMixin {
     private CauseStackManager.StackFrame impl$initFrame = null;
     private final WeakHashMap<ServerPlayerEntity, Map<CommandNode<CommandSource>, List<CommandNode<ISuggestionProvider>>>> impl$playerNodeCache =
             new WeakHashMap<>();
+    private SpongeCommandManager impl$commandManager;
 
-    // We augment the CommandDispatcher with our own methods using a wrapper, so we need to make sure it's replaced here.
+    // We prepare our own dispatcher and commands manager, to redirect registrations to our system
     @Redirect(method = "<init>", at = @At(
             value = "NEW",
             args = "class=com/mojang/brigadier/CommandDispatcher",
             remap = false
     ))
     private CommandDispatcher<CommandSource> impl$useSpongeDispatcher() {
-        return new DelegatingCommandDispatcher();
+        final SpongeCommandManager manager = SpongeBootstrap.getLifecycle().createCommandManager();
+        this.impl$commandManager = manager;
+        return new DelegatingCommandDispatcher(manager.getBrigadierRegistrar());
     }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/command/impl/AdvancementCommand;register(Lcom/mojang/brigadier/CommandDispatcher;)V"))
     private void impl$setupStackFrameOnInit(final CommandDispatcher<CommandSource> dispatcher) {
-        ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).reset();
         this.impl$initFrame = PhaseTracker.getCauseStackManager().pushCauseFrame();
         this.impl$initFrame.pushCause(Launch.getInstance().getMinecraftPlugin());
         AdvancementCommand.register(dispatcher);
@@ -210,7 +209,7 @@ public abstract class CommandsMixin {
             final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode
     ) {
         if (SpongeNodePermissionCache.canUse(
-                rootCommandNode instanceof RootCommandNode, this.shadow$getDispatcher(), commandNode, sourceButTyped)) {
+                rootCommandNode instanceof RootCommandNode, this.impl$commandManager.getDispatcher(), commandNode, sourceButTyped)) {
 
             boolean shouldContinue = true;
             if (commandNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) commandNode).isComplex()) {
@@ -308,8 +307,7 @@ public abstract class CommandsMixin {
             } finally {
                 this.impl$playerNodeCache.remove(playerEntity);
             }
-            for (final CommandNode<ISuggestionProvider> node :
-                    ((SpongeCommandManager) Sponge.getGame().getCommandManager()).getNonBrigadierSuggestions(sourceToUse)) {
+            for (final CommandNode<ISuggestionProvider> node : this.impl$commandManager.getNonBrigadierSuggestions(sourceToUse)) {
                 p_197052_2_.addChild(node);
             }
         }
@@ -323,6 +321,11 @@ public abstract class CommandsMixin {
             return new SuggestionArgumentNode<>((RequiredArgumentBuilder<ISuggestionProvider, ?>) argumentBuilder);
         }
         return argumentBuilder.build();
+    }
+
+    @Override
+    public SpongeCommandManager bridge$commandManager() {
+        return this.impl$commandManager;
     }
 
     private Collection<CommandNode<CommandSource>> impl$getChildrenFromNode(final CommandNode<CommandSource> parentNode) {

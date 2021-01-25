@@ -22,26 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.bridge.command;
 
-import org.spongepowered.api.Server;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.common.scheduler.ServerScheduler;
-import org.spongepowered.common.util.UsernameCache;
-import org.spongepowered.common.world.server.SpongeWorldManager;
-import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 
-public interface SpongeServer extends SpongeEngine, Server {
+public interface CommandsBridge {
 
-    @Override
-    ServerScheduler getScheduler();
-    
-    @Override
-    SpongeWorldManager getWorldManager();
-
-    SpongePlayerDataManager getPlayerDataManager();
-
-    UsernameCache getUsernameCache();
-
-    SpongeCommandManager getCommandManager();
+    SpongeCommandManager bridge$commandManager();
 }

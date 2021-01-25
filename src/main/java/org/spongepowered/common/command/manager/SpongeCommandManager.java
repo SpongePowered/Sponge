@@ -30,7 +30,6 @@ import com.google.common.collect.Multimap;
 import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -47,12 +46,14 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -60,6 +61,7 @@ import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
@@ -73,6 +75,8 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.util.ComponentMessageException;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.command.CommandsBridge;
+import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
@@ -104,8 +108,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Singleton
-public final class SpongeCommandManager implements CommandManager {
+public final class SpongeCommandManager implements CommandManager.Mutable {
 
     private static final boolean ALWAYS_PRINT_STACKTRACES = System.getProperty("sponge.command.alwaysPrintStacktraces") != null;
 
@@ -115,14 +118,25 @@ public final class SpongeCommandManager implements CommandManager {
     private final Multimap<SpongeCommandMapping, String> inverseCommandMappings = HashMultimap.create();
     private final Multimap<PluginContainer, SpongeCommandMapping> pluginToCommandMap = HashMultimap.create();
     private final LinkedHashMap<SpongeCommandMapping, RootCommandTreeNode> mappingToSuggestionNodes = new LinkedHashMap<>();
+    private final Set<CommandRegistrar<?>> knownRegistrars = new HashSet<>();
+    private BrigadierCommandRegistrar brigadierRegistrar;
 
-    private boolean isResetting = false;
-    private boolean hasStarted = false;
+    public static SpongeCommandManager get(final MinecraftServer server) {
+        return ((CommandsBridge) server.getCommands()).bridge$commandManager();
+    }
 
     @Inject
     public SpongeCommandManager(final Game game, final Provider<SpongeCommand> spongeCommand) {
         this.game = game;
         this.spongeCommand = spongeCommand;
+    }
+
+    public SpongeCommandDispatcher getDispatcher() {
+        return this.brigadierRegistrar.getDispatcher();
+    }
+
+    public BrigadierCommandRegistrar getBrigadierRegistrar() {
+        return this.brigadierRegistrar;
     }
 
     @Override
@@ -181,6 +195,14 @@ public final class SpongeCommandManager implements CommandManager {
         // Check it's been registered:
         if (namespacedAlias.contains(" ") || otherAliases.stream().anyMatch(x -> x.contains(" ") || x.contains(":"))) {
                 throw new CommandFailedRegistrationException("Aliases may not contain spaces or colons.");
+        }
+
+        if (!this.knownRegistrars.contains(registrar)) {
+            throw new IllegalArgumentException(String.format("Plugin '%s' is trying to register command %s with unknown registrar %s",
+                    container.getMetadata().getId(),
+                    namespacedAlias,
+                    registrar
+            ));
         }
 
         // We have a Sponge command, so let's start by checking to see what
@@ -245,11 +267,6 @@ public final class SpongeCommandManager implements CommandManager {
     @NonNull
     public Optional<CommandMapping> getCommandMapping(final String alias) {
         return Optional.ofNullable(this.commandMappings.get(alias.toLowerCase()));
-    }
-
-    @Override
-    public boolean isResetting() {
-        return this.isResetting;
     }
 
     @Override
@@ -493,49 +510,65 @@ public final class SpongeCommandManager implements CommandManager {
 
     public void init() {
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+        final Set<TypeToken<?>> usedTokens = new HashSet<>();
+        Sponge.getGame().registries().registry(RegistryTypes.COMMAND_REGISTRAR_TYPE).streamEntries().forEach(entry -> {
+            final CommandRegistrarType<?> type = entry.value();
+            // someone's gonna do it, let's not let them take us down.
+            final TypeToken<?> handledType = type.handledType();
+            if (handledType == null) {
+                SpongeCommon.getLogger().error("Registrar '{}' did not provide a handledType, skipping...", type.getClass());
+            } else if (usedTokens.add(handledType)) { // we haven't done it yet
+                // Add the command registrar
+                final CommandRegistrar<?> registrar = type.create(this);
+                this.knownRegistrars.add(registrar);
+                if (registrar instanceof BrigadierCommandRegistrar) {
+                    this.brigadierRegistrar = (BrigadierCommandRegistrar) registrar;
+                } else if (registrar instanceof SpongeParameterizedCommandRegistrar) {
+                    this.registerInternalCommands((SpongeParameterizedCommandRegistrar) registrar);
+                }
+
+                this.game.getEventManager().post(this.createEvent(cause, this.game, registrar));
+            } else {
+                SpongeCommon.getLogger()
+                        .warn("Command type '{}' has already been collected, skipping request from {}",
+                                handledType.toString(),
+                                type.getClass());
+            }
+        });
+        if (this.brigadierRegistrar == null) {
+            throw new IllegalStateException("Brigadier registrar was not detected");
+        }
+        this.hasStarted = true;
+    }
+
+    private void registerInternalCommands(final CommandRegistrar<Parameterized> registrar) {
         try {
-            SpongeParameterizedCommandRegistrar.INSTANCE.register(
+            registrar.register(
                     Launch.getInstance().getCommonPlugin(),
                     this.spongeCommand.get().createSpongeCommand(),
                     "sponge"
-            );
+                                                                 );
         } catch (final CommandFailedRegistrationException ex) {
             throw new RuntimeException("Failed to create root Sponge command!", ex);
         }
         try {
             final PaginationService paginationService = Sponge.getServiceProvider().paginationService();
             if (paginationService instanceof SpongePaginationService) {
-                SpongeParameterizedCommandRegistrar.INSTANCE.register(
+                registrar.register(
                         Launch.getInstance().getCommonPlugin(),
                         ((SpongePaginationService) paginationService).createPaginationCommand(),
                         "pagination", "page"
-                );
+                                                                     );
             }
         } catch (final CommandFailedRegistrationException ex) {
             throw new RuntimeException("Failed to create pagination command!", ex);
         }
-        final Set<TypeToken<?>> usedTokens = new HashSet<>();
-        Sponge.getGame().registries().registry(RegistryTypes.COMMAND_REGISTRAR).streamEntries().forEach(entry -> {
-            final CommandRegistrar<?> registrar = entry.value();
-            // someone's gonna do it, let's not let them take us down.
-            final TypeToken<?> handledType = registrar.handledType();
-            if (handledType == null) {
-                SpongeCommon.getLogger().error("Registrar '{}' did not provide a handledType, skipping...", registrar.getClass());
-            } else if (usedTokens.add(handledType)) { // we haven't done it yet
-                this.game.getEventManager().post(this.createEvent(cause, this.game, registrar));
-            } else {
-                SpongeCommon.getLogger()
-                        .warn("Command type '{}' has already been collected, skipping request from {}",
-                                handledType.toString(),
-                                registrar.getClass());
-            }
-        });
-        SpongeParameterizedCommandRegistrar.INSTANCE.register(
+
+        // TODO: this used to be done after the event, do we care?
+        registrar.register(
                 Launch.getInstance().getCommonPlugin(),
                 SpongeAdventure.CALLBACK_COMMAND.createCommand(),
                 "callback");
-        BrigadierCommandRegistrar.INSTANCE.completeVanillaRegistration();
-        this.hasStarted = true;
     }
 
     public Collection<CommandNode<ISuggestionProvider>> getNonBrigadierSuggestions(final CommandCause cause) {
@@ -560,17 +593,6 @@ public final class SpongeCommandManager implements CommandManager {
             }
         }
         return suggestions;
-    }
-
-    public void reset() {
-        if (this.hasStarted) {
-            this.isResetting = true;
-            Sponge.getGame().registries().registry(RegistryTypes.COMMAND_REGISTRAR).streamEntries().forEach(entry -> entry.value().reset());
-            this.commandMappings.clear();
-            this.inverseCommandMappings.clear();
-            this.pluginToCommandMap.clear();
-            this.isResetting = false;
-        }
     }
 
     public Collection<String> getAliasesThatStartWithForCause(final CommandCause cause, final String startingText) {
@@ -611,5 +633,4 @@ public final class SpongeCommandManager implements CommandManager {
         }
         return Component.text(message.getString());
     }
-
 }

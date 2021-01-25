@@ -26,7 +26,7 @@ package org.spongepowered.common.command.registrar;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryScope;
@@ -35,26 +35,26 @@ import org.spongepowered.api.registry.RegistryTypes;
 
 @SuppressWarnings("unused")
 @RegistryScopes(scopes = RegistryScope.GAME)
-public final class SpongeCommandRegistrars {
+public final class SpongeCommandRegistrarTypes {
 
     // @formatter:off
 
     // SORTFIELDS:ON
 
-    public static final DefaultedRegistryReference<CommandRegistrar<?>> BRIGADIER = SpongeCommandRegistrars.key(ResourceKey.sponge("brigadier"));
+    public static final DefaultedRegistryReference<CommandRegistrarType<?>> BRIGADIER = SpongeCommandRegistrarTypes.key(ResourceKey.sponge("brigadier"));
 
-    public static final DefaultedRegistryReference<CommandRegistrar<?>> MANAGED = SpongeCommandRegistrars.key(ResourceKey.sponge("managed"));
+    public static final DefaultedRegistryReference<CommandRegistrarType<?>> MANAGED = SpongeCommandRegistrarTypes.key(ResourceKey.sponge("managed"));
 
-    public static final DefaultedRegistryReference<CommandRegistrar<?>> RAW = SpongeCommandRegistrars.key(ResourceKey.sponge("raw"));
+    public static final DefaultedRegistryReference<CommandRegistrarType<?>> RAW = SpongeCommandRegistrarTypes.key(ResourceKey.sponge("raw"));
 
     // SORTFIELDS:OFF
 
     // @formatter:on
 
-    private SpongeCommandRegistrars() {
+    private SpongeCommandRegistrarTypes() {
     }
 
-    private static DefaultedRegistryReference<CommandRegistrar<?>> key(final ResourceKey location) {
-        return RegistryKey.of(RegistryTypes.COMMAND_REGISTRAR, location).asDefaultedReference(() -> Sponge.getGame().registries());
+    private static DefaultedRegistryReference<CommandRegistrarType<?>> key(final ResourceKey location) {
+        return RegistryKey.of(RegistryTypes.COMMAND_REGISTRAR_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
     }
 }

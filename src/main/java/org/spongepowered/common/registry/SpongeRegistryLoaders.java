@@ -59,7 +59,7 @@ import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
 import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedValueParameters;
-import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKeys;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
@@ -170,7 +170,7 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeTargetB
 import org.spongepowered.common.command.parameter.managed.standard.SpongeTargetEntityValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeUserValueParameter;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
-import org.spongepowered.common.command.registrar.SpongeCommandRegistrars;
+import org.spongepowered.common.command.registrar.SpongeCommandRegistrarTypes;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeRawCommandRegistrar;
 import org.spongepowered.common.command.registrar.tree.key.SpongeAmountClientCompletionKey;
@@ -453,11 +453,11 @@ public final class SpongeRegistryLoaders {
         });
     }
 
-    public static RegistryLoader<CommandRegistrar<?>> commandRegistrar() {
+    public static RegistryLoader<CommandRegistrarType<?>> commandRegistrarType() {
         return RegistryLoader.of(l -> {
-            l.add(SpongeCommandRegistrars.BRIGADIER, () -> BrigadierCommandRegistrar.INSTANCE);
-            l.add(SpongeCommandRegistrars.MANAGED, () -> SpongeParameterizedCommandRegistrar.INSTANCE);
-            l.add(SpongeCommandRegistrars.RAW, () -> SpongeRawCommandRegistrar.INSTANCE);
+            l.add(SpongeCommandRegistrarTypes.BRIGADIER, () -> BrigadierCommandRegistrar.TYPE);
+            l.add(SpongeCommandRegistrarTypes.MANAGED, () -> SpongeParameterizedCommandRegistrar.TYPE);
+            l.add(SpongeCommandRegistrarTypes.RAW, () -> SpongeRawCommandRegistrar.TYPE);
         });
     }
 

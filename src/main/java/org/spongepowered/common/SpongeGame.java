@@ -69,7 +69,6 @@ public final class SpongeGame implements Game {
     private final PluginConfigManager configManager;
     private final ChannelRegistry channelRegistry;
     private final MetricsConfigManager metricsConfigManager;
-    private final CommandManager commandManager;
     private final SqlManager sqlManager;
     private final ServiceProvider.GameScoped serviceProvider;
 
@@ -85,7 +84,7 @@ public final class SpongeGame implements Game {
     public SpongeGame(final Platform platform, final GameRegistry registry, final BuilderProvider builderProvider,
             final FactoryProvider factoryProvider, final DataManager dataManager, final PluginManager pluginManager,
             final EventManager eventManager, final AssetManager assetManager, final PluginConfigManager configManager,
-            final ChannelRegistry channelRegistry, final MetricsConfigManager metricsConfigManager, final CommandManager commandManager,
+            final ChannelRegistry channelRegistry, final MetricsConfigManager metricsConfigManager,
             final SqlManager sqlManager, final ServiceProvider.GameScoped serviceProvider) {
 
         this.platform = platform;
@@ -99,7 +98,6 @@ public final class SpongeGame implements Game {
         this.configManager = configManager;
         this.channelRegistry = channelRegistry;
         this.metricsConfigManager = metricsConfigManager;
-        this.commandManager = commandManager;
         this.sqlManager = sqlManager;
         this.serviceProvider = serviceProvider;
 
@@ -173,11 +171,6 @@ public final class SpongeGame implements Game {
     @Override
     public MetricsConfigManager getMetricsConfigManager() {
         return this.metricsConfigManager;
-    }
-
-    @Override
-    public CommandManager getCommandManager() {
-        return this.commandManager;
     }
 
     @Override

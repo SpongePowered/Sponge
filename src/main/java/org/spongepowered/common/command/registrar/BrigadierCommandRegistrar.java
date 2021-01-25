@@ -38,20 +38,18 @@ import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
+import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
-import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongePermissionWrappedLiteralCommandNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -68,14 +66,19 @@ import java.util.stream.Collectors;
  */
 public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
 
-    private static final TypeToken<LiteralArgumentBuilder<CommandSource>> COMMAND_TYPE = new TypeToken<LiteralArgumentBuilder<CommandSource>>() {};
+    public static final CommandRegistrarType<LiteralArgumentBuilder<CommandSource>> TYPE =
+            new SpongeCommandRegistrarType<>(
+                    new TypeToken<LiteralArgumentBuilder<CommandSource>>() {},
+                    BrigadierCommandRegistrar::new
+            );
 
-    public static final BrigadierCommandRegistrar INSTANCE = new BrigadierCommandRegistrar();
+    private final SpongeCommandManager manager;
+    private SpongeCommandDispatcher dispatcher;
 
-    private boolean hasVanillaRegistered;
-    private final List<LiteralCommandNode<CommandSource>> vanilla = new ArrayList<>();
-
-    private SpongeCommandDispatcher dispatcher = new SpongeCommandDispatcher();
+    public BrigadierCommandRegistrar(final CommandManager.Mutable manager) {
+        this.manager = (SpongeCommandManager) manager;
+        this.dispatcher = new SpongeCommandDispatcher(this.manager);
+    }
 
     // For mods and others that use this. We get the plugin container from the CauseStack
     // TODO: Make sure this is valid. For Forge, I suspect we'll have done this in a context of some sort.
@@ -84,12 +87,6 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         final PluginContainer container = PhaseTracker.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
                 .orElseThrow(() -> new IllegalStateException("Cannot register command without knowing its origin."));
 
-        if (!this.hasVanillaRegistered && Launch.getInstance().getMinecraftPlugin() == container) {
-            final LiteralCommandNode<CommandSource> vanillaCommand = this.applyNamespace(container, command, false);
-            this.vanilla.add(vanillaCommand);
-            return vanillaCommand;
-        }
-
         return this.registerInternal(this,
                 container,
                 this.applyNamespace(container, command, false),
@@ -97,23 +94,9 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
                 true).getSecond();
     }
 
-    public void completeVanillaRegistration() {
-        // At this point, let vanilla through anyway, if they haven't come through yet
-        // then they can register anyway.
-        this.hasVanillaRegistered = true;
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final PluginContainer container = Launch.getInstance().getMinecraftPlugin();
-            frame.pushCause(container);
-            for (final LiteralCommandNode<CommandSource> node : this.vanilla) {
-                this.registerInternal(this, container, node, new String[0], true);
-            }
-        }
-        this.vanilla.clear();
-    }
-
     @Override
-    public TypeToken<LiteralArgumentBuilder<CommandSource>> handledType() {
-        return BrigadierCommandRegistrar.COMMAND_TYPE;
+    public @NonNull CommandRegistrarType<LiteralArgumentBuilder<CommandSource>> type() {
+        return TYPE;
     }
 
     @Override
@@ -144,10 +127,6 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         return this.registerInternal(this, container, this.applyNamespace(container, command, true), secondaryAliases, false);
     }
 
-    void registerFromSpongeRegistrar(final LiteralCommandNode<CommandSource> command) {
-        this.dispatcher.register(command);
-    }
-
     private Tuple<CommandMapping, LiteralCommandNode<CommandSource>> registerInternal(
             final CommandRegistrar<?> registrar,
             final PluginContainer container,
@@ -157,7 +136,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
 
         // Get the builder and the first literal.
         final String requestedAlias = namespacedCommand.getLiteral();
-        final Optional<CommandMapping> existingMapping = SpongeCommon.getGame().getCommandManager().getCommandMapping(requestedAlias);
+        final Optional<CommandMapping> existingMapping = this.manager.getCommandMapping(requestedAlias);
         if (allowDuplicates && existingMapping.isPresent()) {
             // then we just let it go, the requirements will be of the old node.
             this.dispatcher.register(namespacedCommand);
@@ -165,7 +144,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         }
 
         // This will throw an error if there is an issue.
-        final CommandMapping mapping = ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).registerNamespacedAlias(
+        final CommandMapping mapping = this.manager.registerNamespacedAlias(
                         registrar,
                         container,
                         namespacedCommand,
@@ -241,14 +220,6 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
 
     public SpongeCommandDispatcher getDispatcher() {
         return this.dispatcher;
-    }
-
-    @Override
-    public void reset() {
-        if (SpongeCommon.getGame().getCommandManager().isResetting()) {
-            this.dispatcher = new SpongeCommandDispatcher();
-            this.hasVanillaRegistered = false;
-        }
     }
 
     private String createCommandString(final String command, final String argument) {

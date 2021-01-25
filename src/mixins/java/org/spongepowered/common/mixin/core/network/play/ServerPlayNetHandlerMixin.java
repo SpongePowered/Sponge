@@ -108,7 +108,6 @@ import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
-import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.data.value.ImmutableSpongeListValue;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -165,7 +164,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         final String rawCommand = packet.getCommand();
         final String[] command = this.impl$extractCommandString(rawCommand);
         final CommandCause cause = CommandCause.create();
-        final SpongeCommandManager manager = ((SpongeCommandManager) Sponge.getCommandManager());
+        final SpongeCommandManager manager = SpongeCommandManager.get(this.server);
         if (!rawCommand.contains(" ")) {
             final SuggestionsBuilder builder = new SuggestionsBuilder(command[0], 0);
             if (command[0].isEmpty()) {
@@ -207,7 +206,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     private ParseResults<CommandSource> impl$informParserThisIsASuggestionCheck(final CommandDispatcher<CommandSource> commandDispatcher,
             final StringReader command,
             final Object source) {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().parse(command, (CommandSource) source, true);
+        return SpongeCommandManager.get(this.server).getDispatcher().parse(command, (CommandSource) source, true);
     }
 
     /**

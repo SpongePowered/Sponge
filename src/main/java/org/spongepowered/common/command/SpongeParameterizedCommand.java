@@ -38,8 +38,10 @@ import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -157,7 +159,8 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     private SpongeCommandDispatcher getCachedDispatcher() {
         if (this.cachedDispatcher == null) {
-            this.cachedDispatcher = new SpongeCommandDispatcher();
+            // TODO: this is wrong -- need to clear out the cached dispatcher when the registrar we are in gets invalidated maybe?
+            this.cachedDispatcher = new SpongeCommandDispatcher(SpongeCommandManager.get(SpongeCommon.getServer()));
             this.cachedDispatcher.register(this.buildWithAlias("command"));
         }
         return this.cachedDispatcher;

@@ -40,7 +40,7 @@ public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> ex
     private final R registrar;
 
     public RegisterCommandEventImpl(final Cause cause, final Game game, final R registrar) {
-        super(cause, game, registrar.handledType());
+        super(cause, game, registrar.type().handledType());
         this.registrar = registrar;
     }
 
@@ -53,6 +53,11 @@ public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> ex
                 this.registrar.register(Objects.requireNonNull(container, "container"), Objects.requireNonNull(command, "command"),
                         Objects.requireNonNull(alias, "alias"), Objects.requireNonNull(aliases, "aliases"))
         );
+    }
+
+    @Override
+    public @NonNull CommandRegistrar<C> registrar() {
+        return this.registrar;
     }
 
     @Override

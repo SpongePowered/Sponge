@@ -24,24 +24,23 @@
  */
 package org.spongepowered.common.command.registrar;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
+import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.common.command.SpongeParameterizedCommand;
+import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.plugin.PluginContainer;
@@ -59,13 +58,25 @@ import java.util.stream.Collectors;
 
 public final class SpongeParameterizedCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<Command.Parameterized> {
 
+    public static final CommandRegistrarType<Command.Parameterized> TYPE = new SpongeCommandRegistrarType<>(
+            Command.Parameterized.class,
+            SpongeParameterizedCommandRegistrar::new
+    );
+
+    private final CommandManager.Mutable commandManager;
     private final Map<CommandMapping, Command.Parameterized> commandMap = new HashMap<>();
-    private static final TypeToken<Command.Parameterized> COMMAND_TYPE = TypeToken.get(Command.Parameterized.class);
-    public static final SpongeParameterizedCommandRegistrar INSTANCE = new SpongeParameterizedCommandRegistrar();
+
+    public SpongeParameterizedCommandRegistrar(final CommandManager.Mutable commandManager) {
+        this.commandManager = commandManager;
+    }
 
     @Override
-    public TypeToken<Command.Parameterized> handledType() {
-        return SpongeParameterizedCommandRegistrar.COMMAND_TYPE;
+    public @NonNull CommandRegistrarType<Command.Parameterized> type() {
+        return TYPE;
+    }
+
+    private SpongeCommandManager commandManager() {
+        return (SpongeCommandManager) this.commandManager;
     }
 
     @Override
@@ -82,7 +93,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
         aliases.addAll(Arrays.asList(secondaryAliases));
 
         // This will throw an error if there is an issue.
-        final CommandMapping mapping = ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).registerAliasWithNamespacing(
+        final CommandMapping mapping = this.commandManager().registerAliasWithNamespacing(
                 this,
                 container,
                 namespacedCommand,
@@ -90,7 +101,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
                 null
         );
 
-        this.createNode(mapping, command).forEach(BrigadierCommandRegistrar.INSTANCE::registerFromSpongeRegistrar);
+        this.createNode(mapping, command).forEach(this.commandManager().getDispatcher()::register);
         this.commandMap.put(mapping, command);
         return mapping;
     }
@@ -103,9 +114,10 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
             @NonNull final String command,
             @NonNull final String arguments) throws CommandException {
         try {
+            final SpongeCommandDispatcher dispatcher = this.commandManager().getDispatcher();
             return CommandResult.builder().setResult(
-                    this.getDispatcher().execute(
-                            this.getDispatcher().parse(this.createCommandString(command, arguments), (CommandSource) cause))).build();
+                    dispatcher.execute(
+                            dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause))).build();
         } catch (final SpongeCommandSyntaxException ex) {
             throw ex.getCause();
         } catch (final CommandSyntaxException e) {
@@ -122,9 +134,12 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
             @NonNull final String command,
             @NonNull final String arguments) {
         try {
-            return this.getDispatcher().getCompletionSuggestions(
-                    this.getDispatcher().parse(this.createCommandString(command, arguments), (CommandSource) cause)
-            ).join().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
+            final SpongeCommandDispatcher dispatcher = this.commandManager().getDispatcher();
+            return dispatcher.getCompletionSuggestions(
+                    dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause)
+            ).join().getList().stream()
+                    .map(Suggestion::getText)
+                    .collect(Collectors.toList());
         } catch (final Exception e) {
             return Collections.emptyList();
         }
@@ -161,14 +176,4 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
         return ((SpongeParameterizedCommand) command).buildWithAliases(mapping.getAllAliases());
     }
 
-    protected CommandDispatcher<CommandSource> getDispatcher() {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher();
-    }
-
-    @Override
-    public void reset() {
-        if (Sponge.getCommandManager().isResetting()) {
-            this.commandMap.clear();
-        }
-    }
 }
