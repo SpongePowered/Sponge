@@ -43,6 +43,7 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.util.ComponentMessageThrowable;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -356,8 +357,8 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
             this.prettyPrintThrowableError(thr, command, args, cause);
 
             Component excBuilder;
-            if (thr instanceof ComponentMessageException) {
-                final Component text = ((ComponentMessageException) thr).componentMessage();
+            if (thr instanceof ComponentMessageThrowable) {
+                final Component text = ((ComponentMessageThrowable) thr).componentMessage();
                 excBuilder = text == null ? Component.text("null") : text;
             } else {
                 excBuilder = Component.text(String.valueOf(thr.getMessage()));
@@ -538,7 +539,6 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
         if (this.brigadierRegistrar == null) {
             throw new IllegalStateException("Brigadier registrar was not detected");
         }
-        this.hasStarted = true;
     }
 
     private void registerInternalCommands(final CommandRegistrar<Parameterized> registrar) {

@@ -38,7 +38,6 @@ import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
@@ -63,7 +62,8 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     private final Predicate<CommandCause> executionRequirements;
     @Nullable private final CommandExecutor executor;
     private final boolean isTerminal;
-    @Nullable private SpongeCommandDispatcher cachedDispatcher;
+    private @Nullable SpongeCommandManager commandManager;
+    private @Nullable SpongeCommandDispatcher cachedDispatcher;
 
     SpongeParameterizedCommand(
             final List<Parameter.Subcommand> subcommands,
@@ -82,6 +82,11 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
         this.executor = executor;
         this.flags = flags;
         this.isTerminal = isTerminal;
+    }
+
+    public void setCommandManager(final SpongeCommandManager commandManager) {
+        this.cachedDispatcher = null;
+        this.commandManager = commandManager;
     }
 
     @Override
@@ -159,8 +164,10 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     private SpongeCommandDispatcher getCachedDispatcher() {
         if (this.cachedDispatcher == null) {
-            // TODO: this is wrong -- need to clear out the cached dispatcher when the registrar we are in gets invalidated maybe?
-            this.cachedDispatcher = new SpongeCommandDispatcher(SpongeCommandManager.get(SpongeCommon.getServer()));
+            if (this.commandManager == null) {
+                throw new IllegalStateException("Completions cannot be requested for an unregistered parameterized command");
+            }
+            this.cachedDispatcher = new SpongeCommandDispatcher(this.commandManager);
             this.cachedDispatcher.register(this.buildWithAlias("command"));
         }
         return this.cachedDispatcher;

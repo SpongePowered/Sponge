@@ -102,6 +102,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
         );
 
         this.createNode(mapping, command).forEach(this.commandManager().getDispatcher()::register);
+        ((SpongeParameterizedCommand) command).setCommandManager(this.commandManager());
         this.commandMap.put(mapping, command);
         return mapping;
     }
