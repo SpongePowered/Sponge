@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.inventory.fabric;
 
-import net.minecraft.inventory.IInventory;
-
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.world.Container;
 
 public class InventoryTranslators {
     private static final Map<Class<?>, InventoryTranslator<?>> fabricTranslators = new HashMap<>();
 
     static {
-        InventoryTranslators.register(IInventory.class, new IInventoryTranslator());
+        InventoryTranslators.register(Container.class, new IInventoryTranslator());
     }
 
     public static void register(Class<?> inventoryInterface, InventoryTranslator<?> translator) {

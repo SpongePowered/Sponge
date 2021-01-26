@@ -25,30 +25,6 @@
 package org.spongepowered.common.entity.projectile;
 
 import com.google.common.collect.Maps;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.item.EnderPearlEntity;
-import net.minecraft.entity.item.ExperienceBottleEntity;
-import net.minecraft.entity.passive.horse.LlamaEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ArrowEntity;
-import net.minecraft.entity.projectile.DragonFireballEntity;
-import net.minecraft.entity.projectile.EggEntity;
-import net.minecraft.entity.projectile.FireballEntity;
-import net.minecraft.entity.projectile.FireworkRocketEntity;
-import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.entity.projectile.LlamaSpitEntity;
-import net.minecraft.entity.projectile.PotionEntity;
-import net.minecraft.entity.projectile.SmallFireballEntity;
-import net.minecraft.entity.projectile.SnowballEntity;
-import net.minecraft.entity.projectile.SpectralArrowEntity;
-import net.minecraft.entity.projectile.ThrowableEntity;
-import net.minecraft.entity.projectile.WitherSkullEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.tileentity.DispenserTileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -80,6 +56,23 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.entity.projectile.ThrownEgg;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
+import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
+import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 
 public final class ProjectileUtil {
 
@@ -125,17 +118,17 @@ public final class ProjectileUtil {
     }
 
     // From ThrowableEntity constructor
-    private static void configureThrowable(final ThrowableEntity entity) {
-        final double x = entity.getX() - MathHelper.cos(entity.yRot / 180.0F * (float) Math.PI) * 0.16F;
+    private static void configureThrowable(final ThrowableProjectile entity) {
+        final double x = entity.getX() - Mth.cos(entity.yRot / 180.0F * (float) Math.PI) * 0.16F;
         final double y = entity.getY() - 0.1D;
-        final double z = entity.getZ() - MathHelper.sin(entity.yRot / 180.0F * (float) Math.PI) * 0.16F;
+        final double z = entity.getZ() - Mth.sin(entity.yRot / 180.0F * (float) Math.PI) * 0.16F;
         entity.setPos(x, y, z);
         final float f = 0.4F;
-        final double motionX = -MathHelper.sin(entity.yRot / 180.0F * (float) Math.PI)
-                * MathHelper.cos(entity.xRot / 180.0F * (float) Math.PI) * f;
-        final double motionZ = MathHelper.cos(entity.yRot / 180.0F * (float) Math.PI)
-                * MathHelper.cos(entity.xRot / 180.0F * (float) Math.PI) * f;
-        final double motionY = -MathHelper.sin((entity.xRot) / 180.0F * (float) Math.PI) * f;
+        final double motionX = -Mth.sin(entity.yRot / 180.0F * (float) Math.PI)
+                * Mth.cos(entity.xRot / 180.0F * (float) Math.PI) * f;
+        final double motionZ = Mth.cos(entity.yRot / 180.0F * (float) Math.PI)
+                * Mth.cos(entity.xRot / 180.0F * (float) Math.PI) * f;
+        final double motionY = -Mth.sin((entity.xRot) / 180.0F * (float) Math.PI) * f;
         entity.setDeltaMovement(motionX, motionY, motionZ);
     }
 
@@ -162,8 +155,8 @@ public final class ProjectileUtil {
     static <P extends Projectile> Optional<P> defaultLaunch(final ProjectileSource source,
             final EntityType<P> projectileType, final ServerLocation loc) {
         final Entity projectile = loc.getWorld().createEntity(projectileType, loc.getPosition());
-        if (projectile instanceof ThrowableEntity) {
-            ProjectileUtil.configureThrowable((ThrowableEntity) projectile);
+        if (projectile instanceof ThrowableProjectile) {
+            ProjectileUtil.configureThrowable((ThrowableProjectile) projectile);
         }
         return ProjectileUtil.doLaunch(loc.getWorld(), (P) projectile);
     }
@@ -184,7 +177,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Arrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final ArrowEntity arrow = new ArrowEntity(source.level, source);
+                final net.minecraft.world.entity.projectile.Arrow arrow = new net.minecraft.world.entity.projectile.Arrow(source.level, source);
                 arrow.shoot(source.xRot, source.yRot, 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.getWorld(), (Arrow) arrow);
             }
@@ -194,7 +187,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<SpectralArrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final SpectralArrowEntity arrow = new SpectralArrowEntity(source.level, source);
+                final net.minecraft.world.entity.projectile.SpectralArrow arrow = new net.minecraft.world.entity.projectile.SpectralArrow(source.level, source);
                 arrow.shoot(source.xRot, source.yRot, 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.getWorld(), (SpectralArrow) arrow);
             }
@@ -203,7 +196,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Egg> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final EggEntity egg = new EggEntity(source.level, source);
+                final ThrownEgg egg = new ThrownEgg(source.level, source);
                 egg.shoot(source.xRot, source.yRot, 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.getWorld(), (Egg) egg);
             }
@@ -213,8 +206,8 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<SmallFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.util.math.vector.Vector3d lookVec = source.getViewVector(1);
-                final SmallFireballEntity fireball = new SmallFireballEntity(source.level, source,
+                final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
+                final net.minecraft.world.entity.projectile.SmallFireball fireball = new net.minecraft.world.entity.projectile.SmallFireball(source.level, source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.getWorld(), (SmallFireball) fireball);
@@ -233,7 +226,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Snowball> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final SnowballEntity snowball = new SnowballEntity(source.level, source);
+                final net.minecraft.world.entity.projectile.Snowball snowball = new net.minecraft.world.entity.projectile.Snowball(source.level, source);
                 snowball.shoot(source.xRot, source.yRot, 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.getWorld(), (Snowball) snowball);
             }
@@ -243,7 +236,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<ExperienceBottle> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final ExperienceBottleEntity expBottle = new ExperienceBottleEntity(source.level, source);
+                final ThrownExperienceBottle expBottle = new ThrownExperienceBottle(source.level, source);
                 expBottle.shoot(source.xRot, source.yRot, -20.0F, 0.7F, 0);
                 return ProjectileUtil.doLaunch(loc.getWorld(), (ExperienceBottle) expBottle);
             }
@@ -254,7 +247,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<EnderPearl> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final EnderPearlEntity pearl = new EnderPearlEntity(source.level, source);
+                final ThrownEnderpearl pearl = new ThrownEnderpearl(source.level, source);
                 pearl.shoot(source.xRot, source.yRot, 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.getWorld(), (EnderPearl) pearl);
             }
@@ -263,8 +256,8 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<ExplosiveFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.util.math.vector.Vector3d lookVec = source.getViewVector(1);
-                final FireballEntity fireball = new FireballEntity(source.level, source,
+                final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
+                final LargeFireball fireball = new LargeFireball(source.level, source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.getWorld(), (ExplosiveFireball) fireball);
@@ -273,14 +266,14 @@ public final class ProjectileUtil {
             @Override
             public Optional<ExplosiveFireball> createProjectile(final ProjectileSource source, final EntityType<ExplosiveFireball> projectileType,
                     final ServerLocation loc) {
-                if (!(source instanceof DispenserTileEntity)) {
+                if (!(source instanceof DispenserBlockEntity)) {
                     return super.createProjectile(source, projectileType, loc);
                 }
-                final DispenserTileEntity dispenser = (DispenserTileEntity) source;
+                final DispenserBlockEntity dispenser = (DispenserBlockEntity) source;
                 final Direction enumfacing = DispenserSourceLogic.getFacing(dispenser);
-                final LivingEntity thrower = new ArmorStandEntity(dispenser.getLevel(), loc.getX() + enumfacing.getStepX(),
+                final LivingEntity thrower = new ArmorStand(dispenser.getLevel(), loc.getX() + enumfacing.getStepX(),
                         loc.getY() + enumfacing.getStepY(), loc.getZ() + enumfacing.getStepZ());
-                final FireballEntity fireball = new FireballEntity(dispenser.getLevel(), thrower, 0, 0, 0);
+                final LargeFireball fireball = new LargeFireball(dispenser.getLevel(), thrower, 0, 0, 0);
                 // Acceleration is set separately because the constructor applies a random value to it
                 // As for 0.1;  it is a reasonable default value
                 fireball.xPower = enumfacing.getStepX() * 0.1;
@@ -293,8 +286,8 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<WitherSkull> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.util.math.vector.Vector3d lookVec = source.getViewVector(1);
-                final WitherSkullEntity skull = new WitherSkullEntity(source.level, source,
+                final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
+                final net.minecraft.world.entity.projectile.WitherSkull skull = new net.minecraft.world.entity.projectile.WitherSkull(source.level, source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 skull.setPos(skull.getX(), skull.getY() + source.getEyeHeight(), skull.getZ());
                 return ProjectileUtil.doLaunch(loc.getWorld(), (WitherSkull) skull);
@@ -306,8 +299,8 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<FishingBobber> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                if (source instanceof PlayerEntity) {
-                    final FishingBobberEntity hook = new FishingBobberEntity(source.level, (PlayerEntity) source, loc.getX(), loc.getY(), loc.getZ());
+                if (source instanceof Player) {
+                    final FishingHook hook = new FishingHook(source.level, (Player) source, loc.getX(), loc.getY(), loc.getZ());
                     return ProjectileUtil.doLaunch(loc.getWorld(), (FishingBobber) hook);
                 }
                 return super.createProjectile(source, loc);
@@ -317,7 +310,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Potion> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final PotionEntity potion = new PotionEntity(source.level, source);
+                final ThrownPotion potion = new ThrownPotion(source.level, source);
                 potion.setItem(new ItemStack(Items.SPLASH_POTION, 1));
                 potion.shoot(source.xRot, source.yRot, -20.0F, 0.5F, 0);
                 return ProjectileUtil.doLaunch(loc.getWorld(), (Potion) potion);
@@ -327,7 +320,7 @@ public final class ProjectileUtil {
 
             @Override
             public Optional<LlamaSpit> launch(final ProjectileSource source) {
-                if (!(source instanceof LlamaEntity)) {
+                if (!(source instanceof Llama)) {
                     return Optional.empty();
                 }
                 return super.launch(source);
@@ -336,9 +329,9 @@ public final class ProjectileUtil {
             @Override
             public Optional<LlamaSpit> createProjectile(final ProjectileSource source,
                     final EntityType<LlamaSpit> projectileType, final ServerLocation loc) {
-                final LlamaEntity llama = (LlamaEntity) source;
-                final LlamaSpitEntity llamaSpit = new LlamaSpitEntity(llama.level, (LlamaEntity) source);
-                final net.minecraft.util.math.vector.Vector3d lookVec = llama.getViewVector(1);
+                final Llama llama = (Llama) source;
+                final net.minecraft.world.entity.projectile.LlamaSpit llamaSpit = new net.minecraft.world.entity.projectile.LlamaSpit(llama.level, (Llama) source);
+                final net.minecraft.world.phys.Vec3 lookVec = llama.getViewVector(1);
                 llamaSpit.shoot(lookVec.x, lookVec.y, lookVec.z, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.getWorld(), (LlamaSpit) llamaSpit);
             }
@@ -348,8 +341,8 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<DragonFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.util.math.vector.Vector3d lookVec = source.getViewVector(1);
-                final DragonFireballEntity fireball = new DragonFireballEntity(source.level, source,
+                final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
+                final net.minecraft.world.entity.projectile.DragonFireball fireball = new net.minecraft.world.entity.projectile.DragonFireball(source.level, source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.getWorld(), (DragonFireball) fireball);

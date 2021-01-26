@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.bridge.block;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface BlockStateBridge {
 
     boolean bridge$hasTileEntity();
 
-    @Nullable TileEntity bridge$createNewTileEntity(World world);
+    @Nullable BlockEntity bridge$createNewTileEntity(Level world);
 
-    int bridge$getLightValue(ServerWorld world, BlockPos pos);
+    int bridge$getLightValue(ServerLevel world, BlockPos pos);
 }

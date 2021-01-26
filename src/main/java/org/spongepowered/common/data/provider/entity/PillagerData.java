@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.PillagerEntity;
+import net.minecraft.world.entity.monster.Pillager;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.monster.PillagerEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.PillagerAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class PillagerData {
@@ -37,10 +37,10 @@ public final class PillagerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(PillagerEntity.class)
+                .asMutable(Pillager.class)
                     .create(Keys.IS_CHARGING_CROSSBOW)
-                        .get(h -> h.getEntityData().get(PillagerEntityAccessor.accessor$IS_CHARGING_CROSSBOW()))
-                        .set(PillagerEntity::setChargingCrossbow);
+                        .get(h -> h.getEntityData().get(PillagerAccessor.accessor$IS_CHARGING_CROSSBOW()))
+                        .set(Pillager::setChargingCrossbow);
     }
     // @formatter:on
 }

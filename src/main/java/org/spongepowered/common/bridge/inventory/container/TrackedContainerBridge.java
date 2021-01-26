@@ -39,9 +39,9 @@ public interface TrackedContainerBridge {
 
     CraftItemEvent.Craft bridge$getLastCraft();
 
-    void bridge$setPreviousCursor(net.minecraft.item.ItemStack stack);
+    void bridge$setPreviousCursor(net.minecraft.world.item.ItemStack stack);
 
-    net.minecraft.item.ItemStack bridge$getPreviousCursor();
+    net.minecraft.world.item.ItemStack bridge$getPreviousCursor();
 
     void bridge$setFirePreview(boolean firePreview);
 

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;

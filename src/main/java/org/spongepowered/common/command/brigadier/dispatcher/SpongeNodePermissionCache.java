@@ -26,7 +26,6 @@ package org.spongepowered.common.command.brigadier.dispatcher;
 
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
@@ -40,17 +39,18 @@ import java.util.WeakHashMap;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import net.minecraft.commands.CommandSourceStack;
 
 public final class SpongeNodePermissionCache {
 
     private final static Pattern ILLEGAL_CHARS = Pattern.compile("[^a-zA-Z0-9]");
-    private final static WeakHashMap<CommandNode<CommandSource>, Supplier<String>> PERMISSION_MAP = new WeakHashMap<>();
+    private final static WeakHashMap<CommandNode<CommandSourceStack>, Supplier<String>> PERMISSION_MAP = new WeakHashMap<>();
 
     public static boolean canUse(
             final boolean isRoot,
             final SpongeCommandDispatcher dispatcher,
-            final CommandNode<CommandSource> node,
-            final CommandSource source
+            final CommandNode<CommandSourceStack> node,
+            final CommandSourceStack source
     ) {
         Supplier<String> supplier = SpongeNodePermissionCache.PERMISSION_MAP.get(node);
         if (supplier == null) {
@@ -72,7 +72,7 @@ public final class SpongeNodePermissionCache {
 
     public static String createFromNode(
             final SpongeCommandDispatcher dispatcher,
-            final CommandNode<CommandSource> node) {
+            final CommandNode<CommandSourceStack> node) {
         final String permission;
         if (node.getRedirect() != null && !(node.getRedirect() instanceof RootCommandNode) && node.getCommand() == null) {
             final Supplier<String> permSupplier = SpongeNodePermissionCache.PERMISSION_MAP.get(node);

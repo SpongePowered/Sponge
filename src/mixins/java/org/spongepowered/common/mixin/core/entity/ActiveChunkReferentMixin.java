@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -34,8 +32,10 @@ import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 import java.lang.ref.WeakReference;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
-@Mixin({Entity.class, TileEntity.class})
+@Mixin({Entity.class, BlockEntity.class})
 public abstract class ActiveChunkReferentMixin implements ActiveChunkReferantBridge {
 
     private WeakReference<ChunkBridge> activeChunk$chunkReference = new WeakReference<>(null);

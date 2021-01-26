@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.tileentity.EndGatewayTileEntityAccessor;
+import org.spongepowered.common.accessor.world.level.block.entity.TheEndGatewayBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
@@ -38,7 +38,7 @@ public final class EndGatewayData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(EndGatewayTileEntityAccessor.class)
+                .asMutable(TheEndGatewayBlockEntityAccessor.class)
                     .create(Keys.COOLDOWN)
                         .get(x -> new SpongeTicks(x.accessor$teleportCooldown()))
                         .setAnd((h, v) -> {
@@ -50,8 +50,8 @@ public final class EndGatewayData {
                             return true;
                         })
                     .create(Keys.DO_EXACT_TELEPORT)
-                        .get(EndGatewayTileEntityAccessor::accessor$exactTeleport)
-                        .set(EndGatewayTileEntityAccessor::accessor$exactTeleport)
+                        .get(TheEndGatewayBlockEntityAccessor::accessor$exactTeleport)
+                        .set(TheEndGatewayBlockEntityAccessor::accessor$exactTeleport)
                     .create(Keys.END_GATEWAY_AGE)
                         .get(x -> new SpongeTicks(x.accessor$age()))
                         .setAnd((h, v) -> {

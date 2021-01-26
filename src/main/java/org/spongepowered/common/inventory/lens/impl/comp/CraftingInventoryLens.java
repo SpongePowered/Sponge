@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingInventoryAdapter;

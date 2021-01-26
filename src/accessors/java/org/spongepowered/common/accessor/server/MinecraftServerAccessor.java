@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.accessor.server;
 
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.CommandStorage;
-import net.minecraft.world.storage.DimensionSavedDataManager;
-import net.minecraft.world.storage.IServerConfiguration;
-import net.minecraft.world.storage.IServerWorldInfo;
-import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.CommandStorage;
+import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -51,30 +51,30 @@ public interface MinecraftServerAccessor {
         throw new UntransformedAccessorError();
     }
 
-    @Invoker("setInitialSpawn") static void invoker$setInitialSpawn(final ServerWorld serverWorld, final IServerWorldInfo levelData, final boolean generateBonusChest,
+    @Invoker("setInitialSpawn") static void invoker$setInitialSpawn(final ServerLevel serverWorld, final ServerLevelData levelData, final boolean generateBonusChest,
             final boolean isDebugGeneration, final boolean nonDebugSpawn) {
         throw new UntransformedInvokerError();
     }
 
     @Accessor("commandStorage") void accessor$commandStorage(final CommandStorage commandStorage);
 
-    @Accessor("storageSource") SaveFormat.LevelSave accessor$storageSource();
+    @Accessor("storageSource") LevelStorageSource.LevelStorageAccess accessor$storageSource();
 
-    @Accessor("levels") Map<RegistryKey<World>, ServerWorld> accessor$levels();
+    @Accessor("levels") Map<ResourceKey<Level>, ServerLevel> accessor$levels();
 
     @Accessor("executor") Executor accessor$executor();
 
-    @Accessor("progressListenerFactory") IChunkStatusListenerFactory accessor$getProgressListenerFactory();
+    @Accessor("progressListenerFactory") ChunkProgressListenerFactory accessor$getProgressListenerFactory();
 
     @Accessor("nextTickTime") void accessor$setNextTickTime(long nextTickTime);
 
     @Invoker("isSpawningMonsters") boolean invoker$isSpawningMonsters();
 
-    @Invoker("setupDebugLevel") void invoker$setDebugLevel(IServerConfiguration serverConfiguration);
+    @Invoker("setupDebugLevel") void invoker$setDebugLevel(WorldData serverConfiguration);
 
     @Invoker("forceDifficulty") void invoker$forceDifficulty();
 
-    @Invoker("readScoreboard") void accessor$readScoreboard(DimensionSavedDataManager manager);
+    @Invoker("readScoreboard") void accessor$readScoreboard(DimensionDataStorage manager);
 
     @Invoker("waitUntilNextTick") void accessor$waitUntilNextTick();
 }

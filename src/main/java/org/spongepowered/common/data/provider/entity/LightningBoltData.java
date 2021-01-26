@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.effect.LightningBoltEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.LightningBoltAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -37,7 +37,7 @@ public final class LightningBoltData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(LightningBoltEntityAccessor.class)
+                .asMutable(LightningBoltAccessor.class)
                     .create(Keys.DESPAWN_DELAY)
                         .get(x -> new SpongeTicks(x.accessor$life()))
                         .setAnd((h, v) -> {
@@ -48,7 +48,7 @@ public final class LightningBoltData {
                             return true;
                         })
                     .create(Keys.IS_EFFECT_ONLY)
-                        .get(LightningBoltEntityAccessor::accessor$visualOnly);
+                        .get(LightningBoltAccessor::accessor$visualOnly);
     }
     // @formatter:on
 }

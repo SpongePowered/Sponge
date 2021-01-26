@@ -26,17 +26,17 @@ package org.spongepowered.common.mixin.core.server;
 
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
-import net.minecraft.resources.IResourceManager;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryReadOps;
 import net.minecraft.server.Main;
-import net.minecraft.server.ServerPropertiesProvider;
-import net.minecraft.server.dedicated.ServerProperties;
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.util.registry.WorldSettingsImport;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
-import net.minecraft.world.storage.FolderName;
-import net.minecraft.world.storage.SaveFormat;
-import net.minecraft.world.storage.ServerWorldInfo;
+import net.minecraft.server.dedicated.DedicatedServerProperties;
+import net.minecraft.server.dedicated.DedicatedServerSettings;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -49,25 +49,25 @@ import java.nio.file.Path;
 @Mixin(Main.class)
 public abstract class MainMixin {
 
-    @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/server/ServerPropertiesProvider"))
-    private static ServerPropertiesProvider impl$cacheBootstrapProperties(final DynamicRegistries p_i242100_1_, final Path p_i242100_2_) {
-        final ServerPropertiesProvider provider = new ServerPropertiesProvider(p_i242100_1_, p_i242100_2_);
-        final ServerProperties properties = provider.getProperties();
+    @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/server/dedicated/DedicatedServerSettings"))
+    private static DedicatedServerSettings impl$cacheBootstrapProperties(final RegistryAccess p_i242100_1_, final Path p_i242100_2_) {
+        final DedicatedServerSettings provider = new DedicatedServerSettings(p_i242100_1_, p_i242100_2_);
+        final DedicatedServerProperties properties = provider.getProperties();
         BootstrapProperties.init(properties.worldGenSettings, properties.gamemode, properties.difficulty, properties.pvp, properties.hardcore,
                 true, properties.viewDistance, p_i242100_1_);
         return provider;
     }
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/WorldSettingsImport;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/resources/IResourceManager;Lnet/minecraft/util/registry/DynamicRegistries$Impl;)Lnet/minecraft/util/registry/WorldSettingsImport;"))
-    private static <T> WorldSettingsImport<T> impl$cacheWorldSettingsAdapter(DynamicOps<T> p_244335_0_, IResourceManager p_244335_1_,
-            DynamicRegistries.Impl p_244335_2_) {
-        final WorldSettingsImport<T> worldSettingsAdapter = WorldSettingsImport.create(p_244335_0_, p_244335_1_, p_244335_2_);
+    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$RegistryHolder;)Lnet/minecraft/resources/RegistryReadOps;"))
+    private static <T> RegistryReadOps<T> impl$cacheWorldSettingsAdapter(DynamicOps<T> p_244335_0_, ResourceManager p_244335_1_,
+            RegistryAccess.RegistryHolder p_244335_2_) {
+        final RegistryReadOps<T> worldSettingsAdapter = RegistryReadOps.create(p_244335_0_, p_244335_1_, p_244335_2_);
         BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
         return worldSettingsAdapter;
     }
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveFormat$LevelSave;getLevelPath(Lnet/minecraft/world/storage/FolderName;)Ljava/nio/file/Path;"))
-    private static Path impl$configurePackRepository(final SaveFormat.LevelSave levelSave, final FolderName folderName) {
+    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
+    private static Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.establishGlobalRegistries();
@@ -77,10 +77,10 @@ public abstract class MainMixin {
         return datapackDir;
     }
 
-    @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/world/storage/ServerWorldInfo"))
-    private static ServerWorldInfo impl$setIsNewLevel(final WorldSettings settings, final DimensionGeneratorSettings generationSettings, final
+    @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/world/level/storage/PrimaryLevelData"))
+    private static PrimaryLevelData impl$setIsNewLevel(final LevelSettings settings, final WorldGenSettings generationSettings, final
             Lifecycle lifecycle) {
         BootstrapProperties.setIsNewLevel(true);
-        return new ServerWorldInfo(settings, generationSettings, lifecycle);
+        return new PrimaryLevelData(settings, generationSettings, lifecycle);
     }
 }

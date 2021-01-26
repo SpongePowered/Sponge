@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.accessor.world.WorldAccessor;
+import org.spongepowered.common.accessor.world.level.LevelAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -50,12 +50,12 @@ public final class RemoveTileEntityFromWorldEffect implements ProcessingSideEffe
         final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag,
         final int limit
     ) {
-        final @Nullable TileEntity tileEntity = oldState.tileEntity;
+        final @Nullable BlockEntity tileEntity = oldState.tileEntity;
         if (tileEntity == null) {
             return EffectResult.NULL_RETURN;
         }
-        final ServerWorld serverWorld = pipeline.getServerWorld();
-        final WorldAccessor worldAccessor = (WorldAccessor) serverWorld;
+        final ServerLevel serverWorld = pipeline.getServerWorld();
+        final LevelAccessor worldAccessor = (LevelAccessor) serverWorld;
         if (worldAccessor.accessor$updatingBlockEntities()) {
             tileEntity.setRemoved();
             worldAccessor.accessor$pendingBlockEntities().remove(tileEntity);

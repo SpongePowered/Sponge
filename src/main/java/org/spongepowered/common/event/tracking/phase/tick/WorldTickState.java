@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -34,13 +33,14 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.function.BiConsumer;
+import net.minecraft.server.level.ServerLevel;
 
 final class WorldTickState extends TickPhaseState<WorldTickState.WorldTickContext> {
 
     private final BiConsumer<CauseStackManager.StackFrame, WorldTickContext> WORLD_MODIFIER = super.getFrameModifier()
         .andThen((frame, context) -> {
             context.getSource(Object.class).ifPresent(frame::pushCause);
-            final @Nullable ServerWorld serverWorld = context.serverWorld.get();
+            final @Nullable ServerLevel serverWorld = context.serverWorld.get();
             if (serverWorld != null) {
                 frame.pushCause(serverWorld);
             }
@@ -63,9 +63,9 @@ final class WorldTickState extends TickPhaseState<WorldTickState.WorldTickContex
 
     public static class WorldTickContext extends TickContext<WorldTickContext> {
 
-        @MonotonicNonNull WeakReference<ServerWorld> serverWorld;
+        @MonotonicNonNull WeakReference<ServerLevel> serverWorld;
 
-        public WorldTickContext world(final ServerWorld server) {
+        public WorldTickContext world(final ServerLevel server) {
             this.serverWorld = new WeakReference<>(server);
             return this;
         }

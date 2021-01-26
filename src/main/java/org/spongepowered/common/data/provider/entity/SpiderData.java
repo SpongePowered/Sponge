@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.SpiderEntity;
+import net.minecraft.world.entity.monster.Spider;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -36,10 +36,10 @@ public final class SpiderData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(SpiderEntity.class)
+                .asMutable(Spider.class)
                     .create(Keys.IS_CLIMBING)
-                        .get(SpiderEntity::isClimbing)
-                        .set(SpiderEntity::setClimbing);
+                        .get(Spider::isClimbing)
+                        .set(Spider::setClimbing);
     }
     // @formatter:on
 }

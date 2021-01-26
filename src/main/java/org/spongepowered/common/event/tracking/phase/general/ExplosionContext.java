@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.common.accessor.world.ExplosionAccessor;
+import org.spongepowered.common.accessor.world.level.ExplosionAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Explosion;
 
 public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext> {
 
@@ -49,7 +49,7 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         return this;
     }
 
-    public ExplosionContext potentialExplosionSource(final ServerWorld worldServer, @Nullable final Entity entityIn) {
+    public ExplosionContext potentialExplosionSource(final ServerLevel worldServer, @Nullable final Entity entityIn) {
         if (entityIn != null) {
             this.source(entityIn);
         } else {

@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.gen.IWorldGenerationBaseReader;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.volume.game.GenerationVolume;
@@ -34,13 +31,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.function.Predicate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.levelgen.Heightmap;
 
-@Mixin(IWorldGenerationBaseReader.class)
+@Mixin(LevelSimulatedReader.class)
 public interface IWorldGenerationBaseReaderMixin_API extends GenerationVolume {
 
     //@formatter:off
-    @Shadow boolean shadow$isStateAtPosition(BlockPos p_217375_1_, Predicate<net.minecraft.block.BlockState> p_217375_2_);
-    @Shadow BlockPos shadow$getHeightmapPos(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
+    @Shadow boolean shadow$isStateAtPosition(BlockPos p_217375_1_, Predicate<net.minecraft.world.level.block.state.BlockState> p_217375_2_);
+    @Shadow BlockPos shadow$getHeightmapPos(Heightmap.Types p_205770_1_, BlockPos p_205770_2_);
     //@formatter:on
 
     @Override

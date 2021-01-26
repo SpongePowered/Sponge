@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.mixin.optimization.mcp.tileentity;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.HopperTileEntity;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.optimization.HopperOptimizationBridge;
 
-@Mixin(value = HopperTileEntity.class, priority = 1300)
+@Mixin(value = HopperBlockEntity.class, priority = 1300)
 public abstract class HopperTileEntityMixin_Optimization_Hopper extends TileEntityMixin_Optimization_Hopper {
 
     @Redirect(method = "tryMoveInItem",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;setItem(ILnet/minecraft/item/ItemStack;)V"))
-    private static void hopper$FlipMarkUpdateWhenInserting(final IInventory destination, final int index, final ItemStack stack) {
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/Container;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
+    private static void hopper$FlipMarkUpdateWhenInserting(final Container destination, final int index, final ItemStack stack) {
         if (destination instanceof HopperOptimizationBridge) {
             ((HopperOptimizationBridge) destination).hopperBridge$setCancelDirtyUpdate(true);
         }

@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.common.accessor.entity.passive.horse.TraderLlamaEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.horse.TraderLlamaAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class TraderLlamaData {
@@ -37,7 +37,7 @@ public final class TraderLlamaData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(TraderLlamaEntityAccessor.class)
+                .asMutable(TraderLlamaAccessor.class)
                     .create(Keys.DESPAWN_DELAY)
                         .get(x -> Ticks.of(x.accessor$despawnDelay()))
                         .setAnd((h, v) -> {

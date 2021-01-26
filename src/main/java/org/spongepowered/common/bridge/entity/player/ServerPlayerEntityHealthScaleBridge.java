@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.bridge.entity.player;
 
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-
 import java.util.Collection;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 
 public interface ServerPlayerEntityHealthScaleBridge {
 
@@ -40,6 +39,6 @@ public interface ServerPlayerEntityHealthScaleBridge {
 
     void bridge$refreshScaledHealth();
 
-    void bridge$injectScaledHealth(Collection<ModifiableAttributeInstance> set);
+    void bridge$injectScaledHealth(Collection<AttributeInstance> set);
 
 }

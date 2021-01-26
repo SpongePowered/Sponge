@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.Projectile;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -38,7 +38,7 @@ public final class ProjectileData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(ProjectileEntity.class)
+                .asMutable(Projectile.class)
                 .create(Keys.SHOOTER)
                 .get(h -> (ProjectileSource) h.getOwner())
                 .set((h, v) -> h.setOwner((Entity) v));

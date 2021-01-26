@@ -27,8 +27,6 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -55,6 +53,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * Similar to {@link Cause} except it can be built continuously and retains no
@@ -328,8 +328,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
         if (this.transactor != null && !this.transactor.isEmpty()) {
             return true;
         }
-        if (this.source != null && this.source instanceof PlayerEntity) {
-            if (!((TrackedInventoryBridge) ((PlayerEntity) this.source).inventory).bridge$getCapturedSlotTransactions().isEmpty()) {
+        if (this.source != null && this.source instanceof Player) {
+            if (!((TrackedInventoryBridge) ((Player) this.source).inventory).bridge$getCapturedSlotTransactions().isEmpty()) {
                 return true;
             }
         }

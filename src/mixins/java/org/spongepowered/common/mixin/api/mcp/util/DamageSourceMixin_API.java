@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 
-@Mixin(value = net.minecraft.util.DamageSource.class)
+@Mixin(value = net.minecraft.world.damagesource.DamageSource.class)
 @Implements(@Interface(iface = DamageSource.class, prefix = "damageSource$"))
 public abstract class DamageSourceMixin_API implements DamageSource {
 

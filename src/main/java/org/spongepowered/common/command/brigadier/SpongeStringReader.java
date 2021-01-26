@@ -28,9 +28,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentUtils;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -167,11 +167,11 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     public String parseNBTString() throws ArgumentParseException {
         final int startCursor = this.getCursor();
         try {
-            new JsonToNBT(this).readStruct();
+            new TagParser(this).readStruct();
         } catch (final CommandSyntaxException ex) {
             this.setCursor(startCursor);
             throw new ArgumentParseException(
-                SpongeAdventure.asAdventure(TextComponentUtils.fromMessage(ex.getRawMessage())),
+                SpongeAdventure.asAdventure(ComponentUtils.fromMessage(ex.getRawMessage())),
                 ex.getInput(),
                 ex.getCursor()
             );
@@ -183,9 +183,9 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     @Override
     public DataContainer parseDataContainer() throws ArgumentParseException {
         try {
-            return NBTTranslator.INSTANCE.translate(new JsonToNBT(this).readStruct());
+            return NBTTranslator.INSTANCE.translate(new TagParser(this).readStruct());
         } catch (final CommandSyntaxException e) {
-            throw this.createException(SpongeAdventure.asAdventure(TextComponentUtils.fromMessage(e.getRawMessage())));
+            throw this.createException(SpongeAdventure.asAdventure(ComponentUtils.fromMessage(e.getRawMessage())));
         }
     }
 

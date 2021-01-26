@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandPreferences;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.common.accessor.entity.MobEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.MobAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class MobData {
@@ -42,7 +42,7 @@ public final class MobData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(MobEntity.class)
+                .asMutable(Mob.class)
                     .create(Keys.DOMINANT_HAND)
                         .get(h -> (HandPreference) (Object) h.getMainArm())
                         .set((h, v) -> h.setLeftHanded(v.equals(HandPreferences.LEFT.get())))
@@ -59,13 +59,13 @@ public final class MobData {
                             return true;
                         })
                         .delete(h -> h.setTarget(null))
-                .asMutable(MobEntityAccessor.class)
+                .asMutable(MobAccessor.class)
                     .create(Keys.IS_AI_ENABLED)
                         .get(h -> !h.invoker$isNoAi())
                         .set((h, v) -> h.invoker$setNoAi(!v))
                     .create(Keys.IS_PERSISTENT)
-                        .get(h -> ((MobEntity) h).isPersistenceRequired())
-                        .set(MobEntityAccessor::accessor$persistenceRequired);
+                        .get(h -> ((Mob) h).isPersistenceRequired())
+                        .set(MobAccessor::accessor$persistenceRequired);
     }
     // @formatter:on
 }

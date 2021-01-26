@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.fabric;
 
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -37,6 +36,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import net.minecraft.world.item.ItemStack;
 
 @SuppressWarnings("unchecked")
 public class CompoundFabric implements Fabric {

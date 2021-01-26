@@ -30,7 +30,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-
+import org.spongepowered.common.util.PrettyPrinter.CentredText;
+import org.spongepowered.common.util.PrettyPrinter.Column;
+import org.spongepowered.common.util.PrettyPrinter.HorizontalRule;
+import org.spongepowered.common.util.PrettyPrinter.ISpecialEntry;
+import org.spongepowered.common.util.PrettyPrinter.IVariableWidthEntry;
+import org.spongepowered.common.util.PrettyPrinter.KeyValue;
+import org.spongepowered.common.util.PrettyPrinter.Row;
+import org.spongepowered.common.util.PrettyPrinter.Table;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;

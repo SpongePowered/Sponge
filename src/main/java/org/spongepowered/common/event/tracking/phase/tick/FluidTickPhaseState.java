@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.fluid.FlowingFluid;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.event.CauseStackManager;
@@ -44,6 +39,11 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.material.FlowingFluid;
 
 class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> {
     private final BiConsumer<CauseStackManager.StackFrame, FluidTickContext> LOCATION_MODIFIER =
@@ -120,9 +120,9 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
     @Override
     public BlockChange associateBlockChangeWithSnapshot(
         final FluidTickContext phaseContext,
-        final net.minecraft.block.BlockState newState,
+        final net.minecraft.world.level.block.state.BlockState newState,
         final Block newBlock,
-        final net.minecraft.block.BlockState currentState,
+        final net.minecraft.world.level.block.state.BlockState currentState,
         final SpongeBlockSnapshot snapshot,
         final Block originalBlock
     ) {
@@ -130,8 +130,8 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
             if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;
             }
-            if (currentState.getBlock() instanceof FlowingFluidBlock) {
-                if (newState.getBlock() instanceof FlowingFluidBlock) {
+            if (currentState.getBlock() instanceof LiquidBlock) {
+                if (newState.getBlock() instanceof LiquidBlock) {
                     return BlockChange.MODIFY;
                 } else if (newState.isAir()) {
                     return BlockChange.DECAY;
@@ -141,7 +141,7 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
             }
 
             if (currentState.isAir()
-                && newState.getBlock() instanceof FlowingFluidBlock) {
+                && newState.getBlock() instanceof LiquidBlock) {
                 return BlockChange.PLACE;
             }
         }

@@ -25,18 +25,6 @@
 package org.spongepowered.common.item.recipe.smithing;
 
 import com.google.gson.JsonObject;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.item.crafting.SingleItemRecipe;
-import net.minecraft.item.crafting.SmithingRecipe;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
@@ -44,10 +32,19 @@ import org.spongepowered.common.item.recipe.stonecutting.SpongeStonecuttingRecip
 import org.spongepowered.common.util.Constants;
 
 import java.util.function.Function;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.UpgradeRecipe;
 
-public class SpongeSmithingRecipeSerializer<R extends SmithingRecipe> implements IRecipeSerializer<R> {
+public class SpongeSmithingRecipeSerializer<R extends UpgradeRecipe> implements RecipeSerializer<R> {
 
-    public static IRecipeSerializer<?> SPONGE_SMITHING = SpongeRecipeRegistration.register("smithing", new SpongeSmithingRecipeSerializer<>());
+    public static RecipeSerializer<?> SPONGE_SMITHING = SpongeRecipeRegistration.register("smithing", new SpongeSmithingRecipeSerializer<>());
 
     @SuppressWarnings("unchecked")
     @Override
@@ -55,9 +52,9 @@ public class SpongeSmithingRecipeSerializer<R extends SmithingRecipe> implements
         final Ingredient base = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.SMITHING_BASE_INGREDIENT));
         final Ingredient addition = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.SMITHING_ADDITION_INGREDIENT));
 
-        final Function<IInventory, ItemStack> resultFunction = ResultUtil.deserializeResultFunction(json);
+        final Function<Container, ItemStack> resultFunction = ResultUtil.deserializeResultFunction(json);
 
-        ItemStack itemstack = ShapedRecipe.itemFromJson(JSONUtils.getAsJsonObject(json, Constants.Recipe.RESULT));
+        ItemStack itemstack = ShapedRecipe.itemFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
         final ItemStack spongeStack = ResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
 
         return (R) new SpongeSmithingRecipe(recipeId, base, addition, spongeStack == null ? itemstack : spongeStack, resultFunction);
@@ -65,11 +62,11 @@ public class SpongeSmithingRecipeSerializer<R extends SmithingRecipe> implements
 
     @SuppressWarnings("unchecked")
     @Override
-    public R fromNetwork(ResourceLocation recipeId, PacketBuffer buffer) {
+    public R fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 
-    public void toNetwork(PacketBuffer buffer, R recipe) {
+    public void toNetwork(FriendlyByteBuf buffer, R recipe) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 }

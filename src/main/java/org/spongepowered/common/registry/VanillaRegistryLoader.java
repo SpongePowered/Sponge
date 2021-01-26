@@ -25,44 +25,44 @@
 package org.spongepowered.common.registry;
 
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.advancements.ICriterionTrigger;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.boss.dragon.phase.PhaseType;
-import net.minecraft.entity.item.BoatEntity;
-import net.minecraft.entity.monster.PhantomEntity;
-import net.minecraft.entity.monster.SpellcastingIllagerEntity;
-import net.minecraft.entity.passive.FoxEntity;
-import net.minecraft.entity.passive.MooshroomEntity;
-import net.minecraft.entity.passive.PandaEntity;
-import net.minecraft.entity.passive.fish.TropicalFishEntity;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ArmorMaterial;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.FireworkRocketItem;
-import net.minecraft.item.ItemTier;
-import net.minecraft.scoreboard.ScoreCriteria;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.state.properties.AttachFace;
-import net.minecraft.state.properties.ChestType;
-import net.minecraft.state.properties.ComparatorMode;
-import net.minecraft.state.properties.DoorHingeSide;
-import net.minecraft.state.properties.Half;
-import net.minecraft.state.properties.NoteBlockInstrument;
-import net.minecraft.state.properties.PistonType;
-import net.minecraft.state.properties.RailShape;
-import net.minecraft.state.properties.RedstoneSide;
-import net.minecraft.state.properties.SlabType;
-import net.minecraft.state.properties.StairsShape;
-import net.minecraft.state.properties.StructureMode;
-import net.minecraft.tileentity.BannerPattern;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.GameType;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.raid.Raid;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.MushroomCow;
+import net.minecraft.world.entity.animal.Panda;
+import net.minecraft.world.entity.animal.TropicalFish;
+import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
+import net.minecraft.world.entity.monster.Phantom;
+import net.minecraft.world.entity.monster.SpellcasterIllager;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.item.ArmorMaterials;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.FireworkRocketItem;
+import net.minecraft.world.item.Tiers;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.state.properties.AttachFace;
+import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.state.properties.ComparatorMode;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
+import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.block.state.properties.PistonType;
+import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.world.level.block.state.properties.RedstoneSide;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.level.block.state.properties.StairsShape;
+import net.minecraft.world.level.block.state.properties.StructureMode;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.scores.Team;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
@@ -77,9 +77,9 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
-import org.spongepowered.common.accessor.entity.passive.MooshroomEntity_TypeAccessor;
-import org.spongepowered.common.accessor.item.ArmorMaterialAccessor;
-import org.spongepowered.common.accessor.tileentity.BannerPatternAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.MushroomCow_MushroomTypeAccessor;
+import org.spongepowered.common.accessor.world.item.ArmorMaterialsAccessor;
+import org.spongepowered.common.accessor.world.level.block.entity.BannerPatternAccessor;
 import org.spongepowered.common.advancement.criterion.SpongeDummyTrigger;
 import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 
@@ -104,26 +104,26 @@ final class VanillaRegistryLoader {
 
     private void loadInstanceRegistries() {
         this.holder.createRegistry(RegistryTypes.CRITERION, VanillaRegistryLoader.criterion().values());
-        this.manualName(RegistryTypes.DRAGON_PHASE_TYPE, PhaseType.getCount(), map -> {
-            map.put(PhaseType.HOLDING_PATTERN, "holding_pattern");
-            map.put(PhaseType.STRAFE_PLAYER, "strafe_player");
-            map.put(PhaseType.LANDING_APPROACH, "landing_approach");
-            map.put(PhaseType.LANDING, "landing");
-            map.put(PhaseType.TAKEOFF, "takeoff");
-            map.put(PhaseType.SITTING_FLAMING, "sitting_flaming");
-            map.put(PhaseType.SITTING_SCANNING, "sitting_scanning");
-            map.put(PhaseType.SITTING_ATTACKING, "sitting_attacking");
-            map.put(PhaseType.CHARGING_PLAYER, "charging_player");
-            map.put(PhaseType.DYING, "dying");
-            map.put(PhaseType.HOVERING, "hover");
+        this.manualName(RegistryTypes.DRAGON_PHASE_TYPE, EnderDragonPhase.getCount(), map -> {
+            map.put(EnderDragonPhase.HOLDING_PATTERN, "holding_pattern");
+            map.put(EnderDragonPhase.STRAFE_PLAYER, "strafe_player");
+            map.put(EnderDragonPhase.LANDING_APPROACH, "landing_approach");
+            map.put(EnderDragonPhase.LANDING, "landing");
+            map.put(EnderDragonPhase.TAKEOFF, "takeoff");
+            map.put(EnderDragonPhase.SITTING_FLAMING, "sitting_flaming");
+            map.put(EnderDragonPhase.SITTING_SCANNING, "sitting_scanning");
+            map.put(EnderDragonPhase.SITTING_ATTACKING, "sitting_attacking");
+            map.put(EnderDragonPhase.CHARGING_PLAYER, "charging_player");
+            map.put(EnderDragonPhase.DYING, "dying");
+            map.put(EnderDragonPhase.HOVERING, "hover");
         });
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape().values());
         this.holder.createRegistry(RegistryTypes.TRIGGER, () -> VanillaRegistryLoader.trigger().values(), true,
-                (k, trigger) -> CriteriaTriggersAccessor.invoker$register((ICriterionTrigger<?>) trigger));
+                (k, trigger) -> CriteriaTriggersAccessor.invoker$register((CriterionTrigger<?>) trigger));
     }
 
     private void loadEnumRegistries() {
-        this.knownName(RegistryTypes.ARMOR_MATERIAL, ArmorMaterial.values(), am -> ((ArmorMaterialAccessor) (Object) am).accessor$name());
+        this.knownName(RegistryTypes.ARMOR_MATERIAL, ArmorMaterials.values(), am -> ((ArmorMaterialsAccessor) (Object) am).accessor$name());
         this.knownName(RegistryTypes.ATTACHMENT_SURFACE, AttachFace.values(), AttachFace::getSerializedName);
         this.manualName(RegistryTypes.ATTRIBUTE_OPERATION, AttributeModifier.Operation.values(), map -> {
             // names come from net.minecraft.world.level.storage.loot.functions.SetAttributesFunction.Modifier#operationFromString
@@ -131,7 +131,7 @@ final class VanillaRegistryLoader {
             map.put(AttributeModifier.Operation.MULTIPLY_BASE, "multiply_base");
             map.put(AttributeModifier.Operation.MULTIPLY_TOTAL, "multiply_total");
         });
-        this.knownName(RegistryTypes.BOAT_TYPE, BoatEntity.Type.values(), BoatEntity.Type::getName);
+        this.knownName(RegistryTypes.BOAT_TYPE, Boat.Type.values(), Boat.Type::getName);
         this.knownName(RegistryTypes.CHEST_ATTACHMENT_TYPE, ChestType.values(), ChestType::getSerializedName);
         this.manualName(RegistryTypes.COLLISION_RULE, Team.CollisionRule.values(), map -> {
             map.put(Team.CollisionRule.ALWAYS, "always");
@@ -143,19 +143,19 @@ final class VanillaRegistryLoader {
         this.knownName(RegistryTypes.DIFFICULTY, Difficulty.values(), Difficulty::getKey);
         this.knownName(RegistryTypes.DYE_COLOR, DyeColor.values(), DyeColor::getSerializedName);
         this.knownName(RegistryTypes.DOOR_HINGE, DoorHingeSide.values(), DoorHingeSide::getSerializedName);
-        this.manualName(RegistryTypes.EQUIPMENT_GROUP, EquipmentSlotType.Group.values(), map -> {
-            map.put(EquipmentSlotType.Group.ARMOR, "worn");
-            map.put(EquipmentSlotType.Group.HAND, "held");
+        this.manualName(RegistryTypes.EQUIPMENT_GROUP, EquipmentSlot.Type.values(), map -> {
+            map.put(EquipmentSlot.Type.ARMOR, "worn");
+            map.put(EquipmentSlot.Type.HAND, "held");
         });
-        this.manualName(RegistryTypes.EQUIPMENT_TYPE, EquipmentSlotType.values(), map -> {
-            map.put(EquipmentSlotType.CHEST, "chest");
-            map.put(EquipmentSlotType.FEET, "feet");
-            map.put(EquipmentSlotType.HEAD, "head");
-            map.put(EquipmentSlotType.LEGS, "legs");
-            map.put(EquipmentSlotType.MAINHAND, "main_hand");
-            map.put(EquipmentSlotType.OFFHAND, "off_hand");
+        this.manualName(RegistryTypes.EQUIPMENT_TYPE, EquipmentSlot.values(), map -> {
+            map.put(EquipmentSlot.CHEST, "chest");
+            map.put(EquipmentSlot.FEET, "feet");
+            map.put(EquipmentSlot.HEAD, "head");
+            map.put(EquipmentSlot.LEGS, "legs");
+            map.put(EquipmentSlot.MAINHAND, "main_hand");
+            map.put(EquipmentSlot.OFFHAND, "off_hand");
         });
-        this.knownName(RegistryTypes.FOX_TYPE, FoxEntity.Type.values(), FoxEntity.Type::getName);
+        this.knownName(RegistryTypes.FOX_TYPE, Fox.Type.values(), Fox.Type::getName);
         this.manualName(RegistryTypes.GAME_MODE, GameType.values(), map -> {
             map.put(GameType.NOT_SET, "not_set"); // getName returns "" (empty string) // TODO(kashike): 1.17
             map.put(GameType.SURVIVAL, GameType.SURVIVAL.getName());
@@ -163,49 +163,49 @@ final class VanillaRegistryLoader {
             map.put(GameType.ADVENTURE, GameType.ADVENTURE.getName());
             map.put(GameType.SPECTATOR, GameType.SPECTATOR.getName());
         });
-        this.automaticName(RegistryTypes.HAND_PREFERENCE, HandSide.values());
-        this.automaticName(RegistryTypes.HAND_TYPE, Hand.values());
+        this.automaticName(RegistryTypes.HAND_PREFERENCE, HumanoidArm.values());
+        this.automaticName(RegistryTypes.HAND_TYPE, InteractionHand.values());
         this.knownName(RegistryTypes.INSTRUMENT_TYPE, NoteBlockInstrument.values(), NoteBlockInstrument::getSerializedName);
-        this.automaticName(RegistryTypes.ITEM_TIER, ItemTier.values());
-        this.knownName(RegistryTypes.MOOSHROOM_TYPE, MooshroomEntity.Type.values(), type -> ((MooshroomEntity_TypeAccessor) (Object) type).accessor$type());
-        this.knownName(RegistryTypes.OBJECTIVE_DISPLAY_MODE, ScoreCriteria.RenderType.values(), ScoreCriteria.RenderType::getId);
-        this.knownName(RegistryTypes.PANDA_GENE, PandaEntity.Gene.values(), PandaEntity.Gene::getName);
-        this.automaticName(RegistryTypes.PHANTOM_PHASE, PhantomEntity.AttackPhase.values());
-        this.automaticName(RegistryTypes.PICKUP_RULE, AbstractArrowEntity.PickupStatus.values());
+        this.automaticName(RegistryTypes.ITEM_TIER, Tiers.values());
+        this.knownName(RegistryTypes.MOOSHROOM_TYPE, MushroomCow.MushroomType.values(), type -> ((MushroomCow_MushroomTypeAccessor) (Object) type).accessor$type());
+        this.knownName(RegistryTypes.OBJECTIVE_DISPLAY_MODE, ObjectiveCriteria.RenderType.values(), ObjectiveCriteria.RenderType::getId);
+        this.knownName(RegistryTypes.PANDA_GENE, Panda.Gene.values(), Panda.Gene::getName);
+        this.automaticName(RegistryTypes.PHANTOM_PHASE, Phantom.AttackPhase.values());
+        this.automaticName(RegistryTypes.PICKUP_RULE, AbstractArrow.Pickup.values());
         this.knownName(RegistryTypes.PISTON_TYPE, PistonType.values(), PistonType::getSerializedName);
         this.knownName(RegistryTypes.PORTION_TYPE, Half.values(), Half::getSerializedName);
-        this.automaticName(RegistryTypes.RAID_STATUS, Raid.Status.values());
+        this.automaticName(RegistryTypes.RAID_STATUS, Raid.RaidStatus.values());
         this.knownName(RegistryTypes.RAIL_DIRECTION, RailShape.values(), RailShape::getSerializedName);
         this.knownName(RegistryTypes.WIRE_ATTACHMENT_TYPE, RedstoneSide.values(), RedstoneSide::getSerializedName);
         this.knownName(RegistryTypes.SLAB_PORTION, SlabType.values(), SlabType::getSerializedName);
-        this.automaticName(RegistryTypes.SPELL_TYPE, SpellcastingIllagerEntity.SpellType.values());
+        this.automaticName(RegistryTypes.SPELL_TYPE, SpellcasterIllager.IllagerSpell.values());
         this.knownName(RegistryTypes.STAIR_SHAPE, StairsShape.values(), StairsShape::getSerializedName);
         this.knownName(RegistryTypes.STRUCTURE_MODE, StructureMode.values(), StructureMode::getSerializedName);
-        this.manualName(RegistryTypes.VISIBILITY, Team.Visible.values(), map -> {
-            map.put(Team.Visible.ALWAYS, "always");
-            map.put(Team.Visible.NEVER, "never");
-            map.put(Team.Visible.HIDE_FOR_OTHER_TEAMS, "hide_for_other_teams");
-            map.put(Team.Visible.HIDE_FOR_OWN_TEAM, "hide_for_own_team");
+        this.manualName(RegistryTypes.VISIBILITY, Team.Visibility.values(), map -> {
+            map.put(Team.Visibility.ALWAYS, "always");
+            map.put(Team.Visibility.NEVER, "never");
+            map.put(Team.Visibility.HIDE_FOR_OTHER_TEAMS, "hide_for_other_teams");
+            map.put(Team.Visibility.HIDE_FOR_OWN_TEAM, "hide_for_own_team");
         });
         this.knownName(RegistryTypes.ADVANCEMENT_TYPE, FrameType.values(), FrameType::getName);
         this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
-        this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFishEntity.Type.values());
-        this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Type.values());
+        this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
+        this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {
         return RegistryLoader.of(l -> {
-            l.add(Criteria.AIR, k -> (Criterion) ScoreCriteria.AIR);
-            l.add(Criteria.ARMOR, k -> (Criterion) ScoreCriteria.ARMOR);
-            l.add(Criteria.DEATH_COUNT, k -> (Criterion) ScoreCriteria.DEATH_COUNT);
-            l.add(Criteria.DUMMY, k -> (Criterion) ScoreCriteria.DUMMY);
-            l.add(Criteria.EXPERIENCE, k -> (Criterion) ScoreCriteria.EXPERIENCE);
-            l.add(Criteria.FOOD, k -> (Criterion) ScoreCriteria.FOOD);
-            l.add(Criteria.HEALTH, k -> (Criterion) ScoreCriteria.HEALTH);
-            l.add(Criteria.LEVEL, k -> (Criterion) ScoreCriteria.LEVEL);
-            l.add(Criteria.PLAYER_KILL_COUNT, k -> (Criterion) ScoreCriteria.KILL_COUNT_PLAYERS);
-            l.add(Criteria.TOTAL_KILL_COUNT, k -> (Criterion) ScoreCriteria.KILL_COUNT_ALL);
-            l.add(Criteria.TRIGGER, k -> (Criterion) ScoreCriteria.TRIGGER);
+            l.add(Criteria.AIR, k -> (Criterion) ObjectiveCriteria.AIR);
+            l.add(Criteria.ARMOR, k -> (Criterion) ObjectiveCriteria.ARMOR);
+            l.add(Criteria.DEATH_COUNT, k -> (Criterion) ObjectiveCriteria.DEATH_COUNT);
+            l.add(Criteria.DUMMY, k -> (Criterion) ObjectiveCriteria.DUMMY);
+            l.add(Criteria.EXPERIENCE, k -> (Criterion) ObjectiveCriteria.EXPERIENCE);
+            l.add(Criteria.FOOD, k -> (Criterion) ObjectiveCriteria.FOOD);
+            l.add(Criteria.HEALTH, k -> (Criterion) ObjectiveCriteria.HEALTH);
+            l.add(Criteria.LEVEL, k -> (Criterion) ObjectiveCriteria.LEVEL);
+            l.add(Criteria.PLAYER_KILL_COUNT, k -> (Criterion) ObjectiveCriteria.KILL_COUNT_PLAYERS);
+            l.add(Criteria.TOTAL_KILL_COUNT, k -> (Criterion) ObjectiveCriteria.KILL_COUNT_ALL);
+            l.add(Criteria.TRIGGER, k -> (Criterion) ObjectiveCriteria.TRIGGER);
         });
     }
 

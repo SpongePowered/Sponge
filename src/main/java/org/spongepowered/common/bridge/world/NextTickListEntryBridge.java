@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.world.server.ServerLocation;
 
 public interface NextTickListEntryBridge {
 
-    void bridge$setWorld(World world);
+    void bridge$setWorld(Level world);
 
     ServerLocation bridge$getLocation();
 }

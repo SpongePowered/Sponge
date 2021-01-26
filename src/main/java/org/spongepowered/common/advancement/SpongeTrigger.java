@@ -28,11 +28,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.leangen.geantyref.TypeToken;
 import com.google.gson.JsonObject;
-import net.minecraft.advancements.ICriterionTrigger;
-import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.loot.ConditionArrayParser;
-import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
@@ -42,7 +37,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.advancements.ICriterionTrigger_ListenerAccessor;
+import org.spongepowered.common.accessor.advancements.CriterionTrigger_ListenerAccessor;
 import org.spongepowered.common.bridge.advancements.TriggerBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
@@ -52,9 +47,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
+import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.PlayerAdvancements;
 
 @SuppressWarnings("rawtypes")
-public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, TriggerBridge {
+public class SpongeTrigger implements CriterionTrigger<SpongeFilteredTrigger>, TriggerBridge {
 
     private final Type triggerConfigurationType;
     final Function<JsonObject, FilteredTriggerConfiguration> constructor;
@@ -99,19 +98,19 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
     }
 
     @Override
-    public SpongeFilteredTrigger createInstance(final JsonObject json, final ConditionArrayParser arrayParser) {
+    public SpongeFilteredTrigger createInstance(final JsonObject json, final DeserializationContext arrayParser) {
         return new SpongeFilteredTrigger(this, this.constructor.apply(json));
     }
 
     @Override
     public void bridge$trigger(final ServerPlayer player) {
-        final PlayerAdvancements playerAdvancements = ((ServerPlayerEntity) player).getAdvancements();
+        final PlayerAdvancements playerAdvancements = ((net.minecraft.server.level.ServerPlayer) player).getAdvancements();
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
 
         @SuppressWarnings("unchecked") // correct type verified in builder
         final TypeToken<FilteredTriggerConfiguration> typeToken = (TypeToken<FilteredTriggerConfiguration>) TypeToken.get(this.triggerConfigurationType);
         for (final Listener listener : new ArrayList<>(this.listeners.get(playerAdvancements))) {
-            final ICriterionTrigger_ListenerAccessor mixinListener = (ICriterionTrigger_ListenerAccessor) listener;
+            final CriterionTrigger_ListenerAccessor mixinListener = (CriterionTrigger_ListenerAccessor) listener;
             final Advancement advancement = (Advancement) mixinListener.accessor$advancement();
             final AdvancementCriterion advancementCriterion = (AdvancementCriterion)
                 ((net.minecraft.advancements.Advancement) advancement).getCriteria().get(mixinListener.accessor$criterion());

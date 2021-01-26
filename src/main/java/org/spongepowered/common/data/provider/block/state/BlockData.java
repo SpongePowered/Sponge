@@ -24,29 +24,29 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.FallingBlock;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.state.properties.ChestType;
-import net.minecraft.state.properties.NoteBlockInstrument;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.MatterTypes;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.common.accessor.block.AbstractBlockAccessor;
-import org.spongepowered.common.accessor.block.AbstractBlock_PropertiesAccessor;
-import org.spongepowered.common.accessor.block.AbstractFireBlockAccessor;
+import org.spongepowered.common.accessor.world.level.block.BaseFireBlockAccessor;
+import org.spongepowered.common.accessor.world.level.block.state.BlockBehaviourAccessor;
+import org.spongepowered.common.accessor.world.level.block.state.BlockBehaviour_PropertiesAccessor;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collections;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.material.Material;
 
 public final class BlockData {
 
@@ -58,7 +58,7 @@ public final class BlockData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.BLAST_RESISTANCE)
-                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) ((AbstractBlockAccessor) h.getBlock()).accessor$properties()).accessor$explosionResistance())
+                        .get(h -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) h.getBlock()).accessor$properties()).accessor$explosionResistance())
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
                             if (h.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
@@ -71,7 +71,7 @@ public final class BlockData {
                         .get(h -> ((DyeColorBlockBridge) h.getBlock()).bridge$getDyeColor().orElse(null))
                         .supports(h -> h.getBlock() instanceof DyeColorBlockBridge)
                     .create(Keys.DESTROY_SPEED)
-                        .get(state -> (double) ((AbstractBlock_PropertiesAccessor) ((AbstractBlockAccessor) state.getBlock()).accessor$properties()).accessor$destroyTime())
+                        .get(state -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) state.getBlock()).accessor$properties()).accessor$destroyTime())
                     .create(Keys.HELD_ITEM)
                         .get(h -> {
                             final Item item = h.getBlock().asItem();
@@ -86,9 +86,9 @@ public final class BlockData {
                     .create(Keys.IS_PASSABLE)
                         .get(h -> !h.getMaterial().blocksMotion())
                     .create(Keys.IS_UNBREAKABLE)
-                        .get(h -> (double) ((AbstractBlock_PropertiesAccessor) ((AbstractBlockAccessor) h.getBlock()).accessor$properties()).accessor$destroyTime() < 0)
+                        .get(h -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) h.getBlock()).accessor$properties()).accessor$destroyTime() < 0)
                     .create(Keys.IS_FLAMMABLE)
-                        .get(((AbstractFireBlockAccessor) Blocks.FIRE)::invoker$canBurn)
+                        .get(((BaseFireBlockAccessor) Blocks.FIRE)::invoker$canBurn)
                     .create(Keys.IS_SOLID)
                         .get(h -> h.getMaterial().isSolid())
                     .create(Keys.IS_REPLACEABLE)
@@ -99,7 +99,7 @@ public final class BlockData {
                         .get(BlockState::getLightEmission)
                     .create(Keys.MATTER_TYPE)
                         .get(h -> {
-                            if (h.getBlock() instanceof FlowingFluidBlock) {
+                            if (h.getBlock() instanceof LiquidBlock) {
                                 return MatterTypes.LIQUID.get();
                             } else if (h.getMaterial() == Material.AIR) {
                                 return MatterTypes.GAS.get();

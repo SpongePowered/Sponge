@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.ParrotEntity;
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.world.entity.animal.Parrot;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ParrotType;
@@ -40,15 +40,15 @@ public final class ParrotData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(ParrotEntity.class)
+                .asMutable(Parrot.class)
                     .create(Keys.PARROT_TYPE)
                         .get(h -> {
                             final int type = h.getVariant();
-                            final SimpleRegistry<ParrotType> registry = (SimpleRegistry<ParrotType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.PARROT_TYPE);
+                            final MappedRegistry<ParrotType> registry = (MappedRegistry<ParrotType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.PARROT_TYPE);
                             return registry.byId(type);
                         })
                         .set((h, v) -> {
-                            final SimpleRegistry<ParrotType> registry = (SimpleRegistry<ParrotType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.PARROT_TYPE);
+                            final MappedRegistry<ParrotType> registry = (MappedRegistry<ParrotType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.PARROT_TYPE);
                             h.setVariant(registry.getId(v));
                         });
     }

@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.world.generation.config.structure;
 
-import net.minecraft.world.gen.settings.StructureSpreadSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
 import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
 
 public final class SpongeSpacedStructureConfigFactory implements SpacedStructureConfig.Factory {
 
     @Override
     public SpacedStructureConfig of(final int distance, final int spread, final int count) {
-        return (SpacedStructureConfig) new StructureSpreadSettings(distance, spread, count);
+        return (SpacedStructureConfig) new StrongholdConfiguration(distance, spread, count);
     }
 }

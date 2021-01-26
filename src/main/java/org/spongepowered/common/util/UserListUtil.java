@@ -24,34 +24,33 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.server.management.UserList;
-import net.minecraft.server.management.UserListEntry;
-import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
-import org.spongepowered.common.accessor.server.management.UserListAccessor;
-
 import java.io.IOException;
+import net.minecraft.server.players.StoredUserEntry;
+import net.minecraft.server.players.StoredUserList;
+import org.spongepowered.common.accessor.server.players.StoredUserEntryAccessor;
+import org.spongepowered.common.accessor.server.players.StoredUserListAccessor;
 
 public final class UserListUtil {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void addEntry(final UserList list, final UserListEntry entry) {
-        ((UserListAccessor) list).accessor$map().put(((UserListAccessor) list).invoker$getKeyForUser(((UserListEntryAccessor) entry).accessor$user()), entry);
+    public static void addEntry(final StoredUserList list, final StoredUserEntry entry) {
+        ((StoredUserListAccessor) list).accessor$map().put(((StoredUserListAccessor) list).invoker$getKeyForUser(((StoredUserEntryAccessor) entry).accessor$user()), entry);
 
         try {
             list.save();
         } catch (final IOException e) {
-            UserListAccessor.accessor$LOGGER().warn("Could not save the list after adding a user.", e);
+            StoredUserListAccessor.accessor$LOGGER().warn("Could not save the list after adding a user.", e);
         }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static void removeEntry(final UserList list, final Object object) {
-        ((UserListAccessor) list).accessor$map().remove(((UserListAccessor) list).invoker$getKeyForUser(object));
+    public static void removeEntry(final StoredUserList list, final Object object) {
+        ((StoredUserListAccessor) list).accessor$map().remove(((StoredUserListAccessor) list).invoker$getKeyForUser(object));
 
         try {
             list.save();
         } catch (final IOException e) {
-            UserListAccessor.accessor$LOGGER().warn("Could not save the list after removing a user.", e);
+            StoredUserListAccessor.accessor$LOGGER().warn("Could not save the list after removing a user.", e);
         }
     }
 

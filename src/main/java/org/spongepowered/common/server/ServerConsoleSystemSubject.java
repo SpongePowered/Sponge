@@ -28,13 +28,12 @@ import java.util.UUID;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.common.SpongeCommon;
@@ -43,7 +42,7 @@ import org.spongepowered.common.service.server.permission.SpongeSystemSubject;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 
-public final class ServerConsoleSystemSubject extends SpongeSystemSubject implements CommandSourceProviderBridge, ICommandSource, ICommandSourceBridge {
+public final class ServerConsoleSystemSubject extends SpongeSystemSubject implements CommandSourceProviderBridge, CommandSource, ICommandSourceBridge {
 
     @Override
     public String getIdentifier() {
@@ -56,20 +55,20 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
     }
 
     @Override
-    public CommandSource bridge$getCommandSource(final Cause cause) {
-        return new CommandSource(this,
-                Vector3d.ZERO,
-                Vector2f.ZERO,
-                SpongeCommon.getServer().getLevel(World.OVERWORLD),
+    public CommandSourceStack bridge$getCommandSource(final Cause cause) {
+        return new CommandSourceStack(this,
+                Vec3.ZERO,
+                Vec2.ZERO,
+                SpongeCommon.getServer().getLevel(Level.OVERWORLD),
                 4,
                 "System Subject",
-                new StringTextComponent("System Subject"),
+                new TextComponent("System Subject"),
                 SpongeCommon.getServer(),
                 null);
     }
 
     @Override
-    public void sendMessage(final ITextComponent component, final UUID identity) {
+    public void sendMessage(final net.minecraft.network.chat.Component component, final UUID identity) {
         SpongeCommon.getLogger().info(component.getString());
     }
 

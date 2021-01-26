@@ -25,22 +25,19 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.google.inject.Injector;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.resources.DataPackRegistries;
-import net.minecraft.resources.IResourcePack;
-import net.minecraft.resources.ResourcePackList;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.FolderName;
-import net.minecraft.world.storage.SaveFormat;
-import net.minecraft.world.storage.ServerWorldInfo;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
@@ -101,18 +98,18 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         CommandSourceProviderBridge, SubjectProxy, ICommandSourceBridge {
 
     // @formatter:off
-    @Shadow @Final private Map<RegistryKey<World>, ServerWorld> levels;
-    @Shadow @Final private PlayerProfileCache profileCache;
+    @Shadow @Final private Map<ResourceKey<Level>, ServerLevel> levels;
+    @Shadow @Final private GameProfileCache profileCache;
     @Shadow @Final private static Logger LOGGER;
     @Shadow private int tickCount;
-    @Shadow @Final protected SaveFormat.LevelSave storageSource;
+    @Shadow @Final protected LevelStorageSource.LevelStorageAccess storageSource;
 
-    @Shadow public abstract CommandSource shadow$createCommandSourceStack();
-    @Shadow public abstract Iterable<ServerWorld> shadow$getAllLevels();
+    @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
+    @Shadow public abstract Iterable<ServerLevel> shadow$getAllLevels();
     @Shadow public abstract boolean shadow$isDedicatedServer();
     @Shadow public abstract boolean shadow$isRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
-    @Shadow public abstract ResourcePackList shadow$getPackRepository();
+    @Shadow public abstract PackRepository shadow$getPackRepository();
     // @formatter:on
 
     @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
@@ -162,7 +159,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @Override
-    public CommandSource bridge$getCommandSource(final Cause cause) {
+    public CommandSourceStack bridge$getCommandSource(final Cause cause) {
         return this.shadow$createCommandSourceStack();
     }
 
@@ -203,12 +200,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "stopServer", at = @At(value = "TAIL"))
     private void impl$closeLevelSaveForOtherWorlds(final CallbackInfo ci) {
-        for (final Map.Entry<RegistryKey<World>, ServerWorld> entry : this.levels.entrySet()) {
-            if (entry.getKey() == World.OVERWORLD) {
+        for (final Map.Entry<ResourceKey<Level>, ServerLevel> entry : this.levels.entrySet()) {
+            if (entry.getKey() == Level.OVERWORLD) {
                 continue;
             }
 
-            final SaveFormat.LevelSave levelSave = ((ServerWorldBridge) entry.getValue()).bridge$getLevelSave();
+            final LevelStorageSource.LevelStorageAccess levelSave = ((ServerWorldBridge) entry.getValue()).bridge$getLevelSave();
             try {
                 levelSave.close();
             } catch (IOException e) {
@@ -243,7 +240,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      */
     @Overwrite
     public boolean saveAllChunks(final boolean suppressLog, final boolean flush, final boolean isForced) {
-        for (final ServerWorld world : this.shadow$getAllLevels()) {
+        for (final ServerLevel world : this.shadow$getAllLevels()) {
             final SerializationBehavior serializationBehavior = ((ServerWorldInfoBridge) world.getLevelData()).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
             boolean log = !suppressLog;
 
@@ -315,13 +312,13 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      */
     @Overwrite
     public void setDifficulty(final Difficulty difficulty, final boolean forceDifficulty) {
-        for (final ServerWorld world : this.shadow$getAllLevels()) {
+        for (final ServerLevel world : this.shadow$getAllLevels()) {
             this.bridge$setDifficulty(world, difficulty, forceDifficulty);
         }
     }
 
     @Override
-    public void bridge$setDifficulty(final ServerWorld world, final Difficulty newDifficulty, final boolean forceDifficulty) {
+    public void bridge$setDifficulty(final ServerLevel world, final Difficulty newDifficulty, final boolean forceDifficulty) {
         if (world.getLevelData().isDifficultyLocked() && !forceDifficulty) {
             return;
         }
@@ -332,7 +329,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
                 ((ServerWorldInfoBridge) world.getLevelData()).bridge$forceSetDifficulty(newDifficulty);
             }
         } else {
-            ((ServerWorldInfo) world.getLevelData()).setDifficulty(newDifficulty);
+            ((PrimaryLevelData) world.getLevelData()).setDifficulty(newDifficulty);
         }
     }
 
@@ -351,7 +348,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      * @return converted message
      */
     @ModifyVariable(method = "sendMessage", at = @At("HEAD"), argsOnly = true)
-    private ITextComponent impl$applyTranslation(final ITextComponent input) {
+    private Component impl$applyTranslation(final Component input) {
         return NativeComponentRenderer.apply(input.copy(), Locale.getDefault());
     }
 
@@ -364,7 +361,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     public void impl$reloadResources(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
         SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents();
         try {
-            SpongeDataPackManager.INSTANCE.serialize(this.storageSource.getLevelPath(FolderName.DATAPACK_DIR), datapacksToLoad);
+            SpongeDataPackManager.INSTANCE.serialize(this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR), datapacksToLoad);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

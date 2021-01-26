@@ -25,21 +25,18 @@
 package org.spongepowered.common.bridge.entity.player;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SRespawnPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.GameType;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.User;
@@ -56,7 +53,7 @@ import java.util.Set;
 public interface ServerPlayerEntityBridge extends ServerPlayerEntityHealthScaleBridge {
 
     default ClientType bridge$getClientType() {
-        final ServerPlayerEntity mPlayer = (ServerPlayerEntity) this;
+        final ServerPlayer mPlayer = (ServerPlayer) this;
         if (mPlayer.connection == null) {
             return ClientType.VANILLA;
         }
@@ -81,7 +78,7 @@ public interface ServerPlayerEntityBridge extends ServerPlayerEntityHealthScaleB
 
     void bridge$setScoreboardOnRespawn(Scoreboard scoreboard);
 
-    void bridge$restorePacketItem(Hand hand);
+    void bridge$restorePacketItem(InteractionHand hand);
 
     void bridge$setPacketItem(ItemStack itemstack);
 
@@ -103,16 +100,16 @@ public interface ServerPlayerEntityBridge extends ServerPlayerEntityHealthScaleB
     @Nullable
     User bridge$getUser();
 
-    @Nullable ITextComponent bridge$getConnectionMessageToSend();
+    net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend();
 
-    void bridge$setConnectionMessageToSend(ITextComponent message);
+    void bridge$setConnectionMessageToSend(net.minecraft.network.chat.Component message);
 
-    default void bridge$sendDimensionData(final NetworkManager manager, final DimensionType dimensionType, final RegistryKey<World> key) {
+    default void bridge$sendDimensionData(final Connection manager, final DimensionType dimensionType, final ResourceKey<Level> key) {
     }
 
-    default void bridge$sendChangeDimension(final DimensionType dimensionType, final RegistryKey<World> key, final long hashedSeed,
+    default void bridge$sendChangeDimension(final DimensionType dimensionType, final ResourceKey<Level> key, final long hashedSeed,
             final GameType gameType, final GameType previousGameType, final boolean isDebug, final boolean isFlat, final boolean keepPlayerData) {
-        ((ServerPlayerEntity) this).connection.send(new SRespawnPacket(dimensionType, key, hashedSeed, gameType, previousGameType, isDebug,
+        ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(dimensionType, key, hashedSeed, gameType, previousGameType, isDebug,
                 isFlat, keepPlayerData));
     }
 

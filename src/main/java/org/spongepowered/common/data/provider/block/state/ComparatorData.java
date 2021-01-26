@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ComparatorBlock;
+import net.minecraft.world.level.block.ComparatorBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ComparatorMode;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -41,7 +41,7 @@ public final class ComparatorData {
                 .asImmutable(BlockState.class)
                     .create(Keys.COMPARATOR_MODE)
                         .get(h -> (ComparatorMode) (Object) h.getValue(ComparatorBlock.MODE))
-                        .set((h, v) -> h.setValue(ComparatorBlock.MODE, (net.minecraft.state.properties.ComparatorMode) (Object) v))
+                        .set((h, v) -> h.setValue(ComparatorBlock.MODE, (net.minecraft.world.level.block.state.properties.ComparatorMode) (Object) v))
                         .supports(h -> h.getBlock() instanceof ComparatorBlock);
     }
     // @formatter:on

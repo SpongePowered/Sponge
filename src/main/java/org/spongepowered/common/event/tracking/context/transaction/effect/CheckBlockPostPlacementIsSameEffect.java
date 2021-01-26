@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -43,7 +43,7 @@ public final class CheckBlockPostPlacementIsSameEffect implements ProcessingSide
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag, final int limit
     ) {
-        final ChunkSection chunkSection = pipeline.getAffectedSection();
+        final LevelChunkSection chunkSection = pipeline.getAffectedSection();
         final int x = oldState.pos.getX() & 15;
         final int y = oldState.pos.getY() & 15;
         final int z = oldState.pos.getZ() & 15;

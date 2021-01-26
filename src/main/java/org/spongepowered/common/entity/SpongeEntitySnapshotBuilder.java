@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity;
 
-import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
@@ -54,6 +53,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
 
 public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnapshot> implements EntitySnapshot.Builder {
 
@@ -65,7 +65,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
 
     @Nullable UUID uniqueId;
     @Nullable DataManipulator.Mutable manipulator;
-    @Nullable CompoundNBT compound;
+    @Nullable CompoundTag compound;
     @Nullable WeakReference<Entity> entityReference;
 
     public SpongeEntitySnapshotBuilder() {
@@ -119,8 +119,8 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         this.entityType = entity.getType();
         this.uniqueId = entity.getUniqueId();
         this.manipulator = ((CustomDataHolderBridge) entity).bridge$getManipulator().copy();
-        this.compound = new CompoundNBT();
-        ((net.minecraft.entity.Entity) entity).saveWithoutId(this.compound);
+        this.compound = new CompoundTag();
+        ((net.minecraft.world.entity.Entity) entity).saveWithoutId(this.compound);
         return this;
     }
 
@@ -158,7 +158,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder from(final net.minecraft.entity.Entity minecraftEntity) {
+    public SpongeEntitySnapshotBuilder from(final net.minecraft.world.entity.Entity minecraftEntity) {
         this.entityType = ((Entity) minecraftEntity).getType();
         this.worldKey = ((Entity) minecraftEntity).getServerLocation().getWorldKey();
         this.uniqueId = minecraftEntity.getUUID();
@@ -167,12 +167,12 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         this.rotation = transform.getRotation();
         this.scale = transform.getScale();
         this.manipulator = DataManipulator.mutableOf((Entity) minecraftEntity);
-        this.compound = new CompoundNBT();
+        this.compound = new CompoundTag();
         minecraftEntity.saveWithoutId(this.compound);
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder unsafeCompound(final CompoundNBT compound) {
+    public SpongeEntitySnapshotBuilder unsafeCompound(final CompoundTag compound) {
         this.compound = Objects.requireNonNull(compound).copy();
         return this;
     }
@@ -204,7 +204,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         // Write the the manipulator values to NBT
         if (this.manipulator != null && !this.manipulator.getKeys().isEmpty()) {
             if (this.compound == null) {
-                this.compound = new CompoundNBT();
+                this.compound = new CompoundTag();
             }
 
             final SimpleNBTDataHolder dataHolder = new SimpleNBTDataHolder(this.compound, NBTDataTypes.ENTITY);

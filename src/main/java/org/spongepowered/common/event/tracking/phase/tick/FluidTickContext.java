@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.fluid.FluidState;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.TrackableBridge;
@@ -50,7 +50,7 @@ public class FluidTickContext extends LocationBasedTickContext<FluidTickContext>
         if (owner instanceof LocatableBlock) {
             final LocatableBlock locatableBlock = (LocatableBlock) owner;
             final Block block = ((BlockState) locatableBlock.getBlockState()).getBlock();
-            this.providesModifier = !(block instanceof FlowingFluidBlock);
+            this.providesModifier = !(block instanceof LiquidBlock);
             this.world = locatableBlock.getWorld();
             if (block instanceof TrackableBridge) {
                 final TrackableBridge trackable = (TrackableBridge) block;

@@ -24,12 +24,6 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -40,6 +34,12 @@ import org.spongepowered.common.util.NBTStreams;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 
 public final class BlockTypeItemStackData {
 
@@ -60,11 +60,11 @@ public final class BlockTypeItemStackData {
     // @formatter:on
 
     private static Set<BlockType> get(final ItemStack stack, final String nbtKey) {
-        final CompoundNBT tag = stack.getTag();
+        final CompoundTag tag = stack.getTag();
         if (tag == null) {
             return null;
         }
-        final ListNBT list = tag.getList(nbtKey, Constants.NBT.TAG_STRING);
+        final ListTag list = tag.getList(nbtKey, Constants.NBT.TAG_STRING);
         if (list.isEmpty()) {
             return null;
         }
@@ -82,8 +82,8 @@ public final class BlockTypeItemStackData {
             return true;
         }
 
-        final CompoundNBT tag = stack.getOrCreateTag();
-        final ListNBT list = value.stream()
+        final CompoundTag tag = stack.getOrCreateTag();
+        final ListTag list = value.stream()
                 .map(type -> Registry.BLOCK.getKey((Block) type).toString())
                 .collect(NBTCollectors.toStringTagList());
         tag.put(nbtKey, list);

@@ -25,11 +25,10 @@
 package org.spongepowered.common.network.packet;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.DimensionType;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -59,7 +58,7 @@ public final class SpongePacketHandler {
                         return;
                     }
 
-                    final ServerPlayerEntity sender = (ServerPlayerEntity) player;
+                    final net.minecraft.server.level.ServerPlayer sender = (net.minecraft.server.level.ServerPlayer) player;
                     final BlockPos pos = new BlockPos(requestPacket.x, requestPacket.y, requestPacket.z);
                     if (!sender.level.hasChunkAt(pos)) {
                         return;
@@ -78,7 +77,7 @@ public final class SpongePacketHandler {
                         return;
                     }
 
-                    final ServerPlayerEntity sender = (ServerPlayerEntity) player;
+                    final net.minecraft.server.level.ServerPlayer sender = (net.minecraft.server.level.ServerPlayer) player;
                     final Entity entity = sender.level.getEntity(requestPacket.entityId);
                     if (!(entity instanceof CreatorTrackedBridge)) {
                         return;
@@ -92,7 +91,7 @@ public final class SpongePacketHandler {
                 });
         SpongePacketHandler.channel.register(ChangeViewerEnvironmentPacket.class, 3).addHandler(ClientSideConnection.class,
                 (packet, connection) -> {
-                    final ClientWorld world = Minecraft.getInstance().level;
+                    final ClientLevel world = Minecraft.getInstance().level;
                     if (world == null) {
                         return;
                     }

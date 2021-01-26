@@ -36,21 +36,21 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.Commands;
-import net.minecraft.resources.DataPackRegistries;
-import net.minecraft.resources.ResourcePackList;
-import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.util.concurrent.RecursiveEventLoop;
-import net.minecraft.util.concurrent.TickDelayedTask;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.IServerConfiguration;
-import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.server.ServerResources;
+import net.minecraft.server.ServerScoreboard;
+import net.minecraft.server.TickTask;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.Mth;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
@@ -103,11 +103,11 @@ import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 @Implements(value = @Interface(iface = Server.class, prefix = "server$"))
-public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer {
+public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLoop<TickTask> implements SpongeServer {
 
     // @formatter:off
     @Shadow @Final public long[] tickTimes;
-    @Shadow @Final protected IServerConfiguration worldData;
+    @Shadow @Final protected WorldData worldData;
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract boolean shadow$usesAuthentication();
     @Shadow public abstract String shadow$getMotd();
@@ -142,10 +142,10 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void api$initializeSpongeFields(final Thread p_i232576_1_, final DynamicRegistries.Impl p_i232576_2_,
-            final SaveFormat.LevelSave p_i232576_3_, final IServerConfiguration p_i232576_4_, final ResourcePackList p_i232576_5_,
-            final Proxy p_i232576_6_, final DataFixer p_i232576_7_, final DataPackRegistries p_i232576_8_, final MinecraftSessionService p_i232576_9_,
-            final GameProfileRepository p_i232576_10_, final PlayerProfileCache p_i232576_11_, final IChunkStatusListenerFactory p_i232576_12_,
+    public void api$initializeSpongeFields(final Thread p_i232576_1_, final RegistryAccess.RegistryHolder p_i232576_2_,
+            final LevelStorageSource.LevelStorageAccess p_i232576_3_, final WorldData p_i232576_4_, final PackRepository p_i232576_5_,
+            final Proxy p_i232576_6_, final DataFixer p_i232576_7_, final ServerResources p_i232576_8_, final MinecraftSessionService p_i232576_9_,
+            final GameProfileRepository p_i232576_10_, final GameProfileCache p_i232576_11_, final ChunkProgressListenerFactory p_i232576_12_,
             final CallbackInfo ci) {
 
         this.api$scheduler = new ServerScheduler();
@@ -302,7 +302,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public double getTicksPerSecond() {
-        final double nanoSPerTick = MathHelper.average(this.tickTimes);
+        final double nanoSPerTick = Mth.average(this.tickTimes);
         // Cap at 20 TPS
         return 1000 / Math.max(50, nanoSPerTick / 1000000);
     }
@@ -348,7 +348,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
         if (this.api$scoreboard == null) {
-            final ServerWorld world = SpongeCommon.getServer().overworld();
+            final ServerLevel world = SpongeCommon.getServer().overworld();
             if (world == null) {
                 return Optional.empty();
             }

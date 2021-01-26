@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.volume.buffer.block;
 
-import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -49,6 +48,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import net.minecraft.core.BlockPos;
 
 public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements BlockVolume.Mutable<ArrayMutableBlockBuffer> {
 
@@ -205,12 +205,12 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         return new SpongeVolumeStream<>(stateStream, () -> this);
     }
 
-    public void setBlock(final BlockPos pos, final net.minecraft.block.BlockState blockState) {
+    public void setBlock(final BlockPos pos, final net.minecraft.world.level.block.state.BlockState blockState) {
         this.setBlock(pos.getX(), pos.getY(), pos.getZ(), (BlockState) blockState);
     }
 
-    public net.minecraft.block.BlockState getBlock(final BlockPos blockPos) {
-        return (net.minecraft.block.BlockState) this.getBlock(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    public net.minecraft.world.level.block.state.BlockState getBlock(final BlockPos blockPos) {
+        return (net.minecraft.world.level.block.state.BlockState) this.getBlock(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
     public ArrayMutableBlockBuffer copy() {

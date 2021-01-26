@@ -27,8 +27,8 @@ package org.spongepowered.common.entity.ai.goal.builtin.creature;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.IRangedAttackMob;
-import net.minecraft.entity.ai.goal.RangedAttackGoal;
+import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
+import net.minecraft.world.entity.monster.RangedAttackMob;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.RangedAttackAgainstAgentGoal;
 import org.spongepowered.api.entity.living.Ranger;
 
@@ -81,7 +81,7 @@ public final class SpongeRangedAttackAgainstAgentGoalBuilder implements RangedAt
     @Override
     public RangedAttackAgainstAgentGoal build(Ranger owner) {
         checkNotNull(owner);
-        checkArgument(owner instanceof IRangedAttackMob, "Ranger must be an IRangedAttackMob!");
-        return (RangedAttackAgainstAgentGoal) new RangedAttackGoal((IRangedAttackMob) owner, this.maxSpeed, this.delayBetweenAttacks, this.attackRadius);
+        checkArgument(owner instanceof RangedAttackMob, "Ranger must be an IRangedAttackMob!");
+        return (RangedAttackAgainstAgentGoal) new RangedAttackGoal((RangedAttackMob) owner, this.maxSpeed, this.delayBetweenAttacks, this.attackRadius);
     }
 }

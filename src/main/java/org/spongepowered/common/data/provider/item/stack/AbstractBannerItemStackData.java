@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.item.BannerItem;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;

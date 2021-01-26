@@ -27,20 +27,18 @@ package org.spongepowered.common.raid;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.entity.monster.AbstractRaiderEntity;
 import org.spongepowered.api.entity.living.monster.raider.Raider;
 import org.spongepowered.api.raid.Raid;
 import org.spongepowered.api.raid.RaidWave;
-import org.spongepowered.common.accessor.world.raid.RaidAccessor;
-
+import org.spongepowered.common.accessor.world.entity.raid.RaidAccessor;
 import java.util.Optional;
 
 public final class SpongeRaidWave implements RaidWave {
 
-    private final net.minecraft.world.raid.Raid raid;
+    private final net.minecraft.world.entity.raid.Raid raid;
     private final int waveId;
 
-    public SpongeRaidWave(final net.minecraft.world.raid.Raid raid, final int waveId) {
+    public SpongeRaidWave(final net.minecraft.world.entity.raid.Raid raid, final int waveId) {
         this.raid = raid;
         this.waveId = waveId;
     }
@@ -79,14 +77,14 @@ public final class SpongeRaidWave implements RaidWave {
     @Override
     public boolean addRaider(Raider raider, boolean addToRaidHealth) {
         checkNotNull(raider, "Raider cannot be null.");
-        return this.raid.addWaveMob(this.waveId, (AbstractRaiderEntity) raider, addToRaidHealth);
+        return this.raid.addWaveMob(this.waveId, (net.minecraft.world.entity.raid.Raider) raider, addToRaidHealth);
     }
 
     @Override
     public boolean removeRaider(Raider raider) {
         checkNotNull(raider, "Raider cannot be null.");
         if (raider.raidWave().isPresent() && this.equals(raider.raidWave().get().get())) {
-            this.raid.removeFromRaid((AbstractRaiderEntity) raider, true);
+            this.raid.removeFromRaid((net.minecraft.world.entity.raid.Raider) raider, true);
             return true;
         }
 

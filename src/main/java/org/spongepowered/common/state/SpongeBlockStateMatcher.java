@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.state;
 
-import net.minecraft.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -35,6 +34,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.minecraft.world.level.block.Block;
 
 public final class SpongeBlockStateMatcher extends AbstractSpongeStateMatcher<@NonNull BlockState, BlockType> {
 
@@ -47,7 +47,7 @@ public final class SpongeBlockStateMatcher extends AbstractSpongeStateMatcher<@N
 
     @Override
     public boolean matches(@NonNull final BlockState state) {
-        return this.isValid((net.minecraft.block.BlockState) state);
+        return this.isValid((net.minecraft.world.level.block.state.BlockState) state);
     }
 
     @Override

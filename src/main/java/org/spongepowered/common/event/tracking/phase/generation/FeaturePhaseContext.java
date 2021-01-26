@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import java.util.Objects;
 
 public final class FeaturePhaseContext extends GenerationContext<FeaturePhaseContext> {

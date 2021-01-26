@@ -24,13 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.crafting.shapeless;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapelessRecipe;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
 import java.util.ArrayList;
@@ -42,6 +35,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.level.Level;
 
 /**
  * Customized matching algorithm matching with ingredient predicate instead of packed item in vanilla
@@ -49,12 +49,12 @@ import java.util.function.Function;
 public class SpongeShapelessRecipe extends ShapelessRecipe {
 
     private final boolean onlyVanillaIngredients;
-    private final Function<CraftingInventory, ItemStack> resultFunction;
-    private final Function<CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction;
+    private final Function<CraftingContainer, ItemStack> resultFunction;
+    private final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction;
 
     public SpongeShapelessRecipe(ResourceLocation idIn, String groupIn, ItemStack recipeOutputIn, NonNullList<Ingredient> recipeItemsIn,
-            Function<CraftingInventory, ItemStack> resultFunction,
-            Function<CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction) {
+            Function<CraftingContainer, ItemStack> resultFunction,
+            Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction) {
         super(idIn, groupIn, recipeOutputIn, recipeItemsIn);
         this.onlyVanillaIngredients = recipeItemsIn.stream().noneMatch(i -> i instanceof SpongeIngredient);
         this.resultFunction = resultFunction;
@@ -62,7 +62,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public boolean matches(CraftingInventory inv, World p_77569_2_) {
+    public boolean matches(CraftingContainer inv, Level p_77569_2_) {
         if (this.onlyVanillaIngredients) {
             return super.matches(inv, p_77569_2_);
         }
@@ -77,7 +77,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
+    public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
         if (this.remainingItemsFunction != null) {
             return this.remainingItemsFunction.apply(inv);
         }
@@ -85,7 +85,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInventory p_77572_1_) {
+    public ItemStack assemble(CraftingContainer p_77572_1_) {
         if (this.resultFunction != null) {
             return this.resultFunction.apply(p_77572_1_);
         }

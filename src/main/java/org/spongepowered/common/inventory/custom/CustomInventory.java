@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.inventory.custom;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
@@ -43,8 +40,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
-public class CustomInventory implements IInventory, CarriedBridge {
+public class CustomInventory implements Container, CarriedBridge {
 
     // shadow usage
     private SlotLensProvider slotLensProvider;
@@ -159,14 +159,14 @@ public class CustomInventory implements IInventory, CarriedBridge {
     @Override
     public void setChanged() {
         for (Inventory inventory : this.inventories) {
-            if (inventory instanceof IInventory) {
-                ((IInventory) inventory).setChanged();
+            if (inventory instanceof Container) {
+                ((Container) inventory).setChanged();
             }
         }
     }
 
     @Override
-    public boolean stillValid(final PlayerEntity player) {
+    public boolean stillValid(final Player player) {
         return true;
     }
 

@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.world.portal;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.EndPortalFrameBlock;
-import net.minecraft.block.NetherPortalBlock;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EndPortalFrameBlock;
+import net.minecraft.world.level.block.NetherPortalBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 // Because Vanilla doesn't move this stuff out...
 public final class PortalHelper {
@@ -44,10 +44,10 @@ public final class PortalHelper {
     private static final BlockState westEndFrame = Blocks.END_PORTAL_FRAME.defaultBlockState().setValue(EndPortalFrameBlock.FACING, Direction.WEST);
     private static final BlockState endPortal = Blocks.END_PORTAL.defaultBlockState();
 
-    public static void generateEndPortal(final ServerWorld world, final int x, final int y, final int z, final boolean placePortalBlocks) {
+    public static void generateEndPortal(final ServerLevel world, final int x, final int y, final int z, final boolean placePortalBlocks) {
         // Sponge Start - Recreate logic for making an end portal frame since Vanilla assumes you are in a stronghold
 
-        final BlockPos.Mutable origin = new BlockPos.Mutable(x, y, z); // 2
+        final BlockPos.MutableBlockPos origin = new BlockPos.MutableBlockPos(x, y, z); // 2
 
         for (int bx = 0; bx < 5; bx++) {
             for (int by = 0; by < 5; by++) {
@@ -78,7 +78,7 @@ public final class PortalHelper {
     }
 
     // see Teleporter#createPortal
-    public static void generateNetherPortal(final ServerWorld world, final int x, final int y, final int z, final Direction.Axis axis, final boolean placePortalBlocks) {
+    public static void generateNetherPortal(final ServerLevel world, final int x, final int y, final int z, final Direction.Axis axis, final boolean placePortalBlocks) {
         final BlockPos portalPos = new BlockPos(x, y, z);
         final Direction direction = Direction.get(Direction.AxisDirection.POSITIVE, axis);
         double d0 = -1.0D;
@@ -87,10 +87,10 @@ public final class PortalHelper {
         BlockPos blockpos1 = null;
         final WorldBorder worldborder = world.getWorldBorder();
         final int i = world.getHeight() - 1;
-        final BlockPos.Mutable blockpos$mutable = portalPos.mutable();
+        final BlockPos.MutableBlockPos blockpos$mutable = portalPos.mutable();
 
-        for(final BlockPos.Mutable blockpos$mutable1 : BlockPos.spiralAround(portalPos, 16, Direction.EAST, Direction.SOUTH)) {
-            final int j = Math.min(i, world.getHeight(Heightmap.Type.MOTION_BLOCKING, blockpos$mutable1.getX(), blockpos$mutable1.getZ()));
+        for(final BlockPos.MutableBlockPos blockpos$mutable1 : BlockPos.spiralAround(portalPos, 16, Direction.EAST, Direction.SOUTH)) {
+            final int j = Math.min(i, world.getHeight(Heightmap.Types.MOTION_BLOCKING, blockpos$mutable1.getX(), blockpos$mutable1.getZ()));
             final int k = 1;
             if (worldborder.isWithinBounds(blockpos$mutable1) && worldborder.isWithinBounds(blockpos$mutable1.move(direction, 1))) {
                 blockpos$mutable1.move(direction.getOpposite(), 1);
@@ -131,7 +131,7 @@ public final class PortalHelper {
         }
 
         if (d0 == -1.0D) {
-            blockpos = (new BlockPos(portalPos.getX(), MathHelper.clamp(portalPos.getY(), 70, world.getHeight() - 10), portalPos.getZ())).immutable();
+            blockpos = (new BlockPos(portalPos.getX(), Mth.clamp(portalPos.getY(), 70, world.getHeight() - 10), portalPos.getZ())).immutable();
             final Direction direction1 = direction.getClockWise();
             if (!worldborder.isWithinBounds(blockpos)) {
                 return;
@@ -170,7 +170,7 @@ public final class PortalHelper {
 
     }
 
-    private static boolean canHostFrame(final ServerWorld world, final BlockPos p_242955_1_, final BlockPos.Mutable p_242955_2_, final Direction p_242955_3_, final int p_242955_4_) {
+    private static boolean canHostFrame(final ServerLevel world, final BlockPos p_242955_1_, final BlockPos.MutableBlockPos p_242955_2_, final Direction p_242955_3_, final int p_242955_4_) {
         final Direction direction = p_242955_3_.getClockWise();
 
         for(int i = -1; i < 3; ++i) {

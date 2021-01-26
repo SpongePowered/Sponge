@@ -26,9 +26,9 @@ package org.spongepowered.common.registry.provider;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import net.minecraft.world.biome.ColumnFuzzedBiomeMagnifier;
-import net.minecraft.world.biome.DefaultBiomeMagnifier;
-import net.minecraft.world.biome.FuzzedBiomeMagnifier;
+import net.minecraft.world.level.biome.FuzzyOffsetBiomeZoomer;
+import net.minecraft.world.level.biome.FuzzyOffsetConstantColumnBiomeZoomer;
+import net.minecraft.world.level.biome.NearestNeighborBiomeZoomer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.biome.BiomeSampler;
@@ -42,9 +42,9 @@ public final class BiomeSamplerProvider {
     private BiomeSamplerProvider() {
         this.mappings = HashBiMap.create();
 
-        this.mappings.put(ResourceKey.sponge("column_fuzzed"), (BiomeSampler) (Object) ColumnFuzzedBiomeMagnifier.INSTANCE);
-        this.mappings.put(ResourceKey.sponge("fuzzy"), (BiomeSampler) (Object) FuzzedBiomeMagnifier.INSTANCE);
-        this.mappings.put(ResourceKey.sponge("default"), (BiomeSampler) (Object) DefaultBiomeMagnifier.INSTANCE);
+        this.mappings.put(ResourceKey.sponge("column_fuzzed"), (BiomeSampler) (Object) FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE);
+        this.mappings.put(ResourceKey.sponge("fuzzy"), (BiomeSampler) (Object) FuzzyOffsetBiomeZoomer.INSTANCE);
+        this.mappings.put(ResourceKey.sponge("default"), (BiomeSampler) (Object) NearestNeighborBiomeZoomer.INSTANCE);
     }
 
     @Nullable

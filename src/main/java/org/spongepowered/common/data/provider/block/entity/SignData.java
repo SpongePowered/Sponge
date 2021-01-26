@@ -25,12 +25,12 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.block.StandingSignBlock;
-import net.minecraft.block.WallSignBlock;
-import net.minecraft.tileentity.SignTileEntity;
+import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.WallSignBlock;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.common.accessor.tileentity.SignTileEntityAccessor;
+import org.spongepowered.common.accessor.world.level.block.entity.SignBlockEntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.DirectionUtil;
@@ -48,7 +48,7 @@ public final class SignData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(SignTileEntity.class)
+                .asMutable(SignBlockEntity.class)
                     .create(Keys.SIGN_LINES)
                         .get(SignData::getSignLines)
                         .set(SignData::setSignLines)
@@ -79,20 +79,20 @@ public final class SignData {
                         .get(SignData::getSignLines)
                         .set(SignData::setSignLines)
                         .delete(h -> SignData.setSignLines(h, Collections.emptyList()))
-                        .supports(loc -> loc.getBlockEntity().map(b -> b instanceof SignTileEntity).orElse(false));
+                        .supports(loc -> loc.getBlockEntity().map(b -> b instanceof SignBlockEntity).orElse(false));
     }
     // @formatter:on
 
-    private static SignTileEntity toSignTileEntity(final ServerLocation holder) {
-        return (SignTileEntity) holder.getBlockEntity().get();
+    private static SignBlockEntity toSignTileEntity(final ServerLocation holder) {
+        return (SignBlockEntity) holder.getBlockEntity().get();
     }
 
     private static void setSignLines(final ServerLocation holder, final List<Component> value) {
         SignData.setSignLines(SignData.toSignTileEntity(holder), value);
     }
 
-    private static void setSignLines(final SignTileEntity holder, final List<Component> value) {
-        final SignTileEntityAccessor accessor = (SignTileEntityAccessor) holder;
+    private static void setSignLines(final SignBlockEntity holder, final List<Component> value) {
+        final SignBlockEntityAccessor accessor = (SignBlockEntityAccessor) holder;
         for (int i = 0; i < accessor.accessor$messages().length; i++) {
             accessor.accessor$messages()[i] = SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i));
         }
@@ -104,8 +104,8 @@ public final class SignData {
         return SignData.getSignLines(SignData.toSignTileEntity(h));
     }
 
-    private static List<Component> getSignLines(SignTileEntity h) {
-        final SignTileEntityAccessor accessor = (SignTileEntityAccessor) h;
+    private static List<Component> getSignLines(SignBlockEntity h) {
+        final SignBlockEntityAccessor accessor = (SignBlockEntityAccessor) h;
         final List<Component> lines = new ArrayList<>(accessor.accessor$messages().length);
         for (int i = 0; i < accessor.accessor$messages().length; i++) {
             lines.add(SpongeAdventure.asAdventure(accessor.accessor$messages()[i]));

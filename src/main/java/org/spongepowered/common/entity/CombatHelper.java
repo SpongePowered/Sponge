@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.entity;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.CombatTracker;
+import net.minecraft.world.damagesource.CombatTracker;
+import net.minecraft.world.entity.LivingEntity;
 
 public final class CombatHelper {
 

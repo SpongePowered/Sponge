@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.CatEntity;
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.world.entity.animal.Cat;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.CatType;
@@ -42,16 +42,16 @@ public final class CatData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(CatEntity.class)
+                .asMutable(Cat.class)
                     .create(Keys.CAT_TYPE)
                         .get(h -> {
                             final int type = h.getCatType();
-                            return ((SimpleRegistry<CatType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.CAT_TYPE)).byId(type);
+                            return ((MappedRegistry<CatType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.CAT_TYPE)).byId(type);
                         })
-                        .set((h, v) -> h.setCatType(((SimpleRegistry<CatType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.CAT_TYPE)).getId(v)))
+                        .set((h, v) -> h.setCatType(((MappedRegistry<CatType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.CAT_TYPE)).getId(v)))
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) h.getCollarColor())
-                        .set((h, v) -> h.setCollarColor((net.minecraft.item.DyeColor) (Object) v))
+                        .set((h, v) -> h.setCollarColor((net.minecraft.world.item.DyeColor) (Object) v))
                     .create(Keys.IS_BEGGING_FOR_FOOD)
                         .get(h -> {
                             throw new MissingImplementationException("CatData", "IS_BEGGING_FOR_FOOD::getter");
@@ -67,8 +67,8 @@ public final class CatData {
                             throw new MissingImplementationException("CatData", "IS_HISSING::setter");
                         })
                     .create(Keys.IS_LYING_DOWN)
-                        .get(CatEntity::isLying)
-                        .set(CatEntity::setLying)
+                        .get(Cat::isLying)
+                        .set(Cat::setLying)
                     .create(Keys.IS_PURRING)
                         .get(h -> {
                             throw new MissingImplementationException("CatData", "IS_PURRING::getter");
@@ -77,8 +77,8 @@ public final class CatData {
                             throw new MissingImplementationException("CatData", "IS_PURRING::setter");
                         })
                     .create(Keys.IS_RELAXED)
-                        .get(CatEntity::isRelaxStateOne)
-                        .set(CatEntity::setRelaxStateOne);
+                        .get(Cat::isRelaxStateOne)
+                        .set(Cat::setRelaxStateOne);
     }
     // @formatter:on
 }

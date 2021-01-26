@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * A bridge onto {@link net.minecraft.world.IBlockReader} to allow for
+ * A bridge onto {@link net.minecraft.world.level.BlockGetter} to allow for
  * some simplified "get Block if loaded" methods on all block readers.
  */
 public interface IBlockReaderBridge {

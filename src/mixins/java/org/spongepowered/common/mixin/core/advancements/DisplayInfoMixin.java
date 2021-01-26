@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.advancements;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.asm.mixin.Final;

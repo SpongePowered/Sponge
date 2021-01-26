@@ -25,8 +25,6 @@
 package org.spongepowered.common.data.datasync;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.bridge.network.datasync.DataParameterBridge;
@@ -34,18 +32,20 @@ import org.spongepowered.common.bridge.network.datasync.DataParameterBridge;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.Entity;
 
 public abstract class DataParameterConverter<E> {
 
-    private final DataParameter<E> parameter;
+    private final EntityDataAccessor<E> parameter;
 
     @SuppressWarnings("unchecked")
-    public DataParameterConverter(final DataParameter<E> parameter) {
+    public DataParameterConverter(final EntityDataAccessor<E> parameter) {
         this.parameter = parameter;
         ((DataParameterBridge<E>) parameter).bridge$setDataConverter(this);
     }
 
-    public DataParameter<E> getParameter() {
+    public EntityDataAccessor<E> getParameter() {
         return this.parameter;
     }
 

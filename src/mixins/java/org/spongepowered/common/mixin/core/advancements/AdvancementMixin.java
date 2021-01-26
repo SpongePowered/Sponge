@@ -33,8 +33,7 @@ import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
@@ -74,7 +73,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private ResourceLocation id;
 
-    @Shadow @Final private ITextComponent chatComponent;
+    @Shadow @Final private net.minecraft.network.chat.Component chatComponent;
     @Shadow @Final private AdvancementRewards rewards;
     // @formatter:on
 

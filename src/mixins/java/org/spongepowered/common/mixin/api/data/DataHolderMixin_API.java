@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.data;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 
-@Mixin(value = {TileEntity.class, Entity.class, ItemStack.class}, priority = 899)
+@Mixin(value = {BlockEntity.class, Entity.class, ItemStack.class}, priority = 899)
 public abstract class DataHolderMixin_API implements DataHolder, SpongeMutableDataHolder {
 
 }

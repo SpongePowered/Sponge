@@ -25,10 +25,6 @@
 package org.spongepowered.common.data.provider.block.state;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.RedstoneWireBlock;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.state.properties.RedstoneSide;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.util.Direction;
@@ -39,14 +35,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.RedstoneSide;
 
 public final class RedstoneWireData {
 
     private static final Map<Direction, EnumProperty<RedstoneSide>> sides = ImmutableMap.of(
-            Direction.EAST, RedstoneWireBlock.EAST,
-            Direction.WEST, RedstoneWireBlock.WEST,
-            Direction.SOUTH, RedstoneWireBlock.SOUTH,
-            Direction.NORTH, RedstoneWireBlock.NORTH
+            Direction.EAST, RedStoneWireBlock.EAST,
+            Direction.WEST, RedStoneWireBlock.WEST,
+            Direction.SOUTH, RedStoneWireBlock.SOUTH,
+            Direction.NORTH, RedStoneWireBlock.NORTH
     );
 
     private RedstoneWireData() {
@@ -72,44 +72,44 @@ public final class RedstoneWireData {
                             }
                             return h;
                         })
-                        .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
+                        .supports(h -> h.getBlock() instanceof RedStoneWireBlock)
                     .create(Keys.IS_CONNECTED_EAST)
-                        .get(h -> h.getValue(RedstoneWireBlock.EAST) != RedstoneSide.NONE)
-                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedstoneWireBlock.EAST))
-                        .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
+                        .get(h -> h.getValue(RedStoneWireBlock.EAST) != RedstoneSide.NONE)
+                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedStoneWireBlock.EAST))
+                        .supports(h -> h.getBlock() instanceof RedStoneWireBlock)
                     .create(Keys.IS_CONNECTED_NORTH)
-                        .get(h -> h.getValue(RedstoneWireBlock.NORTH) != RedstoneSide.NONE)
-                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedstoneWireBlock.NORTH))
-                        .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
+                        .get(h -> h.getValue(RedStoneWireBlock.NORTH) != RedstoneSide.NONE)
+                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedStoneWireBlock.NORTH))
+                        .supports(h -> h.getBlock() instanceof RedStoneWireBlock)
                     .create(Keys.IS_CONNECTED_SOUTH)
-                        .get(h -> h.getValue(RedstoneWireBlock.SOUTH) != RedstoneSide.NONE)
-                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedstoneWireBlock.SOUTH))
-                        .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
+                        .get(h -> h.getValue(RedStoneWireBlock.SOUTH) != RedstoneSide.NONE)
+                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedStoneWireBlock.SOUTH))
+                        .supports(h -> h.getBlock() instanceof RedStoneWireBlock)
                     .create(Keys.IS_CONNECTED_WEST)
-                        .get(h -> h.getValue(RedstoneWireBlock.WEST) != RedstoneSide.NONE)
-                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedstoneWireBlock.WEST))
-                        .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
+                        .get(h -> h.getValue(RedStoneWireBlock.WEST) != RedstoneSide.NONE)
+                        .set((h, v) -> RedstoneWireData.setConnected(h, v, RedStoneWireBlock.WEST))
+                        .supports(h -> h.getBlock() instanceof RedStoneWireBlock)
                     .create(Keys.POWER)
-                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.POWER, RedstoneWireBlock.POWER))
-                        .get(h -> h.getValue(RedstoneWireBlock.POWER))
-                        .set((h, v) -> BoundedUtil.setInteger(h, v, RedstoneWireBlock.POWER))
-                        .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.POWER, RedStoneWireBlock.POWER))
+                        .get(h -> h.getValue(RedStoneWireBlock.POWER))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, RedStoneWireBlock.POWER))
+                        .supports(h -> h.getBlock() instanceof RedStoneWireBlock)
                     .create(Keys.WIRE_ATTACHMENT_EAST)
-                        .get(h -> (WireAttachmentType) (Object) h.getValue(RedstoneWireBlock.EAST))
-                        .set((h, v) -> h.setValue(RedstoneWireBlock.EAST, (RedstoneSide) (Object) v))
-                        .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
+                        .get(h -> (WireAttachmentType) (Object) h.getValue(RedStoneWireBlock.EAST))
+                        .set((h, v) -> h.setValue(RedStoneWireBlock.EAST, (RedstoneSide) (Object) v))
+                        .supports(h -> h.getBlock() instanceof RedStoneWireBlock)
                     .create(Keys.WIRE_ATTACHMENT_NORTH)
-                        .get(h -> (WireAttachmentType) (Object) h.getValue(RedstoneWireBlock.NORTH))
-                        .set((h, v) -> h.setValue(RedstoneWireBlock.NORTH, (RedstoneSide) (Object) v))
-                        .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
+                        .get(h -> (WireAttachmentType) (Object) h.getValue(RedStoneWireBlock.NORTH))
+                        .set((h, v) -> h.setValue(RedStoneWireBlock.NORTH, (RedstoneSide) (Object) v))
+                        .supports(h -> h.getBlock() instanceof RedStoneWireBlock)
                     .create(Keys.WIRE_ATTACHMENT_SOUTH)
-                        .get(h -> (WireAttachmentType) (Object) h.getValue(RedstoneWireBlock.SOUTH))
-                        .set((h, v) -> h.setValue(RedstoneWireBlock.SOUTH, (RedstoneSide) (Object) v))
-                        .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
+                        .get(h -> (WireAttachmentType) (Object) h.getValue(RedStoneWireBlock.SOUTH))
+                        .set((h, v) -> h.setValue(RedStoneWireBlock.SOUTH, (RedstoneSide) (Object) v))
+                        .supports(h -> h.getBlock() instanceof RedStoneWireBlock)
                     .create(Keys.WIRE_ATTACHMENT_WEST)
-                        .get(h -> (WireAttachmentType) (Object) h.getValue(RedstoneWireBlock.WEST))
-                        .set((h, v) -> h.setValue(RedstoneWireBlock.WEST, (RedstoneSide) (Object) v))
-                        .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
+                        .get(h -> (WireAttachmentType) (Object) h.getValue(RedStoneWireBlock.WEST))
+                        .set((h, v) -> h.setValue(RedStoneWireBlock.WEST, (RedstoneSide) (Object) v))
+                        .supports(h -> h.getBlock() instanceof RedStoneWireBlock)
                     .create(Keys.WIRE_ATTACHMENTS)
                         .get(h -> {
                             final Map<Direction, WireAttachmentType> attachments = new HashMap<>();
@@ -128,7 +128,7 @@ public final class RedstoneWireData {
                             }
                             return h;
                         })
-                        .supports(h -> h.getBlock() instanceof RedstoneWireBlock);
+                        .supports(h -> h.getBlock() instanceof RedStoneWireBlock);
     }
     // @formatter:on
 

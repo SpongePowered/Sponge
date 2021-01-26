@@ -26,16 +26,16 @@ package org.spongepowered.common.effect.record;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.item.MusicDiscItem;
-import net.minecraft.network.play.server.SPlaySoundEventPacket;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
-import org.spongepowered.common.accessor.item.MusicDiscItemAccessor;
+import org.spongepowered.common.accessor.world.item.RecordItemAccessor;
 import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
+import net.minecraft.world.item.RecordItem;
 
 public final class SpongeMusicDisc implements MusicDisc {
 
@@ -45,10 +45,10 @@ public final class SpongeMusicDisc implements MusicDisc {
      */
     private static final int EFFECT_ID = 1010;
 
-    private final MusicDiscItem item;
+    private final RecordItem item;
     private final int id;
 
-    public SpongeMusicDisc(final MusicDiscItem item) {
+    public SpongeMusicDisc(final RecordItem item) {
         this.item = item;
         this.id = Registry.ITEM.getId(item);
     }
@@ -59,13 +59,13 @@ public final class SpongeMusicDisc implements MusicDisc {
 
     @Override
     public SoundType getSound() {
-        return (SoundType) ((MusicDiscItemAccessor) this.item).accessor$sound();
+        return (SoundType) ((RecordItemAccessor) this.item).accessor$sound();
     }
 
-    public static SPlaySoundEventPacket createPacket(final Vector3i position, @Nullable final MusicDisc recordType) {
+    public static ClientboundLevelEventPacket createPacket(final Vector3i position, @Nullable final MusicDisc recordType) {
         checkNotNull(position, "position");
         final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
-        return new SPlaySoundEventPacket(SpongeMusicDisc.EFFECT_ID, pos, recordType == null ? 0 :
+        return new ClientboundLevelEventPacket(SpongeMusicDisc.EFFECT_ID, pos, recordType == null ? 0 :
                 ((SpongeMusicDisc) recordType).getId(), false);
     }
 }

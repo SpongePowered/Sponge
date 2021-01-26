@@ -28,8 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -54,7 +53,7 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private Set<Advancement> children;
     @Shadow @Final private ResourceLocation id;
-    @Shadow @Final private ITextComponent chatComponent;
+    @Shadow @Final private net.minecraft.network.chat.Component chatComponent;
     @Shadow @Final private Advancement parent;
 
     @Override

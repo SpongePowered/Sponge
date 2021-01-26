@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.bridge.data;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.util.Constants;
 
 public interface DataCompoundHolder {
 
-    CompoundNBT data$getCompound();
+    CompoundTag data$getCompound();
 
-    void data$setCompound(CompoundNBT nbt);
+    void data$setCompound(CompoundTag nbt);
 
     default boolean data$hasForgeData() {
         if (this.data$getCompound() == null) {
@@ -41,11 +41,11 @@ public interface DataCompoundHolder {
         return this.data$getCompound().contains(Constants.Forge.FORGE_DATA);
     }
 
-    default CompoundNBT data$getForgeData() {
+    default CompoundTag data$getForgeData() {
         if (this.data$getCompound() == null) {
-            this.data$setCompound(new CompoundNBT());
+            this.data$setCompound(new CompoundTag());
         }
-        CompoundNBT forgeCompound = this.data$getCompound().getCompound(Constants.Forge.FORGE_DATA);
+        CompoundTag forgeCompound = this.data$getCompound().getCompound(Constants.Forge.FORGE_DATA);
         if (forgeCompound.isEmpty()) {
             this.data$getCompound().put(Constants.Forge.FORGE_DATA, forgeCompound);
         }
@@ -56,9 +56,9 @@ public interface DataCompoundHolder {
         return this.data$hasForgeData() && this.data$getForgeData().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
     }
 
-    default CompoundNBT data$getSpongeData() {
-        final CompoundNBT spongeCompound = this.data$getForgeData();
-        final CompoundNBT dataCompound = spongeCompound.getCompound(Constants.Sponge.SPONGE_DATA);
+    default CompoundTag data$getSpongeData() {
+        final CompoundTag spongeCompound = this.data$getForgeData();
+        final CompoundTag dataCompound = spongeCompound.getCompound(Constants.Sponge.SPONGE_DATA);
         if (dataCompound.isEmpty()) {
             spongeCompound.put(Constants.Sponge.SPONGE_DATA, dataCompound);
         }
@@ -66,12 +66,12 @@ public interface DataCompoundHolder {
     }
 
     default void data$cleanEmptySpongeData() {
-        final CompoundNBT spongeData = this.data$getSpongeData();
+        final CompoundTag spongeData = this.data$getSpongeData();
         if (spongeData.isEmpty()) {
-            final CompoundNBT spongeCompound = this.data$getForgeData();
+            final CompoundTag spongeCompound = this.data$getForgeData();
             spongeCompound.remove(Constants.Sponge.SPONGE_DATA);
             if (spongeCompound.isEmpty()) {
-                final CompoundNBT nbt = this.data$getCompound();
+                final CompoundTag nbt = this.data$getCompound();
                 nbt.remove(Constants.Forge.FORGE_DATA);
                 if (nbt.isEmpty()) {
                     this.data$setCompound(null);

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -47,7 +47,7 @@ public final class UpdateConnectingBlocksEffect implements ProcessingSideEffect 
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
     ) {
-        final ServerWorld world = pipeline.getServerWorld();
+        final ServerLevel world = pipeline.getServerWorld();
         final BlockPos pos = oldState.pos;
         if (flag.notifyObservers() && flag.getRawFlag() > 0) {
             // int i = p_241211_3_ & -34; // Vanilla negates 34 to flip neighbor notification and and "is moving?"

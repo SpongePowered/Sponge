@@ -25,10 +25,10 @@
 package org.spongepowered.common.bridge.util.registry;
 
 import com.mojang.serialization.Lifecycle;
-import net.minecraft.util.RegistryKey;
 import org.spongepowered.api.registry.RegistryEntry;
 
 import javax.annotation.Nullable;
+import net.minecraft.resources.ResourceKey;
 
 public interface MutableRegistryBridge<T> {
 
@@ -36,5 +36,5 @@ public interface MutableRegistryBridge<T> {
 
     void bridge$setDynamic(boolean isDynamic);
 
-    @Nullable RegistryEntry<T> bridge$register(final RegistryKey<T> key, final T value, final Lifecycle lifecycle);
+    @Nullable RegistryEntry<T> bridge$register(final ResourceKey<T> key, final T value, final Lifecycle lifecycle);
 }

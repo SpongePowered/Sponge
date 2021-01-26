@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import net.minecraft.block.Block;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.Entity;
@@ -44,6 +40,10 @@ import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -86,7 +86,7 @@ public final class PhasePrinter {
             context.printTrace(printer);
         };
 
-    static void printNullSourceForBlock(final ServerWorld worldServer, final BlockPos pos, final Block blockIn, final BlockPos otherPos,
+    static void printNullSourceForBlock(final ServerLevel worldServer, final BlockPos pos, final Block blockIn, final BlockPos otherPos,
                                                final NullPointerException e) {
         final PhaseTracker instance = PhaseTracker.getInstance();
         final PrettyPrinter printer = new PrettyPrinter(60).add("Null Source Block from Unknown Source!").centre().hr()
@@ -110,8 +110,8 @@ public final class PhasePrinter {
     }
 
 
-    static void printUnexpectedBlockChange(final ServerWorldBridge mixinWorld, final BlockPos pos, final net.minecraft.block.BlockState currentState,
-                                            final net.minecraft.block.BlockState newState) {
+    static void printUnexpectedBlockChange(final ServerWorldBridge mixinWorld, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState currentState,
+                                            final net.minecraft.world.level.block.state.BlockState newState) {
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             return;
         }
@@ -427,7 +427,7 @@ public final class PhasePrinter {
         }
     }
 
-    static void printAsyncBlockChange(final TrackedWorldBridge mixinWorld, final BlockPos pos, final net.minecraft.block.BlockState newState) {
+    static void printAsyncBlockChange(final TrackedWorldBridge mixinWorld, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState newState) {
         new PrettyPrinter(60).add("Illegal Async Block Change").centre().hr()
             .addWrapped(PhasePrinter.ASYNC_BLOCK_CHANGE_MESSAGE)
             .add()
@@ -479,7 +479,7 @@ public final class PhasePrinter {
             PhasePrinter.hasPrintedAsyncEntities = true;
             return;
         }
-        PhaseTracker.ASYNC_CAPTURED_ENTITIES.add((net.minecraft.entity.Entity) entity);
+        PhaseTracker.ASYNC_CAPTURED_ENTITIES.add((net.minecraft.world.entity.Entity) entity);
         // At this point we can print an exception about it, if we are told to.
         // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {

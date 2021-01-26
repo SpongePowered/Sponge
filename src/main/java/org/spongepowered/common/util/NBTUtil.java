@@ -24,31 +24,31 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.NumberNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.Tag;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class NBTUtil {
 
-    public static @Nullable Boolean getNullableBoolean(final CompoundNBT compound, final String key) {
-        final INBT tag = compound.get(key);
-        if (tag instanceof NumberNBT) {
-            return ((NumberNBT) tag).getAsByte() != 0;
+    public static @Nullable Boolean getNullableBoolean(final CompoundTag compound, final String key) {
+        final Tag tag = compound.get(key);
+        if (tag instanceof NumericTag) {
+            return ((NumericTag) tag).getAsByte() != 0;
         }
         return null;
     }
 
-    public static @Nullable CompoundNBT getNullableCompound(final CompoundNBT compound, final String key) {
+    public static @Nullable CompoundTag getNullableCompound(final CompoundTag compound, final String key) {
         if (!compound.contains(key, Constants.NBT.TAG_COMPOUND)) {
             return null;
         }
         return compound.getCompound(key);
     }
 
-    public static CompoundNBT getOrCreateCompound(final CompoundNBT compound, final String key) {
+    public static CompoundTag getOrCreateCompound(final CompoundTag compound, final String key) {
         if (!compound.contains(key, Constants.NBT.TAG_COMPOUND)) {
-            final CompoundNBT child = new CompoundNBT();
+            final CompoundTag child = new CompoundTag();
             compound.put(key, child);
             return child;
         }

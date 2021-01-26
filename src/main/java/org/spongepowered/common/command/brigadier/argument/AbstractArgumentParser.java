@@ -30,7 +30,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -44,8 +43,9 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
+import net.minecraft.commands.CommandSourceStack;
 
-public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, SuggestionProvider<CommandSource>, ValueParameter<T> {
+public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, SuggestionProvider<CommandSourceStack>, ValueParameter<T> {
 
     private static final Pattern INTEGER_PATTERN = Pattern.compile("\\d+");
 
@@ -94,7 +94,7 @@ public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, Su
     }
 
     @Override
-    public CompletableFuture<Suggestions> getSuggestions(final CommandContext<CommandSource> context, final SuggestionsBuilder builder) {
+    public CompletableFuture<Suggestions> getSuggestions(final CommandContext<CommandSourceStack> context, final SuggestionsBuilder builder) {
         return this.listSuggestions(context, builder);
     }
 

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -37,6 +35,8 @@ import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class PrepareBlockDropsTransaction extends BlockEventBasedTransaction {
 

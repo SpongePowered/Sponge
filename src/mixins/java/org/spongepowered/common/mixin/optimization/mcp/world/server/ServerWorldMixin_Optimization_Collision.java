@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.mixin.optimization.mcp.world.server;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
@@ -37,12 +33,16 @@ import org.spongepowered.common.mixin.optimization.mcp.world.IWorldReaderMixin_O
 
 import java.util.Optional;
 import java.util.stream.Stream;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
-@Mixin(value = ServerWorld.class, priority = 1500)
+@Mixin(value = ServerLevel.class, priority = 1500)
 public abstract class ServerWorldMixin_Optimization_Collision implements IWorldReaderMixin_Optimization_Collision {
 
     @Override
-    public Stream<BlockState> getBlockStatesIfLoaded(final AxisAlignedBB aabb) {
+    public Stream<BlockState> getBlockStatesIfLoaded(final AABB aabb) {
         if (((WorldBridge) this).bridge$isFake()) {
             return IWorldReaderMixin_Optimization_Collision.super.getBlockStatesIfLoaded(aabb);
         }

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.state;
 
-import net.minecraft.block.Block;
-import net.minecraft.state.StateHolder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.fluid.FluidState;
@@ -36,6 +34,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.StateHolder;
 
 public final class SpongeFluidStateMatcher extends AbstractSpongeStateMatcher<FluidState, FluidType> {
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -37,6 +36,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +47,7 @@ public final class PrimaryDragInventoryStopState extends DragInventoryStopState 
     }
 
     @Override
-    public ClickContainerEvent createInventoryEvent(ServerPlayerEntity playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+    public ClickContainerEvent createInventoryEvent(ServerPlayer playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
         return SpongeEventFactory.createClickContainerEventDragPrimary(
             PhaseTracker.getCauseStackManager().getCurrentCause(), openContainer, transaction,

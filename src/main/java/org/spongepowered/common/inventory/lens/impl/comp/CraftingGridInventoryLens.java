@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.inventory.container.WorkbenchContainer;
+import net.minecraft.world.inventory.CraftingMenu;
+import net.minecraft.world.inventory.InventoryMenu;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
-import org.spongepowered.common.accessor.inventory.container.WorkbenchContainerAccessor;
+import org.spongepowered.common.accessor.world.inventory.CraftingMenuAccessor;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
@@ -62,11 +62,11 @@ public class CraftingGridInventoryLens extends AbstractLens {
         if (fabric instanceof CraftingGridInventory) {
             return ((CraftingGridInventory) fabric);
         }
-        if (fabric instanceof PlayerContainer) {
-            return ((CraftingGridInventory) ((PlayerContainer) fabric).getCraftSlots());
+        if (fabric instanceof InventoryMenu) {
+            return ((CraftingGridInventory) ((InventoryMenu) fabric).getCraftSlots());
         }
-        if (fabric instanceof WorkbenchContainer) {
-            return ((CraftingGridInventory) ((WorkbenchContainerAccessor) fabric).accessor$craftSlots());
+        if (fabric instanceof CraftingMenu) {
+            return ((CraftingGridInventory) ((CraftingMenuAccessor) fabric).accessor$craftSlots());
         }
         throw new IllegalStateException(fabric.getClass().getName() + " is not a known CraftingGridInventory.");
     }

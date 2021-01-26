@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.item.ExperienceOrbEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.ExperienceOrbAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class ExperienceOrbData {
@@ -36,9 +36,9 @@ public final class ExperienceOrbData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(ExperienceOrbEntityAccessor.class)
+                .asMutable(ExperienceOrbAccessor.class)
                     .create(Keys.EXPERIENCE)
-                        .get(ExperienceOrbEntityAccessor::accessor$value)
+                        .get(ExperienceOrbAccessor::accessor$value)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;

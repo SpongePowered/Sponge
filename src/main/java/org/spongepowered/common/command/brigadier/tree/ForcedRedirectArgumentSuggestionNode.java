@@ -29,29 +29,29 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.ISuggestionProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
+import net.minecraft.commands.SharedSuggestionProvider;
 
-public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentCommandNode<ISuggestionProvider, T> implements ForcedRedirectNode {
+public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentCommandNode<SharedSuggestionProvider, T> implements ForcedRedirectNode {
 
-    @Nullable private CommandNode<ISuggestionProvider> forcedRedirect = null;
+    @Nullable private CommandNode<SharedSuggestionProvider> forcedRedirect = null;
 
     public ForcedRedirectArgumentSuggestionNode(final String name,
             final ArgumentType<T> type,
-            final Command<ISuggestionProvider> command,
-            final SuggestionProvider<ISuggestionProvider> customSuggestions) {
+            final Command<SharedSuggestionProvider> command,
+            final SuggestionProvider<SharedSuggestionProvider> customSuggestions) {
         super(name, type, command, isp -> true, null, null, false, customSuggestions);
     }
 
     @Override
-    public void setForcedRedirect(@Nullable final CommandNode<ISuggestionProvider> redirect) {
+    public void setForcedRedirect(@Nullable final CommandNode<SharedSuggestionProvider> redirect) {
         this.forcedRedirect = redirect;
     }
 
     @Override
-    public CommandNode<ISuggestionProvider> getRedirect() {
+    public CommandNode<SharedSuggestionProvider> getRedirect() {
         return this.forcedRedirect;
     }
 

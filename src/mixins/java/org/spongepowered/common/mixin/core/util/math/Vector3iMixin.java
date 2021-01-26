@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.util.math;
 
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.Vec3i;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 
-@Mixin(Vector3i.class)
+@Mixin(Vec3i.class)
 public abstract class Vector3iMixin implements BlockPosBridge {
 
     @Shadow private int x;

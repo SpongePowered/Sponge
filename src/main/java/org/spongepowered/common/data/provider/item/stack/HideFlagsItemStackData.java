@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
@@ -40,36 +40,36 @@ public final class HideFlagsItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.HIDE_ATTRIBUTES)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipDisplayFlags.MODIFIERS))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipDisplayFlags.MODIFIERS, v))
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.MODIFIERS))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.MODIFIERS, v))
                     .create(Keys.HIDE_CAN_DESTROY)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipDisplayFlags.CAN_DESTROY))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipDisplayFlags.CAN_DESTROY, v))
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.CAN_DESTROY))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.CAN_DESTROY, v))
                     .create(Keys.HIDE_CAN_PLACE)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipDisplayFlags.CAN_PLACE))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipDisplayFlags.CAN_PLACE, v))
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.CAN_PLACE))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.CAN_PLACE, v))
                     .create(Keys.HIDE_ENCHANTMENTS)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipDisplayFlags.ENCHANTMENTS))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipDisplayFlags.ENCHANTMENTS, v))
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.ENCHANTMENTS))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.ENCHANTMENTS, v))
                     .create(Keys.HIDE_MISCELLANEOUS)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipDisplayFlags.ADDITIONAL))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipDisplayFlags.ADDITIONAL, v))
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.ADDITIONAL))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.ADDITIONAL, v))
                     .create(Keys.HIDE_UNBREAKABLE)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipDisplayFlags.UNBREAKABLE))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipDisplayFlags.UNBREAKABLE, v));
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.UNBREAKABLE))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.UNBREAKABLE, v));
     }
     // @formatter:on
 
-    private static boolean get(final ItemStack stack, final ItemStack.TooltipDisplayFlags flag) {
-        final CompoundNBT tag = stack.getTag();
+    private static boolean get(final ItemStack stack, final ItemStack.TooltipPart flag) {
+        final CompoundTag tag = stack.getTag();
         if (tag == null || !tag.contains(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_ANY_NUMERIC)) {
             return false;
         }
         return (tag.getInt(Constants.Item.ITEM_HIDE_FLAGS) & flag.getMask()) == 0;
     }
 
-    public static void set(final ItemStack stack, final ItemStack.TooltipDisplayFlags flag, final boolean value) {
-        final CompoundNBT tag = stack.getOrCreateTag();
+    public static void set(final ItemStack stack, final ItemStack.TooltipPart flag, final boolean value) {
+        final CompoundTag tag = stack.getOrCreateTag();
         int flags = tag.getInt(Constants.Item.ITEM_HIDE_FLAGS);
         if (value) {
             tag.putInt(Constants.Item.ITEM_HIDE_FLAGS, flags | flag.getMask());

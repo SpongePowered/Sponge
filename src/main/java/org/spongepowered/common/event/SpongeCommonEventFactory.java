@@ -30,33 +30,30 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.minecraft.block.Block;
-import net.minecraft.block.DirectionalBlock;
-import net.minecraft.block.PistonBlockStructureHelper;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CPlayerDiggingPacket;
-import net.minecraft.network.play.server.SOpenWindowPacket;
-import net.minecraft.tileentity.JukeboxTileEntity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.EntityDamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DirectionalBlock;
+import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
+import net.minecraft.world.level.block.piston.PistonStructureResolver;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -166,7 +163,7 @@ public final class SpongeCommonEventFactory {
     // For animation packet
     public static int lastSecondaryPacketTick = 0;
     public static int lastPrimaryPacketTick = 0;
-    @Nullable public static WeakReference<ServerPlayerEntity> lastAnimationPlayer;
+    @Nullable public static WeakReference<net.minecraft.server.level.ServerPlayer> lastAnimationPlayer;
 
     public static void callDropItemDispense(final List<ItemEntity> items, final PhaseContext<?> context) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -184,7 +181,7 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static void callDropItemDrop(final ServerPlayerEntity player, final List<ItemEntity> items,
+    public static void callDropItemDrop(final net.minecraft.server.level.ServerPlayer player, final List<ItemEntity> items,
             final PhaseContext<?> context) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -297,8 +294,8 @@ public final class SpongeCommonEventFactory {
 
     @SuppressWarnings("unchecked")
     @Nullable
-    public static <T extends net.minecraft.entity.Entity> CollideEntityEvent callCollideEntityEvent(
-            final net.minecraft.world.World world, @Nullable final net.minecraft.entity.Entity sourceEntity,
+    public static <T extends net.minecraft.world.entity.Entity> CollideEntityEvent callCollideEntityEvent(
+            final net.minecraft.world.level.Level world, @Nullable final net.minecraft.world.entity.Entity sourceEntity,
             final List<T> entities) {
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
@@ -337,17 +334,17 @@ public final class SpongeCommonEventFactory {
      * @return if the event was cancelled
      */
     public static boolean handlePistonEvent(
-        final TrackedWorldBridge world, final BlockPos pos, final net.minecraft.block.BlockState blockstate, final int eventId
+        final TrackedWorldBridge world, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState blockstate, final int eventId
     ) {
         final boolean extending = (eventId == 0);
-        final net.minecraft.util.Direction direction = blockstate.getValue(DirectionalBlock.FACING);
+        final net.minecraft.core.Direction direction = blockstate.getValue(DirectionalBlock.FACING);
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((org.spongepowered.api.world.server.ServerWorld) world).state((BlockState) blockstate).position(pos.getX(), pos.getY(), pos.getZ()).build();
 
         // Sets toss out duplicate values (even though there shouldn't be any)
         final HashSet<ServerLocation> locations = new HashSet<>();
         locations.add(ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, pos.getX(), pos.getY(), pos.getZ()));
 
-        final PistonBlockStructureHelper movedBlocks = new PistonBlockStructureHelper((ServerWorld) world, pos, direction, extending);
+        final PistonStructureResolver movedBlocks = new PistonStructureResolver((ServerLevel) world, pos, direction, extending);
         movedBlocks.resolve(); // calculates blocks to be moved
 
         Stream.concat(movedBlocks.getToPush().stream(), movedBlocks.getToDestroy().stream())
@@ -409,10 +406,10 @@ public final class SpongeCommonEventFactory {
             }
 
             // TODO - All of this bit should be nuked since PhaseContext has lazy initializing frames.
-            PlayerEntity player = null;
+            net.minecraft.world.entity.player.Player player = null;
             frame.pushCause(source);
             if (source instanceof Player) {
-                player = (PlayerEntity) source;
+                player = (net.minecraft.world.entity.player.Player) source;
                 if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
                     frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
                 }
@@ -444,7 +441,7 @@ public final class SpongeCommonEventFactory {
     }
 
     public static ChangeBlockEvent callChangeBlockEventModifyLiquidMix(
-        final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, @Nullable Object source) {
+        final net.minecraft.world.level.Level worldIn, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState state, @Nullable Object source) {
 
         final BlockState fromState = (BlockState) worldIn.getBlockState(pos);
         final BlockState toState = (BlockState) state;
@@ -473,12 +470,12 @@ public final class SpongeCommonEventFactory {
     }
 
     public static ChangeBlockEvent callChangeBlockEventModifyLiquidBreak(
-        final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState targetState) {
+        final net.minecraft.world.level.Level worldIn, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState targetState) {
         return SpongeCommonEventFactory.callChangeBlockEventModifyLiquidBreak(worldIn, pos, worldIn.getBlockState(pos), targetState);
     }
 
     public static ChangeBlockEvent callChangeBlockEventModifyLiquidBreak(
-        final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState fromState, final net.minecraft.block.BlockState toState) {
+        final net.minecraft.world.level.Level worldIn, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState fromState, final net.minecraft.world.level.block.state.BlockState toState) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         Object source =context.getSource(LocatableBlock.class).orElse(null);
         if (source == null) {
@@ -491,8 +488,8 @@ public final class SpongeCommonEventFactory {
             final WorldProperties world = ((org.spongepowered.api.world.server.ServerWorld) worldIn).getProperties();
             final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
-            final SpongeBlockSnapshot from = SpongeBlockSnapshotBuilder.pooled().blockState(fromState).world((ServerWorld) worldIn).position(position).build();
-            final SpongeBlockSnapshot to = SpongeBlockSnapshotBuilder.pooled().blockState(toState).world((ServerWorld) worldIn).position(position).build();
+            final SpongeBlockSnapshot from = SpongeBlockSnapshotBuilder.pooled().blockState(fromState).world((ServerLevel) worldIn).position(position).build();
+            final SpongeBlockSnapshot to = SpongeBlockSnapshotBuilder.pooled().blockState(toState).world((ServerLevel) worldIn).position(position).build();
             final BlockTransaction transaction = new BlockTransaction(from, to, Operations.LIQUID_SPREAD.get());
             final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventAll(frame.getCurrentCause(),
                 Collections.singletonList(transaction), ((org.spongepowered.api.world.server.ServerWorld) worldIn));
@@ -504,14 +501,14 @@ public final class SpongeCommonEventFactory {
 
     @SuppressWarnings("rawtypes")
     @Nullable
-    public static NotifyNeighborBlockEvent callNotifyNeighborEvent(final World world, final BlockPos sourcePos, final EnumSet<net.minecraft.util.Direction> notifiedSides) {
+    public static NotifyNeighborBlockEvent callNotifyNeighborEvent(final World world, final BlockPos sourcePos, final EnumSet<net.minecraft.core.Direction> notifiedSides) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         // Don't fire notify events during world gen or while restoring
         if (context.isWorldGeneration() || context.isRestoring()) {
             return null;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final BlockState blockstate = (BlockState) ((net.minecraft.world.World) world).getBlockState(sourcePos);
+            final BlockState blockstate = (BlockState) ((net.minecraft.world.level.Level) world).getBlockState(sourcePos);
             final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((org.spongepowered.api.world.server.ServerWorld) world).position(sourcePos.getX(), sourcePos.getY(),
                     sourcePos.getZ())
                     .state(blockstate)
@@ -520,17 +517,17 @@ public final class SpongeCommonEventFactory {
                 context.addCreatorAndNotifierToCauseStack(frame);
             } else {
 
-                final ChunkBridge mixinChunk = (ChunkBridge) ((ServerWorld) world).getChunkAt(sourcePos);
+                final ChunkBridge mixinChunk = (ChunkBridge) ((ServerLevel) world).getChunkAt(sourcePos);
                 mixinChunk.bridge$getBlockCreator(sourcePos).ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
                 mixinChunk.bridge$getBlockNotifier(sourcePos).ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
             }
             PhaseTracker.getCauseStackManager().pushCause(locatable);
 
             final Map<Direction, BlockState> neighbors = new EnumMap<>(Direction.class);
-            for (final net.minecraft.util.Direction notificationSide : notifiedSides) {
+            for (final net.minecraft.core.Direction notificationSide : notifiedSides) {
                 final BlockPos offset = sourcePos.relative(notificationSide);
                 final Direction direction = DirectionFacingProvider.INSTANCE.getKey(notificationSide).get();
-                final net.minecraft.block.BlockState notificationState = ((ServerWorld) world).getBlockState(offset);
+                final net.minecraft.world.level.block.state.BlockState notificationState = ((ServerLevel) world).getBlockState(offset);
                 neighbors.put(direction, (BlockState) notificationState);
             }
 
@@ -541,7 +538,7 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractEntityEvent.Primary callInteractEntityEventPrimary(final ServerPlayerEntity player, final ItemStack stack, final net.minecraft.entity.Entity entity, final Hand hand) {
+    public static InteractEntityEvent.Primary callInteractEntityEventPrimary(final net.minecraft.server.level.ServerPlayer player, final ItemStack stack, final net.minecraft.world.entity.Entity entity, final InteractionHand hand) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, entity, frame);
             final InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(frame.getCurrentCause(), (Entity) entity);
@@ -553,8 +550,8 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractEntityEvent.Secondary callInteractEntityEventSecondary(final ServerPlayerEntity player, final ItemStack stack, final net.minecraft.entity.Entity entity,
-            final Hand hand, @Nullable final Vector3d hitVec) {
+    public static InteractEntityEvent.Secondary callInteractEntityEventSecondary(final net.minecraft.server.level.ServerPlayer player, final ItemStack stack, final net.minecraft.world.entity.Entity entity,
+            final InteractionHand hand, @Nullable final Vector3d hitVec) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, entity, frame);
             final InteractEntityEvent.Secondary event = hitVec == null ?
@@ -565,7 +562,7 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractItemEvent.Primary callInteractItemEventPrimary(final PlayerEntity player, final ItemStack stack, final Hand hand) {
+    public static InteractItemEvent.Primary callInteractItemEventPrimary(final net.minecraft.world.entity.player.Player player, final ItemStack stack, final InteractionHand hand) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, null, frame);
             final InteractItemEvent.Primary event = SpongeEventFactory.createInteractItemEventPrimary(frame.getCurrentCause(), ItemStackUtil.snapshotOf(stack));
@@ -574,7 +571,7 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractItemEvent.Secondary callInteractItemEventSecondary(final PlayerEntity player, final ItemStack stack, final Hand hand) {
+    public static InteractItemEvent.Secondary callInteractItemEventSecondary(final net.minecraft.world.entity.player.Player player, final ItemStack stack, final InteractionHand hand) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, null, frame);
             final InteractItemEvent.Secondary event = SpongeEventFactory.createInteractItemEventSecondary(frame.getCurrentCause(), ItemStackUtil.snapshotOf(stack));
@@ -584,9 +581,9 @@ public final class SpongeCommonEventFactory {
 
     }
 
-    public static InteractBlockEvent.Primary callInteractBlockEventPrimary(CPlayerDiggingPacket.Action action,
-            final PlayerEntity player, final ItemStack heldItem, final BlockSnapshot blockSnapshot, final Hand hand,
-            @Nullable final net.minecraft.util.Direction side) {
+    public static InteractBlockEvent.Primary callInteractBlockEventPrimary(ServerboundPlayerActionPacket.Action action,
+            final net.minecraft.world.entity.player.Player player, final ItemStack heldItem, final BlockSnapshot blockSnapshot, final InteractionHand hand,
+            @Nullable final net.minecraft.core.Direction side) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, heldItem, hand, blockSnapshot, null, frame);
             final Direction direction;
@@ -616,7 +613,7 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(final PlayerEntity player, final ItemStack heldItem, final Vector3d hitVec, final BlockSnapshot targetBlock, final Direction targetSide, final Hand hand) {
+    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(final net.minecraft.world.entity.player.Player player, final ItemStack heldItem, final Vector3d hitVec, final BlockSnapshot targetBlock, final Direction targetSide, final InteractionHand hand) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, heldItem, hand, targetBlock, null, frame);
             final InteractBlockEvent.Secondary event = SpongeEventFactory.createInteractBlockEventSecondary(frame.getCurrentCause(),
@@ -627,8 +624,8 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static void applyCommonInteractContext(PlayerEntity player, ItemStack stack, Hand hand, @Nullable BlockSnapshot targetBlock,
-            @Nullable net.minecraft.entity.Entity entity, CauseStackManager.StackFrame frame) {
+    public static void applyCommonInteractContext(net.minecraft.world.entity.player.Player player, ItemStack stack, InteractionHand hand, @Nullable BlockSnapshot targetBlock,
+            @Nullable net.minecraft.world.entity.Entity entity, CauseStackManager.StackFrame frame) {
         if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
             frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
         } else {
@@ -654,7 +651,7 @@ public final class SpongeCommonEventFactory {
      *
      * @param entity The event
      */
-    public static void callNaturalMoveEntityEvent(final net.minecraft.entity.Entity entity) {
+    public static void callNaturalMoveEntityEvent(final net.minecraft.world.entity.Entity entity) {
         if (entity.removed) {
             return;
         }
@@ -688,7 +685,7 @@ public final class SpongeCommonEventFactory {
      *
      * @param entity The event
      */
-    public static void callNaturalRotateEntityEvent(final net.minecraft.entity.Entity entity) {
+    public static void callNaturalRotateEntityEvent(final net.minecraft.world.entity.Entity entity) {
         if (entity.removed || (entity.xRot == entity.xRotO && entity.yRot == entity.yRotO)) {
             return;
         }
@@ -747,7 +744,7 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static boolean handleCollideBlockEvent(final Block block, final net.minecraft.world.World world, final BlockPos pos, final net.minecraft.block.BlockState state, final net.minecraft.entity.Entity entity, final Direction direction) {
+    public static boolean handleCollideBlockEvent(final Block block, final net.minecraft.world.level.Level world, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState state, final net.minecraft.world.entity.Entity entity, final Direction direction) {
         if (pos.getY() <= 0) {
             return false;
         }
@@ -782,9 +779,9 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static boolean handleCollideImpactEvent(final net.minecraft.entity.Entity projectile, @Nullable final ProjectileSource projectileSource,
-            final RayTraceResult movingObjectPosition) {
-        final RayTraceResult.Type movingObjectType = movingObjectPosition.getType();
+    public static boolean handleCollideImpactEvent(final net.minecraft.world.entity.Entity projectile, @Nullable final ProjectileSource projectileSource,
+            final HitResult movingObjectPosition) {
+        final HitResult.Type movingObjectType = movingObjectPosition.getType();
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(projectile);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
@@ -796,8 +793,8 @@ public final class SpongeCommonEventFactory {
             final ServerLocation impactPoint = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) projectile.level, VecHelper.toVector3d(movingObjectPosition.getLocation()));
             boolean cancelled = false;
 
-            if (movingObjectType == RayTraceResult.Type.BLOCK) {
-                final BlockRayTraceResult blockMovingObjectPosition = (BlockRayTraceResult) movingObjectPosition;
+            if (movingObjectType == HitResult.Type.BLOCK) {
+                final BlockHitResult blockMovingObjectPosition = (BlockHitResult) movingObjectPosition;
                 final BlockPos blockPos = blockMovingObjectPosition.getBlockPos();
                 if (blockPos.getY() <= 0) {
                     return false;
@@ -816,8 +813,8 @@ public final class SpongeCommonEventFactory {
                     final ChunkBridge spongeChunk = (ChunkBridge) projectile.level.getChunkAt(targetPos);
                     spongeChunk.bridge$addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, creator.get(), PlayerTracker.Type.NOTIFIER);
                 }
-            } else if (movingObjectType == RayTraceResult.Type.ENTITY) { // entity
-                final EntityRayTraceResult entityMovingObjectPosition = (EntityRayTraceResult) movingObjectPosition;
+            } else if (movingObjectType == HitResult.Type.ENTITY) { // entity
+                final EntityHitResult entityMovingObjectPosition = (EntityHitResult) movingObjectPosition;
                 final ArrayList<Entity> entityList = new ArrayList<>();
                 entityList.add((Entity) entityMovingObjectPosition.getEntity());
                 final CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(frame.getCurrentCause(), entityList, impactPoint);
@@ -828,7 +825,7 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractContainerEvent.Close callInteractInventoryCloseEvent(final Container container, final ServerPlayerEntity player,
+    public static InteractContainerEvent.Close callInteractInventoryCloseEvent(final AbstractContainerMenu container, final net.minecraft.server.level.ServerPlayer player,
             final ItemStackSnapshot lastCursor, final ItemStackSnapshot newCursor, final boolean clientSource) {
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         final InteractContainerEvent.Close event =
@@ -836,21 +833,21 @@ public final class SpongeCommonEventFactory {
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
             if (clientSource && container.getSlot(0) != null) {
-                if (!(container instanceof PlayerContainer)) {
+                if (!(container instanceof InventoryMenu)) {
                     // Inventory closed by client, reopen window and send container
                     player.containerMenu = container;
                     final Slot slot = container.getSlot(0);
-                    final IInventory slotInventory = slot.container;
-                    ITextComponent title;
+                    final Container slotInventory = slot.container;
+                    net.minecraft.network.chat.Component title;
                     // TODO get name from last open
-                    if (slotInventory instanceof INamedContainerProvider) {
-                        title = ((INamedContainerProvider) slotInventory).getDisplayName();
+                    if (slotInventory instanceof MenuProvider) {
+                        title = ((MenuProvider) slotInventory).getDisplayName();
                     } else {
                         // expected fallback for unknown types
                         title = null;
                     }
                     slotInventory.startOpen(player);
-                    player.connection.send(new SOpenWindowPacket(container.containerId, container.getType(), title));
+                    player.connection.send(new ClientboundOpenScreenPacket(container.containerId, container.getType(), title));
                     // resync data to client
                     player.refreshContainer(container);
                 } else {
@@ -889,7 +886,7 @@ public final class SpongeCommonEventFactory {
         return event;
     }
 
-    public static Optional<net.minecraft.world.Explosion> detonateExplosive(final ExplosiveBridge explosiveBridge, final Explosion.Builder builder) {
+    public static Optional<net.minecraft.world.level.Explosion> detonateExplosive(final ExplosiveBridge explosiveBridge, final Explosion.Builder builder) {
         final DetonateExplosiveEvent event = SpongeEventFactory.createDetonateExplosiveEvent(
                 PhaseTracker.getCauseStackManager().getCurrentCause(), builder, (Explosive) explosiveBridge, builder.build()
         );
@@ -902,7 +899,7 @@ public final class SpongeCommonEventFactory {
                         e -> GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER).explosion(e)
                     );
             }
-            return Optional.of((net.minecraft.world.Explosion) explosion);
+            return Optional.of((net.minecraft.world.level.Explosion) explosion);
         }
         return Optional.empty();
     }
@@ -928,7 +925,7 @@ public final class SpongeCommonEventFactory {
      * @return The item if it is to be spawned, null if to be ignored
      */
     @Nullable
-    public static ItemStack throwDropItemAndConstructEvent(final net.minecraft.entity.Entity entity, final double posX, final double posY,
+    public static ItemStack throwDropItemAndConstructEvent(final net.minecraft.world.entity.Entity entity, final double posX, final double posY,
         final double posZ, final ItemStackSnapshot snapshot, final List<ItemStackSnapshot> original, final CauseStackManager.StackFrame frame) {
         final PlayerEntityBridge mixinPlayer;
         if (entity instanceof PlayerEntityBridge) {
@@ -1002,7 +999,7 @@ public final class SpongeCommonEventFactory {
         return event;
     }
 
-    public static PlaySoundEvent.Record callPlaySoundRecordEvent(final Cause cause, final JukeboxTileEntity jukebox,
+    public static PlaySoundEvent.Record callPlaySoundRecordEvent(final Cause cause, final JukeboxBlockEntity jukebox,
         final MusicDisc recordType, final int data) {
         final Jukebox apiJuke = (Jukebox) jukebox;
         final ServerLocation location = (ServerLocation) apiJuke.getLocation();
@@ -1017,8 +1014,8 @@ public final class SpongeCommonEventFactory {
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static PlaySoundEvent.AtEntity callPlaySoundAtEntityEvent(final Cause cause, @Nullable final PlayerEntity entity,
-        final WorldBridge worldMixin, final double x, final double y, final double z, final net.minecraft.util.SoundCategory category,
+    public static PlaySoundEvent.AtEntity callPlaySoundAtEntityEvent(final Cause cause, @Nullable final net.minecraft.world.entity.player.Player entity,
+        final WorldBridge worldMixin, final double x, final double y, final double z, final net.minecraft.sounds.SoundSource category,
         final SoundEvent name, final float pitch, final float volume) {
         final ServerLocation location = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldMixin, x, y, z);
         final PlaySoundEvent.AtEntity event = SpongeEventFactory.createPlaySoundEventAtEntity(cause, location,

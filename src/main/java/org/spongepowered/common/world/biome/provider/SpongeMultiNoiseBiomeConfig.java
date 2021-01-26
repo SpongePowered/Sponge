@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.biome.provider;
 
 import com.google.common.collect.Lists;
-import net.minecraft.world.biome.provider.NetherBiomeProvider;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.AttributedBiome;
@@ -34,7 +33,7 @@ import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
-import org.spongepowered.common.accessor.world.biome.provider.NetherBiomeProviderAccessor;
+import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSourceAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.ArrayList;
@@ -42,6 +41,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 
 public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConfig implements MultiNoiseBiomeConfig {
 
@@ -167,7 +167,7 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         public Builder reset() {
             this.biomes.clear();
             this.seed = BootstrapProperties.dimensionGeneratorSettings.seed();
-            final NetherBiomeProvider.Noise defaultNoise = NetherBiomeProviderAccessor.accessor$DEFAULT_NOISE_PARAMETERS();
+            final MultiNoiseBiomeSource.NoiseParameters defaultNoise = MultiNoiseBiomeSourceAccessor.accessor$DEFAULT_NOISE_PARAMETERS();
             this.temperatureConfig = (MultiNoiseConfig) defaultNoise;
             this.humidityConfig = (MultiNoiseConfig) defaultNoise;
             this.altitudeConfig = (MultiNoiseConfig) defaultNoise;

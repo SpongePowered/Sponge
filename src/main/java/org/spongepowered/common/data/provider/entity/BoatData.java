@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.BoatEntity;
+import net.minecraft.world.entity.vehicle.Boat;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.BoatType;
-import org.spongepowered.common.accessor.entity.item.BoatEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.vehicle.BoatAccessor;
 import org.spongepowered.common.bridge.entity.item.BoatBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,13 +39,13 @@ public final class BoatData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(BoatEntity.class)
+                .asMutable(Boat.class)
                     .create(Keys.BOAT_TYPE)
                         .get(h -> ((BoatType) (Object) h.getBoatType()))
-                        .set((h, v) -> h.setType((BoatEntity.Type) (Object) v))
-                .asMutable(BoatEntityAccessor.class)
+                        .set((h, v) -> h.setType((Boat.Type) (Object) v))
+                .asMutable(BoatAccessor.class)
                     .create(Keys.IS_IN_WATER)
-                        .get(h -> h.accessor$status() == BoatEntity.Status.IN_WATER)
+                        .get(h -> h.accessor$status() == Boat.Status.IN_WATER)
                 .asMutable(BoatBridge.class)
                     .create(Keys.CAN_MOVE_ON_LAND)
                         .get(BoatBridge::bridge$getMoveOnLand)

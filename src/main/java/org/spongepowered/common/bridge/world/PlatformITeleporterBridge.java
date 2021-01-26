@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.world.Teleporter;
-import net.minecraft.world.server.ServerWorld;
-
 import java.util.function.Function;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.portal.PortalForcer;
 
 /**
- * Bridge methods designed as hooks for various methods called on a {@link Teleporter}.
+ * Bridge methods designed as hooks for various methods called on a {@link PortalForcer}.
  *
  * <p>The Forge platform adds a mod implementable "ITeleporter" that is meant to be passed to
  * methods where an {@link Entity} is changing dimensions. This bridge is modeled after that
@@ -39,12 +38,12 @@ import java.util.function.Function;
  */
 public interface PlatformITeleporterBridge {
 
-    default Entity bridge$placeEntity(final Entity entity, final ServerWorld fromWorld, final ServerWorld toWorld, final float yaw,
+    default Entity bridge$placeEntity(final Entity entity, final ServerLevel fromWorld, final ServerLevel toWorld, final float yaw,
         final Function<Boolean, Entity> repositionEntity) {
         return repositionEntity.apply(true);
     }
 
     default boolean bridge$isVanilla() {
-        return this.getClass().equals(Teleporter.class);
+        return this.getClass().equals(PortalForcer.class);
     }
 }

@@ -25,16 +25,16 @@
 package org.spongepowered.vanilla.client.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.client.gui.screen.PluginScreen;
 import org.spongepowered.vanilla.util.Bounds;
@@ -53,8 +53,8 @@ import java.util.stream.Collectors;
 
 public final class MetadataPanel extends ScrollPanel {
 
-    private static final ITextComponent NO_RESULTS = new StringTextComponent("No data...")
-            .withStyle(TextFormatting.GRAY);
+    private static final Component NO_RESULTS = new TextComponent("No data...")
+            .withStyle(ChatFormatting.GRAY);
 
     static final Pattern URL_PATTERN = Pattern.compile(
         //         schema                          ipv4            OR        namespace                 port     path         ends
@@ -208,12 +208,12 @@ public final class MetadataPanel extends ScrollPanel {
     }
 
     @Override
-    protected void drawPanel(final MatrixStack stack, final int entryRight, int relativeY, final Tessellator tess, final int mouseX,
+    protected void drawPanel(final PoseStack stack, final int entryRight, int relativeY, final Tesselator tess, final int mouseX,
             final int mouseY) {
         final int baseX = this.left + 4;
 
         if (this.resizedCategories.isEmpty()) {
-            final FontRenderer font = this.minecraft.font;
+            final Font font = this.minecraft.font;
             final int noResultsWidth = font.width(NO_RESULTS);
 
             font.draw(
@@ -283,7 +283,7 @@ public final class MetadataPanel extends ScrollPanel {
             return false;
         }
 
-        final ITextComponent component = entry.value;
+        final Component component = entry.value;
         if (component != null) {
             this.screen.handleComponentClicked(component.getStyle());
             return true;
@@ -299,11 +299,11 @@ public final class MetadataPanel extends ScrollPanel {
      * Credit: MinecraftForge
      * Changes: Set ichat to link if ichat is null
      */
-    public static ITextComponent newChatWithLinks(final String string, final boolean allowMissingHeader) {
+    public static Component newChatWithLinks(final String string, final boolean allowMissingHeader) {
         // Includes ipv4 and domain pattern
         // Matches an ip (xx.xxx.xx.xxx) or a domain (something.com) with or
         // without a protocol or path.
-        IFormattableTextComponent ichat = null;
+        MutableComponent ichat = null;
         final Matcher matcher = MetadataPanel.URL_PATTERN.matcher(string);
         int lastEnd = 0;
 
@@ -316,21 +316,21 @@ public final class MetadataPanel extends ScrollPanel {
             final String part = string.substring(lastEnd, start);
             if (part.length() > 0) {
                 if (ichat == null) {
-                    ichat = new StringTextComponent(part);
+                    ichat = new TextComponent(part);
                 } else {
                     ichat.append(part);
                 }
             }
             lastEnd = end;
             String url = string.substring(start, end);
-            final IFormattableTextComponent link = new StringTextComponent(url);
+            final MutableComponent link = new TextComponent(url);
 
             try {
                 // Add schema so client doesn't crash.
                 if ((new URI(url)).getScheme() == null) {
                     if (!allowMissingHeader) {
                         if (ichat == null) {
-                            ichat = new StringTextComponent(url);
+                            ichat = new TextComponent(url);
                         } else {
                             ichat.append(url);
                         }
@@ -341,7 +341,7 @@ public final class MetadataPanel extends ScrollPanel {
             } catch (final URISyntaxException e) {
                 // Bad syntax bail out!
                 if (ichat == null) {
-                    ichat = new StringTextComponent(url);
+                    ichat = new TextComponent(url);
                 } else {
                     ichat.append(url);
                 }
@@ -352,14 +352,14 @@ public final class MetadataPanel extends ScrollPanel {
             final ClickEvent click = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
             link.withStyle(style -> style.withClickEvent(click)
                         .withUnderlined(true)
-                        .withColor(TextFormatting.BLUE));
+                        .withColor(ChatFormatting.BLUE));
             ichat = ichat == null ? link : ichat.append(link);
         }
 
         // Append the rest of the message.
         final String end = string.substring(lastEnd);
         if (ichat == null) {
-            ichat = new StringTextComponent(end);
+            ichat = new TextComponent(end);
         } else if (end.length() > 0) {
             ichat.append(string.substring(lastEnd));
         }
@@ -368,12 +368,12 @@ public final class MetadataPanel extends ScrollPanel {
 
     private static final class Category {
 
-        protected final ITextComponent name;
+        protected final Component name;
         protected final String rawName;
         private final List<Entry> entries = new ArrayList<>();
 
         public Category(final String name) {
-            this.name = new StringTextComponent(name)
+            this.name = new TextComponent(name)
                     .withStyle(s -> s.withBold(true).withUnderlined(true));
             this.rawName = name;
         }
@@ -409,8 +409,8 @@ public final class MetadataPanel extends ScrollPanel {
         protected final int level;
         @Nullable protected final String rawKey;
         @Nullable protected final String rawValue;
-        @Nullable protected ITextComponent key;
-        @Nullable protected ITextComponent value;
+        @Nullable protected Component key;
+        @Nullable protected Component value;
         @Nullable protected Bounds valueBounds;
 
         public Entry(@Nullable final String key, @Nullable final String value) {
@@ -423,16 +423,16 @@ public final class MetadataPanel extends ScrollPanel {
 
         public Entry(@Nullable final String key, @Nullable final String value, final int level, @Nullable final String originalValue) {
             if (key != null) {
-                this.key = new StringTextComponent(key);
+                this.key = new TextComponent(key);
             }
             this.rawKey = key;
 
             if (value != null) {
-                final IFormattableTextComponent newValue = new StringTextComponent(value).withStyle(TextFormatting.GRAY);
+                final MutableComponent newValue = new TextComponent(value).withStyle(ChatFormatting.GRAY);
 
                 // Account for text components that were split to new lines
                 if (originalValue != null) {
-                    final ITextComponent linkComponent = MetadataPanel.newChatWithLinks(originalValue, false);
+                    final Component linkComponent = MetadataPanel.newChatWithLinks(originalValue, false);
                     if (linkComponent.getStyle().getClickEvent() != null) {
                         newValue.withStyle(s -> linkComponent.getStyle().applyTo(s));
                     }

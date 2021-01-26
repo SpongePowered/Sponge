@@ -24,8 +24,8 @@
  */
 package org.spongepowered.vanilla.client.gui.widget.list;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.gui.screen.Screen;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.util.Bounds;
 
@@ -35,7 +35,7 @@ public final class PluginSelectionList extends FilterableList<PluginSelectionLis
         super(screen, x, y, width, height, entryHeight);
     }
 
-    public static final class Entry extends FilterableList.Entry<PluginSelectionList, Entry> {
+    public static final class Entry extends FilterableList.Entry<PluginSelectionList, org.spongepowered.vanilla.client.gui.widget.list.PluginSelectionList.Entry> {
 
         public final PluginMetadata metadata;
         private final PluginSelectionList list;
@@ -52,7 +52,7 @@ public final class PluginSelectionList extends FilterableList<PluginSelectionLis
         }
 
         @Override
-        public void render(final MatrixStack stack, final int p_render_1_, final int renderY, final int renderX, final int p_render_4_,
+        public void render(final PoseStack stack, final int p_render_1_, final int renderY, final int renderX, final int p_render_4_,
                 final int p_render_5_, final int mouseX, final int mouseY, final boolean p_render_8_, final float p_render_9_) {
             // Draw the name, or ID if name is not present
             Screen.drawString(stack, this.list.fontRenderer, this.metadata.getName().orElse(this.metadata.getId()), renderX + 2, renderY + 1,

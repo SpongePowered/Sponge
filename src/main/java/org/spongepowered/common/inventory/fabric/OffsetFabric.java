@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.inventory.fabric;
 
-import net.minecraft.item.ItemStack;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 
 import java.util.Collection;
+import net.minecraft.world.item.ItemStack;
 
 public class OffsetFabric implements Fabric {
 

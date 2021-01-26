@@ -30,46 +30,46 @@ public final class SpongeDamageSourceFactory implements DamageSource.Factory {
 
     @Override
     public DamageSource drowning() {
-        return (DamageSource) net.minecraft.util.DamageSource.DROWN;
+        return (DamageSource) net.minecraft.world.damagesource.DamageSource.DROWN;
     }
 
     @Override
     public DamageSource dryout() {
-        return (DamageSource) net.minecraft.util.DamageSource.DRY_OUT;
+        return (DamageSource) net.minecraft.world.damagesource.DamageSource.DRY_OUT;
     }
 
     @Override
     public DamageSource falling() {
-        return (DamageSource) net.minecraft.util.DamageSource.FALL;
+        return (DamageSource) net.minecraft.world.damagesource.DamageSource.FALL;
     }
 
     @Override
     public DamageSource fireTick() {
-        return (DamageSource) net.minecraft.util.DamageSource.ON_FIRE;
+        return (DamageSource) net.minecraft.world.damagesource.DamageSource.ON_FIRE;
     }
 
     @Override
     public DamageSource generic() {
-        return (DamageSource) net.minecraft.util.DamageSource.GENERIC;
+        return (DamageSource) net.minecraft.world.damagesource.DamageSource.GENERIC;
     }
 
     @Override
     public DamageSource magic() {
-        return (DamageSource) net.minecraft.util.DamageSource.MAGIC;
+        return (DamageSource) net.minecraft.world.damagesource.DamageSource.MAGIC;
     }
 
     @Override
     public DamageSource starvation() {
-        return (DamageSource) net.minecraft.util.DamageSource.STARVE;
+        return (DamageSource) net.minecraft.world.damagesource.DamageSource.STARVE;
     }
 
     @Override
     public DamageSource voidSource() {
-        return (DamageSource) net.minecraft.util.DamageSource.OUT_OF_WORLD;
+        return (DamageSource) net.minecraft.world.damagesource.DamageSource.OUT_OF_WORLD;
     }
 
     @Override
     public DamageSource wither() {
-        return (DamageSource) net.minecraft.util.DamageSource.WITHER;
+        return (DamageSource) net.minecraft.world.damagesource.DamageSource.WITHER;
     }
 }

@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.world;
 
 import net.kyori.adventure.bossbar.BossBar;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public interface BossInfoBridge {
     /**
@@ -39,5 +39,5 @@ public interface BossInfoBridge {
 
     void bridge$setAdventure(BossBar adventure);
 
-    void bridge$replacePlayer(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer);
+    void bridge$replacePlayer(ServerPlayer oldPlayer, ServerPlayer newPlayer);
 }

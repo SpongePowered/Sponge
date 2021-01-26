@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.type;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.core.MappedRegistry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -48,7 +48,7 @@ public final class SpongeSkinPart implements SkinPart {
     }
 
     public int getMask() {
-        final SimpleRegistry<SkinPart> registry = (SimpleRegistry<SkinPart>) (Object) Sponge.getGame().registries().registry(RegistryTypes.SKIN_PART);
+        final MappedRegistry<SkinPart> registry = (MappedRegistry<SkinPart>) (Object) Sponge.getGame().registries().registry(RegistryTypes.SKIN_PART);
         return 1 << registry.getId(this);
     }
 }

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.spawner;
 
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.MobCategory;
 
 public interface WorldEntitySpawner_EntityDensityManagerBridge {
 
-    boolean bridge$canSpawnForCategoryInWorld(EntityClassification p_234991_1_, ServerWorld world);
+    boolean bridge$canSpawnForCategoryInWorld(MobCategory p_234991_1_, ServerLevel world);
 
 }

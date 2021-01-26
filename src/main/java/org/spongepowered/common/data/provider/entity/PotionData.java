@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.projectile.PotionEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.PotionUtils;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -36,6 +31,11 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.stream.Collectors;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionUtils;
 
 public final class PotionData {
 
@@ -45,7 +45,7 @@ public final class PotionData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(PotionEntity.class)
+                .asMutable(ThrownPotion.class)
                     .create(Keys.ITEM_STACK_SNAPSHOT)
                         .get(h -> ItemStackUtil.snapshotOf(h.getItem()))
                         .setAnd((h, v) -> {
@@ -63,7 +63,7 @@ public final class PotionData {
                         .set((h, v) -> {
                             h.getItem().removeTagKey(Constants.Item.CUSTOM_POTION_EFFECTS);
                             PotionUtils.setCustomEffects(h.getItem(), v.stream()
-                                    .map(EffectInstance.class::cast)
+                                    .map(MobEffectInstance.class::cast)
                                     .collect(Collectors.toList()));
                         });
     }

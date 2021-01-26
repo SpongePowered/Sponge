@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import net.minecraft.world.NextTickListEntry;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.bridge.world.TrackedNextTickEntryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -32,6 +31,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import net.minecraft.world.level.TickNextTickData;
 
 final class DeferredScheduledUpdatePhaseState extends GeneralGenerationPhaseState<DeferredScheduledUpdatePhaseState.Context> {
 
@@ -55,24 +55,24 @@ final class DeferredScheduledUpdatePhaseState extends GeneralGenerationPhaseStat
     }
 
     @Override
-    public void associateScheduledTickUpdate(final Context asContext, final NextTickListEntry<?> entry) {
+    public void associateScheduledTickUpdate(final Context asContext, final TickNextTickData<?> entry) {
         ((TrackedNextTickEntryBridge) entry).bridge$setIsPartOfWorldGeneration(true);
     }
 
     public static final class Context extends GenerationContext<Context> {
 
-        private NextTickListEntry<?> entry;
+        private TickNextTickData<?> entry;
 
         Context(final PhaseTracker tracker) {
             super(GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE, tracker);
         }
 
-        public Context scheduledUpdate(final NextTickListEntry<?> entry) {
+        public Context scheduledUpdate(final TickNextTickData<?> entry) {
             this.entry = entry;
             return this;
         }
 
-        public NextTickListEntry<?> getEntry() {
+        public TickNextTickData<?> getEntry() {
             return Objects.requireNonNull(this.entry, "NextTickListEntry was not initialized");
         }
     }

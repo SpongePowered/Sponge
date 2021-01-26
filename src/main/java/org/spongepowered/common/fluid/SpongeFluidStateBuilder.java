@@ -24,18 +24,11 @@
  */
 package org.spongepowered.common.fluid;
 
-import static net.minecraft.command.arguments.BlockStateParser.ERROR_INVALID_VALUE;
+import static net.minecraft.commands.arguments.blocks.BlockStateParser.ERROR_INVALID_VALUE;
 import static org.spongepowered.common.util.DataUtil.checkDataExists;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.arguments.BlockStateParser;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.state.Property;
-import net.minecraft.state.StateContainer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
@@ -47,6 +40,13 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 
 public final class SpongeFluidStateBuilder implements org.spongepowered.api.fluid.FluidState.Builder {
 
@@ -132,12 +132,12 @@ public final class SpongeFluidStateBuilder implements org.spongepowered.api.flui
         });
     }
 
-    private net.minecraft.fluid.FluidState readProperties(final StringReader reader, final Fluid fluid) throws CommandSyntaxException {
+    private net.minecraft.world.level.material.FluidState readProperties(final StringReader reader, final Fluid fluid) throws CommandSyntaxException {
         reader.skip();
         reader.skipWhitespace();
 
         FluidState state = fluid.defaultFluidState();
-        final StateContainer<?, ?> stateContainer = fluid.getStateDefinition();
+        final StateDefinition<?, ?> stateContainer = fluid.getStateDefinition();
         while(reader.canRead() && reader.peek() != ']') {
             reader.skipWhitespace();
             final int cursor = reader.getCursor();
@@ -179,7 +179,7 @@ public final class SpongeFluidStateBuilder implements org.spongepowered.api.flui
             throw BlockStateParser.ERROR_EXPECTED_END_OF_PROPERTIES.createWithContext(reader);
         }
 
-        return (net.minecraft.fluid.FluidState) state;
+        return (net.minecraft.world.level.material.FluidState) state;
     }
 
     private <T extends Comparable<T>> FluidState parseValue(

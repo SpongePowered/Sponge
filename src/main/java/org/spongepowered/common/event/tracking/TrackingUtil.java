@@ -28,17 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEventData;
-import net.minecraft.block.RedstoneLampBlock;
-import net.minecraft.block.RedstoneTorchBlock;
-import net.minecraft.block.RepeaterBlock;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
@@ -82,6 +71,16 @@ import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.BlockEventData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RedstoneLampBlock;
+import net.minecraft.world.level.block.RedstoneTorchBlock;
+import net.minecraft.world.level.block.RepeaterBlock;
+import net.minecraft.world.level.block.entity.TickableBlockEntity;
+import net.minecraft.world.level.material.FluidState;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -117,7 +116,7 @@ public final class TrackingUtil {
         });
     public static final int WIDTH = 40;
 
-    public static void tickEntity(final Consumer<net.minecraft.entity.Entity> consumer, final net.minecraft.entity.Entity entity) {
+    public static void tickEntity(final Consumer<net.minecraft.world.entity.Entity> consumer, final net.minecraft.world.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
         if (!((TrackableBridge) entity).bridge$shouldTick()) {
@@ -148,7 +147,7 @@ public final class TrackingUtil {
         }
     }
 
-    public static void tickRidingEntity(final net.minecraft.entity.Entity entity) {
+    public static void tickRidingEntity(final net.minecraft.world.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
         if (!((TrackableBridge) entity).bridge$shouldTick()) {
@@ -181,10 +180,10 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings({"unused", "try"})
-    public static void tickTileEntity(final TrackedWorldBridge mixinWorldServer, final ITickableTileEntity tile) {
+    public static void tickTileEntity(final TrackedWorldBridge mixinWorldServer, final TickableBlockEntity tile) {
         checkArgument(tile instanceof BlockEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
-        final TileEntity tileEntity = (TileEntity) tile;
+        final net.minecraft.world.level.block.entity.BlockEntity tileEntity = (net.minecraft.world.level.block.entity.BlockEntity) tile;
         final TileEntityBridge mixinTileEntity = (TileEntityBridge) tile;
         final BlockPos pos = tileEntity.getBlockPos();
         final ChunkBridge chunk = ((ActiveChunkReferantBridge) tile).bridge$getActiveChunk();
@@ -224,8 +223,8 @@ public final class TrackingUtil {
 
     @SuppressWarnings("rawtypes")
     public static void updateTickBlock(
-            final TrackedWorldBridge mixinWorld, final net.minecraft.block.BlockState block, final BlockPos pos, final Random random) {
-        final ServerWorld world = (ServerWorld) mixinWorld;
+            final TrackedWorldBridge mixinWorld, final net.minecraft.world.level.block.state.BlockState block, final BlockPos pos, final Random random) {
+        final ServerLevel world = (ServerLevel) mixinWorld;
         final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) world;
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
@@ -260,10 +259,10 @@ public final class TrackingUtil {
     public static void updateTickFluid(
         final TrackedWorldBridge mixinWorld, final FluidState fluidState, final BlockPos pos
     ) {
-        final ServerWorld world = (ServerWorld) mixinWorld;
+        final ServerLevel world = (ServerLevel) mixinWorld;
         final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) world;
 
-        final net.minecraft.block.BlockState blockState = fluidState.createLegacyBlock();
+        final net.minecraft.world.level.block.state.BlockState blockState = fluidState.createLegacyBlock();
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(blockState, pos, BlockChangeFlags.NONE);
             final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getCauseStackManager().getCurrentCause(), snapshot);
@@ -297,8 +296,8 @@ public final class TrackingUtil {
 
     @SuppressWarnings("rawtypes")
     public static void randomTickBlock(final TrackedWorldBridge mixinWorld,
-                                       final net.minecraft.block.BlockState state, final BlockPos pos, final Random random) {
-        final ServerWorld world = (ServerWorld) mixinWorld;
+                                       final net.minecraft.world.level.block.state.BlockState state, final BlockPos pos, final Random random) {
+        final ServerLevel world = (ServerLevel) mixinWorld;
         final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) world;
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
@@ -334,7 +333,7 @@ public final class TrackingUtil {
     @SuppressWarnings("rawtypes")
     public static void randomTickFluid(final TrackedWorldBridge mixinWorld,
         final FluidState state, final BlockPos pos, final Random random) {
-        final ServerWorld world = (ServerWorld) mixinWorld;
+        final ServerLevel world = (ServerLevel) mixinWorld;
         final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) world;
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
@@ -371,8 +370,8 @@ public final class TrackingUtil {
         }
     }
 
-    public static boolean fireMinecraftBlockEvent(final ServerWorld worldIn, final BlockEventData event,
-        final net.minecraft.block.BlockState currentState
+    public static boolean fireMinecraftBlockEvent(final ServerLevel worldIn, final BlockEventData event,
+        final net.minecraft.world.level.block.state.BlockState currentState
     ) {
         final TrackerBlockEventDataBridge blockEvent = (TrackerBlockEventDataBridge) event;
         final @Nullable Object source = blockEvent.bridge$getTileEntity() != null ? blockEvent.bridge$getTileEntity() : blockEvent.bridge$getTickingLocatable();
@@ -413,7 +412,7 @@ public final class TrackingUtil {
     }
 
     @Nullable
-    public static User getNotifierOrOwnerFromBlock(final ServerWorld world, final BlockPos blockPos) {
+    public static User getNotifierOrOwnerFromBlock(final ServerLevel world, final BlockPos blockPos) {
         final ChunkBridge mixinChunk = (ChunkBridge) world.getChunkAt(blockPos);
         final User notifier = mixinChunk.bridge$getBlockNotifier(blockPos).orElse(null);
         if (notifier != null) {
@@ -461,7 +460,7 @@ public final class TrackingUtil {
         final BlockSnapshot finalSnapshot = transaction.getFinal();
         final SpongeBlockSnapshot spongeSnapshot = (SpongeBlockSnapshot) finalSnapshot;
         final BlockPos pos = spongeSnapshot.getBlockPos();
-        final Block block = ((net.minecraft.block.BlockState) spongeSnapshot.getState()).getBlock();
+        final Block block = ((net.minecraft.world.level.block.state.BlockState) spongeSnapshot.getState()).getBlock();
         spongeSnapshot.getServerWorld()
             .map(world -> world.getChunkAt(pos))
             .map(chunk -> (ChunkBridge) chunk)
@@ -471,9 +470,9 @@ public final class TrackingUtil {
         });
     }
 
-    public static void addTileEntityToBuilder(final TileEntity existing, final SpongeBlockSnapshotBuilder builder) {
+    public static void addTileEntityToBuilder(final net.minecraft.world.level.block.entity.BlockEntity existing, final SpongeBlockSnapshotBuilder builder) {
         // TODO - gather custom data.
-        final CompoundNBT compound = new CompoundNBT();
+        final CompoundTag compound = new CompoundTag();
         try {
             existing.save(compound);
             builder.addUnsafeCompound(compound);
@@ -502,9 +501,9 @@ public final class TrackingUtil {
         }
     }
 
-    public static SpongeBlockSnapshot createPooledSnapshot(final net.minecraft.block.BlockState state, final BlockPos pos,
-        final BlockChangeFlag updateFlag, final int limit, @Nullable final TileEntity blockEntity,
-        final Supplier<ServerWorld> worldSupplier,
+    public static SpongeBlockSnapshot createPooledSnapshot(final net.minecraft.world.level.block.state.BlockState state, final BlockPos pos,
+        final BlockChangeFlag updateFlag, final int limit, @Nullable final net.minecraft.world.level.block.entity.BlockEntity blockEntity,
+        final Supplier<ServerLevel> worldSupplier,
         final Supplier<Optional<UUID>> creatorSupplier,
         final Supplier<Optional<UUID>> notifierSupplier
     ) {

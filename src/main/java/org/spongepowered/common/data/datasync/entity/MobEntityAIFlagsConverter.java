@@ -24,21 +24,20 @@
  */
 package org.spongepowered.common.data.datasync.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.common.accessor.world.entity.MobAccessor;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.accessor.entity.MobEntityAccessor;
-
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.world.entity.Entity;
 
 public final class MobEntityAIFlagsConverter extends DataParameterConverter<Byte> {
 
     public MobEntityAIFlagsConverter() {
-        super(MobEntityAccessor.accessor$DATA_MOB_FLAGS_ID());
+        super(MobAccessor.accessor$DATA_MOB_FLAGS_ID());
     }
 
     @Override

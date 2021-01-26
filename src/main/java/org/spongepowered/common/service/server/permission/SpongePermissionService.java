@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import net.minecraft.server.management.OpList;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -43,6 +42,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.players.ServerOpList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -97,7 +97,7 @@ public final class SpongePermissionService implements PermissionService {
         this.defaultData = this.getDefaultCollection().get(SpongePermissionService.SUBJECTS_DEFAULT);
     }
 
-    static OpList getOps() {
+    static ServerOpList getOps() {
         return SpongeCommon.getServer().getPlayerList().getOps();
     }
 

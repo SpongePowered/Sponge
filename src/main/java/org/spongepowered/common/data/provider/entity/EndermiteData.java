@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.EndermiteEntity;
+import net.minecraft.world.entity.monster.Endermite;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.monster.EndermiteEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.EndermiteAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -40,13 +40,13 @@ public final class EndermiteData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(EndermiteEntity.class)
+                .asMutable(Endermite.class)
                     .create(Keys.DESPAWN_DELAY)
                         .get(h -> {
                             if (h.isPersistenceRequired()) {
                                 return null;
                             }
-                            return new SpongeTicks(((EndermiteEntityAccessor) h).accessor$life());
+                            return new SpongeTicks(((EndermiteAccessor) h).accessor$life());
                         })
                         .setAnd((h, v) -> {
                             if (h.isPersistenceRequired()) {
@@ -56,7 +56,7 @@ public final class EndermiteData {
                             if (ticks < 0 || ticks > EndermiteData.DESPAWN_DELAY_MAX) {
                                 return false;
                             }
-                            ((EndermiteEntityAccessor) h).accessor$life(ticks);
+                            ((EndermiteAccessor) h).accessor$life(ticks);
                             return true;
                         });
     }

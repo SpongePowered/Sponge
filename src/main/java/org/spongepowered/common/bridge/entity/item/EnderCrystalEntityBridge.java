@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.bridge.entity.item;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EnderCrystalEntityBridge {
 
     @Nullable
-    Explosion bridge$throwExplosionEventAndExplode(World world, @Nullable Entity nil, double x,
+    Explosion bridge$throwExplosionEventAndExplode(Level world, @Nullable Entity nil, double x,
         double y, double z, boolean smoking, @Nullable DamageSource source);
 }

@@ -26,7 +26,6 @@ package org.spongepowered.common.world.teleport;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
-import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -48,6 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+import net.minecraft.world.level.border.WorldBorder;
 
 @Singleton
 public final class SpongeTeleportHelper implements TeleportHelper {

@@ -31,6 +31,7 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl.ResultImpl;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Objects;

@@ -27,46 +27,46 @@ package org.spongepowered.common.adventure;
 import java.util.Set;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.server.SUpdateBossInfoPacket;
-import net.minecraft.world.server.ServerBossInfo;
+import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
+import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class VanillaBossBarListener implements BossBar.Listener {
-    private final ServerBossInfo vanilla;
+    private final ServerBossEvent vanilla;
 
-    public VanillaBossBarListener(final ServerBossInfo vanilla) {
+    public VanillaBossBarListener(final ServerBossEvent vanilla) {
       this.vanilla = vanilla;
     }
 
     @Override
     public void bossBarNameChanged(@NonNull final BossBar bar, @NonNull final Component oldName, @NonNull final Component newName) {
-        this.sendPacket(SUpdateBossInfoPacket.Operation.UPDATE_NAME);
+        this.sendPacket(ClientboundBossEventPacket.Operation.UPDATE_NAME);
     }
 
     @Override
     public void bossBarProgressChanged(@NonNull final BossBar bar, final float oldProgress, final float newProgress) {
-        this.sendPacket(SUpdateBossInfoPacket.Operation.UPDATE_PCT);
+        this.sendPacket(ClientboundBossEventPacket.Operation.UPDATE_PCT);
     }
 
     @Override
     public void bossBarColorChanged(@NonNull final BossBar bar, final BossBar.@NonNull Color oldColor, final BossBar.@NonNull Color newColor) {
-        this.sendPacket(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
+        this.sendPacket(ClientboundBossEventPacket.Operation.UPDATE_STYLE);
     }
 
     @Override
     public void bossBarOverlayChanged(@NonNull final BossBar bar, final BossBar.@NonNull Overlay oldOverlay, final BossBar.@NonNull Overlay newOverlay) {
-        this.sendPacket(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
+        this.sendPacket(ClientboundBossEventPacket.Operation.UPDATE_STYLE);
     }
 
     @Override
     public void bossBarFlagsChanged(@NonNull final BossBar bar, @NonNull final Set<BossBar.Flag> flagsAdded, @NonNull final Set<BossBar.Flag> flagsRemoved) {
-        this.sendPacket(SUpdateBossInfoPacket.Operation.UPDATE_PROPERTIES);
+        this.sendPacket(ClientboundBossEventPacket.Operation.UPDATE_PROPERTIES);
     }
 
-    private void sendPacket(final SUpdateBossInfoPacket.Operation action) {
-        final SUpdateBossInfoPacket packet = new SUpdateBossInfoPacket(action, this.vanilla);
-        for (final ServerPlayerEntity player : this.vanilla.getPlayers()) {
+    private void sendPacket(final ClientboundBossEventPacket.Operation action) {
+        final ClientboundBossEventPacket packet = new ClientboundBossEventPacket(action, this.vanilla);
+        for (final ServerPlayer player : this.vanilla.getPlayers()) {
             player.connection.send(packet);
         }
     }

@@ -45,11 +45,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.util.ComponentMessageThrowable;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.ITextComponent;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -150,7 +148,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     public CommandMapping registerNamespacedAlias(
             @NonNull final CommandRegistrar<?> registrar,
             @NonNull final PluginContainer container,
-            @NonNull final LiteralCommandNode<CommandSource> rootArgument,
+            @NonNull final LiteralCommandNode<CommandSourceStack> rootArgument,
             @NonNull final String @NonNull... secondaryAliases)
             throws CommandFailedRegistrationException {
         final String namespaced = rootArgument.getLiteral();
@@ -274,7 +272,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     @Override
     public void updateCommandTreeForPlayer(@NonNull final ServerPlayer player) {
         Objects.requireNonNull(player, "player");
-        SpongeCommon.getServer().getCommands().sendCommands((ServerPlayerEntity) player);
+        SpongeCommon.getServer().getCommands().sendCommands((net.minecraft.server.level.ServerPlayer) player);
     }
 
     @Override
@@ -361,7 +359,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                 this.prettyPrintThrowableError(exception, command, args, cause);
             }
             throw exception;
-        } catch (final net.minecraft.command.CommandException ex) {
+        } catch (final net.minecraft.commands.CommandRuntimeException ex) {
             final CommandResult errorResult = CommandResult.builder().setResult(0).error(SpongeAdventure.asAdventure(ex.getComponent())).build();
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
             if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
@@ -585,22 +583,22 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                 "callback");
     }
 
-    public Collection<CommandNode<ISuggestionProvider>> getNonBrigadierSuggestions(final CommandCause cause) {
-        final List<CommandNode<ISuggestionProvider>> suggestions = new ArrayList<>();
+    public Collection<CommandNode<SharedSuggestionProvider>> getNonBrigadierSuggestions(final CommandCause cause) {
+        final List<CommandNode<SharedSuggestionProvider>> suggestions = new ArrayList<>();
 
         for (final Map.Entry<SpongeCommandMapping, RootCommandTreeNode> entry : this.mappingToSuggestionNodes.entrySet()) {
             final SpongeCommandMapping mapping = entry.getKey();
 
             // create tree from primary mapping
-            final CommandNode<ISuggestionProvider> node = entry.getValue()
+            final CommandNode<SharedSuggestionProvider> node = entry.getValue()
                     .createArgumentTree(cause, LiteralArgumentBuilder.literal(mapping.getPrimaryAlias()));
             if (node != null) {
-                final Command<ISuggestionProvider> executableCommand = node.getCommand();
-                final CommandNode<ISuggestionProvider> toRedirectTo = node.getRedirect() == null ? node : node.getRedirect();
+                final Command<SharedSuggestionProvider> executableCommand = node.getCommand();
+                final CommandNode<SharedSuggestionProvider> toRedirectTo = node.getRedirect() == null ? node : node.getRedirect();
                 suggestions.add(node);
                 for (final String alias : mapping.getAllAliases()) {
                     if (!alias.equals(mapping.getPrimaryAlias())) {
-                        suggestions.add(LiteralArgumentBuilder.<ISuggestionProvider>literal(alias)
+                        suggestions.add(LiteralArgumentBuilder.<SharedSuggestionProvider>literal(alias)
                                 .executes(executableCommand).redirect(toRedirectTo).build());
                     }
                 }

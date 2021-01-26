@@ -26,7 +26,7 @@ package org.spongepowered.common.entity.ai.goal.builtin;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.MobEntity;
+import net.minecraft.world.entity.Mob;
 import org.spongepowered.api.entity.ai.goal.builtin.LookRandomlyGoal;
 import org.spongepowered.api.entity.living.Agent;
 
@@ -46,6 +46,6 @@ public final class SpongeLookRandomlyGoalBuilder implements LookRandomlyGoal.Bui
     public LookRandomlyGoal build(Agent owner) {
         checkNotNull(owner);
 
-        return (LookRandomlyGoal) new net.minecraft.entity.ai.goal.LookRandomlyGoal((MobEntity) owner);
+        return (LookRandomlyGoal) new net.minecraft.world.entity.ai.goal.RandomLookAroundGoal((Mob) owner);
     }
 }

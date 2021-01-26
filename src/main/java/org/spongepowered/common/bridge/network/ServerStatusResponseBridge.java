@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.network;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.ServerStatusResponse;
+import net.minecraft.network.protocol.status.ServerStatus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.network.status.Favicon;
 
@@ -39,7 +39,7 @@ public interface ServerStatusResponseBridge {
 
     void setFavicon(@Nullable Favicon favicon);
 
-    ServerStatusResponse.Players bridge$getPlayerBackup();
+    ServerStatus.Players bridge$getPlayerBackup();
 
-    void bridge$setPlayerBackup(ServerStatusResponse.Players players);
+    void bridge$setPlayerBackup(ServerStatus.Players players);
 }

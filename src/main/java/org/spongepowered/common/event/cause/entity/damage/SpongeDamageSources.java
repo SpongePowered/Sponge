@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.cause.entity.damage;
 
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.common.accessor.util.DamageSourceAccessor;
+import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
 
 public final class SpongeDamageSources {
 

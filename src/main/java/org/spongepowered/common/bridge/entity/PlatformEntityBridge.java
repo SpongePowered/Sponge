@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 /**
  * Bridge methods designed as hooks for various methods called on an {@link Entity}

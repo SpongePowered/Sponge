@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.StairsBlock;
-import net.minecraft.state.properties.StairsShape;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.StairsShape;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -43,21 +43,21 @@ public final class StairsData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtil.getFor(h.getValue(StairsBlock.FACING)))
-                        .set((h, v) -> DirectionUtil.set(h, v, StairsBlock.FACING))
-                        .supports(h -> h.getBlock() instanceof StairsBlock)
+                        .get(h -> DirectionUtil.getFor(h.getValue(StairBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, StairBlock.FACING))
+                        .supports(h -> h.getBlock() instanceof StairBlock)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(StairsBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(StairsBlock.WATERLOGGED, v))
-                        .supports(h -> h.getBlock() instanceof StairsBlock)
+                        .get(h -> h.getValue(StairBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(StairBlock.WATERLOGGED, v))
+                        .supports(h -> h.getBlock() instanceof StairBlock)
                     .create(Keys.PORTION_TYPE)
-                        .get(h -> PortionTypeUtil.getFromHalfBlock(h, StairsBlock.HALF))
-                        .set((h, v) -> PortionTypeUtil.setForHalfBlock(h, v, StairsBlock.HALF))
-                        .supports(h -> h.getBlock() instanceof StairsBlock)
+                        .get(h -> PortionTypeUtil.getFromHalfBlock(h, StairBlock.HALF))
+                        .set((h, v) -> PortionTypeUtil.setForHalfBlock(h, v, StairBlock.HALF))
+                        .supports(h -> h.getBlock() instanceof StairBlock)
                     .create(Keys.STAIR_SHAPE)
-                        .get(h -> (StairShape) (Object) h.getValue(StairsBlock.SHAPE))
-                        .set((h, v) -> h.setValue(StairsBlock.SHAPE, (StairsShape) (Object) v))
-                        .supports(h -> h.getBlock() instanceof StairsBlock);
+                        .get(h -> (StairShape) (Object) h.getValue(StairBlock.SHAPE))
+                        .set((h, v) -> h.setValue(StairBlock.SHAPE, (StairsShape) (Object) v))
+                        .supports(h -> h.getBlock() instanceof StairBlock);
     }
     // @formatter:on
 }

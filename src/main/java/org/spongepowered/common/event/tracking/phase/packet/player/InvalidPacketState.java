@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
 public final class InvalidPacketState extends BasicPacketState {
 
     @Override
-    public boolean isPacketIgnored(IPacket<?> packetIn, ServerPlayerEntity packetPlayer) {
+    public boolean isPacketIgnored(Packet<?> packetIn, ServerPlayer packetPlayer) {
         return true;
     }
 

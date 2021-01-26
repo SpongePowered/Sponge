@@ -24,16 +24,16 @@
  */
 package org.spongepowered.vanilla.client.gui.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.IRenderable;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
@@ -51,10 +51,10 @@ public final class PluginScreen extends Screen {
     private final List<PluginMetadata> metadata;
     private PluginSelectionList selectionList;
     private MetadataPanel contentPanel;
-    private TextFieldWidget searchField;
+    private EditBox searchField;
 
     public PluginScreen(final Screen previousScreen) {
-        super(new StringTextComponent("Plugins"));
+        super(new TextComponent("Plugins"));
         this.previousScreen = previousScreen;
         this.metadata = new ObjectArrayList<>();
         final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().getPlugins();
@@ -76,7 +76,7 @@ public final class PluginScreen extends Screen {
             Launch.getInstance().getPluginManager().getPlugins().stream().map(PluginContainer::getMetadata).collect(Collectors.toList()));
 
         // Add search text field
-        this.searchField = new TextFieldWidget(this.font, this.width / 2 - 100, 22, 200, 20, new TranslationTextComponent(I18n.get("itemGroup.search")));
+        this.searchField = new EditBox(this.font, this.width / 2 - 100, 22, 200, 20, new TranslatableComponent(I18n.get("itemGroup.search")));
         this.searchField.setResponder(value -> {
             this.selectionList.setFilterSupplier(() -> {
                 // Filter based on ID/Name
@@ -98,16 +98,16 @@ public final class PluginScreen extends Screen {
         this.children.addAll(Arrays.asList(this.selectionList, this.contentPanel, this.searchField));
 
         // Add the 'Done' button
-        this.addButton(new Button(this.width / 2 - 50, this.height - 40, 100, 20, new TranslationTextComponent(I18n.get("gui.done")),
+        this.addButton(new Button(this.width / 2 - 50, this.height - 40, 100, 20, new TranslatableComponent(I18n.get("gui.done")),
             (p_214323_1_) -> Minecraft.getInstance().setScreen(this.previousScreen)));
     }
 
     @Override
-    public void render(final MatrixStack stack, final int p_render_1_, final int p_render_2_, final float p_render_3_) {
+    public void render(final PoseStack stack, final int p_render_1_, final int p_render_2_, final float p_render_3_) {
         this.renderBackground(stack);
         this.children.stream()
-            .filter(child -> child instanceof IRenderable)
-            .forEach(child -> ((IRenderable) child).render(stack, p_render_1_, p_render_2_, p_render_3_));
+            .filter(child -> child instanceof Widget)
+            .forEach(child -> ((Widget) child).render(stack, p_render_1_, p_render_2_, p_render_3_));
         Screen.drawCenteredString(stack, this.font, this.title.getString(), this.width / 2, 8, 16777215);
 
         super.render(stack, p_render_1_, p_render_2_, p_render_3_);

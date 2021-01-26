@@ -24,7 +24,11 @@
  */
 package org.spongepowered.vanilla.installer;
 
+import org.objectweb.asm.Opcodes;
+
 public final class Constants {
+
+    public static final int ASM_VERSION = Opcodes.ASM9;
 
     public static final class Libraries {
 
@@ -32,10 +36,8 @@ public final class Constants {
         public static final String MINECRAFT_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
         public static final String MINECRAFT_PATH_PREFIX = "net/minecraft";
         public static final String MINECRAFT_SERVER_JAR_NAME = "minecraft_server";
-        public static final String MCP_CONFIG_NAME = "mcp_config";
-        public static final String MCP_CONFIG_PREFIX_URL = "https://files.minecraftforge.net/maven/de/oceanlabs/mcp/" + Libraries.MCP_CONFIG_NAME;
-        public static final String MCP_CONFIG_PATH_PREFIX = "de/oceanlabs/mcp/" + Libraries.MCP_CONFIG_NAME;
-        public static final String MCP_JOINED_PATH = "config/joined.tsrg";
+        public static final String MINECRAFT_MAPPINGS_PREFIX = MINECRAFT_PATH_PREFIX + "/mappings";
+        public static final String MINECRAFT_MAPPINGS_NAME = "server.txt";
 
         public static final String SPONGE_NEXUS_DOWNLOAD_URL = "https://repo-new.spongepowered.org/service/rest/v1/search/assets?md5=%s&maven"
             + ".groupId=%s&maven.artifactId=%s&maven.baseVersion=%s&maven.extension=jar";
@@ -43,7 +45,7 @@ public final class Constants {
 
     public static final class ManifestAttributes {
 
-        public static final String AT = "AT";
+        public static final String ACCESS_WIDENER = "Access-Widener";
         public static final String LAUNCH_TARGET = "Launch-Target";
     }
 }

@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.inventory.lens.impl;
 
-import net.minecraft.inventory.container.Slot;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.accessor.inventory.container.SlotAccessor;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.world.inventory.Slot;
 
 /**
  * A delegating Lens used in Containers. Provides ordered inventory access.

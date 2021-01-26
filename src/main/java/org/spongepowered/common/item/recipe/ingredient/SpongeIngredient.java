@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.ingredient;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -35,15 +33,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 
 public class SpongeIngredient extends Ingredient {
 
-    public SpongeIngredient(Stream<? extends Ingredient.IItemList> itemlist) {
-        super(itemlist);
+    public SpongeIngredient(final Stream<? extends Ingredient.Value> values) {
+        super(values);
     }
 
-    public SpongeIngredient(Ingredient.IItemList iItemList) {
-        this(Stream.of(iItemList));
+    public SpongeIngredient(final Ingredient.Value value) {
+        this(Stream.of(value));
     }
 
     public static void clearCache() {
@@ -51,19 +51,19 @@ public class SpongeIngredient extends Ingredient {
     }
 
     @Override
-    public boolean test(ItemStack testStack) {
+    public boolean test(final ItemStack testStack) {
         if (testStack == null) {
             return false;
         }
 
-        for (IItemList acceptedItem : this.values) {
+        for (final Value acceptedItem : this.values) {
             if (acceptedItem instanceof SpongeItemList) {
                 if (((SpongeItemList) acceptedItem).test(testStack)) {
                     return true;
                 }
             } else {
                 // TODO caching (relevant for TagList)
-                for (ItemStack stack : acceptedItem.getItems()) {
+                for (final ItemStack stack : acceptedItem.getItems()) {
                     if (stack.getItem() == testStack.getItem()) {
                         return true;
                     }
@@ -74,14 +74,14 @@ public class SpongeIngredient extends Ingredient {
         return false;
     }
 
-    public static SpongeIngredient spongeFromStacks(net.minecraft.item.ItemStack... stacks) {
+    public static SpongeIngredient spongeFromStacks(net.minecraft.world.item.ItemStack... stacks) {
         final SpongeStackItemList itemList = new SpongeStackItemList(stacks);
         return new SpongeIngredient(itemList);
     }
 
     private final static Map<String, Predicate<ItemStack>> cachedPredicates = new HashMap<>();
 
-    public static SpongeIngredient spongeFromPredicate(ResourceKey key, Predicate<org.spongepowered.api.item.inventory.ItemStack> predicate, net.minecraft.item.ItemStack... exemplaryIngredients) {
+    public static SpongeIngredient spongeFromPredicate(ResourceKey key, Predicate<org.spongepowered.api.item.inventory.ItemStack> predicate, net.minecraft.world.item.ItemStack... exemplaryIngredients) {
         final Predicate<ItemStack> mcPredicate = stack -> predicate.test(ItemStackUtil.fromNative(stack));
         if (SpongeIngredient.cachedPredicates.put(key.toString(), mcPredicate) != null) {
             SpongeCommon.getLogger().warn(MessageFormat.format("Predicate ingredient registered twice! {} was replaced.", key.toString()));

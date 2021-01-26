@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.type;
 
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.core.MappedRegistry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
@@ -34,7 +34,7 @@ public final class SpongeNotePitch implements NotePitch {
 
     @Override
     public NotePitch cycleNext() {
-        final SimpleRegistry<NotePitch> registry = (SimpleRegistry<NotePitch>) (Object) Sponge.getGame().registries().registry(RegistryTypes.NOTE_PITCH);
+        final MappedRegistry<NotePitch> registry = (MappedRegistry<NotePitch>) (Object) Sponge.getGame().registries().registry(RegistryTypes.NOTE_PITCH);
         final int value = registry.getId(this) + 1;
         NotePitch next = registry.byId(value);
         if (next == null) {

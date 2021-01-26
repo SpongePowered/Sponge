@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.accessor.entity.projectile.ShulkerBulletEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.projectile.ShulkerBulletAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
@@ -39,13 +39,13 @@ public final class ShulkerBulletData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(ShulkerBulletEntityAccessor.class)
+                .asMutable(ShulkerBulletAccessor.class)
                     .create(Keys.DIRECTION)
                         .get(h -> h.accessor$currentMoveDirection() == null ? Direction.NONE : Constants.DirectionFunctions.getFor(h.accessor$currentMoveDirection()))
                         .set((h, v) -> h.accessor$currentMoveDirection(Constants.DirectionFunctions.getFor(v)))
                     .create(Keys.TARGET_ENTITY)
                         .get(h -> (Entity) h.accessor$finalTarget())
-                        .set((h, v) -> h.accessor$finalTarget((net.minecraft.entity.Entity) v));
+                        .set((h, v) -> h.accessor$finalTarget((net.minecraft.world.entity.Entity) v));
     }
     // @formatter:on
 }

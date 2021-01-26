@@ -24,25 +24,24 @@
  */
 package org.spongepowered.common.item.recipe.cooking;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.SmokingRecipe;
-import net.minecraft.util.ResourceLocation;
-
 import java.util.function.Function;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.SmokingRecipe;
 
 public class SpongeSmokingRecipe extends SmokingRecipe {
 
-    private final Function<IInventory, ItemStack> resultFunction;
+    private final Function<Container, ItemStack> resultFunction;
 
-    public SpongeSmokingRecipe(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<IInventory, ItemStack> resultFunction) {
+    public SpongeSmokingRecipe(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction) {
         super(id, group, ingredient, result, experience, cookingTime);
         this.resultFunction = resultFunction;
     }
 
     @Override
-    public ItemStack assemble(final IInventory container) {
+    public ItemStack assemble(final Container container) {
         if (this.resultFunction != null) {
             final ItemStack result = this.resultFunction.apply(container);
             result.setCount(1);

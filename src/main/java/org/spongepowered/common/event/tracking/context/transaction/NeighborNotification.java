@@ -26,10 +26,6 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
@@ -47,6 +43,10 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEvent> {
     final BlockState original;
@@ -56,10 +56,10 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     // State definitions
     final BlockPos affectedPosition;
     final BlockState originalState;
-    private final Supplier<ServerWorld> serverWorld;
+    private final Supplier<ServerLevel> serverWorld;
     private Supplier<LocatableBlock> locatableBlock;
 
-    NeighborNotification(final Supplier<ServerWorld> serverWorldSupplier,
+    NeighborNotification(final Supplier<ServerLevel> serverWorldSupplier,
         final BlockState notifyState, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos
     ) {

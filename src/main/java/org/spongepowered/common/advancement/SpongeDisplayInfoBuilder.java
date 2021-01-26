@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
@@ -101,10 +100,10 @@ public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     public DisplayInfo build() {
         checkState(this.title != null, "Title has not been set");
         checkState(this.icon != null, "Icon has not been set");
-        final ITextComponent title = SpongeAdventure.asVanilla(this.title);
-        final ITextComponent description = SpongeAdventure.asVanilla(this.description);
+        final net.minecraft.network.chat.Component title = SpongeAdventure.asVanilla(this.title);
+        final net.minecraft.network.chat.Component description = SpongeAdventure.asVanilla(this.description);
         final FrameType frameType = (FrameType) (Object) this.advancementType;
-        final net.minecraft.item.ItemStack icon = (net.minecraft.item.ItemStack) (Object) this.icon.createStack();
+        final net.minecraft.world.item.ItemStack icon = (net.minecraft.world.item.ItemStack) (Object) this.icon.createStack();
         return (DisplayInfo) new net.minecraft.advancements.DisplayInfo(icon, title, description, null,
                 frameType, this.showToast, this.announceToChat, this.hidden);
     }

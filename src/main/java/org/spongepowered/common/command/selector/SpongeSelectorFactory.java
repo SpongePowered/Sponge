@@ -25,7 +25,7 @@
 package org.spongepowered.common.command.selector;
 
 import com.mojang.brigadier.StringReader;
-import net.minecraft.command.arguments.EntitySelectorParser;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.selector.Selector;
 

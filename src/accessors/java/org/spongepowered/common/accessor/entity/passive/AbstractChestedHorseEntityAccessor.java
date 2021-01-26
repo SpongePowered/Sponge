@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.accessor.entity.passive;
 
-import net.minecraft.entity.passive.horse.AbstractChestedHorseEntity;
-import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
 
-@Mixin(AbstractChestedHorseEntity.class)
+@Mixin(AbstractChestedHorse.class)
 public interface AbstractChestedHorseEntityAccessor {
 
     @Accessor("DATA_ID_CHEST")
-    static DataParameter<Boolean> accessor$DATA_ID_CHEST() {
+    static EntityDataAccessor<Boolean> accessor$DATA_ID_CHEST() {
         throw new UntransformedAccessorError();
     }
 

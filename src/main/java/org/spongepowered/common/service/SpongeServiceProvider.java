@@ -40,6 +40,7 @@ import org.spongepowered.common.applaunch.config.common.ServicesCategory;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.AbstractProvideServiceEventImpl;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.service.SpongeServiceProvider.Registration;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 

@@ -55,7 +55,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
 
     public BuildingStep slots(int amount) {
         this.size += amount;
-        net.minecraft.inventory.Inventory adapter = new net.minecraft.inventory.Inventory(amount);
+        net.minecraft.world.SimpleContainer adapter = new net.minecraft.world.SimpleContainer(amount);
         this.inventories.add((Inventory) adapter);
         this.lenses.add(new DefaultIndexedLens(0, amount, ((InventoryAdapter) adapter).inventoryAdapter$getSlotLensProvider()));
         return this;
@@ -63,7 +63,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
 
     public BuildingStep grid(int sizeX, int sizeY) {
         this.size += sizeX * sizeY;
-        net.minecraft.inventory.Inventory adapter = new net.minecraft.inventory.Inventory(sizeX * sizeY);
+        net.minecraft.world.SimpleContainer adapter = new net.minecraft.world.SimpleContainer(sizeX * sizeY);
         this.lenses.add(new GridInventoryLens(0, sizeX, sizeY, ((InventoryAdapter) adapter).inventoryAdapter$getSlotLensProvider()));
         this.inventories.add((Inventory) adapter);
         return this;

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.effect.sound;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 

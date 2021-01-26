@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.block;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.state.StateContainer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.StateDefinition;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
@@ -46,10 +46,10 @@ import java.util.function.Supplier;
 public abstract class BlockMixin_API extends AbstractBlockMixin_API {
 
     // @formatter:off
-    @Shadow @Final protected StateContainer<Block, net.minecraft.block.BlockState> stateDefinition;
+    @Shadow @Final protected StateDefinition<Block, net.minecraft.world.level.block.state.BlockState> stateDefinition;
     @Shadow public abstract Item shadow$asItem();
     @Shadow public abstract String shadow$getDescriptionId();
-    @Shadow public abstract net.minecraft.block.BlockState shadow$defaultBlockState();
+    @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$defaultBlockState();
     // @formatter:on
 
     @Override

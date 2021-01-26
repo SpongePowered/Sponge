@@ -24,13 +24,11 @@
  */
 package org.spongepowered.common.world.server;
 
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -47,31 +45,31 @@ public interface SpongeWorldManager extends WorldManager {
 
     Path getDimensionDataPackDirectory();
 
-    static RegistryKey<World> createRegistryKey(final ResourceKey key) {
-        return RegistryKey.create(Registry.DIMENSION_REGISTRY, (ResourceLocation) (Object) key);
+    static net.minecraft.resources.ResourceKey<Level> createRegistryKey(final ResourceKey key) {
+        return net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_REGISTRY, (ResourceLocation) (Object) key);
     }
 
-    void unloadWorld0(final ServerWorld world) throws IOException;
+    void unloadWorld0(final ServerLevel world) throws IOException;
 
     void loadLevel();
 
     default String getDirectoryName(final ResourceKey key) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
-        if (World.OVERWORLD.equals(registryKey)) {
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
+        if (Level.OVERWORLD.equals(registryKey)) {
             return "";
         }
-        if (World.NETHER.equals(registryKey)) {
+        if (Level.NETHER.equals(registryKey)) {
             return "DIM-1";
         }
-        if (World.END.equals(registryKey)) {
+        if (Level.END.equals(registryKey)) {
             return "DIM1";
         }
         return key.getValue();
     }
 
     default boolean isVanillaWorld(final ResourceKey key) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
-        return World.OVERWORLD.equals(registryKey) || World.NETHER.equals(registryKey) || World.END.equals(registryKey);
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
+        return Level.OVERWORLD.equals(registryKey) || Level.NETHER.equals(registryKey) || Level.END.equals(registryKey);
     }
 
     default boolean isVanillaSubWorld(final String directoryName) {
@@ -79,8 +77,8 @@ public interface SpongeWorldManager extends WorldManager {
     }
 
     default boolean isDefaultWorld(final ResourceKey key) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
-        return World.OVERWORLD.equals(registryKey);
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
+        return Level.OVERWORLD.equals(registryKey);
     }
 
     default Path getDataPackFile(final ResourceKey key) {

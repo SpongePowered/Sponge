@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.volume.buffer.biome;
 
 
-import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.Biomes;
@@ -42,12 +41,13 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import net.minecraft.core.BlockPos;
 
 /**
- * Mutable view of a {@link net.minecraft.world.biome.Biome} array.
+ * Mutable view of a {@link net.minecraft.world.level.biome.Biome} array.
  *
  * <p>Normally, the {@link ByteArrayMutableBiomeBuffer} class uses memory more
- * efficiently, but when the {@link net.minecraft.world.biome.Biome} array is already created (for
+ * efficiently, but when the {@link net.minecraft.world.level.biome.Biome} array is already created (for
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
@@ -90,10 +90,10 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
      * @return The native biome
      */
     @SuppressWarnings("ConstantConditions")
-    public net.minecraft.world.biome.Biome getNativeBiome(final int x, final int y, final int z) {
+    public net.minecraft.world.level.biome.Biome getNativeBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
         final Biome type = this.biomes[this.getIndex(x, y, z)];
-        return (net.minecraft.world.biome.Biome) (Object) type;
+        return (net.minecraft.world.level.biome.Biome) (Object) type;
     }
 
     @Override
@@ -105,7 +105,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     }
 
     @SuppressWarnings("ConstantConditions")
-    public boolean setBiome(final BlockPos pos, final net.minecraft.world.biome.Biome biome) {
+    public boolean setBiome(final BlockPos pos, final net.minecraft.world.level.biome.Biome biome) {
         Objects.requireNonNull(biome, "biome");
         Objects.requireNonNull(pos, "pos");
         this.checkRange(pos.getX(), pos.getY(), pos.getZ());

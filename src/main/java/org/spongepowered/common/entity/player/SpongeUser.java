@@ -29,15 +29,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.inventory.EnderChestInventory;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.FolderName;
-import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -94,6 +85,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.inventory.PlayerEnderChestContainer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.LevelStorageSource;
 
 public final class SpongeUser implements User, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder, BridgeSubject, SubjectBridge,
         DataCompoundHolder, InvulnerableTrackedBridge, VanishableBridge, GameProfileHolderBridge {
@@ -104,7 +104,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     private final GameProfile profile;
     private final Map<ResourceKey, RespawnLocation> spawnLocations = Maps.newHashMap();
 
-    private ResourceKey worldKey = (ResourceKey) (Object) World.OVERWORLD.location();
+    private ResourceKey worldKey = (ResourceKey) (Object) Level.OVERWORLD.location();
     private double x;
     private double y;
     private double z;
@@ -118,8 +118,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Nullable private SubjectReference subjectReference;
     @Nullable private SpongeUserInventory inventory; // lazy load when accessing inventory
-    @Nullable private EnderChestInventory enderChest; // lazy load when accessing inventory
-    @Nullable private CompoundNBT compound;
+    @Nullable private PlayerEnderChestContainer enderChest; // lazy load when accessing inventory
+    @Nullable private CompoundTag compound;
     private boolean isConstructing;
 
     public SpongeUser(final GameProfile profile) {
@@ -170,21 +170,21 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     public void initialize() {
         SpongeUser.initializedUsers.add(this);
-        this.compound = new CompoundNBT();
-        final ServerWorld world = SpongeCommon.getServer().overworld();
+        this.compound = new CompoundTag();
+        final ServerLevel world = SpongeCommon.getServer().overworld();
         if (world == null) {
             return;
         }
 
-        final SaveFormat.LevelSave storageSource = ((MinecraftServerAccessor) Sponge.getServer()).accessor$storageSource();
-        final File file = storageSource.getLevelPath(FolderName.PLAYER_DATA_DIR).resolve(this.profile.getId().toString() + ".dat").toFile();
+        final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.getServer()).accessor$storageSource();
+        final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.profile.getId().toString() + ".dat").toFile();
         if (!file.exists()) {
             return;
         }
 
         try {
             try (final FileInputStream in = new FileInputStream(file)) {
-                this.readCompound(CompressedStreamTools.readCompressed(in));
+                this.readCompound(NbtIo.readCompressed(in));
             }
         } catch (final IOException e) {
             SpongeCommon.getLogger().warn("Corrupt user file '{}'!", file, e);
@@ -197,7 +197,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
                 this.initialize();
             }
             this.inventory = new SpongeUserInventory(this);
-            final ListNBT listNBT = this.compound.getList(Constants.Entity.Player.INVENTORY, 10);
+            final ListTag listNBT = this.compound.getList(Constants.Entity.Player.INVENTORY, 10);
             this.inventory.readList(listNBT);
             this.inventory.currentItem = this.compound.getInt(Constants.Entity.Player.SELECTED_ITEM_SLOT);
         }
@@ -211,22 +211,22 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             }
             this.enderChest = new SpongeUserInventoryEnderchest(this);
             if (this.compound.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9)) {
-                final ListNBT nbttaglist1 = this.compound.getList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
+                final ListTag nbttaglist1 = this.compound.getList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
                 this.enderChest.fromTag(nbttaglist1);
             }
         }
         return this;
     }
 
-    public void readCompound(final CompoundNBT compound) {
+    public void readCompound(final CompoundTag compound) {
         this.reset();
         this.compound = compound;
 
         if (!compound.contains(Constants.Sponge.World.WORLD_KEY)) {
             this.worldKey = ResourceKey.resolve(compound.getString(Constants.Sponge.World.WORLD_KEY));
         }
-        final ListNBT position = compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
-        final ListNBT rotation = compound.getList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
+        final ListTag position = compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+        final ListTag rotation = compound.getList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
         this.x = position.getDouble(0);
         this.y = position.getDouble(1);
         this.z = position.getDouble(2);
@@ -234,7 +234,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.pitch = rotation.getFloat(1);
 
         this.invulnerable = compound.getBoolean(Constants.Entity.Player.INVULNERABLE);
-        final CompoundNBT spongeCompound = compound.getCompound(Constants.Forge.FORGE_DATA).getCompound(Constants.Sponge.SPONGE_DATA);
+        final CompoundTag spongeCompound = compound.getCompound(Constants.Forge.FORGE_DATA).getCompound(Constants.Sponge.SPONGE_DATA);
         this.isConstructing = true;
         CustomDataHolderBridge.syncTagToCustom(this);
         this.isConstructing = false;
@@ -250,10 +250,10 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             this.isVanishCollide = spongeCompound.getBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
         }
 
-        final ListNBT spawns = spongeCompound.getList(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
+        final ListTag spawns = spongeCompound.getList(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
 
         for (int i = 0; i < spawns.size(); i++) {
-            final CompoundNBT spawnCompound = spawns.getCompound(i);
+            final CompoundTag spawnCompound = spawns.getCompound(i);
 
             if (!spawnCompound.contains(Constants.Sponge.World.WORLD_KEY)) {
                 continue;
@@ -272,14 +272,14 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         }
     }
 
-    public void writeCompound(final CompoundNBT compound) {
+    public void writeCompound(final CompoundTag compound) {
 
         compound.putString(Constants.Sponge.World.WORLD_KEY, this.worldKey.getFormatted());
 
         this.loadInventory();
         this.loadEnderInventory();
 
-        compound.put(Constants.Entity.Player.INVENTORY, this.inventory.writeList(new ListNBT()));
+        compound.put(Constants.Entity.Player.INVENTORY, this.inventory.writeList(new ListTag()));
         compound.put(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.createTag());
         compound.putInt(Constants.Entity.Player.SELECTED_ITEM_SLOT, this.inventory.currentItem);
 
@@ -288,19 +288,19 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
         compound.putBoolean(Constants.Entity.Player.INVULNERABLE, this.invulnerable);
 
-        final CompoundNBT forgeCompound = compound.getCompound(Constants.Forge.FORGE_DATA);
-        final CompoundNBT spongeCompound = forgeCompound.getCompound(Constants.Sponge.SPONGE_DATA);
+        final CompoundTag forgeCompound = compound.getCompound(Constants.Forge.FORGE_DATA);
+        final CompoundTag spongeCompound = forgeCompound.getCompound(Constants.Sponge.SPONGE_DATA);
         spongeCompound.remove(Constants.Sponge.User.USER_SPAWN_LIST);
         spongeCompound.remove(Constants.Sponge.Entity.IS_VANISHED);
         spongeCompound.remove(Constants.Sponge.Entity.IS_INVISIBLE);
         spongeCompound.remove(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
         spongeCompound.remove(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
 
-        final ListNBT spawns = new ListNBT();
+        final ListTag spawns = new ListTag();
         for (final Map.Entry<ResourceKey, RespawnLocation> entry : this.spawnLocations.entrySet()) {
             final RespawnLocation respawn = entry.getValue();
 
-            final CompoundNBT spawnCompound = new CompoundNBT();
+            final CompoundTag spawnCompound = new CompoundTag();
             spawnCompound.putString(Constants.Sponge.World.WORLD_KEY, respawn.getWorldKey().getFormatted());
             spawnCompound.putDouble(Constants.Sponge.User.USER_SPAWN_X, respawn.getPosition().getX());
             spawnCompound.putDouble(Constants.Sponge.User.USER_SPAWN_Y, respawn.getPosition().getY());
@@ -494,18 +494,18 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     public void save() {
         Preconditions.checkState(this.isInitialized(), "User {} is not initialized", this.profile.getId());
 
-        final SaveFormat.LevelSave storageSource = ((MinecraftServerAccessor) Sponge.getServer()).accessor$storageSource();
-        final File file = storageSource.getLevelPath(FolderName.PLAYER_DATA_DIR).resolve(this.getUniqueId() + ".dat").toFile();
-        CompoundNBT compound;
+        final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.getServer()).accessor$storageSource();
+        final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.getUniqueId() + ".dat").toFile();
+        CompoundTag compound;
         try {
-            compound = CompressedStreamTools.readCompressed(new FileInputStream(file));
+            compound = NbtIo.readCompressed(new FileInputStream(file));
         } catch (final IOException ignored) {
             // Nevermind
-            compound = new CompoundNBT();
+            compound = new CompoundTag();
         }
         this.writeCompound(compound);
         try (final FileOutputStream out = new FileOutputStream(file)) {
-            CompressedStreamTools.writeCompressed(compound, out);
+            NbtIo.writeCompressed(compound, out);
             SpongeUser.dirtyUsers.remove(this);
             this.invalidate();
         } catch (final IOException e) {
@@ -523,26 +523,26 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         throw new MissingImplementationException("SpongeUser", "setEquippedItem");
     }
 
-    private net.minecraft.item.ItemStack getItemStackFromSlot(final EquipmentSlotType slotIn) {
+    private net.minecraft.world.item.ItemStack getItemStackFromSlot(final EquipmentSlot slotIn) {
         this.loadInventory();
-        if (slotIn == EquipmentSlotType.MAINHAND) {
+        if (slotIn == EquipmentSlot.MAINHAND) {
             return this.inventory.getCurrentItem();
-        } else if (slotIn == EquipmentSlotType.OFFHAND) {
+        } else if (slotIn == EquipmentSlot.OFFHAND) {
             return this.inventory.offHandInventory.get(0);
         } else {
-            return slotIn.getType() == EquipmentSlotType.Group.ARMOR ?
+            return slotIn.getType() == EquipmentSlot.Type.ARMOR ?
                     this.inventory.armorInventory.get(slotIn.getIndex()) :
-                    net.minecraft.item.ItemStack.EMPTY;
+                    net.minecraft.world.item.ItemStack.EMPTY;
         }
     }
 
-    private void setItemStackToSlot(final EquipmentSlotType slotIn, final net.minecraft.item.ItemStack stack) {
+    private void setItemStackToSlot(final EquipmentSlot slotIn, final net.minecraft.world.item.ItemStack stack) {
         this.loadInventory();
-        if (slotIn == EquipmentSlotType.MAINHAND) {
+        if (slotIn == EquipmentSlot.MAINHAND) {
             this.inventory.mainInventory.set(this.inventory.currentItem, stack);
-        } else if (slotIn == EquipmentSlotType.OFFHAND) {
+        } else if (slotIn == EquipmentSlot.OFFHAND) {
             this.inventory.offHandInventory.set(0, stack);
-        } else if (slotIn.getType() == EquipmentSlotType.Group.ARMOR) {
+        } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
             this.inventory.armorInventory.set(slotIn.getIndex(), stack);
         }
     }
@@ -743,12 +743,12 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public CompoundNBT data$getCompound() {
+    public CompoundTag data$getCompound() {
         return this.compound;
     }
 
     @Override
-    public void data$setCompound(CompoundNBT nbt) {
+    public void data$setCompound(CompoundTag nbt) {
         this.compound = nbt;
     }
 

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.PolarBearEntity;
+import net.minecraft.world.entity.animal.PolarBear;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -36,10 +36,10 @@ public final class PolarBearData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(PolarBearEntity.class)
+                .asMutable(PolarBear.class)
                     .create(Keys.IS_STANDING)
-                        .get(PolarBearEntity::isStanding)
-                        .set(PolarBearEntity::setStanding);
+                        .get(PolarBear::isStanding)
+                        .set(PolarBear::setStanding);
     }
     // @formatter:on
 }

@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.projectile.EyeOfEnderEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.projectile.EyeOfEnderAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
@@ -38,7 +38,7 @@ public final class EyeOfEnderData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(EyeOfEnderEntityAccessor.class)
+                .asMutable(EyeOfEnderAccessor.class)
                     .create(Keys.WILL_SHATTER)
                         .get(h -> !h.accessor$surviveAfterDeath())
                         .set((h, v) -> h.accessor$surviveAfterDeath(!v))

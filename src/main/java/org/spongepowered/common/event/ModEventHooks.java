@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import org.spongepowered.common.util.Constants;
 
 /**
@@ -38,7 +38,7 @@ import org.spongepowered.common.util.Constants;
  */
 public final class ModEventHooks {
 
-    public static void firePlayerChangedDimensionEvent(final PlayerEntity player, final RegistryKey<Constants.World> fromWorldKey,
-            final RegistryKey<World> toWorldKey) {
+    public static void firePlayerChangedDimensionEvent(final Player player, final ResourceKey<Constants.World> fromWorldKey,
+            final ResourceKey<Level> toWorldKey) {
     }
 }

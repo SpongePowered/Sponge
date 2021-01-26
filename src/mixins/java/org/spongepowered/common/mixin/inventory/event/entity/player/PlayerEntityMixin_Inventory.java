@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity.player;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -49,27 +44,32 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(value = PlayerEntity.class)
+@Mixin(value = Player.class)
 public class PlayerEntityMixin_Inventory {
 
-    @Final @Shadow public net.minecraft.entity.player.PlayerInventory inventory;
-    @Shadow public Container containerMenu;
+    @Final @Shadow public net.minecraft.world.entity.player.Inventory inventory;
+    @Shadow public AbstractContainerMenu containerMenu;
 
-    @Inject(method = "setItemSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
-    private void onSetItemStackToSlot(final EquipmentSlotType slotIn, final ItemStack stack, final CallbackInfo ci)
+    @Inject(method = "setItemSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
+    private void onSetItemStackToSlot(final EquipmentSlot slotIn, final ItemStack stack, final CallbackInfo ci)
     {
         if (((TrackedInventoryBridge) this.inventory).bridge$capturingInventory()) {
             List<SlotTransaction> slotTransactions = ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions();
-            if (slotIn == EquipmentSlotType.MAINHAND) {
+            if (slotIn == EquipmentSlot.MAINHAND) {
                 final ItemStack orig = this.inventory.items.get(this.inventory.selected);
                 final Slot slot = ((PlayerInventory) this.inventory).getPrimary().getHotbar().getSlot(this.inventory.selected).get();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
-            } else if (slotIn == EquipmentSlotType.OFFHAND) {
+            } else if (slotIn == EquipmentSlot.OFFHAND) {
                 final ItemStack orig = this.inventory.offhand.get(0);
                 final Slot slot = ((PlayerInventory) this.inventory).getOffhand();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
-            } else if (slotIn.getType() == EquipmentSlotType.Group.ARMOR) {
+            } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
                 final ItemStack orig = this.inventory.armor.get(slotIn.getIndex());
                 final Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(slotIn.getIndex()).get();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
@@ -78,8 +78,8 @@ public class PlayerEntityMixin_Inventory {
     }
 
     @Redirect(method = "remove", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/inventory/container/Container;removed(Lnet/minecraft/entity/player/PlayerEntity;)V"))
-    private void inventory$switchToCloseWindowState(final Container container, final PlayerEntity player) {
+            target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;removed(Lnet/minecraft/world/entity/player/Player;)V"))
+    private void inventory$switchToCloseWindowState(final AbstractContainerMenu container, final Player player) {
 
         // TODO Minecraft 1.14 - Know if the server is shutting down
 
@@ -88,8 +88,8 @@ public class PlayerEntityMixin_Inventory {
             container.removed(player);
             return;
         }
-        if (player instanceof ServerPlayerEntity) {
-            final ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+        if (player instanceof ServerPlayer) {
+            final ServerPlayer serverPlayer = (ServerPlayer) player;
 
             try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext(PhaseTracker.SERVER)
                     .source(serverPlayer)

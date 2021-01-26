@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.state.properties.ChestType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.util.Direction;
@@ -35,6 +32,9 @@ import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collections;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.ChestType;
 
 public final class ChestData {
 

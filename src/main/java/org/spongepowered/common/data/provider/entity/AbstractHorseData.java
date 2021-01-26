@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.horse.AbstractHorseEntity;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.entity.passive.horse.AbstractHorseEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -37,12 +37,12 @@ public final class AbstractHorseData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(AbstractHorseEntity.class)
+                .asMutable(AbstractHorse.class)
                     .create(Keys.IS_TAMED)
-                        .get(AbstractHorseEntity::isTamed)
-                        .set(AbstractHorseEntity::setTamed)
+                        .get(AbstractHorse::isTamed)
+                        .set(AbstractHorse::setTamed)
                     .create(Keys.TAMER)
-                        .get(AbstractHorseEntity::getOwnerUUID)
+                        .get(AbstractHorse::getOwnerUUID)
                         .set((h, v) -> {
                             h.setOwnerUUID(v);
                             h.setTamed(v != null);

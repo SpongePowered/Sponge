@@ -25,10 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.util.concurrent.RecursiveEventLoop;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.Connection;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.client.LocalServer;
@@ -51,12 +50,12 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> implements SpongeClient {
+public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Runnable> implements SpongeClient {
 
     // @formatter:off
-    @Shadow public net.minecraft.client.world.ClientWorld level;
-    @Shadow public ClientPlayerEntity player;
-    @Shadow @Nullable private NetworkManager pendingConnection;
+    @Shadow public net.minecraft.client.multiplayer.ClientLevel level;
+    @Shadow public net.minecraft.client.player.LocalPlayer player;
+    @Shadow @Nullable private Connection pendingConnection;
     @Shadow @Nullable public abstract IntegratedServer shadow$getSingleplayerServer();
     // @formatter:on
 

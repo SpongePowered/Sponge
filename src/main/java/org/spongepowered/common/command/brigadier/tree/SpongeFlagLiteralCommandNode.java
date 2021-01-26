@@ -30,36 +30,36 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
 import java.util.Objects;
+import net.minecraft.commands.CommandSourceStack;
 
 public final class SpongeFlagLiteralCommandNode extends SpongeLiteralCommandNode {
 
     private final Flag flag;
-    private Command<CommandSource> executor;
+    private Command<CommandSourceStack> executor;
 
-    public SpongeFlagLiteralCommandNode(final LiteralArgumentBuilder<CommandSource> argumentBuilder, final Flag flag) {
+    public SpongeFlagLiteralCommandNode(final LiteralArgumentBuilder<CommandSourceStack> argumentBuilder, final Flag flag) {
         super(argumentBuilder);
         this.flag = flag;
     }
 
     @Override
-    public void parse(final StringReader reader, final CommandContextBuilder<CommandSource> contextBuilder) throws CommandSyntaxException {
+    public void parse(final StringReader reader, final CommandContextBuilder<CommandSourceStack> contextBuilder) throws CommandSyntaxException {
         super.parse(reader, contextBuilder);
         ((SpongeCommandContextBuilder) contextBuilder).addFlagInvocation(this.flag);
     }
 
     @Override
-    public void forceExecutor(final Command<CommandSource> forcedExecutor) {
+    public void forceExecutor(final Command<CommandSourceStack> forcedExecutor) {
         this.executor = forcedExecutor;
     }
 
     @Override
-    public Command<CommandSource> getCommand() {
-        final Command<CommandSource> command = super.getCommand();
+    public Command<CommandSourceStack> getCommand() {
+        final Command<CommandSourceStack> command = super.getCommand();
         if (command != null) {
             return command;
         }

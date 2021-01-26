@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.AbstractBannerBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.WallBannerBlock;
+import net.minecraft.world.level.block.AbstractBannerBlock;
+import net.minecraft.world.level.block.WallBannerBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;

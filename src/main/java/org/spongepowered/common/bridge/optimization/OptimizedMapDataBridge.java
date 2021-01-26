@@ -24,22 +24,22 @@
  */
 package org.spongepowered.common.bridge.optimization;
 
-import net.minecraft.entity.item.ItemFrameEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.storage.MapData;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.common.applaunch.config.common.OptimizationCategory;
 
 /**
- * Only used for the {@link OptimizationCategory#useMapOptimization()} mixins targeting {@link MapData}.
+ * Only used for the {@link OptimizationCategory#useMapOptimization()} mixins targeting {@link MapItemSavedData}.
  */
 public interface OptimizedMapDataBridge {
 
     void mapOptimizationBridge$tickMap();
 
-    void mapOptimizationBridge$updatePlayer(PlayerEntity player, ItemStack mapStack);
+    void mapOptimizationBridge$updatePlayer(Player player, ItemStack mapStack);
 
-    void mapOptimizationBridge$updateItemFrameDecoration(ItemFrameEntity frame);
+    void mapOptimizationBridge$updateItemFrameDecoration(ItemFrame frame);
 
-    void mapOptimizationBridge$removeItemFrame(ItemFrameEntity frame);
+    void mapOptimizationBridge$removeItemFrame(ItemFrame frame);
 }

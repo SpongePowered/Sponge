@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 
 public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> {
 
@@ -96,7 +96,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
     @Override
     public void associateNeighborStateNotifier(final UnwindingPhaseContext context, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-                                               final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
+                                               final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         final PhaseContext<@NonNull ?> unwindingContext = context.getUnwindingContext();
         unwindingContext.associateNeighborStateNotifier(sourcePos, block, notifyPos, minecraftWorld, notifier);
     }

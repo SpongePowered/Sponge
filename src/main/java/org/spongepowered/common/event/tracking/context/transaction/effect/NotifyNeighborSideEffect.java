@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -47,7 +47,7 @@ public final class NotifyNeighborSideEffect implements ProcessingSideEffect {
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag, final int limit
     ) {
-        final ServerWorld world = pipeline.getServerWorld();
+        final ServerLevel world = pipeline.getServerWorld();
 
         // Vanilla isClientSide is redundant
         // if (!this.isClientSide && (flags & 1) != 0) {

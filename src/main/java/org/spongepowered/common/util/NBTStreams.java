@@ -25,39 +25,38 @@
 package org.spongepowered.common.util;
 
 import com.google.common.collect.Streams;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.NumberNBT;
-import net.minecraft.nbt.StringNBT;
-
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 
 public final class NBTStreams {
 
-    public static Stream<CompoundNBT> toCompounds(final Iterable<INBT> iterable) {
+    public static Stream<CompoundTag> toCompounds(final Iterable<Tag> iterable) {
         return Streams.stream(iterable)
-                .filter(tag -> tag instanceof CompoundNBT)
-                .map(tag -> (CompoundNBT) tag);
+                .filter(tag -> tag instanceof CompoundTag)
+                .map(tag -> (CompoundTag) tag);
     }
 
-    public static Stream<String> toStrings(final Iterable<INBT> iterable) {
+    public static Stream<String> toStrings(final Iterable<Tag> iterable) {
         return Streams.stream(iterable)
-                .filter(tag -> tag instanceof StringNBT)
-                .map(INBT::getAsString);
+                .filter(tag -> tag instanceof StringTag)
+                .map(Tag::getAsString);
     }
 
-    public static LongStream toLongs(final Iterable<INBT> iterable) {
+    public static LongStream toLongs(final Iterable<Tag> iterable) {
         return Streams.stream(iterable)
-                .filter(tag -> tag instanceof NumberNBT)
-                .mapToLong(tag -> ((NumberNBT) tag).getAsLong());
+                .filter(tag -> tag instanceof NumericTag)
+                .mapToLong(tag -> ((NumericTag) tag).getAsLong());
     }
 
-    public static IntStream toInts(final Iterable<INBT> iterable) {
+    public static IntStream toInts(final Iterable<Tag> iterable) {
         return Streams.stream(iterable)
-                .filter(tag -> tag instanceof NumberNBT)
-                .mapToInt(tag -> ((NumberNBT) tag).getAsInt());
+                .filter(tag -> tag instanceof NumericTag)
+                .mapToInt(tag -> ((NumericTag) tag).getAsInt());
     }
 
     private NBTStreams() {

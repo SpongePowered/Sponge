@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.potion.Effect;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -40,6 +39,7 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import net.minecraft.world.effect.MobEffect;
 
 public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> implements PotionEffect.Builder {
 
@@ -136,7 +136,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
     public PotionEffect build() throws IllegalStateException {
         checkState(this.potionType != null, "Potion type has not been set");
         checkState(this.duration > 0, "Duration has not been set");
-        return (PotionEffect) new net.minecraft.potion.EffectInstance((Effect) this.potionType, this.duration,
+        return (PotionEffect) new net.minecraft.world.effect.MobEffectInstance((MobEffect) this.potionType, this.duration,
                 this.amplifier,
                 this.isAmbient,
                 this.showParticles,

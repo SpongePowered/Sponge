@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.inventory.fabric;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 
 import java.util.Collection;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * A {@link Fabric} implementation that uses registered {@link InventoryTranslator}s.
- * This can be used for inventory interfaces like {@link IInventory}
+ * This can be used for inventory interfaces like {@link Container}
  */
 @SuppressWarnings("unchecked")
 public interface UniversalFabric extends Fabric, InventoryBridge {

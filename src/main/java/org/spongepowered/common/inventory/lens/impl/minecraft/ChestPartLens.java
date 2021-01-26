@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
-import net.minecraft.inventory.DoubleSidedInventory;
-import net.minecraft.inventory.container.ChestContainer;
-import net.minecraft.tileentity.ChestTileEntity;
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.accessor.inventory.DoubleSidedInventoryAccessor;
+import org.spongepowered.common.accessor.world.CompoundContainerAccessor;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
@@ -43,21 +43,21 @@ public class ChestPartLens extends RealLens {
 
     @SuppressWarnings("unchecked")
     public ChestPartLens(int base, int width, int height, SlotLensProvider slots, boolean upper) {
-        super(base, width * height, (Class<? extends Inventory>) (Class) ChestTileEntity.class);
+        super(base, width * height, (Class<? extends Inventory>) (Class) ChestBlockEntity.class);
         this.upper = upper;
         this.addSpanningChild(new GridInventoryLens(base, width, height, slots));
     }
 
     @Override
     public Inventory getAdapter(Fabric fabric, Inventory parent) {
-        if (fabric instanceof ChestContainer) {
+        if (fabric instanceof ChestMenu) {
             fabric = fabric.fabric$get(this.base).bridge$getAdapter().inventoryAdapter$getFabric();
         }
-        if (fabric instanceof DoubleSidedInventory) {
+        if (fabric instanceof CompoundContainer) {
             if (this.upper) {
-                return (Inventory) ((DoubleSidedInventoryAccessor) fabric).accessor$container1();
+                return (Inventory) ((CompoundContainerAccessor) fabric).accessor$container1();
             } else {
-                return (Inventory) ((DoubleSidedInventoryAccessor) fabric).accessor$container2();
+                return (Inventory) ((CompoundContainerAccessor) fabric).accessor$container2();
             }
         }
         return super.getAdapter(fabric, parent);

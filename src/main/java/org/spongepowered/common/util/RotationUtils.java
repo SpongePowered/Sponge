@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.state.Property;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.spongepowered.api.util.Direction;
 
 public final class RotationUtils {

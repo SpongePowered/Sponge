@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.chunk;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -58,6 +58,6 @@ public interface TrackedChunkBridge {
      *
      * @param removed The tile entity to remove from the internal maps
      */
-    void bridge$removeTileEntity(TileEntity removed);
+    void bridge$removeTileEntity(BlockEntity removed);
 
 }

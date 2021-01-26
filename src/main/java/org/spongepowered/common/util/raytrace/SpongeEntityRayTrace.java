@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.util.raytrace;
 
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.blockray.RayTraceResult;
@@ -37,6 +34,9 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public final class SpongeEntityRayTrace extends AbstractSpongeRayTrace<@NonNull Entity> {
 
@@ -52,19 +52,19 @@ public final class SpongeEntityRayTrace extends AbstractSpongeRayTrace<@NonNull 
     }
 
     @Override
-    List<net.minecraft.entity.Entity> selectEntities(final ServerWorld serverWorld, final AxisAlignedBB targetAABB) {
-        return ((World) serverWorld).getEntities((net.minecraft.entity.Entity) null, targetAABB, (Predicate) this.select);
+    List<net.minecraft.world.entity.Entity> selectEntities(final ServerWorld serverWorld, final AABB targetAABB) {
+        return ((Level) serverWorld).getEntities((net.minecraft.world.entity.Entity) null, targetAABB, (Predicate) this.select);
     }
 
     @Override
-    final Optional<RayTraceResult<@NonNull Entity>> testSelectLocation(final ServerWorld serverWorld, final Vector3d vec3din, final Vector3d vec3dend) {
+    final Optional<RayTraceResult<@NonNull Entity>> testSelectLocation(final ServerWorld serverWorld, final Vec3 vec3din, final Vec3 vec3dend) {
         double currentSqDist = Double.MAX_VALUE;
         RayTraceResult<@NonNull Entity> returnedEntity = null;
         final LocatableBlock locatableBlock = this.getBlock(serverWorld, vec3din, vec3dend);
-        for (final net.minecraft.entity.Entity entity : this.selectEntities(serverWorld, this.getBlockAABB(locatableBlock.getBlockPosition()))) {
-            final Optional<Vector3d> vec3d = entity.getBoundingBox().clip(vec3din, vec3dend);
+        for (final net.minecraft.world.entity.Entity entity : this.selectEntities(serverWorld, this.getBlockAABB(locatableBlock.getBlockPosition()))) {
+            final Optional<Vec3> vec3d = entity.getBoundingBox().clip(vec3din, vec3dend);
             if (vec3d.isPresent()) {
-                final Vector3d hitPosition = vec3d.get();
+                final Vec3 hitPosition = vec3d.get();
                 final double sqdist = hitPosition.distanceToSqr(vec3din);
                 if (sqdist < currentSqDist) {
                     currentSqDist = sqdist;

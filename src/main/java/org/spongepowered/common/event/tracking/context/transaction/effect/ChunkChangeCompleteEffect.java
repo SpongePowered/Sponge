@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -47,7 +47,7 @@ public final class ChunkChangeCompleteEffect implements ProcessingSideEffect {
         final SpongeBlockChangeFlag flag, final int limit
     ) {
 
-        final Chunk chunk = pipeline.getAffectedChunk();
+        final LevelChunk chunk = pipeline.getAffectedChunk();
         chunk.markUnsaved();
         return new EffectResult(oldState.state, true);
     }

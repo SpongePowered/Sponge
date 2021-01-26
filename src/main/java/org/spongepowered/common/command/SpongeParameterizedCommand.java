@@ -29,7 +29,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
@@ -96,7 +96,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     public List<String> getSuggestions(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
         final SpongeCommandDispatcher dispatcher = this.getCachedDispatcher();
         final String input = arguments.getRemaining();
-        final ParseResults<CommandSource> parseResults = dispatcher.parse((StringReader) arguments, (CommandSource) cause);
+        final ParseResults<CommandSourceStack> parseResults = dispatcher.parse((StringReader) arguments, (CommandSourceStack) cause);
         final Suggestions suggestions = dispatcher.getCompletionSuggestions(parseResults).join();
         return suggestions.getList().stream().map(x -> x.apply(input)).collect(Collectors.toList());
     }
@@ -121,7 +121,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     @Override
     public @NonNull Component getUsage(final @NonNull CommandCause cause) {
         final Collection<Component> usage =
-                Arrays.stream(this.getCachedDispatcher().getAllUsage(this.getCachedDispatcher().getRoot(), (CommandSource) cause, true))
+                Arrays.stream(this.getCachedDispatcher().getAllUsage(this.getCachedDispatcher().getRoot(), (CommandSourceStack) cause, true))
                     .map(Component::text).collect(Collectors.toList());
         return Component.join(Component.newline(), usage);
     }
@@ -156,7 +156,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     @Override
     @NonNull
     public CommandContext parseArguments(@NonNull final CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
-        final ParseResults<CommandSource> results = this.getCachedDispatcher().parse((SpongeStringReader) arguments, (CommandSource) cause);
+        final ParseResults<CommandSourceStack> results = this.getCachedDispatcher().parse((SpongeStringReader) arguments, (CommandSourceStack) cause);
         return (CommandContext) results.getContext().build(arguments.getInput());
     }
 
@@ -176,11 +176,11 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
         return this.cachedDispatcher;
     }
 
-    public LiteralCommandNode<CommandSource> buildWithAlias(final String primaryAlias) {
+    public LiteralCommandNode<CommandSourceStack> buildWithAlias(final String primaryAlias) {
         return this.buildWithAliases(Collections.singleton(primaryAlias)).iterator().next();
     }
 
-    public Collection<LiteralCommandNode<CommandSource>> buildWithAliases(final Collection<String> aliases) {
+    public Collection<LiteralCommandNode<CommandSourceStack>> buildWithAliases(final Collection<String> aliases) {
         return SpongeParameterTranslator.INSTANCE.createCommandTree(this, aliases);
     }
 }

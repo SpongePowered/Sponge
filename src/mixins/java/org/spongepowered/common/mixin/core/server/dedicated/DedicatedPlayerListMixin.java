@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.server.dedicated;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.world.storage.PlayerData;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -45,8 +45,8 @@ import org.spongepowered.common.service.server.permission.SpongePermissionServic
 @Mixin(DedicatedPlayerList.class)
 public abstract class DedicatedPlayerListMixin extends PlayerList {
 
-    public DedicatedPlayerListMixin(final MinecraftServer server, final DynamicRegistries.Impl registryHolder,
-                                    final PlayerData playerIo, final int maxPlayers) {
+    public DedicatedPlayerListMixin(final MinecraftServer server, final RegistryAccess.RegistryHolder registryHolder,
+                                    final PlayerDataStorage playerIo, final int maxPlayers) {
         super(server, registryHolder, playerIo, maxPlayers);
     }
 

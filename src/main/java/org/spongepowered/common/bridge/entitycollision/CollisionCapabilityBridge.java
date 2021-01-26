@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.entitycollision;
 
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.ResourceKey;
 
 public interface CollisionCapabilityBridge {
@@ -35,7 +35,7 @@ public interface CollisionCapabilityBridge {
 
     void collision$setMaxCollisions(int max);
 
-    void collision$initializeCollisionState(World worldIn);
+    void collision$initializeCollisionState(Level worldIn);
 
     void collision$requiresCollisionsCacheRefresh(boolean flag);
 

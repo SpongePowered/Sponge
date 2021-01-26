@@ -25,7 +25,7 @@
 package org.spongepowered.common.relocate.co.aikar.timings;
 
 import co.aikar.timings.Timing;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;

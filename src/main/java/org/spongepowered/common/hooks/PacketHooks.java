@@ -24,29 +24,28 @@
  */
 package org.spongepowered.common.hooks;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.server.SJoinGamePacket;
-import net.minecraft.network.play.server.SRespawnPacket;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.GameType;
-import net.minecraft.world.World;
-
 import java.util.Set;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.protocol.game.ClientboundLoginPacket;
+import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
 
 public interface PacketHooks {
 
-    default SJoinGamePacket createSJoinGamePacket(
-          final ServerPlayerEntity entity,
+    default ClientboundLoginPacket createSJoinGamePacket(
+          final ServerPlayer entity,
           final GameType gameType,
           final GameType previousGameType,
           final long seed,
           final boolean hardcore,
-          final Set<RegistryKey<World>> levels,
-          final DynamicRegistries.Impl registryHolder,
+          final Set<ResourceKey<Level>> levels,
+          final RegistryAccess.RegistryHolder registryHolder,
           final DimensionType dimensionType,
-          final RegistryKey<World> dimension,
+          final ResourceKey<Level> dimension,
           final int maxPlayers,
           final int chunkRadius,
           final boolean reducedDebugInfo,
@@ -55,7 +54,7 @@ public interface PacketHooks {
           final boolean isFlat
     ) {
 
-        return new SJoinGamePacket(
+        return new ClientboundLoginPacket(
               entity.getId(),
               gameType,
               previousGameType,
@@ -74,10 +73,10 @@ public interface PacketHooks {
         );
     }
 
-    default SRespawnPacket createSRespawnPacket(
-          final ServerPlayerEntity entity,
+    default ClientboundRespawnPacket createSRespawnPacket(
+          final ServerPlayer entity,
           final DimensionType dimensionType,
-          final RegistryKey<World> dimension,
+          final ResourceKey<Level> dimension,
           final long seed,
           final GameType playerGameType,
           final GameType previousPlayerGameType,
@@ -85,7 +84,7 @@ public interface PacketHooks {
           final boolean isFlat,
           final boolean keepAllPlayerData
     ) {
-        return new SRespawnPacket(
+        return new ClientboundRespawnPacket(
               dimensionType,
               dimension,
               seed,

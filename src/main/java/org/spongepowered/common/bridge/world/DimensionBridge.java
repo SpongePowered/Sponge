@@ -25,8 +25,8 @@
 package org.spongepowered.common.bridge.world;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.storage.ServerWorldInfo;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -69,7 +69,7 @@ public interface DimensionBridge {
 
     void bridge$populateFromTemplate(SpongeWorldTemplate s);
 
-    void bridge$populateFromLevelData(ServerWorldInfo levelData);
+    void bridge$populateFromLevelData(PrimaryLevelData levelData);
 
     SpongeWorldTemplate bridge$asTemplate();
 }

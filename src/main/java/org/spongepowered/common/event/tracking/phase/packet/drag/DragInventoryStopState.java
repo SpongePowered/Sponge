@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.crafting.ICraftingRecipe;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.network.IPacket;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -40,6 +35,10 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.crafting.RecipeType;
 
 public abstract class DragInventoryStopState extends NamedInventoryState {
 
@@ -48,7 +47,7 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
     }
 
     @Override
-    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, InventoryPacketContext context) {
+    public void populateContext(ServerPlayer playerMP, Packet<?> packet, InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
         ((TrackedContainerBridge) playerMP.containerMenu).bridge$setFirePreview(false);
     }
@@ -60,21 +59,21 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
     }
 
     public static void unwindCraftPreview(InventoryPacketContext context) {
-        final ServerPlayerEntity player = context.getPacketPlayer();
+        final ServerPlayer player = context.getPacketPlayer();
         ((TrackedContainerBridge) player.containerMenu).bridge$setFirePreview(true);
 
         final CraftingInventory craftInv = ((Inventory) player.containerMenu).query(CraftingInventory.class).orElse(null);
         if (craftInv != null) {
             List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) player.containerMenu).bridge$getPreviewTransactions();
             if (!previewTransactions.isEmpty()) {
-                net.minecraft.inventory.CraftingInventory mcCraftInv = null;
+                net.minecraft.world.inventory.CraftingContainer mcCraftInv = null;
                 for (Slot slot : player.containerMenu.slots) {
-                    if (slot.container instanceof net.minecraft.inventory.CraftingInventory) {
-                        mcCraftInv = ((net.minecraft.inventory.CraftingInventory) slot.container);
+                    if (slot.container instanceof net.minecraft.world.inventory.CraftingContainer) {
+                        mcCraftInv = ((net.minecraft.world.inventory.CraftingContainer) slot.container);
                     }
                 }
                 if (mcCraftInv != null) {
-                    Optional<ICraftingRecipe> recipe = player.getServer().getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, mcCraftInv, player.level);
+                    Optional<net.minecraft.world.item.crafting.CraftingRecipe> recipe = player.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, mcCraftInv, player.level);
                     InventoryEventFactory.callCraftEventPre(player, craftInv, previewTransactions.get(0),
                             ((CraftingRecipe) recipe.orElse(null)), player.containerMenu, previewTransactions);
                     previewTransactions.clear();

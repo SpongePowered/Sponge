@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.bridge.network;
 
-import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Connection;
 
 public interface NetworkManagerHolderBridge {
 
-    NetworkManager bridge$getConnection();
+    Connection bridge$getConnection();
 }

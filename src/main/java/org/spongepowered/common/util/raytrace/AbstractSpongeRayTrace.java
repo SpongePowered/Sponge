@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.util.raytrace;
 
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -40,6 +38,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.util.raytrace.AbstractSpongeRayTrace.TData;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -47,6 +46,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 
 public abstract class AbstractSpongeRayTrace<T extends Locatable> implements RayTrace<@NonNull T> {
 
@@ -183,13 +184,13 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
         boolean requireAdvancement = true;
         while (requireAdvancement) {
-            final net.minecraft.util.math.vector.Vector3d vec3dstart = VecHelper.toVanillaVector3d(currentLocation);
+            final net.minecraft.world.phys.Vec3 vec3dstart = VecHelper.toVanillaVector3d(currentLocation);
             // As this iteration is for the CURRENT block location, we need to check where we are with the filter.
             if (this.continueWhileLocation != null && !this.continueWhileLocation.test(ServerLocation.of(serverWorld, currentBlock))) {
                 return Optional.empty();
             }
             final Vector3d nextLocation;
-            final net.minecraft.util.math.vector.Vector3d vec3dend;
+            final net.minecraft.world.phys.Vec3 vec3dend;
             if (tData.getTotalTWithNextStep() > length) {
                 // This is the last step, we break out of the loop after this set of checks.
                 requireAdvancement = false;
@@ -226,11 +227,11 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
                 } else {
                     resultDistance = Double.MAX_VALUE;
                 }
-                final AxisAlignedBB targetAABB = this.getBlockAABB(currentBlock);
-                for (final net.minecraft.entity.Entity entity : this.getFailingEntities(serverWorld, targetAABB)) {
-                    final Optional<net.minecraft.util.math.vector.Vector3d> vec3d = entity.getBoundingBox().clip(vec3dstart, vec3dend);
+                final AABB targetAABB = this.getBlockAABB(currentBlock);
+                for (final net.minecraft.world.entity.Entity entity : this.getFailingEntities(serverWorld, targetAABB)) {
+                    final Optional<net.minecraft.world.phys.Vec3> vec3d = entity.getBoundingBox().clip(vec3dstart, vec3dend);
                     if (vec3d.isPresent()) {
-                        final net.minecraft.util.math.vector.Vector3d hitPosition = vec3d.get();
+                        final net.minecraft.world.phys.Vec3 hitPosition = vec3d.get();
                         final double sqdist = hitPosition.distanceToSqr(vec3dstart);
                         if (sqdist < resultDistance) {
                             // We have a failure, so at this point we just bail out and end the trace.
@@ -284,28 +285,28 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
         );
     }
 
-    final AxisAlignedBB getBlockAABB(final Vector3i currentBlock) {
-        return new AxisAlignedBB(currentBlock.getX(),
+    final AABB getBlockAABB(final Vector3i currentBlock) {
+        return new AABB(currentBlock.getX(),
                 currentBlock.getY(), currentBlock.getZ(), currentBlock.getX() + 1, currentBlock.getY() + 1, currentBlock.getZ() + 1);
     }
 
-    private List<net.minecraft.entity.Entity> getFailingEntities(final ServerWorld serverWorld, final AxisAlignedBB targetAABB) {
-        return ((World) serverWorld).getEntities((net.minecraft.entity.Entity) null, targetAABB, (Predicate) this.continueWhileEntity.negate());
+    private List<net.minecraft.world.entity.Entity> getFailingEntities(final ServerWorld serverWorld, final AABB targetAABB) {
+        return ((Level) serverWorld).getEntities((net.minecraft.world.entity.Entity) null, targetAABB, (Predicate) this.continueWhileEntity.negate());
     }
 
     boolean requiresEntityTracking() {
         return this.continueWhileEntity != null;
     }
 
-    List<net.minecraft.entity.Entity> selectEntities(final ServerWorld serverWorld, final AxisAlignedBB targetAABB) {
+    List<net.minecraft.world.entity.Entity> selectEntities(final ServerWorld serverWorld, final AABB targetAABB) {
         return Collections.emptyList();
     }
 
     abstract Optional<RayTraceResult<@NonNull T>> testSelectLocation(final ServerWorld serverWorld,
-            final net.minecraft.util.math.vector.Vector3d location,
-            final net.minecraft.util.math.vector.Vector3d exitLocation);
+            final net.minecraft.world.phys.Vec3 location,
+            final net.minecraft.world.phys.Vec3 exitLocation);
 
-    final LocatableBlock getBlock(final ServerWorld world, final net.minecraft.util.math.vector.Vector3d in, final net.minecraft.util.math.vector.Vector3d out) {
+    final LocatableBlock getBlock(final ServerWorld world, final net.minecraft.world.phys.Vec3 in, final net.minecraft.world.phys.Vec3 out) {
         final Vector3i coord = new Vector3i(
                 Math.min(in.x, out.x),
                 Math.min(in.y, out.y),
@@ -315,8 +316,8 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     private boolean shouldAdvanceThroughBlock(final ServerWorld serverWorld,
-            final net.minecraft.util.math.vector.Vector3d location,
-            final net.minecraft.util.math.vector.Vector3d exitLocation) {
+            final net.minecraft.world.phys.Vec3 location,
+            final net.minecraft.world.phys.Vec3 exitLocation) {
         if (this.continueWhileBlock == null) {
             return true;
         }

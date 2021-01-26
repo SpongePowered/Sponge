@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.world.generation.config.structure;
 
-import net.minecraft.world.gen.settings.StructureSeparationSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
 
 public final class SpongeSeparatedStructureConfigFactory  implements SeparatedStructureConfig.Factory {
 
     @Override
     public SeparatedStructureConfig of(final int spacing, final int separation, final int seedSalt) {
-        return (SeparatedStructureConfig) new StructureSeparationSettings(spacing, separation, seedSalt);
+        return (SeparatedStructureConfig) new StructureFeatureConfiguration(spacing, separation, seedSalt);
     }
 }

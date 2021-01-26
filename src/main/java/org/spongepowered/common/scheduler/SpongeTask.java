@@ -251,7 +251,7 @@ public final class SpongeTask implements Task {
 
             final String name;
             if (this.name == null) {
-                name = this.plugin.getMetadata().getId() + "-" + Builder.taskCounter.incrementAndGet();
+                name = this.plugin.getMetadata().getId() + "-" + org.spongepowered.common.scheduler.SpongeTask.Builder.taskCounter.incrementAndGet();
             } else {
                 name = this.name;
             }

@@ -26,8 +26,8 @@ package org.spongepowered.common.command.parameter;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandException;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.commands.CommandRuntimeException;
+import net.minecraft.network.chat.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
@@ -125,7 +125,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
         // If we get this far, we failed to parse, return the exceptions
         if (currentExceptions == null) {
-            throw new CommandException(new StringTextComponent("Could not parse element"));
+            throw new CommandRuntimeException(new TextComponent("Could not parse element"));
             // throw new ArgumentParseException(t("Could not parse element"), args.getInput(), args.getCursor());
         } else if (currentExceptions.size() == 1) {
             throw currentExceptions.get(0);

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.hooks;
 
-import net.minecraft.world.DimensionType;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.WorldTypes;
 

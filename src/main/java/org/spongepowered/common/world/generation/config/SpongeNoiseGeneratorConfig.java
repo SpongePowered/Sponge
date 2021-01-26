@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.world.generation.config;
 
-import net.minecraft.util.registry.WorldGenRegistries;
-import net.minecraft.world.gen.DimensionSettings;
-import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
-import org.spongepowered.common.accessor.world.gen.DimensionSettingsAccessor;
-
+import org.spongepowered.common.accessor.world.level.levelgen.NoiseGeneratorSettingsAccessor;
 import java.util.Objects;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.StructureSettings;
 
 public final class SpongeNoiseGeneratorConfig {
 
@@ -89,7 +88,7 @@ public final class SpongeNoiseGeneratorConfig {
 
         @Override
         public NoiseGeneratorConfig.Builder reset() {
-            this.structureConfig = (StructureGenerationConfig) new DimensionStructuresSettings(true);
+            this.structureConfig = (StructureGenerationConfig) new StructureSettings(true);
             this.noiseConfig = NoiseConfig.overworld();
             this.defaultBlock = BlockTypes.STONE.get().getDefaultState();
             this.defaultFluid = BlockTypes.WATER.get().getDefaultState();
@@ -113,9 +112,9 @@ public final class SpongeNoiseGeneratorConfig {
 
         @Override
         public NoiseGeneratorConfig build() {
-            final DimensionSettings settings = DimensionSettingsAccessor.invoker$new((DimensionStructuresSettings) this.structureConfig,
-                    (net.minecraft.world.gen.settings.NoiseSettings) this.noiseConfig, (net.minecraft.block.BlockState) this.defaultBlock,
-                    (net.minecraft.block.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, false);
+            final NoiseGeneratorSettings settings = NoiseGeneratorSettingsAccessor.invoker$new((StructureSettings) this.structureConfig,
+                    (net.minecraft.world.level.levelgen.NoiseSettings) this.noiseConfig, (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
+                    (net.minecraft.world.level.block.state.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, false);
             return (NoiseGeneratorConfig) (Object) settings;
         }
     }
@@ -124,32 +123,32 @@ public final class SpongeNoiseGeneratorConfig {
 
         @Override
         public NoiseGeneratorConfig amplified() {
-            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.AMPLIFIED);
+            return (NoiseGeneratorConfig) (Object) BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(NoiseGeneratorSettings.AMPLIFIED);
         }
 
         @Override
         public NoiseGeneratorConfig overworld() {
-            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.OVERWORLD);
+            return (NoiseGeneratorConfig) (Object) BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(NoiseGeneratorSettings.OVERWORLD);
         }
 
         @Override
         public NoiseGeneratorConfig nether() {
-            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.NETHER);
+            return (NoiseGeneratorConfig) (Object) BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(NoiseGeneratorSettings.NETHER);
         }
 
         @Override
         public NoiseGeneratorConfig end() {
-            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.END);
+            return (NoiseGeneratorConfig) (Object) BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(NoiseGeneratorSettings.END);
         }
 
         @Override
         public NoiseGeneratorConfig caves() {
-            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.CAVES);
+            return (NoiseGeneratorConfig) (Object) BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(NoiseGeneratorSettings.CAVES);
         }
 
         @Override
         public NoiseGeneratorConfig floatingIslands() {
-            return (NoiseGeneratorConfig) (Object) WorldGenRegistries.NOISE_GENERATOR_SETTINGS.get(DimensionSettings.FLOATING_ISLANDS);
+            return (NoiseGeneratorConfig) (Object) BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(NoiseGeneratorSettings.FLOATING_ISLANDS);
         }
     }
 }

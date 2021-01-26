@@ -40,13 +40,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import net.minecraft.server.management.IPBanEntry;
-import net.minecraft.server.management.IPBanList;
+import net.minecraft.server.players.IpBanList;
+import net.minecraft.server.players.IpBanListEntry;
 
 /**
  * Redirects all calls to the {@link BanService}.
  */
-public final class SpongeIPBanList extends IPBanList {
+public final class SpongeIPBanList extends IpBanList {
 
     public SpongeIPBanList(final File file) {
         super(file);
@@ -66,13 +66,13 @@ public final class SpongeIPBanList extends IPBanList {
     }
 
     @Override
-    public @Nullable IPBanEntry get(final String obj) {
+    public @Nullable IpBanListEntry get(final String obj) {
         if (obj.equals(LOCAL_ADDRESS)) { // Check for single player
             return null;
         }
 
         try {
-            return (IPBanEntry) Sponge.getServer().getServiceProvider().banService().getBanFor(InetAddress.getByName(obj)).orElse(null);
+            return (IpBanListEntry) Sponge.getServer().getServiceProvider().banService().getBanFor(InetAddress.getByName(obj)).orElse(null);
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -101,7 +101,7 @@ public final class SpongeIPBanList extends IPBanList {
     }
 
     @Override
-    public void add(final IPBanEntry entry) {
+    public void add(final IpBanListEntry entry) {
         Sponge.getServer().getServiceProvider().banService().addBan((Ban) entry);
     }
 

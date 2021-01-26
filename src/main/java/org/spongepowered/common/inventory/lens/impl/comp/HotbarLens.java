@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
-import net.minecraft.util.Hand;
+import net.minecraft.world.InteractionHand;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.inventory.adapter.impl.comp.HotbarAdapter;
@@ -49,7 +49,7 @@ public class HotbarLens extends InventoryRowLens {
     public int getSelectedSlotIndex(Fabric fabric) {
         for (Object inner : fabric.fabric$allInventories()) {
             if (inner instanceof PlayerInventoryBridge) {
-                return ((PlayerInventoryBridge) inner).bridge$getHeldItemIndex(Hand.MAIN_HAND);
+                return ((PlayerInventoryBridge) inner).bridge$getHeldItemIndex(InteractionHand.MAIN_HAND);
             }
         }
         return 0;

@@ -27,12 +27,6 @@ package org.spongepowered.common.util;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.minecraft.entity.projectile.FireworkRocketEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.registry.SimpleRegistry;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.FireworkEffect;
@@ -40,26 +34,32 @@ import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.accessor.entity.projectile.FireworkRocketEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.projectile.FireworkRocketEntityAccessor;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public final class FireworkUtil {
 
     public static @Nullable FireworkEffect getStarEffect(final ItemStack item) {
         Preconditions.checkArgument(item.getItem() == Items.FIREWORK_STAR, "Item is not a firework star!");
-        @Nullable final CompoundNBT tag = item.getTagElement(Constants.Entity.Firework.EXPLOSION);
+        @Nullable final CompoundTag tag = item.getTagElement(Constants.Entity.Firework.EXPLOSION);
         if (tag == null) {
             return null;
         }
         return FireworkUtil.fromCompound(tag);
     }
 
-    public static FireworkEffect fromCompound(final CompoundNBT compound) {
+    public static FireworkEffect fromCompound(final CompoundTag compound) {
         final FireworkEffect.Builder builder = new SpongeFireworkEffectBuilder();
         if (compound.contains(Constants.Item.Fireworks.FLICKER)) {
             builder.flicker(compound.getBoolean(Constants.Item.Fireworks.FLICKER));
@@ -69,7 +69,7 @@ public final class FireworkUtil {
         }
         if (compound.contains(Constants.Item.Fireworks.SHAPE_TYPE)) {
             final byte type = compound.getByte(Constants.Item.Fireworks.SHAPE_TYPE);
-            final SimpleRegistry<FireworkShape> registry = (SimpleRegistry<FireworkShape>) (Object) Sponge.getGame().registries().registry(RegistryTypes.FIREWORK_SHAPE);
+            final MappedRegistry<FireworkShape> registry = (MappedRegistry<FireworkShape>) (Object) Sponge.getGame().registries().registry(RegistryTypes.FIREWORK_SHAPE);
             @Nullable final FireworkShape shape = registry.byId(type);
             if (shape != null) {
                 builder.shape(shape);
@@ -95,10 +95,10 @@ public final class FireworkUtil {
         return builder.build();
     }
 
-    public static CompoundNBT toCompound(final FireworkEffect effect) {
-        final SimpleRegistry<FireworkShape> registry = (SimpleRegistry<FireworkShape>) (Object) Sponge.getGame().registries().registry(RegistryTypes.FIREWORK_SHAPE);
+    public static CompoundTag toCompound(final FireworkEffect effect) {
+        final MappedRegistry<FireworkShape> registry = (MappedRegistry<FireworkShape>) (Object) Sponge.getGame().registries().registry(RegistryTypes.FIREWORK_SHAPE);
 
-        final CompoundNBT tag = new CompoundNBT();
+        final CompoundTag tag = new CompoundTag();
         tag.putBoolean(Constants.Item.Fireworks.FLICKER, effect.flickers());
         tag.putBoolean(Constants.Item.Fireworks.TRAIL, effect.hasTrail());
         tag.putByte(Constants.Item.Fireworks.SHAPE_TYPE, (byte) registry.getId(effect.getShape()));
@@ -126,7 +126,7 @@ public final class FireworkUtil {
             item.addTagElement(Constants.Entity.Firework.EXPLOSION, FireworkUtil.toCompound(effects.get(0)));
             return true;
         } else if (item.getItem() == Items.FIREWORK_ROCKET) {
-            final CompoundNBT fireworks = item.getOrCreateTagElement(Constants.Item.Fireworks.FIREWORKS);
+            final CompoundTag fireworks = item.getOrCreateTagElement(Constants.Item.Fireworks.FIREWORKS);
             fireworks.put(Constants.Item.Fireworks.EXPLOSIONS, effects.stream()
                     .map(FireworkUtil::toCompound)
                     .collect(NBTCollectors.toTagList()));
@@ -143,12 +143,12 @@ public final class FireworkUtil {
 
         final List<FireworkEffect> effects;
         if (item.getItem() == Items.FIREWORK_ROCKET) {
-            @Nullable final CompoundNBT fireworks = item.getTagElement(Constants.Item.Fireworks.FIREWORKS);
+            @Nullable final CompoundTag fireworks = item.getTagElement(Constants.Item.Fireworks.FIREWORKS);
             if (fireworks == null || !fireworks.contains(Constants.Item.Fireworks.EXPLOSIONS)) {
                 return Optional.empty();
             }
 
-            final ListNBT effectCompounds = fireworks.getList(Constants.Item.Fireworks.EXPLOSIONS, Constants.NBT.TAG_COMPOUND);
+            final ListTag effectCompounds = fireworks.getList(Constants.Item.Fireworks.EXPLOSIONS, Constants.NBT.TAG_COMPOUND);
             effects = NBTStreams.toCompounds(effectCompounds)
                     .map(FireworkUtil::fromCompound)
                     .collect(Collectors.toList());
@@ -170,14 +170,14 @@ public final class FireworkUtil {
         }
 
         if (item.getItem() == Items.FIREWORK_STAR) {
-            @Nullable final CompoundNBT tag = item.getTag();
+            @Nullable final CompoundTag tag = item.getTag();
             if (tag == null) {
                 return true;
             }
             tag.remove(Constants.Entity.Firework.EXPLOSION);
             return true;
         } else if (item.getItem() == Items.FIREWORK_ROCKET) {
-            final CompoundNBT fireworks = item.getOrCreateTagElement(Constants.Item.Fireworks.FIREWORKS);
+            final CompoundTag fireworks = item.getOrCreateTagElement(Constants.Item.Fireworks.FIREWORKS);
             fireworks.remove(Constants.Item.Fireworks.EXPLOSIONS);
             return true;
         }

@@ -24,14 +24,11 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.common.accessor.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -42,6 +39,9 @@ import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.stream.Collectors;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 public final class EntityData {
 
@@ -137,7 +137,7 @@ public final class EntityData {
                     .create(Keys.IS_FLYING)
                         .get(h -> h.hasImpulse)
                         .set((h, v) -> h.hasImpulse = v)
-                        .supports(h -> !(h instanceof PlayerEntity))
+                        .supports(h -> !(h instanceof Player))
                     .create(Keys.IS_GLOWING)
                         .get(Entity::isGlowing)
                         .set(Entity::setGlowing)

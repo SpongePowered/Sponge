@@ -31,17 +31,6 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import net.minecraft.command.arguments.NBTCompoundTagArgument;
-import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.DoubleNBT;
-import net.minecraft.nbt.FloatNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.SharedConstants;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.storage.FolderName;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -83,6 +72,17 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Supplier;
+import net.minecraft.SharedConstants;
+import net.minecraft.commands.arguments.CompoundTagArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.level.storage.LevelResource;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -257,8 +257,8 @@ public final class Constants {
             public static final String DIMENSION_TYPE = "dimensionType";
             public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
             public static final String LEVEL_SPONGE_DAT = "level_sponge.dat";
-            public static final String LEVEL_SPONGE_DAT_OLD = World.LEVEL_SPONGE_DAT + "_old";
-            public static final String LEVEL_SPONGE_DAT_NEW = World.LEVEL_SPONGE_DAT + "_new";
+            public static final String LEVEL_SPONGE_DAT_OLD = org.spongepowered.common.util.Constants.Sponge.World.LEVEL_SPONGE_DAT + "_old";
+            public static final String LEVEL_SPONGE_DAT_NEW = org.spongepowered.common.util.Constants.Sponge.World.LEVEL_SPONGE_DAT + "_new";
             public static final String UNIQUE_ID = "UUID";
             public static final String DIMENSIONS_DIRECTORY = "dimensions";
             public static final String WORLD_KEY = "WorldKey";
@@ -387,11 +387,11 @@ public final class Constants {
         public static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
         public static final Vector3i BLOCK_SIZE = Constants.World.BLOCK_MAX.sub(Constants.World.BLOCK_MIN).add(Vector3i.ONE);
         public static final Vector3i BIOME_MAX = new Vector3i(Constants.World.BLOCK_MAX.getX(), 256, Constants.World.BLOCK_MAX.getZ());
-        public static final EnumSet<net.minecraft.util.Direction> NOTIFY_DIRECTION_SET = EnumSet
-            .of(net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN,
-                net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH);
+        public static final EnumSet<net.minecraft.core.Direction> NOTIFY_DIRECTION_SET = EnumSet
+            .of(net.minecraft.core.Direction.WEST, net.minecraft.core.Direction.EAST, net.minecraft.core.Direction.DOWN,
+                net.minecraft.core.Direction.UP, net.minecraft.core.Direction.NORTH, net.minecraft.core.Direction.SOUTH);
         public static final ResourceKey INVALID_WORLD_KEY = ResourceKey.sponge("invalid_world");
-        public static final String LEVEL_DAT_OLD = FolderName.LEVEL_DATA_FILE.getId() + "_old";
+        public static final String LEVEL_DAT_OLD = LevelResource.LEVEL_DATA_FILE.getId() + "_old";
         public static final int DEFAULT_BLOCK_CHANGE_LIMIT = 512;
     }
 
@@ -962,9 +962,9 @@ public final class Constants {
         public static final byte TAG_LONG_ARRAY = 12;
         public static final byte TAG_ANY_NUMERIC = 99;
 
-        public static CompoundNBT filterSpongeCustomData(final CompoundNBT rootCompound) {
+        public static CompoundTag filterSpongeCustomData(final CompoundTag rootCompound) {
             if (rootCompound.contains(Forge.FORGE_DATA, NBT.TAG_COMPOUND)) {
-                final CompoundNBT forgeCompound = rootCompound.getCompound(Forge.FORGE_DATA);
+                final CompoundTag forgeCompound = rootCompound.getCompound(Forge.FORGE_DATA);
                 if (forgeCompound.contains(Sponge.SPONGE_DATA, NBT.TAG_COMPOUND)) {
                     NBT.cleanseInnerCompound(forgeCompound);
                 }
@@ -977,21 +977,21 @@ public final class Constants {
             return rootCompound;
         }
 
-        private static void cleanseInnerCompound(final CompoundNBT compound) {
-            final CompoundNBT inner = compound.getCompound(Sponge.SPONGE_DATA);
+        private static void cleanseInnerCompound(final CompoundTag compound) {
+            final CompoundTag inner = compound.getCompound(Sponge.SPONGE_DATA);
             if (inner.isEmpty()) {
                 compound.remove(Sponge.SPONGE_DATA);
             }
         }
 
-        public static List<Enchantment> getItemEnchantments(final net.minecraft.item.ItemStack itemStack) {
+        public static List<Enchantment> getItemEnchantments(final net.minecraft.world.item.ItemStack itemStack) {
             if (!itemStack.isEnchanted()) {
                 return Collections.emptyList();
             }
             final List<Enchantment> enchantments = Lists.newArrayList();
-            final ListNBT list = itemStack.getEnchantmentTags();
+            final ListTag list = itemStack.getEnchantmentTags();
             for (int i = 0; i < list.size(); i++) {
-                final CompoundNBT compound = list.getCompound(i);
+                final CompoundTag compound = list.getCompound(i);
                 final short enchantmentId = compound.getShort(Item.ITEM_ENCHANTMENT_ID);
                 final short level = compound.getShort(Item.ITEM_ENCHANTMENT_LEVEL);
 
@@ -1005,21 +1005,21 @@ public final class Constants {
             return enchantments;
         }
 
-        public static ListNBT newDoubleNBTList(final double... numbers) {
-            final ListNBT nbttaglist = new ListNBT();
+        public static ListTag newDoubleNBTList(final double... numbers) {
+            final ListTag nbttaglist = new ListTag();
 
             for (final double d1 : numbers) {
-                nbttaglist.add(DoubleNBT.valueOf(d1));
+                nbttaglist.add(DoubleTag.valueOf(d1));
             }
 
             return nbttaglist;
         }
 
-        public static ListNBT newFloatNBTList(final float... numbers) {
-            final ListNBT nbttaglist = new ListNBT();
+        public static ListTag newFloatNBTList(final float... numbers) {
+            final ListTag nbttaglist = new ListTag();
 
             for (final float f : numbers) {
-                nbttaglist.add(FloatNBT.valueOf(f));
+                nbttaglist.add(FloatTag.valueOf(f));
             }
 
             return nbttaglist;
@@ -1215,7 +1215,7 @@ public final class Constants {
 
         public static final ArgumentType<?> STANDARD_STRING_ARGUMENT_TYPE = StringArgumentType.string();
         public static final ArgumentType<?> GREEDY_STRING_ARGUMENT_TYPE = StringArgumentType.greedyString();
-        public static final ArgumentType<?> NBT_ARGUMENT_TYPE = NBTCompoundTagArgument.compoundTag();
+        public static final ArgumentType<?> NBT_ARGUMENT_TYPE = CompoundTagArgument.compoundTag();
         public static final ResourceLocationArgument RESOURCE_LOCATION_TYPE = ResourceLocationArgument.id();
         public static final String COMMAND_BLOCK_COMMAND = "";
         public static final String SELECTOR_COMMAND = "@";
@@ -1224,26 +1224,26 @@ public final class Constants {
 
     public static final class DirectionFunctions {
 
-        public static net.minecraft.util.Direction getFor(final Direction direction) {
+        public static net.minecraft.core.Direction getFor(final Direction direction) {
             switch (checkNotNull(direction)) {
                 case UP:
-                    return net.minecraft.util.Direction.UP;
+                    return net.minecraft.core.Direction.UP;
                 case DOWN:
-                    return net.minecraft.util.Direction.DOWN;
+                    return net.minecraft.core.Direction.DOWN;
                 case WEST:
-                    return net.minecraft.util.Direction.WEST;
+                    return net.minecraft.core.Direction.WEST;
                 case SOUTH:
-                    return net.minecraft.util.Direction.SOUTH;
+                    return net.minecraft.core.Direction.SOUTH;
                 case EAST:
-                    return net.minecraft.util.Direction.EAST;
+                    return net.minecraft.core.Direction.EAST;
                 case NORTH:
-                    return net.minecraft.util.Direction.NORTH;
+                    return net.minecraft.core.Direction.NORTH;
                 default:
                     throw new IllegalArgumentException("No matching direction found for direction: " + direction);
             }
         }
 
-        public static Direction getFor(final net.minecraft.util.Direction facing) {
+        public static Direction getFor(final net.minecraft.core.Direction facing) {
             switch (checkNotNull(facing)) {
                 case UP:
                     return Direction.UP;
@@ -1315,21 +1315,21 @@ public final class Constants {
             return dir;
         }
 
-        public static net.minecraft.util.Direction.Axis convertAxisToMinecraft(final Axis axis) {
+        public static net.minecraft.core.Direction.Axis convertAxisToMinecraft(final Axis axis) {
             switch (axis) {
                 case X:
-                    return net.minecraft.util.Direction.Axis.X;
+                    return net.minecraft.core.Direction.Axis.X;
                 case Y:
-                    return net.minecraft.util.Direction.Axis.Y;
+                    return net.minecraft.core.Direction.Axis.Y;
                 case Z:
-                    return net.minecraft.util.Direction.Axis.Z;
+                    return net.minecraft.core.Direction.Axis.Z;
                 default:
-                    return net.minecraft.util.Direction.Axis.X;
+                    return net.minecraft.core.Direction.Axis.X;
 
             }
         }
 
-        public static Axis convertAxisToSponge(final net.minecraft.util.Direction.Axis axis) {
+        public static Axis convertAxisToSponge(final net.minecraft.core.Direction.Axis axis) {
             switch (axis) {
                 case X:
                     return Axis.X;

@@ -30,8 +30,8 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.arguments.ColorArgument;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.ColorArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -39,7 +39,7 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.accessor.util.text.TextFormattingAccessor;
+import org.spongepowered.common.accessor.ChatFormattingAccessor;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
 import java.util.List;
@@ -83,8 +83,8 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
         final ArgumentReader.Immutable state = reader.getImmutable();
         // First, is the argument type giving the correct return type?
         try {
-            final TextFormatting formatting = this.colorArgumentType.parse((StringReader) reader);
-            final Integer colorCode = ((TextFormattingAccessor) (Object) formatting).accessor$color();
+            final ChatFormatting formatting = this.colorArgumentType.parse((StringReader) reader);
+            final Integer colorCode = ((ChatFormattingAccessor) (Object) formatting).accessor$color();
             if (colorCode != null) {
                 return Optional.of(Color.ofRgb(colorCode));
             }

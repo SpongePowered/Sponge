@@ -24,25 +24,25 @@
  */
 package org.spongepowered.common.accessor.world.gen;
 
-import net.minecraft.util.registry.SimpleRegistry;
-import net.minecraft.world.Dimension;
-import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
 import java.util.Optional;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 
-@Mixin(DimensionGeneratorSettings.class)
+@Mixin(WorldGenSettings.class)
 public interface DimensionGeneratorSettingsAccessor {
 
-    @Invoker("<init>") static DimensionGeneratorSettings invoker$new(final long seed, final boolean generateFeatures, final boolean generateBonusChest,
-            final SimpleRegistry<Dimension> dimensionRegistry, final Optional<String> legacyCustomOptions) {
+    @Invoker("<init>") static WorldGenSettings invoker$new(final long seed, final boolean generateFeatures, final boolean generateBonusChest,
+            final MappedRegistry<LevelStem> dimensionRegistry, final Optional<String> legacyCustomOptions) {
         throw new UntransformedInvokerError();
     }
 
     @Accessor("legacyCustomOptions") Optional<String> accessor$legacyCustomOptions();
 
-    @Accessor("dimensions") void accessor$dimensions(SimpleRegistry<Dimension> dimensions);
+    @Accessor("dimensions") void accessor$dimensions(MappedRegistry<LevelStem> dimensions);
 }

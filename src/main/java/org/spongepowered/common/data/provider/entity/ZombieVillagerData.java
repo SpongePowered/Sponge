@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.merchant.villager.VillagerProfession;
-import net.minecraft.entity.monster.ZombieVillagerEntity;
+import net.minecraft.world.entity.monster.ZombieVillager;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.api.data.type.VillagerType;
@@ -39,7 +39,7 @@ public final class ZombieVillagerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(ZombieVillagerEntity.class)
+                .asMutable(ZombieVillager.class)
                     .create(Keys.PROFESSION_LEVEL)
                         .get(h -> h.getVillagerData().getLevel())
                         .set((h, v) -> h.setVillagerData(h.getVillagerData().setLevel(v)))
@@ -48,7 +48,7 @@ public final class ZombieVillagerData {
                         .set((h, v) -> h.setVillagerData(h.getVillagerData().setProfession((VillagerProfession) v)))
                     .create(Keys.VILLAGER_TYPE)
                         .get(h -> (VillagerType) (Object) h.getVillagerData().getType())
-                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setType((net.minecraft.entity.villager.VillagerType) (Object) v)));
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setType((net.minecraft.world.entity.npc.VillagerType) (Object) v)));
     }
     // @formatter:on
 }

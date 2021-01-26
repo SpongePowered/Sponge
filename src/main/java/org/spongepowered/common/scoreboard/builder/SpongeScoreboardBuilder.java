@@ -26,7 +26,6 @@ package org.spongepowered.common.scoreboard.builder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.scoreboard.ServerScoreboard;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
@@ -34,6 +33,7 @@ import org.spongepowered.common.SpongeCommon;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.server.ServerScoreboard;
 
 public final class SpongeScoreboardBuilder implements Scoreboard.Builder {
 

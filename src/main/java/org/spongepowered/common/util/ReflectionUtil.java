@@ -27,10 +27,6 @@ package org.spongepowered.common.util;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.spongepowered.common.SpongeCommon;
@@ -42,6 +38,10 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * A handy utility for doing some neat things with generics and reflection.
@@ -57,7 +57,7 @@ public final class ReflectionUtil {
     public static final Marker STUPID_REFLECTION = MarkerManager.getMarker("REFLECTION_BULLSHIT");
     private static final Class<?>[] NEIGHBOR_CHANGED_METHOD_ARGS = {
         BlockState.class,
-        World.class,
+        Level.class,
         BlockPos.class,
         Block.class,
         BlockPos.class,
@@ -69,7 +69,6 @@ public final class ReflectionUtil {
             targetClass,
             Block.class,
             "neighborChanged",
-            "func_220069_a",
             ReflectionUtil.NEIGHBOR_CHANGED_METHOD_ARGS
         );
     }
@@ -78,10 +77,9 @@ public final class ReflectionUtil {
         final Class<?> targetClass,
         final Class<?> ignoredClass,
         final String methodName,
-        final String obfuscated,
         final Class<?>[] methodParameters
     ) {
-        final String targetMethodForEnvironment = Launch.getInstance().isDeveloperEnvironment() ? methodName : obfuscated;
+        final String targetMethodForEnvironment = Launch.getInstance().isDeveloperEnvironment() ? methodName : methodName;
         try {
             final Class<?> declaringClass = targetClass.getMethod(targetMethodForEnvironment, methodParameters).getDeclaringClass();
             return !ignoredClass.equals(declaringClass);

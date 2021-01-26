@@ -25,9 +25,6 @@
 package org.spongepowered.common.mixin.core.data;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,8 +36,11 @@ import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.entity.player.SpongeUser;
 
 import java.util.List;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
-@Mixin({TileEntity.class, Entity.class, SpongeUser.class, ItemStack.class,
+@Mixin({BlockEntity.class, Entity.class, SpongeUser.class, ItemStack.class,
         SpongeEntityArchetype.class,
         SpongeEntitySnapshot.class,
         SpongeBlockSnapshot.class,

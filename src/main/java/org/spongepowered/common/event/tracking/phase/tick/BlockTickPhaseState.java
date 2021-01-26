@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.IGrowable;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -41,6 +37,10 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BonemealableBlock;
 
 class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> {
     private final BiConsumer<CauseStackManager.StackFrame, BlockTickContext> LOCATION_MODIFIER =
@@ -116,13 +116,13 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public BlockChange associateBlockChangeWithSnapshot(final BlockTickContext phaseContext, final net.minecraft.block.BlockState newState, final Block newBlock,
-                                                        final net.minecraft.block.BlockState currentState, final SpongeBlockSnapshot snapshot, final Block originalBlock) {
-        if (phaseContext.tickingBlock instanceof IGrowable) {
+    public BlockChange associateBlockChangeWithSnapshot(final BlockTickContext phaseContext, final net.minecraft.world.level.block.state.BlockState newState, final Block newBlock,
+                                                        final net.minecraft.world.level.block.state.BlockState currentState, final SpongeBlockSnapshot snapshot, final Block originalBlock) {
+        if (phaseContext.tickingBlock instanceof BonemealableBlock) {
             if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;
             }
-            if (newBlock instanceof IGrowable || newState.getMaterial().isFlammable()) {
+            if (newBlock instanceof BonemealableBlock || newState.getMaterial().isFlammable()) {
                 return BlockChange.GROW;
             }
         }

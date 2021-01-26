@@ -25,15 +25,15 @@
 package org.spongepowered.common.world.generation;
 
 import com.mojang.serialization.Lifecycle;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.SimpleRegistry;
-import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGenerationConfig.Mutable.Builder {
 
@@ -60,7 +60,7 @@ public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGen
 
     @Override
     public WorldGenerationConfig.Mutable.Builder reset() {
-        final DimensionGeneratorSettings defaultSettings = BootstrapProperties.dimensionGeneratorSettings;
+        final WorldGenSettings defaultSettings = BootstrapProperties.dimensionGeneratorSettings;
         this.seed = defaultSettings.seed();
         this.generateFeatures = defaultSettings.generateFeatures();
         this.generateBonusChest = defaultSettings.generateBonusChest();
@@ -78,6 +78,6 @@ public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGen
     @Override
     public WorldGenerationConfig.Mutable build() {
         return (WorldGenerationConfig.Mutable) DimensionGeneratorSettingsAccessor.invoker$new(this.seed, this.generateFeatures,
-            this.generateBonusChest, new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()), Optional.empty());
+            this.generateBonusChest, new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()), Optional.empty());
     }
 }

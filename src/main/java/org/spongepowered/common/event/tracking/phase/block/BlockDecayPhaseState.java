@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -36,6 +33,9 @@ import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 final class BlockDecayPhaseState extends BlockPhaseState {
 

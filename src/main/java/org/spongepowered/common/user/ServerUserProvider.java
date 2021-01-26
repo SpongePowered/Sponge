@@ -27,15 +27,15 @@ package org.spongepowered.common.user;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.storage.PlayerData;
+import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.server.management.PlayerListAccessor;
-import org.spongepowered.common.accessor.world.storage.PlayerDataAccessor;
+import org.spongepowered.common.accessor.server.players.PlayerListAccessor;
+import org.spongepowered.common.accessor.world.level.storage.PlayerDataStorageAccessor;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
@@ -293,12 +293,12 @@ public final class ServerUserProvider {
         }
     }
 
-    private PlayerData getSaveHandler() {
-        return (PlayerData) ((PlayerListAccessor) this.server.getPlayerList()).accessor$playerIo();
+    private PlayerDataStorage getSaveHandler() {
+        return (PlayerDataStorage) ((PlayerListAccessor) this.server.getPlayerList()).accessor$playerIo();
     }
 
     private Path getSaveHandlerDirectory() {
-        return ((PlayerDataAccessor) this.getSaveHandler()).accessor$playerDir().toPath();
+        return ((PlayerDataStorageAccessor) this.getSaveHandler()).accessor$playerDir().toPath();
     }
 
     // Used to reduce the number of calls to maps.

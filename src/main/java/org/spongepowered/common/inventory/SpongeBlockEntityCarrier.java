@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.inventory;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -35,10 +35,10 @@ import org.spongepowered.api.world.server.ServerWorld;
 
 public final class SpongeBlockEntityCarrier implements DefaultSingleBlockCarrier {
 
-    private final TileEntity inventory;
+    private final BlockEntity inventory;
     private final Container container;
 
-    public SpongeBlockEntityCarrier(final TileEntity inventory, final Container container) {
+    public SpongeBlockEntityCarrier(final BlockEntity inventory, final Container container) {
         this.inventory = inventory;
         this.container = container;
     }

@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.world.volume;
 
-import net.minecraft.block.BlockState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkPrimerWrapper;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -102,33 +102,33 @@ public final class VolumeStreamUtils {
         };
     }
 
-    public static <R extends Region<R>> BiFunction<R, ChunkPos, @Nullable IChunk> getChunkAccessorByStatus(
-        final IWorldReader worldReader,
+    public static <R extends Region<R>> BiFunction<R, ChunkPos, @Nullable ChunkAccess> getChunkAccessorByStatus(
+        final LevelReader worldReader,
         final boolean shouldGenerate
     ) {
-        final Supplier<IWorldReader> readerSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier(worldReader, "IWorldReader");
+        final Supplier<LevelReader> readerSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier(worldReader, "IWorldReader");
         return (world, chunkPos) -> {
             final ChunkStatus chunkStatus = shouldGenerate
                 ? ChunkStatus.FULL
                 : ChunkStatus.EMPTY;
-            final @Nullable IChunk ichunk = readerSupplier.get().getChunk(chunkPos.x, chunkPos.z, chunkStatus, shouldGenerate);
+            final @Nullable ChunkAccess ichunk = readerSupplier.get().getChunk(chunkPos.x, chunkPos.z, chunkStatus, shouldGenerate);
             if (shouldGenerate) {
                 Objects.requireNonNull(ichunk, "Chunk was expected to load fully and generate, but somehow got a null chunk!");
             }
-            if (ichunk instanceof ChunkPrimerWrapper) {
-                return ((ChunkPrimerWrapper) ichunk).getWrapped();
+            if (ichunk instanceof ImposterProtoChunk) {
+                return ((ImposterProtoChunk) ichunk).getWrapped();
             }
-            return (IChunk) ichunk;
+            return (ChunkAccess) ichunk;
         };
     }
 
-    public static Function<IChunk, Stream<Map.Entry<BlockPos, Biome>>> getBiomesForChunkByPos(final IWorldReader reader, final Vector3i min,
+    public static Function<ChunkAccess, Stream<Map.Entry<BlockPos, Biome>>> getBiomesForChunkByPos(final LevelReader reader, final Vector3i min,
         final Vector3i max
     ) {
         return VolumeStreamUtils.getElementByPosition(VolumeStreamUtils.chunkSectionBiomeGetter().asTri(reader), min, max);
     }
 
-    public static Function<IChunk, Stream<Map.Entry<BlockPos, BlockState>>> getBlockStatesForSections(
+    public static Function<ChunkAccess, Stream<Map.Entry<BlockPos, BlockState>>> getBlockStatesForSections(
         final Vector3i min,
         final Vector3i max
     ) {
@@ -175,11 +175,11 @@ public final class VolumeStreamUtils {
         }
     }
 
-    private static QuadFunction<IChunk, ChunkSection, BlockPos, IWorldReader, Biome> chunkSectionBiomeGetter() {
+    private static QuadFunction<ChunkAccess, LevelChunkSection, BlockPos, LevelReader, Biome> chunkSectionBiomeGetter() {
         return ((chunk, chunkSection, pos, world) -> {
             if (chunk.getBiomes() == null) {
-                if (chunk instanceof Chunk) {
-                    return ((Chunk) chunk).getLevel().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
+                if (chunk instanceof LevelChunk) {
+                    return ((LevelChunk) chunk).getLevel().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
                 } else {
                     // Failover to use the World
                     return world.getUncachedNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
@@ -190,15 +190,15 @@ public final class VolumeStreamUtils {
         );
     }
 
-    private static TriFunction<IChunk, ChunkSection, BlockPos, BlockState> chunkSectionBlockStateGetter() {
+    private static TriFunction<ChunkAccess, LevelChunkSection, BlockPos, BlockState> chunkSectionBlockStateGetter() {
         return ((chunk, chunkSection, pos) -> chunkSection.getBlockState(
             pos.getX() - (chunk.getPos().x << 4),
             pos.getY() & 15,
             pos.getZ() - (chunk.getPos().z << 4)));
     }
 
-    private static <T> Function<IChunk, Stream<Map.Entry<BlockPos, T>>> getElementByPosition(
-        final TriFunction<IChunk, ChunkSection, BlockPos, T> elementAccessor, final Vector3i min,
+    private static <T> Function<ChunkAccess, Stream<Map.Entry<BlockPos, T>>> getElementByPosition(
+        final TriFunction<ChunkAccess, LevelChunkSection, BlockPos, T> elementAccessor, final Vector3i min,
         final Vector3i max
     ) {
         // Get the mins

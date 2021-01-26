@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.EndermanEntity;
+import net.minecraft.world.entity.monster.EnderMan;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.monster.EndermanEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.EnderManAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class EndermanData {
@@ -37,10 +37,10 @@ public final class EndermanData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(EndermanEntity.class)
+                .asMutable(EnderMan.class)
                     .create(Keys.IS_SCREAMING)
-                        .get(EndermanEntity::isCreepy)
-                        .set((h, v) -> h.getEntityData().set(EndermanEntityAccessor.accessor$DATA_CREEPY(), v));
+                        .get(EnderMan::isCreepy)
+                        .set((h, v) -> h.getEntityData().set(EnderManAccessor.accessor$DATA_CREEPY(), v));
     }
     // @formatter:on
 }

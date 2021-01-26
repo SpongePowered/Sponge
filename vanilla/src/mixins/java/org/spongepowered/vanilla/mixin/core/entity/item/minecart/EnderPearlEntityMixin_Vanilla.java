@@ -24,17 +24,17 @@
  */
 package org.spongepowered.vanilla.mixin.core.entity.item.minecart;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EnderPearlEntity;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 
-@Mixin(EnderPearlEntity.class)
+@Mixin(ThrownEnderpearl.class)
 public abstract class EnderPearlEntityMixin_Vanilla implements EntityBridge {
 
     /**
@@ -43,7 +43,7 @@ public abstract class EnderPearlEntityMixin_Vanilla implements EntityBridge {
      */
     @Overwrite
     @Nullable
-    public Entity changeDimension(final ServerWorld serverWorld) {
+    public Entity changeDimension(final ServerLevel serverWorld) {
         return this.bridge$changeDimension(serverWorld, VanillaPortalPlatformTeleporter.getNetherInstance());
     }
 

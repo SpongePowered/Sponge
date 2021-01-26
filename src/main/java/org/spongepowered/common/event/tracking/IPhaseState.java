@@ -25,18 +25,6 @@
 package org.spongepowered.common.event.tracking;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.loot.LootContext;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.NextTickListEntry;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -79,6 +67,17 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.loot.LootContext;
 
 /**
  * A literal phase state of which the {@link World} is currently running
@@ -152,7 +151,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Gets whether this state is considered a "ticking" state. Specifically such that when
-     * {@link Chunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, Predicate)} is used,
+     * {@link LevelChunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, Predicate)} is used,
      * we are not filtering any of the lists, whereas if this state is a ticking state, it will
      * filter the proposed list of entities to supply any potentially captured entities.
      *
@@ -206,7 +205,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * </p>
      *
      * <p>Note that the {@link PhaseTracker} is only provided for easy access
-     * to the {@link ServerWorld}, {@link ServerWorldBridge}, and
+     * to the {@link ServerLevel}, {@link ServerWorldBridge}, and
      * {@link World} instances.</p>
      *
      * @param phaseContext The context of the current state being unwound
@@ -227,7 +226,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * Specifically gets whether this state ignores any attempts at storing
      * or retrieving an owner/notifier from a particular {@link BlockPos}
-     * within a {@link net.minecraft.world.World} or {@link Chunk}.
+     * within a {@link net.minecraft.world.level.Level} or {@link LevelChunk}.
      *
      * <p>Specifically used in
      * {@code ChunkMixin_OwnershipTracked#bridge$addTrackedBlockPosition(Block, BlockPos, User, PlayerTracker.Type)}
@@ -279,7 +278,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state will ignore {@link net.minecraft.world.World#addBlockEvent(BlockPos, Block, int, int)}
+     * Gets whether this state will ignore {@link net.minecraft.world.level.Level#addBlockEvent(BlockPos, Block, int, int)}
      * additions when potentially performing notification updates etc. Usually true for world generation.
      *
      * @return False if block events are to be processed in some way by the state
@@ -290,7 +289,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Gets whether this state will already consider any captures or extra processing for a
-     * {@link Block#tick(BlockState, ServerWorld, BlockPos, Random)}. Again usually
+     * {@link Block#tick(BlockState, ServerLevel, BlockPos, Random)}. Again usually
      * considered for world generation or post states or block restorations.
      *
      * @param context The phase data currently present
@@ -391,7 +390,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param notifier The tracker type (owner or notifier)
      */
     default void associateNeighborStateNotifier(final C unwindingContext, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-        final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
+        final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
 
     }
 
@@ -416,8 +415,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param context The context
      * @param phaseContext the block tick context being entered
      */
-    default void appendNotifierPreBlockTick(final ServerWorld world, final BlockPos pos, final C context, final LocationBasedTickContext<@NonNull ?> phaseContext) {
-        final Chunk chunk = world.getChunkAt(pos);
+    default void appendNotifierPreBlockTick(final ServerLevel world, final BlockPos pos, final C context, final LocationBasedTickContext<@NonNull ?> phaseContext) {
+        final LevelChunk chunk = world.getChunkAt(pos);
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
             mixinChunk.bridge$getBlockCreator(pos).ifPresent(phaseContext::creator);
@@ -442,7 +441,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param playerIn
      * @param context
      */
-    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final @Nullable ServerPlayerEntity playerIn, final C context) {
+    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final @Nullable ServerPlayer playerIn, final C context) {
 
     }
 
@@ -578,7 +577,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default void foldContextForThread(final C context, final TrackedTickDelayedTaskBridge returnValue) {
     }
 
-    default void associateScheduledTickUpdate(C asContext, NextTickListEntry<?> entry) {
+    default void associateScheduledTickUpdate(C asContext, TickNextTickData<?> entry) {
 
     }
 }

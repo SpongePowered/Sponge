@@ -25,13 +25,13 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.IntNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -53,17 +53,17 @@ public final class BookItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.AUTHOR)
                         .get(h -> {
-                            final CompoundNBT tag = h.getTag();
+                            final CompoundTag tag = h.getTag();
                             if (tag == null) {
                                 return null;
                             }
                             return SpongeAdventure.legacySection(tag.getString(Constants.Item.Book.ITEM_BOOK_AUTHOR));
                         })
-                        .set((h, v) -> h.addTagElement(Constants.Item.Book.ITEM_BOOK_AUTHOR, StringNBT.valueOf(SpongeAdventure.legacySection(v))))
+                        .set((h, v) -> h.addTagElement(Constants.Item.Book.ITEM_BOOK_AUTHOR, StringTag.valueOf(SpongeAdventure.legacySection(v))))
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.GENERATION)
                         .get(h -> {
-                            final CompoundNBT tag = h.getTag();
+                            final CompoundTag tag = h.getTag();
                             if (tag == null) {
                                 return null;
                             }
@@ -73,7 +73,7 @@ public final class BookItemStackData {
                             if (v < 0) {
                                 return false;
                             }
-                            h.addTagElement(Constants.Item.Book.ITEM_BOOK_GENERATION, IntNBT.valueOf(v));
+                            h.addTagElement(Constants.Item.Book.ITEM_BOOK_GENERATION, IntTag.valueOf(v));
                             return true;
                         })
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
@@ -91,24 +91,24 @@ public final class BookItemStackData {
     // @formatter:on
 
     private static <V> List<V> get(final ItemStack holder, final Function<String, V> predicate) {
-        final CompoundNBT tag = holder.getTag();
+        final CompoundTag tag = holder.getTag();
         if (tag == null || !tag.contains(Constants.Item.Book.ITEM_BOOK_PAGES)) {
             return null;
         }
-        final ListNBT list = tag.getList(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
+        final ListTag list = tag.getList(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
         return list.stream()
-                .map(INBT::getAsString)
+                .map(Tag::getAsString)
                 .map(predicate)
                 .collect(Collectors.toList());
     }
 
     private static <V> boolean set(final ItemStack holder, final List<V> value, final Function<V, String> predicate) {
-        final ListNBT list = value.stream()
+        final ListTag list = value.stream()
                 .map(predicate)
                 .collect(NBTCollectors.toStringTagList());
 
         holder.addTagElement(Constants.Item.Book.ITEM_BOOK_PAGES, list);
-        final CompoundNBT compound = holder.getOrCreateTag();
+        final CompoundTag compound = holder.getOrCreateTag();
         if (!compound.contains(Constants.Item.Book.ITEM_BOOK_TITLE)) {
             compound.putString(Constants.Item.Book.ITEM_BOOK_TITLE, Constants.Item.Book.INVALID_TITLE);
         }
@@ -120,7 +120,7 @@ public final class BookItemStackData {
     }
 
     private static boolean delete(final ItemStack holder) {
-        final CompoundNBT tag = holder.getTag();
+        final CompoundTag tag = holder.getTag();
         if (tag != null && tag.contains(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_LIST)) {
             tag.remove(Constants.Item.Book.ITEM_BOOK_PAGES);
             return true;

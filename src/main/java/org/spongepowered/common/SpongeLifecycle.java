@@ -29,7 +29,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import io.leangen.geantyref.TypeToken;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
@@ -64,6 +63,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
+import net.minecraft.core.Registry;
 
 @Singleton
 public final class SpongeLifecycle {

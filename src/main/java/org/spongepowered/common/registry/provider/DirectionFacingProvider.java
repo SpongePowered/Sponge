@@ -35,24 +35,24 @@ public final class DirectionFacingProvider {
 
     public static final DirectionFacingProvider INSTANCE = new DirectionFacingProvider();
 
-    private final ImmutableBiMap<Direction, net.minecraft.util.Direction> mappings;
+    private final ImmutableBiMap<Direction, net.minecraft.core.Direction> mappings;
 
     DirectionFacingProvider() {
-        this.mappings = ImmutableBiMap.<Direction, net.minecraft.util.Direction>builder()
-                .put(Direction.NORTH, net.minecraft.util.Direction.NORTH)
-                .put(Direction.EAST, net.minecraft.util.Direction.EAST)
-                .put(Direction.SOUTH, net.minecraft.util.Direction.SOUTH)
-                .put(Direction.WEST, net.minecraft.util.Direction.WEST)
-                .put(Direction.UP, net.minecraft.util.Direction.UP)
-                .put(Direction.DOWN, net.minecraft.util.Direction.DOWN)
+        this.mappings = ImmutableBiMap.<Direction, net.minecraft.core.Direction>builder()
+                .put(Direction.NORTH, net.minecraft.core.Direction.NORTH)
+                .put(Direction.EAST, net.minecraft.core.Direction.EAST)
+                .put(Direction.SOUTH, net.minecraft.core.Direction.SOUTH)
+                .put(Direction.WEST, net.minecraft.core.Direction.WEST)
+                .put(Direction.UP, net.minecraft.core.Direction.UP)
+                .put(Direction.DOWN, net.minecraft.core.Direction.DOWN)
                 .build();
     }
 
-    public Optional<net.minecraft.util.Direction> get(Direction key) {
+    public Optional<net.minecraft.core.Direction> get(Direction key) {
         return Optional.ofNullable(this.mappings.get(checkNotNull(key)));
     }
 
-    public Optional<Direction> getKey(net.minecraft.util.Direction value) {
+    public Optional<Direction> getKey(net.minecraft.core.Direction value) {
         return Optional.ofNullable(this.mappings.inverse().get(checkNotNull(value)));
     }
 }

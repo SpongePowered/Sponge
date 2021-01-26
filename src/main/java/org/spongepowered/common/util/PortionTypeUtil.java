@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.state.properties.BedPart;
-import net.minecraft.state.properties.DoubleBlockHalf;
-import net.minecraft.state.properties.Half;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PortionTypes;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BedPart;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.Half;
 
 public final class PortionTypeUtil {
 

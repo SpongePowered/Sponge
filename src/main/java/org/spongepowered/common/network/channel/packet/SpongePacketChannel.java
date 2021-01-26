@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.channel.packet;
 
-import net.minecraft.network.IPacket;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
@@ -105,7 +104,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         final EngineConnectionSide<?> side = connection.getSide();
 
         final ChannelBuf payload = this.getRegistry().getBufferAllocator().buffer();
-        final Supplier<IPacket<?>> mcPacketSupplier;
+        final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (isLoginPhase) {
             if (side == EngineConnectionSide.CLIENT) {
@@ -135,7 +134,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             transactionStore.put(transactionId, this, transactionData);
         }
 
-        final IPacket<?> mcPacket = mcPacketSupplier.get();
+        final net.minecraft.network.protocol.Packet<?> mcPacket = mcPacketSupplier.get();
         PacketSender.sendTo(connection, mcPacket, sendFuture -> {
             if (!sendFuture.isSuccess()) {
                 this.handleException(connection, sendFuture.cause(), future);
@@ -156,7 +155,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         final EngineConnectionSide<?> side = connection.getSide();
 
         final ChannelBuf payload = this.getRegistry().getBufferAllocator().buffer();
-        final Supplier<IPacket<?>> mcPacketSupplier;
+        final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (packet == null || requestBinding instanceof SpongeFixedTransactionalPacketBinding) {
             final int type = packet == null ? SpongePacketChannel.TYPE_NO_RESPONSE : SpongePacketChannel.TYPE_RESPONSE;
@@ -200,7 +199,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             return;
         }
 
-        final IPacket<?> mcPacket = mcPacketSupplier.get();
+        final net.minecraft.network.protocol.Packet<?> mcPacket = mcPacketSupplier.get();
         PacketSender.sendTo(connection, mcPacket);
     }
 
@@ -212,7 +211,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         final EngineConnectionSide<?> side = connection.getSide();
 
         final ChannelBuf payload = this.getRegistry().getBufferAllocator().buffer();
-        final Supplier<IPacket<?>> mcPacketSupplier;
+        final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (isLoginPhase) {
             if (side == EngineConnectionSide.CLIENT) {
@@ -236,7 +235,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             return;
         }
 
-        final IPacket<?> mcPacket = mcPacketSupplier.get();
+        final net.minecraft.network.protocol.Packet<?> mcPacket = mcPacketSupplier.get();
         PacketSender.sendTo(connection, mcPacket, future);
     }
 

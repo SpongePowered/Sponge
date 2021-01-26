@@ -26,8 +26,6 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -45,6 +43,8 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 @DefaultQualifier(NonNull.class)
 public abstract class GameTransaction<E extends Event & Cancellable> {
@@ -109,15 +109,15 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
 
     public abstract void addToPrinter(PrettyPrinter printer);
 
-    public boolean acceptTileRemoval(final @Nullable TileEntity tileentity) {
+    public boolean acceptTileRemoval(final @Nullable BlockEntity tileentity) {
         return false;
     }
 
-    public boolean acceptTileAddition(final TileEntity tileEntity) {
+    public boolean acceptTileAddition(final BlockEntity tileEntity) {
         return false;
     }
 
-    public boolean acceptTileReplacement(final @Nullable TileEntity existing, final TileEntity proposed) {
+    public boolean acceptTileReplacement(final @Nullable BlockEntity existing, final BlockEntity proposed) {
         return false;
     }
 

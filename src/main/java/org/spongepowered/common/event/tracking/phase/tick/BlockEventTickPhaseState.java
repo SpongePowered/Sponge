@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.CauseStackManager;
@@ -41,6 +38,9 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import java.util.function.BiConsumer;
 
 class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
@@ -74,7 +74,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public void associateNeighborStateNotifier(
         final BlockEventTickContext context, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-                                               final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
+                                               final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
             final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.getChunkAt(notifyPos);

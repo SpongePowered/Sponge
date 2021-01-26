@@ -26,7 +26,6 @@ package org.spongepowered.common.command.parameter.managed.factory;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.util.text.StringTextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -51,6 +50,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import net.minecraft.network.chat.TextComponent;
 
 public final class SpongeVariableValueParametersFactory implements VariableValueParameters.Factory {
 
@@ -132,7 +132,7 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
                 return input;
             }
             throw new SimpleCommandExceptionType(
-                    new StringTextComponent("Input \"" + input + "\" does not match required pattern \"" + pattern.pattern() + "\""))
+                    new TextComponent("Input \"" + input + "\" does not match required pattern \"" + pattern.pattern() + "\""))
                     .createWithContext(reader);
         });
     }

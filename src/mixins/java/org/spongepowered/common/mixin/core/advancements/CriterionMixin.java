@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.advancements;
 
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.ICriterionInstance;
-import net.minecraft.loot.ConditionArrayParser;
+import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,7 +45,7 @@ import java.util.UUID;
 public abstract class CriterionMixin implements CriterionBridge {
 
     // @formatter:off
-    @Shadow @Final private ICriterionInstance trigger;
+    @Shadow @Final private CriterionTriggerInstance trigger;
     // @formatter:on
 
     @Nullable private String impl$name;
@@ -54,7 +54,7 @@ public abstract class CriterionMixin implements CriterionBridge {
     @Nullable private String impl$scoreCriterionName;
 
     @Inject(method = "criterionFromJson", at = @At("RETURN"))
-    private static void impl$fixTriggerTimeDeserializer(final JsonObject json, final ConditionArrayParser p_232633_1_,
+    private static void impl$fixTriggerTimeDeserializer(final JsonObject json, final DeserializationContext p_232633_1_,
             final CallbackInfoReturnable<Criterion> ci) {
         final Criterion criterion = ci.getReturnValue();
         if (json.has("trigger_times")) {

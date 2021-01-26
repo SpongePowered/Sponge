@@ -24,28 +24,28 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class PipelineCursor {
     public final BlockState state;
     public final int opacity;
     public final BlockPos pos;
-    public final @Nullable TileEntity tileEntity;
+    public final @Nullable BlockEntity tileEntity;
     public final @Nullable Entity destroyer;
     public final List<ItemStack> drops;
     public final int limit;
 
     public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
-        @Nullable final TileEntity tileEntity,
+        @Nullable final BlockEntity tileEntity,
         @Nullable final Entity destroyer, final int limit
     ) {
         this.state = state;
@@ -58,7 +58,7 @@ public final class PipelineCursor {
     }
 
     public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
-        @Nullable final TileEntity tileEntity,
+        @Nullable final BlockEntity tileEntity,
         final @Nullable Entity destroyer,
         final List<ItemStack> drops,
         final int limit

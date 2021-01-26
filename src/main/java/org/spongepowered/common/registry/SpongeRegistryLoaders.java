@@ -33,22 +33,22 @@ import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.arguments.BlockStateArgument;
-import net.minecraft.command.arguments.ComponentArgument;
-import net.minecraft.command.arguments.DimensionArgument;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.command.arguments.EntitySelectorParser;
-import net.minecraft.command.arguments.GameProfileArgument;
-import net.minecraft.command.arguments.ItemArgument;
-import net.minecraft.command.arguments.NBTCompoundTagArgument;
-import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.command.arguments.ScoreHolderArgument;
-import net.minecraft.command.arguments.Vec2Argument;
-import net.minecraft.command.arguments.Vec3Argument;
-import net.minecraft.item.Items;
-import net.minecraft.item.MusicDiscItem;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.ComponentArgument;
+import net.minecraft.commands.arguments.CompoundTagArgument;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.ScoreHolderArgument;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.commands.arguments.coordinates.Vec2Argument;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.RecordItem;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -146,9 +146,9 @@ import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.api.world.weather.WeatherTypes;
-import org.spongepowered.common.accessor.command.arguments.ArgumentSerializerAccessor;
-import org.spongepowered.common.accessor.command.arguments.ArgumentTypesAccessor;
-import org.spongepowered.common.accessor.command.arguments.DimensionArgumentAccessor;
+import org.spongepowered.common.accessor.commands.arguments.DimensionArgumentAccessor;
+import org.spongepowered.common.accessor.commands.synchronization.ArgumentTypesAccessor;
+import org.spongepowered.common.accessor.commands.synchronization.EmptyArgumentSerializerAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.ban.SpongeBanType;
 import org.spongepowered.common.block.BlockStateSerializerDeserializer;
@@ -332,7 +332,7 @@ public final class SpongeRegistryLoaders {
                         try {
                             return new URL(input);
                         } catch (final MalformedURLException ex) {
-                            throw new SimpleCommandExceptionType(new StringTextComponent("Could not parse " + input + " as a URL"))
+                            throw new SimpleCommandExceptionType(new TextComponent("Could not parse " + input + " as a URL"))
                                     .createWithContext(reader);
                         }
                     })
@@ -343,14 +343,14 @@ public final class SpongeRegistryLoaders {
                         try {
                             return UUID.fromString(input);
                         } catch (final IllegalArgumentException ex) {
-                            throw new SimpleCommandExceptionType(new StringTextComponent(ex.getMessage()))
+                            throw new SimpleCommandExceptionType(new TextComponent(ex.getMessage()))
                                     .createWithContext(reader);
                         }
                     })
             );
             l.add(ResourceKeyedValueParameters.VECTOR2D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec2Argument.vec2(),
                     (reader, cause, result) -> {
-                        final net.minecraft.util.math.vector.Vector3d r = result.getPosition(cause.getSource());
+                        final net.minecraft.world.phys.Vec3 r = result.getPosition(cause.getSource());
                         return new Vector2d(r.x, r.z);
                     })
             );
@@ -401,7 +401,7 @@ public final class SpongeRegistryLoaders {
     }
 
     public static RegistryLoader<ClientCompletionKey<?>> clientCompletionKey() {
-        final Function<ResourceKey, ArgumentType<?>> fn = key -> ((ArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(key).accessor$serializer()).accessor$constructor().get();
+        final Function<ResourceKey, ArgumentType<?>> fn = key -> ((EmptyArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(key).accessor$serializer()).accessor$constructor().get();
         return RegistryLoader.of(l -> {
             l.add(ClientCompletionKeys.BLOCK_PREDICATE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.BLOCK_STATE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
@@ -445,7 +445,7 @@ public final class SpongeRegistryLoaders {
     public static RegistryLoader<ClientCompletionType> clientCompletionType() {
         return RegistryLoader.of(l -> {
             l.add(ClientCompletionTypes.DECIMAL_NUMBER, k -> new SpongeClientCompletionType(DoubleArgumentType.doubleArg()));
-            l.add(ClientCompletionTypes.SNBT, k -> new SpongeClientCompletionType(NBTCompoundTagArgument.compoundTag()));
+            l.add(ClientCompletionTypes.SNBT, k -> new SpongeClientCompletionType(CompoundTagArgument.compoundTag()));
             l.add(ClientCompletionTypes.NONE, k -> SpongeClientCompletionType.NONE);
             l.add(ClientCompletionTypes.RESOURCE_KEY, k -> new SpongeClientCompletionType(ResourceLocationArgument.id()));
             l.add(ClientCompletionTypes.STRING, k -> new SpongeClientCompletionType(StringArgumentType.string()));
@@ -515,22 +515,22 @@ public final class SpongeRegistryLoaders {
             l.add(2, DisplaySlots.BELOW_NAME, SpongeDisplaySlot::new);
             l.add(0, DisplaySlots.LIST, SpongeDisplaySlot::new);
             l.add(1, DisplaySlots.SIDEBAR_TEAM_NO_COLOR, SpongeDisplaySlot::new);
-            l.add(TextFormatting.AQUA.getId() + 3, DisplaySlots.SIDEBAR_TEAM_AQUA, SpongeDisplaySlot::new);
-            l.add(TextFormatting.BLACK.getId() + 3, DisplaySlots.SIDEBAR_TEAM_BLACK, SpongeDisplaySlot::new);
-            l.add(TextFormatting.BLUE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_BLUE, SpongeDisplaySlot::new);
-            l.add(TextFormatting.DARK_AQUA.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_AQUA, SpongeDisplaySlot::new);
-            l.add(TextFormatting.DARK_BLUE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_BLUE, SpongeDisplaySlot::new);
-            l.add(TextFormatting.DARK_GRAY.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_GRAY, SpongeDisplaySlot::new);
-            l.add(TextFormatting.DARK_GREEN.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_GREEN, SpongeDisplaySlot::new);
-            l.add(TextFormatting.DARK_PURPLE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_PURPLE, SpongeDisplaySlot::new);
-            l.add(TextFormatting.DARK_RED.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_RED, SpongeDisplaySlot::new);
-            l.add(TextFormatting.GOLD.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GOLD, SpongeDisplaySlot::new);
-            l.add(TextFormatting.GRAY.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GRAY, SpongeDisplaySlot::new);
-            l.add(TextFormatting.GREEN.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GREEN, SpongeDisplaySlot::new);
-            l.add(TextFormatting.LIGHT_PURPLE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_LIGHT_PURPLE, SpongeDisplaySlot::new);
-            l.add(TextFormatting.RED.getId() + 3, DisplaySlots.SIDEBAR_TEAM_RED, SpongeDisplaySlot::new);
-            l.add(TextFormatting.WHITE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_WHITE, SpongeDisplaySlot::new);
-            l.add(TextFormatting.YELLOW.getId() + 3, DisplaySlots.SIDEBAR_TEAM_YELLOW, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.AQUA.getId() + 3, DisplaySlots.SIDEBAR_TEAM_AQUA, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.BLACK.getId() + 3, DisplaySlots.SIDEBAR_TEAM_BLACK, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.BLUE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_BLUE, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.DARK_AQUA.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_AQUA, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.DARK_BLUE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_BLUE, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.DARK_GRAY.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_GRAY, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.DARK_GREEN.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_GREEN, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.DARK_PURPLE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_PURPLE, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.DARK_RED.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_RED, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.GOLD.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GOLD, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.GRAY.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GRAY, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.GREEN.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GREEN, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.LIGHT_PURPLE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_LIGHT_PURPLE, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.RED.getId() + 3, DisplaySlots.SIDEBAR_TEAM_RED, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.WHITE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_WHITE, SpongeDisplaySlot::new);
+            l.add(ChatFormatting.YELLOW.getId() + 3, DisplaySlots.SIDEBAR_TEAM_YELLOW, SpongeDisplaySlot::new);
         });
     }
 
@@ -609,19 +609,19 @@ public final class SpongeRegistryLoaders {
 
     public static RegistryLoader<MusicDisc> musicDisc() {
         return RegistryLoader.of(l -> {
-            l.add(MusicDiscs.BLOCKS, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_BLOCKS));
-            l.add(MusicDiscs.CAT, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_CAT));
-            l.add(MusicDiscs.CHIRP, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_CHIRP));
-            l.add(MusicDiscs.FAR, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_FAR));
-            l.add(MusicDiscs.MALL, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_MALL));
-            l.add(MusicDiscs.MELLOHI, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_MELLOHI));
-            l.add(MusicDiscs.MUSIC_DISC_11, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_11));
-            l.add(MusicDiscs.MUSIC_DISC_13, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_13));
-            l.add(MusicDiscs.PIGSTEP, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_PIGSTEP));
-            l.add(MusicDiscs.STAL, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_STAL));
-            l.add(MusicDiscs.STRAD, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_STRAD));
-            l.add(MusicDiscs.WAIT, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_WAIT));
-            l.add(MusicDiscs.WARD, k -> new SpongeMusicDisc((MusicDiscItem) Items.MUSIC_DISC_WARD));
+            l.add(MusicDiscs.BLOCKS, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_BLOCKS));
+            l.add(MusicDiscs.CAT, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_CAT));
+            l.add(MusicDiscs.CHIRP, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_CHIRP));
+            l.add(MusicDiscs.FAR, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_FAR));
+            l.add(MusicDiscs.MALL, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_MALL));
+            l.add(MusicDiscs.MELLOHI, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_MELLOHI));
+            l.add(MusicDiscs.MUSIC_DISC_11, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_11));
+            l.add(MusicDiscs.MUSIC_DISC_13, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_13));
+            l.add(MusicDiscs.PIGSTEP, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_PIGSTEP));
+            l.add(MusicDiscs.STAL, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_STAL));
+            l.add(MusicDiscs.STRAD, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_STRAD));
+            l.add(MusicDiscs.WAIT, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_WAIT));
+            l.add(MusicDiscs.WARD, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_WARD));
         });
     }
 

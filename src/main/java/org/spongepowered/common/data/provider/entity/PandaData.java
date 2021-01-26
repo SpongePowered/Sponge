@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.PandaEntity;
+import net.minecraft.world.entity.animal.Panda;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PandaGene;
-import org.spongepowered.common.accessor.entity.passive.PandaEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.PandaAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -39,36 +39,36 @@ public final class PandaData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(PandaEntity.class)
+                .asMutable(Panda.class)
                     .create(Keys.HIDDEN_GENE)
                         .get(h -> ((PandaGene) (Object) h.getHiddenGene()))
-                        .set((h, v) -> h.setHiddenGene((PandaEntity.Gene) (Object) v))
+                        .set((h, v) -> h.setHiddenGene((Panda.Gene) (Object) v))
                     .create(Keys.IS_EATING)
-                        .get(PandaEntity::isEating)
-                        .set(PandaEntity::eat)
+                        .get(Panda::isEating)
+                        .set(Panda::eat)
                     .create(Keys.IS_FRIGHTENED)
-                        .get(PandaEntity::isScared)
+                        .get(Panda::isScared)
                     .create(Keys.IS_LYING_ON_BACK)
-                        .get(PandaEntity::isOnBack)
-                        .set(PandaEntity::setOnBack)
+                        .get(Panda::isOnBack)
+                        .set(Panda::setOnBack)
                     .create(Keys.IS_ROLLING_AROUND)
-                        .get(PandaEntity::isRolling)
-                        .set(PandaEntity::roll)
+                        .get(Panda::isRolling)
+                        .set(Panda::roll)
                     .create(Keys.IS_SNEEZING)
-                        .get(PandaEntity::isSneezing)
-                        .set(PandaEntity::sneeze)
+                        .get(Panda::isSneezing)
+                        .set(Panda::sneeze)
                     .create(Keys.IS_UNHAPPY)
                         .get(h -> h.getUnhappyCounter() > 0)
                     .create(Keys.KNOWN_GENE)
                         .get(h -> ((PandaGene) (Object) h.getMainGene()))
-                        .set((h, v) -> h.setMainGene((PandaEntity.Gene) (Object) v))
+                        .set((h, v) -> h.setMainGene((Panda.Gene) (Object) v))
                     .create(Keys.SNEEZING_TIME)
                         .get(x -> new SpongeTicks(x.getSneezeCounter()))
                         .set((h, v) -> h.setSneezeCounter((int) v.getTicks()))
                     .create(Keys.UNHAPPY_TIME)
                         .get(x -> new SpongeTicks(x.getUnhappyCounter()))
                         .set((h, v) -> h.setUnhappyCounter((int) v.getTicks()))
-                .asMutable(PandaEntityAccessor.class)
+                .asMutable(PandaAccessor.class)
                     .create(Keys.EATING_TIME)
                         .get(x -> new SpongeTicks(x.invoker$getEatCounter()))
                         .set((h, v) -> h.invoker$setEatCounter((int) v.getTicks()));

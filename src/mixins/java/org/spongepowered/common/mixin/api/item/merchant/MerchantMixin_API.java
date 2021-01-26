@@ -24,12 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.item.merchant;
 
-import net.minecraft.entity.merchant.IMerchant;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.MerchantOffer;
-import net.minecraft.item.MerchantOffers;
-import net.minecraft.world.World;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.item.merchant.Merchant;
@@ -39,20 +33,25 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
+import net.minecraft.world.level.Level;
 import java.util.Collections;
 
 @Mixin(value = Merchant.class)
-@Implements(@Interface(iface = IMerchant.class, prefix = "imerchant$"))
+@Implements(@Interface(iface = net.minecraft.world.item.trading.Merchant.class, prefix = "imerchant$"))
 public interface MerchantMixin_API extends Merchant {
 
-    default void imerchant$setTradingPlayer(@Nullable final PlayerEntity player) {
+    default void imerchant$setTradingPlayer(@Nullable final Player player) {
         this.setCustomer((Humanoid) player);
     }
 
     @Nullable
-    default PlayerEntity imerchant$getTradingPlayer() {
-        return (PlayerEntity) this.getCustomer()
-            .filter(humanoid -> humanoid instanceof PlayerEntity)
+    default Player imerchant$getTradingPlayer() {
+        return (Player) this.getCustomer()
+            .filter(humanoid -> humanoid instanceof Player)
             .orElse(null);
     }
 
@@ -73,7 +72,7 @@ public interface MerchantMixin_API extends Merchant {
 
     }
 
-    default World imerchant$getLevel() {
-        return ((World) this.getLocation().getWorld());
+    default Level imerchant$getLevel() {
+        return ((Level) this.getLocation().getWorld());
     }
 }

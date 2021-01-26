@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.world.gen;
 
-import net.minecraft.world.gen.Heightmap;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.BlockReaderAwareMatcher;
 import org.spongepowered.api.world.HeightType;
@@ -33,16 +32,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.function.Predicate;
+import net.minecraft.world.level.levelgen.Heightmap;
 
-@Mixin(value = Heightmap.Type.class)
+@Mixin(value = Heightmap.Types.class)
 public abstract class Heightmap_TypeMixin_API implements HeightType {
 
     // @formatter:off
-    @Shadow @Final private Predicate<net.minecraft.block.BlockState> isOpaque;
+    @Shadow @Final private Predicate<net.minecraft.world.level.block.state.BlockState> isOpaque;
     // @formatter:on
 
     @Override
     public BlockReaderAwareMatcher<BlockState> getMatcher() {
-        return (state, volume, position) -> this.isOpaque.test((net.minecraft.block.BlockState) state);
+        return (state, volume, position) -> this.isOpaque.test((net.minecraft.world.level.block.state.BlockState) state);
     }
 }

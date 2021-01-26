@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world;
 
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -43,6 +42,7 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import net.minecraft.core.BlockPos;
 
 public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> implements Location<W, L> {
 

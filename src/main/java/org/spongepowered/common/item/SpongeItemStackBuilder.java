@@ -29,15 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.block.Block;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -66,12 +57,21 @@ import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.block.Block;
 
 public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> implements ItemStack.Builder {
     private ItemType type;
     private int quantity;
     @Nullable private LinkedHashMap<Key<?>, Object> keyValues;
-    @Nullable private CompoundNBT compound;
+    @Nullable private CompoundTag compound;
 
     public SpongeItemStackBuilder() {
         super(ItemStack.class, 1);
@@ -112,8 +112,8 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         // Assumes the item stack's values don't need to be validated
         this.type = itemStack.getType();
         this.quantity = itemStack.getQuantity();
-        if ((Object) itemStack instanceof net.minecraft.item.ItemStack) {
-            final CompoundNBT itemCompound = ((net.minecraft.item.ItemStack) (Object) itemStack).getTag();
+        if ((Object) itemStack instanceof net.minecraft.world.item.ItemStack) {
+            final CompoundTag itemCompound = ((net.minecraft.world.item.ItemStack) (Object) itemStack).getTag();
             if (itemCompound != null && !itemCompound.isEmpty()) {
                 this.compound = itemCompound.copy();
             } else {
@@ -135,16 +135,16 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
 
         // Create the compound if needed
         if (this.compound == null) {
-            this.compound = new CompoundNBT();
+            this.compound = new CompoundTag();
         }
 
-        final CompoundNBT compound = this.compound;
+        final CompoundTag compound = this.compound;
 
         if (!compound.contains(Constants.ItemStack.ATTRIBUTE_MODIFIERS, Constants.NBT.TAG_LIST)) {
-            compound.put(Constants.ItemStack.ATTRIBUTE_MODIFIERS, new ListNBT());
+            compound.put(Constants.ItemStack.ATTRIBUTE_MODIFIERS, new ListTag());
         }
 
-        final ListNBT attributeModifiers = compound.getList(Constants.ItemStack.ATTRIBUTE_MODIFIERS, Constants.NBT.TAG_COMPOUND);
+        final ListTag attributeModifiers = compound.getList(Constants.ItemStack.ATTRIBUTE_MODIFIERS, Constants.NBT.TAG_COMPOUND);
 
         // The modifier will apply in any slot, equipable or not. Pass null for the slot
 //        if (equipmentType.equals(EquipmentTypes.ANY.get()) || equipmentType.equals(EquipmentTypes.EQUIPPED.get())) {
@@ -159,8 +159,8 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         return this;
     }
 
-    private void writeAttributeModifier(final ListNBT attributeModifiers, final net.minecraft.entity.ai.attributes.AttributeModifier attributeModifier, final EquipmentSlotType slot) {
-        final CompoundNBT modifierNbt = attributeModifier.save();
+    private void writeAttributeModifier(final ListTag attributeModifiers, final net.minecraft.world.entity.ai.attributes.AttributeModifier attributeModifier, final EquipmentSlot slot) {
+        final CompoundTag modifierNbt = attributeModifier.save();
         modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_NAME, attributeModifier.getName());
 
         if (slot != null) {
@@ -185,7 +185,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         this.itemType(itemType);
 
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            final CompoundNBT compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            final CompoundTag compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (compound.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
                 compound.remove(Constants.Sponge.SPONGE_DATA);
             }
@@ -233,9 +233,9 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockTypeKey)));
         this.quantity(1);
         if (blockSnapshot instanceof SpongeBlockSnapshot) {
-            final Optional<CompoundNBT> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
+            final Optional<CompoundTag> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
             if (compound.isPresent()) {
-                this.compound = new CompoundNBT();
+                this.compound = new CompoundTag();
                 this.compound.put(Constants.Item.BLOCK_ENTITY_TAG, compound.get());
             }
             // todo probably needs more testing, but this'll do donkey...
@@ -277,9 +277,9 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         final ItemType itemType =
                 container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, SpongeCommon.getGame().registries()).orElseThrow(() -> new IllegalStateException(
                         "Unable to find item with id: "));
-        final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count);
+        final net.minecraft.world.item.ItemStack itemStack = new net.minecraft.world.item.ItemStack((Item) itemType, count);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            final CompoundNBT compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            final CompoundTag compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (!compound.isEmpty()) {
                 SpongeItemStackBuilder.fixEnchantmentData(itemType, compound);
                 itemStack.setTag(compound);
@@ -314,12 +314,12 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
 
         if (this.type == null || this.quantity <= 0) {
             // If either type is none(air) or quantity is 0 return the vanilla EMPTY item
-            return ((ItemStack) (Object) net.minecraft.item.ItemStack.EMPTY);
+            return ((ItemStack) (Object) net.minecraft.world.item.ItemStack.EMPTY);
         }
 
-        final ItemStack stack = (ItemStack) (Object) new net.minecraft.item.ItemStack((Item) this.type, this.quantity);
+        final ItemStack stack = (ItemStack) (Object) new net.minecraft.world.item.ItemStack((Item) this.type, this.quantity);
         if (this.compound != null && !this.compound.isEmpty()) {
-            ((net.minecraft.item.ItemStack) (Object) stack).setTag(this.compound.copy());
+            ((net.minecraft.world.item.ItemStack) (Object) stack).setTag(this.compound.copy());
         }
 //        if (this.itemDataSet != null) {
 //            this.itemDataSet.forEach(stack::offer);
@@ -329,9 +329,9 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
             this.keyValues.forEach((key, value) -> stack.offer((Key) key, value));
         }
         if (this.compound != null && this.compound.contains(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
-            final CompoundNBT compoundTag = this.compound.getCompound(Constants.Forge.FORGE_CAPS);
+            final CompoundTag compoundTag = this.compound.getCompound(Constants.Forge.FORGE_CAPS);
             if (compoundTag != null) {
-                PlatformHooks.INSTANCE.getItemHooks().setCapabilitiesFromSpongeBuilder((net.minecraft.item.ItemStack) (Object) stack, compoundTag);
+                PlatformHooks.INSTANCE.getItemHooks().setCapabilitiesFromSpongeBuilder((net.minecraft.world.item.ItemStack) (Object) stack, compoundTag);
             }
         }
 
@@ -345,8 +345,8 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
      * @param itemType the item type
      * @param compound the itemstacks NBTTagCompound
      */
-    public static void fixEnchantmentData(final ItemType itemType, final CompoundNBT compound) {
-        final ListNBT nbttaglist;
+    public static void fixEnchantmentData(final ItemType itemType, final CompoundTag compound) {
+        final ListTag nbttaglist;
         if (itemType == Items.ENCHANTED_BOOK) {
             nbttaglist = compound.getList(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
         } else {
@@ -354,7 +354,7 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
         }
         for (int i = 0; i < nbttaglist.size(); ++i)
         {
-            final CompoundNBT nbttagcompound = nbttaglist.getCompound(i);
+            final CompoundTag nbttagcompound = nbttaglist.getCompound(i);
             final short id = nbttagcompound.getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
             final short lvl = nbttagcompound.getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
 

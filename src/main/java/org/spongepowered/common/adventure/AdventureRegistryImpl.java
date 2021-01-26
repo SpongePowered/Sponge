@@ -32,7 +32,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.util.Index;
 import org.spongepowered.api.adventure.AdventureRegistry;
-
+import org.spongepowered.common.adventure.AdventureRegistryImpl.ForIndex;
 import java.util.Optional;
 import java.util.Set;
 

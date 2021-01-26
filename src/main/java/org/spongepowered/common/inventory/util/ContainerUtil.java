@@ -24,21 +24,6 @@
  */
 package org.spongepowered.common.inventory.util;
 
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.CraftResultInventory;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.DoubleSidedInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.inventory.container.BeaconContainer;
-import net.minecraft.inventory.container.ChestContainer;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.tileentity.ChestTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -47,16 +32,16 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.inventory.container.AbstractFurnaceContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.BeaconContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.BrewingStandContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.ContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.CraftingResultSlotAccessor;
-import org.spongepowered.common.accessor.inventory.container.DispenserContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.HopperContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.HorseInventoryContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.MerchantContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.AbstractRepairContainerAccessor;
+import org.spongepowered.common.accessor.world.inventory.AbstractContainerMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.AbstractFurnaceMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.BeaconMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.BrewingStandMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.DispenserMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.HopperMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.HorseInventoryMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.ItemCombinerMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.MerchantMenuAccessor;
+import org.spongepowered.common.accessor.world.inventory.ResultSlotAccessor;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -77,6 +62,20 @@ import org.spongepowered.common.inventory.lens.impl.minecraft.container.Containe
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.Containers;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.BeaconMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -94,13 +93,13 @@ public final class ContainerUtil {
 
     // Note this is likely not doable throughout the implementation, only in certain cases
 
-    public static Container fromNative(final net.minecraft.inventory.container.Container container) {
+    public static Container fromNative(final net.minecraft.world.inventory.AbstractContainerMenu container) {
         return (Container) container;
     }
 
     // Note, this really cannot be guaranteed to work
-    public static net.minecraft.inventory.container.Container toNative(final Container container) {
-        return (net.minecraft.inventory.container.Container) container;
+    public static net.minecraft.world.inventory.AbstractContainerMenu toNative(final Container container) {
+        return (net.minecraft.world.inventory.AbstractContainerMenu) container;
     }
 
      /**
@@ -114,13 +113,13 @@ public final class ContainerUtil {
      * @param inventory The inventory to drop items from
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void performBlockInventoryDrops(final ServerWorld worldServer, final double x, final double y, final double z, final IInventory inventory) {
+    public static void performBlockInventoryDrops(final ServerLevel worldServer, final double x, final double y, final double z, final net.minecraft.world.Container inventory) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
         if (context.doesBlockEventTracking()) {
             // this is where we could perform item stack pre-merging.
             // TODO - figure out how inventory drops will work?
             for (int j = 0; j < inventory.getContainerSize(); j++) {
-                final net.minecraft.item.ItemStack itemStack = inventory.getItem(j);
+                final net.minecraft.world.item.ItemStack itemStack = inventory.getItem(j);
                 if (!itemStack.isEmpty()) {
                     final float f = ContainerUtil.RANDOM.nextFloat() * 0.8F + 0.1F;
                     final float f1 = ContainerUtil.RANDOM.nextFloat() * 0.8F + 0.1F;
@@ -144,9 +143,9 @@ public final class ContainerUtil {
         }
         // Finally, just default to spawning the entities normally, regardless of the case.
         for (int i = 0; i < inventory.getContainerSize(); i++) {
-            final net.minecraft.item.ItemStack itemStack = inventory.getItem(i);
+            final net.minecraft.world.item.ItemStack itemStack = inventory.getItem(i);
             if (!itemStack.isEmpty()) {
-                InventoryHelper.dropItemStack(worldServer, x, y, z, itemStack);
+                Containers.dropItemStack(worldServer, x, y, z, itemStack);
             }
         }
     }
@@ -154,7 +153,7 @@ public final class ContainerUtil {
     private static class CraftingInventoryData {
         @Nullable private Integer out;
         @Nullable private Integer base;
-        @Nullable private CraftingInventory grid;
+        @Nullable private CraftingContainer grid;
     }
 
     /**
@@ -164,18 +163,18 @@ public final class ContainerUtil {
      * @param slots The slots of the Container
      * @return The generated fallback lens
      */
-    @SuppressWarnings("unchecked") public static Lens generateLens(final net.minecraft.inventory.container.Container container, final SlotLensProvider slots) {
+    @SuppressWarnings("unchecked") public static Lens generateLens(final net.minecraft.world.inventory.AbstractContainerMenu container, final SlotLensProvider slots) {
         // Get all inventories viewed in the Container & count slots & retain order
-        final Map<Optional<IInventory>, List<Slot>> viewed = container.slots.stream()
-                .collect(Collectors.groupingBy(i -> Optional.<IInventory>ofNullable(i.container), LinkedHashMap::new, Collectors.toList()));
+        final Map<Optional<net.minecraft.world.Container>, List<Slot>> viewed = container.slots.stream()
+                .collect(Collectors.groupingBy(i -> Optional.<net.minecraft.world.Container>ofNullable(i.container), LinkedHashMap::new, Collectors.toList()));
         int index = 0; // Count the index
         final CraftingInventoryData crafting = new CraftingInventoryData();
         int chestHeight = 0;
         final List<Lens> lenses = new ArrayList<>();
-        for (final Map.Entry<Optional<IInventory>, List<Slot>> entry : viewed.entrySet()) {
+        for (final Map.Entry<Optional<net.minecraft.world.Container>, List<Slot>> entry : viewed.entrySet()) {
             final List<Slot> slotList = entry.getValue();
             final int slotCount = slotList.size();
-            final IInventory subInventory = entry.getKey().orElse(null);
+            final net.minecraft.world.Container subInventory = entry.getKey().orElse(null);
             // Generate Lens based on existing InventoryAdapter
             Lens lens = ContainerUtil.generateAdapterLens(slots, index, crafting, slotList, subInventory);
             // Inventory size <> Lens size
@@ -237,7 +236,7 @@ public final class ContainerUtil {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static Lens generateAdapterLens(final SlotLensProvider slots, final int index,
-            final org.spongepowered.common.inventory.util.ContainerUtil.CraftingInventoryData crafting, final List<Slot> slotList, @Nullable final IInventory subInventory) {
+            final org.spongepowered.common.inventory.util.ContainerUtil.CraftingInventoryData crafting, final List<Slot> slotList, @Nullable final net.minecraft.world.Container subInventory) {
 
         Lens lens = ((InventoryBridge) subInventory).bridge$getAdapter().inventoryAdapter$getRootLens();
         if (lens instanceof PlayerInventoryLens) {
@@ -247,21 +246,21 @@ public final class ContainerUtil {
             return lens;
         }
         // For Crafting Result we need the Slot to get Filter logic
-        if (subInventory instanceof CraftResultInventory) {
+        if (subInventory instanceof ResultContainer) {
             final Slot slot = slotList.get(0);
-            if (slot instanceof CraftingResultSlotAccessor) {
+            if (slot instanceof ResultSlotAccessor) {
                 crafting.out = index;
                 if (crafting.base == null) {
                     // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
                     // e.g. for IC2 ContainerIndustrialWorkbench
                     crafting.base = index + 1;
-                    crafting.grid = ((CraftingResultSlotAccessor) slot).accessor$craftSlots();
+                    crafting.grid = ((ResultSlotAccessor) slot).accessor$craftSlots();
                 }
             }
         }
-        if (subInventory instanceof CraftingInventory) {
+        if (subInventory instanceof CraftingContainer) {
             crafting.base = index;
-            crafting.grid = ((CraftingInventory) subInventory);
+            crafting.grid = ((CraftingContainer) subInventory);
         }
         return new DelegatingLens(index, slotList, lens, slots);
     }
@@ -273,47 +272,47 @@ public final class ContainerUtil {
         }
         if (container instanceof CustomContainer) {
             return ((CustomContainer) container).inv.getCarrier();
-        } else if (container instanceof ChestContainer) {
-            final IInventory inventory = ((ChestContainer) container).getContainer();
+        } else if (container instanceof ChestMenu) {
+            final net.minecraft.world.Container inventory = ((ChestMenu) container).getContainer();
             if (inventory instanceof Carrier) {
-                if (inventory instanceof ChestTileEntity) {
+                if (inventory instanceof ChestBlockEntity) {
                     return (Carrier) inventory;
-                } else if (inventory instanceof DoubleSidedInventory) {
+                } else if (inventory instanceof CompoundContainer) {
                     return ((BlockCarrier) inventory);
                 }
             }
             return ContainerUtil.carrierOrNull(inventory);
-        } else if (container instanceof HopperContainerAccessor) {
-            return ContainerUtil.carrierOrNull(((HopperContainerAccessor) container).accessor$hopper());
-        } else if (container instanceof DispenserContainerAccessor) {
-            return ContainerUtil.carrierOrNull(((DispenserContainerAccessor) container).accessor$dispenser());
-        } else if (container instanceof AbstractFurnaceContainerAccessor) {
-            return ContainerUtil.carrierOrNull(((AbstractFurnaceContainerAccessor) container).accessor$container());
-        } else if (container instanceof BrewingStandContainerAccessor) {
-            return ContainerUtil.carrierOrNull(((BrewingStandContainerAccessor) container).accessor$brewingStand());
-        } else if (container instanceof BeaconContainer) {
-            return new SpongeBlockEntityCarrier(((BeaconContainerAccessor) container).accessor$access().evaluate(World::getBlockEntity).orElse(null), container);
-        } else if (container instanceof HorseInventoryContainerAccessor) {
-            return (Carrier) ((HorseInventoryContainerAccessor) container).accessor$horse();
-        } else if (container instanceof MerchantContainerAccessor && ((MerchantContainerAccessor) container).accessor$trader() instanceof Carrier) {
-            return (Carrier) ((MerchantContainerAccessor) container).accessor$trader();
-        } else if (container instanceof AbstractRepairContainerAccessor) {
-            final PlayerEntity player = ((AbstractRepairContainerAccessor) container).accessor$player();
-            if (player instanceof ServerPlayerEntity) {
+        } else if (container instanceof HopperMenuAccessor) {
+            return ContainerUtil.carrierOrNull(((HopperMenuAccessor) container).accessor$hopper());
+        } else if (container instanceof DispenserMenuAccessor) {
+            return ContainerUtil.carrierOrNull(((DispenserMenuAccessor) container).accessor$dispenser());
+        } else if (container instanceof AbstractFurnaceMenuAccessor) {
+            return ContainerUtil.carrierOrNull(((AbstractFurnaceMenuAccessor) container).accessor$container());
+        } else if (container instanceof BrewingStandMenuAccessor) {
+            return ContainerUtil.carrierOrNull(((BrewingStandMenuAccessor) container).accessor$brewingStand());
+        } else if (container instanceof BeaconMenu) {
+            return new SpongeBlockEntityCarrier(((BeaconMenuAccessor) container).accessor$access().evaluate(Level::getBlockEntity).orElse(null), container);
+        } else if (container instanceof HorseInventoryMenuAccessor) {
+            return (Carrier) ((HorseInventoryMenuAccessor) container).accessor$horse();
+        } else if (container instanceof MerchantMenuAccessor && ((MerchantMenuAccessor) container).accessor$trader() instanceof Carrier) {
+            return (Carrier) ((MerchantMenuAccessor) container).accessor$trader();
+        } else if (container instanceof ItemCombinerMenuAccessor) {
+            final Player player = ((ItemCombinerMenuAccessor) container).accessor$player();
+            if (player instanceof ServerPlayer) {
                 return (Carrier) player;
             }
         }
 
         // Fallback: Try to find a Carrier owning the first Slot of the Container
-        if (container instanceof ContainerAccessor) {
-            for (final Slot slot : ((ContainerAccessor) container).accessor$slots()) {
+        if (container instanceof AbstractContainerMenuAccessor) {
+            for (final Slot slot : ((AbstractContainerMenuAccessor) container).accessor$slots()) {
                 // Slot Inventory is a Carrier?
                 if (slot.container instanceof Carrier) {
                     return ((Carrier) slot.container);
                 }
                 // Slot Inventory is a TileEntity
-                if (slot.container instanceof TileEntity) {
-                    return new SpongeBlockEntityCarrier((TileEntity) slot.container, container);
+                if (slot.container instanceof BlockEntity) {
+                    return new SpongeBlockEntityCarrier((BlockEntity) slot.container, container);
                 }
             }
         }
@@ -325,7 +324,7 @@ public final class ContainerUtil {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Carrier carrierOrNull(final IInventory inventory) {
+    private static Carrier carrierOrNull(final net.minecraft.world.Container inventory) {
         if (inventory instanceof Carrier) {
             return (Carrier) inventory;
         }

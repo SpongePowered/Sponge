@@ -25,8 +25,6 @@
 package org.spongepowered.common.bridge.data;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -50,11 +48,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 
 public interface CustomDataHolderBridge {
 
     static void serializeCustomData(final DataCompoundHolder object) {
-        CompoundNBT compound = object.data$getCompound();
+        CompoundTag compound = object.data$getCompound();
         if (!(object instanceof CustomDataHolderBridge)) {
             return;
         }
@@ -74,13 +74,13 @@ public interface CustomDataHolderBridge {
                 dataStore.serialize(manipulator, dataContainer);
             }
         }
-        final CompoundNBT serialized = NBTTranslator.INSTANCE.translate(dataContainer);
+        final CompoundTag serialized = NBTTranslator.INSTANCE.translate(dataContainer);
         compound.merge(serialized); // TODO does this work?
 
-        final CompoundNBT spongeData = object.data$getSpongeData();
+        final CompoundTag spongeData = object.data$getSpongeData();
         final List<DataView> failedData = ((CustomDataHolderBridge) object).bridge$getFailedData();
         if (!failedData.isEmpty()) {
-            final ListNBT failedList = new ListNBT();
+            final ListTag failedList = new ListTag();
             for (final DataView failedDatum : failedData) {
                 failedList.add(NBTTranslator.INSTANCE.translate(failedDatum));
             }
@@ -91,14 +91,14 @@ public interface CustomDataHolderBridge {
     }
 
     static void deserializeCustomData(final DataCompoundHolder object) {
-        final CompoundNBT compound = object.data$getCompound();
+        final CompoundTag compound = object.data$getCompound();
         if (compound == null) {
             return;
         }
         if (!(object instanceof CustomDataHolderBridge && object.data$getSpongeData().contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST))) {
             return;
         }
-        final ListNBT list = object.data$getSpongeData().getList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
+        final ListTag list = object.data$getSpongeData().getList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
         if (list.isEmpty()) {
             return;
         }
@@ -142,7 +142,7 @@ public interface CustomDataHolderBridge {
         if (dataHolder instanceof DataCompoundHolder) {
             if (((DataCompoundHolder) dataHolder).data$hasSpongeData()) {
                 final DataCompoundHolder compoundHolder = (DataCompoundHolder) dataHolder;
-                CompoundNBT compound = compoundHolder.data$getCompound();
+                CompoundTag compound = compoundHolder.data$getCompound();
                 if (compound == null) {
                     return;
                 }
@@ -154,9 +154,9 @@ public interface CustomDataHolderBridge {
     static void syncCustomToTag(Object dataHolder) {
         if (dataHolder instanceof DataCompoundHolder) {
             final DataCompoundHolder compoundHolder = (DataCompoundHolder) dataHolder;
-            CompoundNBT compound = compoundHolder.data$getCompound();
+            CompoundTag compound = compoundHolder.data$getCompound();
             if (compound == null) {
-                compound = new CompoundNBT();
+                compound = new CompoundTag();
                 compoundHolder.data$setCompound(compound);
             }
             CustomDataHolderBridge.serializeCustomData((DataCompoundHolder) dataHolder);

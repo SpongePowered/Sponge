@@ -28,7 +28,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -37,7 +37,7 @@ import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 
 import java.util.Objects;
 
-public final class SpongeCommandExecutorWrapper implements Command<CommandSource> {
+public final class SpongeCommandExecutorWrapper implements Command<CommandSourceStack> {
 
     private final CommandExecutor executor;
 
@@ -46,7 +46,7 @@ public final class SpongeCommandExecutorWrapper implements Command<CommandSource
     }
 
     @Override
-    public int run(final CommandContext<CommandSource> context) throws CommandSyntaxException {
+    public int run(final CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         final SpongeCommandContext spongeCommandContext = (SpongeCommandContext) context;
         try {
             final CommandResult result = Objects.requireNonNull(this.executor.execute(spongeCommandContext),

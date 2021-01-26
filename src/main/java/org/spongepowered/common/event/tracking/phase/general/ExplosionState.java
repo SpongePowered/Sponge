@@ -25,11 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.world.Explosion;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.Living;
@@ -39,7 +34,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.accessor.world.ExplosionAccessor;
+import org.spongepowered.common.accessor.world.level.ExplosionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -49,6 +44,11 @@ import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTr
 
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 final class ExplosionState extends GeneralState<ExplosionContext> {
 
@@ -94,10 +94,10 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     @Override
     public void populateLootContext(final ExplosionContext phaseContext, final LootContext.Builder lootBuilder) {
         final Explosion explosion = phaseContext.getExplosion();
-        lootBuilder.withOptionalParameter(LootParameters.THIS_ENTITY, ((ExplosionAccessor) explosion).accessor$source());
+        lootBuilder.withOptionalParameter(LootContextParams.THIS_ENTITY, ((ExplosionAccessor) explosion).accessor$source());
 
-        if (((ExplosionAccessor) explosion).accessor$blockInteraction() == net.minecraft.world.Explosion.Mode.DESTROY) {
-            lootBuilder.withParameter(LootParameters.EXPLOSION_RADIUS, ((ExplosionAccessor) explosion).accessor$radius());
+        if (((ExplosionAccessor) explosion).accessor$blockInteraction() == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY) {
+            lootBuilder.withParameter(LootContextParams.EXPLOSION_RADIUS, ((ExplosionAccessor) explosion).accessor$radius());
         }
     }
 

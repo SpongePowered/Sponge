@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.hooks;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.api.data.persistence.DataContainer;
 
 public interface ItemHooks {
 
-    default void setCapabilitiesFromSpongeBuilder(final ItemStack stack, final CompoundNBT compound) { }
+    default void setCapabilitiesFromSpongeBuilder(final ItemStack stack, final CompoundTag compound) { }
 
     default boolean canEnchantmentBeAppliedToItem(final Enchantment enchantment, final ItemStack stack) {
         return enchantment.canEnchant(stack);

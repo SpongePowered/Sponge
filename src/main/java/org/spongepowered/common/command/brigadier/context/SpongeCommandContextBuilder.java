@@ -39,7 +39,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.kyori.adventure.identity.Identified;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -60,7 +60,7 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-public final class SpongeCommandContextBuilder extends CommandContextBuilder<CommandSource>
+public final class SpongeCommandContextBuilder extends CommandContextBuilder<CommandSourceStack>
         implements org.spongepowered.api.command.parameter.CommandContext.Builder {
 
     private final boolean isTransactionCopy;
@@ -68,15 +68,15 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     // The Sponge system allows for multiple arguments to be put under the same key.
     private final Object2IntOpenHashMap<String> flagMap = new Object2IntOpenHashMap<>();
     private final Map<Parameter.Key<?>, Collection<?>> arguments = new HashMap<>();
-    private RedirectModifier<CommandSource> modifier;
+    private RedirectModifier<CommandSourceStack> modifier;
     private boolean forks;
     private Deque<SpongeCommandContextBuilderTransaction> transaction = null;
     private org.spongepowered.api.command.Command.Parameterized currentTargetCommand = null;
 
     public SpongeCommandContextBuilder(
-            final CommandDispatcher<CommandSource> dispatcher,
-            final CommandSource source,
-            final CommandNode<CommandSource> root,
+            final CommandDispatcher<CommandSourceStack> dispatcher,
+            final CommandSourceStack source,
+            final CommandNode<CommandSourceStack> root,
             final int start) {
         super(dispatcher, source, root, start);
         this.isTransactionCopy = false;
@@ -123,7 +123,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public CommandSource getSource() {
+    public CommandSourceStack getSource() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().getSource();
         }
@@ -131,7 +131,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public Map<String, ParsedArgument<CommandSource, ?>> getArguments() {
+    public Map<String, ParsedArgument<CommandSourceStack, ?>> getArguments() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().getArguments();
         }
@@ -139,7 +139,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public CommandContextBuilder<CommandSource> getChild() {
+    public CommandContextBuilder<CommandSourceStack> getChild() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().getChild();
         }
@@ -147,7 +147,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public CommandContextBuilder<CommandSource> getLastChild() {
+    public CommandContextBuilder<CommandSourceStack> getLastChild() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().getLastChild();
         }
@@ -155,7 +155,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public Command<CommandSource> getCommand() {
+    public Command<CommandSourceStack> getCommand() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().getCommand();
         }
@@ -163,7 +163,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public List<ParsedCommandNode<CommandSource>> getNodes() {
+    public List<ParsedCommandNode<CommandSourceStack>> getNodes() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().getNodes();
         }
@@ -171,7 +171,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public SuggestionContext<CommandSource> findSuggestionContext(final int cursor) {
+    public SuggestionContext<CommandSourceStack> findSuggestionContext(final int cursor) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().findSuggestionContext(cursor);
         }
@@ -183,14 +183,14 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
                 if (this.getChild() != null) {
                     return this.getChild().findSuggestionContext(cursor);
                 } else if (!this.getNodes().isEmpty()) {
-                    final ParsedCommandNode<CommandSource> last = this.getNodes().get(this.getNodes().size() - 1);
+                    final ParsedCommandNode<CommandSourceStack> last = this.getNodes().get(this.getNodes().size() - 1);
                     return new SuggestionContext<>(last.getNode(), last.getRange().getEnd() + 1);
                 } else {
                     return new SuggestionContext<>(this.getRootNode(), this.getRange().getStart());
                 }
             } else {
-                CommandNode<CommandSource> prev = this.getRootNode();
-                for (final ParsedCommandNode<CommandSource> node : this.getNodes()) {
+                CommandNode<CommandSourceStack> prev = this.getRootNode();
+                for (final ParsedCommandNode<CommandSourceStack> node : this.getNodes()) {
                     final StringRange nodeRange = node.getRange();
                     // Sponge Start
                     if (SpongeCommandContextBuilder.checkNodeCannotBeEmpty(node.getNode(), nodeRange)) {
@@ -213,12 +213,12 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public SpongeCommandContextBuilder withArgument(final String name, final ParsedArgument<CommandSource, ?> argument) {
+    public SpongeCommandContextBuilder withArgument(final String name, final ParsedArgument<CommandSourceStack, ?> argument) {
         // Generic wildcards begone!
         return this.withArgumentInternal(name, argument, true);
     }
 
-    public <T> SpongeCommandContextBuilder withArgumentInternal(final String name, final ParsedArgument<CommandSource, T> argument,
+    public <T> SpongeCommandContextBuilder withArgumentInternal(final String name, final ParsedArgument<CommandSourceStack, T> argument,
             final boolean addToSpongeMap) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().withArgument(name, argument, addToSpongeMap);
@@ -233,7 +233,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public SpongeCommandContextBuilder withSource(final CommandSource source) {
+    public SpongeCommandContextBuilder withSource(final CommandSourceStack source) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().withSource(source);
         }
@@ -242,7 +242,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public CommandContextBuilder<CommandSource> withNode(final CommandNode<CommandSource> node, final StringRange range) {
+    public CommandContextBuilder<CommandSourceStack> withNode(final CommandNode<CommandSourceStack> node, final StringRange range) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().withNode(node, range);
         }
@@ -253,7 +253,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public CommandContextBuilder<CommandSource> withChild(final CommandContextBuilder<CommandSource> child) {
+    public CommandContextBuilder<CommandSourceStack> withChild(final CommandContextBuilder<CommandSourceStack> child) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().withChild(child);
         }
@@ -261,7 +261,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public CommandContextBuilder<CommandSource> withCommand(final Command<CommandSource> command) {
+    public CommandContextBuilder<CommandSourceStack> withCommand(final Command<CommandSourceStack> command) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().withCommand(command);
         }
@@ -453,7 +453,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
             this.commit(this.transaction.peek());
         }
 
-        final CommandContextBuilder<CommandSource> child = this.getChild();
+        final CommandContextBuilder<CommandSourceStack> child = this.getChild();
         return new SpongeCommandContext(
                 this.getSource(),
                 input,
@@ -501,7 +501,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         ((List<T>) this.arguments.computeIfAbsent(key, k -> new ArrayList<>())).add(value);
     }
 
-    private static boolean checkNodeCannotBeEmpty(final CommandNode<CommandSource> node, final StringRange range) {
+    private static boolean checkNodeCannotBeEmpty(final CommandNode<CommandSourceStack> node, final StringRange range) {
         if (range.getStart() == range.getEnd()) {
             return !(node instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) node).getParser().doesNotRead());
         }

@@ -24,26 +24,24 @@
  */
 package org.spongepowered.common.item.recipe.stonecutting;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.SmokingRecipe;
-import net.minecraft.item.crafting.StonecuttingRecipe;
-import net.minecraft.util.ResourceLocation;
-
 import java.util.function.Function;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
 
-public class SpongeStonecuttingRecipe extends StonecuttingRecipe {
+public class SpongeStonecuttingRecipe extends StonecutterRecipe {
 
-    private final Function<IInventory, ItemStack> resultFunction;
+    private final Function<Container, ItemStack> resultFunction;
 
-    public SpongeStonecuttingRecipe(ResourceLocation idIn, String groupIn, Ingredient ingredientIn, ItemStack resultIn, Function<IInventory, ItemStack> resultFunction) {
+    public SpongeStonecuttingRecipe(ResourceLocation idIn, String groupIn, Ingredient ingredientIn, ItemStack resultIn, Function<Container, ItemStack> resultFunction) {
         super(idIn, groupIn, ingredientIn, resultIn);
         this.resultFunction = resultFunction;
     }
 
     @Override
-    public ItemStack assemble(IInventory p_77572_1_) {
+    public ItemStack assemble(Container p_77572_1_) {
         if (this.resultFunction != null) {
             return this.resultFunction.apply(p_77572_1_);
         }

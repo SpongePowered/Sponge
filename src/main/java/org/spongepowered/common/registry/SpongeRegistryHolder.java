@@ -26,11 +26,6 @@ package org.spongepowered.common.registry;
 
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.util.registry.MutableRegistry;
-import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.Registry;
@@ -38,8 +33,8 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
-import org.spongepowered.common.accessor.util.RegistryKeyAccessor;
-import org.spongepowered.common.accessor.util.registry.DynamicRegistriesAccessor;
+import org.spongepowered.common.accessor.core.RegistryAccessAccessor;
+import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 import org.spongepowered.common.bridge.util.registry.MutableRegistryBridge;
 
 import java.util.Map;
@@ -50,24 +45,28 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.ResourceLocation;
 
 public final class SpongeRegistryHolder implements RegistryHolder {
 
-    private final Map<ResourceKey, net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>>> roots = new Object2ObjectOpenHashMap<>();
+    private final Map<ResourceKey, net.minecraft.core.Registry<net.minecraft.core.Registry<?>>> roots = new Object2ObjectOpenHashMap<>();
 
     public SpongeRegistryHolder() {
         this.roots.put(
             (ResourceKey) (Object) new ResourceLocation("minecraft", "root"),
-            new SimpleRegistry<>(
-                net.minecraft.util.RegistryKey.createRegistryKey((ResourceLocation) (Object) RegistryRoots.MINECRAFT),
+            new MappedRegistry<>(
+                net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) RegistryRoots.MINECRAFT),
                 Lifecycle.experimental()
             )
         );
         final ResourceLocation sponge = new ResourceLocation("sponge", "root");
         this.roots.put(
             (ResourceKey) (Object) sponge,
-            new SimpleRegistry<>(
-                RegistryKeyAccessor.invoker$create(
+            new MappedRegistry<>(
+                ResourceKeyAccessor.invoker$create(
                     sponge,
                     sponge
                 ),
@@ -77,29 +76,29 @@ public final class SpongeRegistryHolder implements RegistryHolder {
     }
 
     // TODO: Minecraft 1.17 - Is this still fine to do?
-    public SpongeRegistryHolder(final DynamicRegistries.Impl dynamicAccess) {
+    public SpongeRegistryHolder(final RegistryAccess.RegistryHolder dynamicAccess) {
         this();
 
-        final MutableRegistry root = (MutableRegistry) this.roots.get(new ResourceLocation("minecraft", "root"));
-        for (final RegistryKey<? extends net.minecraft.util.registry.Registry<?>> entry : DynamicRegistriesAccessor.accessor$REGISTRIES()
+        final WritableRegistry root = (WritableRegistry) this.roots.get(new ResourceLocation("minecraft", "root"));
+        for (final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<?>> entry : RegistryAccessAccessor.accessor$REGISTRIES()
                 .keySet()) {
-            final MutableRegistry<?> registry = dynamicAccess.registryOrThrow((RegistryKey) (Object) entry);
+            final WritableRegistry<?> registry = dynamicAccess.registryOrThrow((net.minecraft.resources.ResourceKey) (Object) entry);
             root.register(entry, registry, Lifecycle.stable());
         }
     }
 
-    public void setRootMinecraftRegistry(final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> rootRegistry) {
+    public void setRootMinecraftRegistry(final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> rootRegistry) {
         this.roots.put(RegistryRoots.MINECRAFT, rootRegistry);
     }
 
     @Override
     public <T> Registry<T> registry(final RegistryType<T> type) {
         Objects.requireNonNull(type, "type");
-        final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> root = this.roots.get(type.root());
+        final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(type.root());
         if (root == null) {
             throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
         }
-        final net.minecraft.util.registry.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
+        final net.minecraft.core.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
         if (registry == null) {
             throw new ValueNotFoundException(String.format("No '%s' registry has been defined in root '%s'", type.location(), type.root()));
         }
@@ -109,7 +108,7 @@ public final class SpongeRegistryHolder implements RegistryHolder {
     @Override
     public <T> Optional<Registry<T>> findRegistry(final RegistryType<T> type) {
         Objects.requireNonNull(type, "type");
-        final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> root = this.roots.get(type.root());
+        final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(type.root());
         if (root == null) {
             return Optional.empty();
         }
@@ -119,7 +118,7 @@ public final class SpongeRegistryHolder implements RegistryHolder {
     @Override
     public Stream<Registry<?>> stream(final ResourceKey root) {
         Objects.requireNonNull(root, "root");
-        final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> rootRegistry = this.roots.get(root);
+        final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> rootRegistry = this.roots.get(root);
         if (rootRegistry == null) {
             return Stream.empty();
         }
@@ -153,28 +152,28 @@ public final class SpongeRegistryHolder implements RegistryHolder {
             final @Nullable Supplier<Map<ResourceKey, T>> defaultValues,
             final boolean isDynamic,
             final @Nullable
-            BiConsumer<RegistryKey<T>, T> callback) {
+            BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback) {
         Objects.requireNonNull(type, "type");
 
-        final net.minecraft.util.registry.Registry<net.minecraft.util.registry.Registry<?>> root = this.roots.get(type.root());
+        final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(type.root());
         if (root == null) {
             throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
         }
-        net.minecraft.util.registry.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
+        net.minecraft.core.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
         if (registry != null) {
             throw new DuplicateRegistrationException(String.format("Registry '%s' in root '%s' has already been defined", type.location(), type.root()));
         }
-        final net.minecraft.util.RegistryKey<net.minecraft.util.registry.Registry<T>> key;
-        if (net.minecraft.util.registry.Registry.ROOT_REGISTRY_NAME.equals(type.root())) {
-            key = net.minecraft.util.RegistryKey.createRegistryKey((ResourceLocation) (Object) type.location());
+        final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>> key;
+        if (net.minecraft.core.Registry.ROOT_REGISTRY_NAME.equals(type.root())) {
+            key = net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) type.location());
         } else {
-            key = RegistryKeyAccessor.invoker$create(
+            key = ResourceKeyAccessor.invoker$create(
                     (ResourceLocation) (Object) RegistryRoots.SPONGE,
                     (ResourceLocation) (Object) type.location()
             );
         }
         if (callback == null) {
-            registry = new SimpleRegistry<>(key, Lifecycle.stable());
+            registry = new MappedRegistry<>(key, Lifecycle.stable());
 
         } else {
             registry = new CallbackRegistry<>(key, Lifecycle.stable(), callback);
@@ -183,14 +182,14 @@ public final class SpongeRegistryHolder implements RegistryHolder {
         ((MutableRegistryBridge<T>) registry).bridge$setDynamic(isDynamic);
         if (defaultValues != null) {
             for (final Map.Entry<ResourceKey, T> entry : defaultValues.get().entrySet()) {
-                ((SimpleRegistry<T>) registry).register(
-                        net.minecraft.util.RegistryKey.create(key, (ResourceLocation) (Object) entry.getKey()),
+                ((MappedRegistry<T>) registry).register(
+                        net.minecraft.resources.ResourceKey.create(key, (ResourceLocation) (Object) entry.getKey()),
                         entry.getValue(),
                         Lifecycle.stable()
                 );
             }
         }
-        ((MutableRegistry) root).register(key, registry, Lifecycle.stable());
+        ((WritableRegistry) root).register(key, registry, Lifecycle.stable());
         if (registry instanceof CallbackRegistry) {
             ((CallbackRegistry<?>) registry).setCallbackEnabled(true);
         }

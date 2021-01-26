@@ -24,7 +24,6 @@
  */
 package org.spongepowered.vanilla.mixin.core.entity.player;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.bridge.entity.EntityBridge;
@@ -32,6 +31,7 @@ import org.spongepowered.common.world.portal.PlatformTeleporter;
 import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.entity.Entity;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin_Vanilla implements EntityBridge {
@@ -39,14 +39,14 @@ public abstract class EntityMixin_Vanilla implements EntityBridge {
     /**
      * @author dualspiral - 19th December 2020 - 1.16.4
      * @reason Overwrite to redirect call to
-     *         {@link #bridge$changeDimension(net.minecraft.world.server.ServerWorld, PlatformTeleporter)}, this
+     *         {@link #bridge$changeDimension(net.minecraft.server.level.ServerLevel, PlatformTeleporter)}, this
      *         is to support Forge mods and their ITeleporter
      *
      *         Forge will require it's own PlatformTeleporter
      */
     @Overwrite
     @Nullable
-    public Entity changeDimension(final net.minecraft.world.server.ServerWorld originalDestinationWorld) {
+    public Entity changeDimension(final net.minecraft.server.level.ServerLevel originalDestinationWorld) {
         // We've redirected the End versions, so we're going to use the nether one.
         return this.bridge$changeDimension(originalDestinationWorld, VanillaPortalPlatformTeleporter.getNetherInstance());
     }

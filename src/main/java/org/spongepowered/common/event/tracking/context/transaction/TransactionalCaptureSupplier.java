@@ -26,18 +26,6 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.CombatEntry;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,8 +36,8 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.common.accessor.util.CombatEntryAccessor;
-import org.spongepowered.common.accessor.util.CombatTrackerAccessor;
+import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
+import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -70,6 +58,18 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.CombatEntry;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 @SuppressWarnings("rawtypes")
 public final class TransactionalCaptureSupplier implements ICaptureSupplier {
@@ -153,8 +153,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return changeBlock;
     }
 
-    public boolean logTileAddition(final TileEntity tileEntity,
-        final Supplier<ServerWorld> worldSupplier, final Chunk chunk
+    public boolean logTileAddition(final BlockEntity tileEntity,
+        final Supplier<ServerLevel> worldSupplier, final LevelChunk chunk
         ) {
         if (this.tail != null) {
             final boolean newRecorded = this.tail.acceptTileAddition(tileEntity);
@@ -167,7 +167,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return true;
     }
 
-    public boolean logTileRemoval(@Nullable final TileEntity tileentity, final Supplier<ServerWorld> worldSupplier) {
+    public boolean logTileRemoval(@Nullable final BlockEntity tileentity, final Supplier<ServerLevel> worldSupplier) {
         if (tileentity == null) {
             return false;
         }
@@ -181,7 +181,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return true;
     }
 
-    public boolean logTileReplacement(final BlockPos pos, final @Nullable TileEntity existing, final @Nullable TileEntity proposed, final Supplier<ServerWorld> worldSupplier) {
+    public boolean logTileReplacement(final BlockPos pos, final @Nullable BlockEntity existing, final @Nullable BlockEntity proposed, final Supplier<ServerLevel> worldSupplier) {
         if (proposed == null) {
             return false;
         }
@@ -195,9 +195,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return true;
     }
 
-    public void logNeighborNotification(final Supplier<ServerWorld> serverWorldSupplier, final BlockPos immutableFrom, final Block blockIn,
+    public void logNeighborNotification(final Supplier<ServerLevel> serverWorldSupplier, final BlockPos immutableFrom, final Block blockIn,
         final BlockPos immutableTarget, final BlockState targetBlockState,
-        @Nullable final TileEntity existingTile
+        @Nullable final BlockEntity existingTile
     ) {
         final NeighborNotification notificationTransaction = new NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom);
         this.logTransaction(notificationTransaction);
@@ -206,14 +206,14 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     public void logEntitySpawn(final PhaseContext<@NonNull ?> current, final TrackedWorldBridge serverWorld,
         final Entity entityIn) {
-        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) serverWorld);
-        final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
+        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
         final Supplier<SpawnType> contextualType = current.getSpawnTypeForTransaction(entityIn);
         final SpawnEntityTransaction transaction = new SpawnEntityTransaction(worldSupplier, entityIn, contextualType);
         this.logTransaction(transaction);
     }
-    private GameTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable TileEntity existing,
-        final TileEntity proposed, final Supplier<ServerWorld> worldSupplier
+    private GameTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable BlockEntity existing,
+        final BlockEntity proposed, final Supplier<ServerLevel> worldSupplier
     ) {
         final BlockState currentState = worldSupplier.get().getBlockState(pos);
         final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
@@ -232,10 +232,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
 
     @SuppressWarnings("ConstantConditions")
     public EffectTransactor logBlockDrops(
-        final PhaseContext<@NonNull ?> context, final World serverWorld, final BlockPos pos, final BlockState state,
-        final @Nullable TileEntity tileEntity) {
-        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) serverWorld);
-        final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final PhaseContext<@NonNull ?> context, final Level serverWorld, final BlockPos pos, final BlockState state,
+        final @Nullable BlockEntity tileEntity) {
+        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
+        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
         final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
             state,
             pos,
@@ -254,9 +254,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     public void logBlockEvent(final BlockState state, final TrackedWorldBridge serverWorld, final BlockPos pos,
         final TrackerBlockEventDataBridge blockEvent
     ) {
-        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) serverWorld);
-        final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final @Nullable TileEntity tileEntity = ((ServerWorld) serverWorld).getBlockEntity(pos);
+        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
+        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final @Nullable BlockEntity tileEntity = ((ServerLevel) serverWorld).getBlockEntity(pos);
         final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
             state,
             pos,
@@ -278,9 +278,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 return null;
             }
         }
-        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) entity.level);
-        final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final CompoundNBT tag = new CompoundNBT();
+        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) entity.level);
+        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final CompoundTag tag = new CompoundTag();
         entity.saveWithoutId(tag);
         final @Nullable DamageSource lastAttacker;
         if (entity instanceof LivingEntity) {
@@ -317,8 +317,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
     }
 
-    private RemoveTileEntity createTileRemovalTransaction(final TileEntity tileentity,
-        final Supplier<ServerWorld> worldSupplier
+    private RemoveTileEntity createTileRemovalTransaction(final BlockEntity tileentity,
+        final Supplier<ServerLevel> worldSupplier
     ) {
         final BlockState currentState = tileentity.getBlockState();
         final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
@@ -335,12 +335,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return new RemoveTileEntity(tileentity, snapshot);
     }
 
-    private AddTileEntity createTileAdditionTransaction(final TileEntity tileentity,
-        final Supplier<ServerWorld> worldSupplier, final Chunk chunk
+    private AddTileEntity createTileAdditionTransaction(final BlockEntity tileentity,
+        final Supplier<ServerLevel> worldSupplier, final LevelChunk chunk
     ) {
         final BlockPos pos = tileentity.getBlockPos().immutable();
         final BlockState currentBlock = chunk.getBlockState(pos);
-        final @Nullable TileEntity existingTile = chunk.getBlockEntity(pos, Chunk.CreateEntityType.CHECK);
+        final @Nullable BlockEntity existingTile = chunk.getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
 
         final SpongeBlockSnapshot added = TrackingUtil.createPooledSnapshot(
             currentBlock,

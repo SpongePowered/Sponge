@@ -26,34 +26,34 @@ package org.spongepowered.common.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.state.DirectionProperty;
 import org.spongepowered.api.util.Direction;
 
 import java.util.Objects;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 
 public final class DirectionUtil {
 
-    public static net.minecraft.util.Direction getFor(final Direction direction) {
+    public static net.minecraft.core.Direction getFor(final Direction direction) {
         Objects.requireNonNull(direction);
         switch (direction) {
             case UP:
-                return net.minecraft.util.Direction.UP;
+                return net.minecraft.core.Direction.UP;
             case DOWN:
-                return net.minecraft.util.Direction.DOWN;
+                return net.minecraft.core.Direction.DOWN;
             case WEST:
-                return net.minecraft.util.Direction.WEST;
+                return net.minecraft.core.Direction.WEST;
             case SOUTH:
-                return net.minecraft.util.Direction.SOUTH;
+                return net.minecraft.core.Direction.SOUTH;
             case EAST:
-                return net.minecraft.util.Direction.EAST;
+                return net.minecraft.core.Direction.EAST;
             case NORTH:
-                return net.minecraft.util.Direction.NORTH;
+                return net.minecraft.core.Direction.NORTH;
             default:
                 return null;
         }
     }
 
-    public static Direction getFor(final net.minecraft.util.Direction facing) {
+    public static Direction getFor(final net.minecraft.core.Direction facing) {
         checkNotNull(facing);
         switch (facing) {
             case UP:
@@ -73,8 +73,8 @@ public final class DirectionUtil {
         }
     }
 
-    public static net.minecraft.block.BlockState set(final net.minecraft.block.BlockState holder, final Direction value, final DirectionProperty property) {
-        final net.minecraft.util.Direction direction = DirectionUtil.getFor(value);
+    public static net.minecraft.world.level.block.state.BlockState set(final net.minecraft.world.level.block.state.BlockState holder, final Direction value, final DirectionProperty property) {
+        final net.minecraft.core.Direction direction = DirectionUtil.getFor(value);
         if (direction == null || !property.getPossibleValues().contains(direction)) {
             return holder;
         }

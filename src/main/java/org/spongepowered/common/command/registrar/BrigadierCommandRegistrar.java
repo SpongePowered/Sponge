@@ -32,7 +32,7 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
@@ -64,11 +64,11 @@ import java.util.stream.Collectors;
  * {@link #register(PluginContainer, LiteralArgumentBuilder, String...)}
  * method.</p>
  */
-public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
+public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSourceStack>> {
 
-    public static final CommandRegistrarType<LiteralArgumentBuilder<CommandSource>> TYPE =
+    public static final CommandRegistrarType<LiteralArgumentBuilder<CommandSourceStack>> TYPE =
             new SpongeCommandRegistrarType<>(
-                    new TypeToken<LiteralArgumentBuilder<CommandSource>>() {},
+                    new TypeToken<LiteralArgumentBuilder<CommandSourceStack>>() {},
                     BrigadierCommandRegistrar::new
             );
 
@@ -82,7 +82,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
 
     // For mods and others that use this. We get the plugin container from the CauseStack
     // TODO: Make sure this is valid. For Forge, I suspect we'll have done this in a context of some sort.
-    public LiteralCommandNode<CommandSource> register(final LiteralArgumentBuilder<CommandSource> command) {
+    public LiteralCommandNode<CommandSourceStack> register(final LiteralArgumentBuilder<CommandSourceStack> command) {
         // Get the plugin container
         final PluginContainer container = PhaseTracker.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
                 .orElseThrow(() -> new IllegalStateException("Cannot register command without knowing its origin."));
@@ -95,7 +95,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     }
 
     @Override
-    public @NonNull CommandRegistrarType<LiteralArgumentBuilder<CommandSource>> type() {
+    public @NonNull CommandRegistrarType<LiteralArgumentBuilder<CommandSourceStack>> type() {
         return BrigadierCommandRegistrar.TYPE;
     }
 
@@ -103,7 +103,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     @NonNull
     public CommandMapping register(
             @NonNull final PluginContainer container,
-            @NonNull final LiteralArgumentBuilder<CommandSource> command,
+            @NonNull final LiteralArgumentBuilder<CommandSourceStack> command,
             @NonNull final String primaryAlias,
             final String @NonNull... secondaryAliases) throws CommandFailedRegistrationException {
 
@@ -119,18 +119,18 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
      * @param secondaryAliases Any aliases should be registered (they will be registered as a redirection)
      * @return The built {@link LiteralCommandNode}.
      */
-    public Tuple<CommandMapping, LiteralCommandNode<CommandSource>> register(
+    public Tuple<CommandMapping, LiteralCommandNode<CommandSourceStack>> register(
             final PluginContainer container,
-            final LiteralArgumentBuilder<CommandSource> command,
+            final LiteralArgumentBuilder<CommandSourceStack> command,
             final String... secondaryAliases) {
 
         return this.registerInternal(this, container, this.applyNamespace(container, command, true), secondaryAliases, false);
     }
 
-    private Tuple<CommandMapping, LiteralCommandNode<CommandSource>> registerInternal(
+    private Tuple<CommandMapping, LiteralCommandNode<CommandSourceStack>> registerInternal(
             final CommandRegistrar<?> registrar,
             final PluginContainer container,
-            final LiteralCommandNode<CommandSource> namespacedCommand,
+            final LiteralCommandNode<CommandSourceStack> namespacedCommand,
             final String[] secondaryAliases,
             final boolean allowDuplicates) { // Brig technically allows them...
 
@@ -157,7 +157,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         // Redirect aliases
         for (final String alias : mapping.getAllAliases()) {
             if (!alias.equals(namespacedCommand.getLiteral())) {
-                final LiteralArgumentBuilder<CommandSource> redirecting = LiteralArgumentBuilder.<CommandSource>literal(alias)
+                final LiteralArgumentBuilder<CommandSourceStack> redirecting = LiteralArgumentBuilder.<CommandSourceStack>literal(alias)
                         .executes(namespacedCommand.getCommand())
                         .requires(namespacedCommand.getRequirement());
                 if (namespacedCommand.getRedirect() == null) {
@@ -181,7 +181,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
             @NonNull final String command,
             @NonNull final String arguments) throws CommandException {
         try {
-            final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause));
+            final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause));
             return CommandResult.builder().setResult(result).build();
         } catch (final CommandSyntaxException e) {
             throw new CommandException(Component.text(e.getMessage()), e);
@@ -197,7 +197,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
             @NonNull final String arguments) {
         final CompletableFuture<Suggestions> suggestionsCompletableFuture =
                 this.dispatcher.getCompletionSuggestions(
-                        this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause, true));
+                        this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause, true));
         // TODO: Fix so that we keep suggestions in the Mojang format?
         return suggestionsCompletableFuture.join().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
     }
@@ -205,9 +205,9 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     @Override
     @NonNull
     public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final CommandMapping mapping) {
-        final CommandNode<CommandSource> node = this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias()));
+        final CommandNode<CommandSourceStack> node = this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias()));
         if (node != null) {
-            return Optional.of(Component.text(this.dispatcher.getSmartUsage(node, (CommandSource) cause).toString()));
+            return Optional.of(Component.text(this.dispatcher.getSmartUsage(node, (CommandSourceStack) cause).toString()));
         }
 
         return Optional.empty();
@@ -215,7 +215,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
 
     @Override
     public boolean canExecute(final CommandCause cause, final CommandMapping mapping) {
-        return this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias())).getRequirement().test((CommandSource) cause);
+        return this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias())).getRequirement().test((CommandSourceStack) cause);
     }
 
     public SpongeCommandDispatcher getDispatcher() {
@@ -230,19 +230,19 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         return command + " " + argument;
     }
 
-    private LiteralCommandNode<CommandSource> applyNamespace(final PluginContainer pluginContainer,
-            final LiteralArgumentBuilder<CommandSource> builder, final boolean isSpongeAware) {
+    private LiteralCommandNode<CommandSourceStack> applyNamespace(final PluginContainer pluginContainer,
+            final LiteralArgumentBuilder<CommandSourceStack> builder, final boolean isSpongeAware) {
         if (builder.getLiteral().contains(":") || builder.getLiteral().contains(" ")) {
             // nope
             throw new IllegalArgumentException("The literal must not contain a colon or a space.");
         }
 
-        final LiteralArgumentBuilder<CommandSource> replacementBuilder =
-                LiteralArgumentBuilder.<CommandSource>literal(pluginContainer.getMetadata().getId() + ":" + builder.getLiteral())
+        final LiteralArgumentBuilder<CommandSourceStack> replacementBuilder =
+                LiteralArgumentBuilder.<CommandSourceStack>literal(pluginContainer.getMetadata().getId() + ":" + builder.getLiteral())
                         .forward(builder.getRedirect(), builder.getRedirectModifier(), builder.isFork())
                         .executes(builder.getCommand())
                         .requires(builder.getRequirement());
-        for (final CommandNode<CommandSource> node : builder.getArguments()) {
+        for (final CommandNode<CommandSourceStack> node : builder.getArguments()) {
             replacementBuilder.then(node);
         }
 

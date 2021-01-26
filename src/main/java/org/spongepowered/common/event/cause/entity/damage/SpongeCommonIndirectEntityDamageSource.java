@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.event.cause.entity.damage;
 
-import net.minecraft.entity.Entity;
-import org.spongepowered.common.accessor.util.EntityDamageSourceAccessor;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
-import org.spongepowered.common.accessor.util.DamageSourceAccessor;
-import org.spongepowered.common.accessor.util.IndirectEntityDamageSourceAccessor;
+import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
+import org.spongepowered.common.accessor.world.damagesource.EntityDamageSourceAccessor;
+import org.spongepowered.common.accessor.world.damagesource.IndirectEntityDamageSourceAccessor;
 
 /*
 To summarize, the way this works is that DamageSource isn't directly created, but
@@ -41,7 +41,7 @@ but it can certainly declare the methods as abstract.
 More notes are geared for abstraction of generating the builders, since those
 will require sending the builders into the ctors.
  */
-public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecraft.util.IndirectEntityDamageSource implements IndirectEntityDamageSource {
+public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecraft.world.damagesource.IndirectEntityDamageSource implements IndirectEntityDamageSource {
 
     public SpongeCommonIndirectEntityDamageSource() {
         super("SpongeEntityDamageSource", null, null);

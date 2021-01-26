@@ -27,13 +27,6 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import io.leangen.geantyref.TypeToken;
-import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.WorldGenSettingsExport;
-import net.minecraft.world.Dimension;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.biome.IBiomeMagnifier;
-import net.minecraft.world.gen.ChunkGenerator;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
@@ -41,7 +34,7 @@ import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
-import org.spongepowered.common.accessor.world.DimensionTypeAccessor;
+import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.bridge.world.DimensionBridge;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
@@ -51,6 +44,13 @@ import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
 import java.util.OptionalLong;
 import java.util.function.BiFunction;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.resources.RegistryWriteOps;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.BiomeZoomer;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 
 public final class SpongeDataPackType<T extends DataPackSerializable, U extends DataPackSerializedObject> implements DataPackType {
 
@@ -102,8 +102,8 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 
         private final SpongeDataPackType<@NonNull RecipeRegistration, RecipeSerializedObject> recipe = new SpongeDataPackType<>(TypeToken.get(RecipeRegistration.class),
                 new RecipeDataPackSerializer(),
-                s -> ((IFinishedRecipe) s).serializeRecipe(),
-                (i1, i2) -> new RecipeSerializedObject(i1.getKey(), i2, new DataPackSerializedObject(i1.getKey(), ((IFinishedRecipe) i1).serializeAdvancement())),
+                s -> ((FinishedRecipe) s).serializeRecipe(),
+                (i1, i2) -> new RecipeSerializedObject(i1.getKey(), i2, new DataPackSerializedObject(i1.getKey(), ((FinishedRecipe) i1).serializeAdvancement())),
                 false
         );
 
@@ -115,9 +115,9 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                             DimensionTypeAccessor.invoker$new(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
                                     s.coordinateMultiplier(),
                                     s.createDragonFight(), s.piglinSafe(), s.bedsUsable(), s.respawnAnchorsUsable(), s.hasRaids(), s.logicalHeight(),
-                                    (IBiomeMagnifier) s.biomeSampler(), (ResourceLocation) (Object) ((SpongeWorldTypeTemplate) s).infiniburn,
+                                    (BiomeZoomer) s.biomeSampler(), (ResourceLocation) (Object) ((SpongeWorldTypeTemplate) s).infiniburn,
                                     (ResourceLocation) (Object) s.effect().getKey(), s.ambientLighting());
-                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(WorldGenSettingsExport.create(JsonOps.INSTANCE, BootstrapProperties.registries), type).getOrThrow(false, e -> {});
+                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), type).getOrThrow(false, e -> {});
                 },
                 (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
                 true
@@ -126,10 +126,10 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         private final SpongeDataPackType<@NonNull WorldTemplate, DataPackSerializedObject> world = new SpongeDataPackType<>(TypeToken.get(WorldTemplate.class),
                 new DataPackSerializer<>("Dimensions", "dimension"),
                 s -> {
-                    final Dimension template = new Dimension(() -> BootstrapProperties.registries.dimensionTypes().get((ResourceLocation) (Object) s.worldType().location()), (ChunkGenerator) s.generator());
+                    final LevelStem template = new LevelStem(() -> BootstrapProperties.registries.dimensionTypes().get((ResourceLocation) (Object) s.worldType().location()), (ChunkGenerator) s.generator());
                     ((DimensionBridge) (Object) template).bridge$setFromSettings(false);
                     ((DimensionBridge) (Object) template).bridge$populateFromTemplate((SpongeWorldTemplate) s);
-                    return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(WorldGenSettingsExport.create(JsonOps.INSTANCE, BootstrapProperties.registries), template).getOrThrow(false, e -> {});
+                    return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), template).getOrThrow(false, e -> {});
                 },
                 (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
                 true

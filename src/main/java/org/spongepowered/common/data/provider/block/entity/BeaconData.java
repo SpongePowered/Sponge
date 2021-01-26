@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.potion.Effect;
-import net.minecraft.tileentity.BeaconTileEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.common.accessor.tileentity.BeaconTileEntityAccessor;
+import org.spongepowered.common.accessor.world.level.block.entity.BeaconBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 
 public final class BeaconData {
 
@@ -42,39 +42,39 @@ public final class BeaconData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(BeaconTileEntity.class)
+                .asMutable(BeaconBlockEntity.class)
                     .create(Keys.PRIMARY_POTION_EFFECT_TYPE)
-                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$primaryPower))
-                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$primaryPower))
-                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$primaryPower,
-                                BeaconTileEntityAccessor::accessor$primaryPower))
+                        .get(h -> BeaconData.get(h, BeaconBlockEntityAccessor::accessor$primaryPower))
+                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconBlockEntityAccessor::accessor$primaryPower))
+                        .deleteAnd(h -> BeaconData.delete(h, BeaconBlockEntityAccessor::accessor$primaryPower,
+                                BeaconBlockEntityAccessor::accessor$primaryPower))
                     .create(Keys.SECONDARY_POTION_EFFECT_TYPE)
-                        .get(h -> BeaconData.get(h, BeaconTileEntityAccessor::accessor$secondaryPower))
-                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconTileEntityAccessor::accessor$secondaryPower))
-                        .deleteAnd(h -> BeaconData.delete(h, BeaconTileEntityAccessor::accessor$secondaryPower,
-                                BeaconTileEntityAccessor::accessor$secondaryPower));
+                        .get(h -> BeaconData.get(h, BeaconBlockEntityAccessor::accessor$secondaryPower))
+                        .setAnd((h, v) -> BeaconData.set(h, v, BeaconBlockEntityAccessor::accessor$secondaryPower))
+                        .deleteAnd(h -> BeaconData.delete(h, BeaconBlockEntityAccessor::accessor$secondaryPower,
+                                BeaconBlockEntityAccessor::accessor$secondaryPower));
     }
     // @formatter:on
 
-    private static PotionEffectType get(final BeaconTileEntity holder, final Function<BeaconTileEntityAccessor, Effect> getter) {
-        return (PotionEffectType) getter.apply((BeaconTileEntityAccessor) holder);
+    private static PotionEffectType get(final BeaconBlockEntity holder, final Function<BeaconBlockEntityAccessor, MobEffect> getter) {
+        return (PotionEffectType) getter.apply((BeaconBlockEntityAccessor) holder);
     }
 
-    private static boolean set(final BeaconTileEntity holder, final PotionEffectType value,
-            final BiConsumer<BeaconTileEntityAccessor, Effect> setter) {
-        final BeaconTileEntityAccessor accessor = (BeaconTileEntityAccessor) holder;
-        final Effect effect = (Effect) value;
-        if (!BeaconTileEntityAccessor.accessor$VALID_EFFECTS().contains(effect)) {
+    private static boolean set(final BeaconBlockEntity holder, final PotionEffectType value,
+            final BiConsumer<BeaconBlockEntityAccessor, MobEffect> setter) {
+        final BeaconBlockEntityAccessor accessor = (BeaconBlockEntityAccessor) holder;
+        final MobEffect effect = (MobEffect) value;
+        if (!BeaconBlockEntityAccessor.accessor$VALID_EFFECTS().contains(effect)) {
             return false;
         }
-        setter.accept(accessor, (Effect) value);
+        setter.accept(accessor, (MobEffect) value);
         holder.setChanged();
         return true;
     }
 
-    private static boolean delete(final BeaconTileEntity holder, final Function<BeaconTileEntityAccessor, Effect> getter,
-            final BiConsumer<BeaconTileEntityAccessor, Effect> setter) {
-        final BeaconTileEntityAccessor accessor = (BeaconTileEntityAccessor) holder;
+    private static boolean delete(final BeaconBlockEntity holder, final Function<BeaconBlockEntityAccessor, MobEffect> getter,
+            final BiConsumer<BeaconBlockEntityAccessor, MobEffect> setter) {
+        final BeaconBlockEntityAccessor accessor = (BeaconBlockEntityAccessor) holder;
         if (accessor.accessor$primaryPower() != null) {
             setter.accept(accessor, null);
             holder.setChanged();

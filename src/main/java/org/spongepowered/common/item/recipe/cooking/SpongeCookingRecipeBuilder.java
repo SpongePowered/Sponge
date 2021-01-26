@@ -24,13 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.cooking;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -47,14 +40,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
 public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, CookingRecipe.Builder>
         implements CookingRecipe.Builder.ResultStep, CookingRecipe.Builder.IngredientStep, CookingRecipe.Builder.EndStep {
 
-    private IRecipeType type;
+    private net.minecraft.world.item.crafting.RecipeType type;
     private Ingredient ingredient;
     private ItemStack result;
-    private Function<IInventory, net.minecraft.item.ItemStack> resultFunction;
+    private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
 
     @Nullable private Float experience;
     @Nullable private Integer cookingTime;
@@ -122,7 +121,7 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
 
     @Override
     public IngredientStep type(final RecipeType<CookingRecipe> type) {
-        this.type = (IRecipeType) type;
+        this.type = (net.minecraft.world.item.crafting.RecipeType) type;
         return this;
     }
 
@@ -144,27 +143,27 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
 
         final List<Ingredient> ingredientList = Collections.singletonList(this.ingredient);
 
-        final IRecipeSerializer<?> serializer;
-        if (this.type == IRecipeType.BLASTING) {
+        final RecipeSerializer<?> serializer;
+        if (this.type == net.minecraft.world.item.crafting.RecipeType.BLASTING) {
             if (this.cookingTime == null) {
                 this.cookingTime = 100;
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.BLASTING_RECIPE, SpongeCookingRecipeSerializer.Blasting.SPONGE_BLASTING);
-        } else if (this.type == IRecipeType.CAMPFIRE_COOKING) {
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.BLASTING_RECIPE, SpongeCookingRecipeSerializer.Blasting.SPONGE_BLASTING);
+        } else if (this.type == net.minecraft.world.item.crafting.RecipeType.CAMPFIRE_COOKING) {
             if (this.cookingTime == null) {
                 this.cookingTime = 600;
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.CAMPFIRE_COOKING_RECIPE, SpongeCookingRecipeSerializer.Campfire.SPONGE_CAMPFIRE_COOKING);
-        } else if (this.type == IRecipeType.SMOKING) {
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.CAMPFIRE_COOKING_RECIPE, SpongeCookingRecipeSerializer.Campfire.SPONGE_CAMPFIRE_COOKING);
+        } else if (this.type == net.minecraft.world.item.crafting.RecipeType.SMOKING) {
             if (this.cookingTime == null) {
                 this.cookingTime = 100;
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.SMOKING_RECIPE, SpongeCookingRecipeSerializer.Smoking.SPONGE_SMOKING);
-        } else if (this.type == IRecipeType.SMELTING) {
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.SMOKING_RECIPE, SpongeCookingRecipeSerializer.Smoking.SPONGE_SMOKING);
+        } else if (this.type == net.minecraft.world.item.crafting.RecipeType.SMELTING) {
             if (this.cookingTime == null) {
                 this.cookingTime = 200;
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, IRecipeSerializer.SMELTING_RECIPE, SpongeCookingRecipeSerializer.Smelting.SPONGE_SMELTING);
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.SMELTING_RECIPE, SpongeCookingRecipeSerializer.Smelting.SPONGE_SMELTING);
         } else {
             throw new IllegalArgumentException("Unknown RecipeType " + this.type);
         }

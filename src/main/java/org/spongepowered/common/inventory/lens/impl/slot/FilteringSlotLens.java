@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import net.minecraft.inventory.IInventory;
+import net.minecraft.world.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
@@ -44,7 +44,7 @@ public class FilteringSlotLens extends DelegatingSlotLens {
     }
 
     @Override
-    public boolean setStack(Fabric fabric, net.minecraft.item.ItemStack stack) {
+    public boolean setStack(Fabric fabric, net.minecraft.world.item.ItemStack stack) {
         return this.getItemStackFilter().test(fabric, ItemStackUtil.fromNative(stack)) && super.setStack(fabric, stack);
     }
 
@@ -68,8 +68,8 @@ public class FilteringSlotLens extends DelegatingSlotLens {
         static ItemStackFilter filterIInventory(int slot) {
             return (fabric, item) -> {
                 InventoryBridge inventory = fabric.fabric$get(slot);
-                if (inventory instanceof IInventory) {
-                    return ((IInventory) inventory).canPlaceItem(slot, ItemStackUtil.toNative(item));
+                if (inventory instanceof Container) {
+                    return ((Container) inventory).canPlaceItem(slot, ItemStackUtil.toNative(item));
                 }
                 return true;
             };

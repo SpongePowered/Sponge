@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 
 public interface PlatformServerWorldBridge {
     default void bridge$removeEntity(Entity entity, boolean keepData) {
-        if (entity instanceof ServerPlayerEntity) {
-            ((ServerWorld) this).removePlayerImmediately((ServerPlayerEntity) entity);
+        if (entity instanceof ServerPlayer) {
+            ((ServerLevel) this).removePlayerImmediately((ServerPlayer) entity);
         } else {
-            ((ServerWorld) this).despawn(entity);
+            ((ServerLevel) this).despawn(entity);
         }
     }
 }

@@ -24,13 +24,6 @@
  */
 package org.spongepowered.common.inventory.util;
 
-import net.minecraft.block.ChestBlock;
-import net.minecraft.entity.EntityType;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.DoubleSidedInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.state.properties.ChestType;
-import net.minecraft.tileentity.ChestTileEntity;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -55,23 +48,29 @@ import org.spongepowered.plugin.PluginContainer;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.properties.ChestType;
 
 public final class InventoryUtil {
 
     private InventoryUtil() {}
 
-    public static CraftingGridInventory toSpongeInventory(final CraftingInventory inv) {
+    public static CraftingGridInventory toSpongeInventory(final CraftingContainer inv) {
         return (CraftingGridInventory) inv;
     }
 
     @SuppressWarnings("unchecked")
-    public static <C extends IInventory> C toNativeInventory(final Inventory inv) {
-        if (inv instanceof CraftingInventory) {
+    public static <C extends net.minecraft.world.Container> C toNativeInventory(final Inventory inv) {
+        if (inv instanceof CraftingContainer) {
             return (C) inv;
         }
         if (inv instanceof Container) {
             for (final Object inventory : ((InventoryAdapter) inv).inventoryAdapter$getFabric().fabric$allInventories()) {
-                if (inventory instanceof CraftingInventory) {
+                if (inventory instanceof CraftingContainer) {
                     return (C) inventory;
                 }
             }
@@ -81,31 +80,31 @@ public final class InventoryUtil {
         throw new IllegalStateException("Invalid CraftingGridInventory. Could not find CraftingInventory.\nInventory was: " + inv.getClass().getSimpleName());
     }
 
-    public static Optional<Inventory> getDoubleChestInventory(final ChestTileEntity chest) {
+    public static Optional<Inventory> getDoubleChestInventory(final ChestBlockEntity chest) {
         final Optional<Chest> connectedChestOptional = ((Chest) chest).getConnectedChest();
         if (!connectedChestOptional.isPresent()) {
             return Optional.empty();
         }
 
         final ChestType chestType = chest.getBlockState().getValue(ChestBlock.TYPE);
-        final ChestTileEntity connectedChest = (ChestTileEntity) connectedChestOptional.get();
+        final ChestBlockEntity connectedChest = (ChestBlockEntity) connectedChestOptional.get();
         // Logic in the instanceof check of ChestBlock.getChestInventory but with exploded ternary operators.
         if (chestType == ChestType.RIGHT) {
-            return Optional.of((Inventory) new DoubleSidedInventory(chest, connectedChest));
+            return Optional.of((Inventory) new CompoundContainer(chest, connectedChest));
         } else {
-            return Optional.of((Inventory) new DoubleSidedInventory(connectedChest, chest));
+            return Optional.of((Inventory) new CompoundContainer(connectedChest, chest));
         }
     }
 
     // Utility
-    public static Inventory toInventory(final IInventory inventory) {
+    public static Inventory toInventory(final net.minecraft.world.Container inventory) {
         return InventoryUtil.toInventory(inventory, null);
     }
 
     public static Inventory toInventory(Object inventory, @Nullable final Object forgeItemHandler) {
         if (forgeItemHandler == null) {
-            if (inventory instanceof ChestTileEntity) {
-                inventory = InventoryUtil.getDoubleChestInventory(((ChestTileEntity) inventory)).orElse(((Inventory) inventory));
+            if (inventory instanceof ChestBlockEntity) {
+                inventory = InventoryUtil.getDoubleChestInventory(((ChestBlockEntity) inventory)).orElse(((Inventory) inventory));
             }
             if (inventory instanceof Inventory) {
                 return ((Inventory) inventory);
@@ -176,7 +175,7 @@ public final class InventoryUtil {
 
     @SuppressWarnings("unchecked")
     public static <T extends Carrier> CarriedInventory<T> carriedWrapperInventory(
-        final net.minecraft.inventory.IInventory inventory, final T carrier) {
+        final net.minecraft.world.Container inventory, final T carrier) {
         return (CarriedInventory<T>) new CarriedWrapperInventory(inventory, carrier);
     }
 }

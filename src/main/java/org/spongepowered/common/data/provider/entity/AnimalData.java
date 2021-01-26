@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.passive.AnimalEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.AnimalAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class AnimalData {
@@ -36,10 +36,10 @@ public final class AnimalData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(AnimalEntityAccessor.class)
+                .asMutable(AnimalAccessor.class)
                     .create(Keys.BREEDER)
-                        .get(AnimalEntityAccessor::accessor$loveCause)
-                        .set(AnimalEntityAccessor::accessor$loveCause);
+                        .get(AnimalAccessor::accessor$loveCause)
+                        .set(AnimalAccessor::accessor$loveCause);
     }
     // @formatter:on
 }

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.BlazeEntity;
+import net.minecraft.world.entity.monster.Blaze;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.monster.BlazeEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.BlazeAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class BlazeData {
@@ -37,10 +37,10 @@ public final class BlazeData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(BlazeEntity.class)
+                .asMutable(Blaze.class)
                     .create(Keys.IS_AFLAME)
-                        .get(BlazeEntity::isOnFire)
-                        .set((h, v) -> ((BlazeEntityAccessor) h).invoker$setCharged(v));
+                        .get(Blaze::isOnFire)
+                        .set((h, v) -> ((BlazeAccessor) h).invoker$setCharged(v));
     }
     // @formatter:on
 }

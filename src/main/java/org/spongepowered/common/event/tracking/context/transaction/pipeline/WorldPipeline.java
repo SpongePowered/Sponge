@@ -24,13 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -45,12 +38,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 
 public final class WorldPipeline implements BlockPipeline {
 
-    private final Supplier<Chunk> chunkSupplier;
-    private final Supplier<ServerWorld> serverWorld;
-    private final Supplier<ChunkSection> sectionSupplier;
+    private final Supplier<LevelChunk> chunkSupplier;
+    private final Supplier<ServerLevel> serverWorld;
+    private final Supplier<LevelChunkSection> sectionSupplier;
     private final boolean wasEmpty;
     private final List<ResultingTransactionBySideEffect> worldEffects;
     private final ChunkPipeline chunkPipeline;
@@ -60,22 +60,22 @@ public final class WorldPipeline implements BlockPipeline {
         this.worldEffects = builder.effects;
         this.serverWorld = builder.serverWorld;
         this.sectionSupplier = builder.sectionSupplier;
-        final @Nullable ChunkSection chunkSection = Objects.requireNonNull(builder.sectionSupplier).get();
+        final @Nullable LevelChunkSection chunkSection = Objects.requireNonNull(builder.sectionSupplier).get();
         this.wasEmpty = chunkSection == null || chunkSection.isEmpty();
         this.chunkPipeline = builder.chunkPipeline;
     }
 
-    public ServerWorld getServerWorld() {
+    public ServerLevel getServerWorld() {
         return Objects.requireNonNull(this.serverWorld, "ServerWorld Supplier is null in ChunkPipeline").get();
     }
 
     @Override
-    public Chunk getAffectedChunk() {
+    public LevelChunk getAffectedChunk() {
         return Objects.requireNonNull(this.chunkSupplier, "Chunk Supplier is null in ChunkPipeline").get();
     }
 
     @Override
-    public ChunkSection getAffectedSection() {
+    public LevelChunkSection getAffectedSection() {
         return Objects.requireNonNull(this.sectionSupplier, "ChunkSection Supplier is null in ChunkPipeline").get();
     }
 
@@ -87,14 +87,14 @@ public final class WorldPipeline implements BlockPipeline {
         if (this.worldEffects.isEmpty()) {
             return false;
         }
-        final ServerWorld serverWorld = Objects.requireNonNull(this.serverWorld).get();
+        final ServerLevel serverWorld = Objects.requireNonNull(this.serverWorld).get();
         // We have to get the "old state" from
         final @Nullable BlockState oldState = this.chunkPipeline.processChange(context, currentState, newProposedState, pos, limit);
         if (oldState == null) {
             return false;
         }
         final int oldOpacity = oldState.getLightBlock(serverWorld, pos);
-        final @Nullable TileEntity existing = this.chunkSupplier.get().getBlockEntity(pos, Chunk.CreateEntityType.CHECK);
+        final @Nullable BlockEntity existing = this.chunkSupplier.get().getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
         PipelineCursor formerState = new PipelineCursor(oldState, oldOpacity, pos, existing, destroyer, limit);
 
         for (final ResultingTransactionBySideEffect effect : this.worldEffects) {
@@ -128,9 +128,9 @@ public final class WorldPipeline implements BlockPipeline {
 
     public static final class Builder {
 
-        final Supplier<ServerWorld> serverWorld;
-        final Supplier<Chunk> chunkSupplier;
-        final Supplier<ChunkSection> sectionSupplier;
+        final Supplier<ServerLevel> serverWorld;
+        final Supplier<LevelChunk> chunkSupplier;
+        final Supplier<LevelChunkSection> sectionSupplier;
         @MonotonicNonNull List<ResultingTransactionBySideEffect> effects;
         final ChunkPipeline chunkPipeline;
 

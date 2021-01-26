@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.monster.VindicatorEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.VindicatorAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class VindicatorData {
@@ -36,10 +36,10 @@ public final class VindicatorData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(VindicatorEntityAccessor.class)
+                .asMutable(VindicatorAccessor.class)
                     .create(Keys.IS_JOHNNY)
-                        .get(VindicatorEntityAccessor::accessor$isJohnny)
-                        .set(VindicatorEntityAccessor::accessor$isJohnny);
+                        .get(VindicatorAccessor::accessor$isJohnny)
+                        .set(VindicatorAccessor::accessor$isJohnny);
     }
     // @formatter:on
 }

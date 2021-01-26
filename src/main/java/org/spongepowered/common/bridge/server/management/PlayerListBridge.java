@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.bridge.server.management;
 
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
 public interface PlayerListBridge {
 
-    void bridge$setNewDestinationDimension(RegistryKey<World> dimension);
+    void bridge$setNewDestinationDimension(ResourceKey<Level> dimension);
 
-    void bridge$setOriginalDestinationDimension(RegistryKey<World> dimension);
+    void bridge$setOriginalDestinationDimension(ResourceKey<Level> dimension);
 }

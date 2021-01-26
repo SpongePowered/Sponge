@@ -35,6 +35,8 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.data.persistence.ConfigurateTranslator.ToDataView;
+import org.spongepowered.common.data.persistence.ConfigurateTranslator.VisitState;
 import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;

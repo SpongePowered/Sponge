@@ -36,7 +36,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.core.Registry;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -188,7 +188,7 @@ class TimingsExport extends Thread {
                 )
                 .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) ->
                         {
-                            final ResourceKey resourceKey = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.entity.EntityType<?>) entityType);
+                            final ResourceKey resourceKey = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) entityType);
                             return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), resourceKey);
                         })
                 )

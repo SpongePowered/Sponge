@@ -24,14 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.crafting.shaped;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.item.crafting.ShapelessRecipe;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
 import java.util.ArrayList;
@@ -42,22 +34,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 
 public class SpongeShapedRecipe extends ShapedRecipe {
 
-    private final Function<CraftingInventory, ItemStack> resultFunction;
-    private final Function<CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction;
+    private final Function<CraftingContainer, ItemStack> resultFunction;
+    private final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction;
 
     public SpongeShapedRecipe(ResourceLocation idIn, String groupIn, int recipeWidthIn, int recipeHeightIn, NonNullList<Ingredient> recipeItemsIn,
-            ItemStack recipeOutputIn, Function<CraftingInventory, ItemStack> resultFunction,
-            Function<CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction) {
+            ItemStack recipeOutputIn, Function<CraftingContainer, ItemStack> resultFunction,
+            Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction) {
         super(idIn, groupIn, recipeWidthIn, recipeHeightIn, recipeItemsIn, recipeOutputIn);
         this.resultFunction = resultFunction;
         this.remainingItemsFunction = remainingItemsFunction;
     }
 
     @Override
-    public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
+    public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
         if (this.remainingItemsFunction != null) {
             return this.remainingItemsFunction.apply(inv);
         }
@@ -65,7 +63,7 @@ public class SpongeShapedRecipe extends ShapedRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInventory p_77572_1_) {
+    public ItemStack assemble(CraftingContainer p_77572_1_) {
         if (this.resultFunction != null) {
             return this.resultFunction.apply(p_77572_1_);
         }

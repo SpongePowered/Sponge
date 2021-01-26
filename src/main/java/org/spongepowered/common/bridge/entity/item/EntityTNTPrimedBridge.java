@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.entity.item;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 
 public interface EntityTNTPrimedBridge {
 

@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.village;
 
-import net.minecraft.item.MerchantOffer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.item.trading.MerchantOffer;
 
 @Mixin(MerchantOffer.class)
 public abstract class MerchantOfferMixin {
 
-    @Shadow public abstract net.minecraft.item.ItemStack shadow$getBaseCostA();
-    @Shadow @Nullable public abstract net.minecraft.item.ItemStack shadow$getCostB();
-    @Shadow public abstract net.minecraft.item.ItemStack shadow$getResult();
+    @Shadow public abstract net.minecraft.world.item.ItemStack shadow$getBaseCostA();
+    @Shadow @Nullable public abstract net.minecraft.world.item.ItemStack shadow$getCostB();
+    @Shadow public abstract net.minecraft.world.item.ItemStack shadow$getResult();
     @Shadow public abstract int shadow$getUses();
     @Shadow public abstract int shadow$getMaxUses();
     @Shadow public abstract int shadow$getXp();

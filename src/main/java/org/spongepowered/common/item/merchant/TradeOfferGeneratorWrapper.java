@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.item.merchant;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.merchant.villager.VillagerTrades;
-import net.minecraft.item.MerchantOffer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
@@ -34,8 +31,11 @@ import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import java.util.Objects;
 import java.util.Random;
 import java.util.StringJoiner;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.item.trading.MerchantOffer;
 
-public final class TradeOfferGeneratorWrapper implements VillagerTrades.ITrade, TradeOfferGenerator {
+public final class TradeOfferGeneratorWrapper implements VillagerTrades.ItemListing, TradeOfferGenerator {
 
     private final TradeOfferGenerator generator;
 

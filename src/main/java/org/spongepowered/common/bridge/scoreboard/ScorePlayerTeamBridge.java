@@ -27,7 +27,7 @@ package org.spongepowered.common.bridge.scoreboard;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public interface ScorePlayerTeamBridge {
 
@@ -45,7 +45,7 @@ public interface ScorePlayerTeamBridge {
 
     void bridge$setColor(NamedTextColor color);
 
-    Audience bridge$getTeamChannel(ServerPlayerEntity player);
+    Audience bridge$getTeamChannel(ServerPlayer player);
 
     Audience bridge$getNonTeamChannel();
 }

@@ -35,45 +35,44 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.longs.LongIterator;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.ReportedException;
-import net.minecraft.nbt.INBT;
+import net.minecraft.CrashReport;
+import net.minecraft.ReportedException;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.worldgen.Features;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryWriteOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.util.registry.SimpleRegistry;
-import net.minecraft.util.registry.WorldGenSettingsExport;
-import net.minecraft.util.registry.WorldSettingsImport;
-import net.minecraft.village.VillageSiege;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.Dimension;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.ForcedChunksSaveData;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.GameType;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.biome.BiomeManager;
-import net.minecraft.world.chunk.listener.IChunkStatusListener;
-import net.minecraft.world.gen.feature.Features;
-import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.server.TicketType;
-import net.minecraft.world.spawner.CatSpawner;
-import net.minecraft.world.spawner.ISpecialSpawner;
-import net.minecraft.world.spawner.PatrolSpawner;
-import net.minecraft.world.spawner.PhantomSpawner;
-import net.minecraft.world.spawner.WanderingTraderSpawner;
-import net.minecraft.world.storage.CommandStorage;
-import net.minecraft.world.storage.FolderName;
-import net.minecraft.world.storage.IServerConfiguration;
-import net.minecraft.world.storage.SaveFormat;
-import net.minecraft.world.storage.ServerWorldInfo;
+import net.minecraft.world.entity.ai.village.VillageSiege;
+import net.minecraft.world.entity.npc.CatSpawner;
+import net.minecraft.world.entity.npc.WanderingTraderSpawner;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.CustomSpawner;
+import net.minecraft.world.level.ForcedChunksSavedData;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.PatrolSpawner;
+import net.minecraft.world.level.levelgen.PhantomSpawner;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.storage.CommandStorage;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -89,8 +88,8 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
-import org.spongepowered.common.accessor.world.storage.SaveFormat_LevelSaveAccessor;
-import org.spongepowered.common.accessor.world.storage.ServerWorldInfoAccessor;
+import org.spongepowered.common.accessor.world.level.storage.LevelStorageSource_LevelStorageAccessAccessor;
+import org.spongepowered.common.accessor.world.level.storage.PrimaryLevelDataAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.DimensionBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -139,19 +138,19 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     private final MinecraftServer server;
     private final Path dimensionsDataPackDirectory, defaultWorldDirectory, customWorldsDirectory;
-    private final Map<RegistryKey<World>, ServerWorld> worlds;
+    private final Map<net.minecraft.resources.ResourceKey<Level>, ServerLevel> worlds;
 
     private static final TicketType<ResourceLocation> SPAWN_CHUNKS = TicketType.create("spawn_chunks", (i, o) -> i.compareTo(o));
 
     public VanillaWorldManager(final MinecraftServer server) {
         this.server = server;
-        this.dimensionsDataPackDirectory = ((MinecraftServerAccessor) server).accessor$storageSource().getLevelPath(FolderName.DATAPACK_DIR).resolve("plugin_dimension").resolve("data");
+        this.dimensionsDataPackDirectory = ((MinecraftServerAccessor) server).accessor$storageSource().getLevelPath(LevelResource.DATAPACK_DIR).resolve("plugin_dimension").resolve("data");
         try {
             Files.createDirectories(this.dimensionsDataPackDirectory);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-        this.defaultWorldDirectory = ((SaveFormat_LevelSaveAccessor) ((MinecraftServerAccessor) this.server).accessor$storageSource()).accessor$levelPath();
+        this.defaultWorldDirectory = ((LevelStorageSource_LevelStorageAccessAccessor) ((MinecraftServerAccessor) this.server).accessor$storageSource()).accessor$levelPath();
         this.customWorldsDirectory = this.defaultWorldDirectory.resolve("dimensions");
         try {
             Files.createDirectories(this.customWorldsDirectory);
@@ -178,7 +177,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public org.spongepowered.api.world.server.ServerWorld defaultWorld() {
-        final ServerWorld world = this.server.overworld();
+        final ServerLevel world = this.server.overworld();
         if (world == null) {
             throw new IllegalStateException("The default world has not been loaded yet! (Did you call this too early in the lifecycle?");
         }
@@ -198,14 +197,14 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     @Override
     public List<ResourceKey> worldKeys() {
         final List<ResourceKey> worldKeys = new ArrayList<>();
-        worldKeys.add((ResourceKey) (Object) World.OVERWORLD.location());
+        worldKeys.add((ResourceKey) (Object) Level.OVERWORLD.location());
 
-        if (Files.exists(this.defaultWorldDirectory.resolve(this.getDirectoryName((ResourceKey) (Object) World.NETHER.location())))) {
-            worldKeys.add((ResourceKey) (Object) World.NETHER.location());
+        if (Files.exists(this.defaultWorldDirectory.resolve(this.getDirectoryName((ResourceKey) (Object) Level.NETHER.location())))) {
+            worldKeys.add((ResourceKey) (Object) Level.NETHER.location());
         }
 
-        if (Files.exists(this.defaultWorldDirectory.resolve(this.getDirectoryName((ResourceKey) (Object) World.END.location())))) {
-            worldKeys.add((ResourceKey) (Object) World.END.location());
+        if (Files.exists(this.defaultWorldDirectory.resolve(this.getDirectoryName((ResourceKey) (Object) Level.END.location())))) {
+            worldKeys.add((ResourceKey) (Object) Level.END.location());
         }
 
         try {
@@ -231,9 +230,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public boolean worldExists(final ResourceKey key) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
 
-        if (World.OVERWORLD.equals(registryKey)) {
+        if (Level.OVERWORLD.equals(registryKey)) {
             return true;
         }
 
@@ -241,7 +240,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return true;
         }
 
-        final boolean isVanillaSubLevel = World.NETHER.equals(registryKey) || World.END.equals(registryKey);
+        final boolean isVanillaSubLevel = Level.NETHER.equals(registryKey) || Level.END.equals(registryKey);
         final Path levelDirectory = isVanillaSubLevel ? this.defaultWorldDirectory.resolve(this.getDirectoryName(key)) :
             this.customWorldsDirectory.resolve(key.getNamespace()).resolve(key.getValue());
         return Files.exists(levelDirectory);
@@ -262,29 +261,29 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     @Override
     public CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld(final WorldTemplate template) {
         final ResourceKey key = Objects.requireNonNull(template, "template").getKey();
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(key);
-        if (World.OVERWORLD.equals(registryKey)) {
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
+        if (Level.OVERWORLD.equals(registryKey)) {
             FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
         }
-        final ServerWorld serverWorld = this.worlds.get(registryKey);
+        final ServerLevel serverWorld = this.worlds.get(registryKey);
         if (serverWorld != null) {
             return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) serverWorld);
         }
 
         this.saveTemplate(template);
 
-        return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template).asDimension(), ((DimensionGeneratorSettings) template.generationConfig()));
+        return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template).asDimension(), ((WorldGenSettings) template.generationConfig()));
     }
 
     @Override
     public CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld(final ResourceKey key) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
 
-        if (World.OVERWORLD.equals(registryKey)) {
+        if (Level.OVERWORLD.equals(registryKey)) {
             FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
         }
 
-        final ServerWorld world = this.worlds.get(registryKey);
+        final ServerLevel world = this.worlds.get(registryKey);
         if (world != null) {
             return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
         }
@@ -292,8 +291,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         return this.loadTemplate(key).thenCompose(r -> {
             WorldTemplate loadedTemplate = r.orElse(null);
             if (loadedTemplate == null) {
-                final Dimension scratch = BootstrapProperties.dimensionGeneratorSettings.dimensions().get(RegistryKey.create(
-                    net.minecraft.util.registry.Registry.LEVEL_STEM_REGISTRY, (ResourceLocation) (Object) key));
+                final LevelStem scratch = BootstrapProperties.dimensionGeneratorSettings.dimensions().get(net.minecraft.resources.ResourceKey.create(
+                    net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, (ResourceLocation) (Object) key));
                 if (scratch != null) {
                     ((ResourceKeyBridge) (Object) scratch).bridge$setKey(key);
                     loadedTemplate = new SpongeWorldTemplate(scratch);
@@ -306,14 +305,14 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 this.saveTemplate(loadedTemplate);
             }
 
-            return this.loadWorld0(registryKey, ((SpongeWorldTemplate) loadedTemplate).asDimension(), ((DimensionGeneratorSettings) loadedTemplate.generationConfig()));
+            return this.loadWorld0(registryKey, ((SpongeWorldTemplate) loadedTemplate).asDimension(), ((WorldGenSettings) loadedTemplate.generationConfig()));
         });
     }
 
-    private CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld0(final RegistryKey<World> registryKey,
-            final Dimension template, DimensionGeneratorSettings generatorSettings) {
-        final ServerWorldInfo defaultLevelData = (ServerWorldInfo) this.server.getWorldData();
-        final WorldSettings defaultLevelSettings = ((ServerWorldInfoAccessor) defaultLevelData).accessor$settings();
+    private CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld0(final net.minecraft.resources.ResourceKey<Level> registryKey,
+            final LevelStem template, WorldGenSettings generatorSettings) {
+        final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
+        final LevelSettings defaultLevelSettings = ((PrimaryLevelDataAccessor) defaultLevelData).accessor$settings();
         final DimensionBridge templateBridge = (DimensionBridge) (Object) template;
         final ResourceKey worldKey = ((ResourceKeyBridge) templateBridge).bridge$getKey();
 
@@ -323,38 +322,38 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         MinecraftServerAccessor.accessor$LOGGER().info("Loading World '{}' ({})", worldKey, worldTypeKey);
         final String directoryName = this.getDirectoryName(worldKey);
         final boolean isVanillaSubLevel = this.isVanillaSubWorld(directoryName);
-        final SaveFormat.LevelSave storageSource;
+        final LevelStorageSource.LevelStorageAccess storageSource;
 
         try {
             if (isVanillaSubLevel) {
-                storageSource = SaveFormat.createDefault(this.defaultWorldDirectory).createAccess(directoryName);
+                storageSource = LevelStorageSource.createDefault(this.defaultWorldDirectory).createAccess(directoryName);
             } else {
-                storageSource = SaveFormat.createDefault(this.customWorldsDirectory).createAccess(worldKey.getNamespace() + File.separator + worldKey.getValue());
+                storageSource = LevelStorageSource.createDefault(this.customWorldsDirectory).createAccess(worldKey.getNamespace() + File.separator + worldKey.getValue());
             }
         } catch (final IOException e) {
             e.printStackTrace();
             return FutureUtil.completedWithException(new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e));
         }
 
-        ServerWorldInfo levelData;
+        PrimaryLevelData levelData;
 
-        levelData = (ServerWorldInfo) storageSource.getDataTag((DynamicOps<INBT>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig());
+        levelData = (PrimaryLevelData) storageSource.getDataTag((DynamicOps<Tag>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig());
         if (levelData == null) {
-            final WorldSettings levelSettings;
-            final DimensionGeneratorSettings generationSettings;
+            final LevelSettings levelSettings;
+            final WorldGenSettings generationSettings;
 
             if (this.server.isDemo()) {
                 levelSettings = MinecraftServer.DEMO_SETTINGS;
-                generationSettings = DimensionGeneratorSettings.demoSettings(BootstrapProperties.registries);
+                generationSettings = WorldGenSettings.demoSettings(BootstrapProperties.registries);
             } else {
-                levelSettings = new WorldSettings(directoryName, (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.getGame().registries()),
+                levelSettings = new LevelSettings(directoryName, (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.getGame().registries()),
                         templateBridge.bridge$hardcore().orElse(BootstrapProperties.hardcore), (Difficulty) (Object) BootstrapProperties.difficulty
                         .get(Sponge.getGame().registries()), templateBridge.bridge$commands().orElse(BootstrapProperties.commands), new GameRules(),
                     defaultLevelData.getDataPackConfig());
                 generationSettings = generatorSettings;
             }
 
-            levelData = new ServerWorldInfo(levelSettings, generationSettings, Lifecycle.stable());
+            levelData = new PrimaryLevelData(levelSettings, generationSettings, Lifecycle.stable());
         }
 
         ((ServerWorldInfoBridge) levelData).bridge$populateFromDimension(template);
@@ -366,9 +365,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final boolean isDebugGeneration = levelData.worldGenSettings().isDebug();
         final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
 
-        final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$getProgressListenerFactory().create(11);
+        final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$getProgressListenerFactory().create(11);
 
-        final ServerWorld world = new ServerWorld(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), storageSource, levelData,
+        final ServerLevel world = new ServerLevel(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), storageSource, levelData,
                 registryKey, (DimensionType) worldType, chunkStatusListener, template.generator(), isDebugGeneration, seed, ImmutableList.of(), true);
         this.worlds.put(registryKey, world);
 
@@ -381,13 +380,13 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public CompletableFuture<Boolean> unloadWorld(final ResourceKey key) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
 
-        if (World.OVERWORLD.equals(registryKey)) {
+        if (Level.OVERWORLD.equals(registryKey)) {
             return CompletableFuture.completedFuture(false);
         }
 
-        final ServerWorld world = this.worlds.get(registryKey);
+        final ServerLevel world = this.worlds.get(registryKey);
         if (world == null) {
             return CompletableFuture.completedFuture(false);
         }
@@ -397,9 +396,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public CompletableFuture<Boolean> unloadWorld(final org.spongepowered.api.world.server.ServerWorld world) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(world, "world").getKey());
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(world, "world").getKey());
 
-        if (World.OVERWORLD.equals(registryKey)) {
+        if (Level.OVERWORLD.equals(registryKey)) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -408,7 +407,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
 
         try {
-            this.unloadWorld0((ServerWorld) world);
+            this.unloadWorld0((ServerLevel) world);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
         }
@@ -426,7 +425,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final Path dataPackFile = this.getDataPackFile(Objects.requireNonNull(key, "key"));
         if (Files.exists(dataPackFile)) {
             try {
-                final Dimension template = this.loadTemplate0(SpongeWorldManager.createRegistryKey(key), dataPackFile);
+                final LevelStem template = this.loadTemplate0(SpongeWorldManager.createRegistryKey(key), dataPackFile);
                 ((ResourceKeyBridge) (Object) template).bridge$setKey(key);
                 return CompletableFuture.completedFuture(Optional.of(((DimensionBridge) (Object) template).bridge$asTemplate()));
             } catch (final IOException e) {
@@ -439,9 +438,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public CompletableFuture<Boolean> saveTemplate(final WorldTemplate template) {
-        final Dimension scratch = ((SpongeWorldTemplate) Objects.requireNonNull(template, "template")).asDimension();
+        final LevelStem scratch = ((SpongeWorldTemplate) Objects.requireNonNull(template, "template")).asDimension();
         try {
-            final JsonElement element = SpongeWorldTemplate.DIRECT_CODEC.encodeStart(WorldGenSettingsExport.create(JsonOps.INSTANCE, BootstrapProperties.registries), scratch).getOrThrow(true, s -> { });
+            final JsonElement element = SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), scratch).getOrThrow(true, s -> { });
             final Path dataPackFile = this.getDataPackFile(template.getKey());
             Files.createDirectories(dataPackFile.getParent());
             DataPackSerializer.writeFile(dataPackFile, element);
@@ -454,7 +453,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public CompletableFuture<Optional<ServerWorldProperties>> loadProperties(final ResourceKey key) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
 
         if (this.worlds.get(registryKey) != null) {
             return CompletableFuture.completedFuture(Optional.empty());
@@ -466,32 +465,32 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final boolean isVanillaWorld = this.isVanillaWorld(key);
         final String directoryName = this.getDirectoryName(key);
-        final SaveFormat.LevelSave storageSource;
+        final LevelStorageSource.LevelStorageAccess storageSource;
 
         try {
             if (isVanillaWorld) {
-                storageSource = SaveFormat.createDefault(this.defaultWorldDirectory).createAccess(directoryName);
+                storageSource = LevelStorageSource.createDefault(this.defaultWorldDirectory).createAccess(directoryName);
             } else {
-                storageSource = SaveFormat.createDefault(this.customWorldsDirectory).createAccess(key.getNamespace() + File.separator +
+                storageSource = LevelStorageSource.createDefault(this.customWorldsDirectory).createAccess(key.getNamespace() + File.separator +
                         key.getValue());
             }
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
         }
 
-        final ServerWorldInfo defaultLevelData = (ServerWorldInfo) this.server.getWorldData();
-        final WorldSettings defaultLevelSettings = ((ServerWorldInfoAccessor) defaultLevelData).accessor$settings();
+        final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
+        final LevelSettings defaultLevelSettings = ((PrimaryLevelDataAccessor) defaultLevelData).accessor$settings();
 
-        final IServerConfiguration levelData;
+        final WorldData levelData;
         try {
-            levelData = storageSource.getDataTag((DynamicOps<INBT>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig());
+            levelData = storageSource.getDataTag((DynamicOps<Tag>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig());
         } catch (final Exception ex) {
             return FutureUtil.completedWithException(ex);
         }
 
         return this.loadTemplate(key).thenCompose(r -> {
             r.ifPresent(template -> {
-                final Dimension scratch = ((SpongeWorldTemplate) template).asDimension();
+                final LevelStem scratch = ((SpongeWorldTemplate) template).asDimension();
                 ((ServerWorldInfoBridge) levelData).bridge$populateFromDimension(scratch);
             });
 
@@ -501,7 +500,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public CompletableFuture<Boolean> saveProperties(final ServerWorldProperties properties) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(properties, "properties").getKey());
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(properties, "properties").getKey());
 
         if (this.worlds.get(registryKey) != null) {
             return CompletableFuture.completedFuture(false);
@@ -511,13 +510,13 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final boolean isVanillaWorld = this.isVanillaWorld(key);
         final String directoryName = this.getDirectoryName(key);
-        final SaveFormat.LevelSave storageSource;
+        final LevelStorageSource.LevelStorageAccess storageSource;
 
         try {
             if (isVanillaWorld) {
-                storageSource = SaveFormat.createDefault(this.defaultWorldDirectory).createAccess(directoryName);
+                storageSource = LevelStorageSource.createDefault(this.defaultWorldDirectory).createAccess(directoryName);
             } else {
-                storageSource = SaveFormat.createDefault(this.customWorldsDirectory).createAccess(key.getNamespace() + File.separator +
+                storageSource = LevelStorageSource.createDefault(this.customWorldsDirectory).createAccess(key.getNamespace() + File.separator +
                         key.getValue());
             }
         } catch (final IOException e) {
@@ -525,7 +524,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
 
         try {
-            storageSource.saveDataTag(BootstrapProperties.registries, (IServerConfiguration) properties, null);
+            storageSource.saveDataTag(BootstrapProperties.registries, (WorldData) properties, null);
         } catch (final Exception ex) {
             return FutureUtil.completedWithException(ex);
         }
@@ -534,8 +533,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         return this.loadTemplate(key).thenCompose(r -> {
             final WorldTemplate template = r.orElse(null);
             if (template != null) {
-                final Dimension scratch = ((SpongeWorldTemplate) template).asDimension();
-                ((DimensionBridge) (Object) scratch).bridge$populateFromLevelData((ServerWorldInfo) properties);
+                final LevelStem scratch = ((SpongeWorldTemplate) template).asDimension();
+                ((DimensionBridge) (Object) scratch).bridge$populateFromLevelData((PrimaryLevelData) properties);
 
                 return this.saveTemplate(((DimensionBridge) (Object) scratch).bridge$asTemplate());
             }
@@ -546,10 +545,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public CompletableFuture<Boolean> copyWorld(final ResourceKey key, final ResourceKey copyKey) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
-        final RegistryKey<World> copyRegistryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(copyKey, "copyKey"));
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
+        final net.minecraft.resources.ResourceKey<Level> copyRegistryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(copyKey, "copyKey"));
 
-        if (World.OVERWORLD.equals(copyRegistryKey)) {
+        if (Level.OVERWORLD.equals(copyRegistryKey)) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -561,7 +560,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return CompletableFuture.completedFuture(false);
         }
 
-        final ServerWorld loadedWorld = this.worlds.get(registryKey);
+        final ServerLevel loadedWorld = this.worlds.get(registryKey);
         boolean disableLevelSaving = false;
 
         if (loadedWorld != null) {
@@ -670,9 +669,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public CompletableFuture<Boolean> moveWorld(final ResourceKey key, final ResourceKey movedKey) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
 
-        if (World.OVERWORLD.equals(registryKey)) {
+        if (Level.OVERWORLD.equals(registryKey)) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -684,7 +683,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return CompletableFuture.completedFuture(false);
         }
 
-        final ServerWorld loadedWorld = this.worlds.get(registryKey);
+        final ServerLevel loadedWorld = this.worlds.get(registryKey);
         if (loadedWorld != null) {
             try {
                 this.unloadWorld0(loadedWorld);
@@ -740,9 +739,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public CompletableFuture<Boolean> deleteWorld(final ResourceKey key) {
-        final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
 
-        if (World.OVERWORLD.equals(registryKey)) {
+        if (Level.OVERWORLD.equals(registryKey)) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -750,7 +749,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return CompletableFuture.completedFuture(false);
         }
 
-        final ServerWorld loadedWorld = this.worlds.get(registryKey);
+        final ServerLevel loadedWorld = this.worlds.get(registryKey);
         if (loadedWorld != null) {
             final boolean disableLevelSaving = loadedWorld.noSave;
             loadedWorld.noSave = true;
@@ -797,8 +796,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public void unloadWorld0(final ServerWorld world) throws IOException {
-        final RegistryKey<World> registryKey = world.dimension();
+    public void unloadWorld0(final ServerLevel world) throws IOException {
+        final net.minecraft.resources.ResourceKey<Level> registryKey = world.dimension();
 
         if (world.getPlayers(p -> true).size() != 0) {
             throw new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location()));
@@ -827,11 +826,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public void loadLevel() {
-        final ServerWorldInfo defaultLevelData = (ServerWorldInfo) this.server.getWorldData();
-        final DimensionGeneratorSettings defaultGenerationSettings = defaultLevelData.worldGenSettings();
-        final WorldSettings defaultLevelSettings = ((ServerWorldInfoAccessor) defaultLevelData).accessor$settings();
+        final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
+        final WorldGenSettings defaultGenerationSettings = defaultLevelData.worldGenSettings();
+        final LevelSettings defaultLevelSettings = ((PrimaryLevelDataAccessor) defaultLevelData).accessor$settings();
 
-        final SimpleRegistry<Dimension> templates = defaultGenerationSettings.dimensions();
+        final MappedRegistry<LevelStem> templates = defaultGenerationSettings.dimensions();
 
         final boolean multiworldEnabled = this.server.isSingleplayer() || this.server.isNetherEnabled();
         if (!multiworldEnabled) {
@@ -839,9 +838,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     + "Multi-World support has been disabled and no worlds besides the default world will be loaded.");
         }
 
-        for (final RegistryEntry<Dimension> entry : ((Registry<Dimension>) (Object) templates).streamEntries().collect(Collectors.toList())) {
+        for (final RegistryEntry<LevelStem> entry : ((Registry<LevelStem>) (Object) templates).streamEntries().collect(Collectors.toList())) {
             final ResourceKey worldKey = entry.key();
-            final Dimension template = entry.value();
+            final LevelStem template = entry.value();
             final DimensionBridge templateBridge = (DimensionBridge) (Object) template;
             ((ResourceKeyBridge) templateBridge).bridge$setKey(worldKey);
 
@@ -861,40 +860,40 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             final String directoryName = this.getDirectoryName(worldKey);
             final boolean isVanillaSubLevel = this.isVanillaSubWorld(directoryName);
-            final SaveFormat.LevelSave storageSource;
+            final LevelStorageSource.LevelStorageAccess storageSource;
 
             if (isDefaultWorld) {
                 storageSource = ((MinecraftServerAccessor) this.server).accessor$storageSource();
             } else {
                 try {
                     if (isVanillaSubLevel) {
-                        storageSource = SaveFormat.createDefault(this.defaultWorldDirectory).createAccess(directoryName);
+                        storageSource = LevelStorageSource.createDefault(this.defaultWorldDirectory).createAccess(directoryName);
                     } else {
-                        storageSource = SaveFormat.createDefault(this.customWorldsDirectory).createAccess(worldKey.getNamespace() + File.separator + worldKey.getValue());
+                        storageSource = LevelStorageSource.createDefault(this.customWorldsDirectory).createAccess(worldKey.getNamespace() + File.separator + worldKey.getValue());
                     }
                 } catch (final IOException e) {
                     throw new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e);
                 }
             }
 
-            ServerWorldInfo levelData;
+            PrimaryLevelData levelData;
             final boolean isDebugGeneration;
 
             if (isDefaultWorld) {
                 levelData = defaultLevelData;
                 isDebugGeneration = defaultGenerationSettings.isDebug();
             } else {
-                levelData = (ServerWorldInfo) storageSource
-                        .getDataTag((DynamicOps<INBT>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig());
+                levelData = (PrimaryLevelData) storageSource
+                        .getDataTag((DynamicOps<Tag>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig());
                 if (levelData == null) {
-                    final WorldSettings levelSettings;
-                    final DimensionGeneratorSettings generationSettings;
+                    final LevelSettings levelSettings;
+                    final WorldGenSettings generationSettings;
 
                     if (this.server.isDemo()) {
                         levelSettings = MinecraftServer.DEMO_SETTINGS;
-                        generationSettings = DimensionGeneratorSettings.demoSettings(BootstrapProperties.registries);
+                        generationSettings = WorldGenSettings.demoSettings(BootstrapProperties.registries);
                     } else {
-                        levelSettings = new WorldSettings(directoryName,
+                        levelSettings = new LevelSettings(directoryName,
                                 (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.getGame().registries()),
                                 templateBridge.bridge$hardcore().orElse(BootstrapProperties.hardcore),
                                 (Difficulty) (Object) BootstrapProperties.difficulty.get(Sponge.getGame().registries()),
@@ -904,10 +903,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
                     isDebugGeneration = generationSettings.isDebug();
 
-                    ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$dimensions(new SimpleRegistry<>(
-                            net.minecraft.util.registry.Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()));
+                    ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$dimensions(new MappedRegistry<>(
+                            net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()));
 
-                    levelData = new ServerWorldInfo(levelSettings, generationSettings, Lifecycle.stable());
+                    levelData = new PrimaryLevelData(levelSettings, generationSettings, Lifecycle.stable());
                 } else {
                     isDebugGeneration = levelData.worldGenSettings().isDebug();
                 }
@@ -921,16 +920,16 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().isPresent());
             final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
 
-            final RegistryKey<World> registryKey = SpongeWorldManager.createRegistryKey(worldKey);
-            final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$getProgressListenerFactory().create(11);
-            final List<ISpecialSpawner> spawners;
+            final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(worldKey);
+            final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$getProgressListenerFactory().create(11);
+            final List<CustomSpawner> spawners;
             if (isDefaultWorld) {
                 spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(levelData));
             } else {
                 spawners = ImmutableList.of();
             }
 
-            final ServerWorld world = new ServerWorld(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), storageSource, levelData,
+            final ServerLevel world = new ServerLevel(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), storageSource, levelData,
                     registryKey, (DimensionType) worldType, chunkStatusListener, template.generator(), isDebugGeneration, seed, spawners, true);
             this.worlds.put(registryKey, world);
 
@@ -939,7 +938,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         ((MinecraftServerAccessor) this.server).invoker$forceDifficulty();
 
-        for (final Map.Entry<RegistryKey<World>, ServerWorld> entry : this.worlds.entrySet()) {
+        for (final Map.Entry<net.minecraft.resources.ResourceKey<Level>, ServerLevel> entry : this.worlds.entrySet()) {
             try {
                 this.postWorldLoad(entry.getValue(), true).get();
             } catch (final InterruptedException | ExecutionException e) {
@@ -951,9 +950,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().load();
     }
 
-    private ServerWorld prepareWorld(final ServerWorld world, final boolean isDebugGeneration) {
-        final boolean isDefaultWorld = World.OVERWORLD.equals(world.dimension());
-        final ServerWorldInfo levelData = (ServerWorldInfo) world.getLevelData();
+    private ServerLevel prepareWorld(final ServerLevel world, final boolean isDebugGeneration) {
+        final boolean isDefaultWorld = Level.OVERWORLD.equals(world.dimension());
+        final PrimaryLevelData levelData = (PrimaryLevelData) world.getLevelData();
 
         if (isDefaultWorld) {
             // Initialize scoreboard data. This will hook to the ServerScoreboard, needs to be made multi-world aware
@@ -978,8 +977,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 if (!hasSpawnAlready) {
                     if (isDefaultWorld || ((ServerWorldProperties) world.getLevelData()).performsSpawnLogic()) {
                         MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(), isDebugGeneration, !isDebugGeneration);
-                    } else if (World.END.equals(world.dimension())) {
-                        ((ServerWorldInfo) world.getLevelData()).setSpawn(ServerWorld.END_SPAWN_POINT, 0);
+                    } else if (Level.END.equals(world.dimension())) {
+                        ((PrimaryLevelData) world.getLevelData()).setSpawn(ServerLevel.END_SPAWN_POINT, 0);
                     }
                 } else {
                     Features.BONUS_CHEST.place(world, world.getChunkSource().getGenerator(), world.random, new BlockPos(levelData.getXSpawn(),
@@ -1012,8 +1011,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         return world;
     }
 
-    private CompletableFuture<ServerWorld> postWorldLoad(final ServerWorld world, final boolean blocking) {
-        final ServerWorldInfo levelData = (ServerWorldInfo) world.getLevelData();
+    private CompletableFuture<ServerLevel> postWorldLoad(final ServerLevel world, final boolean blocking) {
+        final PrimaryLevelData levelData = (PrimaryLevelData) world.getLevelData();
         final ServerWorldInfoBridge levelBridge = (ServerWorldInfoBridge) levelData;
         final boolean isDefaultWorld = this.isDefaultWorld((ResourceKey) (Object) world.dimension().location());
         if (isDefaultWorld || levelBridge.bridge$performsSpawnLogic()) {
@@ -1029,11 +1028,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         return CompletableFuture.completedFuture(world); // Chunks are NOT generated AND will not generate unless prompted
     }
 
-    private CompletableFuture<ServerWorld> loadSpawnChunksAsync(final ServerWorld world) {
+    private CompletableFuture<ServerLevel> loadSpawnChunksAsync(final ServerLevel world) {
 
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         final ChunkPos chunkPos = new ChunkPos(spawnPoint);
-        final ServerChunkProvider serverChunkProvider = world.getChunkSource();
+        final ServerChunkCache serverChunkProvider = world.getChunkSource();
         serverChunkProvider.getLightEngine().setTaskPerBatch(500);
 
         final int borderRadius = 11;
@@ -1041,7 +1040,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final int spawnChunks = diameter * diameter;
 
         serverChunkProvider.addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, borderRadius, world.dimension().location());
-        final CompletableFuture<ServerWorld> generationFuture = new CompletableFuture<>();
+        final CompletableFuture<ServerLevel> generationFuture = new CompletableFuture<>();
         Sponge.getAsyncScheduler().submit(
                 Task.builder().plugin(Launch.getInstance().getPlatformPlugin())
                         .execute(task -> {
@@ -1068,12 +1067,12 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         });
     }
 
-    private void loadSpawnChunks(final ServerWorld world) {
+    private void loadSpawnChunks(final ServerLevel world) {
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         final ChunkPos chunkPos = new ChunkPos(spawnPoint);
-        final IChunkStatusListener chunkStatusListener = ((ServerWorldBridge) world).bridge$getChunkStatusListener();
+        final ChunkProgressListener chunkStatusListener = ((ServerWorldBridge) world).bridge$getChunkStatusListener();
         chunkStatusListener.updateSpawnPos(chunkPos);
-        final ServerChunkProvider serverChunkProvider = world.getChunkSource();
+        final ServerChunkCache serverChunkProvider = world.getChunkSource();
         serverChunkProvider.getLightEngine().setTaskPerBatch(500);
         ((MinecraftServerAccessor) this.server).accessor$setNextTickTime(Util.getMillis());
         serverChunkProvider.addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, 11, world.dimension().location());
@@ -1099,8 +1098,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
     }
 
-    private void updateForcedChunks(final ServerWorld world, final ServerChunkProvider serverChunkProvider) {
-        final ForcedChunksSaveData forcedChunksSaveData = world.getDataStorage().get(ForcedChunksSaveData::new, "chunks");
+    private void updateForcedChunks(final ServerLevel world, final ServerChunkCache serverChunkProvider) {
+        final ForcedChunksSavedData forcedChunksSaveData = world.getDataStorage().get(ForcedChunksSavedData::new, "chunks");
         if (forcedChunksSaveData != null) {
             final LongIterator longIterator = forcedChunksSaveData.getChunks().iterator();
 
@@ -1112,15 +1111,15 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
     }
 
-    private Dimension loadTemplate0(final RegistryKey<World> registryKey, final Path file) throws IOException {
+    private LevelStem loadTemplate0(final net.minecraft.resources.ResourceKey<Level> registryKey, final Path file) throws IOException {
         try (final InputStream stream = Files.newInputStream(file); final InputStreamReader reader = new InputStreamReader(stream)) {
             final JsonParser parser = new JsonParser();
             final JsonElement element = parser.parse(reader);
             final SingleTemplateAccess singleTemplateAccess = new SingleTemplateAccess(registryKey, element);
-            final WorldSettingsImport<JsonElement> settingsAdapter = WorldSettingsImport.create(JsonOps.INSTANCE, singleTemplateAccess, (DynamicRegistries.Impl) BootstrapProperties.registries);
-            final SimpleRegistry<Dimension> registry = new SimpleRegistry<>(net.minecraft.util.registry.Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
-            settingsAdapter.decodeElements(registry, net.minecraft.util.registry.Registry.LEVEL_STEM_REGISTRY, Dimension.CODEC);
-            final Dimension template = registry.stream().findAny().orElse(null);
+            final RegistryReadOps<JsonElement> settingsAdapter = RegistryReadOps.create(JsonOps.INSTANCE, singleTemplateAccess, (RegistryAccess.RegistryHolder) BootstrapProperties.registries);
+            final MappedRegistry<LevelStem> registry = new MappedRegistry<>(net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
+            settingsAdapter.decodeElements(registry, net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, LevelStem.CODEC);
+            final LevelStem template = registry.stream().findAny().orElse(null);
             if (template != null) {
                 ((DimensionBridge) (Object) template).bridge$setFromSettings(false);
             }
@@ -1128,18 +1127,18 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
     }
 
-    private static final class SingleTemplateAccess implements WorldSettingsImport.IResourceAccess {
+    private static final class SingleTemplateAccess implements RegistryReadOps.ResourceAccess {
 
-        private final RegistryKey<?> key;
+        private final net.minecraft.resources.ResourceKey<?> key;
         private final JsonElement element;
 
-        public SingleTemplateAccess(final RegistryKey<?> key, final JsonElement element) {
+        public SingleTemplateAccess(final net.minecraft.resources.ResourceKey<?> key, final JsonElement element) {
             this.key = key;
             this.element = element;
         }
 
         @Override
-        public Collection<ResourceLocation> listResources(final RegistryKey<? extends net.minecraft.util.registry.Registry<?>> registryKey) {
+        public Collection<ResourceLocation> listResources(final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<?>> registryKey) {
             if (this.key.isFor(registryKey)) {
                 return Collections.singletonList(new ResourceLocation(this.key.location().getNamespace(),
                         registryKey.location().getPath() + "/" + this.key.location().getPath() + ".json"));
@@ -1148,7 +1147,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
 
         @Override
-        public <E> DataResult<Pair<E, OptionalInt>> parseElement(final DynamicOps<JsonElement> ops, final RegistryKey<? extends net.minecraft.util.registry.Registry<E>> registryKey, final RegistryKey<E> elementKey, final Decoder<E> decoder) {
+        public <E> DataResult<Pair<E, OptionalInt>> parseElement(final DynamicOps<JsonElement> ops, final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<E>> registryKey, final net.minecraft.resources.ResourceKey<E> elementKey, final Decoder<E> decoder) {
             final DataResult<E> result = decoder.parse(ops, this.element);
             return result.map(t -> Pair.of(t, OptionalInt.empty()));
         }

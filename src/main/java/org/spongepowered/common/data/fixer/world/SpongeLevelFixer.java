@@ -32,7 +32,7 @@ import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.List;
-import net.minecraft.util.datafix.TypeReferences;
+import net.minecraft.util.datafix.fixes.References;
 import org.spongepowered.common.util.Constants;
 
 public final class SpongeLevelFixer extends DataFix {
@@ -42,7 +42,7 @@ public final class SpongeLevelFixer extends DataFix {
     }
 
     public TypeRewriteRule makeRule() {
-        final Type<?> levelType = this.getOutputSchema().getType(TypeReferences.LEVEL);
+        final Type<?> levelType = this.getOutputSchema().getType(References.LEVEL);
         return TypeRewriteRule.seq(
                 this.fixTypeEverywhereTyped("FixWorldUniqueId", levelType, SpongeLevelFixer::updateUUIDIn),
                 this.fixTypeEverywhereTyped("FixPlayerIdTable", levelType, type -> this.fixPlayerIdTable(type, levelType))

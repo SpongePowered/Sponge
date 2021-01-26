@@ -25,7 +25,6 @@
 package org.spongepowered.common.service.server.permission;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.command.ICommandSource;
 import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;

@@ -24,29 +24,29 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.potion.EffectInstance;
 import org.spongepowered.api.effect.potion.PotionEffect;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.minecraft.world.effect.MobEffectInstance;
 
 public final class PotionEffectUtil {
 
-    public static EffectInstance copy(final EffectInstance instance) {
-        return new EffectInstance(instance.getEffect(), instance.getDuration(), instance.getAmplifier(),
+    public static MobEffectInstance copy(final MobEffectInstance instance) {
+        return new MobEffectInstance(instance.getEffect(), instance.getDuration(), instance.getAmplifier(),
                 instance.isAmbient(), instance.isVisible(), instance.showIcon());
     }
 
-    public static EffectInstance copyAsEffectInstance(final PotionEffect instance) {
-        return PotionEffectUtil.copy((EffectInstance) instance);
+    public static MobEffectInstance copyAsEffectInstance(final PotionEffect instance) {
+        return PotionEffectUtil.copy((MobEffectInstance) instance);
     }
 
-    public static List<EffectInstance> copyAsEffectInstances(final Collection<PotionEffect> effects) {
-        return effects.stream().map(effect -> PotionEffectUtil.copy((EffectInstance) effect)).collect(Collectors.toList());
+    public static List<MobEffectInstance> copyAsEffectInstances(final Collection<PotionEffect> effects) {
+        return effects.stream().map(effect -> PotionEffectUtil.copy((MobEffectInstance) effect)).collect(Collectors.toList());
     }
 
-    public static List<PotionEffect> copyAsPotionEffects(final Collection<EffectInstance> effects) {
+    public static List<PotionEffect> copyAsPotionEffects(final Collection<MobEffectInstance> effects) {
         return effects.stream().map(effect -> (PotionEffect) PotionEffectUtil.copy(effect)).collect(Collectors.toList());
     }
 

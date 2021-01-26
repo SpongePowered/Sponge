@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
-import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.value.Value;
@@ -40,6 +39,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 @SuppressWarnings("unchecked")
 public final class KeyValueMatcherQuery<T> extends SpongeQuery {
@@ -63,10 +63,10 @@ public final class KeyValueMatcherQuery<T> extends SpongeQuery {
     }
 
     private Map<Lens, Integer> search(final Inventory inventory, final Lens lens) {
-        if (inventory instanceof Container) {
+        if (inventory instanceof AbstractContainerMenu) {
             final Map<Lens, Integer> matches = new LinkedHashMap<>();
             // Search for Container Slot properties
-            for (final net.minecraft.inventory.container.Slot slot : ((Container) inventory).slots) {
+            for (final net.minecraft.world.inventory.Slot slot : ((AbstractContainerMenu) inventory).slots) {
                 if (this.matches(null, null, (Inventory) slot)) {
                     matches.put(((InventoryAdapter)slot).inventoryAdapter$getRootLens(), 0);
                 }

@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.tileentity.CommandBlockTileEntity;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.tileentity.CommandBlockLogicAccessor;
+import org.spongepowered.common.accessor.world.level.BaseCommandBlockAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,20 +39,20 @@ public final class CommandBlockData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(CommandBlockTileEntity.class)
+                .asMutable(CommandBlockEntity.class)
                     .create(Keys.COMMAND)
                         .get(h -> h.getCommandBlock().getCommand())
-                        .set((h, v) -> ((CommandBlockLogicAccessor) h.getCommandBlock()).accessor$command(v))
+                        .set((h, v) -> ((BaseCommandBlockAccessor) h.getCommandBlock()).accessor$command(v))
                     .create(Keys.LAST_COMMAND_OUTPUT)
                         .get(h -> {
-                            final ITextComponent component = ((CommandBlockLogicAccessor) h.getCommandBlock()).accessor$lastOutput();
+                            final Component component = ((BaseCommandBlockAccessor) h.getCommandBlock()).accessor$lastOutput();
                             return component == null ? null : SpongeAdventure.asAdventure(component);
                         })
                         .set((h, v) -> h.getCommandBlock().setLastOutput(SpongeAdventure.asVanilla(v)))
                         .delete(h -> h.getCommandBlock().setLastOutput(null))
                     .create(Keys.SUCCESS_COUNT)
                         .get(h -> h.getCommandBlock().getSuccessCount())
-                        .set((h, v) -> ((CommandBlockLogicAccessor) h.getCommandBlock()).accessor$successCount(v))
+                        .set((h, v) -> ((BaseCommandBlockAccessor) h.getCommandBlock()).accessor$successCount(v))
                     .create(Keys.TRACKS_OUTPUT)
                         .get(h -> h.getCommandBlock().acceptsFailure())
                         .set((h, v) -> h.getCommandBlock().setTrackOutput(v));

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.hooks;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public interface WorldHooks {
@@ -34,7 +34,7 @@ public interface WorldHooks {
         return null;
     }
 
-    default boolean isRestoringBlocks(final World world) {
+    default boolean isRestoringBlocks(final Level world) {
         return PhaseTracker.getInstance().getPhaseContext().isRestoring();
     }
 }

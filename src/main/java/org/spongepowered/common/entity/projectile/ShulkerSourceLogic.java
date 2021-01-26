@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.entity.projectile;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.monster.ShulkerEntity;
-import net.minecraft.entity.projectile.ShulkerBulletEntity;
-import net.minecraft.util.SoundEvents;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.golem.Shulker;
 import org.spongepowered.api.entity.projectile.Projectile;
 
 import java.util.Optional;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ShulkerBullet;
 
 public final class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> {
 
@@ -42,9 +41,9 @@ public final class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> 
     public <P extends Projectile> Optional<P> launch(final ProjectileLogic<P> logic, final Shulker source,
             final EntityType<P> projectileType, final Object... args) {
         if (projectileType == EntityTypes.SHULKER_BULLET.get() && args.length == 1 && args[0] instanceof Entity) {
-            final ShulkerEntity shulker = (ShulkerEntity) source;
-            final ShulkerBulletEntity bullet =
-                    new ShulkerBulletEntity(shulker.level, shulker, (Entity) args[0], shulker.getAttachFace().getAxis());
+            final net.minecraft.world.entity.monster.Shulker shulker = (net.minecraft.world.entity.monster.Shulker) source;
+            final ShulkerBullet bullet =
+                    new ShulkerBullet(shulker.level, shulker, (Entity) args[0], shulker.getAttachFace().getAxis());
             shulker.level.addFreshEntity(bullet);
             shulker.playSound(SoundEvents.SHULKER_SHOOT,
                     2.0F, (shulker.level.random.nextFloat() - shulker.level.random.nextFloat()) * 0.2F + 1.0F);

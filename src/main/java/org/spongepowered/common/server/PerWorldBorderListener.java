@@ -24,42 +24,42 @@
  */
 package org.spongepowered.common.server;
 
-import net.minecraft.network.play.server.SWorldBorderPacket;
-import net.minecraft.world.border.IBorderListener;
-import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.border.BorderChangeListener;
+import net.minecraft.world.level.border.WorldBorder;
 
-public final class PerWorldBorderListener implements IBorderListener {
+public final class PerWorldBorderListener implements BorderChangeListener {
 
-    private final ServerWorld world;
+    private final ServerLevel world;
 
-    public PerWorldBorderListener(ServerWorld world) {
+    public PerWorldBorderListener(ServerLevel world) {
         this.world = world;
     }
 
     @Override
     public void onBorderSizeSet(final WorldBorder border, final double newSize) {
-        this.sendWorldBorderActionPacket(border, SWorldBorderPacket.Action.SET_SIZE);
+        this.sendWorldBorderActionPacket(border, ClientboundSetBorderPacket.Type.SET_SIZE);
     }
 
     @Override
     public void onBorderSizeLerping(final WorldBorder border, final double oldSize, final double newSize, final long time) {
-        this.sendWorldBorderActionPacket(border, SWorldBorderPacket.Action.LERP_SIZE);
+        this.sendWorldBorderActionPacket(border, ClientboundSetBorderPacket.Type.LERP_SIZE);
     }
 
     @Override
     public void onBorderCenterSet(final WorldBorder border, final double x, final double z) {
-        this.sendWorldBorderActionPacket(border, SWorldBorderPacket.Action.SET_CENTER);
+        this.sendWorldBorderActionPacket(border, ClientboundSetBorderPacket.Type.SET_CENTER);
     }
 
     @Override
     public void onBorderSetWarningTime(final WorldBorder border, final int newTime) {
-        this.sendWorldBorderActionPacket(border, SWorldBorderPacket.Action.SET_WARNING_TIME);
+        this.sendWorldBorderActionPacket(border, ClientboundSetBorderPacket.Type.SET_WARNING_TIME);
     }
 
     @Override
     public void onBorderSetWarningBlocks(final WorldBorder border, final int newDistance) {
-        this.sendWorldBorderActionPacket(border, SWorldBorderPacket.Action.SET_WARNING_BLOCKS);
+        this.sendWorldBorderActionPacket(border, ClientboundSetBorderPacket.Type.SET_WARNING_BLOCKS);
     }
 
     @Override
@@ -70,8 +70,8 @@ public final class PerWorldBorderListener implements IBorderListener {
     public void onBorderSetDamageSafeZOne(final WorldBorder border, final double newSize) {
     }
 
-    private void sendWorldBorderActionPacket(final WorldBorder border, final SWorldBorderPacket.Action action) {
-        final SWorldBorderPacket packet = new SWorldBorderPacket(border, action);
+    private void sendWorldBorderActionPacket(final WorldBorder border, final ClientboundSetBorderPacket.Type action) {
+        final ClientboundSetBorderPacket packet = new ClientboundSetBorderPacket(border, action);
         this.world.players().forEach(player -> player.connection.send(packet));
     }
 }

@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import java.util.Objects;
 
 @SuppressWarnings("unchecked")
 public abstract class GenerationContext<G extends GenerationContext<G>> extends PhaseContext<G> {
 
-    @Nullable private ServerWorld world;
+    @Nullable private ServerLevel world;
     @Nullable private ChunkGenerator generator;
 
     GenerationContext(final IPhaseState<G> state, final PhaseTracker tracker) {
@@ -51,12 +51,12 @@ public abstract class GenerationContext<G extends GenerationContext<G>> extends 
         this.generator = null;
     }
 
-    public final G world(final ServerWorld world) {
+    public final G world(final ServerLevel world) {
         this.world = Objects.requireNonNull(world);
         return (G) this;
     }
 
-    public final ServerWorld getWorld() {
+    public final ServerLevel getWorld() {
         return Objects.requireNonNull(this.world);
     }
 

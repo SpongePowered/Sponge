@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.bridge.entity.projectile;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface FireballEntityBridge {
 
     @Nullable
-    Explosion bridge$throwExplosionEventAndExplode(World worldObj, @Nullable Entity nil,
-        double x, double y, double z, float strength, boolean flaming, Explosion.Mode mode);
+    Explosion bridge$throwExplosionEventAndExplode(Level worldObj, @Nullable Entity nil,
+        double x, double y, double z, float strength, boolean flaming, Explosion.BlockInteraction mode);
 }

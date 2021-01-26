@@ -24,13 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.brain.Brain;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
@@ -57,28 +50,33 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 @Mixin(value = LivingEntity.class)
 public abstract class LivingEntityMixin_Inventory {
 
     // @formatter:off
-    @Shadow public abstract void shadow$setItemSlot(EquipmentSlotType slotIn, ItemStack stack);
-    @Shadow protected abstract ItemStack shadow$getLastHandItem(EquipmentSlotType p_241347_1_);
-    @Shadow protected abstract ItemStack shadow$getLastArmorItem(EquipmentSlotType p_241346_1_);
+    @Shadow public abstract void shadow$setItemSlot(EquipmentSlot slotIn, ItemStack stack);
+    @Shadow protected abstract ItemStack shadow$getLastHandItem(EquipmentSlot p_241347_1_);
+    @Shadow protected abstract ItemStack shadow$getLastArmorItem(EquipmentSlot p_241346_1_);
     // @formatter:on
 
-    private final EnumMap<EquipmentSlotType, SlotLens> impl$slotLens = new EnumMap<>(EquipmentSlotType.class);
+    private final EnumMap<EquipmentSlot, SlotLens> impl$slotLens = new EnumMap<>(EquipmentSlot.class);
 
     @Inject(method = "handleHandSwap", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerChunkProvider;broadcast(Lnet/minecraft/entity/Entity;Lnet/minecraft/network/IPacket;)V"))
-    private void inventory$onHandleHandSwap(Map<EquipmentSlotType, ItemStack> map, CallbackInfo ci) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerChunkCache;broadcast(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/network/protocol/Packet;)V"))
+    private void inventory$onHandleHandSwap(Map<EquipmentSlot, ItemStack> map, CallbackInfo ci) {
         if (this instanceof ServerPlayer) {
             return; // For players ChangeInventoryEvent.SwapHand is called somewhere else
         }
-        final SlotAdapter mainHand = this.impl$getSpongeSlot(EquipmentSlotType.MAINHAND);
-        final boolean customMainHand = this.impl$throwEquipmentEvent(EquipmentSlotType.MAINHAND, mainHand, map.get(EquipmentSlotType.MAINHAND), this.shadow$getLastHandItem(EquipmentSlotType.MAINHAND));
-        final SlotAdapter offHand = this.impl$getSpongeSlot(EquipmentSlotType.OFFHAND);
-        final boolean customOffHand = this.impl$throwEquipmentEvent(EquipmentSlotType.OFFHAND, offHand, map.get(EquipmentSlotType.OFFHAND), this.shadow$getLastHandItem(EquipmentSlotType.OFFHAND));
+        final SlotAdapter mainHand = this.impl$getSpongeSlot(EquipmentSlot.MAINHAND);
+        final boolean customMainHand = this.impl$throwEquipmentEvent(EquipmentSlot.MAINHAND, mainHand, map.get(EquipmentSlot.MAINHAND), this.shadow$getLastHandItem(EquipmentSlot.MAINHAND));
+        final SlotAdapter offHand = this.impl$getSpongeSlot(EquipmentSlot.OFFHAND);
+        final boolean customOffHand = this.impl$throwEquipmentEvent(EquipmentSlot.OFFHAND, offHand, map.get(EquipmentSlot.OFFHAND), this.shadow$getLastHandItem(EquipmentSlot.OFFHAND));
         if (customMainHand || customOffHand) {
             ci.cancel(); // If canceled or customized let handleEquipmentChanges send packets instead
         }
@@ -86,8 +84,8 @@ public abstract class LivingEntityMixin_Inventory {
 
     @Inject(method = "handleEquipmentChanges",
             at = @At(value = "INVOKE", target = "Ljava/util/Map;forEach(Ljava/util/function/BiConsumer;)V"))
-    private void inventory$onHandleEquipmentChanges(Map<EquipmentSlotType, ItemStack> map, CallbackInfo ci) {
-        if ((Object) this instanceof PlayerEntity && ((Entity) (Object) this).tickCount == 1) {
+    private void inventory$onHandleEquipmentChanges(Map<EquipmentSlot, ItemStack> map, CallbackInfo ci) {
+        if ((Object) this instanceof Player && ((Entity) (Object) this).tickCount == 1) {
             // Ignore Equipment on player spawn/respawn
             return;
         }
@@ -106,7 +104,7 @@ public abstract class LivingEntityMixin_Inventory {
         });
     }
 
-    private boolean impl$throwEquipmentEvent(EquipmentSlotType equipmentslottype, SlotAdapter slot, ItemStack newStack, ItemStack oldStack) {
+    private boolean impl$throwEquipmentEvent(EquipmentSlot equipmentslottype, SlotAdapter slot, ItemStack newStack, ItemStack oldStack) {
         final ChangeEntityEquipmentEvent event = InventoryEventFactory.callChangeEntityEquipmentEvent((LivingEntity) (Object) this,
                 ItemStackUtil.snapshotOf(oldStack), ItemStackUtil.snapshotOf(newStack), slot);
         if (event.isCancelled()) {
@@ -127,11 +125,11 @@ public abstract class LivingEntityMixin_Inventory {
         return false;
     }
 
-    private SlotAdapter impl$getSpongeSlot(EquipmentSlotType equipmentslottype) {
+    private SlotAdapter impl$getSpongeSlot(EquipmentSlot equipmentslottype) {
         final Inventory slotAdapter;
-        if (((Object) this) instanceof ServerPlayerEntity) {
+        if (((Object) this) instanceof net.minecraft.server.level.ServerPlayer) {
             final SlotLens slotLens;
-            final PlayerInventoryBridge inventory = (PlayerInventoryBridge) ((ServerPlayerEntity) (Object) this).inventory;
+            final PlayerInventoryBridge inventory = (PlayerInventoryBridge) ((net.minecraft.server.level.ServerPlayer) (Object) this).inventory;
             final Lens inventoryLens = ((InventoryAdapter) inventory).inventoryAdapter$getRootLens();
             final Fabric fabric = ((InventoryAdapter) inventory).inventoryAdapter$getFabric();
             if (inventoryLens instanceof PlayerInventoryLens) {
@@ -153,7 +151,7 @@ public abstract class LivingEntityMixin_Inventory {
             slotAdapter = slotLens.getAdapter(fabric, (Inventory) inventory);
         } else {
             if (this.impl$slotLens.isEmpty()) {
-                for (final EquipmentSlotType slot : EquipmentSlotType.values()) {
+                for (final EquipmentSlot slot : EquipmentSlot.values()) {
                     this.impl$slotLens.put(slot, new BasicSlotLens(slot.getIndex()));
                 }
             }

@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.world.entity.projectile.FishingHook;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.accessor.entity.projectile.FishingBobberEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.projectile.FishingHookAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class FishingBobberData {
@@ -38,10 +38,10 @@ public final class FishingBobberData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(FishingBobberEntity.class)
+                .asMutable(FishingHook.class)
                     .create(Keys.TARGET_ENTITY)
                         .get(h -> (Entity) h.getHookedIn())
-                        .set((h, v) -> ((FishingBobberEntityAccessor) h).accessor$hookedIn((net.minecraft.entity.Entity) v));
+                        .set((h, v) -> ((FishingHookAccessor) h).accessor$hookedIn((net.minecraft.world.entity.Entity) v));
     }
     // @formatter:on
 }

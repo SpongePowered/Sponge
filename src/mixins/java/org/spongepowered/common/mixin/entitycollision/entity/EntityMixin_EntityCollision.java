@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.entitycollision.entity;
 
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -45,19 +45,19 @@ import org.spongepowered.common.config.inheritable.EntityCollisionCategory;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 
-@Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
+@Mixin(value = net.minecraft.world.entity.Entity.class, priority = 1002)
 public abstract class EntityMixin_EntityCollision implements CollisionCapabilityBridge {
 
-    @Shadow public abstract net.minecraft.world.World shadow$getCommandSenderWorld();
+    @Shadow public abstract net.minecraft.world.level.Level shadow$getCommandSenderWorld();
 
     private ResourceKey entityCollision$key;
     private int entityCollision$maxCollisions = 8;
     private boolean entityCollision$refreshCache = false;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void collisions$InjectActivationInformation(net.minecraft.entity.EntityType<?> type, net.minecraft.world.World world, CallbackInfo ci) {
+    private void collisions$InjectActivationInformation(net.minecraft.world.entity.EntityType<?> type, net.minecraft.world.level.Level world, CallbackInfo ci) {
         if (world != null && !((WorldBridge) world).bridge$isFake() && ((ServerWorldInfoBridge) world.getLevelData()).bridge$valid()) {
-            if ((net.minecraft.entity.Entity) (Object) this instanceof ItemEntity) {
+            if ((net.minecraft.world.entity.Entity) (Object) this instanceof ItemEntity) {
                 final ItemEntity item = (ItemEntity) (Object) this;
                 final ItemStack itemstack = item.getItem();
                 if (!itemstack.isEmpty()) {
@@ -89,7 +89,7 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
     }
 
     @Override
-    public void collision$initializeCollisionState(final net.minecraft.world.World world) {
+    public void collision$initializeCollisionState(final net.minecraft.world.level.Level world) {
         final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((ServerWorldInfoBridge) world.getLevelData()).bridge$configAdapter();
         final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
         final EntityCollisionCategory.ModSubCategory worldCollMod =
@@ -117,7 +117,7 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
             }
 
             Integer entityMaxCollision = null;
-            if ((net.minecraft.entity.Entity) (Object) this instanceof ItemEntity) {
+            if ((net.minecraft.world.entity.Entity) (Object) this instanceof ItemEntity) {
                 // check if all items are overridden
                 entityMaxCollision = worldCollMod.entities.get(this.entityCollision$key.getValue());
             }

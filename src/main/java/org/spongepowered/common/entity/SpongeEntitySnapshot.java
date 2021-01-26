@@ -25,7 +25,6 @@
 package org.spongepowered.common.entity;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -58,6 +57,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
 
 public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableDataHolder<EntitySnapshot>, DataContainerHolder.Immutable<EntitySnapshot> {
 
@@ -67,7 +67,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     private final Vector3d position;
     private final Vector3d rotation;
     private final Vector3d scale;
-    @Nullable private final CompoundNBT compound;
+    @Nullable private final CompoundTag compound;
     @Nullable private final WeakReference<Entity> entityReference;
 
     SpongeEntitySnapshot(final SpongeEntitySnapshotBuilder builder) {
@@ -128,7 +128,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @Override
     public DataContainer toContainer() {
-        final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(this.compound == null ? new CompoundNBT() : this.compound);
+        final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(this.compound == null ? new CompoundTag() : this.compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Queries.WORLD_KEY, this.worldKey.getFormatted())
@@ -147,7 +147,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
                 .set(Queries.POSITION_Y, this.scale.getY())
                 .set(Queries.POSITION_Z, this.scale.getZ())
                 .getContainer()
-                .set(Constants.Entity.TYPE, net.minecraft.entity.EntityType.getKey((net.minecraft.entity.EntityType<?>) this.entityType))
+                .set(Constants.Entity.TYPE, net.minecraft.world.entity.EntityType.getKey((net.minecraft.world.entity.EntityType<?>) this.entityType))
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
 
         if (this.uniqueId != null) {
@@ -188,7 +188,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
         final SpongeEntitySnapshotBuilder builder = this.createBuilder();
         builder.position = location.getPosition();
         builder.worldKey = location.getWorld().getKey();
-        builder.compound = new CompoundNBT();
+        builder.compound = new CompoundTag();
         return builder.build();
     }
 
@@ -199,7 +199,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
                 .scale(this.scale);
     }
 
-    public Optional<CompoundNBT> getCompound() {
+    public Optional<CompoundTag> getCompound() {
         if (this.compound == null) {
             return Optional.empty();
         }
@@ -228,7 +228,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
             final Entity newEntity = world.get().createEntity(this.getType(), this.position);
             if (newEntity != null) {
-                final net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
+                final net.minecraft.world.entity.Entity nmsEntity = (net.minecraft.world.entity.Entity) newEntity;
                 if (this.compound != null) {
                     nmsEntity.load(this.compound);
                 }

@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.client.CPlayerDiggingPacket;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
@@ -38,7 +34,7 @@ import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -48,6 +44,10 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 
 public final class InteractionPacketState extends PacketState<InteractionPacketContext> {
@@ -64,7 +64,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final InteractionPacketContext context) {
+    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final InteractionPacketContext context) {
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getMainHandItem());
         if (stack != null) {
             context.itemUsed(stack);
@@ -73,7 +73,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         if (itemInUse != null) {
             context.activeItem(itemInUse);
         }
-        final BlockPos target = ((CPlayerDiggingPacket) packet).getPos();
+        final BlockPos target = ((ServerboundPlayerActionPacket) packet).getPos();
         if (!playerMP.level.isLoaded(target)) {
             context.targetBlock(BlockSnapshot.empty());
         } else {
@@ -96,14 +96,14 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     @Override
     public void unwind(final InteractionPacketContext phaseContext) {
 
-        final ServerPlayerEntity player = phaseContext.getPacketPlayer();
+        final ServerPlayer player = phaseContext.getPacketPlayer();
         final ItemStack usedStack = phaseContext.getItemUsed();
         final HandType usedHand = phaseContext.getHandUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = (Entity) player;
         final BlockSnapshot targetBlock = phaseContext.getTargetBlock();
         
-        final net.minecraft.item.ItemStack endActiveItem = player.getUseItem();
+        final net.minecraft.world.item.ItemStack endActiveItem = player.getUseItem();
         ((LivingEntityAccessor) player).accessor$useItem(ItemStackUtil.toNative(phaseContext.getActiveItem()));
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {

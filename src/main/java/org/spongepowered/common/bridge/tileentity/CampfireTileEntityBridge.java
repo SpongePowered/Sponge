@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.tileentity;
 
-import net.minecraft.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 
 public interface CampfireTileEntityBridge {
 

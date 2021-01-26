@@ -24,13 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -47,26 +40,33 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 
 public final class ChunkPipeline implements BlockPipeline {
 
-    private final @Nullable Supplier<Chunk> chunkSupplier;
-    private final @Nullable Supplier<ServerWorld> serverWorld;
-    private final @Nullable Supplier<ChunkSection> sectionSupplier;
+    private final @Nullable Supplier<LevelChunk> chunkSupplier;
+    private final @Nullable Supplier<ServerLevel> serverWorld;
+    private final @Nullable Supplier<LevelChunkSection> sectionSupplier;
     private final boolean wasEmpty;
     private final List<ResultingTransactionBySideEffect> chunkEffects;
     final ChangeBlock transaction;
 
-    public static ChunkPipeline nullReturn(final Chunk chunk, final ServerWorld world) {
+    public static ChunkPipeline nullReturn(final LevelChunk chunk, final ServerLevel world) {
         return new ChunkPipeline(chunk, world);
     }
 
-    private ChunkPipeline(final Chunk chunk, final ServerWorld world) {
-        final WeakReference<Chunk> chunkWeakReference = new WeakReference<>(chunk);
+    private ChunkPipeline(final LevelChunk chunk, final ServerLevel world) {
+        final WeakReference<LevelChunk> chunkWeakReference = new WeakReference<>(chunk);
         this.chunkSupplier = () -> chunkWeakReference.get();
-        final WeakReference<ServerWorld> serverWorldWeakReference = new WeakReference<>(world);
+        final WeakReference<ServerLevel> serverWorldWeakReference = new WeakReference<>(world);
         this.serverWorld = () -> serverWorldWeakReference.get();
-        this.sectionSupplier = () -> Chunk.EMPTY_SECTION;
+        this.sectionSupplier = () -> LevelChunk.EMPTY_SECTION;
         this.wasEmpty = true;
         this.chunkEffects = Collections.emptyList();
         this.transaction = null;
@@ -81,7 +81,7 @@ public final class ChunkPipeline implements BlockPipeline {
         this.transaction = builder.transaction;
     }
 
-    public Supplier<Chunk> getChunkSupplier() {
+    public Supplier<LevelChunk> getChunkSupplier() {
         return this.chunkSupplier;
     }
 
@@ -89,17 +89,17 @@ public final class ChunkPipeline implements BlockPipeline {
         return this.chunkEffects;
     }
 
-    public ServerWorld getServerWorld() {
+    public ServerLevel getServerWorld() {
         return Objects.requireNonNull(this.serverWorld, "ServerWorld Supplier is null in ChunkPipeline").get();
     }
 
     @Override
-    public Chunk getAffectedChunk() {
+    public LevelChunk getAffectedChunk() {
         return Objects.requireNonNull(this.chunkSupplier, "Chunk Supplier is null in ChunkPipeline").get();
     }
 
     @Override
-    public ChunkSection getAffectedSection() {
+    public LevelChunkSection getAffectedSection() {
         return Objects.requireNonNull(this.sectionSupplier, "ChunkSection Supplier is null in ChunkPipeline").get();
     }
 
@@ -111,10 +111,10 @@ public final class ChunkPipeline implements BlockPipeline {
         if (this.chunkEffects.isEmpty()) {
             return null;
         }
-        final ServerWorld serverWorld = this.serverWorld.get();
+        final ServerLevel serverWorld = this.serverWorld.get();
         final int oldOpacity = currentState.getLightBlock(serverWorld, pos);
         final SpongeBlockChangeFlag flag = this.transaction.getBlockChangeFlag();
-        final @Nullable TileEntity existing = this.chunkSupplier.get().getBlockEntity(pos, Chunk.CreateEntityType.CHECK);
+        final @Nullable BlockEntity existing = this.chunkSupplier.get().getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
         PipelineCursor formerState = new PipelineCursor(currentState, oldOpacity, pos, existing, (Entity) null, limit);
 
         for (final ResultingTransactionBySideEffect effect : this.chunkEffects) {
@@ -148,9 +148,9 @@ public final class ChunkPipeline implements BlockPipeline {
 
     public static final class Builder {
 
-        @Nullable Supplier<ServerWorld> serverWorld;
-        @Nullable Supplier<Chunk> chunkSupplier;
-        @Nullable Supplier<ChunkSection> sectionSupplier;
+        @Nullable Supplier<ServerLevel> serverWorld;
+        @Nullable Supplier<LevelChunk> chunkSupplier;
+        @Nullable Supplier<LevelChunkSection> sectionSupplier;
         boolean wasSectionEmpty;
         @MonotonicNonNull ChangeBlock transaction;
         List<ResultingTransactionBySideEffect> effects;
@@ -167,10 +167,10 @@ public final class ChunkPipeline implements BlockPipeline {
             return this;
         }
 
-        public Builder chunk(final Chunk chunk) {
-            final WeakReference<Chunk> worldRef = new WeakReference<>(chunk);
+        public Builder chunk(final LevelChunk chunk) {
+            final WeakReference<LevelChunk> worldRef = new WeakReference<>(chunk);
             this.chunkSupplier = () -> {
-                final Chunk chunkRef = worldRef.get();
+                final LevelChunk chunkRef = worldRef.get();
                 if (chunkRef == null) {
                     throw new IllegalStateException("ServerWorld dereferenced");
                 }
@@ -179,10 +179,10 @@ public final class ChunkPipeline implements BlockPipeline {
             return this;
         }
 
-        public Builder chunkSection(final ChunkSection section) {
-            final WeakReference<ChunkSection> worldRef = new WeakReference<>(section);
+        public Builder chunkSection(final LevelChunkSection section) {
+            final WeakReference<LevelChunkSection> worldRef = new WeakReference<>(section);
             this.sectionSupplier = () -> {
-                final ChunkSection chunkRef = worldRef.get();
+                final LevelChunkSection chunkRef = worldRef.get();
                 if (chunkRef == null) {
                     throw new IllegalStateException("ServerWorld dereferenced");
                 }
@@ -192,10 +192,10 @@ public final class ChunkPipeline implements BlockPipeline {
             return this;
         }
 
-        public Builder world(final ServerWorld world) {
-            final WeakReference<ServerWorld> worldRef = new WeakReference<>(world);
+        public Builder world(final ServerLevel world) {
+            final WeakReference<ServerLevel> worldRef = new WeakReference<>(world);
             this.serverWorld = () -> {
-                final ServerWorld serverWorld = worldRef.get();
+                final ServerLevel serverWorld = worldRef.get();
                 if (serverWorld == null) {
                     throw new IllegalStateException("ServerWorld dereferenced");
                 }

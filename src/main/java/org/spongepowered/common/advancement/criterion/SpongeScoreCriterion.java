@@ -25,7 +25,7 @@
 package org.spongepowered.common.advancement.criterion;
 
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.ICriterionInstance;
+import net.minecraft.advancements.CriterionTriggerInstance;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
@@ -44,11 +44,11 @@ public class SpongeScoreCriterion implements ScoreAdvancementCriterion, Defaulte
     public final List<DefaultedAdvancementCriterion> internalCriteria;
 
     @SuppressWarnings("ConstantConditions")
-    public SpongeScoreCriterion(final String name, final int goal, @Nullable final ICriterionInstance trigger) {
+    public SpongeScoreCriterion(final String name, final int goal, @Nullable final CriterionTriggerInstance trigger) {
         this.internalCriteria = new ArrayList<>(goal);
         this.name = name;
         for (int i = 0; i < goal; i++) {
-            final ICriterionInstance mctrigger;
+            final CriterionTriggerInstance mctrigger;
             if (i == 0) {
                 mctrigger = trigger == null ? SpongeScoreTrigger.Instance.of(goal) : trigger;
             } else {

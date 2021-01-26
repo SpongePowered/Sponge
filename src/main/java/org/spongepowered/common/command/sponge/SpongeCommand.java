@@ -32,7 +32,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
@@ -430,7 +430,7 @@ public class SpongeCommand {
     }
 
     private TextComponent.Builder appendTickTime(final long[] tickTimes, final TextComponent.Builder builder) {
-        final double averageTickTime = MathHelper.average(tickTimes) * 1.0E-6D;
+        final double averageTickTime = Mth.average(tickTimes) * 1.0E-6D;
         builder.append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (averageTickTime), 20)), NamedTextColor.LIGHT_PURPLE))
                 .append(Component.text(", Mean: "))
                 .append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime) + "ms", NamedTextColor.RED));

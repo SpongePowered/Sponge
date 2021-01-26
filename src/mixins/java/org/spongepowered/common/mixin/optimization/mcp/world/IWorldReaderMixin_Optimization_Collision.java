@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.mixin.optimization.mcp.world;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.gen.WorldGenRegion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.stream.Stream;
+import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
-@Mixin(value = IWorldReader.class, priority = 1500)
-public interface IWorldReaderMixin_Optimization_Collision extends IBlockReader {
+@Mixin(value = LevelReader.class, priority = 1500)
+public interface IWorldReaderMixin_Optimization_Collision extends BlockGetter {
 
     @Shadow @Deprecated boolean shadow$hasChunksAt(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
 
@@ -46,13 +46,13 @@ public interface IWorldReaderMixin_Optimization_Collision extends IBlockReader {
      * @reason Do not check for chunks if we are dealing with a live world
      */
     @Overwrite
-    default Stream<BlockState> getBlockStatesIfLoaded(AxisAlignedBB p_234939_1_) {
-        int i = MathHelper.floor(p_234939_1_.minX);
-        int j = MathHelper.floor(p_234939_1_.maxX);
-        int k = MathHelper.floor(p_234939_1_.minY);
-        int l = MathHelper.floor(p_234939_1_.maxY);
-        int i1 = MathHelper.floor(p_234939_1_.minZ);
-        int j1 = MathHelper.floor(p_234939_1_.maxZ);
+    default Stream<BlockState> getBlockStatesIfLoaded(AABB p_234939_1_) {
+        int i = Mth.floor(p_234939_1_.minX);
+        int j = Mth.floor(p_234939_1_.maxX);
+        int k = Mth.floor(p_234939_1_.minY);
+        int l = Mth.floor(p_234939_1_.maxY);
+        int i1 = Mth.floor(p_234939_1_.minZ);
+        int j1 = Mth.floor(p_234939_1_.maxZ);
         return (!(this instanceof WorldGenRegion) || this.shadow$hasChunksAt(i, k, i1, j, l, j1)) ? this.getBlockStates(p_234939_1_) :
                 Stream.empty();
     }

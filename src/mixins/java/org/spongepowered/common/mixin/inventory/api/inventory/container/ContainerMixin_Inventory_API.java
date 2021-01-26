@@ -24,13 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.api.inventory.container;
 
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -50,13 +43,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(value = Container.class, priority = 998)
+@Mixin(value = AbstractContainerMenu.class, priority = 998)
 public abstract class ContainerMixin_Inventory_API implements org.spongepowered.api.item.inventory.Container,
         DefaultImplementedAdapterInventory.WithClear {
 
-    @Shadow @Final private List<IContainerListener> containerListeners;
-    @Shadow @Final @Nullable private net.minecraft.inventory.container.ContainerType<?> menuType;
+    @Shadow @Final private List<ContainerListener> containerListeners;
+    @Shadow @Final @Nullable private net.minecraft.world.inventory.MenuType<?> menuType;
 
     @Override
     public boolean isViewedSlot(final org.spongepowered.api.item.inventory.Slot slot) {
@@ -69,7 +67,7 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
                     }
                     // TODO better detection of viewer inventory - needs tracking of who views a container
                     // For now assume that a player inventory is always the viewers inventory
-                    if (((Slot) slot).container.getClass() != PlayerInventory.class) {
+                    if (((Slot) slot).container.getClass() != net.minecraft.world.entity.player.Inventory.class) {
                         return true;
                     }
                 }
@@ -81,7 +79,7 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
     @Override
     public List<Inventory> getViewed() {
         List<Inventory> list = new ArrayList<>();
-        for (IInventory inv : ((ContainerBridge) this).bridge$getInventories().keySet()) {
+        for (Container inv : ((ContainerBridge) this).bridge$getInventories().keySet()) {
             Inventory inventory = InventoryUtil.toInventory(inv, null);
             list.add(inventory);
         }
@@ -127,10 +125,10 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
         return ((ContainerType) this.menuType);
     }
 
-    private List<ServerPlayerEntity> listeners() {
+    private List<net.minecraft.server.level.ServerPlayer> listeners() {
         return this.containerListeners.stream()
-                .filter(ServerPlayerEntity.class::isInstance)
-                .map(ServerPlayerEntity.class::cast)
+                .filter(net.minecraft.server.level.ServerPlayer.class::isInstance)
+                .map(net.minecraft.server.level.ServerPlayer.class::cast)
                 .collect(Collectors.toList());
     }
 

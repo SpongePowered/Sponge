@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.tracker.server;
 
-import net.minecraft.crash.CrashReport;
+import net.minecraft.CrashReport;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.concurrent.RecursiveEventLoop;
-import net.minecraft.util.concurrent.TickDelayedTask;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.TickTask;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,13 +43,12 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.mixin.tracker.util.concurrent.ThreadTaskExecutorMixin_Tracker;
-
+import org.spongepowered.common.mixin.tracker.util.thread.BlockableEventLoopMixin_Tracker;
 import java.util.function.BooleanSupplier;
 
 @SuppressWarnings("rawtypes")
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMixin_Tracker {
+public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMixin_Tracker {
 
     @Shadow public abstract boolean shadow$isStopped();
 
@@ -88,10 +87,10 @@ public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMix
         method = "tickChildren",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/server/ServerWorld;tick(Ljava/util/function/BooleanSupplier;)V"
+            target = "Lnet/minecraft/server/level/ServerLevel;tick(Ljava/util/function/BooleanSupplier;)V"
         )
     )
-    private void tracker$wrapWorldTick(final ServerWorld serverWorld, final BooleanSupplier hasTimeLeft) {
+    private void tracker$wrapWorldTick(final ServerLevel serverWorld, final BooleanSupplier hasTimeLeft) {
         try (
             final PhaseContext<@NonNull ?> context = TickPhase.Tick.WORLD_TICK
                 .createPhaseContext(PhaseTracker.SERVER)
@@ -103,7 +102,7 @@ public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMix
     }
 
     @Inject(method = "wrapRunnable", at = @At("RETURN"))
-    private void tracker$associatePhaseContextWithWrappedTask(final Runnable runnable, final CallbackInfoReturnable<TickDelayedTask> cir) {        final TickDelayedTask returnValue = cir.getReturnValue();
+    private void tracker$associatePhaseContextWithWrappedTask(final Runnable runnable, final CallbackInfoReturnable<TickTask> cir) {        final TickTask returnValue = cir.getReturnValue();
         if (!PhaseTracker.SERVER.onSidedThread()) {
             final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
             if (phaseContext.isEmpty()) {
@@ -114,14 +113,14 @@ public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMix
     }
 
     @Redirect(
-        method = "doRunTask(Lnet/minecraft/util/concurrent/TickDelayedTask;)V",
+        method = "doRunTask(Lnet/minecraft/server/TickTask;)V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/util/concurrent/RecursiveEventLoop;doRunTask(Ljava/lang/Runnable;)V"
+            target = "Lnet/minecraft/util/thread/ReentrantBlockableEventLoop;doRunTask(Ljava/lang/Runnable;)V"
         )
     )
     @SuppressWarnings("unchecked")
-    private void tracker$wrapAndPerformContextSwitch(final RecursiveEventLoop<?> thisServer, final Runnable runnable) {
+    private void tracker$wrapAndPerformContextSwitch(final ReentrantBlockableEventLoop<?> thisServer, final Runnable runnable) {
         try (final PhaseContext<@NonNull ?> context = PluginPhase.State.DELAYED_TASK.createPhaseContext(PhaseTracker.SERVER)
             .source(runnable)
             .setDelayedContextPopulator(((TrackedTickDelayedTaskBridge) runnable).bridge$getFrameModifier().orElse(null))

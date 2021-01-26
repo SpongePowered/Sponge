@@ -26,11 +26,11 @@ package org.spongepowered.common.event.tracking.phase.block;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -45,7 +45,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
 
     protected PhaseContext<?> priorContext;
     ItemStackSnapshot usedItem;
-    World world;
+    Level world;
     BlockState blockState;
     BlockPos pos;
     SpongeBlockSnapshot snapshot;
@@ -60,7 +60,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         return this;
     }
 
-    public GrowablePhaseContext world(final World worldIn) {
+    public GrowablePhaseContext world(final Level worldIn) {
         this.world = worldIn;
         return this;
     }
@@ -83,7 +83,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         checkState(this.priorContext != null, "Prior context is null");
         checkState(this.world != null, "World is null");
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
-            .world(((ServerWorld) this.world))
+            .world(((ServerLevel) this.world))
             .position(VecHelper.toVector3i(this.pos))
             .blockState(this.blockState)
             .flag(BlockChangeFlags.PHYSICS_OBSERVER);

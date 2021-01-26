@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.passive.OcelotEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.OcelotAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class OcelotData {
@@ -36,10 +36,10 @@ public final class OcelotData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(OcelotEntityAccessor.class)
+                .asMutable(OcelotAccessor.class)
                     .create(Keys.IS_TRUSTING)
-                        .get(OcelotEntityAccessor::invoker$isTrusting)
-                        .set(OcelotEntityAccessor::invoker$setTrusting);
+                        .get(OcelotAccessor::invoker$isTrusting)
+                        .set(OcelotAccessor::invoker$setTrusting);
     }
     // @formatter:on
 }

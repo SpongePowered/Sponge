@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.world.entity.animal.Sheep;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -37,13 +37,13 @@ public final class SheepData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(SheepEntity.class)
+                .asMutable(Sheep.class)
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) h.getColor())
-                        .set((h, v) -> h.setColor((net.minecraft.item.DyeColor) (Object) v))
+                        .set((h, v) -> h.setColor((net.minecraft.world.item.DyeColor) (Object) v))
                     .create(Keys.IS_SHEARED)
-                        .get(SheepEntity::isSheared)
-                        .set(SheepEntity::setSheared);
+                        .get(Sheep::isSheared)
+                        .set(Sheep::setSheared);
     }
     // @formatter:on
 }

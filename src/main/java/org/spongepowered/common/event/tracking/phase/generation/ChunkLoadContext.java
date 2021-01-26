@@ -46,7 +46,7 @@ public class ChunkLoadContext extends GenerationContext<ChunkLoadContext> {
     }
 
     @SuppressWarnings("unchecked")
-    public ChunkLoadContext chunk(final net.minecraft.world.chunk.Chunk chunk) {
+    public ChunkLoadContext chunk(final net.minecraft.world.level.chunk.LevelChunk chunk) {
         this.chunk = (Chunk) chunk;
         return this;
     }

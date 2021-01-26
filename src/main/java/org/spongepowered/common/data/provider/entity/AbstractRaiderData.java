@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.AbstractRaiderEntity;
-import net.minecraft.entity.monster.PatrollerEntity;
+import net.minecraft.world.entity.monster.PatrollingMonster;
+import net.minecraft.world.entity.raid.Raider;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.monster.AbstractRaiderEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.raid.RaiderAccessor;
 import org.spongepowered.common.bridge.world.raid.RaidBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,16 +39,16 @@ public final class AbstractRaiderData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(AbstractRaiderEntity.class)
+                .asMutable(Raider.class)
                     .create(Keys.CAN_JOIN_RAID)
-                        .get(AbstractRaiderEntity::canJoinRaid)
-                        .set(AbstractRaiderEntity::setCanJoinRaid)
+                        .get(Raider::canJoinRaid)
+                        .set(Raider::setCanJoinRaid)
                     .create(Keys.IS_CELEBRATING)
-                        .get(h -> h.getEntityData().get(AbstractRaiderEntityAccessor.accessor$IS_CELEBRATING()))
-                        .set(AbstractRaiderEntity::setCelebrating)
+                        .get(h -> h.getEntityData().get(RaiderAccessor.accessor$IS_CELEBRATING()))
+                        .set(Raider::setCelebrating)
                     .create(Keys.IS_LEADER)
-                        .get(PatrollerEntity::isPatrolLeader)
-                        .set(PatrollerEntity::setPatrolLeader)
+                        .get(PatrollingMonster::isPatrolLeader)
+                        .set(PatrollingMonster::setPatrolLeader)
                     .create(Keys.RAID_WAVE)
                         .get(h -> ((RaidBridge) h.getCurrentRaid()).bridge$getWaves().get(h.getWave()));
     }

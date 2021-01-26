@@ -92,7 +92,7 @@ public abstract class SpongeResourcePack implements ResourcePack {
             Objects.requireNonNull(uri);
             try {
                 Hasher hasher = Hashing.sha1().newHasher();
-                try (InputStream in = Factory.openStream(uri)) {
+                try (InputStream in = org.spongepowered.common.resourcepack.SpongeResourcePack.Factory.openStream(uri)) {
                     byte[] buf = new byte[256];
                     while (true) {
                         int read = in.read(buf);

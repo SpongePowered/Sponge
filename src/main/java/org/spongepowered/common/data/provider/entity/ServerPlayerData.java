@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stat;
-import net.minecraft.world.GameType;
+import net.minecraft.world.level.GameType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibilities;
@@ -34,7 +34,7 @@ import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
+import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityHealthScaleBridge;
 import org.spongepowered.common.bridge.stats.StatisticsManagerBridge;
@@ -50,7 +50,7 @@ public final class ServerPlayerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(ServerPlayerEntity.class)
+                .asMutable(ServerPlayer.class)
                     .create(Keys.GAME_MODE)
                         .get(h -> (GameMode) (Object) h.gameMode.getGameModeForPlayer())
                         .set((h, v) -> h.setGameMode((GameType) (Object) v))
@@ -58,7 +58,7 @@ public final class ServerPlayerData {
                         .get(h -> (ProfileProperty) h.getGameProfile().getProperties().get(ProfileProperty.TEXTURES).iterator().next())
                     .create(Keys.SPECTATOR_TARGET)
                         .get(h -> (Entity) h.getCamera())
-                        .set((h, v) -> h.setCamera((net.minecraft.entity.Entity) v))
+                        .set((h, v) -> h.setCamera((net.minecraft.world.entity.Entity) v))
                         .delete(h -> h.setCamera(null))
                     .create(Keys.STATISTICS)
                         .get(h -> ((StatisticsManagerBridge) h.getStats()).bridge$getStatsData().entrySet().stream()
@@ -72,13 +72,13 @@ public final class ServerPlayerData {
                             }
                             return visibility;
                         })
-                .asMutable(ServerPlayerEntityAccessor.class)
+                .asMutable(ServerPlayerAccessor.class)
                     .create(Keys.HAS_VIEWED_CREDITS)
-                        .get(ServerPlayerEntityAccessor::accessor$seenCredits)
-                        .set(ServerPlayerEntityAccessor::accessor$seenCredits)
+                        .get(ServerPlayerAccessor::accessor$seenCredits)
+                        .set(ServerPlayerAccessor::accessor$seenCredits)
 
                    .create(Keys.CHAT_COLORS_ENABLED)
-                        .get(ServerPlayerEntityAccessor::accessor$canChatColor)
+                        .get(ServerPlayerAccessor::accessor$canChatColor)
                 .asMutable(ServerPlayerEntityBridge.class)
                     .create(Keys.LOCALE)
                         .get(ServerPlayerEntityBridge::bridge$getLanguage)

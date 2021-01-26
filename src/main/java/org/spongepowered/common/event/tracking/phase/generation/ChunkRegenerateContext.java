@@ -46,7 +46,7 @@ public class ChunkRegenerateContext extends GenerationContext<ChunkRegenerateCon
     }
 
     @SuppressWarnings("unchecked")
-    public ChunkRegenerateContext chunk(final net.minecraft.world.chunk.Chunk chunk) {
+    public ChunkRegenerateContext chunk(final net.minecraft.world.level.chunk.LevelChunk chunk) {
         this.chunk = (Chunk) chunk;
         return this;
     }

@@ -25,11 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.client.CClickWindowPacket;
-import net.minecraft.network.play.client.CPlayerDiggingPacket;
-import net.minecraft.util.Hand;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -60,6 +55,10 @@ import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -73,7 +72,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
     @Override
     public void unwind(final InventoryPacketContext context) {
-        final ServerPlayerEntity player = context.getPacketPlayer();
+        final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
         //final ItemStack usedStack = context.getItemUsed();
         //final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = (Entity) player;
@@ -92,15 +91,15 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
                 final int usedButton;
                 final Slot slot;
-                if (context.getPacket() instanceof CPlayerDiggingPacket) {
-                    final CPlayerDiggingPacket packetIn = context.getPacket();
-                    usedButton = packetIn.getAction() == CPlayerDiggingPacket.Action.DROP_ITEM
+                if (context.getPacket() instanceof ServerboundPlayerActionPacket) {
+                    final ServerboundPlayerActionPacket packetIn = context.getPacket();
+                    usedButton = packetIn.getAction() == ServerboundPlayerActionPacket.Action.DROP_ITEM
                         ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID
                         : 1;
                     slot = ((PlayerInventory) player.inventory).getEquipment().getSlot(
                         EquipmentTypes.MAIN_HAND).orElse(null);
                 } else {
-                    final CClickWindowPacket packetIn = context.getPacket();
+                    final ServerboundContainerClickPacket packetIn = context.getPacket();
                     usedButton = packetIn.getButtonNum();
                     slot = ((InventoryAdapter) player.inventory).inventoryAdapter$getSlot(
                         packetIn.getSlotNum()).orElse(null);
@@ -117,7 +116,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                 SpongeCommon.postEvent(dropItemEvent);
                 if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
                     dropItemEvent.getTransactions())) {
-                    ((ServerPlayerEntityBridge) player).bridge$restorePacketItem(Hand.MAIN_HAND);
+                    ((ServerPlayerEntityBridge) player).bridge$restorePacketItem(InteractionHand.MAIN_HAND);
                     PacketPhaseUtil.handleSlotRestore(player, player.containerMenu, dropItemEvent.getTransactions(),
                         true);
                 } else {
@@ -139,7 +138,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public ClickContainerEvent.Drop createInventoryEvent(final ServerPlayerEntity serverPlayer,
+    public ClickContainerEvent.Drop createInventoryEvent(final net.minecraft.server.level.ServerPlayer serverPlayer,
         final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {

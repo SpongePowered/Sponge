@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -55,7 +55,7 @@ public final class ExplodeBlockEffect implements ProcessingSideEffect {
     ) {
         final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
 
-        final ServerWorld world = pipeline.getServerWorld();
+        final ServerLevel world = pipeline.getServerWorld();
         final BlockPos pos = oldState.pos;
         if (phaseContext instanceof ExplosionContext) {
             oldState.state.getBlock().wasExploded(world, pos, ((ExplosionContext) phaseContext).getExplosion());

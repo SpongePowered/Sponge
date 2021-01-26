@@ -32,9 +32,9 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.gson.LegacyHoverEventSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.kyori.adventure.util.Codec;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ import java.util.UUID;
 
 public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSerializer {
     public static final NbtLegacyHoverEventSerializer INSTANCE = new NbtLegacyHoverEventSerializer();
-    private static final Codec<CompoundNBT, String, CommandSyntaxException, RuntimeException> SNBT_CODEC = Codec.of(JsonToNBT::parseTag, INBT::toString);
+    private static final Codec<CompoundTag, String, CommandSyntaxException, RuntimeException> SNBT_CODEC = Codec.of(TagParser::parseTag, Tag::toString);
 
     static final String ITEM_TYPE = "id";
     static final String ITEM_COUNT = "Count";
@@ -59,8 +59,8 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
     public HoverEvent.ShowItem deserializeShowItem(final Component input) throws IOException {
         final String rawContent = PlainComponentSerializer.plain().serialize(input);
         try {
-            final CompoundNBT contents = NbtLegacyHoverEventSerializer.SNBT_CODEC.decode(rawContent);
-            final CompoundNBT tag = contents.getCompound(NbtLegacyHoverEventSerializer.ITEM_TAG);
+            final CompoundTag contents = NbtLegacyHoverEventSerializer.SNBT_CODEC.decode(rawContent);
+            final CompoundTag tag = contents.getCompound(NbtLegacyHoverEventSerializer.ITEM_TAG);
             return HoverEvent.ShowItem.of(
                 Key.key(contents.getString(NbtLegacyHoverEventSerializer.ITEM_TYPE)),
                 contents.contains(NbtLegacyHoverEventSerializer.ITEM_COUNT) ? contents.getByte(NbtLegacyHoverEventSerializer.ITEM_COUNT) : 1,
@@ -75,7 +75,7 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
     public HoverEvent.@NonNull ShowEntity deserializeShowEntity(final Component input, final Codec.Decoder<Component, String, ? extends RuntimeException> componentCodec) throws IOException {
         final String raw = PlainComponentSerializer.plain().serialize(input);
         try {
-            final CompoundNBT contents = NbtLegacyHoverEventSerializer.SNBT_CODEC.decode(raw);
+            final CompoundTag contents = NbtLegacyHoverEventSerializer.SNBT_CODEC.decode(raw);
             return HoverEvent.ShowEntity.of(
                 Key.key(contents.getString(NbtLegacyHoverEventSerializer.ENTITY_TYPE)),
                 UUID.fromString(contents.getString(NbtLegacyHoverEventSerializer.ENTITY_ID)),
@@ -88,7 +88,7 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
 
     @Override
     public @NonNull Component serializeShowItem(final HoverEvent.@NonNull ShowItem input) throws IOException {
-        final CompoundNBT tag = new CompoundNBT();
+        final CompoundTag tag = new CompoundTag();
         tag.putString(NbtLegacyHoverEventSerializer.ITEM_TYPE, input.item().asString());
         tag.putByte(NbtLegacyHoverEventSerializer.ITEM_COUNT, (byte) input.count());
         if (input.nbt() != null) {
@@ -104,7 +104,7 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
 
     @Override
     public @NonNull Component serializeShowEntity(final HoverEvent.ShowEntity input, final Codec.Encoder<Component, String, ? extends RuntimeException> componentCodec) {
-        final CompoundNBT tag = new CompoundNBT();
+        final CompoundTag tag = new CompoundTag();
         tag.putString(NbtLegacyHoverEventSerializer.ENTITY_ID, input.id().toString());
         tag.putString(NbtLegacyHoverEventSerializer.ENTITY_TYPE, input.type().asString());
         if (input.name() != null) {

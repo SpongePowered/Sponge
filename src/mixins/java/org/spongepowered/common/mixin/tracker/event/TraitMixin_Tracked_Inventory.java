@@ -24,22 +24,22 @@
  */
 package org.spongepowered.common.mixin.tracker.event;
 
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.tileentity.DropperTileEntity;
-import net.minecraft.tileentity.HopperTileEntity;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.entity.DropperBlockEntity;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 
 @Mixin(value = {
-    DropperTileEntity.class,
-    HopperTileEntity.class,
-    PlayerInventory.class,
-    Container.class
+    DropperBlockEntity.class,
+    HopperBlockEntity.class,
+    Inventory.class,
+    AbstractContainerMenu.class
 })
 public abstract class TraitMixin_Tracked_Inventory implements TrackedInventoryBridge {
 

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.horse.AbstractChestedHorseEntity;
+import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -36,10 +36,10 @@ public final class AbstractChestedHorseData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(AbstractChestedHorseEntity.class)
+                .asMutable(AbstractChestedHorse.class)
                     .create(Keys.HAS_CHEST)
-                        .get(AbstractChestedHorseEntity::hasChest)
-                        .set(AbstractChestedHorseEntity::setChest);
+                        .get(AbstractChestedHorse::hasChest)
+                        .set(AbstractChestedHorse::setChest);
     }
     // @formatter:on
 }

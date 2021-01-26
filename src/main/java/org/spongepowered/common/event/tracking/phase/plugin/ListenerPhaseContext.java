@@ -36,7 +36,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends PluginPhaseContext<L> {
 
@@ -140,7 +140,7 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
                 .toString();
         }
 
-        public void addPlayer(final ServerPlayerEntity playerMP) {
+        public void addPlayer(final ServerPlayer playerMP) {
             this.player = ((Player) playerMP);
         }
     }

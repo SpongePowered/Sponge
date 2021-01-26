@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.monster.RavagerEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.RavagerAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -37,7 +37,7 @@ public final class RavagerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(RavagerEntityAccessor.class)
+                .asMutable(RavagerAccessor.class)
                     .create(Keys.ATTACK_TIME)
                         .get(x -> new SpongeTicks(x.accessor$attackTick()))
                         .set((h, v) -> h.accessor$attackTick((int) v.getTicks()))

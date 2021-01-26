@@ -27,15 +27,15 @@ package org.spongepowered.common.event.cause.entity.damage;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.entity.item.FallingBlockEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
-import org.spongepowered.common.accessor.util.DamageSourceAccessor;
+import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
 import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 
 import java.lang.ref.WeakReference;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 
 public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBuilder<FallingBlockDamageSource, FallingBlockDamageSource.Builder> implements FallingBlockDamageSource.Builder {
 

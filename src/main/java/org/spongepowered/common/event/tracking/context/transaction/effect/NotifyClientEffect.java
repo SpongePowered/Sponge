@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ChunkHolder;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ChunkHolder;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -48,13 +48,13 @@ public final class NotifyClientEffect implements ProcessingSideEffect {
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
     ) {
-        final Chunk chunk = pipeline.getAffectedChunk();
-        final ServerWorld world = pipeline.getServerWorld();
+        final LevelChunk chunk = pipeline.getAffectedChunk();
+        final ServerLevel world = pipeline.getServerWorld();
 
         // Vanilla flags & 2 to check if clients are notified. isClientSide is redundant since it's guaranteed a server world.
         // And the last bit is the equivalent to basically checking if the chunk is not a border and populated.
         // if ((flags & 2) != 0 && (!this.isClientSide || (flags & 4) == 0) && (this.isClientSide || chunk.getLocationType() != null && chunk.getLocationType().isAtLeast(ChunkHolder.LocationType.TICKING))) {
-        if (flag.notifyClients() && (chunk.getFullStatus().isOrAfter(ChunkHolder.LocationType.TICKING))) {
+        if (flag.notifyClients() && (chunk.getFullStatus().isOrAfter(ChunkHolder.FullChunkStatus.TICKING))) {
             // this.notifyBlockUpdate(pos, blockstate, newWorldState, flags);
             world.sendBlockUpdated(oldState.pos, oldState.state, newState, flag.getRawFlag());
         }

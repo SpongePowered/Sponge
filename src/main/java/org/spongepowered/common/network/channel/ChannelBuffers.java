@@ -26,17 +26,17 @@ package org.spongepowered.common.network.channel;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import org.spongepowered.api.network.channel.ChannelBuf;
 
 public final class ChannelBuffers {
 
     public static ChannelBuf wrap(final ByteBuf buf) {
-        return (ChannelBuf) (buf instanceof PacketBuffer ? buf : new PacketBuffer(buf));
+        return (ChannelBuf) (buf instanceof FriendlyByteBuf ? buf : new FriendlyByteBuf(buf));
     }
 
     public static ChannelBuf wrap(final byte[] bytes) {
-        return (ChannelBuf) new PacketBuffer(Unpooled.wrappedBuffer(bytes));
+        return (ChannelBuf) new FriendlyByteBuf(Unpooled.wrappedBuffer(bytes));
     }
 
     public static boolean release(final ChannelBuf buf) {
@@ -44,7 +44,7 @@ public final class ChannelBuffers {
     }
 
     public static void write(final ChannelBuf target, final ChannelBuf source) {
-        ((PacketBuffer) target).writeBytes((PacketBuffer) source);
+        ((FriendlyByteBuf) target).writeBytes((FriendlyByteBuf) source);
     }
 
     private ChannelBuffers() {

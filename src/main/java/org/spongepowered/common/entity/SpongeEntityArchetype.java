@@ -26,11 +26,6 @@ package org.spongepowered.common.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -60,6 +55,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
 
 public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity> implements EntityArchetype,
         DataContainerHolder.Mutable {
@@ -73,7 +73,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     private Vector3d position;
 
     SpongeEntityArchetype(final SpongeEntityArchetypeBuilder builder) {
-        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundNBT() :
+        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundTag() :
                 NBTTranslator.INSTANCE.translate(builder.entityData));
     }
 
@@ -83,7 +83,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     @Nullable
-    public CompoundNBT getData() {
+    public CompoundTag getData() {
         return this.data;
     }
 
@@ -100,7 +100,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             return Optional.empty();
         }
         try {
-            final ListNBT pos = this.data.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+            final ListTag pos = this.data.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
             final double x = pos.getDouble(0);
             final double y = pos.getDouble(1);
             final double z = pos.getDouble(2);
@@ -132,9 +132,9 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             return Optional.empty();
         }
         final org.spongepowered.api.world.server.ServerWorld spongeWorld = location.getWorld();
-        final ServerWorld worldServer = (ServerWorld) spongeWorld;
+        final ServerLevel worldServer = (ServerLevel) spongeWorld;
 
-        final Entity entity = ((net.minecraft.entity.EntityType<?>) this.type).create(worldServer);
+        final Entity entity = ((net.minecraft.world.entity.EntityType<?>) this.type).create(worldServer);
         if (entity == null) {
             return Optional.empty();
         }
@@ -148,8 +148,8 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             requiresInitialSpawn = true;
         }
 
-        if (entity instanceof MobEntity) {
-            final MobEntity mobentity = (MobEntity) entity;
+        if (entity instanceof Mob) {
+            final Mob mobentity = (Mob) entity;
             mobentity.yHeadRot = mobentity.yRot;
             mobentity.yBodyRot = mobentity.xRot;
             if (requiresInitialSpawn) {
@@ -159,7 +159,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         }
 
         // like applyItemNBT
-        final CompoundNBT mergedNbt = entity.saveWithoutId(new CompoundNBT());
+        final CompoundTag mergedNbt = entity.saveWithoutId(new CompoundTag());
         final UUID uniqueID = entity.getUUID();
 
         mergedNbt.merge(this.data);
@@ -188,7 +188,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     public EntitySnapshot toSnapshot(final ServerLocation location) {
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
         builder.entityType = this.type;
-        final CompoundNBT newCompound = this.data.copy();
+        final CompoundTag newCompound = this.data.copy();
         final Vector3d pos = location.getPosition();
         newCompound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(pos.getX(), pos.getY(), pos.getZ()));
         newCompound.putString(Constants.Sponge.World.WORLD_KEY, location.getWorldKey().getFormatted());
@@ -201,7 +201,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     private Vector3d getRotation() {
-        final ListNBT listnbt3 = this.data.getList("Rotation", 5);
+        final ListTag listnbt3 = this.data.getList("Rotation", 5);
         final float rotationYaw = listnbt3.getFloat(0);
         final float rotationPitch = listnbt3.getFloat(1);
         return new Vector3d(rotationPitch, rotationYaw, 0);

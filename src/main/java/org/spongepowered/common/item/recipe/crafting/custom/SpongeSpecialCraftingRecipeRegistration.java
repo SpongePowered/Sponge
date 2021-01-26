@@ -25,10 +25,6 @@
 package org.spongepowered.common.item.recipe.crafting.custom;
 
 import com.google.gson.JsonObject;
-import net.minecraft.item.Items;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipeSerializer;
-import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -37,6 +33,10 @@ import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 
 public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistration {
 
@@ -44,7 +44,7 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
     private final Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction;
     private final Function<CraftingGridInventory, ItemStack> resultFunction;
 
-    private final SpecialRecipeSerializer<?> serializer;
+    private final SimpleRecipeSerializer<?> serializer;
     private final SpongeSpecialRecipe recipe;
 
     public SpongeSpecialCraftingRecipeRegistration(ResourceLocation key,
@@ -58,11 +58,11 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
         this.resultFunction = resultFunction;
 
         this.recipe = new SpongeSpecialRecipe(key, this.biPredicate, this.remainingItemsFunction, this.resultFunction);
-        this.serializer = SpongeRecipeRegistration.register(key, new SpecialRecipeSerializer<>(rl -> this.recipe));
+        this.serializer = SpongeRecipeRegistration.register(key, new SimpleRecipeSerializer<>(rl -> this.recipe));
     }
 
     @Override
-    public IRecipeSerializer<?> getType() {
+    public RecipeSerializer<?> getType() {
         return this.serializer;
     }
 

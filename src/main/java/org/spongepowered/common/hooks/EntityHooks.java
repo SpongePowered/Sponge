@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.hooks;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
 public interface EntityHooks {
 
-    default boolean checkAttackEntity(final PlayerEntity player, final Entity victim) {
+    default boolean checkAttackEntity(final Player player, final Entity victim) {
         return true;
     }
 

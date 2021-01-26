@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.network.play.client.CResourcePackStatusPacketAccessor;
+import org.spongepowered.common.accessor.network.protocol.game.ServerboundResourcePackPacketAccessor;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -41,11 +40,11 @@ public final class ResourcePackState extends BasicPacketState {
 
     @Override
     public void unwind(BasicPacketContext phaseContext) {
-        final ServerPlayerEntity player = phaseContext.getPacketPlayer();
+        final net.minecraft.server.level.ServerPlayer player = phaseContext.getPacketPlayer();
 
-        final ServerPlayNetHandler connection = player.connection;
+        final ServerGamePacketListenerImpl connection = player.connection;
         final ServerPlayNetHandlerBridge mixinHandler = (ServerPlayNetHandlerBridge) connection;
-        final CResourcePackStatusPacketAccessor resource = phaseContext.getPacket();
+        final ServerboundResourcePackPacketAccessor resource = phaseContext.getPacket();
         final ResourcePackStatusEvent.ResourcePackStatus status;
         ResourcePack pack;
         switch (resource.accessor$action()) {

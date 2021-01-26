@@ -24,17 +24,18 @@
  */
 package org.spongepowered.common.world.portal;
 
-import net.minecraft.block.PortalInfo;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
-import org.spongepowered.common.accessor.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
+import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter.Holder;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.function.Function;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.portal.PortalInfo;
 
 public abstract class VanillaPortalPlatformTeleporter implements PlatformTeleporter {
 
@@ -55,12 +56,12 @@ public abstract class VanillaPortalPlatformTeleporter implements PlatformTelepor
     }
 
     @Override
-    public PortalInfo getPortalInfo(final Entity entity, final ServerWorld currentWorld, final ServerWorld targetWorld, final Vector3d currentPosition) {
+    public PortalInfo getPortalInfo(final Entity entity, final ServerLevel currentWorld, final ServerLevel targetWorld, final Vector3d currentPosition) {
         return ((EntityAccessor) entity).invoker$findDimensionEntryPoint(targetWorld);
     }
 
     @Override
-    public Entity performTeleport(final Entity entity, final ServerWorld currentWorld, final ServerWorld targetWorld, final float xRot,
+    public Entity performTeleport(final Entity entity, final ServerLevel currentWorld, final ServerLevel targetWorld, final float xRot,
             final Function<Boolean, Entity> entityRepositioner) {
         return entityRepositioner.apply(true);
     }

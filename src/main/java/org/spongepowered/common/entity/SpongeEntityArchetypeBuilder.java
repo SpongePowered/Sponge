@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity;
 
-import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
@@ -37,19 +36,20 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.common.accessor.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.nbt.CompoundTag;
 
 public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArchetype> implements EntityArchetype.Builder {
 
     EntityType entityType = null;
     DataContainer entityData;
-    CompoundNBT compound;
+    CompoundTag compound;
     DataManipulator.Mutable manipulator;
 
     public SpongeEntityArchetypeBuilder() {
@@ -104,8 +104,8 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     public EntityArchetype.Builder from(final Entity entity) {
         Objects.requireNonNull(entity, "Cannot build an EntityArchetype for a null entity!");
         this.entityType = Objects.requireNonNull(entity.getType(), "Entity is returning a null EntityType!");
-        final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
-        final CompoundNBT compound = new CompoundNBT();
+        final net.minecraft.world.entity.Entity minecraftEntity = (net.minecraft.world.entity.Entity) entity;
+        final CompoundTag compound = new CompoundTag();
         minecraftEntity.saveAsPassenger(compound);
         compound.putString(Constants.Sponge.EntityArchetype.ENTITY_ID, ((EntityAccessor) minecraftEntity).invoker$getEncodeId());
         compound.remove(Constants.UUID);

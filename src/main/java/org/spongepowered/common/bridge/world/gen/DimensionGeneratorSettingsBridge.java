@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.gen;
 
-import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 public interface DimensionGeneratorSettingsBridge {
 
-    DimensionGeneratorSettings bridge$copy();
+    WorldGenSettings bridge$copy();
 }

@@ -27,15 +27,15 @@ package org.spongepowered.common.mixin.core.server.dedicated;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
-import net.minecraft.resources.DataPackRegistries;
-import net.minecraft.resources.ResourcePackList;
-import net.minecraft.server.ServerPropertiesProvider;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.server.ServerResources;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
-import net.minecraft.world.storage.IServerConfiguration;
-import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.server.dedicated.DedicatedServerSettings;
+import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -49,17 +49,17 @@ import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$setServerOnGame(Thread p_i232601_1_, DynamicRegistries.Impl p_i232601_2_, SaveFormat.LevelSave p_i232601_3_,
-            ResourcePackList p_i232601_4_, DataPackRegistries p_i232601_5_, IServerConfiguration p_i232601_6_, ServerPropertiesProvider p_i232601_7_,
-            DataFixer p_i232601_8_, MinecraftSessionService p_i232601_9_, GameProfileRepository p_i232601_10_, PlayerProfileCache p_i232601_11_,
-            IChunkStatusListenerFactory p_i232601_12_, CallbackInfo ci) {
+    private void impl$setServerOnGame(Thread p_i232601_1_, RegistryAccess.RegistryHolder p_i232601_2_, LevelStorageSource.LevelStorageAccess p_i232601_3_,
+            PackRepository p_i232601_4_, ServerResources p_i232601_5_, WorldData p_i232601_6_, DedicatedServerSettings p_i232601_7_,
+            DataFixer p_i232601_8_, MinecraftSessionService p_i232601_9_, GameProfileRepository p_i232601_10_, GameProfileCache p_i232601_11_,
+            ChunkProgressListenerFactory p_i232601_12_, CallbackInfo ci) {
 
         SpongeCommon.getGame().setServer(this);
         p_i232601_11_.load();
     }
 
-    @Redirect(method = "initServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerProfileCache;save()V"))
-    private void onSave(final PlayerProfileCache cache) {
+    @Redirect(method = "initServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/GameProfileCache;save()V"))
+    private void onSave(final GameProfileCache cache) {
         ((PlayerProfileCacheBridge) cache).bridge$setCanSave(true);
         cache.save();
         ((PlayerProfileCacheBridge) cache).bridge$setCanSave(false);

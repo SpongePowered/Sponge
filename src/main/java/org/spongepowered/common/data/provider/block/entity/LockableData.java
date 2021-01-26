@@ -26,8 +26,8 @@ package org.spongepowered.common.data.provider.block.entity;
 
 import net.minecraft.world.LockCode;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.tileentity.LockableTileEntityAccessor;
 import org.spongepowered.common.accessor.world.LockCodeAccessor;
+import org.spongepowered.common.accessor.world.level.block.entity.BaseContainerBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class LockableData {
@@ -38,7 +38,7 @@ public final class LockableData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(LockableTileEntityAccessor.class)
+                .asMutable(BaseContainerBlockEntityAccessor.class)
                     .create(Keys.LOCK_TOKEN)
                         .get(h -> ((LockCodeAccessor) h.accessor$lockKey()).accessor$key())
                         .set((h, v) -> h.accessor$lockKey(v.isEmpty() ? LockCode.NO_LOCK : new LockCode(v)));

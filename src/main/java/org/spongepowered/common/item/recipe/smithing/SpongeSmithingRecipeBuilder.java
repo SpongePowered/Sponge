@@ -27,11 +27,6 @@ package org.spongepowered.common.item.recipe.smithing;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -51,6 +46,11 @@ import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Function;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
 public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, SmithingRecipe.Builder> implements
         SmithingRecipe.Builder, SmithingRecipe.Builder.AdditionStep, SmithingRecipe.Builder.ResultStep, SmithingRecipe.Builder.EndStep {
@@ -58,7 +58,7 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
     private ItemStack result;
     private Ingredient base;
     private Ingredient addition;
-    private Function<IInventory, net.minecraft.item.ItemStack> resultFunction;
+    private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
     @Nullable private String group;
 
     @Override
@@ -118,9 +118,9 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
 
     @Override
     public RecipeRegistration build0() {
-        final net.minecraft.item.ItemStack result = ItemStackUtil.toNative(this.result);
-        final IRecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Arrays.asList(this.base, this.addition),
-                IRecipeSerializer.SMITHING, SpongeSmithingRecipeSerializer.SPONGE_SMITHING);
+        final net.minecraft.world.item.ItemStack result = ItemStackUtil.toNative(this.result);
+        final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Arrays.asList(this.base, this.addition),
+                RecipeSerializer.SMITHING, SpongeSmithingRecipeSerializer.SPONGE_SMITHING);
 
         return new SpongeSmithingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.base, this.addition, result, this.resultFunction);
     }

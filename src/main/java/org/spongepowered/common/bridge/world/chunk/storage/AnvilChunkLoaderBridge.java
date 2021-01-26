@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.bridge.world.chunk.storage;
 
-import net.minecraft.world.World;
-
 import java.nio.file.Path;
+import net.minecraft.world.level.Level;
 
 public interface AnvilChunkLoaderBridge {
 
     // Forge method
-    boolean bridge$chunkExists(World world, int x, int z);
+    boolean bridge$chunkExists(Level world, int x, int z);
 
     Path bridge$getWorldDir();
 }

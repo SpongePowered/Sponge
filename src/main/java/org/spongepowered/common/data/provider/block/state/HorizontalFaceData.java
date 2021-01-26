@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFaceBlock;
-import net.minecraft.state.properties.AttachFace;
+import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.AttachFace;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.AttachmentSurface;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -41,9 +41,9 @@ public final class HorizontalFaceData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.ATTACHMENT_SURFACE)
-                        .get(h -> (AttachmentSurface) (Object) h.getValue(HorizontalFaceBlock.FACE))
-                        .set((h, v) -> h.setValue(HorizontalFaceBlock.FACE, (AttachFace) (Object) v))
-                        .supports(h -> h.getBlock() instanceof HorizontalFaceBlock);
+                        .get(h -> (AttachmentSurface) (Object) h.getValue(FaceAttachedHorizontalDirectionalBlock.FACE))
+                        .set((h, v) -> h.setValue(FaceAttachedHorizontalDirectionalBlock.FACE, (AttachFace) (Object) v))
+                        .supports(h -> h.getBlock() instanceof FaceAttachedHorizontalDirectionalBlock);
     }
     // @formatter:on
 }

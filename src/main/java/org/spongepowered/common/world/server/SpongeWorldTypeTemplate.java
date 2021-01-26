@@ -26,15 +26,15 @@ package org.spongepowered.common.world.server;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKeyCodec;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.biome.ColumnFuzzedBiomeMagnifier;
-import net.minecraft.world.biome.IBiomeMagnifier;
+import net.minecraft.tags.Tag;
+import net.minecraft.world.level.biome.BiomeZoomer;
+import net.minecraft.world.level.biome.FuzzyOffsetConstantColumnBiomeZoomer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -48,7 +48,7 @@ import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
-import org.spongepowered.common.accessor.world.DimensionTypeAccessor;
+import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.registry.provider.BiomeSamplerProvider;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -101,14 +101,14 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
                             Codec.BOOL.fieldOf("respawn_anchor_works").forGetter(DimensionType::respawnAnchorWorks),
                             Codec.BOOL.fieldOf("has_raids").forGetter(DimensionType::hasRaids),
                             Codec.intRange(0, 256).fieldOf("logical_height").forGetter(DimensionType::logicalHeight),
-                            ResourceLocation.CODEC.fieldOf("infiniburn").forGetter(v -> ((ITag.INamedTag<Block>)v.infiniburn()).getName()),
+                            ResourceLocation.CODEC.fieldOf("infiniburn").forGetter(v -> ((Tag.Named<Block>)v.infiniburn()).getName()),
                             ResourceLocation.CODEC.fieldOf("effects").orElse((ResourceLocation) (Object) WorldTypeEffects.OVERWORLD.getKey()).forGetter(v -> ((DimensionTypeAccessor) v).accessor$effectsLocation()),
                             Codec.FLOAT.fieldOf("ambient_light").forGetter(v -> ((DimensionTypeAccessor) v).accessor$ambientLight()),
                             SpongeWorldTypeTemplate.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeSamplerProvider.INSTANCE.get((BiomeSampler) v.getBiomeZoomer()), v.createDragonFight())))
                     )
                     // *Chuckles* I'm in danger
                     .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15) -> {
-                        final IBiomeMagnifier biomeMagnifier = f15.isPresent() ? (IBiomeMagnifier) BiomeSamplerProvider.INSTANCE.get((ResourceKey) (Object) f15.get().biomeSampler) : ColumnFuzzedBiomeMagnifier.INSTANCE;
+                        final BiomeZoomer biomeMagnifier = f15.isPresent() ? (BiomeZoomer) BiomeSamplerProvider.INSTANCE.get((ResourceKey) (Object) f15.get().biomeSampler) : FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE;
                         final boolean createDragonFight = f15.isPresent() && f15.get().createDragonFight;
 
                         return DimensionTypeAccessor.invoker$new(f1, f2, f3, f4, f5, f6, createDragonFight, f7, f8, f9, f10, f11,
@@ -116,7 +116,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
                     })
             );
 
-    public static final Codec<Supplier<DimensionType>> CODEC = RegistryKeyCodec.create(Registry.DIMENSION_TYPE_REGISTRY, SpongeWorldTypeTemplate.DIRECT_CODEC);
+    public static final Codec<Supplier<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, SpongeWorldTypeTemplate.DIRECT_CODEC);
 
     protected SpongeWorldTypeTemplate(final BuilderImpl builder) {
         super(builder.key);
@@ -157,7 +157,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.hasRaids = dimensionType.hasRaids();
         this.logicalHeight = dimensionType.logicalHeight();
         this.biomeSampler = (BiomeSampler) dimensionType.getBiomeZoomer();
-        this.infiniburn = (ResourceKey) (Object) ((ITag.INamedTag<Block>) dimensionType.infiniburn()).getName();
+        this.infiniburn = (ResourceKey) (Object) ((Tag.Named<Block>) dimensionType.infiniburn()).getName();
         this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) ((DimensionTypeAccessor) dimensionType).accessor$effectsLocation());
         this.ambientLight = ((DimensionTypeAccessor) dimensionType).accessor$ambientLight();
         this.createDragonFight = dimensionType.createDragonFight();

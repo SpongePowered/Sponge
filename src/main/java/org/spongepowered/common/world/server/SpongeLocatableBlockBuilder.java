@@ -86,7 +86,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
     }
 
     @SuppressWarnings("unchecked")
-    public SpongeLocatableBlockBuilder world(final Supplier<net.minecraft.world.server.ServerWorld> worldSupplier) {
+    public SpongeLocatableBlockBuilder world(final Supplier<net.minecraft.server.level.ServerLevel> worldSupplier) {
         Objects.requireNonNull(worldSupplier, "Supplier cannot be null!");
         Objects.requireNonNull(worldSupplier.get(), "ServerWorld reference cannot be null!");
         this.worldReference = (Supplier<ServerWorld>) (Supplier<?>) worldSupplier;

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.realtime.tileentity;
 
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,10 +34,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.mixin.core.tileentity.TileEntityMixin;
+import org.spongepowered.common.mixin.core.world.level.block.entity.BlockEntityMixin;
 
-@Mixin(value = AbstractFurnaceTileEntity.class, priority = 1001)
-public abstract class AbstractFurnaceTileEntityMixin_RealTime extends TileEntityMixin {
+@Mixin(value = AbstractFurnaceBlockEntity.class, priority = 1001)
+public abstract class AbstractFurnaceTileEntityMixin_RealTime extends BlockEntityMixin {
 
     @Shadow private int litTime;
     @Shadow private int cookingProgress;
@@ -46,24 +46,24 @@ public abstract class AbstractFurnaceTileEntityMixin_RealTime extends TileEntity
     @Redirect(method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;litTime:I",
+            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;litTime:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;isLit()Z",
+                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;isLit()Z",
                 opcode = 1
             ),
             to = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;level:Lnet/minecraft/world/World;",
+                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;level:Lnet/minecraft/world/level/Level;",
                 opcode = Opcodes.GETFIELD,
                 ordinal = 0
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeBurnTime(final AbstractFurnaceTileEntity self, final int modifier) {
+    private void realTimeImpl$adjustForRealTimeBurnTime(final AbstractFurnaceBlockEntity self, final int modifier) {
         if (((WorldBridge) this.level).bridge$isFake()) {
             this.litTime = modifier;
             return;
@@ -76,24 +76,24 @@ public abstract class AbstractFurnaceTileEntityMixin_RealTime extends TileEntity
         method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;cookingProgress:I",
+            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;cookingProgress:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;canBurn(Lnet/minecraft/item/crafting/IRecipe;)Z",
+                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/world/item/crafting/Recipe;)Z",
                 ordinal = 1
             ),
             to = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;cookingTotalTime:I",
+                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;cookingTotalTime:I",
                 opcode = Opcodes.GETFIELD,
                 ordinal = 0
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeCookTime(final AbstractFurnaceTileEntity self, final int modifier) {
+    private void realTimeImpl$adjustForRealTimeCookTime(final AbstractFurnaceBlockEntity self, final int modifier) {
         if (((WorldBridge) this.level).bridge$isFake()) {
             this.cookingProgress = modifier;
             return;
@@ -106,27 +106,27 @@ public abstract class AbstractFurnaceTileEntityMixin_RealTime extends TileEntity
         method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;cookingProgress:I",
+            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;cookingProgress:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/util/math/MathHelper;clamp(III)I"
+                target = "Lnet/minecraft/util/Mth;clamp(III)I"
             ),
             to = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/world/World;setBlock(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"
+                target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeCookTimeCooldown(final AbstractFurnaceTileEntity self, final int modifier) {
+    private void realTimeImpl$adjustForRealTimeCookTimeCooldown(final AbstractFurnaceBlockEntity self, final int modifier) {
         if (((WorldBridge) this.level).bridge$isFake()) {
             this.cookingProgress = modifier;
             return;
         }
         final int ticks = (int) ((RealTimeTrackingBridge) this.level).realTimeBridge$getRealTimeTicks();
-        this.cookingProgress = MathHelper.clamp(this.cookingProgress - (2 * ticks), 0, this.cookingTotalTime);
+        this.cookingProgress = Mth.clamp(this.cookingProgress - (2 * ticks), 0, this.cookingTotalTime);
     }
 
 }

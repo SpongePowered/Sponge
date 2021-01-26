@@ -31,12 +31,12 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.ILocationArgument;
-import net.minecraft.command.arguments.Vec3Argument;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -112,7 +112,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
 
         try {
             reader.skipWhitespace();
-            final Vector3d vec3d = SpongeServerLocationValueParameter.VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context.getCause());
+            final Vec3 vec3d = SpongeServerLocationValueParameter.VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSourceStack) context.getCause());
             return Optional.of(serverWorld.getLocation(VecHelper.toVector3d(vec3d)));
         } catch (final CommandSyntaxException e) {
             throw reader.createException(Component.text(e.getMessage()));
@@ -125,13 +125,13 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
     }
 
     @Override
-    public CommandNode<ISuggestionProvider> createSuggestions(final CommandNode<ISuggestionProvider> rootNode, final String key,
+    public CommandNode<SharedSuggestionProvider> createSuggestions(final CommandNode<SharedSuggestionProvider> rootNode, final String key,
             final boolean isTerminal,
-            final Consumer<List<CommandNode<ISuggestionProvider>>> firstNodes,
-            final Consumer<CommandNode<ISuggestionProvider>> redirectionNodes,
+            final Consumer<List<CommandNode<SharedSuggestionProvider>>> firstNodes,
+            final Consumer<CommandNode<SharedSuggestionProvider>> redirectionNodes,
             final boolean allowCustomSuggestionsOnTheFirstElement) {
 
-        final RequiredArgumentBuilder<ISuggestionProvider, ResourceLocation> firstNode =
+        final RequiredArgumentBuilder<SharedSuggestionProvider, ResourceLocation> firstNode =
                 RequiredArgumentBuilder.argument(key, Constants.Command.RESOURCE_LOCATION_TYPE);
         if (allowCustomSuggestionsOnTheFirstElement) {
             firstNode.suggests((context, builder) -> {
@@ -139,18 +139,18 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
                 return builder.buildFuture();
             });
         }
-        final RequiredArgumentBuilder<ISuggestionProvider, ILocationArgument> secondNode =
+        final RequiredArgumentBuilder<SharedSuggestionProvider, Coordinates> secondNode =
                 RequiredArgumentBuilder.argument(key + "_pos", Vec3Argument.vec3());
         if (isTerminal) {
             secondNode.executes(x -> 1);
         }
-        final CommandNode<ISuggestionProvider> second = secondNode.build();
+        final CommandNode<SharedSuggestionProvider> second = secondNode.build();
         firstNode.then(second);
-        final CommandNode<ISuggestionProvider> first = firstNode.build();
+        final CommandNode<SharedSuggestionProvider> first = firstNode.build();
         redirectionNodes.accept(second);
         rootNode.addChild(first);
         rootNode.addChild(second);
-        final List<CommandNode<ISuggestionProvider>> nodesToAttach = new ArrayList<>();
+        final List<CommandNode<SharedSuggestionProvider>> nodesToAttach = new ArrayList<>();
         nodesToAttach.add(first);
         nodesToAttach.add(second);
         firstNodes.accept(nodesToAttach);

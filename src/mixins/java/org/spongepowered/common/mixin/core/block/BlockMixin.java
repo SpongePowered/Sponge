@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import co.aikar.timings.Timing;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,6 +38,7 @@ import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.level.block.Block;
 
 @Mixin(value = Block.class)
 public abstract class BlockMixin implements BlockBridge, TrackableBridge, TimingBridge {

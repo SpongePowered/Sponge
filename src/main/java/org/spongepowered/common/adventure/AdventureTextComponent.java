@@ -28,10 +28,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.renderer.ComponentRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.IReorderingProcessor;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -45,8 +44,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-public class AdventureTextComponent implements ITextComponent, TextComponentBridge {
-    private @MonotonicNonNull ITextComponent converted;
+public class AdventureTextComponent implements net.minecraft.network.chat.Component, TextComponentBridge {
+    private net.minecraft.network.chat.@MonotonicNonNull Component converted;
     private @Nullable Locale deepConvertedLocalized;
     private final net.kyori.adventure.text.Component wrapped;
     private final @Nullable ComponentRenderer<Locale> renderer;
@@ -76,8 +75,8 @@ public class AdventureTextComponent implements ITextComponent, TextComponentBrid
         return this.lastRendered = this.renderer == null ? this : new AdventureTextComponent(this.renderer.render(this.wrapped, locale), null);
     }
 
-    ITextComponent deepConverted() {
-        ITextComponent converted = this.converted;
+    net.minecraft.network.chat.Component deepConverted() {
+        net.minecraft.network.chat.Component converted = this.converted;
         if (converted == null || this.deepConvertedLocalized != null) {
             converted = this.converted = ((ComponentBridge) this.wrapped).bridge$asVanillaComponent();
             this.deepConvertedLocalized = null;
@@ -86,8 +85,8 @@ public class AdventureTextComponent implements ITextComponent, TextComponentBrid
     }
 
     @OnlyIn(Dist.CLIENT)
-    ITextComponent deepConvertedLocalized() {
-        ITextComponent converted = this.converted;
+    net.minecraft.network.chat.Component deepConvertedLocalized() {
+        net.minecraft.network.chat.Component converted = this.converted;
         final Locale target = LocaleCache.getLocale(Minecraft.getInstance().options.languageCode);
         if (converted == null || this.deepConvertedLocalized != target) {
             converted = this.converted = this.rendered(target).deepConverted();
@@ -96,7 +95,7 @@ public class AdventureTextComponent implements ITextComponent, TextComponentBrid
         return converted;
     }
 
-    public @Nullable ITextComponent deepConvertedIfPresent() {
+    public net.minecraft.network.chat.@Nullable Component deepConvertedIfPresent() {
         return this.converted;
     }
 
@@ -125,34 +124,34 @@ public class AdventureTextComponent implements ITextComponent, TextComponentBrid
     }
 
     @Override
-    public List<ITextComponent> getSiblings() {
+    public List<net.minecraft.network.chat.Component> getSiblings() {
         return this.deepConverted().getSiblings();
     }
 
     @Override
-    public IFormattableTextComponent plainCopy() {
+    public MutableComponent plainCopy() {
         return this.deepConverted().plainCopy();
     }
 
     @Override
-    public IFormattableTextComponent copy() {
+    public MutableComponent copy() {
         return this.deepConverted().copy();
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public IReorderingProcessor getVisualOrderText() {
+    public FormattedCharSequence getVisualOrderText() {
         return this.deepConvertedLocalized().getVisualOrderText();
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public <T> Optional<T> visit(final IStyledTextAcceptor<T> visitor, final Style style) {
+    public <T> Optional<T> visit(final StyledContentConsumer<T> visitor, final Style style) {
         return this.deepConvertedLocalized().visit(visitor, style);
     }
 
     @Override
-    public <T> Optional<T> visit(final ITextAcceptor<T> visitor) {
+    public <T> Optional<T> visit(final ContentConsumer<T> visitor) {
         return this.deepConverted().visit(visitor);
     }
 

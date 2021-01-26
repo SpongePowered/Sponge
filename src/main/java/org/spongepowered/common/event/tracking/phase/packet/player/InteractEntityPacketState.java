@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.client.CUseEntityPacket;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
@@ -39,21 +36,24 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.server.level.ServerPlayer;
 
 public final class InteractEntityPacketState extends BasicPacketState {
 
     @Override
-    public boolean isPacketIgnored(IPacket<?> packetIn, ServerPlayerEntity packetPlayer) {
-        final CUseEntityPacket useEntityPacket = (CUseEntityPacket) packetIn;
+    public boolean isPacketIgnored(Packet<?> packetIn, ServerPlayer packetPlayer) {
+        final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getTarget(packetPlayer.level);
+        @Nullable net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(packetPlayer.level);
         return entity == null;
     }
 
     @Override
-    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
-        final CUseEntityPacket useEntityPacket = (CUseEntityPacket) packet;
-        net.minecraft.entity.Entity entity = useEntityPacket.getTarget(playerMP.level);
+    public void populateContext(ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
+        final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packet;
+        net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(playerMP.level);
         if (entity != null) {
             final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getItemInHand(useEntityPacket.getHand()));
             if (stack != null) {
@@ -68,9 +68,9 @@ public final class InteractEntityPacketState extends BasicPacketState {
     @Override
     public void unwind(BasicPacketContext phaseContext) {
 
-        final ServerPlayerEntity player = phaseContext.getPacketPlayer();
-        final CUseEntityPacket useEntityPacket = phaseContext.getPacket();
-        final net.minecraft.entity.Entity entity = useEntityPacket.getTarget(player.level);
+        final ServerPlayer player = phaseContext.getPacketPlayer();
+        final ServerboundInteractPacket useEntityPacket = phaseContext.getPacket();
+        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(player.level);
         if (entity == null) {
             // Something happened?
             return;

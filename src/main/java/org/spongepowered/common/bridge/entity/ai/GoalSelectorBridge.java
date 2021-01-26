@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.bridge.entity.ai;
 
-import net.minecraft.entity.MobEntity;
+import net.minecraft.world.entity.Mob;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 
 public interface GoalSelectorBridge {
 
-    MobEntity bridge$getOwner();
+    Mob bridge$getOwner();
 
-    void bridge$setOwner(MobEntity living);
+    void bridge$setOwner(Mob living);
 
     GoalExecutorType bridge$getType();
 

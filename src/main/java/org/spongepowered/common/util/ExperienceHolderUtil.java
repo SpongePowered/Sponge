@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 
@@ -37,7 +37,7 @@ public final class ExperienceHolderUtil {
     // run ExperienceHolderUtilsTest to check your results.
 
     /**
-     * A static version of {@link PlayerEntity#getXpNeededForNextLevel()}.
+     * A static version of {@link Player#getXpNeededForNextLevel()}.
      *
      * @param level The player's level
      * @return The amount of XP between the specified level and the next level
@@ -49,7 +49,7 @@ public final class ExperienceHolderUtil {
     /**
      * Utility method for getting the total experience at an arbitrary level.
      * The formulas here are basically (slightly modified) integrals of those
-     * of {@link PlayerEntity#getXpNeededForNextLevel()}.
+     * of {@link Player#getXpNeededForNextLevel()}.
      *
      * @param level The player's level
      * @return The total amount of XP a player would have if they are exactly
@@ -84,7 +84,7 @@ public final class ExperienceHolderUtil {
         }
     }
 
-    public static void setExperience(final PlayerEntity holder, final Integer value) {
+    public static void setExperience(final Player holder, final Integer value) {
         int level = -1;
 
         int experienceForCurrentLevel;
@@ -125,7 +125,7 @@ public final class ExperienceHolderUtil {
         }
     }
 
-    public static void setExperienceSinceLevel(final PlayerEntity holder, Integer value) {
+    public static void setExperienceSinceLevel(final Player holder, Integer value) {
         while (value >= holder.getXpNeededForNextLevel()) {
             value -= holder.getXpNeededForNextLevel();
         }

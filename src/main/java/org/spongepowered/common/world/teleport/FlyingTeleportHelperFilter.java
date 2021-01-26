@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.world.teleport;
 
-import net.minecraft.block.material.Material;
+import net.minecraft.world.level.material.Material;
 import org.spongepowered.api.block.BlockState;
 
 public final class FlyingTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return ((net.minecraft.block.BlockState) blockState).getMaterial() != Material.CACTUS;
+        return ((net.minecraft.world.level.block.state.BlockState) blockState).getMaterial() != Material.CACTUS;
     }
 
 }

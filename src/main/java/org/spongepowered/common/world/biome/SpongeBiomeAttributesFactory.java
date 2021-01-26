@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.world.biome;
 
-import net.minecraft.world.biome.Biome;
+import net.minecraft.world.level.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
 
 public final class SpongeBiomeAttributesFactory implements BiomeAttributes.Factory {
 
     @Override
     public BiomeAttributes of(final float temperature, final float humidity, final float altitude, final float weirdness, final float offset) {
-        return (BiomeAttributes) new Biome.Attributes(temperature, humidity, altitude, weirdness, offset);
+        return (BiomeAttributes) new Biome.ClimateParameters(temperature, humidity, altitude, weirdness, offset);
     }
 }

@@ -25,24 +25,24 @@
 package org.spongepowered.common.util;
 
 import com.google.common.collect.EnumBiMap;
-import net.minecraft.util.ActionResultType;
+import net.minecraft.world.InteractionResult;
 import org.spongepowered.api.util.Tristate;
 
 public final class TristateUtil {
 
-    private static final EnumBiMap<ActionResultType, Tristate> map = EnumBiMap.create(ActionResultType.class, Tristate.class);
+    private static final EnumBiMap<InteractionResult, Tristate> map = EnumBiMap.create(InteractionResult.class, Tristate.class);
 
     static {
-        TristateUtil.map.put(ActionResultType.FAIL, Tristate.FALSE);
-        TristateUtil.map.put(ActionResultType.PASS, Tristate.UNDEFINED);
-        TristateUtil.map.put(ActionResultType.SUCCESS, Tristate.TRUE);
+        TristateUtil.map.put(InteractionResult.FAIL, Tristate.FALSE);
+        TristateUtil.map.put(InteractionResult.PASS, Tristate.UNDEFINED);
+        TristateUtil.map.put(InteractionResult.SUCCESS, Tristate.TRUE);
     }
 
-    public static Tristate fromActionResult(final ActionResultType result) {
+    public static Tristate fromActionResult(final InteractionResult result) {
         return TristateUtil.map.get(result);
     }
 
-    public static ActionResultType toActionResult(final Tristate tristate) {
+    public static InteractionResult toActionResult(final Tristate tristate) {
         return TristateUtil.map.inverse().get(tristate);
     }
 

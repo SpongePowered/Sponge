@@ -9,27 +9,27 @@
     "client": [
         "client.ClientBrandRetrieverMixin_Vanilla",
         "client.MinecraftMixin_Vanilla",
-        "client.gui.screen.MainMenuScreenMixin_Vanilla",
-        "client.network.login.ClientLoginNetHandlerMixin_Vanilla",
-        "client.network.play.ClientPlayNetHandlerMixin_Vanilla",
-        "server.integrated.IntegratedServerMixin_Vanilla"
+        "client.gui.screens.TitleScreenMixin_Vanilla",
+        "client.multiplayer.ClientHandshakePacketListenerImplMixin_Vanilla",
+        "client.multiplayer.ClientPacketListenerMixin_Vanilla",
+        "client.server.IntegratedServerMixin_Vanilla"
     ],
     "server": [
         "server.dedicated.DedicatedServerMixin_Vanilla"
     ],
     "mixins": [
-        "crash.CrashReportMixin_Vanilla",
+        "CrashReportMixin_Vanilla",
         "entity.player.EntityMixin_Vanilla",
-        "entity.player.ServerPlayerEntityMixin_Vanilla",
-        "network.login.ServerLoginNetHandler_1Mixin_Vanilla",
-        "network.login.ServerLoginNetHandlerMixin_Vanilla",
-        "network.play.ServerPlayNetHandlerMixin_Vanilla",
+        "server.level.ServerPlayerMixin_Vanilla",
+        "network.loginnet.minecraft.server.network.ServerLoginPacketListenerImpl_Mixin_Vanilla",
+        "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
+        "server.network.ServerGamePacketListenerImplMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
-        "util.registry.BootstrapMixin_Vanilla",
-        "util.registry.RegistryMixin_Vanilla",
-        "util.registry.SimpleRegistryMixin_Vanilla",
-        "util.registry.MutableRegistryMixin_Vanilla",
-        "entity.item.minecart.ContainerMinecartEntityMixin_Vanilla",
+        "server.BootstrapMixin_Vanilla",
+        "core.RegistryMixin_Vanilla",
+        "core.MappedRegistryMixin_Vanilla",
+        "core.WritableRegistryMixin_Vanilla",
+        "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla",
         "entity.item.minecart.EnderPearlEntityMixin_Vanilla"
     ],
     "injectors": {

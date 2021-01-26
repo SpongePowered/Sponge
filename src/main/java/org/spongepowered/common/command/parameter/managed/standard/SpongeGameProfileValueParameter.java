@@ -30,8 +30,8 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.arguments.GameProfileArgument;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.GameProfileArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -79,7 +79,7 @@ public final class SpongeGameProfileValueParameter extends ResourceKeyedArgument
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
         try {
             final Collection<com.mojang.authlib.GameProfile> profileCollection =
-                    this.argument.parse((StringReader) reader).getNames((CommandSource) context.getCause());
+                    this.argument.parse((StringReader) reader).getNames((CommandSourceStack) context.getCause());
             if (profileCollection.size() == 1) {
                 return Optional.of(SpongeGameProfile.of(profileCollection.iterator().next()));
             } else if (profileCollection.isEmpty()) {

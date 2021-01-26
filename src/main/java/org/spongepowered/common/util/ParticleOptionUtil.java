@@ -25,10 +25,6 @@
 package org.spongepowered.common.util;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.particles.BlockParticleData;
-import net.minecraft.particles.ItemParticleData;
-import net.minecraft.particles.ParticleType;
-import net.minecraft.particles.RedstoneParticleData;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleOptions;
@@ -38,6 +34,10 @@ import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleType;
 
 public final class ParticleOptionUtil {
 
@@ -50,11 +50,11 @@ public final class ParticleOptionUtil {
         options.put(ParticleOptions.OFFSET.get(), Vector3d.ZERO);
         options.put(ParticleOptions.QUANTITY.get(), 1);
 
-        if (type.getDeserializer() == BlockParticleData.DESERIALIZER) {
+        if (type.getDeserializer() == BlockParticleOption.DESERIALIZER) {
             options.put(ParticleOptions.BLOCK_STATE.get(), BlockTypes.AIR.get().getDefaultState());
-        } else if (type.getDeserializer() == ItemParticleData.DESERIALIZER) {
+        } else if (type.getDeserializer() == ItemParticleOption.DESERIALIZER) {
             options.put(ParticleOptions.ITEM_STACK_SNAPSHOT.get(), ItemStackSnapshot.empty());
-        } else if (type.getDeserializer() == RedstoneParticleData.DESERIALIZER) {
+        } else if (type.getDeserializer() == DustParticleOptions.DESERIALIZER) {
             options.put(ParticleOptions.COLOR.get(), Color.RED);
         }
 

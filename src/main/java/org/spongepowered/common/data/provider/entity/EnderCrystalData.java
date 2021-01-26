@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.EnderCrystalEntity;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
@@ -41,7 +41,7 @@ public final class EnderCrystalData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(EnderCrystalEntity.class)
+                .asMutable(EndCrystal.class)
                     .create(Keys.HEALTH)
                         .get(h -> h.removed ? 0.0 : EnderCrystalData.ALIVE_HEALTH)
                         .setAnd((h, v) -> {
@@ -56,8 +56,8 @@ public final class EnderCrystalData {
                             return true;
                         })
                     .create(Keys.SHOW_BOTTOM)
-                        .get(EnderCrystalEntity::showsBottom)
-                        .set(EnderCrystalEntity::setShowBottom)
+                        .get(EndCrystal::showsBottom)
+                        .set(EndCrystal::setShowBottom)
                     .create(Keys.TARGET_POSITION)
                         .get(h -> VecHelper.toVector3i(h.getBeamTarget()))
                         .set((h, v) -> h.setBeamTarget(VecHelper.toBlockPos(v)));

@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.bridge.command;
 
-import net.minecraft.command.ICommandSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 
 import java.util.function.Supplier;
+import net.minecraft.commands.CommandSource;
 
 public interface CommandSourceBridge {
 
     Cause bridge$getCause();
 
-    ICommandSource bridge$getICommandSource();
+    CommandSource bridge$getICommandSource();
 
     void bridge$updateFrameFromICommandSource(CauseStackManager.StackFrame frame);
 

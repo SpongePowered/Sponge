@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.FallingBlockEntity;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.item.FallingBlockEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -46,7 +46,7 @@ public final class FallingBlockData {
                 .asMutable(FallingBlockEntityAccessor.class)
                     .create(Keys.BLOCK_STATE)
                         .get(h -> (BlockState) h.accessor$blockState())
-                        .set((h, v) -> h.accessor$blockState((net.minecraft.block.BlockState) v))
+                        .set((h, v) -> h.accessor$blockState((net.minecraft.world.level.block.state.BlockState) v))
                     .create(Keys.CAN_PLACE_AS_BLOCK)
                         .get(h -> !h.accessor$cancelDrop())
                         .set((h, v) -> h.accessor$cancelDrop(!v))

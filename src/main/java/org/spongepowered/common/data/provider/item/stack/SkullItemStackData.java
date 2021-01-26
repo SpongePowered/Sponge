@@ -25,10 +25,10 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.SkullItem;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PlayerHeadItem;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.profile.SpongeGameProfile;
@@ -45,17 +45,17 @@ public final class SkullItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.GAME_PROFILE)
                         .get(h -> {
-                            final CompoundNBT tag = h.getTagElement(Constants.Item.Skull.ITEM_SKULL_OWNER);
-                            final GameProfile mcProfile = tag == null ? null : NBTUtil.readGameProfile(tag);
+                            final CompoundTag tag = h.getTagElement(Constants.Item.Skull.ITEM_SKULL_OWNER);
+                            final GameProfile mcProfile = tag == null ? null : NbtUtils.readGameProfile(tag);
                             return mcProfile == null ? null : SpongeGameProfile.of(mcProfile);
                         })
                         .set((h, v) -> {
                             final com.mojang.authlib.GameProfile mcProfile = SpongeGameProfile.toMcProfile(v);
-                            final CompoundNBT tag = NBTUtil.writeGameProfile(new CompoundNBT(), mcProfile);
+                            final CompoundTag tag = NbtUtils.writeGameProfile(new CompoundTag(), mcProfile);
                             h.addTagElement(Constants.Item.Skull.ITEM_SKULL_OWNER, tag);
                         })
                         .delete(h -> h.removeTagKey(Constants.Item.Skull.ITEM_SKULL_OWNER))
-                        .supports(h -> h.getItem() instanceof SkullItem);
+                        .supports(h -> h.getItem() instanceof PlayerHeadItem);
     }
     // @formatter:on
 }

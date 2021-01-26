@@ -24,24 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.FallingBlockEntity;
-import net.minecraft.entity.item.HangingEntity;
-import net.minecraft.entity.item.ItemFrameEntity;
-import net.minecraft.util.CombatEntry;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.common.accessor.entity.item.ItemFrameEntityAccessor;
-import org.spongepowered.common.accessor.util.CombatEntryAccessor;
-import org.spongepowered.common.accessor.util.CombatTrackerAccessor;
+import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
+import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
+import org.spongepowered.common.accessor.world.entity.decoration.ItemFrameAccessor;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.EntityTrackedBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -54,6 +45,15 @@ import org.spongepowered.common.world.BlockChange;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.CombatEntry;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.phys.AABB;
 
 class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
@@ -149,7 +149,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     private void appendContextOfPossibleEntityDeath(final Entity tickingEntity, final CauseStackManager.StackFrame frame) {
-        if (EntityUtil.isEntityDead((net.minecraft.entity.Entity) tickingEntity)) {
+        if (EntityUtil.isEntityDead((net.minecraft.world.entity.Entity) tickingEntity)) {
             if (tickingEntity instanceof LivingEntity) {
                 final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) tickingEntity).getCombatTracker()).invoker$getMostSignificantFall();
                 if (entry != null) {
@@ -173,8 +173,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-            final List<HangingEntity> hangingEntities = ((ServerWorld) tickingEntity.getWorld())
-                .getEntitiesOfClass(HangingEntity.class, new AxisAlignedBB(blockPos, blockPos).inflate(1.1D, 1.1D, 1.1D),
+            final List<HangingEntity> hangingEntities = ((ServerLevel) tickingEntity.getWorld())
+                .getEntitiesOfClass(HangingEntity.class, new AABB(blockPos, blockPos).inflate(1.1D, 1.1D, 1.1D),
                     entityIn -> {
                         if (entityIn == null) {
                             return false;
@@ -201,10 +201,10 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                         return false;
                     });
             for (final HangingEntity entityHanging : hangingEntities) {
-                if (entityHanging instanceof ItemFrameEntity) {
-                    final ItemFrameEntity itemFrame = (ItemFrameEntity) entityHanging;
+                if (entityHanging instanceof ItemFrame) {
+                    final ItemFrame itemFrame = (ItemFrame) entityHanging;
                     if (!itemFrame.removed) {
-                        ((ItemFrameEntityAccessor) itemFrame).invoker$dropItem((net.minecraft.entity.Entity) tickingEntity, true);
+                        ((ItemFrameAccessor) itemFrame).invoker$dropItem((net.minecraft.world.entity.Entity) tickingEntity, true);
                     }
                     itemFrame.remove();
                 }

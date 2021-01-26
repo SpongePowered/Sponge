@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.monster.GuardianEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Guardian;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.common.accessor.entity.monster.GuardianEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.GuardianAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class GuardianData {
@@ -39,10 +39,10 @@ public final class GuardianData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(GuardianEntity.class)
+                .asMutable(Guardian.class)
                     .create(Keys.BEAM_TARGET_ENTITY)
                         .get(h -> (Living) h.getActiveAttackTarget())
-                        .set((h, v) -> ((GuardianEntityAccessor) h).invoker$setActiveAttackTarget(((LivingEntity) v).getId()));
+                        .set((h, v) -> ((GuardianAccessor) h).invoker$setActiveAttackTarget(((LivingEntity) v).getId()));
     }
     // @formatter:on
 }

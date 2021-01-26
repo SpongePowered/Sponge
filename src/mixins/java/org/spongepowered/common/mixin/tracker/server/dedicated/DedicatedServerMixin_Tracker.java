@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.tracker.server.dedicated;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,7 +53,7 @@ public abstract class DedicatedServerMixin_Tracker {
      * will apply to any world. Additionally, fire a spawn protection event
      */
     @Overwrite
-    public boolean isUnderSpawnProtection(final ServerWorld worldIn, final BlockPos pos, final PlayerEntity playerIn) {
+    public boolean isUnderSpawnProtection(final ServerLevel worldIn, final BlockPos pos, final Player playerIn) {
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
         final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
         if (!context.isInteraction()) {

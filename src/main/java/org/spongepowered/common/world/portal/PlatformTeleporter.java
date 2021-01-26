@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.world.portal;
 
-import net.minecraft.block.PortalInfo;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.function.Function;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.portal.PortalInfo;
 
 /**
  * For wrapping around Forge's ITeleporter
@@ -40,11 +40,11 @@ import java.util.function.Function;
 public interface PlatformTeleporter {
 
     @Nullable
-    PortalInfo getPortalInfo(Entity entity, ServerWorld currentWorld, ServerWorld targetWorld, Vector3d currentPosition);
+    PortalInfo getPortalInfo(Entity entity, ServerLevel currentWorld, ServerLevel targetWorld, Vector3d currentPosition);
 
     // Implementor note: the final function Boolean is true if a portal exists
     @Nullable
-    Entity performTeleport(Entity entity, ServerWorld currentWorld, ServerWorld targetWorld, float xRot, Function<Boolean, Entity> teleportLogic);
+    Entity performTeleport(Entity entity, ServerLevel currentWorld, ServerLevel targetWorld, float xRot, Function<Boolean, Entity> teleportLogic);
 
     // This isn't if it's a vanilla portal - it's if it's vanilla(ish) logic.
     boolean isVanilla();

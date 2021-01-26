@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import net.minecraft.entity.merchant.villager.VillagerProfession;
-import net.minecraft.item.MerchantOffer;
-import net.minecraft.item.MerchantOffers;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.api.data.type.VillagerType;
@@ -35,6 +31,10 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.stream.Collectors;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 
 public final class VillagerData {
 
@@ -44,7 +44,7 @@ public final class VillagerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(VillagerEntity.class)
+                .asMutable(Villager.class)
                     .create(Keys.PROFESSION_LEVEL)
                         .get(h -> h.getVillagerData().getLevel())
                         .set((h, v) -> h.setVillagerData(h.getVillagerData().setLevel(v)))
@@ -52,8 +52,8 @@ public final class VillagerData {
                         .get(h -> (ProfessionType) h.getVillagerData().getProfession())
                         .set((h, v) -> h.setVillagerData(h.getVillagerData().setProfession((VillagerProfession) v)))
                     .create(Keys.EXPERIENCE)
-                        .get(VillagerEntity::getVillagerXp)
-                        .set(VillagerEntity::setVillagerXp)
+                        .get(Villager::getVillagerXp)
+                        .set(Villager::setVillagerXp)
                     .delete(h -> h.setVillagerXp(0))
                     .create(Keys.EXPERIENCE_LEVEL)
                         .get(h -> h.getVillagerData().getLevel())
@@ -69,7 +69,7 @@ public final class VillagerData {
                         .set((h, v) -> h.setOffers(v.stream().map(MerchantOffer.class::cast).collect(Collectors.toCollection(MerchantOffers::new))))
                     .create(Keys.VILLAGER_TYPE)
                         .get(h -> (VillagerType) (Object) h.getVillagerData().getType())
-                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setType((net.minecraft.entity.villager.VillagerType) (Object) v)));
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setType((net.minecraft.world.entity.npc.VillagerType) (Object) v)));
     }
     // @formatter:on
 }

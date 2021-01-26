@@ -25,28 +25,27 @@
 package org.spongepowered.common.hooks;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.structure.LegacyStructureDataUtil;
-import net.minecraft.world.storage.DimensionSavedDataManager;
-
 import java.util.List;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.structure.LegacyStructureDataHandler;
+import net.minecraft.world.level.storage.DimensionDataStorage;
 
 public interface WorldGenerationHooks {
 
-    default LegacyStructureDataUtil createLegacyStructureDataUtil(final RegistryKey<World> dimensionType, final DimensionSavedDataManager savedData) {
-        if (dimensionType == World.OVERWORLD) {
-            return new LegacyStructureDataUtil(
+    default LegacyStructureDataHandler createLegacyStructureDataUtil(final ResourceKey<Level> dimensionType, final DimensionDataStorage savedData) {
+        if (dimensionType == Level.OVERWORLD) {
+            return new LegacyStructureDataHandler(
                 savedData,
                 ImmutableList.of("Monument", "Stronghold", "Village", "Mineshaft", "Temple", "Mansion"),
                 ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument")
             );
-        } else if (dimensionType == World.NETHER) {
+        } else if (dimensionType == Level.NETHER) {
             final List<String> keys = ImmutableList.of("Fortress");
-            return new LegacyStructureDataUtil(savedData, keys, keys);
-        } else if (dimensionType == World.END) {
+            return new LegacyStructureDataHandler(savedData, keys, keys);
+        } else if (dimensionType == Level.END) {
             final List<String> keys = ImmutableList.of("EndCity");
-            return new LegacyStructureDataUtil(savedData, keys, keys);
+            return new LegacyStructureDataHandler(savedData, keys, keys);
         } else {
             throw new RuntimeException(String.format("Unknown dimension type : %s", dimensionType));
         }

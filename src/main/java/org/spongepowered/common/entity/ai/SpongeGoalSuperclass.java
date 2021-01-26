@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity.ai;
 
-import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 public abstract class SpongeGoalSuperclass extends Goal {
 

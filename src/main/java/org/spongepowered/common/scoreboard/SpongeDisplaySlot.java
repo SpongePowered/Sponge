@@ -25,7 +25,7 @@
 package org.spongepowered.common.scoreboard;
 
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -35,8 +35,8 @@ import java.util.function.Function;
 
 public final class SpongeDisplaySlot implements DisplaySlot {
 
-    private final @Nullable TextFormatting formatting;
-    private final @Nullable Function<TextFormatting, DisplaySlot> withColorFunction;
+    private final @Nullable ChatFormatting formatting;
+    private final @Nullable Function<ChatFormatting, DisplaySlot> withColorFunction;
 
     private @Nullable NamedTextColor color;
 
@@ -44,7 +44,7 @@ public final class SpongeDisplaySlot implements DisplaySlot {
         this(null, null);
     }
 
-    public SpongeDisplaySlot(@Nullable final TextFormatting color, @Nullable final Function<TextFormatting, DisplaySlot> withColorFunction) {
+    public SpongeDisplaySlot(@Nullable final ChatFormatting color, @Nullable final Function<ChatFormatting, DisplaySlot> withColorFunction) {
         this.withColorFunction = withColorFunction;
         this.formatting = color;
     }
@@ -55,7 +55,7 @@ public final class SpongeDisplaySlot implements DisplaySlot {
             return this;
         }
         final DisplaySlot slot = this.withColorFunction.apply(
-                color == null ? TextFormatting.RESET : SpongeAdventure.asVanilla(color));
+                color == null ? ChatFormatting.RESET : SpongeAdventure.asVanilla(color));
         return slot == null ? this : slot;
     }
 

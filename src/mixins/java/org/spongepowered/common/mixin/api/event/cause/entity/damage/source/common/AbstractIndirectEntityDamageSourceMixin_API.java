@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.event.cause.entity.damage.source.common;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;

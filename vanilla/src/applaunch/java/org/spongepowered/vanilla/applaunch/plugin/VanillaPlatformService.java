@@ -29,14 +29,15 @@ import com.google.common.collect.Maps;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
-import net.minecraftforge.accesstransformer.AccessTransformerEngine;
+import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
 import org.spongepowered.vanilla.applaunch.Main;
+import org.spongepowered.vanilla.applaunch.service.AccessWidenerLaunchService;
 import org.spongepowered.vanilla.installer.Constants;
 
-import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +50,8 @@ public final class VanillaPlatformService implements ITransformationService {
 
     private static final VanillaPluginEngine pluginEngine = Main.getInstance().getPluginEngine();
 
-    @Nonnull
     @Override
-    public String name() {
+    public @NonNull String name() {
         return VanillaPlatformService.NAME;
     }
 
@@ -69,6 +69,9 @@ public final class VanillaPlatformService implements ITransformationService {
     public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
         VanillaPlatformService.pluginEngine.locatePluginResources();
         VanillaPlatformService.pluginEngine.createPluginCandidates();
+        final ILaunchPluginService accessWidener = environment.findLaunchPlugin(AccessWidenerLaunchService.NAME)
+                .orElse(null);
+
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
@@ -77,15 +80,15 @@ public final class VanillaPlatformService implements ITransformationService {
             for (final PluginResource resource : resources) {
 
                 // Handle Access Transformers
-                if (resource instanceof JVMPluginResource) {
+                if (accessWidener != null && resource instanceof JVMPluginResource) {
                     ((JVMPluginResource) resource).getManifest().ifPresent(manifest -> {
-                        final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.AT);
+                        final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.ACCESS_WIDENER);
                         if (atFiles != null) {
                             for (final String atFile : atFiles.split(",")) {
-                                if (!atFile.endsWith(".cfg")) {
+                                if (!atFile.endsWith(".accesswidener")) {
                                     continue;
                                 }
-                                AccessTransformerEngine.INSTANCE.addResource(resource.getFileSystem().getPath("META-INF").resolve(atFile), atFile);
+                                accessWidener.offerResource(resource.getFileSystem().getPath(atFile), atFile);
                             }
                         }
                     });
@@ -114,16 +117,15 @@ public final class VanillaPlatformService implements ITransformationService {
                 .getLogger().info("Plugin language loader '{}' found.", k));
     }
 
-    @Nonnull
     @Override
-    public List<ITransformer> transformers() {
+    public @NonNull List<ITransformer> transformers() {
         return ImmutableList.of();
     }
 
     private String getCodeSource() {
         try {
             return this.getClass().getProtectionDomain().getCodeSource().getLocation().toString();
-        } catch (Throwable th) {
+        } catch (final Throwable th) {
             return "Unknown";
         }
     }

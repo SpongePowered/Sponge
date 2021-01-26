@@ -26,18 +26,6 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.block.Block;
-import net.minecraft.item.Food;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.PickaxeItem;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -45,7 +33,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.NestedTableEntry;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.accessor.item.ToolItemAccessor;
+import org.spongepowered.common.accessor.world.item.DiggerItemAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
@@ -53,6 +41,18 @@ import org.spongepowered.common.util.NBTCollectors;
 
 import java.util.List;
 import java.util.Set;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 public final class ItemStackData {
@@ -67,10 +67,10 @@ public final class ItemStackData {
                     .create(Keys.APPLICABLE_POTION_EFFECTS)
                         .get(h -> {
                             if (h.isEdible()) {
-                                final List<Pair<EffectInstance,Float>> itemEffects = h.getItem().getFoodProperties().getEffects();
+                                final List<Pair<MobEffectInstance,Float>> itemEffects = h.getItem().getFoodProperties().getEffects();
                                 final WeightedTable<PotionEffect> effects = new WeightedTable<>();
                                 final ChanceTable<PotionEffect> chance = new ChanceTable<>();
-                                for (final Pair<EffectInstance,Float> effect : itemEffects) {
+                                for (final Pair<MobEffectInstance,Float> effect : itemEffects) {
                                     chance.add((PotionEffect) effect.getFirst(), effect.getSecond());
                                 }
                                 effects.add(new NestedTableEntry<>(1, chance));
@@ -80,7 +80,7 @@ public final class ItemStackData {
                         })
                     .create(Keys.BURN_TIME)
                         .get(h -> {
-                            final Integer burnTime = AbstractFurnaceTileEntity.getFuel().get(h.getItem());
+                            final Integer burnTime = AbstractFurnaceBlockEntity.getFuel().get(h.getItem());
                             if (burnTime != null && burnTime > 0) {
                                 return burnTime;
                             }
@@ -89,8 +89,8 @@ public final class ItemStackData {
                     .create(Keys.CAN_HARVEST)
                         .get(h -> {
                             final Item item = h.getItem();
-                            if (item instanceof ToolItemAccessor && !(item instanceof PickaxeItem)) {
-                                final Set<Block> blocks = ((ToolItemAccessor) item).accessor$blocks();
+                            if (item instanceof DiggerItemAccessor && !(item instanceof PickaxeItem)) {
+                                final Set<Block> blocks = ((DiggerItemAccessor) item).accessor$blocks();
                                 return ImmutableSet.copyOf((Set<BlockType>) (Object) blocks);
                             }
 
@@ -105,7 +105,7 @@ public final class ItemStackData {
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> {
                             if (h.getItem() == Items.WRITTEN_BOOK) {
-                                final CompoundNBT tag = h.getTag();
+                                final CompoundTag tag = h.getTag();
                                 if (tag != null) {
                                     final String title = tag.getString(Constants.Item.Book.ITEM_BOOK_TITLE);
                                     return SpongeAdventure.legacySection(title);
@@ -116,25 +116,25 @@ public final class ItemStackData {
                         .setAnd((h, v) -> {
                             if (h.getItem() == Items.WRITTEN_BOOK) {
                                 final String legacy = SpongeAdventure.legacySection(v);
-                                h.addTagElement(Constants.Item.Book.ITEM_BOOK_TITLE, StringNBT.valueOf(legacy));
+                                h.addTagElement(Constants.Item.Book.ITEM_BOOK_TITLE, StringTag.valueOf(legacy));
                                 return true;
                             }
                             return false;
                         })
                     .create(Keys.CUSTOM_MODEL_DATA)
                         .get(h -> {
-                            final CompoundNBT tag = h.getTag();
+                            final CompoundTag tag = h.getTag();
                             if (tag == null || !tag.contains(Constants.Item.CUSTOM_MODEL_DATA, Constants.NBT.TAG_INT)) {
                                 return null;
                             }
                             return tag.getInt(Constants.Item.CUSTOM_MODEL_DATA);
                         })
                         .set((h, v) -> {
-                            final CompoundNBT tag = h.getOrCreateTag();
+                            final CompoundTag tag = h.getOrCreateTag();
                             tag.putInt(Constants.Item.CUSTOM_MODEL_DATA, v);
                         })
                         .delete(h -> {
-                            final CompoundNBT tag = h.getTag();
+                            final CompoundTag tag = h.getTag();
                             if (tag != null) {
                                 tag.remove(Constants.Item.CUSTOM_MODEL_DATA);
                             }
@@ -145,7 +145,7 @@ public final class ItemStackData {
                         .delete(ItemStack::resetHoverName)
                     .create(Keys.IS_UNBREAKABLE)
                         .get(h -> {
-                            final CompoundNBT tag = h.getTag();
+                            final CompoundTag tag = h.getTag();
                             if (tag == null || !tag.contains(Constants.Item.ITEM_UNBREAKABLE, Constants.NBT.TAG_BYTE)) {
                                 return false;
                             }
@@ -155,12 +155,12 @@ public final class ItemStackData {
                         .delete(h -> ItemStackData.setIsUnbrekable(h, false))
                     .create(Keys.LORE)
                         .get(h -> {
-                            final CompoundNBT tag = h.getTag();
+                            final CompoundTag tag = h.getTag();
                             if (tag == null || tag.contains(Constants.Item.ITEM_DISPLAY)) {
                                 return null;
                             }
 
-                            final ListNBT list = tag.getList(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
+                            final ListTag list = tag.getList(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
                             return list.isEmpty() ? null : SpongeAdventure.json(list.stream().collect(NBTCollectors.toStringList()));
                         })
                         .set((h, v) -> {
@@ -168,7 +168,7 @@ public final class ItemStackData {
                                 ItemStackData.deleteLore(h);
                                 return;
                             }
-                            final ListNBT list = SpongeAdventure.listTagJson(v);
+                            final ListTag list = SpongeAdventure.listTagJson(v);
                             h.getOrCreateTagElement(Constants.Item.ITEM_DISPLAY).put(Constants.Item.ITEM_LORE, list);
                         })
                         .delete(ItemStackData::deleteLore)
@@ -182,7 +182,7 @@ public final class ItemStackData {
                     .create(Keys.REPLENISHED_FOOD)
                         .get(h -> {
                             if (h.getItem().isEdible()) {
-                                final Food food = h.getItem().getFoodProperties();
+                                final FoodProperties food = h.getItem().getFoodProperties();
                                 return food == null ? null : food.getNutrition();
                             }
                             return null;
@@ -191,7 +191,7 @@ public final class ItemStackData {
                     .create(Keys.REPLENISHED_SATURATION)
                         .get(h -> {
                             if (h.getItem().isEdible()) {
-                                final Food food = h.getItem().getFoodProperties();
+                                final FoodProperties food = h.getItem().getFoodProperties();
                                 if (food != null) {
                                     // Translate's Minecraft's weird internal value to the actual saturation value
                                     return food.getSaturationModifier() * food.getNutrition() * 2.0;
@@ -207,7 +207,7 @@ public final class ItemStackData {
         if (value == null || (!value && !stack.hasTag())) {
             return;
         }
-        final CompoundNBT tag = stack.getOrCreateTag();
+        final CompoundTag tag = stack.getOrCreateTag();
         if (value) {
             tag.putBoolean(Constants.Item.ITEM_UNBREAKABLE, true);
         } else {
@@ -216,7 +216,7 @@ public final class ItemStackData {
     }
 
     private static void deleteLore(final ItemStack stack) {
-        final CompoundNBT tag = stack.getTag();
+        final CompoundTag tag = stack.getTag();
         if (tag != null && tag.contains(Constants.Item.ITEM_DISPLAY)) {
             tag.getCompound(Constants.Item.ITEM_DISPLAY).remove(Constants.Item.ITEM_LORE);
         }

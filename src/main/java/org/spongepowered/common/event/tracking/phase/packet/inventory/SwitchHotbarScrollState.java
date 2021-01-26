@@ -25,12 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.client.CHeldItemChangePacket;
-import net.minecraft.network.play.server.SHeldItemChangePacket;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -49,20 +43,25 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.Slot;
 import java.util.List;
 import java.util.Optional;
 
 public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
 
     @Override
-    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet,
+    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet,
         final InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
         context.setOldHighlightedSlot(playerMP.inventory.selected);
     }
 
     @Override
-    public ClickContainerEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer,
+    public ClickContainerEvent createInventoryEvent(final ServerPlayer playerMP, final Container openContainer,
         final Transaction<ItemStackSnapshot> transaction, final List<SlotTransaction> slotTransactions,
         final List<Entity> capturedEntities,
         final int usedButton, @Nullable final org.spongepowered.api.item.inventory.Slot slot) {
@@ -75,12 +74,12 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
     @Override
     public void unwind(final InventoryPacketContext context) {
 
-        final ServerPlayerEntity player = context.getPacketPlayer();
-        final CHeldItemChangePacket itemChange = context.getPacket();
+        final ServerPlayer player = context.getPacketPlayer();
+        final ServerboundSetCarriedItemPacket itemChange = context.getPacket();
         final int previousSlot = context.getOldHighlightedSlotId();
-        final net.minecraft.inventory.container.Container inventoryContainer = player.containerMenu;
-        final PlayerInventory inventory = player.inventory;
-        final int preHotbarSize = inventory.items.size() - PlayerInventory.getSelectionSize() + inventory.armor.size() + 4 + 1; // Crafting Grid & Result
+        final net.minecraft.world.inventory.AbstractContainerMenu inventoryContainer = player.containerMenu;
+        final net.minecraft.world.entity.player.Inventory inventory = player.inventory;
+        final int preHotbarSize = inventory.items.size() - net.minecraft.world.entity.player.Inventory.getSelectionSize() + inventory.armor.size() + 4 + 1; // Crafting Grid & Result
         final Slot sourceSlot = inventoryContainer.getSlot(previousSlot + preHotbarSize);
         final Slot targetSlot = inventoryContainer.getSlot(itemChange.getSlot() + preHotbarSize);
 
@@ -97,11 +96,11 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
             final ChangeInventoryEvent.Held changeInventoryEventHeld = SpongeEventFactory
                 .createChangeInventoryEventHeld(frame.getCurrentCause(), slotNew, (Inventory) inventoryContainer,
                     slotPrev, transactions);
-            final net.minecraft.inventory.container.Container openContainer = player.containerMenu;
+            final net.minecraft.world.inventory.AbstractContainerMenu openContainer = player.containerMenu;
             SpongeCommon.postEvent(changeInventoryEventHeld);
             if (changeInventoryEventHeld.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
                 changeInventoryEventHeld.getTransactions())) {
-                player.connection.send(new SHeldItemChangePacket(previousSlot));
+                player.connection.send(new ClientboundSetCarriedItemPacket(previousSlot));
                 inventory.selected = previousSlot;
             } else {
                 PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(),

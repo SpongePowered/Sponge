@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.world.generation.config.flat;
 
-import net.minecraft.block.Block;
-import net.minecraft.world.gen.FlatLayerInfo;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
-import org.spongepowered.common.accessor.world.gen.FlatLayerInfoAccessor;
+import org.spongepowered.common.accessor.world.level.levelgen.flat.FlatLayerInfoAccessor;
 
 public final class SpongeLayerConfigFactory implements LayerConfig.Factory {
 
     @Override
     public LayerConfig of(final int height, final BlockState block) {
         final FlatLayerInfo layer = new FlatLayerInfo(height, (Block) block.getType());
-        ((FlatLayerInfoAccessor) layer).accessor$blockState((net.minecraft.block.BlockState) block);
+        ((FlatLayerInfoAccessor) layer).accessor$blockState((net.minecraft.world.level.block.state.BlockState) block);
         return (LayerConfig) layer;
     }
 }

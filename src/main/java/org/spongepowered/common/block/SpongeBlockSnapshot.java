@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.block;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -66,6 +61,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 @DefaultQualifier(NonNull.class)
 public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutableDataHolder<BlockSnapshot>, DataContainerHolder.Immutable<BlockSnapshot>, DataCompoundHolder {
@@ -73,11 +72,11 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     private final BlockState blockState;
     private final ResourceKey worldKey;
     private final Vector3i pos;
-    @Nullable final CompoundNBT compound;
+    @Nullable final CompoundTag compound;
     // Internal use only
     private final BlockPos blockPos;
     private final SpongeBlockChangeFlag changeFlag;
-    @Nullable WeakReference<ServerWorld> world;
+    @Nullable WeakReference<ServerLevel> world;
     @MonotonicNonNull public BlockChange blockChange; // used for post event
 
     SpongeBlockSnapshot(final SpongeBlockSnapshotBuilder builder) {
@@ -131,22 +130,22 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     public boolean restore(final boolean force, final BlockChangeFlag flag) {
         // TODO - rewrite with the PhaseTracker being the hook or use SpongeImplHooks to do the restore.
 
-        final Optional<ServerWorld> optionalWorld = Optional.ofNullable(this.world.get());
+        final Optional<ServerLevel> optionalWorld = Optional.ofNullable(this.world.get());
         if (!optionalWorld.isPresent()) {
             return false;
         }
 
-        final ServerWorld world = optionalWorld.get();
+        final ServerLevel world = optionalWorld.get();
         // We need to deterministically define the context as nullable if we don't need to enter.
         // this way we guarantee an exit.
         try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER)) {
             context.buildAndSwitch();
             final BlockPos pos = VecHelper.toBlockPos(this.pos);
-            if (!World.isInWorldBounds(pos)) { // Invalid position. Inline this check
+            if (!net.minecraft.world.level.Level.isInWorldBounds(pos)) { // Invalid position. Inline this check
                 return false;
             }
-            final net.minecraft.block.BlockState current = world.getBlockState(pos);
-            final net.minecraft.block.BlockState replaced = (net.minecraft.block.BlockState) this.blockState;
+            final net.minecraft.world.level.block.state.BlockState current = world.getBlockState(pos);
+            final net.minecraft.world.level.block.state.BlockState replaced = (net.minecraft.world.level.block.state.BlockState) this.blockState;
             if (!force && (current.getBlock() != replaced.getBlock() || current != replaced)) {
                 return false;
             }
@@ -158,14 +157,14 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
             world.removeBlockEntity(pos);
             world.setBlock(pos, replaced, BlockChangeFlagManager.andNotifyClients(flag).getRawFlag());
             if (this.compound != null) {
-                @Nullable TileEntity te = world.getBlockEntity(pos);
+                @Nullable BlockEntity te = world.getBlockEntity(pos);
                 if (te != null) {
-                    te.load((net.minecraft.block.BlockState) this.blockState, this.compound);
+                    te.load((net.minecraft.world.level.block.state.BlockState) this.blockState, this.compound);
                 } else {
                     // Because, some mods will "unintentionally" only obey some of the rules but not all.
                     // In cases like this, we need to directly just say "fuck it" and deserialize from the compound directly.
                     try {
-                        te = TileEntity.loadStatic((net.minecraft.block.BlockState) this.blockState, this.compound);
+                        te = BlockEntity.loadStatic((net.minecraft.world.level.block.state.BlockState) this.blockState, this.compound);
                         if (te != null) {
                             world.getChunk(pos).setBlockEntity(pos, te);
                         }
@@ -249,10 +248,10 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
 
-    public Optional<ServerWorld> getServerWorld() {
-        @Nullable ServerWorld world = this.world != null ? this.world.get() : null;
+    public Optional<ServerLevel> getServerWorld() {
+        @Nullable ServerLevel world = this.world != null ? this.world.get() : null;
         if (world == null) {
-            world = (ServerWorld) Sponge.getServer().getWorldManager().world(this.worldKey).orElse(null);
+            world = (ServerLevel) Sponge.getServer().getWorldManager().world(this.worldKey).orElse(null);
             if (world != null) {
                 this.world = new WeakReference<>(world);
             }
@@ -260,8 +259,8 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         return Optional.ofNullable(world);
     }
 
-    public Optional<CompoundNBT> getCompound() {
-        return this.compound == null ? Optional.<CompoundNBT>empty() : Optional.of(this.compound.copy());
+    public Optional<CompoundTag> getCompound() {
+        return this.compound == null ? Optional.<CompoundTag>empty() : Optional.of(this.compound.copy());
     }
 
     public SpongeBlockSnapshotBuilder createBuilder() {
@@ -295,12 +294,12 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     }
 
     @Override
-    public CompoundNBT data$getCompound() {
-        return this.compound == null ? new CompoundNBT() : this.compound.copy();
+    public CompoundTag data$getCompound() {
+        return this.compound == null ? new CompoundTag() : this.compound.copy();
     }
 
     @Override
-    public void data$setCompound(CompoundNBT nbt) {
+    public void data$setCompound(CompoundTag nbt) {
         // do nothing this is immutable
     }
 

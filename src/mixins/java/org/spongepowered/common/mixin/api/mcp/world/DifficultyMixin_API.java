@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,7 +34,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 public abstract class DifficultyMixin_API implements Difficulty {
 
     // @formatter:off
-    @Shadow public abstract ITextComponent shadow$getDisplayName();
+    @Shadow public abstract net.minecraft.network.chat.Component shadow$getDisplayName();
     // @formatter:on
 
     @Override

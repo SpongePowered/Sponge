@@ -32,15 +32,18 @@ import org.cadixdev.bombe.asm.jar.JarEntryRemappingTransformer;
 import org.cadixdev.lorenz.MappingSet;
 import org.cadixdev.lorenz.asm.LorenzRemapper;
 import org.cadixdev.lorenz.io.MappingFormats;
+import org.cadixdev.lorenz.io.proguard.ProGuardConstants;
+import org.cadixdev.lorenz.io.proguard.ProGuardFormat;
+import org.cadixdev.lorenz.io.proguard.ProGuardReader;
 import org.spongepowered.vanilla.installer.model.mojang.Version;
 import org.spongepowered.vanilla.installer.model.mojang.VersionManifest;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -76,9 +79,9 @@ public final class InstallerMain {
     public void run() throws Exception {
         this.installer.getLibraryManager().validate();
 
-        this.downloadMinecraft(LauncherCommandLine.librariesDirectory);
-        final Path srgZip = this.downloadSRG(LauncherCommandLine.librariesDirectory);
-        final Path minecraftJar = this.remapMinecraft(LauncherCommandLine.librariesDirectory, srgZip);
+        final Version mcVersion = this.downloadMinecraft(LauncherCommandLine.librariesDirectory);
+        final Path mappings = this.downloadMappings(mcVersion, LauncherCommandLine.librariesDirectory);
+        final Path minecraftJar = this.remapMinecraft(LauncherCommandLine.librariesDirectory, mappings);
 
         this.installer.getLibraryManager().addLibrary(new LibraryManager.Library("minecraft", minecraftJar));
 
@@ -122,14 +125,14 @@ public final class InstallerMain {
                     process.destroy();
                     process.waitFor();
                 }
-            } catch (InterruptedException e) {
-                installer.getLogger().error("Waiting for server termination failed!", e);
+            } catch (final InterruptedException e) {
+                this.installer.getLogger().error("Waiting for server termination failed!", e);
             }
         }));
         process.waitFor();
     }
 
-    private void downloadMinecraft(final Path librariesDirectory) throws Exception {
+    private Version downloadMinecraft(final Path librariesDirectory) throws Exception {
         this.installer.getLogger().info("Downloading the Minecraft versions manifest...");
 
         VersionManifest.Version foundVersionManifest = null;
@@ -150,7 +153,7 @@ public final class InstallerMain {
             throw new IOException(String.format("Failed to find version manifest for '%s'!", Constants.Libraries.MINECRAFT_VERSION_TARGET));
         }
 
-        Version version;
+        final Version version;
 
         try (final JsonReader reader = new JsonReader(new InputStreamReader(foundVersionManifest.url.openStream()))) {
             version = gson.fromJson(reader, Version.class);
@@ -194,32 +197,36 @@ public final class InstallerMain {
                 this.installer.getLogger().info("Detected existing Minecraft jar. Skipping hash check as that is turned off...");
             }
         }
+
+        return version;
     }
 
-    private Path downloadSRG(final Path librariesDirectory) throws IOException {
-        this.installer.getLogger().info("Setting up MCP config for Minecraft {}", Constants.Libraries.MINECRAFT_VERSION_TARGET);
-        final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MCP_CONFIG_PATH_PREFIX).resolve(Constants.Libraries
-            .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MCP_CONFIG_NAME + "-" + Constants.Libraries
-            .MINECRAFT_VERSION_TARGET + ".zip");
+    private Path downloadMappings(final Version version, final Path librariesDirectory) throws IOException {
+        this.installer.getLogger().info("Setting up names for Minecraft {}", Constants.Libraries.MINECRAFT_VERSION_TARGET);
+        final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_MAPPINGS_PREFIX)
+                .resolve(Constants.Libraries.MINECRAFT_VERSION_TARGET)
+                .resolve(Constants.Libraries.MINECRAFT_MAPPINGS_NAME);
         if (Files.notExists(downloadTarget)) {
-            final URL mcpConfigUrl = new URL(Constants.Libraries.MCP_CONFIG_PREFIX_URL + "/" + Constants.Libraries.MINECRAFT_VERSION_TARGET
-                + "/" + Constants.Libraries.MCP_CONFIG_NAME + "-" + Constants.Libraries.MINECRAFT_VERSION_TARGET + ".zip");
+            final Version.Downloads.Download mappings = version.downloads.server_mappings;
+            if (mappings == null) {
+                throw new IOException(String.format("Mappings were not included in version manifest for %s", Constants.Libraries.MINECRAFT_VERSION_TARGET));
+            }
             // TODO Figure out how to sha1 check the zip file
             if (this.installer.getLauncherConfig().autoDownloadLibraries) {
-                InstallerUtils.download(this.installer.getLogger(), mcpConfigUrl, downloadTarget, false);
+                InstallerUtils.download(this.installer.getLogger(), mappings.url, downloadTarget, false);
             } else {
-                throw new IOException(String.format("MCP config was not located at '%s' and downloading it has been turned off.", downloadTarget));
+                throw new IOException(String.format("Mappings were not located at '%s' and downloading them has been turned off.", downloadTarget));
             }
         } else {
-            this.installer.getLogger().info("Detected existing MCP mappings, verifying hashes...");
+            this.installer.getLogger().info("Detected existing mappings, verifying hashes...");
             // TODO Figure out how to sha1 check the zip file
-            this.installer.getLogger().info("MCP mappings verified!");
+            this.installer.getLogger().info("mappings verified!");
         }
 
         return downloadTarget;
     }
 
-    private Path remapMinecraft(final Path librariesDirectory, final Path srgZip) throws IOException {
+    private Path remapMinecraft(final Path librariesDirectory, final Path serverMappings) throws IOException {
         this.installer.getLogger().info("Checking if we need to remap Minecraft...");
         final Path inputJar = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX).resolve(Constants.Libraries
             .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
@@ -231,17 +238,17 @@ public final class InstallerMain {
             return outputJar;
         }
 
-        this.installer.getLogger().info("Remapping Minecraft to SRG. This may take a while...");
-        try (final FileSystem fileSystem = FileSystems.newFileSystem(srgZip, null)) {
-            final Path srgFile = fileSystem.getPath(Constants.Libraries.MCP_JOINED_PATH);
-            final MappingSet mappings = MappingSet.create();
-            MappingFormats.TSRG.read(mappings, srgFile);
-            final Atlas atlas = new Atlas();
-            atlas.install(ctx -> new JarEntryRemappingTransformer(
-                new LorenzRemapper(mappings, ctx.inheritanceProvider())
-            ));
-            atlas.run(inputJar, outputJar);
+        this.installer.getLogger().info("Remapping Minecraft. This may take a while...");
+        final MappingSet mappings = MappingSet.create();
+        try (final BufferedReader reader = Files.newBufferedReader(serverMappings, StandardCharsets.UTF_8)) {
+            new ProGuardReader(reader).read().reverse(mappings);
         }
+
+        final Atlas atlas = new Atlas();
+        atlas.install(ctx -> new JarEntryRemappingTransformer(
+            new LorenzRemapper(mappings, ctx.inheritanceProvider())
+        ));
+        atlas.run(inputJar, outputJar);
 
         return outputJar;
     }

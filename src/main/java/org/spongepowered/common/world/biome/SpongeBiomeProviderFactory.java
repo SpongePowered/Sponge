@@ -25,14 +25,6 @@
 package org.spongepowered.common.world.biome;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.MutableRegistry;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.biome.provider.CheckerboardBiomeProvider;
-import net.minecraft.world.biome.provider.EndBiomeProvider;
-import net.minecraft.world.biome.provider.NetherBiomeProvider;
-import net.minecraft.world.biome.provider.OverworldBiomeProvider;
-import net.minecraft.world.biome.provider.SingleBiomeProvider;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.AttributedBiome;
@@ -43,9 +35,9 @@ import org.spongepowered.api.world.biome.provider.ConfigurableBiomeProvider;
 import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
 import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
-import org.spongepowered.common.accessor.world.biome.provider.BiomeProviderAccessor;
-import org.spongepowered.common.accessor.world.biome.provider.EndBiomeProviderAccessor;
-import org.spongepowered.common.accessor.world.biome.provider.NetherBiomeProviderAccessor;
+import org.spongepowered.common.accessor.world.level.biome.BiomeSourceAccessor;
+import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSourceAccessor;
+import org.spongepowered.common.accessor.world.level.biome.TheEndBiomeSourceAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.ArrayList;
@@ -53,51 +45,59 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
+import net.minecraft.world.level.biome.FixedBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.OverworldBiomeSource;
+import net.minecraft.world.level.biome.TheEndBiomeSource;
 
 @SuppressWarnings("unchecked")
 public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public <T extends LayeredBiomeConfig> ConfigurableBiomeProvider<T> layered(final T config) {
-        final MutableRegistry<net.minecraft.world.biome.Biome> biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
-        final OverworldBiomeProvider layeredBiomeProvider = new OverworldBiomeProvider(config.seed(), config.largeBiomes(), false,
+        final WritableRegistry<net.minecraft.world.level.biome.Biome> biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
+        final OverworldBiomeSource layeredBiomeProvider = new OverworldBiomeSource(config.seed(), config.largeBiomes(), false,
                 biomeRegistry);
-        final List<net.minecraft.world.biome.Biome> biomes = new ArrayList<>();
+        final List<net.minecraft.world.level.biome.Biome> biomes = new ArrayList<>();
         for (final RegistryReference<Biome> biome : config.biomes()) {
             biomes.add(biomeRegistry.get((ResourceLocation) (Object) biome.location()));
         }
-        ((BiomeProviderAccessor) layeredBiomeProvider).accessor$possibleBiomes(biomes);
+        ((BiomeSourceAccessor) layeredBiomeProvider).accessor$possibleBiomes(biomes);
         return (ConfigurableBiomeProvider<T>) layeredBiomeProvider;
     }
 
     @Override
     public ConfigurableBiomeProvider<LayeredBiomeConfig> overworld() {
-        return (ConfigurableBiomeProvider<LayeredBiomeConfig>) new OverworldBiomeProvider(BootstrapProperties.dimensionGeneratorSettings.seed(), false, false,
+        return (ConfigurableBiomeProvider<LayeredBiomeConfig>) new OverworldBiomeSource(BootstrapProperties.dimensionGeneratorSettings.seed(), false, false,
             BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY));
     }
 
     @Override
     public <T extends MultiNoiseBiomeConfig> ConfigurableBiomeProvider<T> multiNoise(final T config) {
-        final MutableRegistry<net.minecraft.world.biome.Biome> biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
-        final List<Pair<net.minecraft.world.biome.Biome.Attributes, Supplier<net.minecraft.world.biome.Biome>>> attributedBiomes = new ArrayList<>();
+        final WritableRegistry<net.minecraft.world.level.biome.Biome> biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
+        final List<Pair<net.minecraft.world.level.biome.Biome.ClimateParameters, Supplier<net.minecraft.world.level.biome.Biome>>> attributedBiomes = new ArrayList<>();
         for (final AttributedBiome attributedBiome : config.attributedBiomes()) {
-            attributedBiomes.add(Pair.of((net.minecraft.world.biome.Biome.Attributes) attributedBiome.attributes(),
+            attributedBiomes.add(Pair.of((net.minecraft.world.level.biome.Biome.ClimateParameters) attributedBiome.attributes(),
                     () -> biomeRegistry.get((ResourceLocation) (Object) attributedBiome.biome().location())));
         }
-        return (ConfigurableBiomeProvider<T>) NetherBiomeProviderAccessor.invoker$new(config.seed(), attributedBiomes,
-                (NetherBiomeProvider.Noise) config.temperatureConfig(), (NetherBiomeProvider.Noise) config.humidityConfig(),
-                (NetherBiomeProvider.Noise) config.altitudeConfig(), (NetherBiomeProvider.Noise) config.weirdnessConfig(), Optional.empty());
+        return (ConfigurableBiomeProvider<T>) MultiNoiseBiomeSourceAccessor.invoker$new(config.seed(), attributedBiomes,
+                (MultiNoiseBiomeSource.NoiseParameters) config.temperatureConfig(), (MultiNoiseBiomeSource.NoiseParameters) config.humidityConfig(),
+                (MultiNoiseBiomeSource.NoiseParameters) config.altitudeConfig(), (MultiNoiseBiomeSource.NoiseParameters) config.weirdnessConfig(), Optional.empty());
     }
 
     @Override
     public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> nether() {
-        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) NetherBiomeProvider.Preset.NETHER.biomeSource(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY), BootstrapProperties.dimensionGeneratorSettings.seed());
+        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.NETHER.biomeSource(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY), BootstrapProperties.dimensionGeneratorSettings.seed());
     }
 
     @Override
     public <T extends EndStyleBiomeConfig> ConfigurableBiomeProvider<T> endStyle(final T config) {
-        final MutableRegistry<net.minecraft.world.biome.Biome> registry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
-        return (ConfigurableBiomeProvider<T>) EndBiomeProviderAccessor.invoker$new(registry,
+        final WritableRegistry<net.minecraft.world.level.biome.Biome> registry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
+        return (ConfigurableBiomeProvider<T>) TheEndBiomeSourceAccessor.invoker$new(registry,
                 config.seed(),
                 registry.get((ResourceLocation) (Object) config.endBiome().location()),
                 registry.get((ResourceLocation) (Object) config.highlandsBiome().location()),
@@ -109,23 +109,23 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public ConfigurableBiomeProvider<EndStyleBiomeConfig> end() {
-        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) new EndBiomeProvider(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY), BootstrapProperties.dimensionGeneratorSettings.seed());
+        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) new TheEndBiomeSource(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY), BootstrapProperties.dimensionGeneratorSettings.seed());
     }
 
     @Override
     public <T extends CheckerboardBiomeConfig> ConfigurableBiomeProvider<T> checkerboard(final T config) {
-        final List<Supplier<net.minecraft.world.biome.Biome>> biomes = new ArrayList<>();
+        final List<Supplier<net.minecraft.world.level.biome.Biome>> biomes = new ArrayList<>();
         for (final RegistryReference<Biome> biome : config.biomes()) {
             biomes.add(() -> BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY).get((ResourceLocation) (Object) biome.location()));
         }
 
-        return (ConfigurableBiomeProvider<T>) new CheckerboardBiomeProvider(biomes, config.scale());
+        return (ConfigurableBiomeProvider<T>) new CheckerboardColumnBiomeSource(biomes, config.scale());
     }
 
     @Override
     public BiomeProvider fixed(final RegistryReference<Biome> biome) {
         Objects.requireNonNull(biome, "biome");
 
-        return (BiomeProvider) new SingleBiomeProvider(() -> (net.minecraft.world.biome.Biome) (Object) biome.get(Sponge.getServer().registries()));
+        return (BiomeProvider) new FixedBiomeSource(() -> (net.minecraft.world.level.biome.Biome) (Object) biome.get(Sponge.getServer().registries()));
     }
 }

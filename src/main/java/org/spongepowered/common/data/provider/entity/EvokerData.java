@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.SheepEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.animal.Sheep;
-import org.spongepowered.common.accessor.entity.monster.EvokerEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.EvokerAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class EvokerData {
@@ -38,10 +37,10 @@ public final class EvokerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(EvokerEntityAccessor.class)
+                .asMutable(EvokerAccessor.class)
                     .create(Keys.WOLOLO_TARGET)
                         .get(h -> (Sheep) h.accessor$wololoTarget())
-                        .set((h, v) -> h.accessor$wololoTarget((SheepEntity) v));
+                        .set((h, v) -> h.accessor$wololoTarget((net.minecraft.world.entity.animal.Sheep) v));
     }
     // @formatter:on
 }

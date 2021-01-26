@@ -24,13 +24,6 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.item.CompassItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTDynamicOps;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -38,6 +31,13 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.Optional;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CompassItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.spongepowered.common.util.VecHelper;
 
 final class CompassItemData {
@@ -50,26 +50,26 @@ final class CompassItemData {
                 .create(Keys.LODESTONE)
                     .get(stack -> {
                         if (CompassItem.isLodestoneCompass(stack)) {
-                            final CompoundNBT tag = stack.getOrCreateTag();
-                            final Optional<RegistryKey<World>> dimension = CompassItem.getLodestoneDimension(tag);
+                            final CompoundTag tag = stack.getOrCreateTag();
+                            final Optional<ResourceKey<Level>> dimension = CompassItem.getLodestoneDimension(tag);
                             if (dimension.isPresent()) {
                                 return ServerLocation.of(
                                     (ServerWorld) SpongeCommon.getServer().getLevel(dimension.get()),
-                                    VecHelper.toVector3d(NBTUtil.readBlockPos(tag.getCompound("LodestonePos")))
+                                    VecHelper.toVector3d(NbtUtils.readBlockPos(tag.getCompound("LodestonePos")))
                                 );
                             }
                         }
                         return null;
                     })
                     .set((stack, location) -> {
-                        final CompoundNBT tag = stack.getOrCreateTag();
-                        tag.put("LodestonePos", NBTUtil.writeBlockPos(VecHelper.toBlockPos(location)));
-                        World.RESOURCE_KEY_CODEC.encodeStart(NBTDynamicOps.INSTANCE, ((net.minecraft.world.server.ServerWorld) location.getWorld()).dimension())
+                        final CompoundTag tag = stack.getOrCreateTag();
+                        tag.put("LodestonePos", NbtUtils.writeBlockPos(VecHelper.toBlockPos(location)));
+                        Level.RESOURCE_KEY_CODEC.encodeStart(NbtOps.INSTANCE, ((net.minecraft.server.level.ServerLevel) location.getWorld()).dimension())
                             .resultOrPartial(SpongeCommon.getLogger()::error).ifPresent(dimension -> tag.put("LodestoneDimension", dimension));
                         tag.putBoolean("LodestoneTracked", true);
                     })
                     .delete(stack -> {
-                        final CompoundNBT tag = stack.getTag();
+                        final CompoundTag tag = stack.getTag();
                         if (tag != null) {
                             tag.remove("LodestoneDimension");
                             tag.remove("LodestonePos");

@@ -25,8 +25,8 @@
 package org.spongepowered.common.bridge.server;
 
 import com.google.inject.Injector;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -41,7 +41,7 @@ public interface MinecraftServerBridge {
     @Nullable
     ResourcePack bridge$getResourcePack();
 
-    void bridge$setDifficulty(ServerWorld world, Difficulty newDifficulty, boolean forceDifficulty);
+    void bridge$setDifficulty(ServerLevel world, Difficulty newDifficulty, boolean forceDifficulty);
 
     boolean bridge$performAutosaveChecks();
 }

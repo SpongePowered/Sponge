@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.SpellcastingIllagerEntity;
+import net.minecraft.world.entity.monster.SpellcasterIllager;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.SpellType;
-import org.spongepowered.common.accessor.entity.monster.SpellcastingIllagerEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.SpellcasterIllagerAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class SpellcastingIllagerData {
@@ -38,9 +38,9 @@ public final class SpellcastingIllagerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(SpellcastingIllagerEntityAccessor.class)
+                .asMutable(SpellcasterIllagerAccessor.class)
                     .create(Keys.CASTING_TIME)
-                        .get(SpellcastingIllagerEntityAccessor::accessor$spellCastingTickCount)
+                        .get(SpellcasterIllagerAccessor::accessor$spellCastingTickCount)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
@@ -48,10 +48,10 @@ public final class SpellcastingIllagerData {
                             h.accessor$spellCastingTickCount(v);
                             return true;
                         })
-                .asMutable(SpellcastingIllagerEntity.class)
+                .asMutable(SpellcasterIllager.class)
                     .create(Keys.CURRENT_SPELL)
-                        .get(h -> (SpellType) (Object) ((SpellcastingIllagerEntityAccessor) h).invoker$getCurrentSpell())
-                        .set((h, v) -> h.setIsCastingSpell((SpellcastingIllagerEntity.SpellType) (Object) v));
+                        .get(h -> (SpellType) (Object) ((SpellcasterIllagerAccessor) h).invoker$getCurrentSpell())
+                        .set((h, v) -> h.setIsCastingSpell((SpellcasterIllager.IllagerSpell) (Object) v));
     }
     // @formatter:on
 }

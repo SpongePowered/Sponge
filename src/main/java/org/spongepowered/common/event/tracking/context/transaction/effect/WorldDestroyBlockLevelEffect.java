@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.AbstractFireBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -47,7 +47,7 @@ public final class WorldDestroyBlockLevelEffect implements ProcessingSideEffect 
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag, final int limit
     ) {
-        if (!(oldState.state.getBlock() instanceof AbstractFireBlock)) {
+        if (!(oldState.state.getBlock() instanceof BaseFireBlock)) {
             pipeline.getServerWorld().levelEvent(2001, oldState.pos, Block.getId(oldState.state));
         }
         return EffectResult.NULL_PASS;

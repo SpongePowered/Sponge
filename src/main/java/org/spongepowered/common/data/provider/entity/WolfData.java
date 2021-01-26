@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.WolfEntity;
+import net.minecraft.world.entity.animal.Wolf;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.common.accessor.entity.passive.WolfEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.WolfAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class WolfData {
@@ -38,17 +38,17 @@ public final class WolfData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(WolfEntity.class)
+                .asMutable(Wolf.class)
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) h.getCollarColor())
-                        .set((h, v) -> h.setCollarColor((net.minecraft.item.DyeColor) (Object) v))
+                        .set((h, v) -> h.setCollarColor((net.minecraft.world.item.DyeColor) (Object) v))
                     .create(Keys.IS_BEGGING_FOR_FOOD)
-                        .get(WolfEntity::isInterested)
-                        .set(WolfEntity::setIsInterested)
+                        .get(Wolf::isInterested)
+                        .set(Wolf::setIsInterested)
                     .create(Keys.IS_WET)
-                        .get(h -> ((WolfEntityAccessor) h).accessor$isWet() || ((WolfEntityAccessor) h).accessor$isShaking())
+                        .get(h -> ((WolfAccessor) h).accessor$isWet() || ((WolfAccessor) h).accessor$isShaking())
                         .set((h, v) -> {
-                            final WolfEntityAccessor accessor = (WolfEntityAccessor) h;
+                            final WolfAccessor accessor = (WolfAccessor) h;
                             accessor.accessor$isWet(v);
                             accessor.accessor$isShaking(v);
                             accessor.accessor$shakeAnim(0f);

@@ -25,8 +25,8 @@
 package org.spongepowered.common.bridge.scoreboard;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -39,9 +39,9 @@ import javax.annotation.Nullable;
 
 public interface ServerScoreboardBridge {
 
-    void bridge$addPlayer(ServerPlayerEntity player, boolean sendPackets);
+    void bridge$addPlayer(ServerPlayer player, boolean sendPackets);
 
-    void bridge$removePlayer(ServerPlayerEntity player, boolean sendPackets);
+    void bridge$removePlayer(ServerPlayer player, boolean sendPackets);
 
     Optional<Objective> bridge$getObjective(String name);
 
@@ -63,5 +63,5 @@ public interface ServerScoreboardBridge {
 
     void bridge$removeScores(Component name);
 
-    void bridge$sendToPlayers(IPacket<?> packet);
+    void bridge$sendToPlayers(Packet<?> packet);
 }

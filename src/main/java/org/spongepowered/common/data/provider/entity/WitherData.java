@@ -25,10 +25,10 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.kyori.adventure.bossbar.BossBar;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.boss.WitherEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.boss.WitherEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.boss.wither.WitherBossAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.stream.Collectors;
@@ -42,7 +42,7 @@ public final class WitherData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(WitherEntity.class)
+                .asMutable(WitherBoss.class)
                     .create(Keys.WITHER_TARGETS)
                         .get(h -> Stream.of(h.getAlternativeTarget(0), h.getAlternativeTarget(1), h.getAlternativeTarget(2))
                                 .map(id -> h.getCommandSenderWorld().getEntity(id))
@@ -59,7 +59,7 @@ public final class WitherData {
                                 h.setAlternativeTarget(i, target == null ? 0 : target.getId());
                             }
                         })
-                .asMutable(WitherEntityAccessor.class)
+                .asMutable(WitherBossAccessor.class)
                     .create(Keys.BOSS_BAR)
                         .get(h -> (BossBar) h.accessor$bossEvent());
     }

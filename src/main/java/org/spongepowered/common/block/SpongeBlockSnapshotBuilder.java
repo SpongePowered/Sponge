@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.block;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -58,6 +54,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull BlockSnapshot> implements BlockSnapshot.Builder {
 
@@ -81,9 +81,9 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
     @Nullable UUID notifierUniqueId;
     Vector3i coordinates;
     @Nullable List<DataManipulator.Immutable> manipulators;
-    @Nullable CompoundNBT compound;
+    @Nullable CompoundTag compound;
     SpongeBlockChangeFlag flag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
-    @Nullable WeakReference<ServerWorld> worldRef;
+    @Nullable WeakReference<ServerLevel> worldRef;
     private final boolean pooled;
 
 
@@ -104,7 +104,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
         return this;
     }
     
-    public SpongeBlockSnapshotBuilder world(final ServerWorld world) {
+    public SpongeBlockSnapshotBuilder world(final ServerLevel world) {
         this.worldKey = ((org.spongepowered.api.world.server.ServerWorld) Objects.requireNonNull(world)).getKey();
         this.worldRef = new WeakReference<>(world);
         return this;
@@ -117,7 +117,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
         return this;
     }
 
-    public SpongeBlockSnapshotBuilder blockState(final net.minecraft.block.BlockState blockState) {
+    public SpongeBlockSnapshotBuilder blockState(final net.minecraft.world.level.block.state.BlockState blockState) {
         this.blockState = Objects.requireNonNull((BlockState) blockState);
         return this;
     }
@@ -228,7 +228,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
     }
 
     @Nullable
-    public CompoundNBT getCompound() {
+    public CompoundTag getCompound() {
         return this.compound;
     }
 
@@ -297,7 +297,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
         return Optional.of(builder.build());
     }
 
-    public SpongeBlockSnapshotBuilder addUnsafeCompound(final CompoundNBT compound) {
+    public SpongeBlockSnapshotBuilder addUnsafeCompound(final CompoundTag compound) {
         Objects.requireNonNull(compound);
 
         this.compound = compound.copy();
@@ -309,9 +309,9 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
         return this;
     }
 
-    public SpongeBlockSnapshotBuilder tileEntity(final TileEntity added) {
+    public SpongeBlockSnapshotBuilder tileEntity(final BlockEntity added) {
         this.compound = null;
-        final CompoundNBT tag = new CompoundNBT();
+        final CompoundTag tag = new CompoundTag();
         added.save(tag);
         this.compound = tag;
         return this;

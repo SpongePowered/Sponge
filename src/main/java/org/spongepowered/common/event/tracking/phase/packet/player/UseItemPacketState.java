@@ -24,14 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.client.CPlayerTryUseItemPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
@@ -54,6 +46,13 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.level.block.Block;
 
 @SuppressWarnings("unchecked")
 public final class UseItemPacketState extends BasicPacketState {
@@ -81,9 +80,9 @@ public final class UseItemPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
-        final CPlayerTryUseItemPacket placeBlock = (CPlayerTryUseItemPacket) packet;
-        final net.minecraft.item.ItemStack usedItem = playerMP.getItemInHand(placeBlock.getHand());
+    public void populateContext(net.minecraft.server.level.ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
+        final ServerboundUseItemPacket placeBlock = (ServerboundUseItemPacket) packet;
+        final net.minecraft.world.item.ItemStack usedItem = playerMP.getItemInHand(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
         context.itemUsed(itemstack);
         final HandType handType = (HandType) (Object) placeBlock.getHand();
@@ -95,7 +94,7 @@ public final class UseItemPacketState extends BasicPacketState {
         BasicPacketContext context) {
         ServerPlayer player = context.getSpongePlayer();
         BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getLocation().get());
-        ChunkBridge spongeChunk = (ChunkBridge) ((ServerWorld) player.getWorld()).getChunkAt(pos);
+        ChunkBridge spongeChunk = (ChunkBridge) ((ServerLevel) player.getWorld()).getChunkAt(pos);
         if (blockChange == BlockChange.PLACE) {
             spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player.getUser(), PlayerTracker.Type.CREATOR);
         }
@@ -106,7 +105,7 @@ public final class UseItemPacketState extends BasicPacketState {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void unwind(BasicPacketContext context) {
-        final ServerPlayerEntity player = context.getPacketPlayer();
+        final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
         final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = context.getItemUsedSnapshot();
         final HandType hand = context.getHandUsed();
@@ -123,7 +122,7 @@ public final class UseItemPacketState extends BasicPacketState {
                 boolean success = TrackingUtil.processBlockCaptures(context);
                 if (!success && snapshot.isEmpty()) {
                     PhaseTracker.getCauseStackManager().pushCause(player);
-                    PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), (Hand) (Object) hand);
+                    PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), (InteractionHand) (Object) hand);
                 }
             }
         }

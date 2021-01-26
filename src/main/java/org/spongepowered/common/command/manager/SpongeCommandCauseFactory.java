@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.command.manager;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
@@ -58,9 +58,9 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
     public CommandCause create() {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final Cause cause = frame.getCurrentCause();
-            final ICommandSource iCommandSource =
-                    cause.first(ICommandSource.class).orElseGet(() -> SpongeCommon.getGame().getSystemSubject());
-            final CommandSource commandSource;
+            final CommandSource iCommandSource =
+                    cause.first(CommandSource.class).orElseGet(() -> SpongeCommon.getGame().getSystemSubject());
+            final CommandSourceStack commandSource;
             if (iCommandSource instanceof CommandSourceProviderBridge) {
                 // We know about this one so we can create it using the factory method on the source.
                 commandSource = ((CommandSourceProviderBridge) iCommandSource).bridge$getCommandSource(cause);
@@ -69,33 +69,33 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
                 // put any identifying characteristics on the object, we have to go it alone...
                 final EventContext context = cause.getContext();
                 final @Nullable Locatable locatable = iCommandSource instanceof Locatable ? (Locatable) iCommandSource : null;
-                final ITextComponent displayName;
+                final Component displayName;
                 if (iCommandSource instanceof Entity) {
                     displayName = ((Entity) iCommandSource).get(Keys.DISPLAY_NAME).map(SpongeAdventure::asVanilla)
-                            .orElseGet(() -> new StringTextComponent(
+                            .orElseGet(() -> new TextComponent(
                                     iCommandSource instanceof Nameable ? ((Nameable) iCommandSource).getName() :
                                             iCommandSource.getClass().getSimpleName()));
                 } else {
-                    displayName = new StringTextComponent(
+                    displayName = new TextComponent(
                             iCommandSource instanceof Nameable ? ((Nameable) iCommandSource).getName() :
                                     iCommandSource.getClass().getSimpleName());
                 }
                 final String name = displayName.getString();
-                commandSource = new CommandSource(
+                commandSource = new CommandSourceStack(
                         iCommandSource,
                         context.get(EventContextKeys.LOCATION).map(x -> VecHelper.toVanillaVector3d(x.getPosition()))
-                                .orElseGet(() -> locatable == null ? Vector3d.ZERO : VecHelper.toVanillaVector3d(locatable.getLocation().getPosition())),
+                                .orElseGet(() -> locatable == null ? Vec3.ZERO : VecHelper.toVanillaVector3d(locatable.getLocation().getPosition())),
                         context.get(EventContextKeys.ROTATION)
-                                .map(x -> new Vector2f((float) x.getX(), (float) x.getY()))
-                                .orElse(Vector2f.ZERO),
-                        context.get(EventContextKeys.LOCATION).map(x -> (ServerWorld) x.getWorld())
-                                .orElseGet(() -> locatable == null ? SpongeCommon.getServer().getLevel(World.OVERWORLD) :
-                                        (ServerWorld) locatable.getServerLocation().getWorld()),
+                                .map(x -> new Vec2((float) x.getX(), (float) x.getY()))
+                                .orElse(Vec2.ZERO),
+                        context.get(EventContextKeys.LOCATION).map(x -> (ServerLevel) x.getWorld())
+                                .orElseGet(() -> locatable == null ? SpongeCommon.getServer().getLevel(Level.OVERWORLD) :
+                                        (ServerLevel) locatable.getServerLocation().getWorld()),
                         4,
                         name,
                         displayName,
                         SpongeCommon.getServer(),
-                        iCommandSource instanceof Entity ? (net.minecraft.entity.Entity) iCommandSource : null
+                        iCommandSource instanceof Entity ? (net.minecraft.world.entity.Entity) iCommandSource : null
                 );
             }
 

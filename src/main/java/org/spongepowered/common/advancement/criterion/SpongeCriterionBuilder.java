@@ -25,7 +25,7 @@
 package org.spongepowered.common.advancement.criterion;
 
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.ICriterionInstance;
+import net.minecraft.advancements.CriterionTriggerInstance;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 
@@ -35,7 +35,7 @@ public class SpongeCriterionBuilder extends AbstractCriterionBuilder<Advancement
     @SuppressWarnings("ConstantConditions")
     @Override
     AdvancementCriterion build0() {
-        ICriterionInstance trigger = (ICriterionInstance) this.trigger;
+        CriterionTriggerInstance trigger = (CriterionTriggerInstance) this.trigger;
         if (this.trigger == null) {
             trigger = SpongeDummyTrigger.Instance.dummy();
         }

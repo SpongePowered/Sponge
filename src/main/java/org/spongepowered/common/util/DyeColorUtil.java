@@ -24,19 +24,18 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.DyeColor;
-import net.minecraft.util.IItemProvider;
-import org.spongepowered.common.accessor.entity.passive.SheepEntityAccessor;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
 
 public class DyeColorUtil {
 
-    public static final Map<IItemProvider, DyeColor> COLOR_BY_WOOL = SheepEntityAccessor.accessor$ITEM_BY_DYE().entrySet()
+    public static final Map<ItemLike, DyeColor> COLOR_BY_WOOL = SheepAccessor.accessor$ITEM_BY_DYE().entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 

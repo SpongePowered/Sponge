@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.HandSide;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandPreference;
-import org.spongepowered.common.accessor.entity.player.PlayerAbilitiesAccessor;
-import org.spongepowered.common.accessor.entity.player.PlayerEntityAccessor;
-import org.spongepowered.common.accessor.util.FoodStatsAccessor;
+import org.spongepowered.common.accessor.world.entity.player.AbilitiesAccessor;
+import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
+import org.spongepowered.common.accessor.world.food.FoodDataAccessor;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -49,7 +49,7 @@ public final class PlayerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(PlayerEntity.class)
+                .asMutable(Player.class)
                     .create(Keys.CAN_FLY)
                         .get(h -> h.abilities.mayfly)
                         .set((h, v) -> {
@@ -58,14 +58,14 @@ public final class PlayerData {
                         })
                     .create(Keys.DOMINANT_HAND)
                         .get(h -> (HandPreference) (Object) h.getMainArm())
-                        .set((h, v) -> h.setMainArm((HandSide) (Object) v))
+                        .set((h, v) -> h.setMainArm((HumanoidArm) (Object) v))
                     .create(Keys.EXHAUSTION)
-                        .get(h -> (double) ((FoodStatsAccessor) h.getFoodData()).accessor$exhaustionLevel())
+                        .get(h -> (double) ((FoodDataAccessor) h.getFoodData()).accessor$exhaustionLevel())
                         .setAnd((h, v) -> {
                             if (v < 0 || v > PlayerData.EXHAUSTION_MAX) {
                                 return false;
                             }
-                            ((FoodStatsAccessor) h.getFoodData()).accessor$exhaustionLevel(v.floatValue());
+                            ((FoodDataAccessor) h.getFoodData()).accessor$exhaustionLevel(v.floatValue());
                             return true;
                         })
                     .create(Keys.EXPERIENCE)
@@ -73,7 +73,7 @@ public final class PlayerData {
                         .set(ExperienceHolderUtil::setExperience)
                         .delete(h -> ExperienceHolderUtil.setExperience(h, 0))
                     .create(Keys.EXPERIENCE_FROM_START_OF_LEVEL)
-                        .get(PlayerEntity::getXpNeededForNextLevel)
+                        .get(Player::getXpNeededForNextLevel)
                     .create(Keys.EXPERIENCE_LEVEL)
                         .get(h -> h.experienceLevel)
                         .setAnd((h, v) -> {
@@ -102,7 +102,7 @@ public final class PlayerData {
                             if (v < 0) {
                                 return false;
                             }
-                            ((PlayerAbilitiesAccessor) h.abilities).accessor$flyingSpeed(v.floatValue());
+                            ((AbilitiesAccessor) h.abilities).accessor$flyingSpeed(v.floatValue());
                             h.onUpdateAbilities();
                             return true;
                         })
@@ -122,9 +122,9 @@ public final class PlayerData {
                             h.onUpdateAbilities();
                         })
                     .create(Keys.IS_SLEEPING)
-                        .get(PlayerEntity::isSleeping)
+                        .get(Player::isSleeping)
                     .create(Keys.IS_SLEEPING_IGNORED)
-                        .get(PlayerEntity::isSleeping)
+                        .get(Player::isSleeping)
                     .create(Keys.MAX_EXHAUSTION)
                         .get(h -> PlayerData.EXHAUSTION_MAX)
                     .create(Keys.MAX_FOOD_LEVEL)
@@ -137,16 +137,16 @@ public final class PlayerData {
                             if (v < 0 || v > PlayerData.SATURATION_MAX) {
                                 return false;
                             }
-                            ((FoodStatsAccessor) h.getFoodData()).accessor$saturationLevel(v.floatValue());
+                            ((FoodDataAccessor) h.getFoodData()).accessor$saturationLevel(v.floatValue());
                             return true;
                         })
                     .create(Keys.SLEEP_TIMER)
-                        .get(PlayerEntity::getSleepTimer)
-                        .set((p, i) -> ((PlayerEntityAccessor) p).accessor$sleepCounter(i))
+                        .get(Player::getSleepTimer)
+                        .set((p, i) -> ((PlayerAccessor) p).accessor$sleepCounter(i))
                     .create(Keys.WALKING_SPEED)
                         .get(h -> (double) h.abilities.getWalkingSpeed())
                         .set((h, v) -> {
-                            ((PlayerAbilitiesAccessor) h.abilities).accessor$walkingSpeed(v.floatValue());
+                            ((AbilitiesAccessor) h.abilities).accessor$walkingSpeed(v.floatValue());
                             h.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(v);
                             h.onUpdateAbilities();
                         })

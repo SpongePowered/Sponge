@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.inventory.custom;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.ContainerType;
 
-public class CustomContainer extends Container {
+public class CustomContainer extends AbstractContainerMenu {
 
     public CustomInventory inv;
 
-    public CustomContainer(int id, final PlayerEntity player, final CustomInventory inventory, ContainerType type) {
-        super((net.minecraft.inventory.container.ContainerType<?>) type, id);
+    public CustomContainer(int id, final Player player, final CustomInventory inventory, ContainerType type) {
+        super((net.minecraft.world.inventory.MenuType<?>) type, id);
         this.inv = inventory;
 
         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
@@ -53,18 +53,18 @@ public class CustomContainer extends Container {
     }
 
     @Override
-    public boolean stillValid(final PlayerEntity playerIn) {
+    public boolean stillValid(final Player playerIn) {
         return true;
     }
 
     @Override
-    public void removed(final PlayerEntity playerIn) {
+    public void removed(final Player playerIn) {
         super.removed(playerIn);
         this.inv.stopOpen(playerIn);
     }
 
     @Override
-    public ItemStack quickMoveStack(final PlayerEntity playerIn, final int index) {
+    public ItemStack quickMoveStack(final Player playerIn, final int index) {
         // Almost 1:1 copy of ChestContainer#transferStackInSlot
         ItemStack itemstack = ItemStack.EMPTY;
         final Slot slot = this.slots.get(index);

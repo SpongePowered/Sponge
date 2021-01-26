@@ -27,18 +27,17 @@ package org.spongepowered.common.world.biome.provider;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryLookupCodec;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.provider.OverworldBiomeProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.accessor.world.biome.provider.BiomeProviderAccessor;
-import org.spongepowered.common.accessor.world.biome.provider.OverworldBiomeProviderAccessor;
-
+import org.spongepowered.common.accessor.world.level.biome.BiomeSourceAccessor;
+import org.spongepowered.common.accessor.world.level.biome.OverworldBiomeSourceAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryLookupCodec;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.OverworldBiomeSource;
 
 public final class SpongeLayeredBiomeProviderHelper {
 
@@ -50,15 +49,15 @@ public final class SpongeLayeredBiomeProviderHelper {
                     .apply(r, f1 -> new SpongeDataSection(f1.orElse(null)))
             );
 
-    public static final Codec<OverworldBiomeProvider> DIRECT_CODEC = RecordCodecBuilder
+    public static final Codec<OverworldBiomeSource> DIRECT_CODEC = RecordCodecBuilder
             .create(r -> r
                     .group(
-                            Codec.LONG.fieldOf("seed").stable().forGetter(v -> ((OverworldBiomeProviderAccessor) v).accessor$seed()),
-                            Codec.BOOL.optionalFieldOf("legacy_biome_init_layer", Boolean.FALSE, Lifecycle.stable()).forGetter(v -> ((OverworldBiomeProviderAccessor) v).accessor$legacyBiomeInitLayer()),
-                            Codec.BOOL.fieldOf("large_biomes").orElse(false).stable().forGetter(v -> ((OverworldBiomeProviderAccessor) v).accessor$largeBiomes()),
-                            RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(v -> ((OverworldBiomeProviderAccessor) v).accessor$biomes()),
+                            Codec.LONG.fieldOf("seed").stable().forGetter(v -> ((OverworldBiomeSourceAccessor) v).accessor$seed()),
+                            Codec.BOOL.optionalFieldOf("legacy_biome_init_layer", Boolean.FALSE, Lifecycle.stable()).forGetter(v -> ((OverworldBiomeSourceAccessor) v).accessor$legacyBiomeInitLayer()),
+                            Codec.BOOL.fieldOf("large_biomes").orElse(false).stable().forGetter(v -> ((OverworldBiomeSourceAccessor) v).accessor$largeBiomes()),
+                            RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(v -> ((OverworldBiomeSourceAccessor) v).accessor$biomes()),
                             SpongeLayeredBiomeProviderHelper.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> {
-                                final List<Biome> biomes = ((BiomeProviderAccessor) v).accessor$possibleBiomes();
+                                final List<Biome> biomes = ((BiomeSourceAccessor) v).accessor$possibleBiomes();
                                 final List<Supplier<Biome>> supplied = new ArrayList<>();
                                 biomes.forEach(biome -> supplied.add(() -> biome));
 
@@ -66,12 +65,12 @@ public final class SpongeLayeredBiomeProviderHelper {
                             })
                     )
                     .apply(r, r.stable((f1, f2, f3, f4, f5) -> {
-                        final OverworldBiomeProvider provider = new OverworldBiomeProvider(f1, f2, f3, f4);
+                        final OverworldBiomeSource provider = new OverworldBiomeSource(f1, f2, f3, f4);
                         f5.ifPresent(v -> {
                             final List<Biome> biomes = new ArrayList<>();
                             v.biomes.forEach(biome -> biomes.add(biome.get()));
 
-                            ((BiomeProviderAccessor) provider).accessor$possibleBiomes(biomes);
+                            ((BiomeSourceAccessor) provider).accessor$possibleBiomes(biomes);
                         });
                         return provider;
                     }))

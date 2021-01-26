@@ -25,8 +25,8 @@
 package org.spongepowered.vanilla.mixin.core.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.server.IntegratedServer;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -75,14 +75,14 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
         SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
     }
 
-    @Redirect(method = "clearLevel(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;singleplayerServer:Lnet/minecraft/server/integrated/IntegratedServer;", opcode =
+    @Redirect(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;singleplayerServer:Lnet/minecraft/client/server/IntegratedServer;", opcode =
             Opcodes.PUTFIELD))
     private void vanilla$storeTemporaryServerRed(Minecraft minecraft, IntegratedServer server) {
         ((MinecraftBridge) minecraft).bridge$setTemporaryIntegratedServer(this.singleplayerServer);
         this.singleplayerServer = null;
     }
 
-    @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("TAIL"))
+    @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("TAIL"))
     private void vanilla$nullServerRefAndPhaseTracker(Screen screenIn, CallbackInfo ci) {
         ((MinecraftBridge) this).bridge$setTemporaryIntegratedServer(null);
         try {

@@ -26,7 +26,6 @@ package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.util.SharedConstants;
 import org.apache.commons.io.FileUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -35,6 +34,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import net.minecraft.SharedConstants;
 
 public class DataPackSerializer<T extends DataPackSerializedObject> {
 

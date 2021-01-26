@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.bridge.world.chunk;
 
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface AbstractChunkProviderBridge {
 
     void bridge$setMaxChunkUnloads(int maxUnloads);
 
-    @Nullable Chunk bridge$getLoadedChunkWithoutMarkingActive(int x, int z);
+    @Nullable LevelChunk bridge$getLoadedChunkWithoutMarkingActive(int x, int z);
 }

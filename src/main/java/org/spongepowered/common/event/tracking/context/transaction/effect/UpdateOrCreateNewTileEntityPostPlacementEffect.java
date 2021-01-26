@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
@@ -50,9 +50,9 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag, final int limit
     ) {
-        final ServerWorld serverWorld = pipeline.getServerWorld();
-        final Chunk chunk = pipeline.getAffectedChunk();
-        final @Nullable TileEntity maybeNewTileEntity = chunk.getBlockEntity(oldState.pos, Chunk.CreateEntityType.CHECK);
+        final ServerLevel serverWorld = pipeline.getServerWorld();
+        final LevelChunk chunk = pipeline.getAffectedChunk();
+        final @Nullable BlockEntity maybeNewTileEntity = chunk.getBlockEntity(oldState.pos, LevelChunk.EntityCreationType.CHECK);
         if (((BlockStateBridge) newState).bridge$hasTileEntity()) {
             if (maybeNewTileEntity == null) {
                 // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world); // Vanilla

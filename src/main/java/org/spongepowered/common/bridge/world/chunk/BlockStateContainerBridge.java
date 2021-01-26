@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.chunk;
 
-import net.minecraft.util.BitArray;
+import net.minecraft.util.BitStorage;
 
 public interface BlockStateContainerBridge {
 
     int bridge$getBits();
 
-    BitArray bridge$getStorage();
+    BitStorage bridge$getStorage();
 }

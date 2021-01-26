@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.network.status;
 
-import net.minecraft.network.ServerStatusResponse;
+import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Sponge;
@@ -47,24 +47,24 @@ public final class SpongeStatusResponse {
     }
 
     @Nullable
-    public static ServerStatusResponse post(MinecraftServer server, StatusClient client) {
+    public static ServerStatus post(MinecraftServer server, StatusClient client) {
         return SpongeStatusResponse.call(SpongeStatusResponse.create(server), client);
     }
 
     @Nullable
-    public static ServerStatusResponse postLegacy(MinecraftServer server, InetSocketAddress address, MinecraftVersion version,
+    public static ServerStatus postLegacy(MinecraftServer server, InetSocketAddress address, MinecraftVersion version,
             InetSocketAddress virtualHost) {
-        ServerStatusResponse response = SpongeStatusResponse.create(server);
-        response.setVersion(new ServerStatusResponse.Version(response.getVersion().getName(), Byte.MAX_VALUE));
+        ServerStatus response = SpongeStatusResponse.create(server);
+        response.setVersion(new ServerStatus.Version(response.getVersion().getName(), Byte.MAX_VALUE));
         response = SpongeStatusResponse.call(response, new SpongeLegacyStatusClient(address, version, virtualHost));
         if (response != null && response.getPlayers() == null) {
-            response.setPlayers(new ServerStatusResponse.Players(-1, 0));
+            response.setPlayers(new ServerStatus.Players(-1, 0));
         }
         return response;
     }
 
     @Nullable
-    private static ServerStatusResponse call(ServerStatusResponse response, StatusClient client) {
+    private static ServerStatus call(ServerStatus response, StatusClient client) {
         if (!SpongeCommon.postEvent(SpongeEventFactory.createClientPingServerEvent(Cause.of(EventContext.empty(), Sponge.getServer()), client,
             (ClientPingServerEvent.Response) response))) {
             return response;
@@ -72,12 +72,12 @@ public final class SpongeStatusResponse {
         return null;
     }
 
-    public static ServerStatusResponse create(MinecraftServer server) {
+    public static ServerStatus create(MinecraftServer server) {
         return SpongeStatusResponse.clone(server.getStatus());
     }
 
-    private static ServerStatusResponse clone(ServerStatusResponse original) {
-        ServerStatusResponse clone = new ServerStatusResponse();
+    private static ServerStatus clone(ServerStatus original) {
+        ServerStatus clone = new ServerStatus();
         clone.setDescription(original.getDescription());
         if (original.getFavicon() != null) {
             ((ClientPingServerEvent.Response) clone).setFavicon(((StatusResponse) original).getFavicon().get());
@@ -89,9 +89,9 @@ public final class SpongeStatusResponse {
     }
 
     @Nullable
-    private static ServerStatusResponse.Players clone(@Nullable ServerStatusResponse.Players original) {
+    private static ServerStatus.Players clone(@Nullable ServerStatus.Players original) {
         if (original != null) {
-            ServerStatusResponse.Players clone = new ServerStatusResponse.Players(original.getMaxPlayers(),
+            ServerStatus.Players clone = new ServerStatus.Players(original.getMaxPlayers(),
                     original.getNumPlayers());
             clone.setSample(original.getSample());
             return clone;
@@ -100,15 +100,15 @@ public final class SpongeStatusResponse {
     }
 
     @Nullable
-    private static ServerStatusResponse.Version clone(@Nullable ServerStatusResponse.Version original) {
-        return original != null ? new ServerStatusResponse.Version(original.getName(), original.getProtocol()) : null;
+    private static ServerStatus.Version clone(@Nullable ServerStatus.Version original) {
+        return original != null ? new ServerStatus.Version(original.getName(), original.getProtocol()) : null;
     }
 
-    public static String getMotd(ServerStatusResponse response) {
+    public static String getMotd(ServerStatus response) {
         return SpongeStatusResponse.getFirstLine(SpongeAdventure.legacySection(SpongeAdventure.asAdventure(response.getDescription())));
     }
 
-    public static String getUnformattedMotd(ServerStatusResponse response) {
+    public static String getUnformattedMotd(ServerStatus response) {
         return SpongeStatusResponse.getFirstLine(SpongeAdventure.plain(SpongeAdventure.asAdventure(response.getDescription())));
     }
 

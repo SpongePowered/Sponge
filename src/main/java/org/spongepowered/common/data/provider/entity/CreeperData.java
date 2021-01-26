@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.CreeperEntity;
+import net.minecraft.world.entity.monster.Creeper;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.monster.CreeperEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.CreeperAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class CreeperData {
@@ -37,10 +37,10 @@ public final class CreeperData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(CreeperEntity.class)
+                .asMutable(Creeper.class)
                     .create(Keys.IS_CHARGED)
-                        .get(CreeperEntity::isPowered)
-                        .set((h, v) -> h.getEntityData().set(CreeperEntityAccessor.accessor$DATA_IS_POWERED(), v));
+                        .get(Creeper::isPowered)
+                        .set((h, v) -> h.getEntityData().set(CreeperAccessor.accessor$DATA_IS_POWERED(), v));
     }
     // @formatter:on
 }

@@ -28,22 +28,22 @@
  */
 package org.spongepowered.vanilla.client.gui.widget;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.FocusableGui;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.IRenderable;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
 
-public abstract class ScrollPanel extends FocusableGui implements IRenderable {
+public abstract class ScrollPanel extends AbstractContainerEventHandler implements Widget {
 
     private final Minecraft client;
     protected final int width;
@@ -82,7 +82,7 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
      * @param mouseX
      * @param mouseY
      */
-    protected abstract void drawPanel(final MatrixStack stack, int entryRight, int relativeY, Tessellator tess, int mouseX, int mouseY);
+    protected abstract void drawPanel(final PoseStack stack, int entryRight, int relativeY, Tesselator tess, int mouseX, int mouseY);
 
     protected boolean clickPanel(final double mouseX, final double mouseY, final int button) {
         return false;
@@ -177,10 +177,10 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
     }
 
     @Override
-    public void render(final MatrixStack stack, final int mouseX, final int mouseY, final float partialTicks) {
+    public void render(final PoseStack stack, final int mouseX, final int mouseY, final float partialTicks) {
         this.drawBackground();
 
-        final Tessellator tess = Tessellator.getInstance();
+        final Tesselator tess = Tesselator.getInstance();
         final BufferBuilder worldr = tess.getBuilder();
 
         final double scale = this.client.getWindow().getGuiScale();
@@ -190,10 +190,10 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
 
         GlStateManager._disableLighting();
         GlStateManager._disableFog();
-        this.client.getTextureManager().bind(AbstractGui.BACKGROUND_LOCATION);
+        this.client.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
         GlStateManager._color4f(1.0F, 1.0F, 1.0F, 1.0F);
         final float texScale = 32.0F;
-        worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+        worldr.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         worldr.vertex(this.left, this.bottom, 0.0f).uv(this.left / texScale, (this.bottom + (int) this.scrollDistance) / texScale)
             .color(0x20, 0x20, 0x20, 0xFF).endVertex();
         worldr.vertex(this.right, this.bottom, 0.0f).uv(this.right / texScale, (this.bottom + (int) this.scrollDistance) / texScale)
@@ -219,19 +219,19 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
             }
 
             GlStateManager._disableTexture();
-            worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+            worldr.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             worldr.vertex(this.barLeft, this.bottom, 0.0f).uv(0.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
             worldr.vertex(this.barLeft + this.barWidth, this.bottom, 0.0f).uv(1.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
             worldr.vertex(this.barLeft + this.barWidth, this.top, 0.0f).uv(1.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
             worldr.vertex(this.barLeft, this.top, 0.0f).uv(0.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
             tess.end();
-            worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+            worldr.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             worldr.vertex(this.barLeft, barTop + barHeight, 0.0f).uv(0.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
             worldr.vertex(this.barLeft + this.barWidth, barTop + barHeight, 0.0f).uv(1.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
             worldr.vertex(this.barLeft + this.barWidth, barTop, 0.0f).uv(1.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
             worldr.vertex(this.barLeft, barTop, 0.0f).uv(0.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
             tess.end();
-            worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+            worldr.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             worldr.vertex(this.barLeft, barTop + barHeight - 1, 0.0f).uv(0.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
             worldr.vertex(this.barLeft + this.barWidth - 1, barTop + barHeight - 1, 0.0f).uv(1.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
             worldr.vertex(this.barLeft + this.barWidth - 1, barTop, 0.0f).uv(1.0f, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
@@ -247,7 +247,7 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
     }
 
     @Override
-    public List<? extends IGuiEventListener> children() {
+    public List<? extends GuiEventListener> children() {
         return Collections.emptyList();
     }
 }

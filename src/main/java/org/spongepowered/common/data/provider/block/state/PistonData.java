@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.DirectionalBlock;
-import net.minecraft.block.PistonBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DirectionalBlock;
+import net.minecraft.world.level.block.piston.PistonBaseBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PistonTypes;
-import org.spongepowered.common.accessor.block.PistonBlockAccessor;
+import org.spongepowered.common.accessor.world.level.block.piston.PistonBaseBlockAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class PistonData {
@@ -43,11 +43,11 @@ public final class PistonData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_EXTENDED)
-                        .get(h -> h.getValue(PistonBlock.EXTENDED))
-                        .set((h, v) -> h.setValue(PistonBlock.EXTENDED, v))
-                        .supports(h -> h.getBlock() instanceof PistonBlock)
+                        .get(h -> h.getValue(PistonBaseBlock.EXTENDED))
+                        .set((h, v) -> h.setValue(PistonBaseBlock.EXTENDED, v))
+                        .supports(h -> h.getBlock() instanceof PistonBaseBlock)
                     .create(Keys.PISTON_TYPE)
-                        .get(h -> ((PistonBlockAccessor) h.getBlock()).accessor$isSticky() ? PistonTypes.STICKY.get() : PistonTypes.NORMAL.get())
+                        .get(h -> ((PistonBaseBlockAccessor) h.getBlock()).accessor$isSticky() ? PistonTypes.STICKY.get() : PistonTypes.NORMAL.get())
                         .set((h, v) -> {
                             if (v == PistonTypes.NORMAL.get()) {
                                 return Blocks.PISTON.defaultBlockState().setValue(DirectionalBlock.FACING, h.getValue(DirectionalBlock.FACING));
@@ -55,7 +55,7 @@ public final class PistonData {
                                 return Blocks.STICKY_PISTON.defaultBlockState().setValue(DirectionalBlock.FACING, h.getValue(DirectionalBlock.FACING));
                             }
                         })
-                        .supports(h -> h.getBlock() instanceof PistonBlock);
+                        .supports(h -> h.getBlock() instanceof PistonBaseBlock);
     }
     // @formatter:on
 }

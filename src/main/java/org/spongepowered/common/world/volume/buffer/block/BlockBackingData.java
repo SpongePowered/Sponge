@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.world.volume.buffer.block;
 
-import net.minecraft.util.math.MathHelper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;
+import net.minecraft.util.Mth;
 
 /**
  * Basically a fixed length list of non negative numbers/ids.
@@ -131,7 +131,7 @@ public interface BlockBackingData {
             this.bits = bits;
 
             this.maxValue = (1 << bits) - 1;
-            this.longArray = new long[MathHelper.roundUp(size * bits, Long.SIZE) / Long.SIZE];
+            this.longArray = new long[Mth.roundUp(size * bits, Long.SIZE) / Long.SIZE];
         }
 
         private PackedBackingData(final int size, final int bits, final long[] array) {

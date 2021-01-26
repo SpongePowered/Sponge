@@ -25,16 +25,6 @@
 package org.spongepowered.common.event.tracking;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.loot.LootContext;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.NextTickListEntry;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -66,6 +56,15 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.loot.LootContext;
 
 public interface PhaseStateProxy<C extends PhaseContext<C>> {
 
@@ -111,7 +110,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
 
     /**
      * Gets whether this state is considered a "ticking" state. Specifically such that when
-     * {@link Chunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, Predicate)} is used,
+     * {@link LevelChunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, Predicate)} is used,
      * we are not filtering any of the lists, whereas if this state is a ticking state, it will
      * filter the proposed list of entities to supply any potentially captured entities.
      *
@@ -168,7 +167,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     /**
      * Specifically gets whether this state ignores any attempts at storing
      * or retrieving an owner/notifier from a particular {@link BlockPos}
-     * within a {@link net.minecraft.world.World} or {@link Chunk}.
+     * within a {@link net.minecraft.world.level.Level} or {@link LevelChunk}.
      *
      * <p>Specifically used in
      * {@code ChunkMixin_OwnershipTracked#bridge$addTrackedBlockPosition(Block, BlockPos, User, PlayerTracker.Type)}
@@ -220,7 +219,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state will ignore {@link net.minecraft.world.World#addBlockEvent(BlockPos, Block, int, int)}
+     * Gets whether this state will ignore {@link net.minecraft.world.level.Level#addBlockEvent(BlockPos, Block, int, int)}
      * additions when potentially performing notification updates etc. Usually true for world generation.
      *
      * @return False if block events are to be processed in some way by the state
@@ -231,7 +230,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
 
     /**
      * Gets whether this state will already consider any captures or extra processing for a
-     * {@link Block#tick(BlockState, net.minecraft.world.World, BlockPos, Random)}. Again usually
+     * {@link Block#tick(BlockState, net.minecraft.world.level.Level, BlockPos, Random)}. Again usually
      * considered for world generation or post states or block restorations.
      *
      * @return True if it's going to be ignored
@@ -329,7 +328,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
      * @param notifier The tracker type (owner or notifier)
      */
     default void associateNeighborStateNotifier(@Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-        final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
+        final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         this.getState().associateNeighborStateNotifier(this.asContext(), sourcePos, block, notifyPos,minecraftWorld, notifier);
     }
 
@@ -352,7 +351,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
      * @param pos The position being updated
      * @param phaseContext the block tick context being entered
      */
-    default void appendNotifierPreBlockTick(final ServerWorld world, final BlockPos pos, final LocationBasedTickContext<@NonNull ?> phaseContext) {
+    default void appendNotifierPreBlockTick(final ServerLevel world, final BlockPos pos, final LocationBasedTickContext<@NonNull ?> phaseContext) {
         this.getState().appendNotifierPreBlockTick(world, pos, this.asContext(), phaseContext);
     }
 
@@ -372,7 +371,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
      * @param itemStack
      * @param playerIn
      */
-    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final @Nullable ServerPlayerEntity playerIn) {
+    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final @Nullable ServerPlayer playerIn) {
         this.getState().capturePlayerUsingStackToBreakBlock(itemStack, playerIn, this.asContext());
     }
 
@@ -493,7 +492,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         this.getState().foldContextForThread(this.asContext(), returnValue);
     }
 
-    default void associateScheduledTickUpdate(NextTickListEntry<?> entry) {
+    default void associateScheduledTickUpdate(TickNextTickData<?> entry) {
         this.getState().associateScheduledTickUpdate(this.asContext(), entry);
     }
 }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.ItemFrameEntity;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.orientation.Orientation;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -38,7 +38,7 @@ public final class ItemFrameData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(ItemFrameEntity.class)
+                .asMutable(ItemFrame.class)
                     .create(Keys.ITEM_STACK_SNAPSHOT)
                         .get(h -> ItemStackUtil.snapshotOf(h.getItem()))
                         .set((h, v) -> h.setItem(ItemStackUtil.fromSnapshotToNative(v)))

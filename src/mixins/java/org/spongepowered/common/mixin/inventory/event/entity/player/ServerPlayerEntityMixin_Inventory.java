@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity.player;
 
-import net.minecraft.entity.passive.horse.AbstractHorseEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.INamedContainerProvider;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,17 +35,21 @@ import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 
 import java.util.OptionalInt;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 
-@Mixin(value = ServerPlayerEntity.class)
+@Mixin(value = ServerPlayer.class)
 public class ServerPlayerEntityMixin_Inventory extends PlayerEntityMixin_Inventory {
 
-    @Inject(method = "openMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/container/Container;addSlotListener(Lnet/minecraft/inventory/container/IContainerListener;)V"))
-    private void impl$onOpenMenu(final INamedContainerProvider containerProvider, CallbackInfoReturnable<OptionalInt> cir) {
+    @Inject(method = "openMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;addSlotListener(Lnet/minecraft/world/inventory/ContainerListener;)V"))
+    private void impl$onOpenMenu(final MenuProvider containerProvider, CallbackInfoReturnable<OptionalInt> cir) {
         ((TrackedContainerBridge) this.containerMenu).bridge$trackViewable(containerProvider);
     }
 
-    @Inject(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/container/Container;addSlotListener(Lnet/minecraft/inventory/container/IContainerListener;)V"))
-    private void impl$onOpenHorseInventory(final AbstractHorseEntity horse, final IInventory inventoryIn, final CallbackInfo ci) {
+    @Inject(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;addSlotListener(Lnet/minecraft/world/inventory/ContainerListener;)V"))
+    private void impl$onOpenHorseInventory(final AbstractHorse horse, final Container inventoryIn, final CallbackInfo ci) {
         ((TrackedContainerBridge) this.containerMenu).bridge$trackViewable(inventoryIn);
     }
 

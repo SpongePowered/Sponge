@@ -24,27 +24,10 @@
  */
 package org.spongepowered.common.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.server.SPlayEntityEffectPacket;
-import net.minecraft.network.play.server.SPlaySoundEventPacket;
-import net.minecraft.network.play.server.SPlayerAbilitiesPacket;
-import net.minecraft.network.play.server.SServerDifficultyPacket;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.biome.BiomeManager;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.IWorldInfo;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
-import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
+import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
+import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
@@ -60,6 +43,23 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.storage.LevelData;
 
 public final class EntityUtil {
 
@@ -77,12 +77,12 @@ public final class EntityUtil {
     private EntityUtil() {
     }
 
-    public static void performPostChangePlayerWorldLogic(final ServerPlayerEntity player, final ServerWorld fromWorld,
-            final ServerWorld originalToWorld, final ServerWorld toWorld, final boolean isPortal) {
+    public static void performPostChangePlayerWorldLogic(final ServerPlayer player, final ServerLevel fromWorld,
+            final ServerLevel originalToWorld, final ServerLevel toWorld, final boolean isPortal) {
         // Sponge Start - Send any platform dimension data
         ((ServerPlayerEntityBridge) player).bridge$sendDimensionData(player.connection.connection, toWorld.dimensionType(), toWorld.dimension());
         // Sponge End
-        IWorldInfo worldinfo = toWorld.getLevelData();
+        LevelData worldinfo = toWorld.getLevelData();
         // We send dimension change for portals before loading chunks
         if (!isPortal) {
             // Sponge Start - Allow the platform to handle how dimension changes are sent down
@@ -91,7 +91,7 @@ public final class EntityUtil {
                     toWorld.isDebug(), toWorld.isFlat(), true);
         }
         // Sponge End
-        player.connection.send(new SServerDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
+        player.connection.send(new ClientboundChangeDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
         final PlayerList playerlist = player.getServer().getPlayerList();
         playerlist.sendPlayerPermissionLevel(player);
 
@@ -104,27 +104,27 @@ public final class EntityUtil {
         player.setLevel(toWorld);
         toWorld.addDuringPortalTeleport(player);
         if (isPortal) {
-            ((ServerPlayerEntityAccessor) player).invoker$triggerDimensionChangeTriggers(toWorld);
+            ((ServerPlayerAccessor) player).invoker$triggerDimensionChangeTriggers(toWorld);
         }
         player.gameMode.setLevel(toWorld);
-        player.connection.send(new SPlayerAbilitiesPacket(player.abilities));
+        player.connection.send(new ClientboundPlayerAbilitiesPacket(player.abilities));
         playerlist.sendLevelInfo(player, toWorld);
         playerlist.sendAllPlayerInfo(player);
 
-        for (final EffectInstance effectinstance : player.getActiveEffects()) {
-            player.connection.send(new SPlayEntityEffectPacket(player.getId(), effectinstance));
+        for (final MobEffectInstance effectinstance : player.getActiveEffects()) {
+            player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effectinstance));
         }
 
         if (isPortal) {
-            player.connection.send(new SPlaySoundEventPacket(1032, BlockPos.ZERO, 0, false));
+            player.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
         }
 
         ((ServerWorldBridge) fromWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
         ((ServerWorldBridge) toWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
 
-        ((ServerPlayerEntityAccessor) player).accessor$lastSentExp(-1);
-        ((ServerPlayerEntityAccessor) player).accessor$lastSentHealth(-1.0f);
-        ((ServerPlayerEntityAccessor) player).accessor$lastSentFood(-1);
+        ((ServerPlayerAccessor) player).accessor$lastSentExp(-1);
+        ((ServerPlayerAccessor) player).accessor$lastSentHealth(-1.0f);
+        ((ServerPlayerAccessor) player).accessor$lastSentFood(-1);
 
         if (!isPortal) {
             player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot);
@@ -140,7 +140,7 @@ public final class EntityUtil {
         // Sponge End
     }
 
-    public static boolean isEntityDead(final net.minecraft.entity.Entity entity) {
+    public static boolean isEntityDead(final net.minecraft.world.entity.Entity entity) {
         if (entity instanceof LivingEntity) {
             final LivingEntity base = (LivingEntity) entity;
             return base.getHealth() <= 0 || base.deathTime > 0 || ((LivingEntityAccessor) entity).accessor$dead();
@@ -196,7 +196,7 @@ public final class EntityUtil {
                 }
             });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        ((net.minecraft.world.World) entity.getWorld()).addFreshEntity((Entity) entity);
+        ((net.minecraft.world.level.Level) entity.getWorld()).addFreshEntity((Entity) entity);
         return true;
     }
 
@@ -211,21 +211,21 @@ public final class EntityUtil {
      * @return The motion vector
      */
     @SuppressWarnings("unused")
-    private static Vector3d createDropMotion(final boolean dropAround, final PlayerEntity player, final Random random) {
+    private static Vector3d createDropMotion(final boolean dropAround, final Player player, final Random random) {
         double x;
         double y;
         double z;
         if (dropAround) {
             final float f = random.nextFloat() * 0.5F;
             final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
-            x = -MathHelper.sin(f1) * f;
-            z = MathHelper.cos(f1) * f;
+            x = -Mth.sin(f1) * f;
+            z = Mth.cos(f1) * f;
             y = 0.20000000298023224D;
         } else {
             float f2 = 0.3F;
-            x = -MathHelper.sin(player.yRot * 0.017453292F) * MathHelper.cos(player.xRot * 0.017453292F) * f2;
-            z = MathHelper.cos(player.yRot * 0.017453292F) * MathHelper.cos(player.xRot * 0.017453292F) * f2;
-            y = - MathHelper.sin(player.xRot * 0.017453292F) * f2 + 0.1F;
+            x = -Mth.sin(player.yRot * 0.017453292F) * Mth.cos(player.xRot * 0.017453292F) * f2;
+            z = Mth.cos(player.yRot * 0.017453292F) * Mth.cos(player.xRot * 0.017453292F) * f2;
+            y = - Mth.sin(player.xRot * 0.017453292F) * f2 + 0.1F;
             final float f3 = random.nextFloat() * ((float) Math.PI * 2F);
             f2 = 0.02F * random.nextFloat();
             x += Math.cos(f3) * f2;

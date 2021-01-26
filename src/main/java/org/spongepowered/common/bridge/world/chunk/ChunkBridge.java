@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.bridge.world.chunk;
 
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkPrimer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Direction;
@@ -37,6 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.ProtoChunk;
 
 public interface ChunkBridge {
 
@@ -63,12 +63,12 @@ public interface ChunkBridge {
 
     void bridge$setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPlayerPositions);
 
-    void bridge$setNeighbor(Direction direction, Chunk neighbor);
+    void bridge$setNeighbor(Direction direction, LevelChunk neighbor);
 
-    void bridge$setNeighborChunk(int index, @Nullable Chunk chunk);
+    void bridge$setNeighborChunk(int index, @Nullable LevelChunk chunk);
 
     @Nullable
-    Chunk bridge$getNeighborChunk(int index);
+    LevelChunk bridge$getNeighborChunk(int index);
 
     boolean bridge$areNeighborsLoaded();
 
@@ -78,13 +78,13 @@ public interface ChunkBridge {
 
     boolean bridge$isPersistedChunk();
 
-    void bridge$fill(ChunkPrimer primer);
+    void bridge$fill(ProtoChunk primer);
 
     boolean bridge$isSpawning();
 
     void bridge$setIsSpawning(boolean spawning);
 
-    List<Chunk> bridge$getNeighbors();
+    List<LevelChunk> bridge$getNeighbors();
 
     boolean bridge$isQueuedForUnload();
 
@@ -92,5 +92,5 @@ public interface ChunkBridge {
 
     boolean bridge$isActive();
 
-    Chunk[] bridge$getNeighborArray();
+    LevelChunk[] bridge$getNeighborArray();
 }

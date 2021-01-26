@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.world.dragon;
 
-import net.minecraft.world.end.DragonFightManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -32,22 +31,23 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
 
 @SuppressWarnings("unchecked")
 public abstract class DragonContext<D extends DragonContext<D>> extends PhaseContext<D> {
 
-    @Nullable private DragonFightManager manager;
+    @Nullable private EndDragonFight manager;
 
     public DragonContext(final IPhaseState<D> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 
-    public D manager(DragonFightManager manager) {
+    public D manager(EndDragonFight manager) {
         this.manager = Objects.requireNonNull(manager);
         return (D) this;
     }
 
-    public DragonFightManager getManager() {
+    public EndDragonFight getManager() {
         return Objects.requireNonNull(this.manager);
     }
 }

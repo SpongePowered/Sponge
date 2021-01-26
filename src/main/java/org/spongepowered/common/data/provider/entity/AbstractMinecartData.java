@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
@@ -40,10 +40,10 @@ public final class AbstractMinecartData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(AbstractMinecartEntity.class)
+                .asMutable(AbstractMinecart.class)
                     .create(Keys.BLOCK_STATE)
                         .get(h -> h.hasCustomDisplay() ? (BlockState) h.getDisplayBlockState() : null)
-                        .set((h, v) -> h.setDisplayBlockState((net.minecraft.block.BlockState) v))
+                        .set((h, v) -> h.setDisplayBlockState((net.minecraft.world.level.block.state.BlockState) v))
                         .delete(h -> h.setCustomDisplay(false))
                     .create(Keys.IS_ON_RAIL)
                         .get(h -> {
@@ -55,7 +55,7 @@ public final class AbstractMinecartData {
                             return h.level.getBlockState(posBelow).is(BlockTags.RAILS);
                         })
                     .create(Keys.MINECART_BLOCK_OFFSET)
-                        .get(AbstractMinecartEntity::getDisplayOffset)
+                        .get(AbstractMinecart::getDisplayOffset)
                         .setAnd(AbstractMinecartData::setBlockOffset)
                         .deleteAnd(h -> AbstractMinecartData.setBlockOffset(h, h.getDefaultDisplayOffset()))
                 .asMutable(MinecartEntityBridge.class)
@@ -75,7 +75,7 @@ public final class AbstractMinecartData {
     }
     // @formatter:on
 
-    private static boolean setBlockOffset(final AbstractMinecartEntity holder, final Integer value) {
+    private static boolean setBlockOffset(final AbstractMinecart holder, final Integer value) {
         if (!holder.hasCustomDisplay()) {
             return false;
         }

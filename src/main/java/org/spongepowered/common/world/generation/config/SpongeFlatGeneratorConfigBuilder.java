@@ -26,12 +26,6 @@ package org.spongepowered.common.world.generation.config;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.gen.FlatGenerationSettings;
-import net.minecraft.world.gen.FlatLayerInfo;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.registry.RegistryReference;
@@ -45,6 +39,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.levelgen.StructureSettings;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
 public final class SpongeFlatGeneratorConfigBuilder implements FlatGeneratorConfig.Builder {
 
@@ -103,8 +103,8 @@ public final class SpongeFlatGeneratorConfigBuilder implements FlatGeneratorConf
 
     @Override
     public FlatGeneratorConfig.Builder reset() {
-        this.structureConfig = (StructureGenerationConfig) new DimensionStructuresSettings(Optional.of(DimensionStructuresSettings.DEFAULT_STRONGHOLD),
-                Maps.newHashMap(ImmutableMap.of(Structure.VILLAGE, DimensionStructuresSettings.DEFAULTS.get(Structure.VILLAGE))));
+        this.structureConfig = (StructureGenerationConfig) new StructureSettings(Optional.of(StructureSettings.DEFAULT_STRONGHOLD),
+                Maps.newHashMap(ImmutableMap.of(StructureFeature.VILLAGE, StructureSettings.DEFAULTS.get(StructureFeature.VILLAGE))));
         this.layers.clear();
         this.layers.add(LayerConfig.of(1, BlockTypes.BEDROCK.get().getDefaultState()));
         this.layers.add(LayerConfig.of(2, BlockTypes.DIRT.get().getDefaultState()));
@@ -130,8 +130,8 @@ public final class SpongeFlatGeneratorConfigBuilder implements FlatGeneratorConf
         if (this.layers.isEmpty()) {
             throw new IllegalStateException("Flat generation requires at least 1 Layer!");
         }
-        return (FlatGeneratorConfig) new FlatGenerationSettings(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
-                (DimensionStructuresSettings) this.structureConfig, (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
+        return (FlatGeneratorConfig) new FlatLevelGeneratorSettings(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
+                (StructureSettings) this.structureConfig, (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
                 this.performDecoration, Optional.of(() -> BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY)
                 .get((ResourceLocation) (Object) this.biome.location())));
     }

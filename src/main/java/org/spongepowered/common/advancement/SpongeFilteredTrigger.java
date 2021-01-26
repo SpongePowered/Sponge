@@ -27,9 +27,6 @@ package org.spongepowered.common.advancement;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.advancements.ICriterionInstance;
-import net.minecraft.loot.ConditionArraySerializer;
-import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
@@ -38,9 +35,12 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataSerializable;
 
 import java.io.IOException;
+import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.critereon.SerializationContext;
+import net.minecraft.resources.ResourceLocation;
 
 @SuppressWarnings("rawtypes")
-public final class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigger {
+public final class SpongeFilteredTrigger implements CriterionTriggerInstance, FilteredTrigger {
 
     private final static Gson GSON = new Gson();
 
@@ -68,7 +68,7 @@ public final class SpongeFilteredTrigger implements ICriterionInstance, Filtered
     }
 
     @Override
-    public JsonObject serializeToJson(final ConditionArraySerializer arraySerializer) {
+    public JsonObject serializeToJson(final SerializationContext arraySerializer) {
         if (this.configuration instanceof DataSerializable) {
             final DataContainer dataContainer = ((DataSerializable) this.configuration).toContainer();
             try {

@@ -26,9 +26,6 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -39,7 +36,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
+import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
@@ -49,23 +46,26 @@ import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 
 @DefaultQualifier(NonNull.class)
 public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEvent> {
 
-    final Supplier<ServerWorld> worldSupplier;
-    final CompoundNBT entityTag;
+    final Supplier<ServerLevel> worldSupplier;
+    final CompoundTag entityTag;
     final Entity entityToSpawn;
     final Vector3d originalPosition;
     final Supplier<SpawnType> deducedSpawnType;
 
     public static final class DummySnapshot {
         final Vector3d originalPosition;
-        final CompoundNBT entityTag;
-        final Supplier<ServerWorld> worldSupplier;
+        final CompoundTag entityTag;
+        final Supplier<ServerLevel> worldSupplier;
 
-        public DummySnapshot(final Vector3d originalPosition, final CompoundNBT entityTag,
-            final Supplier<ServerWorld> worldSupplier
+        public DummySnapshot(final Vector3d originalPosition, final CompoundTag entityTag,
+            final Supplier<ServerLevel> worldSupplier
         ) {
             this.originalPosition = originalPosition;
             this.entityTag = entityTag;
@@ -73,13 +73,13 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
         }
     }
 
-    SpawnEntityTransaction(final Supplier<ServerWorld> worldSupplier, final Entity entityToSpawn,
+    SpawnEntityTransaction(final Supplier<ServerLevel> worldSupplier, final Entity entityToSpawn,
         final Supplier<SpawnType> deducedSpawnType
     ) {
         super(TransactionTypes.SPAWN_ENTITY.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).getKey());
         this.worldSupplier = worldSupplier;
         this.entityToSpawn = entityToSpawn;
-        this.entityTag = entityToSpawn.saveWithoutId(new CompoundNBT());
+        this.entityTag = entityToSpawn.saveWithoutId(new CompoundTag());
         this.originalPosition = new Vector3d(entityToSpawn.getX(), entityToSpawn.getY(), entityToSpawn.getZ());
         this.deducedSpawnType = deducedSpawnType;
     }
@@ -122,12 +122,12 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
 
     @Override
     public void restore() {
-        final ServerWorld serverWorld = this.worldSupplier.get();
-        if (((ServerWorldAccessor) serverWorld).accessor$tickingEntities()) {
+        final ServerLevel serverWorld = this.worldSupplier.get();
+        if (((ServerLevelAccessor) serverWorld).accessor$tickingEntities()) {
             // More than likely we could also be needing to remove the entity from both the entities to add
             // and the chunk.
-            ((ServerWorldAccessor) serverWorld).accessor$toAddAfterTick().remove(this.entityToSpawn);
-            ((ServerWorldAccessor) serverWorld).invoker$removeFromChunk(this.entityToSpawn);
+            ((ServerLevelAccessor) serverWorld).accessor$toAddAfterTick().remove(this.entityToSpawn);
+            ((ServerLevelAccessor) serverWorld).invoker$removeFromChunk(this.entityToSpawn);
         } else {
             serverWorld.despawn(this.entityToSpawn);
         }

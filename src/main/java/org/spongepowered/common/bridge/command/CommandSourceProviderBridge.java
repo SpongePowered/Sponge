@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.bridge.command;
 
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 
 public interface CommandSourceProviderBridge {
 
     // we do this because of the lectern tile entity
-    CommandSource bridge$getCommandSource(Cause cause);
+    CommandSourceStack bridge$getCommandSource(Cause cause);
 
 }

@@ -24,12 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -53,6 +47,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public abstract class PacketState<P extends PacketContext<P>> extends PooledPhaseState<P> implements IPhaseState<P> {
 
@@ -67,12 +66,12 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
     }
 
 
-    protected static void processSpawnedEntities(final ServerPlayerEntity player, final SpawnEntityEvent event) {
+    protected static void processSpawnedEntities(final net.minecraft.server.level.ServerPlayer player, final SpawnEntityEvent event) {
         final List<Entity> entities = event.getEntities();
         PacketState.processEntities(player, entities);
     }
 
-    protected static void processEntities(final ServerPlayerEntity player, final Collection<Entity> entities) {
+    protected static void processEntities(final net.minecraft.server.level.ServerPlayer player, final Collection<Entity> entities) {
         for (final Entity entity : entities) {
             EntityUtil.processEntitySpawn(entity, () -> Optional.of(((ServerPlayer)player).getUser()));
         }
@@ -96,18 +95,18 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     @Override
     public void associateNeighborStateNotifier(
-        final P unwindingContext, final BlockPos sourcePos, final Block block, final BlockPos notifyPos, final ServerWorld minecraftWorld,
+        final P unwindingContext, final BlockPos sourcePos, final Block block, final BlockPos notifyPos, final ServerLevel minecraftWorld,
         final PlayerTracker.Type notifier) {
         final Player player = unwindingContext.getSpongePlayer();
-        final Chunk chunk = minecraftWorld.getChunkAt(notifyPos);
+        final LevelChunk chunk = minecraftWorld.getChunkAt(notifyPos);
         ((ChunkBridge) chunk).bridge$setBlockNotifier(notifyPos, player.getUniqueId());
     }
 
-    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final P context) {
+    public void populateContext(final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet, final P context) {
 
     }
 
-    public boolean isPacketIgnored(final IPacket<?> packetIn, final ServerPlayerEntity packetPlayer) {
+    public boolean isPacketIgnored(final Packet<?> packetIn, final net.minecraft.server.level.ServerPlayer packetPlayer) {
         return false;
     }
 

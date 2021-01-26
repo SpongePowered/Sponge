@@ -26,9 +26,6 @@ package org.spongepowered.common.network.channel;
 
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.util.concurrent.ThreadTaskExecutor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
@@ -37,27 +34,30 @@ import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.util.thread.BlockableEventLoop;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class PacketSender {
 
-    public static void sendTo(final EngineConnection connection, final IPacket<?> packet) {
+    public static void sendTo(final EngineConnection connection, final Packet<?> packet) {
         PacketSender.sendTo(connection, packet, (Consumer) null);
     }
 
-    public static void sendTo(final EngineConnection connection, final IPacket<?> packet,
+    public static void sendTo(final EngineConnection connection, final Packet<?> packet,
             final @Nullable Consumer<Future<? super Void>> listener) {
-        final NetworkManager networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
+        final Connection networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
         GenericFutureListener<? extends Future<? super Void>> asyncListener = null;
         if (listener != null) {
             final EngineConnectionSide<?> side = connection.getSide();
             // Complete the netty callback on the sync thread
             asyncListener = future -> {
-                final ThreadTaskExecutor<?> executor;
+                final BlockableEventLoop<?> executor;
                 if (side == EngineConnectionSide.CLIENT) {
-                    executor = (ThreadTaskExecutor<?>) Sponge.getClient();
+                    executor = (BlockableEventLoop<?>) Sponge.getClient();
                 } else {
-                    executor = (ThreadTaskExecutor<?>) Sponge.getServer();
+                    executor = (BlockableEventLoop<?>) Sponge.getServer();
                 }
                 executor.execute(() -> listener.accept(future));
             };
@@ -65,7 +65,7 @@ public final class PacketSender {
         networkManager.send(packet, asyncListener);
     }
 
-    public static void sendTo(final EngineConnection connection, final IPacket<?> packet, final CompletableFuture<Void> future) {
+    public static void sendTo(final EngineConnection connection, final Packet<?> packet, final CompletableFuture<Void> future) {
         PacketSender.sendTo(connection, packet, sendFuture -> {
             if (sendFuture.isSuccess()) {
                 future.complete(null);

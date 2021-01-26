@@ -24,15 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.api;
 
-import net.minecraft.entity.NPCMerchant;
-import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
-import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.DoubleSidedInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.BeaconTileEntity;
-import net.minecraft.tileentity.LecternTileEntity;
-import net.minecraft.tileentity.LockableTileEntity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
@@ -43,21 +34,29 @@ import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
 
 import java.util.Collections;
 import java.util.Set;
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.ClientSideMerchant;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.LecternBlockEntity;
 
 /**
  * {@link org.spongepowered.common.mixin.inventory.impl.TraitMixin_ViewableBridge_Inventory}
  */
 @Mixin(value = {
         // INamedContainerProvider impls:
-        ContainerMinecartEntity.class,
-        LecternTileEntity.class,
-        LockableTileEntity.class,
+        AbstractMinecartContainer.class,
+        LecternBlockEntity.class,
+        BaseContainerBlockEntity.class,
         ViewableCustomInventory.class,
         // IMerchant impls:
-        AbstractVillagerEntity.class,
-        NPCMerchant.class,
+        AbstractVillager.class,
+        ClientSideMerchant.class,
         // ChestBlock - DoubleSidedInventory
-        DoubleSidedInventory.class,
+        CompoundContainer.class,
 }, priority = 999)
 public abstract class TraitMixin_Viewable_Inventory_API implements ViewableInventory {
 
@@ -78,8 +77,8 @@ public abstract class TraitMixin_Viewable_Inventory_API implements ViewableInven
 
     @Override
     public boolean canInteractWith(ServerPlayer player) {
-        if (this instanceof IInventory) {
-            return ((IInventory) this).stillValid((PlayerEntity) player);
+        if (this instanceof Container) {
+            return ((Container) this).stillValid((Player) player);
         }
         // TODO other impl possible?
         return true;

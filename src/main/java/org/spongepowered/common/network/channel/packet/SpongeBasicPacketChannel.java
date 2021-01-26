@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.channel.packet;
 
-import net.minecraft.network.IPacket;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.ClientSideConnection;
@@ -86,7 +85,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
             final TransactionStore transactionStore = ConnectionUtil.getTransactionStore(connection);
             final int transactionId = transactionStore.nextId();
 
-            final IPacket<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.FML_LOGIN_WRAPPER_CHANNEL, payload, transactionId);
+            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.FML_LOGIN_WRAPPER_CHANNEL, payload, transactionId);
             PacketSender.sendTo(connection, mcPacket, sendFuture -> {
                 if (!sendFuture.isSuccess()) {
                     // Failed before it could reach the client
@@ -116,7 +115,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
             final TransactionStore transactionStore = ConnectionUtil.getTransactionStore(connection);
             final int transactionId = transactionStore.nextId();
 
-            final IPacket<?> mcPacket = PacketUtil.createLoginPayloadRequest(SpongeBasicPacketChannel.this.getKey(), payload, transactionId);
+            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(SpongeBasicPacketChannel.this.getKey(), payload, transactionId);
             PacketSender.sendTo(connection, mcPacket, future);
             return future;
         }
@@ -177,7 +176,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
                 return future;
             }
 
-            final IPacket<?> mcPacket = PacketUtil.createPlayPayload(SpongeBasicPacketChannel.this.getKey(), payload, connection.getSide());
+            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createPlayPayload(SpongeBasicPacketChannel.this.getKey(), payload, connection.getSide());
             PacketSender.sendTo(connection, mcPacket, future);
             return future;
         }
@@ -262,7 +261,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
 
                     @Override
                     protected void fail0(final ChannelException exception) {
-                        final IPacket<?> mcPacket = PacketUtil.createLoginPayloadResponse(null, transactionId);
+                        final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(null, transactionId);
                         PacketSender.sendTo(connection, mcPacket);
                     }
 
@@ -270,7 +269,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
                     protected void success0(final Packet response) {
                         try {
                             final ChannelBuf responsePayload = SpongeBasicPacketChannel.this.encodeLoginPayload(transactionalBinding.getOpcode(), response);
-                            final IPacket<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);
+                            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);
                             PacketSender.sendTo(connection, mcPacket);
                         } catch (final Throwable ex) {
                             SpongeBasicPacketChannel.this.handleException(connection, new ChannelIOException("Failed to encode response packet", ex), null);
@@ -285,7 +284,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
                 }
             }
             if (!success) {
-                final IPacket<?> mcPacket = PacketUtil.createLoginPayloadResponse(null, transactionId);
+                final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(null, transactionId);
                 PacketSender.sendTo(connection, mcPacket);
             }
         }

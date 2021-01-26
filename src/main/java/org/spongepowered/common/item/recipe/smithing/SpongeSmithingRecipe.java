@@ -24,36 +24,34 @@
  */
 package org.spongepowered.common.item.recipe.smithing;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.SmithingRecipe;
-import net.minecraft.item.crafting.StonecuttingRecipe;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-
 import java.util.function.Function;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.UpgradeRecipe;
 
-public class SpongeSmithingRecipe extends SmithingRecipe {
+public class SpongeSmithingRecipe extends UpgradeRecipe {
 
-    private final Function<IInventory, ItemStack> resultFunction;
+    private final Function<Container, ItemStack> resultFunction;
 
-    public SpongeSmithingRecipe(ResourceLocation idIn, Ingredient base, Ingredient addition, ItemStack resultIn, Function<IInventory, ItemStack> resultFunction) {
+    public SpongeSmithingRecipe(ResourceLocation idIn, Ingredient base, Ingredient addition, ItemStack resultIn, Function<Container, ItemStack> resultFunction) {
         super(idIn, base, addition, resultIn);
         this.resultFunction = resultFunction;
     }
 
     @Override
-    public ItemStack assemble(IInventory p_77572_1_) {
+    public ItemStack assemble(Container p_77572_1_) {
         if (this.resultFunction != null) {
             return this.resultFunction.apply(p_77572_1_);
         }
 
         if (this.getResultItem().hasTag()) {
             final ItemStack itemStack = this.getResultItem().copy();
-            CompoundNBT compoundnbt = p_77572_1_.getItem(0).getTag();
+            CompoundTag compoundnbt = p_77572_1_.getItem(0).getTag();
             if (compoundnbt != null) {
-                final CompoundNBT merged = itemStack.getTag().merge(compoundnbt.copy());
+                final CompoundTag merged = itemStack.getTag().merge(compoundnbt.copy());
                 itemStack.setTag(merged);
                 return itemStack;
             }

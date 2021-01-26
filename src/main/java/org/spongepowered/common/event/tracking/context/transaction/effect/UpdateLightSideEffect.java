@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
@@ -51,7 +51,7 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
             return EffectResult.NULL_PASS;
         }
         final int originalOpactiy = oldState.opacity;
-        final ServerWorld serverWorld = pipeline.getServerWorld();
+        final ServerLevel serverWorld = pipeline.getServerWorld();
         final BlockState currentState = pipeline.getAffectedChunk().getBlockState(oldState.pos);
         if (oldState.state != currentState && (((BlockStateBridge) currentState).bridge$getLightValue(serverWorld, oldState.pos) != originalOpactiy || currentState.useShapeForLightOcclusion() || oldState.state.useShapeForLightOcclusion())) {
             // this.profiler.startSection("queueCheckLight");

@@ -24,30 +24,30 @@
  */
 package org.spongepowered.common.network.channel;
 
-import net.minecraft.client.network.login.IClientLoginNetHandler;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.login.IServerLoginNetHandler;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
 import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 
 import java.util.Set;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.login.ClientLoginPacketListener;
+import net.minecraft.network.protocol.login.ServerLoginPacketListener;
 
 public final class ConnectionUtil {
 
     public static boolean isLoginPhase(final EngineConnection connection) {
-        return connection instanceof IClientLoginNetHandler ||
-                connection instanceof IServerLoginNetHandler;
+        return connection instanceof ClientLoginPacketListener ||
+                connection instanceof ServerLoginPacketListener;
     }
 
     public static Set<ResourceKey> getRegisteredChannels(final EngineConnection connection) {
-        final NetworkManager networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
+        final Connection networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
         return ((NetworkManagerBridge) networkManager).bridge$getRegisteredChannels();
     }
 
     public static TransactionStore getTransactionStore(final EngineConnection connection) {
-        final NetworkManager networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
+        final Connection networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
         return ((NetworkManagerBridge) networkManager).bridge$getTransactionStore();
     }
 

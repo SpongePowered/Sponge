@@ -24,57 +24,55 @@
  */
 package org.spongepowered.common.network.channel;
 
-import net.minecraft.network.IPacket;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.login.client.CCustomPayloadLoginPacket;
-import net.minecraft.network.login.server.SCustomPayloadLoginPacket;
-import net.minecraft.network.play.client.CCustomPayloadPacket;
-import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
-import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.packet.Packet;
-import org.spongepowered.common.accessor.network.login.client.CCustomPayloadLoginPacketAccessor;
-import org.spongepowered.common.accessor.network.login.server.SCustomPayloadLoginPacketAccessor;
-import org.spongepowered.common.accessor.network.play.client.CCustomPayloadPacketAccessor;
-import org.spongepowered.common.accessor.network.play.server.SCustomPayloadPlayPacketAccessor;
-
+import org.spongepowered.common.accessor.network.protocol.game.ClientboundCustomPayloadPacketAccessor;
+import org.spongepowered.common.accessor.network.protocol.game.ServerboundCustomPayloadPacketAccessor;
+import org.spongepowered.common.accessor.network.protocol.login.ClientboundCustomQueryPacketAccessor;
+import org.spongepowered.common.accessor.network.protocol.login.ServerboundCustomQueryPacketAccessor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
+import net.minecraft.resources.ResourceLocation;
 
 public final class PacketUtil {
 
-    public static IPacket<?> createLoginPayloadResponse(final @Nullable ChannelBuf payload, final int transactionId) {
-        final CCustomPayloadLoginPacket packet = new CCustomPayloadLoginPacket();
-        final CCustomPayloadLoginPacketAccessor accessor = (CCustomPayloadLoginPacketAccessor) packet;
+    public static net.minecraft.network.protocol.Packet<?> createLoginPayloadResponse(final @Nullable ChannelBuf payload, final int transactionId) {
+        final ServerboundCustomQueryPacket packet = new ServerboundCustomQueryPacket();
+        final ServerboundCustomQueryPacketAccessor accessor = (ServerboundCustomQueryPacketAccessor) packet;
         accessor.accessor$transactionId(transactionId);
-        accessor.accessor$data((PacketBuffer) payload);
+        accessor.accessor$data((FriendlyByteBuf) payload);
         return packet;
     }
 
-    public static IPacket<?> createLoginPayloadRequest(final ResourceKey channel, final ChannelBuf payload, final int transactionId) {
-        final SCustomPayloadLoginPacket packet = new SCustomPayloadLoginPacket();
-        final SCustomPayloadLoginPacketAccessor accessor = (SCustomPayloadLoginPacketAccessor) packet;
+    public static net.minecraft.network.protocol.Packet<?> createLoginPayloadRequest(final ResourceKey channel, final ChannelBuf payload, final int transactionId) {
+        final ClientboundCustomQueryPacket packet = new ClientboundCustomQueryPacket();
+        final ClientboundCustomQueryPacketAccessor accessor = (ClientboundCustomQueryPacketAccessor) packet;
         accessor.accessor$identifier((ResourceLocation) (Object) channel);
         accessor.accessor$transactionId(transactionId);
-        accessor.accessor$data((PacketBuffer) payload);
+        accessor.accessor$data((FriendlyByteBuf) payload);
         return packet;
     }
 
-    public static IPacket<?> createPlayPayload(final ResourceKey channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
+    public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final ResourceKey channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
         if (side == EngineConnectionSide.CLIENT) {
-            final CCustomPayloadPacketAccessor packet = (CCustomPayloadPacketAccessor) new CCustomPayloadPacket();
+            final ServerboundCustomPayloadPacketAccessor packet = (ServerboundCustomPayloadPacketAccessor) new ServerboundCustomPayloadPacket();
             packet.accessor$identifier((ResourceLocation) (Object) channel);
-            packet.accessor$data((PacketBuffer) payload);
-            return (IPacket<?>) packet;
+            packet.accessor$data((FriendlyByteBuf) payload);
+            return (net.minecraft.network.protocol.Packet<?>) packet;
         } else if (side == EngineConnectionSide.SERVER) {
-            final SCustomPayloadPlayPacketAccessor packet = (SCustomPayloadPlayPacketAccessor) new SCustomPayloadPlayPacket();
+            final ClientboundCustomPayloadPacketAccessor packet = (ClientboundCustomPayloadPacketAccessor) new ClientboundCustomPayloadPacket();
             packet.accessor$identifier((ResourceLocation) (Object) channel);
-            packet.accessor$data((PacketBuffer) payload);
-            return (IPacket<?>) packet;
+            packet.accessor$data((FriendlyByteBuf) payload);
+            return (net.minecraft.network.protocol.Packet<?>) packet;
         } else {
             throw new UnsupportedOperationException();
         }

@@ -26,7 +26,6 @@ package org.spongepowered.common.advancement.criterion;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -43,6 +42,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.time.Instant;
 import java.util.Optional;
+import net.minecraft.util.Mth;
 
 public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, ImplementationBackedCriterionProgress {
 
@@ -136,12 +136,12 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
 
     @Override
     public Optional<Instant> add(final int score) {
-        return this.set(MathHelper.clamp(this.getScore() + score, 0, this.getGoal()));
+        return this.set(Mth.clamp(this.getScore() + score, 0, this.getGoal()));
     }
 
     @Override
     public Optional<Instant> remove(final int score) {
-        return this.set(MathHelper.clamp(this.getScore() - score, 0, this.getGoal()));
+        return this.set(Mth.clamp(this.getScore() - score, 0, this.getGoal()));
     }
 
     @Override

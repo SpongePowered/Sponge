@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.DataView;
@@ -36,6 +34,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
 
 public final class NBTDataFormat implements DataFormat {
 
@@ -49,7 +49,7 @@ public final class NBTDataFormat implements DataFormat {
             dis = new DataInputStream(input);
         }
         try {
-            CompoundNBT tag = CompressedStreamTools.read(dis);
+            CompoundTag tag = NbtIo.read(dis);
             return NBTTranslator.INSTANCE.translateFrom(tag);
         } finally {
             dis.close();
@@ -59,7 +59,7 @@ public final class NBTDataFormat implements DataFormat {
     @Override
     @SuppressWarnings("resource")
     public void writeTo(OutputStream output, DataView data) throws IOException {
-        CompoundNBT tag = NBTTranslator.INSTANCE.translate(data);
+        CompoundTag tag = NBTTranslator.INSTANCE.translate(data);
         DataOutputStream dos;
         if (output instanceof DataOutputStream) {
             dos = (DataOutputStream) output;
@@ -67,7 +67,7 @@ public final class NBTDataFormat implements DataFormat {
             dos = new DataOutputStream(output);
         }
         try {
-            CompressedStreamTools.write(tag, dos);
+            NbtIo.write(tag, dos);
         } finally {
             dos.close();
         }

@@ -24,18 +24,17 @@
  */
 package org.spongepowered.vanilla.chat;
 
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.util.text.event.ClickEvent;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public final class ChatFormatter {
 
@@ -54,9 +53,9 @@ public final class ChatFormatter {
     private ChatFormatter() {
     }
 
-    public static void formatChatComponent(final TranslationTextComponent component) {
+    public static void formatChatComponent(final TranslatableComponent component) {
         final String message = (String) component.getArgs()[1];
-        final ITextComponent formatted = ChatFormatter.format(message);
+        final Component formatted = ChatFormatter.format(message);
         if (formatted == null) {
             return;
         }
@@ -65,13 +64,13 @@ public final class ChatFormatter {
     }
 
     @Nullable
-    public static ITextComponent format(final String s) {
+    public static Component format(final String s) {
         final Matcher matcher = ChatFormatter.URL_PATTERN.matcher(s);
         if (!matcher.find()) {
             return null;
         }
 
-        IFormattableTextComponent result = null;
+        MutableComponent result = null;
 
         int pos = 0;
         do {
@@ -91,7 +90,7 @@ public final class ChatFormatter {
 
             if (pos < start) {
                 if (result == null) {
-                    result = new StringTextComponent(s.substring(pos, start));
+                    result = new TextComponent(s.substring(pos, start));
                 } else {
                     result.append(s.substring(pos, start));
                 }
@@ -99,11 +98,11 @@ public final class ChatFormatter {
 
             pos = end;
 
-            final IFormattableTextComponent link = new StringTextComponent(displayUrl);
+            final MutableComponent link = new TextComponent(displayUrl);
             link.setStyle(link.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url)));
 
             if (result == null) {
-                result = new StringTextComponent("");
+                result = new TextComponent("");
             }
 
             result.append(link);
@@ -113,7 +112,7 @@ public final class ChatFormatter {
         // If there is something left, append the rest
         if (pos < s.length()) {
             if (result == null) {
-                result = new StringTextComponent(s.substring(pos));
+                result = new TextComponent(s.substring(pos));
             } else {
                 result.append(s.substring(pos));
             }

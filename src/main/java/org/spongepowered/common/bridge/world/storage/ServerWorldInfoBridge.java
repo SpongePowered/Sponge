@@ -25,10 +25,10 @@
 package org.spongepowered.common.bridge.world.storage;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.Dimension;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
@@ -42,7 +42,7 @@ public interface ServerWorldInfoBridge {
     boolean bridge$valid();
 
     @Nullable
-    ServerWorld bridge$world();
+    ServerLevel bridge$world();
 
     @Nullable
     DimensionType bridge$dimensionType();
@@ -89,5 +89,5 @@ public interface ServerWorldInfoBridge {
 
     void bridge$configAdapter(InheritableConfigHandle<WorldConfig> adapter);
 
-    void bridge$populateFromDimension(Dimension dimension);
+    void bridge$populateFromDimension(LevelStem dimension);
 }

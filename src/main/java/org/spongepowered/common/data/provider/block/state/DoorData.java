@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DoorBlock;
-import net.minecraft.state.properties.DoorHingeSide;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DoorHinges;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.holder;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 
@@ -34,21 +34,21 @@ import org.spongepowered.common.data.provider.nbt.NBTDataType;
  */
 public final class SimpleNBTDataHolder implements DataCompoundHolder, SpongeMutableDataHolder {
 
-    private CompoundNBT compound;
+    private CompoundTag compound;
     private final NBTDataType dataType;
 
-    public SimpleNBTDataHolder(final CompoundNBT compound, final NBTDataType dataType) {
+    public SimpleNBTDataHolder(final CompoundTag compound, final NBTDataType dataType) {
         this.compound = compound;
         this.dataType = dataType;
     }
 
     @Override
-    public CompoundNBT data$getCompound() {
+    public CompoundTag data$getCompound() {
         return this.compound;
     }
 
     @Override 
-    public void data$setCompound(final CompoundNBT compound) {
+    public void data$setCompound(final CompoundTag compound) {
         this.compound = compound;
     }
 

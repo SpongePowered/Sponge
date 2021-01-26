@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.server.CustomServerBossInfoManager;
-import net.minecraft.world.chunk.listener.IChunkStatusListener;
-import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.server.bossevents.CustomBossEvents;
+import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -37,13 +37,13 @@ import org.spongepowered.math.vector.Vector3d;
 
 public interface ServerWorldBridge {
 
-    SaveFormat.LevelSave bridge$getLevelSave();
+    LevelStorageSource.LevelStorageAccess bridge$getLevelSave();
 
-    IChunkStatusListener bridge$getChunkStatusListener();
+    ChunkProgressListener bridge$getChunkStatusListener();
 
     boolean bridge$isLoaded();
 
-    CustomServerBossInfoManager bridge$getBossBarManager();
+    CustomBossEvents bridge$getBossBarManager();
 
     void bridge$updateRotation(Entity entityIn);
 

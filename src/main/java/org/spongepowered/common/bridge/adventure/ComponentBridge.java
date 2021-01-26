@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.bridge.adventure;
 
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 
 public interface ComponentBridge {
-    ITextComponent bridge$asVanillaComponent();
+    Component bridge$asVanillaComponent();
 }

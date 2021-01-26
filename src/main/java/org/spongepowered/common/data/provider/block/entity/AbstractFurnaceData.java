@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.tileentity.AbstractFurnaceTileEntityAccessor;
+import org.spongepowered.common.accessor.world.level.block.entity.AbstractFurnaceBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -37,9 +37,9 @@ public final class AbstractFurnaceData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(AbstractFurnaceTileEntityAccessor.class)
+                .asMutable(AbstractFurnaceBlockEntityAccessor.class)
                     .create(Keys.FUEL)
-                        .get(AbstractFurnaceTileEntityAccessor::accessor$litTime)
+                        .get(AbstractFurnaceBlockEntityAccessor::accessor$litTime)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;

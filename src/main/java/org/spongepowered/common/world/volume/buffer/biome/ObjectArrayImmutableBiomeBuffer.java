@@ -43,7 +43,7 @@ import java.util.stream.Stream;
  * Mutable view of a {@link Biome} array.
  *
  * <p>Normally, the {@link ByteArrayMutableBiomeBuffer} class uses memory more
- * efficiently, but when the {@link net.minecraft.world.biome.Biome} array is already created (for
+ * efficiently, but when the {@link net.minecraft.world.level.biome.Biome} array is already created (for
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
@@ -80,10 +80,10 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
      * @return The native biome
      */
     @SuppressWarnings("ConstantConditions")
-    public net.minecraft.world.biome.Biome getNativeBiome(final int x, final int y, final int z) {
+    public net.minecraft.world.level.biome.Biome getNativeBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
         final Biome type = this.biomes[this.getIndex(x, y, z)];
-        return (net.minecraft.world.biome.Biome) (Object) type;
+        return (net.minecraft.world.level.biome.Biome) (Object) type;
     }
 
     @Override

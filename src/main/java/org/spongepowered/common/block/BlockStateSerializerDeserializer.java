@@ -26,18 +26,18 @@ package org.spongepowered.common.block;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.arguments.BlockStateArgument;
-import net.minecraft.command.arguments.BlockStateParser;
 import org.spongepowered.api.block.BlockState;
 
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
 
 public final class BlockStateSerializerDeserializer {
 
     public static String serialize(final BlockState state) {
-        return BlockStateParser.serialize((net.minecraft.block.BlockState) state);
+        return BlockStateParser.serialize((net.minecraft.world.level.block.state.BlockState) state);
     }
 
     public static Optional<BlockState> deserialize(final String string) {

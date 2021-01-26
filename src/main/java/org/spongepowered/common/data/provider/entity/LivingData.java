@@ -25,16 +25,12 @@
 package org.spongepowered.common.data.provider.entity;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.DamageSource;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.accessor.entity.EntityAccessor;
-import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.entity.LivingEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
@@ -44,6 +40,10 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Collection;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public final class LivingData {
 
@@ -149,7 +149,7 @@ public final class LivingData {
                         .set((h, v) -> h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(v))
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
-                            final Collection<EffectInstance> effects = h.getActiveEffects();
+                            final Collection<MobEffectInstance> effects = h.getActiveEffects();
                             return effects.isEmpty() ? null : PotionEffectUtil.copyAsPotionEffects(effects);
                         })
                         .set((h, v) -> {

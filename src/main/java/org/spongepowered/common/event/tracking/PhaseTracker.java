@@ -30,13 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
-import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -78,6 +71,13 @@ import java.util.StringJoiner;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 /**
  * The core state machine of Sponge. Acts a as proxy between various engine objects by processing actions through
@@ -90,7 +90,7 @@ public final class PhaseTracker implements CauseStackManager {
     public static final PhaseTracker CLIENT = new PhaseTracker();
     public static final PhaseTracker SERVER = new PhaseTracker();
     public static final Logger LOGGER = LogManager.getLogger(PhaseTracker.class);
-    static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
+    static final CopyOnWriteArrayList<net.minecraft.world.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
     private static final Map<Thread, PhaseTracker> SPINOFF_TRACKERS = new MapMaker().weakKeys().concurrencyLevel(8).makeMap();
     private static final boolean DEBUG_CAUSE_FRAMES = Boolean.parseBoolean(System.getProperty("sponge.debugcauseframes", "false"));
     private static final String INITIAL_POOL_SIZE_PROPERTY = "sponge.cause.initialFramePoolSize";
@@ -122,8 +122,8 @@ public final class PhaseTracker implements CauseStackManager {
         return PhaseTracker.getInstance();
     }
 
-    public static Block validateBlockForNeighborNotification(final ServerWorld worldServer, final BlockPos pos, @Nullable Block blockIn,
-        final BlockPos otherPos, final Chunk chunk) {
+    public static Block validateBlockForNeighborNotification(final ServerLevel worldServer, final BlockPos pos, @Nullable Block blockIn,
+        final BlockPos otherPos, final LevelChunk chunk) {
         if (blockIn == null) {
             // If the block is null, check with the PhaseState to see if it can perform a safe way
             final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
@@ -131,13 +131,13 @@ public final class PhaseTracker implements CauseStackManager {
 
             if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
                 // Try to save ourselves
-                @Nullable final TileEntity source = (TileEntity) currentContext.getSource();
+                @Nullable final BlockEntity source = (BlockEntity) currentContext.getSource();
 
-                @Nullable final TileEntityType<?> type = Optional.ofNullable(source)
-                                                   .map(TileEntity::getType)
+                @Nullable final BlockEntityType<?> type = Optional.ofNullable(source)
+                                                   .map(BlockEntity::getType)
                                                    .orElse(null);
                 if (type != null) {
-                    @Nullable ResourceLocation id = TileEntityType.getKey(type);
+                    @Nullable ResourceLocation id = BlockEntityType.getKey(type);
                     if (id == null) {
                         id = new ResourceLocation(source.getClass().getCanonicalName());
                     }
@@ -246,13 +246,13 @@ public final class PhaseTracker implements CauseStackManager {
                     return;
                 }
 
-                final List<net.minecraft.entity.Entity> entities = new ArrayList<>(PhaseTracker.ASYNC_CAPTURED_ENTITIES);
+                final List<net.minecraft.world.entity.Entity> entities = new ArrayList<>(PhaseTracker.ASYNC_CAPTURED_ENTITIES);
                 PhaseTracker.ASYNC_CAPTURED_ENTITIES.removeAll(entities);
                 try (final CauseStackManager.StackFrame frame = this.pushCauseFrame()) {
                     // We are forcing the spawn, as we can't throw the proper event at the proper time, so
                     // we'll just mark it as "forced".
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpongeSpawnTypes.FORCED);
-                    for (final net.minecraft.entity.Entity entity : entities) {
+                    for (final net.minecraft.world.entity.Entity entity : entities) {
                         // At this point, we don't care what the causes are...
                         entity.getCommandSenderWorld().addFreshEntity(entity);
                     }

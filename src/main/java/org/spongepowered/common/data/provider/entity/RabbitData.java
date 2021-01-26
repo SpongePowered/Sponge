@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.RabbitEntity;
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.world.entity.animal.Rabbit;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.RabbitType;
@@ -40,15 +40,15 @@ public final class RabbitData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(RabbitEntity.class)
+                .asMutable(Rabbit.class)
                     .create(Keys.RABBIT_TYPE)
                         .get(h -> {
                             final int type = h.getRabbitType();
-                            final SimpleRegistry<RabbitType> registry = (SimpleRegistry<RabbitType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.RABBIT_TYPE);
+                            final MappedRegistry<RabbitType> registry = (MappedRegistry<RabbitType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.RABBIT_TYPE);
                             return registry.byId(type);
                         })
                         .set((h, v) -> {
-                            final SimpleRegistry<RabbitType> registry = (SimpleRegistry<RabbitType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.RABBIT_TYPE);
+                            final MappedRegistry<RabbitType> registry = (MappedRegistry<RabbitType>) (Object) Sponge.getGame().registries().registry(RegistryTypes.RABBIT_TYPE);
                             h.setRabbitType(registry.getId(v));
                         });
     }

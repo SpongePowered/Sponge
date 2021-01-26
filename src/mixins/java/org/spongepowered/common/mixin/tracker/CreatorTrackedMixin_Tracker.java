@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.mixin.tracker;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
@@ -45,8 +40,13 @@ import org.spongepowered.common.util.Constants;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
-@Mixin({Entity.class, TileEntity.class})
+@Mixin({Entity.class, BlockEntity.class})
 public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridge {
 
     @Nullable private UUID tracker$creator;
@@ -165,21 +165,21 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
         if (this.tracker$creator != null && PlayerTracker.Type.CREATOR == type) {
             return this.tracker$creator;
         }
-        if ((Object)this instanceof TameableEntity) {
-            final TameableEntity ownable = (TameableEntity) (Object) this;
+        if ((Object)this instanceof TamableAnimal) {
+            final TamableAnimal ownable = (TamableAnimal) (Object) this;
             final Entity owner = ownable.getOwner();
-            if (owner instanceof PlayerEntity) {
+            if (owner instanceof Player) {
                 this.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, owner.getUUID());
                 return owner.getUUID();
             }
         } else if (this.tracker$notifier != null && PlayerTracker.Type.NOTIFIER == type) {
             return this.tracker$notifier;
         }
-        final CompoundNBT compound = ((DataCompoundHolder) this).data$getSpongeData();
+        final CompoundTag compound = ((DataCompoundHolder) this).data$getSpongeData();
         if (!compound.contains(type.compoundKey)) {
             return null;
         }
-        final CompoundNBT creatorNbt = compound.getCompound(type.compoundKey);
+        final CompoundTag creatorNbt = compound.getCompound(type.compoundKey);
 
 
         if (!creatorNbt.contains(Constants.UUID_MOST) && !creatorNbt.contains(Constants.UUID_LEAST)) {

@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.service.permission;
 
-import net.minecraft.entity.item.minecart.CommandBlockMinecartEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.rcon.RConConsoleSource;
-import net.minecraft.tileentity.CommandBlockTileEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.rcon.RconConsoleSource;
+import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
+import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.service.server.permission.BridgeSubject;
 
@@ -35,6 +35,6 @@ import org.spongepowered.common.service.server.permission.BridgeSubject;
  * Mixin to provide a common implementation of subject that refers to the
  * installed permissions service for a subject.
  */
-@Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, CommandBlockMinecartEntity.class, RConConsoleSource.class})
+@Mixin(value = {ServerPlayer.class, CommandBlockEntity.class, MinecartCommandBlock.class, RconConsoleSource.class})
 public abstract class SubjectMixin_API implements BridgeSubject {
 }

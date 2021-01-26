@@ -26,11 +26,6 @@ package org.spongepowered.common.block.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.Block;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -52,6 +47,10 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 
 public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEntityType, BlockSnapshot, BlockEntity> implements
         org.spongepowered.api.block.entity.BlockEntityArchetype {
@@ -86,25 +85,25 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     @Override
     public Optional<BlockEntity> apply(final ServerLocation location) {
         final BlockState currentState = location.getBlock();
-        final Block currentBlock = ((net.minecraft.block.BlockState) currentState).getBlock();
-        final Block newBlock = ((net.minecraft.block.BlockState) this.blockState).getBlock();
-        final World minecraftWorld = (net.minecraft.world.World) location.getWorld();
+        final Block currentBlock = ((net.minecraft.world.level.block.state.BlockState) currentState).getBlock();
+        final Block newBlock = ((net.minecraft.world.level.block.state.BlockState) this.blockState).getBlock();
+        final Level minecraftWorld = (net.minecraft.world.level.Level) location.getWorld();
 
         final BlockPos blockpos = VecHelper.toBlockPos(location);
         if (currentBlock != newBlock) {
             ((org.spongepowered.api.world.World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState,
                     BlockChangeFlags.ALL);
         }
-        final CompoundNBT compound = this.data.copy();
+        final CompoundTag compound = this.data.copy();
 
-        final @Nullable TileEntity tileEntity = minecraftWorld.getBlockEntity(blockpos);
+        final net.minecraft.world.level.block.entity.@Nullable BlockEntity tileEntity = minecraftWorld.getBlockEntity(blockpos);
         if (tileEntity == null) {
             return Optional.empty();
         }
         compound.putInt(Constants.TileEntity.X_POS, blockpos.getX());
         compound.putInt(Constants.TileEntity.Y_POS, blockpos.getY());
         compound.putInt(Constants.TileEntity.Z_POS, blockpos.getZ());
-        tileEntity.load((net.minecraft.block.BlockState) currentState, compound);
+        tileEntity.load((net.minecraft.world.level.block.state.BlockState) currentState, compound);
         tileEntity.clearCache();
         return Optional.of((org.spongepowered.api.block.entity.BlockEntity) tileEntity);
     }

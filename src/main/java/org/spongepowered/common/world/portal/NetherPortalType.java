@@ -24,15 +24,6 @@
  */
 package org.spongepowered.common.world.portal;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.PortalInfo;
-import net.minecraft.block.PortalSize;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.TeleportationRepositioner;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.MovementType;
@@ -42,23 +33,33 @@ import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.common.accessor.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.util.AxisUtil;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.portal.NetherPortalType.Teleporter;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import net.minecraft.BlockUtil;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.level.portal.PortalShape;
 
 public final class NetherPortalType extends VanillaPortalType {
 
-    static Optional<TeleportationRepositioner.Result> findPortalInternal(final ServerLocation location) {
-        final ServerWorld serverWorld = (ServerWorld) location.getWorld();
+    static Optional<BlockUtil.FoundRectangle> findPortalInternal(final ServerLocation location) {
+        final ServerLevel serverWorld = (ServerLevel) location.getWorld();
         final BlockPos position = VecHelper.toBlockPos(location.getBlockPosition());
         return serverWorld.getPortalForcer()
-                .findPortalAround(position, serverWorld.dimension() == World.NETHER);
+                .findPortalAround(position, serverWorld.dimension() == Level.NETHER);
     }
 
     @Override
@@ -68,7 +69,7 @@ public final class NetherPortalType extends VanillaPortalType {
         if (mcAxis == Direction.Axis.Y) {
             mcAxis = Direction.Axis.X;
         }
-        PortalHelper.generateNetherPortal((ServerWorld) location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), mcAxis, true);
+        PortalHelper.generateNetherPortal((ServerLevel) location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), mcAxis, true);
     }
 
     @Override
@@ -82,7 +83,7 @@ public final class NetherPortalType extends VanillaPortalType {
         Objects.requireNonNull(entity);
         Objects.requireNonNull(destination);
 
-        final net.minecraft.entity.Entity mEntity = (net.minecraft.entity.Entity) entity;
+        final net.minecraft.world.entity.Entity mEntity = (net.minecraft.world.entity.Entity) entity;
 
         // Nether Portal Block Collision Rules
         if (mEntity.isPassenger() || mEntity.isVehicle() || !mEntity.canChangeDimensions()) {
@@ -92,7 +93,7 @@ public final class NetherPortalType extends VanillaPortalType {
         final PlatformTeleporter teleporter = new Teleporter(destination, generateDestinationPortal, this);
 
         ((EntityAccessor) entity).accessor$portalEntrancePos(VecHelper.toBlockPos(entity.getBlockPosition()));
-        return ((EntityBridge) entity).bridge$changeDimension((ServerWorld) destination.getWorld(), teleporter) != null;
+        return ((EntityBridge) entity).bridge$changeDimension((ServerLevel) destination.getWorld(), teleporter) != null;
 
     }
 
@@ -110,9 +111,9 @@ public final class NetherPortalType extends VanillaPortalType {
 
         @Override
         @Nullable
-        public PortalInfo getPortalInfo(final net.minecraft.entity.Entity entity,
-                final ServerWorld currentWorld,
-                final ServerWorld targetWorld,
+        public PortalInfo getPortalInfo(final net.minecraft.world.entity.Entity entity,
+                final ServerLevel currentWorld,
+                final ServerLevel targetWorld,
                 final Vector3d currentPosition) {
             Optional<PortalInfo> portal = NetherPortalType.findPortalInternal(this.originalDestination)
                     .map(x -> this.createNetherPortalInfo(entity, targetWorld, x.minCorner, x));
@@ -140,8 +141,8 @@ public final class NetherPortalType extends VanillaPortalType {
         }
 
         @Override
-        public net.minecraft.entity.Entity performTeleport(final net.minecraft.entity.Entity entity, final ServerWorld currentWorld,
-                final ServerWorld targetWorld, final float xRot, final Function<Boolean, net.minecraft.entity.Entity> teleportLogic) {
+        public net.minecraft.world.entity.Entity performTeleport(final net.minecraft.world.entity.Entity entity, final ServerLevel currentWorld,
+                final ServerLevel targetWorld, final float xRot, final Function<Boolean, net.minecraft.world.entity.Entity> teleportLogic) {
             return teleportLogic.apply(false);
         }
 
@@ -161,23 +162,23 @@ public final class NetherPortalType extends VanillaPortalType {
         }
 
         private PortalInfo createNetherPortalInfo(
-                final net.minecraft.entity.Entity entity,
-                final ServerWorld serverWorld,
+                final net.minecraft.world.entity.Entity entity,
+                final ServerLevel serverWorld,
                 final BlockPos portalLocation,
-                final TeleportationRepositioner.Result result) {
+                final BlockUtil.FoundRectangle result) {
             final BlockState blockstate = serverWorld.getBlockState(portalLocation);
             final Direction.Axis axis;
-            final net.minecraft.util.math.vector.Vector3d vector3d;
+            final net.minecraft.world.phys.Vec3 vector3d;
             if (blockstate.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
                 axis = blockstate.getValue(BlockStateProperties.HORIZONTAL_AXIS);
-                final TeleportationRepositioner.Result res = TeleportationRepositioner.getLargestRectangleAround(portalLocation, axis, 21,
+                final BlockUtil.FoundRectangle res = BlockUtil.getLargestRectangleAround(portalLocation, axis, 21,
                         Direction.Axis.Y, 21, (pos) -> serverWorld.getBlockState(pos) == blockstate);
-                vector3d = PortalSize.getRelativePosition(res, axis, entity.position(), entity.getDimensions(entity.getPose()));
+                vector3d = PortalShape.getRelativePosition(res, axis, entity.position(), entity.getDimensions(entity.getPose()));
             } else {
                 axis = Direction.Axis.X;
-                vector3d = new net.minecraft.util.math.vector.Vector3d(0.5D, 0.0D, 0.0D);
+                vector3d = new net.minecraft.world.phys.Vec3(0.5D, 0.0D, 0.0D);
             }
-            return PortalSize.createPortalInfo(serverWorld, result, axis, vector3d,
+            return PortalShape.createPortalInfo(serverWorld, result, axis, vector3d,
                     entity.getDimensions(entity.getPose()), entity.getDeltaMovement(), entity.yRot, entity.xRot);
         }
 

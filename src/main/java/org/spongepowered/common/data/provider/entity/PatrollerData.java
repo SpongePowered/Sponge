@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.PatrollerEntity;
+import net.minecraft.world.entity.monster.PatrollingMonster;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.monster.PatrollerEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.PatrollingMonsterAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
 
@@ -38,14 +38,14 @@ public final class PatrollerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(PatrollerEntity.class)
+                .asMutable(PatrollingMonster.class)
                     .create(Keys.TARGET_POSITION)
                         .get(h -> VecHelper.toVector3i(h.getPatrolTarget()))
                         .set((h, v) -> h.setPatrolTarget(VecHelper.toBlockPos(v)))
-                .asMutable(PatrollerEntityAccessor.class)
+                .asMutable(PatrollingMonsterAccessor.class)
                     .create(Keys.IS_PATROLLING)
-                        .get(PatrollerEntityAccessor::accessor$patrolling)
-                        .set(PatrollerEntityAccessor::accessor$patrolling);
+                        .get(PatrollingMonsterAccessor::accessor$patrolling)
+                        .set(PatrollingMonsterAccessor::accessor$patrolling);
     }
     // @formatter:on
 }

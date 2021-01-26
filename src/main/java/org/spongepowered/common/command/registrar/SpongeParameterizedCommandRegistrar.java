@@ -28,7 +28,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
@@ -118,7 +118,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
             final SpongeCommandDispatcher dispatcher = this.commandManager().getDispatcher();
             return CommandResult.builder().setResult(
                     dispatcher.execute(
-                            dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause))).build();
+                            dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause))).build();
         } catch (final SpongeCommandSyntaxException ex) {
             throw ex.getCause();
         } catch (final CommandSyntaxException e) {
@@ -137,7 +137,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
         try {
             final SpongeCommandDispatcher dispatcher = this.commandManager().getDispatcher();
             return dispatcher.getCompletionSuggestions(
-                    dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause)
+                    dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause)
             ).join().getList().stream()
                     .map(Suggestion::getText)
                     .collect(Collectors.toList());
@@ -170,7 +170,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
         return command + " " + argument;
     }
 
-    private Collection<LiteralCommandNode<CommandSource>> createNode(final CommandMapping mapping, final Command.Parameterized command) {
+    private Collection<LiteralCommandNode<CommandSourceStack>> createNode(final CommandMapping mapping, final Command.Parameterized command) {
         if (!(command instanceof SpongeParameterizedCommand)) {
             throw new IllegalArgumentException("Command must be a SpongeParameterizedCommand!");
         }

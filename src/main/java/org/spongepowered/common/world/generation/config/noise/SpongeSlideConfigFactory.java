@@ -30,6 +30,6 @@ public final class SpongeSlideConfigFactory implements SlideConfig.Factory {
 
     @Override
     public SlideConfig of(final int target, final int size, final int offset) {
-        return (SlideConfig) new net.minecraft.world.gen.settings.SlideSettings(target, size, offset);
+        return (SlideConfig) new net.minecraft.world.level.levelgen.NoiseSlideSettings(target, size, offset);
     }
 }

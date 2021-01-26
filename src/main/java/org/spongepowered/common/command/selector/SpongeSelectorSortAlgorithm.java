@@ -24,22 +24,22 @@
  */
 package org.spongepowered.common.command.selector;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.vector.Vector3d;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 public final class SpongeSelectorSortAlgorithm implements SelectorSortAlgorithm {
 
-    private final BiConsumer<Vector3d, List<? extends Entity>> sortAlgorithm;
+    private final BiConsumer<Vec3, List<? extends Entity>> sortAlgorithm;
 
-    public SpongeSelectorSortAlgorithm(final BiConsumer<Vector3d, List<? extends Entity>> sortAlgorithm) {
+    public SpongeSelectorSortAlgorithm(final BiConsumer<Vec3, List<? extends Entity>> sortAlgorithm) {
         this.sortAlgorithm = sortAlgorithm;
     }
 
-    public final BiConsumer<Vector3d, List<? extends Entity>> getSortAlgorithm() {
+    public final BiConsumer<Vec3, List<? extends Entity>> getSortAlgorithm() {
         return this.sortAlgorithm;
     }
 

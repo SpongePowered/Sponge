@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.state.properties.SlabType;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.SlabPortion;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;

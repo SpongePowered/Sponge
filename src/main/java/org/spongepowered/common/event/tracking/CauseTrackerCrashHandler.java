@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import net.minecraft.crash.ICrashReportDetail;
+import net.minecraft.CrashReportDetail;
 
-public class CauseTrackerCrashHandler implements ICrashReportDetail<String> {
+public class CauseTrackerCrashHandler implements CrashReportDetail<String> {
 
     public static final CauseTrackerCrashHandler INSTANCE = new CauseTrackerCrashHandler();
 

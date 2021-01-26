@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.world.teleport;
 
-import net.minecraft.block.material.Material;
+import net.minecraft.world.level.material.Material;
 import org.spongepowered.api.block.BlockState;
 
 public final class NoPortalTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return ((net.minecraft.block.BlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeFloorMaterial(blockState);
+        return ((net.minecraft.world.level.block.state.BlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeFloorMaterial(blockState);
     }
 
     @Override
     public boolean isSafeBodyMaterial(BlockState blockState) {
-        return ((net.minecraft.block.BlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeBodyMaterial(blockState);
+        return ((net.minecraft.world.level.block.state.BlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeBodyMaterial(blockState);
     }
 }

@@ -26,11 +26,6 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
@@ -47,17 +42,22 @@ import org.spongepowered.common.util.PrettyPrinter;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MobSpawnType;
 
 public final class EntityPerformingDropsTransaction extends GameTransaction<HarvestEntityEvent> {
 
-    final Supplier<ServerWorld> worldSupplier;
+    final Supplier<ServerLevel> worldSupplier;
     final Entity destroyingEntity;
-    final CompoundNBT entityTag;
+    final CompoundTag entityTag;
     final Supplier<Optional<DamageSource>> lastAttacker;
 
     EntityPerformingDropsTransaction(
-        final Supplier<ServerWorld> worldSupplier,
-        final Entity destroyingEntity, final CompoundNBT entityTag,
+        final Supplier<ServerLevel> worldSupplier,
+        final Entity destroyingEntity, final CompoundTag entityTag,
         final Supplier<Optional<DamageSource>> lastAttacker
     ) {
         super(TransactionTypes.ENTITY_DEATH_DROPS.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).getKey());
@@ -110,7 +110,7 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
         this.destroyingEntity.getType()
             .spawn(this.worldSupplier.get(),
                 this.entityTag, null, null, this.destroyingEntity.blockPosition(),
-            SpawnReason.COMMAND, false, false);
+            MobSpawnType.COMMAND, false, false);
     }
 
     @Override

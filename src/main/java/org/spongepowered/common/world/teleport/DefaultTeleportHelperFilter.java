@@ -25,19 +25,19 @@
 package org.spongepowered.common.world.teleport;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.AnvilBlock;
-import net.minecraft.block.CauldronBlock;
-import net.minecraft.block.ChorusPlantBlock;
-import net.minecraft.block.FenceBlock;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.block.SnowBlock;
-import net.minecraft.block.material.Material;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EmptyBlockReader;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 
 import java.util.Set;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.EmptyBlockGetter;
+import net.minecraft.world.level.block.AnvilBlock;
+import net.minecraft.world.level.block.CauldronBlock;
+import net.minecraft.world.level.block.ChorusPlantBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.material.Material;
 
 public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
 
@@ -46,16 +46,16 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return !DefaultTeleportHelperFilter.NOT_SAFE_FLOOR.contains(((net.minecraft.block.BlockState) blockState).getMaterial());
+        return !DefaultTeleportHelperFilter.NOT_SAFE_FLOOR.contains(((net.minecraft.world.level.block.state.BlockState) blockState).getMaterial());
     }
 
     @Override
     public boolean isSafeBodyMaterial(BlockState blockState) {
-        net.minecraft.block.BlockState state = (net.minecraft.block.BlockState) blockState;
+        net.minecraft.world.level.block.state.BlockState state = (net.minecraft.world.level.block.state.BlockState) blockState;
         Material material = state.getMaterial();
 
         // Deny blocks that suffocate
-        if (state.isSuffocating(EmptyBlockReader.INSTANCE, BlockPos.ZERO)) {
+        if (state.isSuffocating(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) {
             return false;
         }
         // Deny dangerous lava
@@ -71,7 +71,7 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
                  state.getBlock() instanceof AnvilBlock ||
                  state.getBlock() instanceof FenceBlock ||
                  state.getBlock() instanceof ChorusPlantBlock ||
-                 state.getBlock() instanceof SnowBlock ||
+                 state.getBlock() instanceof SnowLayerBlock ||
                  material == Material.GLASS ||
                  material == Material.LEAVES);
     }

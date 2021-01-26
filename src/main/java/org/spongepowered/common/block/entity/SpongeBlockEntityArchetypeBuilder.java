@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.block.entity;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
@@ -46,6 +44,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.nbt.CompoundTag;
 
 public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder<BlockEntityArchetype> implements BlockEntityArchetype.Builder {
 
@@ -80,7 +79,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
 
     @Override
     public BlockEntityArchetype.Builder state(final BlockState state) {
-        final net.minecraft.block.BlockState blockState = (net.minecraft.block.BlockState) state;
+        final net.minecraft.world.level.block.state.BlockState blockState = (net.minecraft.world.level.block.state.BlockState) state;
         if (!((BlockStateBridge) (blockState)).bridge$hasTileEntity()) {
             new IllegalArgumentException("BlockState: "+ state + " does not provide TileEntities!").printStackTrace();
         }
@@ -107,11 +106,11 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
 
     @Override
     public BlockEntityArchetype.Builder blockEntity(final BlockEntity blockEntity) {
-        if (!(Objects.requireNonNull(blockEntity, "BlockEntity cannot be null!") instanceof TileEntity)) {
+        if (!(Objects.requireNonNull(blockEntity, "BlockEntity cannot be null!") instanceof net.minecraft.world.level.block.entity.BlockEntity)) {
             throw new IllegalArgumentException("BlockEntity is not compatible with this implementation!");
         }
-        final CompoundNBT compound = new CompoundNBT();
-        ((TileEntity) blockEntity).save(compound);
+        final CompoundTag compound = new CompoundTag();
+        ((net.minecraft.world.level.block.entity.BlockEntity) blockEntity).save(compound);
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X);
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y);
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Z);

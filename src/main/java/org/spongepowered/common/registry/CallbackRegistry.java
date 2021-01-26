@@ -25,24 +25,23 @@
 package org.spongepowered.common.registry;
 
 import com.mojang.serialization.Lifecycle;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.SimpleRegistry;
-
 import java.util.function.BiConsumer;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 
-public final class CallbackRegistry<T> extends SimpleRegistry<T> {
+public final class CallbackRegistry<T> extends MappedRegistry<T> {
 
-    private final BiConsumer<RegistryKey<T>, T> callback;
+    private final BiConsumer<ResourceKey<T>, T> callback;
     private boolean callbackEnabled;
 
-    public CallbackRegistry(final RegistryKey<? extends Registry<T>> key, final Lifecycle lifecycle, final BiConsumer<RegistryKey<T>, T> callback) {
+    public CallbackRegistry(final ResourceKey<? extends Registry<T>> key, final Lifecycle lifecycle, final BiConsumer<ResourceKey<T>, T> callback) {
         super(key, lifecycle);
         this.callback = callback;
     }
 
     @Override
-    public <V extends T> V register(final RegistryKey<T> key, final V instance, final Lifecycle lifecycle) {
+    public <V extends T> V register(final ResourceKey<T> key, final V instance, final Lifecycle lifecycle) {
         V value = super.register(key, instance, lifecycle);
         if (this.callbackEnabled) {
             this.callback.accept(key, instance);

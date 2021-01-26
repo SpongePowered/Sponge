@@ -25,7 +25,6 @@
 package org.spongepowered.common.command.brigadier.tree;
 
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -33,16 +32,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import net.minecraft.commands.CommandSourceStack;
 
 public final class UnsortedNodeHolder {
 
     // used so we can have insertion order.
-    private final List<CommandNode<CommandSource>> standardChildren = new LinkedList<>();
-    private final List<CommandNode<CommandSource>> redirectingChildren = new LinkedList<>();
+    private final List<CommandNode<CommandSourceStack>> standardChildren = new LinkedList<>();
+    private final List<CommandNode<CommandSourceStack>> redirectingChildren = new LinkedList<>();
 
-    @Nullable private List<CommandNode<CommandSource>> cachedResult;
+    @Nullable private List<CommandNode<CommandSourceStack>> cachedResult;
 
-    public void add(final CommandNode<CommandSource> node) {
+    public void add(final CommandNode<CommandSourceStack> node) {
         this.cachedResult = null;
         if (node.getRedirect() == null) {
             this.standardChildren.add(node);
@@ -51,9 +51,9 @@ public final class UnsortedNodeHolder {
         }
     }
 
-    public Collection<CommandNode<CommandSource>> getChildren() {
+    public Collection<CommandNode<CommandSourceStack>> getChildren() {
         if (this.cachedResult == null) {
-            final LinkedList<CommandNode<CommandSource>> result = new LinkedList<>();
+            final LinkedList<CommandNode<CommandSourceStack>> result = new LinkedList<>();
             result.addAll(this.standardChildren);
             result.addAll(this.redirectingChildren);
             this.cachedResult = Collections.unmodifiableList(result);
@@ -63,20 +63,20 @@ public final class UnsortedNodeHolder {
     }
 
     // Handles hidden nodes
-    public Collection<CommandNode<CommandSource>> getChildrenForSuggestions() {
-        final ArrayList<CommandNode<CommandSource>> nodes = new ArrayList<>();
-        for (final CommandNode<CommandSource> childNode : this.getChildren()) {
-            if (childNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<CommandSource>) childNode).getParser().doesNotRead()) {
-                final CommandNode<CommandSource> redirected = childNode.getRedirect();
+    public Collection<CommandNode<CommandSourceStack>> getChildrenForSuggestions() {
+        final ArrayList<CommandNode<CommandSourceStack>> nodes = new ArrayList<>();
+        for (final CommandNode<CommandSourceStack> childNode : this.getChildren()) {
+            if (childNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<CommandSourceStack>) childNode).getParser().doesNotRead()) {
+                final CommandNode<CommandSourceStack> redirected = childNode.getRedirect();
                 if (redirected != null) {
                     // get the nodes from the redirect
                     if (redirected instanceof SpongeArgumentCommandNode) {
-                        nodes.addAll(((SpongeArgumentCommandNode<CommandSource>) redirected).getChildrenForSuggestions());
+                        nodes.addAll(((SpongeArgumentCommandNode<CommandSourceStack>) redirected).getChildrenForSuggestions());
                     } else {
                         nodes.addAll(redirected.getChildren());
                     }
                 } else {
-                    nodes.addAll(((SpongeArgumentCommandNode<CommandSource>) childNode).getChildrenForSuggestions());
+                    nodes.addAll(((SpongeArgumentCommandNode<CommandSourceStack>) childNode).getChildrenForSuggestions());
                 }
             } else {
                 nodes.add(childNode);

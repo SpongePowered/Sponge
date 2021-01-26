@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.stats;
 
-import net.minecraft.stats.IStatFormatter;
 import net.minecraft.stats.Stat;
+import net.minecraft.stats.StatFormatter;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.asm.mixin.Final;
@@ -40,7 +40,7 @@ import java.util.Optional;
 public abstract class StatMixin_API implements Statistic {
 
     // @formatter:off
-    @Shadow @Final private IStatFormatter formatter;
+    @Shadow @Final private StatFormatter formatter;
     // @formatter:on
 
     @Override

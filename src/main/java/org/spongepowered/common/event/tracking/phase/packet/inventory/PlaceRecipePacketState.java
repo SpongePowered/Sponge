@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.RecipeManager;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.client.CPlaceRecipePacket;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -53,23 +48,27 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundPlaceRecipePacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.crafting.RecipeManager;
 
 public final class PlaceRecipePacketState extends BasicInventoryPacketState {
 
     @Override
-    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final InventoryPacketContext context) {
+    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final InventoryPacketContext context) {
         ((TrackedInventoryBridge) playerMP.containerMenu).bridge$setCaptureInventory(true);
         ((TrackedContainerBridge) playerMP.containerMenu).bridge$setFirePreview(false);
     }
 
     @Override
     public void unwind(final InventoryPacketContext context) {
-        final CPlaceRecipePacket packet = context.getPacket();
+        final ServerboundPlaceRecipePacket packet = context.getPacket();
         final boolean shift = packet.isShiftDown();
         RecipeManager recipeManager = context.getPacketPlayer().server.getRecipeManager();
-        final IRecipe recipe = recipeManager.byKey(packet.getRecipe()).orElse(null);
+        final net.minecraft.world.item.crafting.Recipe recipe = recipeManager.byKey(packet.getRecipe()).orElse(null);
 
-        final ServerPlayerEntity player = context.getPacketPlayer();
+        final ServerPlayer player = context.getPacketPlayer();
         ((TrackedContainerBridge)player.containerMenu).bridge$detectAndSendChanges(true);
         ((TrackedInventoryBridge) player.containerMenu).bridge$setCaptureInventory(false);
         ((TrackedContainerBridge) player.containerMenu).bridge$setFirePreview(true);

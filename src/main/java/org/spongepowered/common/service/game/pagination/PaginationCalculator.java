@@ -37,7 +37,7 @@ import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.translation.GlobalTranslator;
-import net.minecraft.util.text.LanguageMap;
+import net.minecraft.locale.Language;
 import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.configurate.ConfigurateException;
@@ -179,7 +179,7 @@ final class PaginationCalculator {
                     children.addAll(tl.args());
                 } else {
                     // If there's no adventure translation, then fall back to native
-                    final String mc = LanguageMap.getInstance().getOrDefault(tl.key());
+                    final String mc = Language.getInstance().getOrDefault(tl.key());
                     if (!mc.equals(tl.key())) {
                         // we found a translation, so let's include the with elements
                         children.addAll(tl.args());

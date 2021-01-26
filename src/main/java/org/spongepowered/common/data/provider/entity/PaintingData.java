@@ -24,19 +24,13 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.PaintingEntity;
-import net.minecraft.entity.item.PaintingType;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.server.SDestroyEntitiesPacket;
-import net.minecraft.network.play.server.SSpawnPaintingPacket;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.entity.item.HangingEntityAccessor;
-import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
-import org.spongepowered.common.accessor.world.server.EntityTrackerAccessor;
+import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
+import org.spongepowered.common.accessor.world.entity.decoration.HangingEntityAccessor;
+import org.spongepowered.common.accessor.world.servernet.minecraft.server.level.ChunkMap_TrackedEntityAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.launch.Launch;
@@ -44,6 +38,12 @@ import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.decoration.Motive;
+import net.minecraft.world.entity.decoration.Painting;
 
 public final class PaintingData {
 
@@ -53,13 +53,13 @@ public final class PaintingData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(PaintingEntity.class)
+                .asMutable(Painting.class)
                     .create(Keys.ART_TYPE)
                         .get(h -> (ArtType) h.motive)
                         .setAnd((h, v) -> {
                             if (!h.level.isClientSide) {
-                                final PaintingType oldArt = h.motive;
-                                h.motive = (PaintingType) v;
+                                final Motive oldArt = h.motive;
+                                h.motive = (Motive) v;
                                 ((HangingEntityAccessor) h).invoker$setDirection(h.getDirection());
                                 if (!h.survives()) {
                                     h.motive = oldArt;
@@ -67,24 +67,24 @@ public final class PaintingData {
                                     return false;
                                 }
 
-                                final ChunkManagerAccessor chunkManager = (ChunkManagerAccessor) ((ServerWorld) h.level).getChunkSource().chunkMap;
-                                final EntityTrackerAccessor paintingTracker = chunkManager.accessor$entityMap().get(h.getId());
+                                final ChunkMapAccessor chunkManager = (ChunkMapAccessor) ((ServerLevel) h.level).getChunkSource().chunkMap;
+                                final ChunkMap_TrackedEntityAccessor paintingTracker = chunkManager.accessor$entityMap().get(h.getId());
                                 if (paintingTracker == null) {
                                     return true;
                                 }
 
-                                final List<ServerPlayerEntity> players = new ArrayList<>();
-                                for (final ServerPlayerEntity player : paintingTracker.accessor$seenBy()) {
-                                    final SDestroyEntitiesPacket packet = new SDestroyEntitiesPacket(h.getId());
+                                final List<ServerPlayer> players = new ArrayList<>();
+                                for (final ServerPlayer player : paintingTracker.accessor$seenBy()) {
+                                    final ClientboundRemoveEntitiesPacket packet = new ClientboundRemoveEntitiesPacket(h.getId());
                                     player.connection.send(packet);
                                     players.add(player);
                                 }
-                                for (final ServerPlayerEntity player : players) {
+                                for (final ServerPlayer player : players) {
                                     SpongeCommon.getServerScheduler().submit(Task.builder()
                                             .plugin(Launch.getInstance().getCommonPlugin())
                                             .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.level).get().entity.painting.respawnDelay))
                                             .execute(() -> {
-                                                final SSpawnPaintingPacket packet = new SSpawnPaintingPacket(h);
+                                                final ClientboundAddPaintingPacket packet = new ClientboundAddPaintingPacket(h);
                                                 player.connection.send(packet);
                                             })
                                             .build());

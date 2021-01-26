@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.server;
 
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.util.registry.WorldSettingsImport;
-import net.minecraft.world.GameType;
-import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -39,7 +39,7 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 
 public final class BootstrapProperties {
 
-    public static DimensionGeneratorSettings dimensionGeneratorSettings;
+    public static WorldGenSettings dimensionGeneratorSettings;
     public static RegistryReference<GameMode> gameMode;
     public static RegistryReference<Difficulty> difficulty;
     public static SerializationBehavior serializationBehavior;
@@ -47,12 +47,12 @@ public final class BootstrapProperties {
     public static boolean hardcore;
     public static boolean commands;
     public static int viewDistance;
-    public static DynamicRegistries registries;
-    public static WorldSettingsImport<?> worldSettingsAdapter;
+    public static RegistryAccess registries;
+    public static RegistryReadOps<?> worldSettingsAdapter;
     public static boolean isNewLevel = false;
 
-    public static void init(final DimensionGeneratorSettings dimensionGeneratorSettings, final GameType gameType, final net.minecraft.world.Difficulty difficulty,
-            final boolean pvp, final boolean hardcore, final boolean commands, final int viewDistance, final DynamicRegistries registries) {
+    public static void init(final WorldGenSettings dimensionGeneratorSettings, final GameType gameType, final net.minecraft.world.Difficulty difficulty,
+            final boolean pvp, final boolean hardcore, final boolean commands, final int viewDistance, final RegistryAccess registries) {
         BootstrapProperties.dimensionGeneratorSettings = dimensionGeneratorSettings;
         BootstrapProperties.gameMode = RegistryKey.of(RegistryTypes.GAME_MODE, ResourceKey.sponge(gameType.getName())).asDefaultedReference(() -> Sponge.getGame().registries());
         BootstrapProperties.difficulty = RegistryKey.of(RegistryTypes.DIFFICULTY, ResourceKey.sponge(difficulty.getKey())).asDefaultedReference(() -> Sponge.getGame().registries());
@@ -64,7 +64,7 @@ public final class BootstrapProperties {
         BootstrapProperties.serializationBehavior = SerializationBehavior.AUTOMATIC;
     }
 
-    public static <T> void worldSettingsAdapter(final WorldSettingsImport<T> worldSettingsAdapter) {
+    public static <T> void worldSettingsAdapter(final RegistryReadOps<T> worldSettingsAdapter) {
         BootstrapProperties.worldSettingsAdapter = worldSettingsAdapter;
     }
 

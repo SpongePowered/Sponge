@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -46,8 +46,8 @@ public final class ReplaceTileEntityInWorldEffect implements ProcessingSideEffec
         final SpongeBlockChangeFlag flag,
         final int limit
     ) {
-        final ServerWorld serverWorld = pipeline.getServerWorld();
-        final TileEntity tileEntity = oldState.tileEntity;
+        final ServerLevel serverWorld = pipeline.getServerWorld();
+        final BlockEntity tileEntity = oldState.tileEntity;
         final BlockPos pos = oldState.pos;
         if (tileEntity == null || tileEntity.isRemoved()) {
             return EffectResult.NULL_RETURN;

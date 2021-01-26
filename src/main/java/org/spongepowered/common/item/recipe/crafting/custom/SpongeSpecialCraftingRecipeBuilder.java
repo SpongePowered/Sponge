@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.crafting.custom;
 
-import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
@@ -35,6 +34,7 @@ import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import net.minecraft.resources.ResourceLocation;
 
 public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, SpecialCraftingRecipe.Builder>
         implements SpecialCraftingRecipe.Builder, SpecialCraftingRecipe.Builder.ResultStep, SpecialCraftingRecipe.Builder.EndStep {

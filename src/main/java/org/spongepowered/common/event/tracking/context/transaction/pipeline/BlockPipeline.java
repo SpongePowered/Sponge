@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 
 public interface BlockPipeline {
 
-    ServerWorld getServerWorld();
+    ServerLevel getServerWorld();
 
-    Chunk getAffectedChunk();
+    LevelChunk getAffectedChunk();
 
-    ChunkSection getAffectedSection();
+    LevelChunkSection getAffectedSection();
 
     boolean wasEmpty();
 

@@ -28,13 +28,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.kyori.adventure.text.Component;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.SimpleRegistry;
-import net.minecraft.world.Dimension;
-import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.ISpawnWorldInfo;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -110,11 +109,11 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                     )
             );
 
-    public static final Codec<Dimension> DIRECT_CODEC = RecordCodecBuilder
+    public static final Codec<LevelStem> DIRECT_CODEC = RecordCodecBuilder
             .create(r ->  r
                     .group(
-                            SpongeWorldTypeTemplate.CODEC.fieldOf("type").forGetter(Dimension::typeSupplier),
-                            net.minecraft.world.gen.ChunkGenerator.CODEC.fieldOf("generator").forGetter(Dimension::generator),
+                            SpongeWorldTypeTemplate.CODEC.fieldOf("type").forGetter(LevelStem::typeSupplier),
+                            net.minecraft.world.level.chunk.ChunkGenerator.CODEC.fieldOf("generator").forGetter(LevelStem::generator),
                             SpongeWorldTemplate.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> {
                                 final DimensionBridge dimensionBridge = (DimensionBridge) (Object) v;
                                 return Optional.of(new SpongeDataSection(dimensionBridge.bridge$displayName().orElse(null),
@@ -129,7 +128,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                     .apply(r, r
                         .stable((f1, f2, f3) ->
                             {
-                                final Dimension template = new Dimension(f1, f2);
+                                final LevelStem template = new LevelStem(f1, f2);
                                 f3.ifPresent(((DimensionBridge) (Object) template)::bridge$populateFromData);
                                 return template;
                             }
@@ -155,7 +154,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.pvp = builder.pvp;
     }
 
-    public SpongeWorldTemplate(final ServerWorld world) {
+    public SpongeWorldTemplate(final ServerLevel world) {
         super((ResourceKey) (Object) world.dimension().location());
         final ServerWorldProperties levelData = (ServerWorldProperties) world.getLevelData();
         final ServerWorldInfoBridge levelBridge = (ServerWorldInfoBridge) world.getLevelData();
@@ -176,7 +175,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.pvp = levelData.pvp();
     }
 
-    public SpongeWorldTemplate(final Dimension template) {
+    public SpongeWorldTemplate(final LevelStem template) {
         super(((ResourceKeyBridge) (Object) template).bridge$getKey());
         final DimensionBridge templateBridge = (DimensionBridge) (Object) template;
         this.displayName = templateBridge.bridge$displayName().orElse(null);
@@ -280,10 +279,10 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         throw new MissingImplementationException("SpongeWorldTemplate", "toContainer");
     }
 
-    public Dimension asDimension() {
-        final Dimension scratch =
-                new Dimension(() -> BootstrapProperties.registries.dimensionTypes().get((ResourceLocation) (Object) this.worldType.location()),
-                        (net.minecraft.world.gen.ChunkGenerator) this.generator);
+    public LevelStem asDimension() {
+        final LevelStem scratch =
+                new LevelStem(() -> BootstrapProperties.registries.dimensionTypes().get((ResourceLocation) (Object) this.worldType.location()),
+                        (net.minecraft.world.level.chunk.ChunkGenerator) this.generator);
         ((DimensionBridge) (Object) scratch).bridge$setFromSettings(false);
         ((DimensionBridge) (Object) scratch).bridge$populateFromTemplate(this);
         return scratch;
@@ -424,10 +423,10 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.displayName = null;
             this.worldType = WorldTypes.OVERWORLD;
             this.generator = ChunkGenerator.overworld();
-            final DimensionGeneratorSettings generationSettings = BootstrapProperties.dimensionGeneratorSettings;
+            final WorldGenSettings generationSettings = BootstrapProperties.dimensionGeneratorSettings;
             this.generationConfig = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
-                    new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()),
+                    new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());
             this.gameMode = null;
             this.difficulty = null;
@@ -448,10 +447,10 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.displayName = template.displayName().orElse(null);
             this.worldType = template.worldType();
             this.generator = template.generator();
-            final DimensionGeneratorSettings generationSettings = (DimensionGeneratorSettings) template.generationConfig();
+            final WorldGenSettings generationSettings = (WorldGenSettings) template.generationConfig();
             this.generationConfig = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
-                    new SimpleRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()),
+                    new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());
             this.gameMode = template.gameMode().orElse(null);
             this.difficulty = template.difficulty().orElse(null);

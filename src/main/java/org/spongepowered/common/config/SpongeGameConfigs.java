@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.config;
 
-import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,6 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import net.minecraft.world.level.Level;
 
 /**
  * SpongeCommon configurations that need to interact with game state
@@ -76,10 +76,10 @@ public final class SpongeGameConfigs {
     }
 
     public static InheritableConfigHandle<WorldConfig> getForWorld(final org.spongepowered.api.world.World<?, ?> spongeWorld) {
-        return SpongeGameConfigs.getForWorld((net.minecraft.world.World) spongeWorld);
+        return SpongeGameConfigs.getForWorld((net.minecraft.world.level.Level) spongeWorld);
     }
 
-    public static InheritableConfigHandle<WorldConfig> getForWorld(final net.minecraft.world.World mcWorld) {
+    public static InheritableConfigHandle<WorldConfig> getForWorld(final net.minecraft.world.level.Level mcWorld) {
         return ((ServerWorldInfoBridge) mcWorld.getLevelData()).bridge$configAdapter();
     }
 
@@ -127,7 +127,7 @@ public final class SpongeGameConfigs {
 
     @SuppressWarnings("EqualsBetweenInconvertibleTypes") // ResourceKey is ResourceLocation
     private static String getLegacyValue(final ResourceKey dimensionType) {
-        if (dimensionType.equals(World.NETHER.location())) {
+        if (dimensionType.equals(Level.NETHER.location())) {
             return "nether";
         } else {
             return dimensionType.getValue();
@@ -136,11 +136,11 @@ public final class SpongeGameConfigs {
 
     @SuppressWarnings("EqualsBetweenInconvertibleTypes") // ResourceKey is ResourceLocation
     private static @Nullable String getLegacyWorldName(final ResourceKey world) {
-        if (world.equals(World.OVERWORLD.location())) {
+        if (world.equals(Level.OVERWORLD.location())) {
             return "world";
-        } else if (world.equals(World.END.location())) {
+        } else if (world.equals(Level.END.location())) {
             return "DIM1";
-        } else if (world.equals(World.NETHER.location())) {
+        } else if (world.equals(Level.NETHER.location())) {
             return "DIM-1";
         }
         return null;

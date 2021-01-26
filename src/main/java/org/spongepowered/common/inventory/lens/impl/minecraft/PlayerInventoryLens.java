@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
-import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -45,6 +44,7 @@ import org.spongepowered.common.inventory.property.KeyValuePair;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class PlayerInventoryLens extends AbstractLens {
 
@@ -131,9 +131,9 @@ public class PlayerInventoryLens extends AbstractLens {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Inventory getAdapter(Fabric fabric, Inventory parent) {
-        if (this.isContainer && fabric instanceof Container) {
+        if (this.isContainer && fabric instanceof AbstractContainerMenu) {
             // If Lens is for Container extract the PlayerInventory
-            Container container = (Container) fabric;
+            AbstractContainerMenu container = (AbstractContainerMenu) fabric;
             Optional carrier = ((CarriedInventory) container).getCarrier();
             if (carrier.isPresent() && carrier.get() instanceof Player) {
                 return ((Player) carrier.get()).getInventory();

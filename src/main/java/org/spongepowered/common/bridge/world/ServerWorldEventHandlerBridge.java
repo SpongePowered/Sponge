@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.SoundCategory;
-
 import javax.annotation.Nullable;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 
 public interface ServerWorldEventHandlerBridge {
 
-    void bridge$playCustomSoundToAllNearExcept(@Nullable PlayerEntity player, String soundIn, SoundCategory category, double x, double y, double z,
+    void bridge$playCustomSoundToAllNearExcept(@Nullable Player player, String soundIn, SoundSource category, double x, double y, double z,
         float volume, float pitch);
 }

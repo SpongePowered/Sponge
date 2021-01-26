@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.state;
 
-import net.minecraft.state.Property;
-import net.minecraft.state.StateHolder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.DataHolder;
@@ -39,6 +37,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.world.level.block.state.StateHolder;
+import net.minecraft.world.level.block.state.properties.Property;
 
 public abstract class AbstractSpongeStateMatcher<S extends State<@NonNull S>, T extends StateContainer<@NonNull S>>
         implements StateMatcher<@NonNull S> {

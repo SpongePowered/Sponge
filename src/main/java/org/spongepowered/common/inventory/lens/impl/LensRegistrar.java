@@ -26,30 +26,6 @@ package org.spongepowered.common.inventory.lens.impl;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.entity.item.minecart.ChestMinecartEntity;
-import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
-import net.minecraft.inventory.CraftResultInventory;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.DoubleSidedInventory;
-import net.minecraft.inventory.EnderChestInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.inventory.container.RepairContainer;
-import net.minecraft.inventory.container.WorkbenchContainer;
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import net.minecraft.tileentity.BarrelTileEntity;
-import net.minecraft.tileentity.BlastFurnaceTileEntity;
-import net.minecraft.tileentity.BrewingStandTileEntity;
-import net.minecraft.tileentity.ChestTileEntity;
-import net.minecraft.tileentity.DispenserTileEntity;
-import net.minecraft.tileentity.DropperTileEntity;
-import net.minecraft.tileentity.FurnaceTileEntity;
-import net.minecraft.tileentity.HopperTileEntity;
-import net.minecraft.tileentity.ShulkerBoxTileEntity;
-import net.minecraft.tileentity.SmokerTileEntity;
-import net.minecraft.tileentity.TrappedChestTileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -74,6 +50,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.vehicle.MinecartChest;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.AnvilMenu;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.CraftingMenu;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.PlayerEnderChestContainer;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.entity.BarrelBlockEntity;
+import net.minecraft.world.level.block.entity.BlastFurnaceBlockEntity;
+import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.level.block.entity.DropperBlockEntity;
+import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
+import net.minecraft.world.level.block.entity.SmokerBlockEntity;
+import net.minecraft.world.level.block.entity.TrappedChestBlockEntity;
 
 /**
  * Register known Lenses here
@@ -89,47 +89,47 @@ public class LensRegistrar {
     static {
 
         LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensGrid(inv, size, 9, 3, slp),
-                ChestTileEntity.class,
-                ShulkerBoxTileEntity.class,
-                TrappedChestTileEntity.class,
-                BarrelTileEntity.class,
-                EnderChestInventory.class,
-                ChestMinecartEntity.class
+                ChestBlockEntity.class,
+                ShulkerBoxBlockEntity.class,
+                TrappedChestBlockEntity.class,
+                BarrelBlockEntity.class,
+                PlayerEnderChestContainer.class,
+                MinecartChest.class
         );
 
         LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensGrid(inv, size, 3,3, slp),
-                DispenserTileEntity.class,
-                DropperTileEntity.class);
+                DispenserBlockEntity.class,
+                DropperBlockEntity.class);
 
-        LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensCraftingInventory(size, 2, 2, slp), CraftingInventory.class);
-        LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensCraftingInventory(size, 3, 3, slp), CraftingInventory.class);
+        LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensCraftingInventory(size, 2, 2, slp), CraftingContainer.class);
+        LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensCraftingInventory(size, 3, 3, slp), CraftingContainer.class);
 
         LensRegistrar.register((inv, size, slp) -> LensRegistrar.lensGrid(inv, size, 5, 1, slp),
-                HopperTileEntity.class);
+                HopperBlockEntity.class);
 
         LensRegistrar.register(
             LensRegistrar.restricted(LensRegistrar::lensFurnace, s -> s == 3),
-                AbstractFurnaceTileEntity.class,
-                SmokerTileEntity.class,
-                FurnaceTileEntity.class,
-                BlastFurnaceTileEntity.class
+                AbstractFurnaceBlockEntity.class,
+                SmokerBlockEntity.class,
+                FurnaceBlockEntity.class,
+                BlastFurnaceBlockEntity.class
         );
 
-        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensBrewingStandTileEntity, s -> s == 5), BrewingStandTileEntity.class);
-        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensDoubleSided, s -> s == 2 * 9 * 3), DoubleSidedInventory.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensBrewingStandTileEntity, s -> s == 5), BrewingStandBlockEntity.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensDoubleSided, s -> s == 2 * 9 * 3), CompoundContainer.class);
 
-        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensRepairContainer, s -> s == 2 + 1 + 9 * 3), RepairContainer.class);
-        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensWorkbenchContainer,s -> s == 1 + 3 * 3 + 9 * 3), WorkbenchContainer.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensRepairContainer, s -> s == 2 + 1 + 9 * 3), AnvilMenu.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensWorkbenchContainer,s -> s == 1 + 3 * 3 + 9 * 3), CraftingMenu.class);
 
-        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensPlayerContainer, s -> s == 1+ 4 + 4 + 9*4 + 1), PlayerContainer.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensPlayerContainer, s -> s == 1+ 4 + 4 + 9*4 + 1), InventoryMenu.class);
 
         LensRegistrar.register(
             LensRegistrar.restricted(LensRegistrar::generateLens, s -> s == 8),
-                AbstractVillagerEntity.class,
-                VillagerEntity.class,
-                WanderingTraderEntity.class);
+                AbstractVillager.class,
+                Villager.class,
+                WanderingTrader.class);
 
-        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensSlot, s -> s == 1), CraftResultInventory.class);
+        LensRegistrar.register(LensRegistrar.restricted(LensRegistrar::lensSlot, s -> s == 1), ResultContainer.class);
     }
 
     private static Lens lensSlot(Object inventory, int size, SlotLensProvider slotLensProvider) {
@@ -179,11 +179,11 @@ public class LensRegistrar {
             }
         }
 
-        if (inventory instanceof CraftingInventory) {
-            lens = LensRegistrar.lensCraftingInventory(size, ((CraftingInventory) inventory).getWidth(), ((CraftingInventory) inventory).getHeight(), slotLensProvider);
+        if (inventory instanceof CraftingContainer) {
+            lens = LensRegistrar.lensCraftingInventory(size, ((CraftingContainer) inventory).getWidth(), ((CraftingContainer) inventory).getHeight(), slotLensProvider);
         }
-        else if (inventory instanceof Container) {
-            lens = ContainerUtil.generateLens(((Container) inventory), slotLensProvider);
+        else if (inventory instanceof AbstractContainerMenu) {
+            lens = ContainerUtil.generateLens(((AbstractContainerMenu) inventory), slotLensProvider);
         } else if (size == 1) {
             return slotLensProvider.getSlotLens(0);
         }

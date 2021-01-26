@@ -24,26 +24,26 @@
  */
 package org.spongepowered.common.inventory.custom;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.common.bridge.inventory.CarriedBridge;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * A wrapper Inventory providing a carrier for an inventory
  */
-public class CarriedWrapperInventory implements IInventory, CarriedBridge {
+public class CarriedWrapperInventory implements Container, CarriedBridge {
 
-    private IInventory wrapped;
+    private Container wrapped;
     private Carrier carrier; // shadow usage
 
-    public CarriedWrapperInventory(IInventory wrapped, Carrier carrier) {
+    public CarriedWrapperInventory(Container wrapped, Carrier carrier) {
         this.wrapped = wrapped;
         this.carrier = carrier;
     }
@@ -100,17 +100,17 @@ public class CarriedWrapperInventory implements IInventory, CarriedBridge {
     }
 
     @Override
-    public boolean stillValid(PlayerEntity player) {
+    public boolean stillValid(Player player) {
         return this.wrapped.stillValid(player);
     }
 
     @Override
-    public void startOpen(PlayerEntity player) {
+    public void startOpen(Player player) {
        this.wrapped.startOpen(player);
     }
 
     @Override
-    public void stopOpen(PlayerEntity player) {
+    public void stopOpen(Player player) {
         this.wrapped.stopOpen(player);
     }
 

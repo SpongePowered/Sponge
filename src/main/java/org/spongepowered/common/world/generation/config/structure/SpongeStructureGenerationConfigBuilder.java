@@ -25,9 +25,6 @@
 package org.spongepowered.common.world.generation.config.structure;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.world.gen.settings.DimensionStructuresSettings;
-import net.minecraft.world.gen.settings.StructureSeparationSettings;
-import net.minecraft.world.gen.settings.StructureSpreadSettings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.generation.structure.Structure;
@@ -38,6 +35,9 @@ import org.spongepowered.api.world.generation.config.structure.StructureGenerati
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.world.level.levelgen.StructureSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 
 public final class SpongeStructureGenerationConfigBuilder implements StructureGenerationConfig.Builder {
 
@@ -70,9 +70,9 @@ public final class SpongeStructureGenerationConfigBuilder implements StructureGe
 
     @Override
     public StructureGenerationConfig.Builder reset() {
-        this.stronghold = (SpacedStructureConfig) DimensionStructuresSettings.DEFAULT_STRONGHOLD;
+        this.stronghold = (SpacedStructureConfig) StructureSettings.DEFAULT_STRONGHOLD;
         this.structures.clear();
-        this.structures.putAll((Map<? extends Structure, ? extends SeparatedStructureConfig>) (Object) DimensionStructuresSettings.DEFAULTS);
+        this.structures.putAll((Map<? extends Structure, ? extends SeparatedStructureConfig>) (Object) StructureSettings.DEFAULTS);
         return this;
     }
 
@@ -86,7 +86,7 @@ public final class SpongeStructureGenerationConfigBuilder implements StructureGe
 
     @Override
     public @NonNull StructureGenerationConfig build() {
-        return (StructureGenerationConfig) new DimensionStructuresSettings(Optional.ofNullable((StructureSpreadSettings) this.stronghold),
-                (Map<net.minecraft.world.gen.feature.structure.Structure<?>, StructureSeparationSettings>) (Object) this.structures);
+        return (StructureGenerationConfig) new StructureSettings(Optional.ofNullable((StrongholdConfiguration) this.stronghold),
+                (Map<net.minecraft.world.level.levelgen.feature.StructureFeature<?>, StructureFeatureConfiguration>) (Object) this.structures);
     }
 }

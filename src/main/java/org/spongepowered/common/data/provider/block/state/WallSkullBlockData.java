@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.AbstractSkullBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SkullBlock;
-import net.minecraft.block.WallSkullBlock;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.block.AbstractSkullBlockAccessor;
+import org.spongepowered.common.accessor.world.level.block.AbstractSkullBlockAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.StateUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.block.AbstractSkullBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SkullBlock;
+import net.minecraft.world.level.block.WallSkullBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class WallSkullBlockData {
 
@@ -55,13 +55,13 @@ public final class WallSkullBlockData {
                     .create(Keys.IS_ATTACHED)
                         .get(h -> h.getBlock() instanceof WallSkullBlock)
                         .set((h, v) -> {
-                            final Map<SkullBlock.ISkullType, Pair> wallAndGroundPairs = new HashMap<>();
+                            final Map<SkullBlock.Type, Pair> wallAndGroundPairs = new HashMap<>();
                             final AbstractSkullBlock block = (AbstractSkullBlock) h.getBlock();
                             final boolean isWallBlock = block instanceof WallSkullBlock;
                             if (v == isWallBlock) {
                                 return h;
                             }
-                            final SkullBlock.ISkullType type = ((AbstractSkullBlockAccessor) block).accessor$type();
+                            final SkullBlock.Type type = ((AbstractSkullBlockAccessor) block).accessor$type();
                             // Find the ground/wall pair based on the skull type
                             final Pair pair = wallAndGroundPairs.computeIfAbsent(type, type1 -> {
                                 final SkullBlock groundBlock = (SkullBlock) Registry.BLOCK.stream()

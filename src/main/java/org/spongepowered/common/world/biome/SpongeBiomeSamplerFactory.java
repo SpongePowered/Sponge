@@ -24,24 +24,24 @@
  */
 package org.spongepowered.common.world.biome;
 
-import net.minecraft.world.biome.ColumnFuzzedBiomeMagnifier;
-import net.minecraft.world.biome.DefaultBiomeMagnifier;
-import net.minecraft.world.biome.FuzzedBiomeMagnifier;
+import net.minecraft.world.level.biome.FuzzyOffsetBiomeZoomer;
+import net.minecraft.world.level.biome.FuzzyOffsetConstantColumnBiomeZoomer;
+import net.minecraft.world.level.biome.NearestNeighborBiomeZoomer;
 import org.spongepowered.api.world.biome.BiomeSampler;
 
 public final class SpongeBiomeSamplerFactory implements BiomeSampler.Factory {
 
     public BiomeSampler columnFuzzed() {
-        return (BiomeSampler) (Object) ColumnFuzzedBiomeMagnifier.INSTANCE;
+        return (BiomeSampler) (Object) FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE;
     }
 
     @Override
     public BiomeSampler fuzzy() {
-        return (BiomeSampler) (Object) FuzzedBiomeMagnifier.INSTANCE;
+        return (BiomeSampler) (Object) FuzzyOffsetBiomeZoomer.INSTANCE;
     }
 
     @Override
     public BiomeSampler defaultFinder() {
-        return (BiomeSampler) (Object) DefaultBiomeMagnifier.INSTANCE;
+        return (BiomeSampler) (Object) NearestNeighborBiomeZoomer.INSTANCE;
     }
 }

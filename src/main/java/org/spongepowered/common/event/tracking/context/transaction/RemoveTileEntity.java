@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -41,14 +38,17 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 @DefaultQualifier(NonNull.class)
 public final class RemoveTileEntity extends BlockEventBasedTransaction {
 
-    final TileEntity removed;
+    final BlockEntity removed;
     final SpongeBlockSnapshot tileSnapshot;
 
-    RemoveTileEntity(final TileEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
+    RemoveTileEntity(final BlockEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
         super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState(), attachedSnapshot.getWorld());
         this.removed = removed;
         this.tileSnapshot = attachedSnapshot;
@@ -77,7 +77,7 @@ public final class RemoveTileEntity extends BlockEventBasedTransaction {
     @Override
     protected SpongeBlockSnapshot getResultingSnapshot() {
         return SpongeBlockSnapshotBuilder.pooled()
-            .world((ServerWorld) this.removed.getLevel())
+            .world((ServerLevel) this.removed.getLevel())
             .position(new Vector3i(this.affectedPosition.getX(), this.affectedPosition.getY(), this.affectedPosition.getZ()))
             .blockState(this.originalState)
             .build()

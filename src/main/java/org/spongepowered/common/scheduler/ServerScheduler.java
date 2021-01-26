@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.scheduler;
 
-import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
@@ -45,9 +44,9 @@ public final class ServerScheduler extends SyncScheduler {
         super.tick();
 
         for (final Player player : Sponge.getServer().getOnlinePlayers()) {
-            if (player instanceof PlayerEntity) {
+            if (player instanceof net.minecraft.world.entity.player.Player) {
                 // Detect Changes on PlayerInventories marked as dirty.
-                ((PlayerInventoryBridge) ((PlayerEntity) player).inventory).bridge$cleanupDirty();
+                ((PlayerInventoryBridge) ((net.minecraft.world.entity.player.Player) player).inventory).bridge$cleanupDirty();
             }
         }
     }

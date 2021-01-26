@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -34,21 +33,22 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.level.Level;
 
 public class WorldTickListenerContext extends ListenerPhaseContext<WorldTickListenerContext> {
 
-    @Nullable private World tickingWorld;
+    @Nullable private Level tickingWorld;
 
     WorldTickListenerContext(final IPhaseState<WorldTickListenerContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 
-    public WorldTickListenerContext world(final World world) {
+    public WorldTickListenerContext world(final Level world) {
         this.tickingWorld = world;
         return this;
     }
 
-    public World getWorld() {
+    public Level getWorld() {
         return checkNotNull(this.tickingWorld, "Ticking World is null");
     }
 
