@@ -52,7 +52,7 @@ public abstract class FireworkRocketEntityMixin_API extends ProjectileEntityMixi
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         // Projectile
-        values.add(this.shooter().asImmutable());
+        this.shooter().map(Value::asImmutable).ifPresent(values::add);
 
         // FusedExplosive
         values.add(this.primed().asImmutable());

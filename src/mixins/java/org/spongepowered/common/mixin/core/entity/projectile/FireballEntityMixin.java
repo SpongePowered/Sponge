@@ -27,13 +27,13 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.world.Explosion.Mode;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -46,8 +46,9 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(FireballEntity.class)
 public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin implements FireballEntityBridge, ExplosiveBridge {
@@ -79,11 +80,9 @@ public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin 
     public net.minecraft.world.Explosion bridge$throwExplosionEventAndExplode(net.minecraft.world.World worldObj, @Nullable Entity nil,
             double x, double y, double z, float strength, boolean flaming, net.minecraft.world.Explosion.Mode mode) {
         final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
-        final ProjectileSource shooter = ((Projectile) this).shooter().get();
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter);
-            frame.pushCause(shooter);
+            ((Projectile) this).get(Keys.SHOOTER).ifPresent(shooter -> frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter));
             final Optional<net.minecraft.world.Explosion> ex = SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                     .location(ServerLocation.of((ServerWorld) worldObj, x, y, z))
                     .sourceExplosive(((ExplosiveFireball) this))

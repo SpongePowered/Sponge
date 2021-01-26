@@ -40,7 +40,7 @@ public abstract class DamagingProjectileEntityMixin_API extends ProjectileEntity
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         // Projectile
-        values.add(this.shooter().asImmutable());
+        this.shooter().map(Value::asImmutable).ifPresent(values::add);
 
         // Projectile Data values
         values.add(this.attackDamage().asImmutable());

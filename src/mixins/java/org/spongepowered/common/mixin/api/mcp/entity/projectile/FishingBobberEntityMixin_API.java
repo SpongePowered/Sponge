@@ -40,7 +40,7 @@ public abstract class FishingBobberEntityMixin_API extends EntityMixin_API imple
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         // Projectile
-        values.add(this.shooter().asImmutable());
+        this.shooter().map(Value::asImmutable).ifPresent(values::add);
 
         this.targetEntity().map(Value::asImmutable).ifPresent(values::add);
 

@@ -28,12 +28,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.Explosion.Mode;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -115,9 +116,10 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
         final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            final ProjectileSource shooter = ((WitherSkull) this).shooter().get();
-            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter);
-            frame.pushCause(shooter);
+            ((Projectile) this).get(Keys.SHOOTER).ifPresent(shooter -> {
+                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter);
+                frame.pushCause(shooter);
+            });
             return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                     .location(ServerLocation.of((ServerWorld) worldObj, x, y, z))
                     .sourceExplosive(((WitherSkull) this))

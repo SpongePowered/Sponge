@@ -40,7 +40,7 @@ public abstract class EvokerFangsEntityMixin_API extends EntityMixin_API impleme
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         // Projectile
-        values.add(this.shooter().asImmutable());
+        this.shooter().map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

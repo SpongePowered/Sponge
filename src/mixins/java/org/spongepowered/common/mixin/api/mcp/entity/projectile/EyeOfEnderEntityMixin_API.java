@@ -40,7 +40,7 @@ public abstract class EyeOfEnderEntityMixin_API extends EntityMixin_API implemen
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         // Projectile
-        values.add(this.shooter().asImmutable());
+        this.shooter().map(Value::asImmutable).ifPresent(values::add);
 
         values.add(this.targetLocation().asImmutable());
 

@@ -40,7 +40,7 @@ public abstract class AbstractArrowEntityMixin_API extends EntityMixin_API imple
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         // Projectile
-        values.add(this.shooter().asImmutable());
+        this.shooter().map(Value::asImmutable).ifPresent(values::add);
 
         // DamagingProjectile
         values.add(this.attackDamage().asImmutable());

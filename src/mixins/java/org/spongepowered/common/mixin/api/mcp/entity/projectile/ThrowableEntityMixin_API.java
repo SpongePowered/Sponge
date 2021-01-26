@@ -39,7 +39,7 @@ public abstract class ThrowableEntityMixin_API extends EntityMixin_API implement
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.shooter().asImmutable());
+        this.shooter().map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }
