@@ -36,6 +36,7 @@ import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
+import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collections;
@@ -85,7 +86,7 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
     public CommandResult process(final CommandCause cause, final CommandMapping mapping, final String command, final String arguments) throws CommandException {
         final Command.Raw commandToExecute = this.commands.get(mapping);
         if (commandToExecute.canExecute(cause)) {
-            return commandToExecute.process(cause, arguments);
+            return commandToExecute.process(cause, new SpongeStringReader(arguments));
         }
         throw new CommandPermissionException(Component.text("You do not have permission to run /" + command));
     }
@@ -94,7 +95,7 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
     public List<String> suggestions(final CommandCause cause, final CommandMapping mapping, final String command, final String arguments) throws CommandException {
         final Command.Raw commandToExecute = this.commands.get(mapping);
         if (commandToExecute.canExecute(cause)) {
-            return commandToExecute.getSuggestions(cause, arguments);
+            return commandToExecute.getSuggestions(cause, new SpongeStringReader(arguments));
         }
         return Collections.emptyList();
     }
