@@ -591,9 +591,11 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         final double deltaZ = packetIn.getZ() - this.player.posZ;
         final double deltaChange = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
 
-        if (deltaChange <= 1f / 256) { // Micro-optimization, avoids almost negligible position movement from floating point differences.
+        // Disable micro-optimization
+        // MoveEntityEvent must be fired in all cases to avoid players making small vehicle movements to bypass protection plugins
+        /*if (deltaChange <= 1f / 256) { // Micro-optimization, avoids almost negligible position movement from floating point differences.
             return ridingEntity;
-        }
+        }*/
 
         // Sponge Start - Movement event
         final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) ridingEntity;
