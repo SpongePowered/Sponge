@@ -38,6 +38,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.settings.DimensionGeneratorSettings;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
@@ -57,6 +58,7 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -94,6 +96,8 @@ import javax.annotation.Nullable;
 public abstract class ServerWorldMixin extends WorldMixin implements ServerWorldBridge, PlatformServerWorldBridge, ResourceKeyBridge {
 
     // @formatter:off
+    @Shadow @Final private IServerWorldInfo serverLevelData;
+
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow protected abstract void shadow$saveLevelData();
     // @formatter:on
@@ -115,6 +119,11 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         this.impl$chunkStatusListener = p_i241885_7_;
         this.impl$rotationUpdates = new Object2ObjectOpenHashMap<>();
         this.impl$registerHolder = new SpongeRegistryHolder(((DynamicRegistries.Impl) p_i241885_1_.registryAccess()));
+    }
+
+    @Redirect(method = "getSeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/IServerConfiguration;worldGenSettings()Lnet/minecraft/world/gen/settings/DimensionGeneratorSettings;"))
+    public DimensionGeneratorSettings impl$onGetSeed(IServerConfiguration iServerConfiguration) {
+        return ((ServerWorldInfo) this.serverLevelData).worldGenSettings();
     }
 
     @Override

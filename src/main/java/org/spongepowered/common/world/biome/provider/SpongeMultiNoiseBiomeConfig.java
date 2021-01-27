@@ -97,6 +97,7 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
 
         @Override
         public Builder seed(final long seed) {
+            this.seed = seed;
             return this;
         }
 

@@ -273,7 +273,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         this.saveTemplate(template);
 
-        return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template).asDimension());
+        return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template).asDimension(), ((DimensionGeneratorSettings) template.generationConfig()));
     }
 
     @Override
@@ -306,12 +306,12 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 this.saveTemplate(loadedTemplate);
             }
 
-            return this.loadWorld0(registryKey, ((SpongeWorldTemplate) loadedTemplate).asDimension());
+            return this.loadWorld0(registryKey, ((SpongeWorldTemplate) loadedTemplate).asDimension(), ((DimensionGeneratorSettings) loadedTemplate.generationConfig()));
         });
     }
 
     private CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld0(final RegistryKey<World> registryKey,
-            final Dimension template) {
+            final Dimension template, DimensionGeneratorSettings generatorSettings) {
         final ServerWorldInfo defaultLevelData = (ServerWorldInfo) this.server.getWorldData();
         final WorldSettings defaultLevelSettings = ((ServerWorldInfoAccessor) defaultLevelData).accessor$settings();
         final DimensionBridge templateBridge = (DimensionBridge) (Object) template;
@@ -351,7 +351,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                         templateBridge.bridge$hardcore().orElse(BootstrapProperties.hardcore), (Difficulty) (Object) BootstrapProperties.difficulty
                         .get(Sponge.getGame().registries()), templateBridge.bridge$commands().orElse(BootstrapProperties.commands), new GameRules(),
                     defaultLevelData.getDataPackConfig());
-                generationSettings = ((DimensionGeneratorSettingsBridge) defaultLevelData.worldGenSettings()).bridge$copy();
+                generationSettings = generatorSettings;
             }
 
             levelData = new ServerWorldInfo(levelSettings, generationSettings, Lifecycle.stable());
