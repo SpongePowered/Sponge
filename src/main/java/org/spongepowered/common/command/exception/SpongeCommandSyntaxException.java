@@ -52,7 +52,13 @@ public final class SpongeCommandSyntaxException extends CommandSyntaxException {
     }
 
     @Override
-    public synchronized Throwable getCause() {
+    public synchronized Throwable fillInStackTrace() {
+        // Don't gather stacktrace, we are just wrapping the existing exception
+        return this;
+    }
+
+    @Override
+    public synchronized CommandException getCause() {
         return this.innerException;
     }
 

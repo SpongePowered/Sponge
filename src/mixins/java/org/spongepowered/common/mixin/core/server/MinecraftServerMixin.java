@@ -371,13 +371,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         this.shadow$getPackRepository().reload();
     }
 
-    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/DataPackRegistries;loadResources(Ljava/util/List;Lnet/minecraft/command/Commands$EnvironmentType;ILjava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"))
-    public CompletableFuture<DataPackRegistries> impl$loadResources(List<IResourcePack> p_240961_0_, Commands.EnvironmentType p_240961_1_, int p_240961_2_, Executor p_240961_3_, Executor p_240961_4_) {
-        final CompletableFuture<DataPackRegistries> future = DataPackRegistries.loadResources(p_240961_0_, p_240961_1_, p_240961_2_, p_240961_3_, p_240961_4_);
-        SpongeBootstrap.getLifecycle().establishCommands();
-        return future;
-    }
-
     @Override
     public String toString() {
         return this.getClass().getSimpleName();

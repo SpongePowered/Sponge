@@ -22,26 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.command.registrar.tree.builder;
 
-import org.spongepowered.api.Server;
-import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.common.scheduler.ServerScheduler;
-import org.spongepowered.common.util.UsernameCache;
-import org.spongepowered.common.world.server.SpongeWorldManager;
-import org.spongepowered.common.world.storage.SpongePlayerDataManager;
+import com.mojang.brigadier.arguments.ArgumentType;
+import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
-public interface SpongeServer extends SpongeEngine, Server {
+public final class BasicCommandTreeNode extends ArgumentCommandTreeNode<CommandTreeNode.Basic> implements CommandTreeNode.Basic {
+
+    private final ArgumentType<?> type;
+
+    public BasicCommandTreeNode(final ClientCompletionKey<Basic> parameterType, final ArgumentType<?> type) {
+        super(parameterType);
+        this.type = type;
+    }
 
     @Override
-    ServerScheduler getScheduler();
-    
-    @Override
-    SpongeWorldManager getWorldManager();
-
-    SpongePlayerDataManager getPlayerDataManager();
-
-    UsernameCache getUsernameCache();
-
-    SpongeCommandManager getCommandManager();
+    protected ArgumentType<?> getArgumentType() {
+        return this.type;
+    }
 }

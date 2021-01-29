@@ -237,7 +237,11 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
     @Redirect(method = "canUseGameMasterBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getPermissionLevel()I"))
     private int impl$checkPermissionForCommandBlock(final PlayerEntity playerEntity) {
-        return ((Subject) this).hasPermission(Constants.Permissions.COMMAND_BLOCK_PERMISSION) ? Constants.Permissions.COMMAND_BLOCK_LEVEL : 0;
+        if (this instanceof Subject) {
+            return ((Subject) this).hasPermission(Constants.Permissions.COMMAND_BLOCK_PERMISSION) ? Constants.Permissions.COMMAND_BLOCK_LEVEL : 0;
+        } else {
+            return this.shadow$getPermissionLevel();
+        }
     }
 
     /**

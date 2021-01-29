@@ -149,8 +149,10 @@ public final class SpongeLifecycle {
         ((SpongeServer) this.game.getServer()).getUsernameCache().load();
     }
 
-    public void establishCommands() {
-        ((SpongeCommandManager) this.game.getCommandManager()).init();
+    public SpongeCommandManager createCommandManager() {
+        final SpongeCommandManager result = this.injector.getInstance(SpongeCommandManager.class);
+        result.init();
+        return result;
     }
 
     public void registerPluginListeners() {

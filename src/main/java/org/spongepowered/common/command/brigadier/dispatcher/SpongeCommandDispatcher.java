@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.brigadier.dispatcher;
 
+import com.mojang.brigadier.AmbiguityConsumer;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
@@ -41,9 +42,9 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
@@ -68,9 +69,11 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
 
     // Mojang don't provide a way to get this...
     private ResultConsumer<CommandSource> resultConsumer = (context, success, result) -> { };
+    private final SpongeCommandManager commandManager;
 
-    public SpongeCommandDispatcher() {
+    public SpongeCommandDispatcher(final SpongeCommandManager commandManager) {
         super(new SpongeRootCommandNode());
+        this.commandManager = commandManager;
     }
 
     public LiteralCommandNode<CommandSource> register(final LiteralCommandNode<CommandSource> command) {
@@ -111,7 +114,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             final CommandSourceBridge sourceBridge = (CommandSourceBridge) source;
             frame.addContext(EventContextKeys.COMMAND, input.getString());
             sourceBridge.bridge$updateFrameFromICommandSource(frame);
-            return ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).process(sourceBridge.bridge$withCurrentCause(), input.getRemaining()).getResult();
+            return this.commandManager.process(sourceBridge.bridge$withCurrentCause(), input.getRemaining()).getResult();
         } catch (final CommandException e) {
             throw new net.minecraft.command.CommandException(SpongeAdventure.asVanilla(e.componentMessage()));
         }
@@ -366,7 +369,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         return new ParseResults<>(contextSoFar, originalReader, errors == null ? Collections.emptyMap() : errors);
     }
 
-    private static Command<CommandSource> getCommand(CommandContextBuilder<CommandSource> context) {
+    private static Command<CommandSource> getCommand(final CommandContextBuilder<CommandSource> context) {
         final Command<CommandSource> command = context.getCommand();
         if (command == null && context.getChild() != null) {
             return SpongeCommandDispatcher.getCommand(context.getChild());
@@ -418,6 +421,12 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         // Sponge End
     }
 
+    @Override
+    public void findAmbiguities(final AmbiguityConsumer<CommandSource> consumer) {
+        // No-op, we don't want to spam the logs
+        // This produces bad information for Sponge anyways
+    }
+
     private boolean shouldContinueTraversing(final SpongeStringReader reader, final CommandNode<CommandSource> child) {
         final CommandNode<CommandSource> redirect = child.getRedirect();
         if (redirect == null) {
@@ -429,4 +438,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         }
     }
 
+    CommandManager getCommandManager() {
+        return this.commandManager;
+    }
 }

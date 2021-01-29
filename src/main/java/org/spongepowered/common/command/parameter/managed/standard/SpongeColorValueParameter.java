@@ -96,7 +96,11 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
 
         // Hex code?
         if (SpongeColorValueParameter.HEX_CODE.matcher(string).matches()) {
-            // Hex code
+            try {
+                return Optional.of(Color.ofRgb(Integer.parseInt(string.substring(1), 16)));
+            } catch (final NumberFormatException ex) {
+                // handled below
+            }
         }
 
         final String[] rgb = string.split(",", 3);

@@ -40,7 +40,7 @@ public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> ex
     private final R registrar;
 
     public RegisterCommandEventImpl(final Cause cause, final Game game, final R registrar) {
-        super(cause, game, registrar.handledType());
+        super(cause, game, registrar.type().handledType());
         this.registrar = registrar;
     }
 

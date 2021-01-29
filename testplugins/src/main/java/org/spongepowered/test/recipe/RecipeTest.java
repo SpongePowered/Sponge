@@ -81,7 +81,7 @@ public final class RecipeTest implements LoadableModule {
     public void enable(CommandContext ctx) {
         this.enabled = true;
         try {
-            Sponge.getCommandManager().process("reload");
+            Sponge.getServer().getCommandManager().process("reload");
         } catch (CommandException e) {
             e.printStackTrace();
         }
@@ -91,7 +91,7 @@ public final class RecipeTest implements LoadableModule {
     public void disable(CommandContext ctx) {
         this.enabled = false;
         try {
-            Sponge.getCommandManager().process("reload");
+            Sponge.getServer().getCommandManager().process("reload");
         } catch (CommandException e) {
             e.printStackTrace();
         }

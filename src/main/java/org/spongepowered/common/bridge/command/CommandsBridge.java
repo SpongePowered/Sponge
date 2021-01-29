@@ -22,23 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree.builder;
+package org.spongepowered.common.bridge.command;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 
-public final class EmptyCommandTreeNode extends ArgumentCommandTreeNode<CommandTreeNode.Basic> implements CommandTreeNode.Basic {
+public interface CommandsBridge {
 
-    private final ArgumentType<?> type;
-
-    public EmptyCommandTreeNode(final ClientCompletionKey<Basic> parameterType, final ArgumentType<?> type) {
-        super(parameterType);
-        this.type = type;
-    }
-
-    @Override
-    protected ArgumentType<?> getArgumentType() {
-        return this.type;
-    }
+    SpongeCommandManager bridge$commandManager();
 }

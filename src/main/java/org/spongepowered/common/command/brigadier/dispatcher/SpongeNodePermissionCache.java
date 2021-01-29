@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.brigadier.dispatcher;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
@@ -49,7 +48,7 @@ public final class SpongeNodePermissionCache {
 
     public static boolean canUse(
             final boolean isRoot,
-            final CommandDispatcher<CommandSource> dispatcher,
+            final SpongeCommandDispatcher dispatcher,
             final CommandNode<CommandSource> node,
             final CommandSource source
     ) {
@@ -72,7 +71,7 @@ public final class SpongeNodePermissionCache {
     }
 
     public static String createFromNode(
-            final CommandDispatcher<CommandSource> dispatcher,
+            final SpongeCommandDispatcher dispatcher,
             final CommandNode<CommandSource> node) {
         final String permission;
         if (node.getRedirect() != null && !(node.getRedirect() instanceof RootCommandNode) && node.getCommand() == null) {
@@ -96,7 +95,7 @@ public final class SpongeNodePermissionCache {
                                 + "Unable to determine owning plugin - using \"unknown\" as plugin ID", permString);
             } else {
                 final String original = path.iterator().next();
-                pluginId = SpongeCommon.getGame().getCommandManager()
+                pluginId = dispatcher.getCommandManager()
                         .getCommandMapping(original)
                         .map(x -> x.getPlugin().getMetadata().getId()).orElseGet(() -> {
                             SpongeCommon.getLogger().error("Root command /{} does not have an associated plugin!", original);

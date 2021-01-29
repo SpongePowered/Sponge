@@ -90,7 +90,7 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     @Override
     public Parameter.Value.@NonNull Builder<T> setRequiredPermission(@Nullable final String permission) {
         if (permission == null) {
-            return this.setUsage(null);
+            return this.setRequirements(null);
         } else {
             return this.setRequirements(commandCause -> commandCause.getSubject().hasPermission(permission));
         }

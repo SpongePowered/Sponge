@@ -35,11 +35,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandExecutor;
+import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
+import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +64,8 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     private final Predicate<CommandCause> executionRequirements;
     @Nullable private final CommandExecutor executor;
     private final boolean isTerminal;
-    @Nullable private SpongeCommandDispatcher cachedDispatcher;
+    private @Nullable SpongeCommandManager commandManager;
+    private @Nullable SpongeCommandDispatcher cachedDispatcher;
 
     SpongeParameterizedCommand(
             final List<Parameter.Subcommand> subcommands,
@@ -82,13 +86,19 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
         this.isTerminal = isTerminal;
     }
 
+    public void setCommandManager(final SpongeCommandManager commandManager) {
+        this.cachedDispatcher = null;
+        this.commandManager = commandManager;
+    }
+
     @Override
     @NonNull
-    public List<String> getSuggestions(@NonNull final CommandCause cause, @NonNull final String arguments) {
+    public List<String> getSuggestions(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
         final SpongeCommandDispatcher dispatcher = this.getCachedDispatcher();
-        final ParseResults<CommandSource> parseResults = dispatcher.parse(arguments, (CommandSource) cause);
+        final String input = arguments.getRemaining();
+        final ParseResults<CommandSource> parseResults = dispatcher.parse((StringReader) arguments, (CommandSource) cause);
         final Suggestions suggestions = dispatcher.getCompletionSuggestions(parseResults).join();
-        return suggestions.getList().stream().map(x -> x.apply(arguments)).collect(Collectors.toList());
+        return suggestions.getList().stream().map(x -> x.apply(input)).collect(Collectors.toList());
     }
 
     @Override
@@ -145,9 +155,9 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     @Override
     @NonNull
-    public CommandContext parseArguments(@NonNull final CommandCause cause, @NonNull final String arguments) {
-        final ParseResults<CommandSource> results = this.getCachedDispatcher().parse(new StringReader(arguments), (CommandSource) cause);
-        return (CommandContext) results.getContext().build(arguments);
+    public CommandContext parseArguments(@NonNull final CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
+        final ParseResults<CommandSource> results = this.getCachedDispatcher().parse((SpongeStringReader) arguments, (CommandSource) cause);
+        return (CommandContext) results.getContext().build(arguments.getInput());
     }
 
     @Override
@@ -157,7 +167,10 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     private SpongeCommandDispatcher getCachedDispatcher() {
         if (this.cachedDispatcher == null) {
-            this.cachedDispatcher = new SpongeCommandDispatcher();
+            if (this.commandManager == null) {
+                throw new IllegalStateException("Completions cannot be requested for an unregistered parameterized command");
+            }
+            this.cachedDispatcher = new SpongeCommandDispatcher(this.commandManager);
             this.cachedDispatcher.register(this.buildWithAlias("command"));
         }
         return this.cachedDispatcher;

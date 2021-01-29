@@ -36,6 +36,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.minecraft.command.Commands;
 import net.minecraft.resources.DataPackRegistries;
 import net.minecraft.resources.ResourcePackList;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -79,7 +80,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.command.CommandsBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
@@ -120,6 +123,8 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract boolean shadow$isSpawningAnimals();
     @Shadow public abstract boolean shadow$isNetherEnabled();
     // @formatter:on
+
+    @Shadow public abstract Commands getCommands();
 
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
@@ -329,6 +334,11 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         }
 
         return this.api$profileManager;
+    }
+
+    @Override
+    public SpongeCommandManager getCommandManager() {
+        return ((CommandsBridge) this.getCommands()).bridge$commandManager();
     }
 
     public Optional<ResourcePack> server$getResourcePack() {

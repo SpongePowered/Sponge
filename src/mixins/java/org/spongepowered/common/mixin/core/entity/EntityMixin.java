@@ -188,6 +188,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             TeleportationRepositioner.Result teleportationrepositioner$result);
     @Shadow protected abstract void shadow$removeAfterChangingDimensions();
     @Shadow public abstract void shadow$absMoveTo(double p_242281_1_, double p_242281_3_, double p_242281_5_);
+    @Shadow protected abstract int shadow$getPermissionLevel();
 
     // @formatter:on
 

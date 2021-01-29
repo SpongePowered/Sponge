@@ -83,7 +83,6 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
         this.bindAndExpose(SqlManager.class).to(SpongeSqlManager.class);
         this.bindAndExpose(ServiceProvider.GameScoped.class).to(SpongeGameScopedServiceProvider.class);
-        this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
         this.bindAndExpose(FactoryProvider.class).to(SpongeFactoryProvider.class);
         this.bindAndExpose(BuilderProvider.class).to(SpongeBuilderProvider.class);
 

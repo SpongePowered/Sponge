@@ -93,7 +93,7 @@ public final class AdvancementTest implements LoadableModule {
         this.enabled = true;
         Sponge.getEventManager().registerListeners(this.plugin, this.listeners);
         try {
-            Sponge.getCommandManager().process("reload");
+            Sponge.getServer().getCommandManager().process("reload");
         } catch (final CommandException e) {
             e.printStackTrace();
         }
@@ -105,7 +105,7 @@ public final class AdvancementTest implements LoadableModule {
         this.enabled = false;
         Sponge.getEventManager().unregisterListeners(this.listeners);
         try {
-            Sponge.getCommandManager().process("reload");
+            Sponge.getServer().getCommandManager().process("reload");
         } catch (final CommandException e) {
             e.printStackTrace();
         }
