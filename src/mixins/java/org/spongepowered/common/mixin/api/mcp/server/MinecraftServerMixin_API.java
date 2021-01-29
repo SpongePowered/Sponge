@@ -302,9 +302,13 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
 
     @Override
     public double getTicksPerSecond() {
-        final double nanoSPerTick = Mth.average(this.tickTimes);
         // Cap at 20 TPS
-        return 1000 / Math.max(50, nanoSPerTick / 1000000);
+        return 1000 / Math.max(50, this.getAverageTickTime());
+    }
+
+    @Override
+    public double getAverageTickTime() {
+        return Mth.average(this.tickTimes) / 1000000;
     }
 
     @Override
