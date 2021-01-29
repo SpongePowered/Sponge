@@ -56,11 +56,6 @@ public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> ex
     }
 
     @Override
-    public @NonNull CommandRegistrar<C> registrar() {
-        return this.registrar;
-    }
-
-    @Override
     public String toString() {
         return "RegisterCommandEvent{cause=" + this.cause + ", token=" + this.token + "}";
     }

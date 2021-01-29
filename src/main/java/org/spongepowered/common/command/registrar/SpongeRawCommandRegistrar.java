@@ -61,7 +61,7 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
 
     @Override
     public @NonNull CommandRegistrarType<Command.Raw> type() {
-        return TYPE;
+        return SpongeRawCommandRegistrar.TYPE;
     }
 
     @Override

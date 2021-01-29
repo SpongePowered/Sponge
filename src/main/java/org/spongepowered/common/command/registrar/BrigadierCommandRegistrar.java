@@ -96,7 +96,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
 
     @Override
     public @NonNull CommandRegistrarType<LiteralArgumentBuilder<CommandSource>> type() {
-        return TYPE;
+        return BrigadierCommandRegistrar.TYPE;
     }
 
     @Override

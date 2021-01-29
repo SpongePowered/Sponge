@@ -72,7 +72,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
 
     @Override
     public @NonNull CommandRegistrarType<Command.Parameterized> type() {
-        return TYPE;
+        return SpongeParameterizedCommandRegistrar.TYPE;
     }
 
     private SpongeCommandManager commandManager() {
