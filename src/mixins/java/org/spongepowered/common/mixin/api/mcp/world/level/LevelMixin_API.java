@@ -134,7 +134,12 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         if (chunkProvider instanceof ServerChunkCache) {
             final ChunkMapAccessor chunkManager = (ChunkMapAccessor) ((ServerChunkCache) chunkProvider).chunkMap;
             final List<Chunk> chunks = new ArrayList<>();
-            chunkManager.invoker$getChunks().forEach(holder -> chunks.add((Chunk) holder.getTickingChunk()));
+            chunkManager.invoker$getChunks().forEach(holder -> {
+                final Chunk chunk = (Chunk) holder.getTickingChunk();
+                if (chunk != null) {
+                    chunks.add(chunk);
+                }
+            });
             return chunks;
         }
         return Collections.emptyList();

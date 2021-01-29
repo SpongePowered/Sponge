@@ -25,12 +25,18 @@
 package org.spongepowered.common.mixin.api.mcp.world.level.chunk;
 
 import net.minecraft.util.Mth;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.chunk.ChunkBiomeContainerAccessor;
+import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
 public abstract class LevelChunkMixin_API implements Chunk {
@@ -38,6 +44,10 @@ public abstract class LevelChunkMixin_API implements Chunk {
     //@formatter:off
     @Shadow private ChunkBiomeContainer biomes;
     @Shadow private long inhabitedTime;
+    @Shadow @Final private ChunkPos chunkPos;
+    @Shadow @Final private Level level;
+
+    @Shadow public abstract void shadow$setInhabitedTime(long p_177415_1_);
     //@formatter:on
 
     @Override
@@ -55,9 +65,36 @@ public abstract class LevelChunkMixin_API implements Chunk {
         return true;
     }
 
-    @Override
-    public long getInhabitedTime() {
+    @Intrinsic
+    public long impl$getInhabitedTime() {
         return this.inhabitedTime;
+    }
+
+    @Intrinsic
+    public void impl$setInhabitedTime(long newInhabitedTime) {
+        this.shadow$setInhabitedTime(newInhabitedTime);
+    }
+
+    @Override
+    public Vector3i getChunkPosition() {
+        return new Vector3i(this.chunkPos.x, 0, this.chunkPos.z);
+    }
+
+    @Override
+    public double getRegionalDifficultyFactor() {
+        return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(),
+                this.getInhabitedTime(), this.level.getMoonBrightness()).getEffectiveDifficulty();
+    }
+
+    @Override
+    public double getRegionalDifficultyPercentage() {
+        return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(),
+                this.getInhabitedTime(), this.level.getMoonBrightness()).getSpecialMultiplier();
+    }
+
+    @Override
+    public org.spongepowered.api.world.World<?, ?> getWorld() {
+        return ((org.spongepowered.api.world.World<?, ?>) this.level);
     }
 
     // TODO implement the rest of it
