@@ -13,11 +13,7 @@ plugins {
 
 val apiProject = project.project("SpongeAPI")
 val commonProject = project
-val mappingsChannel: String by project
-val mappingsVersion: String by project
-val minecraftDep: String by project
 val minecraftVersion: String by project
-val minecraftMcpVersion: String by project
 val recommendedVersion: String by project
 
 val asmVersion: String by project
@@ -629,7 +625,7 @@ project("SpongeVanilla") {
         api(launch.map { it.output })
         implementation(accessors.map { it.output })
         implementation(project(commonProject.path)) {
-            exclude(group = "net.minecraft", module = minecraftDep)
+            // exclude(group = "net.minecraft", module = minecraftDep)
         }
         // annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 

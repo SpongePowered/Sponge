@@ -109,7 +109,7 @@ public final class Constants {
     public static final String MINECRAFT_CLIENT = "net.minecraft.client.Minecraft";
     public static final String DEDICATED_SERVER = "net.minecraft.server.dedicated.DedicatedServer";
     public static final String MINECRAFT_SERVER = "net.minecraft.server.MinecraftServer";
-    public static final String INTEGRATED_SERVER = "net.minecraft.server.integrated.IntegratedServer";
+    public static final String INTEGRATED_SERVER = "net.minecraft.client.server.IntegratedServer";
 
     private Constants() {
     }
