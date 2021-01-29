@@ -36,8 +36,7 @@ jobs:
           echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
           echo "BUILD_NUMBER=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
       - name: Build with Gradle
-        run: |
-          ./gradlew -PenableTestPlugins=true -s build
+        run: ./gradlew -PenableTestPlugins=true build --stacktrace
         env:
           CI_SYSTEM: Github Actions
       - name: Add artifacts to build
