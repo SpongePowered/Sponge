@@ -7,7 +7,7 @@ plugins {
     `java-library`
     eclipse
     id("org.cadixdev.licenser") version "0.5.0"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("com.github.johnrengelman.shadow") version "6.1.0"
     // id("org.spongepowered.mixin")
 }
 
@@ -149,6 +149,9 @@ val applaunch by sourceSets.registering {
     project.dependencies {
         mixinsConfig(this@registering.output)
     }
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(applaunchConfig)
+    }
 }
 val launch by sourceSets.registering {
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = applaunch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
@@ -159,17 +162,26 @@ val launch by sourceSets.registering {
         implementation(this@registering.output)
     }
 
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(launchConfig)
+    }
 }
 
 val accessors by sourceSets.registering {
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = launch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = this, targetSource = main, implProject = project, dependencyConfigName = main.implementationConfigurationName)
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(accessorsConfig)
+    }
 }
 val mixins by sourceSets.registering {
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = launch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = applaunch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = accessors.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = main, targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(mixinsConfig)
+    }
 }
 
 repositories {
@@ -223,7 +235,6 @@ dependencies {
     launchConfig("com.google.code.gson:gson:2.8.0")
     launchConfig("org.ow2.asm:asm-tree:$asmVersion")
     launchConfig("org.ow2.asm:asm-util:$asmVersion")
-    add(launch.get().implementationConfigurationName, launchConfig)
 
     // Applaunch -- initialization that needs to occur without game access
     applaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
@@ -242,7 +253,6 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
     applaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
-    add(applaunch.get().implementationConfigurationName, applaunchConfig)
 
     // Annotation Processor
     // "accessorsAnnotationProcessor"("org.spongepowered:mixin:$mixinVersion:processor")
@@ -250,8 +260,6 @@ dependencies {
     // "accessorsAnnotationProcessor"("org.apache.logging.log4j:log4j-core:2.11.2")
     // "mixinsAnnotationProcessor"("org.apache.logging.log4j:log4j-core:2.11.2")
     mixinsConfig(sourceSets.named("main").map { it.output })
-    add(accessors.get().implementationConfigurationName, accessorsConfig)
-    add(mixins.get().implementationConfigurationName, mixinsConfig)
     add(mixins.get().implementationConfigurationName, project(":SpongeAPI"))
 
     // Tests
@@ -552,6 +560,12 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaMain, implProject = vanillaProject, dependencyConfigName = vanillaMain.implementationConfigurationName)
+
+        configurations.named(implementationConfigurationName) {
+            extendsFrom(vanillaAppLaunchConfig)
+            extendsFrom(vanillaMinecraftConfig)
+            extendsFrom(vanillaMinecraftClasspathConfig)
+        }
     }
     val vanillaMixins by sourceSets.register("mixins") {
         // implementation (compile) dependencies
@@ -570,20 +584,24 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaInstaller, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaLaunch, implProject = vanillaProject, dependencyConfigName = vanillaLaunch.implementationConfigurationName)
         // runtime dependencies - literally add the rest of the project, because we want to launch the game
-        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMixins, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeClasspathConfigurationName)
-        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeClasspathConfigurationName)
-        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = mixins.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeClasspathConfigurationName)
-        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeClasspathConfigurationName)
-        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeClasspathConfigurationName)
-        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMain, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeClasspathConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMixins, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeOnlyConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeOnlyConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = mixins.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeOnlyConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeOnlyConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeOnlyConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMain, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeOnlyConfigurationName)
     }
     val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
+        extendsFrom(vanillaAppLaunchConfig)
         extendsFrom(vanillaMinecraftConfig)
         extendsFrom(vanillaMinecraftClasspathConfig)
     }
-    val vanillaMixinsAnnotationProcessor by configurations.named(vanillaMixins.annotationProcessorConfigurationName)
-    val vanillaInstallerImplementation by configurations.named(vanillaInstaller.implementationConfigurationName)
-    val vanillaAppLaunchImplementation by configurations.named(vanillaAppLaunch.implementationConfigurationName) {
+    configurations.named(vanillaMixins.annotationProcessorConfigurationName)
+    configurations.named(vanillaInstaller.implementationConfigurationName) {
+        extendsFrom(vanillaInstallerConfig)
+    }
+    configurations.named(vanillaAppLaunch.implementationConfigurationName) {
+        extendsFrom(vanillaAppLaunchConfig)
         extendsFrom(launchConfig)
     }
     val vanillaAppLaunchRuntime by configurations.named(vanillaAppLaunch.runtimeOnlyConfigurationName)
@@ -631,9 +649,6 @@ project("SpongeVanilla") {
 
         vanillaMixinsImplementation(project(commonProject.path))
         add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
-        add(vanillaLaunch.implementationConfigurationName, vanillaAppLaunchConfig)
-        add(vanillaLaunch.implementationConfigurationName, vanillaMinecraftConfig)
-        add(vanillaLaunch.implementationConfigurationName, vanillaMinecraftClasspathConfig)
 
         vanillaInstallerConfig("com.google.code.gson:gson:2.8.0")
         vanillaInstallerConfig("org.spongepowered:configurate-hocon:4.0.0")
@@ -647,14 +662,13 @@ project("SpongeVanilla") {
                 .onEach {
             vanillaInstallerConfig("org.ow2.asm:$it:$asmVersion")
         }.toSet()
-        vanillaInstallerConfig("org.cadixdev:atlas:0.2.0") {
+        vanillaInstallerConfig("org.cadixdev:atlas:0.2.1") {
             asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
         }
         vanillaInstallerConfig("org.cadixdev:lorenz-asm:0.5.6") {
             asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
         }
         vanillaInstallerConfig("org.cadixdev:lorenz-io-proguard:0.5.6")
-        vanillaInstallerImplementation(vanillaInstallerConfig)
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
         vanillaAppLaunchConfig(platform("net.kyori:adventure-bom:4.4.0"))
@@ -694,10 +708,6 @@ project("SpongeVanilla") {
         vanillaAppLaunchConfig("net.fabricmc:access-widener:1.0.0") {
             exclude(group = "org.apache.logging.log4j")
         }
-        vanillaAppLaunchImplementation(vanillaAppLaunchConfig)
-        vanillaMixinsImplementation(vanillaAppLaunchConfig)
-        vanillaMixinsImplementation(vanillaMinecraftConfig)
-        vanillaMixinsImplementation(vanillaMinecraftClasspathConfig)
 
         // Annotation Processor
         // vanillaMixinsAnnotationProcessor(vanillaAppLaunchImplementation)
