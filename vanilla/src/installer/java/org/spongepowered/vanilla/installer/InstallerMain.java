@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
 
 public final class InstallerMain {
 
-    private static final Pattern CLASSPATH_SPLITTER = Pattern.compile(";", Pattern.LITERAL);
+    private static final Pattern CLASSPATH_SPLITTER = Pattern.compile(File.pathSeparator, Pattern.LITERAL);
 
     static {
         final String log4jConfig = System.getProperty("log4j.configurationFile");
