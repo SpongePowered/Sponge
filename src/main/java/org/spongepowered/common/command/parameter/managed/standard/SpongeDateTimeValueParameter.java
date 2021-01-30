@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -38,6 +39,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,16 +51,14 @@ public final class SpongeDateTimeValueParameter extends ResourceKeyedArgumentVal
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
-        return ImmutableList.of();
+    public List<String> complete(@NonNull final CommandCause context, final @NonNull String currentInput) {
+        return Collections.emptyList();
     }
 
     @Override
     @NonNull
     public Optional<? extends LocalDateTime> parseValue(
-            final Parameter.@NonNull Key<? super LocalDateTime> parameterKey,
-            final ArgumentReader.@NonNull Mutable reader,
-            final CommandContext.@NonNull Builder context) throws ArgumentParseException {
+            final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         final String date = reader.parseString();
         try {
             return Optional.of(LocalDateTime.parse(date));

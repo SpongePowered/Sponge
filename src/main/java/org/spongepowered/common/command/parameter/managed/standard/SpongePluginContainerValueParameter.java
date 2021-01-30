@@ -27,6 +27,7 @@ package org.spongepowered.common.command.parameter.managed.standard;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -47,7 +48,7 @@ public final class SpongePluginContainerValueParameter extends ResourceKeyedArgu
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+    public List<String> complete(@NonNull final CommandCause context, final String currentInput) {
         return Launch.getInstance().getPluginManager().plugins().stream().map(x -> x.getMetadata().getId()).filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());
     }
@@ -55,9 +56,7 @@ public final class SpongePluginContainerValueParameter extends ResourceKeyedArgu
     @Override
     @NonNull
     public Optional<? extends PluginContainer> parseValue(
-            final Parameter.@NonNull Key<? super PluginContainer> parameterKey,
-            final ArgumentReader.@NonNull Mutable reader,
-            final CommandContext.@NonNull Builder context) throws ArgumentParseException {
+            final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
         final String id = reader.parseString();
         final Optional<PluginContainer> container = Launch.getInstance().getPluginManager().plugin(id);

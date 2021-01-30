@@ -29,6 +29,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -39,6 +40,7 @@ import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgument
 import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,20 +52,19 @@ public final class SpongeDataContainerValueParameter extends ResourceKeyedArgume
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+    public List<String> complete(@NonNull final CommandCause context, final @NonNull String currentInput) {
         return ImmutableList.of();
     }
 
     @Override
     public List<ArgumentType<?>> getClientCompletionArgumentType() {
-        return ImmutableList.of(Constants.Command.NBT_ARGUMENT_TYPE);
+        return Collections.singletonList(Constants.Command.NBT_ARGUMENT_TYPE);
     }
 
     @Override
     @NonNull
-    public Optional<? extends DataContainer> parseValue(final Parameter.@NonNull Key<? super DataContainer> parameterKey,
-                                                      final ArgumentReader.@NonNull Mutable reader,
-                                                      final CommandContext.@NonNull Builder context) throws ArgumentParseException {
+    public Optional<? extends DataContainer> parseValue(
+            final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         return Optional.of(reader.parseDataContainer());
     }
 }

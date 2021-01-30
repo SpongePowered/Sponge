@@ -26,6 +26,7 @@ package org.spongepowered.common.command.parameter;
 
 import io.leangen.geantyref.GenericTypeReflector;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.Parameter;
 
 import java.lang.reflect.Type;
@@ -72,13 +73,13 @@ public final class SpongeParameterKey<T> implements Parameter.Key<T> {
     }
 
     @Override
-    public boolean isInstance(final Object value) {
+    public boolean isInstance(final @Nullable Object value) {
         return value != null && GenericTypeReflector.erase(this.type).isInstance(value);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public T cast(final Object value) {
+    public @NonNull T cast(final @NonNull Object value) {
         return (T) value;
     }
 

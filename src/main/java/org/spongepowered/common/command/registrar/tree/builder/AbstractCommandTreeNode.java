@@ -28,20 +28,17 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.commands.SharedSuggestionProvider;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.command.brigadier.tree.ForcedRedirectNode;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
-import net.minecraft.commands.SharedSuggestionProvider;
 
 public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull T>, O extends CommandNode<SharedSuggestionProvider>>
         implements CommandTreeNode<@NonNull T> {
@@ -100,7 +97,7 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     }
 
     @Override
-    public @NonNull T requires(final Predicate<CommandCause> requirement) {
+    public @NonNull T requires(final @Nullable Predicate<CommandCause> requirement) {
         this.requirement = requirement == null ? c -> true : requirement;
         return this.getThis();
     }

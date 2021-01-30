@@ -27,7 +27,7 @@ package org.spongepowered.common.command.brigadier;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
@@ -55,7 +55,6 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import net.minecraft.commands.CommandSourceStack;
 
 public final class SpongeParameterTranslator {
 
@@ -317,11 +316,11 @@ public final class SpongeParameterTranslator {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @NonNull
-    private static <T> SpongeArgumentCommandNodeBuilder<? extends T> createArgumentNodeBuilders(
+    private static <T> SpongeArgumentCommandNodeBuilder<T> createArgumentNodeBuilders(
             final SpongeParameterValue<T> parameter,
             @Nullable final String suffix) {
 
-        ArgumentParser<? extends T> type = parameter.getArgumentTypeIfStandard();
+        ArgumentParser<T> type = parameter.argumentTypeIfStandard();
 
         if (type == null) {
             type = new CustomArgumentParser<>(parameter.parsers(), parameter.completer(), false);
@@ -331,6 +330,7 @@ public final class SpongeParameterTranslator {
                 SpongeParameterKey.getSpongeKey(parameter.key()),
                 type,
                 parameter.completer(),
+                parameter.modifier().orElse(null),
                 parameter.valueUsage().orElse(null),
                 suffix
         );

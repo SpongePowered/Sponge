@@ -34,6 +34,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -66,7 +67,7 @@ public final class SpongeGameProfileValueParameter extends ResourceKeyedArgument
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
+    public List<String> complete(final @NonNull CommandCause context, @NonNull final String currentInput) {
         final SuggestionsBuilder builder = new SuggestionsBuilder(currentInput, 0);
         this.listSuggestions((com.mojang.brigadier.context.CommandContext<?>) context, builder);
         return builder.build().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
@@ -74,12 +75,10 @@ public final class SpongeGameProfileValueParameter extends ResourceKeyedArgument
 
     @Override
     public Optional<? extends GameProfile> parseValue(
-            final Parameter.@NonNull Key<? super GameProfile> parameterKey,
-            final ArgumentReader.@NonNull Mutable reader,
-            final CommandContext.@NonNull Builder context) throws ArgumentParseException {
+            final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         try {
             final Collection<com.mojang.authlib.GameProfile> profileCollection =
-                    this.argument.parse((StringReader) reader).getNames((CommandSourceStack) context.cause());
+                    this.argument.parse((StringReader) reader).getNames((CommandSourceStack) cause);
             if (profileCollection.size() == 1) {
                 return Optional.of(SpongeGameProfile.of(profileCollection.iterator().next()));
             } else if (profileCollection.isEmpty()) {

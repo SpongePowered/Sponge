@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,16 +45,14 @@ public final class SpongeNoneValueParameter extends ResourceKeyedArgumentValuePa
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
-        return ImmutableList.of();
+    public List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+        return Collections.emptyList();
     }
 
     @Override
     @NonNull
     public Optional<? extends Void> parseValue(
-            final Parameter.@NonNull Key<? super Void> parameterKey,
-            final ArgumentReader.@NonNull Mutable reader,
-            final CommandContext.@NonNull Builder context) throws ArgumentParseException {
+            final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         return Optional.empty();
     }
 
@@ -68,7 +65,7 @@ public final class SpongeNoneValueParameter extends ResourceKeyedArgumentValuePa
     @Override
     @NonNull
     public List<ClientCompletionType> clientCompletionType() {
-        return ImmutableList.of(ClientCompletionTypes.NONE.get());
+        return Collections.singletonList(ClientCompletionTypes.NONE.get());
     }
 
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.parameter;
 
-import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.network.chat.TextComponent;
@@ -36,6 +35,7 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
+import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
 import org.spongepowered.api.command.parameter.managed.ValueParser;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
@@ -49,24 +49,26 @@ import java.util.stream.Collectors;
 
 public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
-    private final ImmutableList<ValueParser<? extends T>> parsers;
+    private final List<ValueParser<? extends T>> parsers;
     private final ValueCompleter completer;
     private final Predicate<CommandCause> requirement;
-    @Nullable private final ValueUsage usage;
+    private @Nullable final ValueUsage usage;
     private final Key<T> key;
     private final boolean isOptional;
     private final boolean consumeAll;
     private final boolean terminal;
+    private final @Nullable ValueParameterModifier<T> modifier;
 
     public SpongeParameterValue(
-            final ImmutableList<ValueParser<? extends T>> parsers,
+            final List<ValueParser<? extends T>> parsers,
             final ValueCompleter completer,
             @Nullable final ValueUsage usage,
             final Predicate<CommandCause> requirement,
             final Key<T> key,
             final boolean isOptional,
             final boolean consumeAll,
-            final boolean terminal) {
+            final boolean terminal,
+            final @Nullable ValueParameterModifier<T> modifier) {
         this.parsers = parsers;
         this.completer = completer;
         this.requirement = requirement;
@@ -74,6 +76,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
         this.key = key;
         this.isOptional = isOptional;
         this.consumeAll = consumeAll;
+        this.modifier = modifier;
         this.terminal = consumeAll || terminal;
     }
 
@@ -109,7 +112,13 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
         final CommandContext.Builder.Transaction transaction = context.startTransaction();
         for (final ValueParser<? extends T> parser : this.parsers) {
             try {
-                parser.parseValue(this.key, args, context).ifPresent(t -> context.putEntry(this.key, t));
+                T value = parser.parseValue(this.key, args, context).orElse(null);
+                if (this.modifier != null) {
+                    value = this.modifier.modifyResult(this.key, args.immutable(), context, value).orElse(null);
+                }
+                if (value != null) {
+                    context.putEntry(this.key, value);
+                }
                 context.commit(transaction);
                 return; // something parsed, so we exit.
             } catch (final ArgumentParseException ex) {
@@ -145,7 +154,12 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     @Override
     @NonNull
     public List<String> complete(final ArgumentReader.@NonNull Immutable reader, @NonNull final CommandContext context) {
-        return this.completer.complete(context, reader.remaining());
+        final String currentInput = reader.remaining();
+        final List<String> result = this.completer.complete(context, currentInput);
+        if (this.modifier != null) {
+            return this.modifier.modifyCompletion(context, currentInput, result);
+        }
+        return result;
     }
 
     @Override
@@ -176,6 +190,13 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     }
 
     @Override
+    @NonNull
+    public Optional<ValueParameterModifier<T>> modifier() {
+        return Optional.ofNullable(this.modifier);
+    }
+
+    @Override
+    @NonNull
     public Optional<ValueUsage> valueUsage() {
         return Optional.ofNullable(this.usage);
     }
@@ -203,7 +224,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
     @SuppressWarnings("unchecked")
     @Nullable
-    public ArgumentParser<? extends T> getArgumentTypeIfStandard() {
+    public ArgumentParser<T> argumentTypeIfStandard() {
         if (this.parsers.size() == 1) {
             final ValueParser<? extends T> parser = this.parsers.get(0);
             if (parser instanceof ArgumentParser<?>) {
