@@ -30,7 +30,6 @@ import net.minecraft.server.level.ChunkMap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.accessor.world.servernet.minecraft.server.level.ChunkMap_TrackedEntityAccessor;
 
 @Mixin(ChunkMap.class)
 public interface ChunkMapAccessor {

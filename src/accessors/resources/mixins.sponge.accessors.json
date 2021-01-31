@@ -183,7 +183,7 @@
         "world.entity.raid.RaidAccessor",
         "world.entity.raid.RaidsAccessor",
         "server.level.ChunkMapAccessor",
-        "world.servernet.minecraft.server.level.ChunkMap_TrackedEntityAccessor",
+        "server.level.ChunkMap_TrackedEntityAccessor",
         "server.level.ServerLevelAccessor",
         "world.level.BaseSpawnerAccessor",
         "world.level.NaturalSpawner_SpawnStateAccessor",
