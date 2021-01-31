@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.generation.config.noise;
 
+import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
@@ -42,12 +43,18 @@ public final class SpongeNoiseConfig {
         public SamplingConfig sampling;
         public SlideConfig top, bottom;
         
-        public int height, horizontalSize, verticalSize;
+        public int minY, height, horizontalSize, verticalSize;
         public double densityFactor, densityOffset;
         public boolean simplexForSurface, randomizeDensityOffset, amplified;
 
         public BuilderImpl() {
             this.reset();
+        }
+
+        @Override
+        public NoiseConfig.Builder minY(final int minY) {
+            this.minY = minY;
+            return this;
         }
 
         @Override
@@ -155,7 +162,7 @@ public final class SpongeNoiseConfig {
             Objects.requireNonNull(this.top, "top");
             Objects.requireNonNull(this.bottom, "bottom");
 
-            return (NoiseConfig) new net.minecraft.world.level.levelgen.NoiseSettings(this.height, (NoiseSamplingSettings) this.sampling,
+            return (NoiseConfig) net.minecraft.world.level.levelgen.NoiseSettings.create(this.minY, this.height, (NoiseSamplingSettings) this.sampling,
                     (net.minecraft.world.level.levelgen.NoiseSlideSettings) this.top, (net.minecraft.world.level.levelgen.NoiseSlideSettings) this.bottom,
                     this.horizontalSize, this.verticalSize, this.densityFactor, this.densityOffset, this.simplexForSurface,
                     this.randomizeDensityOffset, false, this.amplified);
@@ -164,17 +171,17 @@ public final class SpongeNoiseConfig {
 
     public static final class FactoryImpl implements NoiseConfig.Factory {
 
-        private static final NoiseConfig OVERWORLD = (NoiseConfig) new net.minecraft.world.level.levelgen.NoiseSettings(256,
+        private static final NoiseConfig OVERWORLD = (NoiseConfig) net.minecraft.world.level.levelgen.NoiseSettings.create(DimensionType.MIN_Y, 256,
                 new NoiseSamplingSettings(0.9999999814507745D, 0.9999999814507745D, 80.0D, 160.0D),
                 new net.minecraft.world.level.levelgen.NoiseSlideSettings(-10, 3, 0), new net.minecraft.world.level.levelgen.NoiseSlideSettings(-30, 0, 0), 1, 2, 1.0D,
                 -0.46875D, true, true, false, false);
 
-        private static final NoiseConfig NETHER = (NoiseConfig) new net.minecraft.world.level.levelgen.NoiseSettings(128,
+        private static final NoiseConfig NETHER = (NoiseConfig) net.minecraft.world.level.levelgen.NoiseSettings.create(DimensionType.MIN_Y, 128,
                 new NoiseSamplingSettings(1.0D, 3.0D, 80.0D, 60.0D), new net.minecraft.world.level.levelgen.NoiseSlideSettings(120, 3, 0), new net.minecraft.world.level.levelgen.NoiseSlideSettings(320,
                 4, -1), 1, 2, 0.0D, 0.019921875D, false,
                 false, false, false);
 
-        private static final NoiseConfig END = (NoiseConfig) new net.minecraft.world.level.levelgen.NoiseSettings(128,
+        private static final NoiseConfig END = (NoiseConfig) net.minecraft.world.level.levelgen.NoiseSettings.create(DimensionType.MIN_Y, 128,
                 new NoiseSamplingSettings(2.0D, 1.0D, 80.0D, 160.0D), new net.minecraft.world.level.levelgen.NoiseSlideSettings(-3000, 64, -46), new net.minecraft.world.level.levelgen.NoiseSlideSettings(
                 -30, 7, 1), 2, 1, 0.0D, 0.0D,
                 true, false, false, false);

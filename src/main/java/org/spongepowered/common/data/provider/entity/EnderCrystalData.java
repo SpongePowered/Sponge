@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
 import org.spongepowered.common.util.VecHelper;
@@ -43,7 +44,7 @@ public final class EnderCrystalData {
         registrator
                 .asMutable(EndCrystal.class)
                     .create(Keys.HEALTH)
-                        .get(h -> h.removed ? 0.0 : EnderCrystalData.ALIVE_HEALTH)
+                        .get(h -> h.isRemoved() ? 0.0 : EnderCrystalData.ALIVE_HEALTH)
                         .setAnd((h, v) -> {
                             if (v < 0 || v > EnderCrystalData.ALIVE_HEALTH) {
                                 return false;
@@ -51,7 +52,7 @@ public final class EnderCrystalData {
                             if (v == 0) {
                                 h.hurt((DamageSource) SpongeDamageSources.IGNORED, 1000F);
                             } else {
-                                h.removed = false;
+                                ((EntityAccessor) h).invoker$unsetRemoved();
                             }
                             return true;
                         })

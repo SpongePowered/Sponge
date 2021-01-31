@@ -81,7 +81,7 @@ public final class BlockItemStackData {
                                 return false;
                             }
                             try {
-                                final BlockEntity tile = ((EntityBlock) block).newBlockEntity(null);
+                                final BlockEntity tile = ((EntityBlock) block).newBlockEntity(null, null);
                                 return tile instanceof BaseContainerBlockEntity;
                             } catch (final NullPointerException ex) {
                                 return false;

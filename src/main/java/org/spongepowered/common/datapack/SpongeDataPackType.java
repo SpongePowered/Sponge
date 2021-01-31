@@ -27,6 +27,7 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import io.leangen.geantyref.TypeToken;
+import net.minecraft.core.Registry;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
@@ -126,7 +127,9 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         private final SpongeDataPackType<@NonNull WorldTemplate, DataPackSerializedObject> world = new SpongeDataPackType<>(TypeToken.get(WorldTemplate.class),
                 new DataPackSerializer<>("Dimensions", "dimension"),
                 s -> {
-                    final LevelStem template = new LevelStem(() -> BootstrapProperties.registries.dimensionTypes().get((ResourceLocation) (Object) s.worldType().location()), (ChunkGenerator) s.generator());
+                    final LevelStem template =
+                            new LevelStem(() -> BootstrapProperties.registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get((ResourceLocation) (Object) s.worldType().location()),
+                                    (ChunkGenerator) s.generator());
                     ((DimensionBridge) (Object) template).bridge$setFromSettings(false);
                     ((DimensionBridge) (Object) template).bridge$populateFromTemplate((SpongeWorldTemplate) s);
                     return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), template).getOrThrow(false, e -> {});

@@ -68,7 +68,7 @@ public final class BookUtil {
             final ServerPlayer mcPlayer = (ServerPlayer) player;
             final ServerGamePacketListenerImpl receiver = mcPlayer.connection;
 
-            final Inventory inventory = mcPlayer.inventory;
+            final Inventory inventory = mcPlayer.getInventory();
             final int bookSlot = inventory.items.size() + inventory.selected;
             receiver.send(new ClientboundContainerSetSlotPacket(BookUtil.WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
 

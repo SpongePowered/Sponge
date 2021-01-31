@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -112,7 +113,7 @@ public final class PacketPhaseUtil {
 
     public static void handleCustomCursor(final Player player, final ItemStackSnapshot customCursor) {
         final ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
-        player.inventory.setCarried(cursor);
+        player.getInventory().setCarried(cursor);
         if (player instanceof net.minecraft.server.level.ServerPlayer) {
             ((net.minecraft.server.level.ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, cursor));
         }
@@ -138,13 +139,13 @@ public final class PacketPhaseUtil {
         player.ignoreSlotUpdateHack = false;
         int slotId = 0;
         if (hand == InteractionHand.OFF_HAND) {
-            player.inventory.offhand.set(0, itemStack);
-            slotId = (player.inventory.items.size() + Inventory.getSelectionSize());
+            player.getInventory().offhand.set(0, itemStack);
+            slotId = (player.getInventory().items.size() + Inventory.getSelectionSize());
         } else {
-            player.inventory.items.set(player.inventory.selected, itemStack);
-            // TODO check if window id -2 and slotid = player.inventory.currentItem works instead of this:
+            player.getInventory().items.set(player.getInventory().selected, itemStack);
+            // TODO check if window id -2 and slotid = player.getInventory().currentItem works instead of this:
             for (Slot containerSlot : player.containerMenu.slots) {
-                if (containerSlot.container == player.inventory && ((SlotAccessor) containerSlot).accessor$slot() == player.inventory.selected) {
+                if (containerSlot.container == player.getInventory() && ((SlotAccessor) containerSlot).accessor$slot() == player.getInventory().selected) {
                     slotId = containerSlot.index;
                     break;
                 }
@@ -202,7 +203,7 @@ public final class PacketPhaseUtil {
                 if (ignoreMovementCapture || (packetIn instanceof ServerboundClientInformationPacket)) {
                     packetIn.handle(netHandler);
                 } else {
-                    final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getCarried());
+                    final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.getInventory().getCarried());
                     final IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
                     // At the very least make an unknown packet state case.
                     final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.SERVER);

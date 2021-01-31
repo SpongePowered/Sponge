@@ -279,9 +279,9 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         throw new MissingImplementationException("SpongeWorldTemplate", "toContainer");
     }
 
-    public LevelStem asDimension() {
+    public LevelStem asLevelStem() {
         final LevelStem scratch =
-                new LevelStem(() -> BootstrapProperties.registries.dimensionTypes().get((ResourceLocation) (Object) this.worldType.location()),
+                new LevelStem(() -> BootstrapProperties.registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get((ResourceLocation) (Object) this.worldType.location()),
                         (net.minecraft.world.level.chunk.ChunkGenerator) this.generator);
         ((DimensionBridge) (Object) scratch).bridge$setFromSettings(false);
         ((DimensionBridge) (Object) scratch).bridge$populateFromTemplate(this);

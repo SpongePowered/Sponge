@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
@@ -38,7 +38,7 @@ public final class AgeableData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(AgableMob.class)
+                .asMutable(AgeableMob.class)
                     .create(Keys.BABY_TICKS)
                         .get(h -> h.getAge() < 0 ? new SpongeTicks(-h.getAge()) : null)
                         .setAnd((h, v) -> {

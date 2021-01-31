@@ -22,29 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.accessor.world.level.levelgen.flat;
 
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.PrimedTnt;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.common.accessor.world.entity.item.PrimedTntAccessor;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.StructureSettings;
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-public final class TNTData {
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-    private TNTData() {
+@Mixin(FlatLevelGeneratorSettings.class)
+public interface FlatLevelGeneratorSettingsAccessor {
+
+    @Invoker("<init>") static FlatLevelGeneratorSettings invoker$new(Registry<Biome>var1, StructureSettings var2, List<FlatLayerInfo> var3, boolean var4,
+            boolean var5, Optional<Supplier<Biome>> var6) {
+        throw new UntransformedInvokerError();
     }
-
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(PrimedTnt.class)
-                    .create(Keys.DETONATOR)
-                        .get(h -> (Living) h.getOwner())
-                        .set((h, v) -> ((PrimedTntAccessor) h).accessor$owner((LivingEntity) v))
-                    .create(Keys.IS_PRIMED)
-                        .get(h -> !h.isRemoved() && h.getFuse() > 0);
-    }
-    // @formatter:on
 }

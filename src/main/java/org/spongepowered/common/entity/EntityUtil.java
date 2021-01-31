@@ -27,6 +27,7 @@ package org.spongepowered.common.entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
@@ -97,7 +98,7 @@ public final class EntityUtil {
 
         // Sponge Start - Have the platform handle removing the entity from the world. Move this to after the event call so
         //                that we do not remove the player from the world unless we really have teleported..
-        ((PlatformServerWorldBridge) fromWorld).bridge$removeEntity(player, true);
+        ((PlatformServerWorldBridge) fromWorld).bridge$removeEntity(player, Entity.RemovalReason.CHANGED_DIMENSION, true);
         ((PlatformEntityBridge) player).bridge$revive();
         // Sponge End
 
@@ -107,7 +108,7 @@ public final class EntityUtil {
             ((ServerPlayerAccessor) player).invoker$triggerDimensionChangeTriggers(toWorld);
         }
         player.gameMode.setLevel(toWorld);
-        player.connection.send(new ClientboundPlayerAbilitiesPacket(player.abilities));
+        player.connection.send(new ClientboundPlayerAbilitiesPacket(player.getAbilities()));
         playerlist.sendLevelInfo(player, toWorld);
         playerlist.sendAllPlayerInfo(player);
 
@@ -145,7 +146,7 @@ public final class EntityUtil {
             final LivingEntity base = (LivingEntity) entity;
             return base.getHealth() <= 0 || base.deathTime > 0 || ((LivingEntityAccessor) entity).accessor$dead();
         }
-        return entity.removed;
+        return entity.isRemoved();
     }
 
     public static boolean processEntitySpawnsFromEvent(final SpawnEntityEvent event, final Supplier<Optional<User>> entityCreatorSupplier) {
@@ -177,8 +178,8 @@ public final class EntityUtil {
                                 ((CreatorTrackedBridge) entityToSpawn).tracked$setCreatorReference(spawned);
                             }
                         });
-                    if (entityToSpawn.removed) {
-                        entityToSpawn.removed = false;
+                    if (entityToSpawn.isRemoved()) {
+                        ((EntityAccessor) entityToSpawn).invoker$unsetRemoved();
                     }
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will

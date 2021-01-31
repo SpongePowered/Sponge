@@ -95,7 +95,7 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
             frame.pushCause(player.containerMenu);
 
             final List<SlotTransaction> transactions = ((TrackedInventoryBridge) player.containerMenu).bridge$getCapturedSlotTransactions();
-            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
+            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(player.getInventory().getCarried());
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(cursor, cursor);
             final ClickContainerEvent event;
 

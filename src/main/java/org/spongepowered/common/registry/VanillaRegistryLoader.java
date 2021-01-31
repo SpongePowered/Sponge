@@ -157,7 +157,6 @@ final class VanillaRegistryLoader {
         });
         this.knownName(RegistryTypes.FOX_TYPE, Fox.Type.values(), Fox.Type::getName);
         this.manualName(RegistryTypes.GAME_MODE, GameType.values(), map -> {
-            map.put(GameType.NOT_SET, "not_set"); // getName returns "" (empty string) // TODO(kashike): 1.17
             map.put(GameType.SURVIVAL, GameType.SURVIVAL.getName());
             map.put(GameType.CREATIVE, GameType.CREATIVE.getName());
             map.put(GameType.ADVENTURE, GameType.ADVENTURE.getName());

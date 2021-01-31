@@ -109,4 +109,6 @@ public interface EntityAccessor {
 
     @Invoker("findDimensionEntryPoint") PortalInfo invoker$findDimensionEntryPoint(ServerLevel targetWorld);
 
+    @Invoker("unsetRemoved") void invoker$unsetRemoved();
+
 }

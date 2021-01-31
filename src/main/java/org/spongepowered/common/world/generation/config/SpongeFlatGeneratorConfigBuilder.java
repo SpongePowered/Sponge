@@ -33,6 +33,7 @@ import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
+import org.spongepowered.common.accessor.world.level.levelgen.flat.FlatLevelGeneratorSettingsAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.ArrayList;
@@ -130,9 +131,10 @@ public final class SpongeFlatGeneratorConfigBuilder implements FlatGeneratorConf
         if (this.layers.isEmpty()) {
             throw new IllegalStateException("Flat generation requires at least 1 Layer!");
         }
-        return (FlatGeneratorConfig) new FlatLevelGeneratorSettings(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
-                (StructureSettings) this.structureConfig, (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
-                this.performDecoration, Optional.of(() -> BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY)
-                .get((ResourceLocation) (Object) this.biome.location())));
+        return (FlatGeneratorConfig) FlatLevelGeneratorSettingsAccessor.invoker$new(BootstrapProperties.registries.registryOrThrow(
+                Registry.BIOME_REGISTRY), (StructureSettings) this.structureConfig, (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
+                this.performDecoration, Optional.of(() -> BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY).get(
+                        (ResourceLocation) (Object) this.biome.location()))
+        );
     }
 }

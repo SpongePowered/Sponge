@@ -660,7 +660,7 @@ public final class Constants {
 
         public static final Supplier<DyeColor> DEFAULT_SHULKER_COLOR = DyeColors.PURPLE;
         public static final Supplier<ComparatorMode> DEFAULT_COMPARATOR_MODE = ComparatorModes.COMPARE;
-        public static final Supplier<GameMode> DEFAULT_GAMEMODE = GameModes.NOT_SET;
+        public static final Supplier<GameMode> DEFAULT_GAMEMODE = GameModes.SURVIVAL;
         public static final Supplier<ArtType> DEFAULT_ART = ArtTypes.KEBAB;
         public static final Supplier<HandPreference> DEFAULT_HAND = HandPreferences.RIGHT;
 

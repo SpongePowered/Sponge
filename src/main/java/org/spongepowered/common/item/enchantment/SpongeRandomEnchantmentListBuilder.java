@@ -116,7 +116,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
         // Same code as net.minecraft.enchantment.EnchantmentHelper#buildEnchantmentList
         if (!list1.isEmpty())
         {
-            list.add(WeighedRandom.getRandomItem(randomIn, list1));
+            WeighedRandom.getRandomItem(randomIn, list1).ifPresent(list::add);
 
             while (randomIn.nextInt(50) <= this.level)
             {
@@ -127,7 +127,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
                     break;
                 }
 
-                list.add(WeighedRandom.getRandomItem(randomIn, list1));
+                WeighedRandom.getRandomItem(randomIn, list1).ifPresent(list::add);
                 this.level /= 2;
             }
         }

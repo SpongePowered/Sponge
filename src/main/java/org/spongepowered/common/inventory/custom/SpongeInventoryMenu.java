@@ -89,7 +89,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
                 final net.minecraft.world.inventory.AbstractContainerMenu container = (net.minecraft.world.inventory.AbstractContainerMenu) entry.getKey();
                 final ServerPlayer player = entry.getValue();
                 // create a new container for the viewable inventory
-                final net.minecraft.world.inventory.AbstractContainerMenu newContainer = ((ViewableCustomInventory) inventory).createMenu(-1, ((Player)player).inventory, (Player) player);
+                final net.minecraft.world.inventory.AbstractContainerMenu newContainer = ((ViewableCustomInventory) inventory).createMenu(-1, ((Player)player).getInventory(), (Player) player);
                 for (int i = 0; i < inventory.capacity(); i++) {
                     // And put its slots into the old container
                     final Slot slot = newContainer.slots.get(i);

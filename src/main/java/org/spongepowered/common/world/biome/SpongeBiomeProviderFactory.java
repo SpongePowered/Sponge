@@ -59,7 +59,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public <T extends LayeredBiomeConfig> ConfigurableBiomeProvider<T> layered(final T config) {
-        final WritableRegistry<net.minecraft.world.level.biome.Biome> biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
+        final Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
         final OverworldBiomeSource layeredBiomeProvider = new OverworldBiomeSource(config.seed(), config.largeBiomes(), false,
                 biomeRegistry);
         final List<net.minecraft.world.level.biome.Biome> biomes = new ArrayList<>();
@@ -78,7 +78,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public <T extends MultiNoiseBiomeConfig> ConfigurableBiomeProvider<T> multiNoise(final T config) {
-        final WritableRegistry<net.minecraft.world.level.biome.Biome> biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
+        final Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
         final List<Pair<net.minecraft.world.level.biome.Biome.ClimateParameters, Supplier<net.minecraft.world.level.biome.Biome>>> attributedBiomes = new ArrayList<>();
         for (final AttributedBiome attributedBiome : config.attributedBiomes()) {
             attributedBiomes.add(Pair.of((net.minecraft.world.level.biome.Biome.ClimateParameters) attributedBiome.attributes(),
@@ -96,7 +96,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public <T extends EndStyleBiomeConfig> ConfigurableBiomeProvider<T> endStyle(final T config) {
-        final WritableRegistry<net.minecraft.world.level.biome.Biome> registry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
+        final Registry<net.minecraft.world.level.biome.Biome> registry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
         return (ConfigurableBiomeProvider<T>) TheEndBiomeSourceAccessor.invoker$new(registry,
                 config.seed(),
                 registry.get((ResourceLocation) (Object) config.endBiome().location()),

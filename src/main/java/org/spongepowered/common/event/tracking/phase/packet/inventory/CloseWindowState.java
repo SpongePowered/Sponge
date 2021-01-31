@@ -51,7 +51,7 @@ public final class CloseWindowState extends BasicPacketState {
         final ServerPlayer player = context.getSource(ServerPlayer.class).get();
         final AbstractContainerMenu container = context.getOpenContainer();
         ItemStackSnapshot lastCursor = context.getCursor();
-        ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
+        ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.getInventory().getCarried());
         final CauseStackManager stackManager = PhaseTracker.getCauseStackManager();
         if (lastCursor != null) {
             stackManager.pushCause(player);

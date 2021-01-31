@@ -29,11 +29,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 
 public interface PlatformServerWorldBridge {
-    default void bridge$removeEntity(Entity entity, boolean keepData) {
+    default void bridge$removeEntity(final Entity entity, final Entity.RemovalReason removalReason, final boolean keepData) {
         if (entity instanceof ServerPlayer) {
-            ((ServerLevel) this).removePlayerImmediately((ServerPlayer) entity);
+            ((ServerLevel) this).removePlayerImmediately((ServerPlayer) entity, removalReason);
         } else {
-            ((ServerLevel) this).despawn(entity);
+            entity.remove(removalReason);
         }
     }
 }

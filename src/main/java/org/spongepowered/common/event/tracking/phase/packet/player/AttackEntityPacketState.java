@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
@@ -62,7 +63,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
         // There are cases where a player is interacting with an entity that
         // doesn't exist on the server.
         @Nullable
-        net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(packetPlayer.level);
+        net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget((ServerLevel) packetPlayer.level);
         return entity == null;
     }
 
@@ -77,7 +78,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
     public void unwind(BasicPacketContext context) {
         final ServerPlayer player = context.getPacketPlayer();
         final ServerboundInteractPacket useEntityPacket = context.getPacket();
-        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(player.level);
+        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget((ServerLevel) player.level);
         if (entity == null) {
             // Something happened?
             return;

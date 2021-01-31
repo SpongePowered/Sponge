@@ -203,10 +203,10 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             for (final HangingEntity entityHanging : hangingEntities) {
                 if (entityHanging instanceof ItemFrame) {
                     final ItemFrame itemFrame = (ItemFrame) entityHanging;
-                    if (!itemFrame.removed) {
+                    if (!itemFrame.isRemoved()) {
                         ((ItemFrameAccessor) itemFrame).invoker$dropItem((net.minecraft.world.entity.Entity) tickingEntity, true);
                     }
-                    itemFrame.remove();
+                    itemFrame.remove(net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
                 }
             }
         }

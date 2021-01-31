@@ -410,7 +410,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     private boolean isAliveAndInWorld() {
-        return this.level.getEntity(this.getId()) == this && !this.removed;
+        return this.level.getEntity(this.getId()) == this && !this.isRemoved();
     }
 
     private void respawnOnClient() {
@@ -474,7 +474,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     public ClientboundPlayerInfoPacket createPlayerListPacket(final ClientboundPlayerInfoPacket.Action action) {
         final ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(action);
         ((ClientboundPlayerInfoPacketAccessor) packet).accessor$entries()
-                .add(packet.new PlayerUpdate(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
+                .add(packet.new PlayerUpdate(this.fakeProfile, 0, GameType.DEFAULT_MODE, this.getDisplayName()));
         return packet;
     }
 

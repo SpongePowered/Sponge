@@ -141,7 +141,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER)) {
             context.buildAndSwitch();
             final BlockPos pos = VecHelper.toBlockPos(this.pos);
-            if (!net.minecraft.world.level.Level.isInWorldBounds(pos)) { // Invalid position. Inline this check
+            if (!world.isInWorldBounds(pos)) { // Invalid position. Inline this check
                 return false;
             }
             final net.minecraft.world.level.block.state.BlockState current = world.getBlockState(pos);
@@ -159,14 +159,16 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
             if (this.compound != null) {
                 @Nullable BlockEntity te = world.getBlockEntity(pos);
                 if (te != null) {
-                    te.load((net.minecraft.world.level.block.state.BlockState) this.blockState, this.compound);
+                    te.setBlockState((net.minecraft.world.level.block.state.BlockState) this.blockState);
+                    te.load(this.compound);
                 } else {
                     // Because, some mods will "unintentionally" only obey some of the rules but not all.
                     // In cases like this, we need to directly just say "fuck it" and deserialize from the compound directly.
                     try {
-                        te = BlockEntity.loadStatic((net.minecraft.world.level.block.state.BlockState) this.blockState, this.compound);
+
+                        te = BlockEntity.loadStatic(pos, (net.minecraft.world.level.block.state.BlockState) this.blockState, this.compound);
                         if (te != null) {
-                            world.getChunk(pos).setBlockEntity(pos, te);
+                            world.getChunk(pos).setBlockEntity(te);
                         }
                     } catch (Exception e) {
                         // Seriously? The mod should be broken then.
