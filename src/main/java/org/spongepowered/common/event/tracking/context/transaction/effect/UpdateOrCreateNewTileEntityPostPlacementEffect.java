@@ -60,7 +60,7 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
                 // We cast to our bridge for easy access
                 serverWorld.setBlockEntity(((BlockStateBridge) newState).bridge$createNewTileEntity(serverWorld));
             } else {
-                maybeNewTileEntity.clearCache();
+                maybeNewTileEntity.setBlockState(null);
             }
         }
         return EffectResult.NULL_PASS;
