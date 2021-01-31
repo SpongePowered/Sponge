@@ -409,6 +409,7 @@ allprojects {
         }
     }
 }
+
 tasks {
     val jar by existing
     val sourceJar by existing
@@ -449,7 +450,6 @@ publishing {
         register("sponge", MavenPublication::class) {
             from(components["java"])
 
-            artifact(tasks["shadowJar"])
             artifact(tasks["sourceJar"])
             artifact(tasks["mixinsJar"])
             artifact(tasks["accessorsJar"])
