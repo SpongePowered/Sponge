@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.accessor.world.level.chunk;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -33,6 +35,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 @Mixin(LevelChunk.class)
 public interface LevelChunkAccessor {
+
+    @Accessor("blockEntities") Map<BlockPos, BlockEntity> accessor$blockEntities();
 
     @Accessor("heightmaps") Map<Heightmap.Types, Heightmap> accessor$heightmaps();
 
