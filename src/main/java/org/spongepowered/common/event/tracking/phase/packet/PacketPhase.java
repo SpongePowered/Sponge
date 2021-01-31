@@ -304,17 +304,7 @@ public final class PacketPhase {
             final IPhaseState<? extends PacketContext<?>> state = PacketPhase.INTERACTION_ACTION_MAPPINGS.get(action);
             return state == null ? PacketPhase.General.UNKNOWN : state;
         });
-        this.packetTranslationMap.put(ServerboundUseItemOnPacket.class, packet -> {
-            // Note that CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
-            final ServerboundUseItemOnPacket blockPlace = (ServerboundUseItemOnPacket) packet;
-            final BlockPos blockPos = blockPlace.getHitResult().getBlockPos();
-            final Direction front = blockPlace.getHitResult().getDirection();
-            final MinecraftServer server = SpongeCommon.getServer();
-            if (blockPos.getY() < server.getMaxBuildHeight() - 1 || front != Direction.UP && blockPos.getY() < server.getMaxBuildHeight()) {
-                return PacketPhase.General.PLACE_BLOCK;
-            }
-            return PacketPhase.General.INVALID;
-        });
+        this.packetTranslationMap.put(ServerboundUseItemOnPacket.class, packet -> General.PLACE_BLOCK);
         this.packetTranslationMap.put(ServerboundUseItemPacket.class, packet -> PacketPhase.General.USE_ITEM);
         this.packetTranslationMap.put(ServerboundSetCarriedItemPacket.class, packet -> PacketPhase.Inventory.SWITCH_HOTBAR_SCROLL);
         this.packetTranslationMap.put(ServerboundSwingPacket.class, packet -> PacketPhase.General.ANIMATION);
