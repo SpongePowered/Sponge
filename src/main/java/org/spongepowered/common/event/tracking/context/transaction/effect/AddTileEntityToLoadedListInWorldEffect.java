@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.common.accessor.world.level.chunk.LevelChunkAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -49,11 +50,11 @@ public final class AddTileEntityToLoadedListInWorldEffect implements ProcessingS
         final int limit
     ) {
         final ServerLevel serverWorld = pipeline.getServerWorld();
-        final BlockEntity tileEntity = oldState.tileEntity;
-        if (tileEntity == null) {
+        final BlockEntity blockEntity = oldState.tileEntity;
+        if (blockEntity == null) {
             return EffectResult.NULL_RETURN;
         }
-        serverWorld.blockEntityList.add(tileEntity);
+        ((LevelChunkAccessor) serverWorld.getChunkAt(blockEntity.getBlockPos())).accessor$blockEntities().put(blockEntity.getBlockPos(), blockEntity);
         return new EffectResult(oldState.state, false);
     }
 }

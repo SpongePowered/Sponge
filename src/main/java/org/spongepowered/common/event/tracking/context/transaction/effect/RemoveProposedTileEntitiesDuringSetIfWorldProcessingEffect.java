@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.accessor.world.level.LevelAccessor;
+import org.spongepowered.common.accessor.world.level.chunk.LevelChunkAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -54,9 +55,9 @@ public final class RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect im
         final int limit
     ) {
         final ServerLevel serverWorld = pipeline.getServerWorld();
-        final @Nullable BlockEntity tileEntity = oldState.tileEntity;
+        final @Nullable BlockEntity blockEntity = oldState.tileEntity;
         final BlockPos pos = oldState.pos;
-        if (tileEntity == null || tileEntity.isRemoved()) {
+        if (blockEntity == null || blockEntity.isRemoved()) {
             return EffectResult.NULL_RETURN;
         }
         if (((LevelAccessor) serverWorld).accessor$updatingBlockEntities()) {
@@ -69,7 +70,7 @@ public final class RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect im
                     iterator.remove();
                 }
             }
-            serverWorld.blockEntityList.add(tileEntity);
+            ((LevelChunkAccessor) serverWorld.getChunkAt(pos)).accessor$blockEntities().put(blockEntity.getBlockPos(), blockEntity);
             return EffectResult.NULL_RETURN;
         }
         return EffectResult.NULL_PASS;
