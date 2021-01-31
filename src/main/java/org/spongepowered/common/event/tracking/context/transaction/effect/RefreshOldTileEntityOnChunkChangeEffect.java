@@ -52,7 +52,7 @@ public final class RefreshOldTileEntityOnChunkChangeEffect implements Processing
         final @Nullable BlockEntity existing = pipeline.getAffectedChunk().getBlockEntity(oldState.pos, LevelChunk.EntityCreationType.CHECK);
         if (((BlockStateBridge) oldState.state).bridge$hasTileEntity()) {
             if (existing != null) {
-                existing.clearCache();
+                existing.setBlockState(null);
             }
         }
         return EffectResult.NULL_PASS;

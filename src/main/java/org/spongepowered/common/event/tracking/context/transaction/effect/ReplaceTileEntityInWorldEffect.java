@@ -52,7 +52,7 @@ public final class ReplaceTileEntityInWorldEffect implements ProcessingSideEffec
             return EffectResult.NULL_RETURN;
         }
         pipeline.getAffectedChunk().setBlockEntity(tileEntity);
-        serverWorld.addBlockEntity(tileEntity);
+        serverWorld.setBlockEntity(tileEntity);
         return EffectResult.NULL_RETURN;
     }
 }
