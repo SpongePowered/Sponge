@@ -73,11 +73,11 @@ public final class DispenserSourceLogic implements ProjectileSourceLogic<Dispens
         final DispenseItemBehavior behavior = DispenserBlockAccessor.accessor$DISPENSER_REGISTRY().get(item);
         final ServerLevel world = (ServerLevel) dispenser.getLevel();
         behavior.dispense(new BlockSourceImpl(world, dispenser.getBlockPos()), new ItemStack(item));
-        final List<Entity> entities = world.getEntities((net.minecraft.world.entity.EntityType<?>) projectileType, entity -> true);
+        final List<P> entities = (List<P>) world.getEntities((net.minecraft.world.entity.EntityType<?>) projectileType, entity -> true);
         if (entities.isEmpty()) {
             return Optional.empty();
         }
         // Hack - get the projectile that was spawned from dispense()
-        return Optional.of((P) entities.get(entities.size() - 1));
+        return Optional.of(entities.get(entities.size() - 1));
     }
 }

@@ -329,7 +329,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
             return true;
         }
         if (this.source != null && this.source instanceof Player) {
-            if (!((TrackedInventoryBridge) ((Player) this.source).inventory).bridge$getCapturedSlotTransactions().isEmpty()) {
+            if (!((TrackedInventoryBridge) ((Player) this.source).getInventory()).bridge$getCapturedSlotTransactions().isEmpty()) {
                 return true;
             }
         }

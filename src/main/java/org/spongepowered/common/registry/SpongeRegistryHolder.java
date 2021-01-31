@@ -82,7 +82,7 @@ public final class SpongeRegistryHolder implements RegistryHolder {
         final WritableRegistry root = (WritableRegistry) this.roots.get(new ResourceLocation("minecraft", "root"));
         for (final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<?>> entry : RegistryAccessAccessor.accessor$REGISTRIES()
                 .keySet()) {
-            final WritableRegistry<?> registry = dynamicAccess.registryOrThrow((net.minecraft.resources.ResourceKey) (Object) entry);
+            final net.minecraft.core.Registry<?> registry = dynamicAccess.registryOrThrow((net.minecraft.resources.ResourceKey) (Object) entry);
             root.register(entry, registry, Lifecycle.stable());
         }
     }

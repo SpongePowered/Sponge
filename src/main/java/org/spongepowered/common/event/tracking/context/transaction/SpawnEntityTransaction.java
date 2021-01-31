@@ -129,7 +129,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
             ((ServerLevelAccessor) serverWorld).accessor$toAddAfterTick().remove(this.entityToSpawn);
             ((ServerLevelAccessor) serverWorld).invoker$removeFromChunk(this.entityToSpawn);
         } else {
-            serverWorld.despawn(this.entityToSpawn);
+            this.entityToSpawn.remove(Entity.RemovalReason.DISCARDED);
         }
     }
 

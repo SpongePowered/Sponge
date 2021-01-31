@@ -270,7 +270,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     public Transaction<ItemStackSnapshot> getCursorTransaction(final InventoryPacketContext context, final net.minecraft.server.level.ServerPlayer player) {
         final ItemStackSnapshot lastCursor = context.getCursor();
-        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
+        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.getInventory().getCarried());
         return new Transaction<>(lastCursor, newCursor);
     }
 }

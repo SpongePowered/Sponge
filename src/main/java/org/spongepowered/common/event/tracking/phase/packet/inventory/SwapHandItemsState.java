@@ -46,8 +46,8 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
     }
 
     @Override
-    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final InventoryPacketContext context) {
-        ((TrackedInventoryBridge) playerMP.inventory).bridge$setCaptureInventory(true);
+    public void populateContext(final ServerPlayer player, final Packet<?> packet, final InventoryPacketContext context) {
+        ((TrackedInventoryBridge) player.getInventory()).bridge$setCaptureInventory(true);
     }
 
     @Override
@@ -56,9 +56,9 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
         final Entity spongePlayer = (Entity) player;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
-            final TrackedInventoryBridge mixinInventory = ((TrackedInventoryBridge) player.inventory);
+            final TrackedInventoryBridge mixinInventory = ((TrackedInventoryBridge) player.getInventory());
             final List<SlotTransaction> trans = mixinInventory.bridge$getCapturedSlotTransactions();
-            final ChangeInventoryEvent.SwapHand swapItemEvent = this.createInventoryEvent(((Inventory) player.inventory), trans);
+            final ChangeInventoryEvent.SwapHand swapItemEvent = this.createInventoryEvent(((Inventory) player.getInventory()), trans);
             SpongeCommon.postEvent(swapItemEvent);
             PacketPhaseUtil.handleSlotRestore(player, null, swapItemEvent.getTransactions(), swapItemEvent.isCancelled());
             mixinInventory.bridge$setCaptureInventory(false);

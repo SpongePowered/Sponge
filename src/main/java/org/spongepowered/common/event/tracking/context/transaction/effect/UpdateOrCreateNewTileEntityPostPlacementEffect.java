@@ -58,7 +58,7 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
                 // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world); // Vanilla
                 // tileentity1 = state.createTileEntity(this.world); // Forge
                 // We cast to our bridge for easy access
-                serverWorld.setBlockEntity(oldState.pos, ((BlockStateBridge) newState).bridge$createNewTileEntity(serverWorld));
+                serverWorld.setBlockEntity(((BlockStateBridge) newState).bridge$createNewTileEntity(serverWorld));
             } else {
                 maybeNewTileEntity.clearCache();
             }

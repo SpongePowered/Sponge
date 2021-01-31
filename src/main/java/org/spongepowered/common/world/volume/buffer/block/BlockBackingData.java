@@ -131,7 +131,7 @@ public interface BlockBackingData {
             this.bits = bits;
 
             this.maxValue = (1 << bits) - 1;
-            this.longArray = new long[Mth.roundUp(size * bits, Long.SIZE) / Long.SIZE];
+            this.longArray = new long[Mth.roundToward(size * bits, Long.SIZE) / Long.SIZE];
         }
 
         private PackedBackingData(final int size, final int bits, final long[] array) {

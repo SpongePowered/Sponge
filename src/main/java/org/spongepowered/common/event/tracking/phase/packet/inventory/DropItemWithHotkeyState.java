@@ -96,12 +96,12 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     usedButton = packetIn.getAction() == ServerboundPlayerActionPacket.Action.DROP_ITEM
                         ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID
                         : 1;
-                    slot = ((PlayerInventory) player.inventory).getEquipment().getSlot(
+                    slot = ((PlayerInventory) player.getInventory()).getEquipment().getSlot(
                         EquipmentTypes.MAIN_HAND).orElse(null);
                 } else {
                     final ServerboundContainerClickPacket packetIn = context.getPacket();
                     usedButton = packetIn.getButtonNum();
-                    slot = ((InventoryAdapter) player.inventory).inventoryAdapter$getSlot(
+                    slot = ((InventoryAdapter) player.getInventory()).inventoryAdapter$getSlot(
                         packetIn.getSlotNum()).orElse(null);
                 }
 

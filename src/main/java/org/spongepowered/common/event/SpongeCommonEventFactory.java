@@ -652,7 +652,7 @@ public final class SpongeCommonEventFactory {
      * @param entity The event
      */
     public static void callNaturalMoveEntityEvent(final net.minecraft.world.entity.Entity entity) {
-        if (entity.removed) {
+        if (entity.isRemoved()) {
             return;
         }
 
@@ -686,7 +686,7 @@ public final class SpongeCommonEventFactory {
      * @param entity The event
      */
     public static void callNaturalRotateEntityEvent(final net.minecraft.world.entity.Entity entity) {
-        if (entity.removed || (entity.xRot == entity.xRotO && entity.yRot == entity.yRotO)) {
+        if (entity.isRemoved() || (entity.xRot == entity.xRotO && entity.yRot == entity.yRotO)) {
             return;
         }
 

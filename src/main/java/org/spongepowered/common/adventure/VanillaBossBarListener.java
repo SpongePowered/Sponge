@@ -46,7 +46,7 @@ public final class VanillaBossBarListener implements BossBar.Listener {
 
     @Override
     public void bossBarProgressChanged(@NonNull final BossBar bar, final float oldProgress, final float newProgress) {
-        this.sendPacket(ClientboundBossEventPacket.Operation.UPDATE_PCT);
+        this.sendPacket(ClientboundBossEventPacket.Operation.UPDATE_PROGRESS);
     }
 
     @Override

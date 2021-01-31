@@ -46,7 +46,7 @@ public final class ServerScheduler extends SyncScheduler {
         for (final Player player : Sponge.getServer().getOnlinePlayers()) {
             if (player instanceof net.minecraft.world.entity.player.Player) {
                 // Detect Changes on PlayerInventories marked as dirty.
-                ((PlayerInventoryBridge) ((net.minecraft.world.entity.player.Player) player).inventory).bridge$cleanupDirty();
+                ((PlayerInventoryBridge) ((net.minecraft.world.entity.player.Player) player).getInventory()).bridge$cleanupDirty();
             }
         }
     }

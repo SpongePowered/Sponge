@@ -97,11 +97,11 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         final CauseStackManager csm = PhaseTracker.getCauseStackManager();
         if (playerSource.isPresent()) {
             // Post event for inventory changes
-            ((TrackedInventoryBridge) playerSource.get().inventory).bridge$setCaptureInventory(false);
-            final List<SlotTransaction> list = ((TrackedInventoryBridge) playerSource.get().inventory).bridge$getCapturedSlotTransactions();
+            ((TrackedInventoryBridge) playerSource.get().getInventory()).bridge$setCaptureInventory(false);
+            final List<SlotTransaction> list = ((TrackedInventoryBridge) playerSource.get().getInventory()).bridge$getCapturedSlotTransactions();
             if (!list.isEmpty()) {
                 final ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.getCurrentCause(),
-                        ((Inventory) playerSource.get().inventory), list);
+                        ((Inventory) playerSource.get().getInventory()), list);
                 SpongeCommon.postEvent(event);
                 PacketPhaseUtil.handleSlotRestore(playerSource.get(), null, list, event.isCancelled());
                 list.clear();

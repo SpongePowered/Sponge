@@ -42,7 +42,7 @@ public final class OpenInventoryState extends BasicInventoryPacketState {
     public void unwind(InventoryPacketContext context) {
         final ServerPlayer player = context.getPacketPlayer();
         final ItemStackSnapshot lastCursor = context.getCursor();
-        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
+        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.getInventory().getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);

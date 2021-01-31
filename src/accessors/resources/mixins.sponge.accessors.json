@@ -190,7 +190,8 @@
         "world.level.NaturalSpawnerAccessor",
         "world.level.storage.PlayerDataStorageAccessor",
         "world.level.storage.LevelStorageSource_LevelStorageAccessAccessor",
-        "world.level.storage.PrimaryLevelDataAccessor"
+        "world.level.storage.PrimaryLevelDataAccessor",
+        "world.level.levelgen.flat.FlatLevelGeneratorSettingsAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

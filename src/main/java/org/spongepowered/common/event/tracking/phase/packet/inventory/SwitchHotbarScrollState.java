@@ -54,10 +54,10 @@ import java.util.Optional;
 public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
 
     @Override
-    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet,
+    public void populateContext(final ServerPlayer player, final Packet<?> packet,
         final InventoryPacketContext context) {
-        super.populateContext(playerMP, packet, context);
-        context.setOldHighlightedSlot(playerMP.inventory.selected);
+        super.populateContext(player, packet, context);
+        context.setOldHighlightedSlot(player.getInventory().selected);
     }
 
     @Override
@@ -78,7 +78,7 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
         final ServerboundSetCarriedItemPacket itemChange = context.getPacket();
         final int previousSlot = context.getOldHighlightedSlotId();
         final net.minecraft.world.inventory.AbstractContainerMenu inventoryContainer = player.containerMenu;
-        final net.minecraft.world.entity.player.Inventory inventory = player.inventory;
+        final net.minecraft.world.entity.player.Inventory inventory = player.getInventory();
         final int preHotbarSize = inventory.items.size() - net.minecraft.world.entity.player.Inventory.getSelectionSize() + inventory.armor.size() + 4 + 1; // Crafting Grid & Result
         final Slot sourceSlot = inventoryContainer.getSlot(previousSlot + preHotbarSize);
         final Slot targetSlot = inventoryContainer.getSlot(itemChange.getSlot() + preHotbarSize);

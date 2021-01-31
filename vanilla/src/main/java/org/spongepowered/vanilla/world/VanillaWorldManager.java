@@ -272,7 +272,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         this.saveTemplate(template);
 
-        return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template).asDimension(), ((WorldGenSettings) template.generationConfig()));
+        return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template).asLevelStem(), ((WorldGenSettings) template.generationConfig()));
     }
 
     @Override
@@ -305,7 +305,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 this.saveTemplate(loadedTemplate);
             }
 
-            return this.loadWorld0(registryKey, ((SpongeWorldTemplate) loadedTemplate).asDimension(), ((WorldGenSettings) loadedTemplate.generationConfig()));
+            return this.loadWorld0(registryKey, ((SpongeWorldTemplate) loadedTemplate).asLevelStem(), ((WorldGenSettings) loadedTemplate.generationConfig()));
         });
     }
 
@@ -438,7 +438,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public CompletableFuture<Boolean> saveTemplate(final WorldTemplate template) {
-        final LevelStem scratch = ((SpongeWorldTemplate) Objects.requireNonNull(template, "template")).asDimension();
+        final LevelStem scratch = ((SpongeWorldTemplate) Objects.requireNonNull(template, "template")).asLevelStem();
         try {
             final JsonElement element = SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), scratch).getOrThrow(true, s -> { });
             final Path dataPackFile = this.getDataPackFile(template.getKey());
@@ -490,7 +490,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         return this.loadTemplate(key).thenCompose(r -> {
             r.ifPresent(template -> {
-                final LevelStem scratch = ((SpongeWorldTemplate) template).asDimension();
+                final LevelStem scratch = ((SpongeWorldTemplate) template).asLevelStem();
                 ((ServerWorldInfoBridge) levelData).bridge$populateFromDimension(scratch);
             });
 
@@ -533,7 +533,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         return this.loadTemplate(key).thenCompose(r -> {
             final WorldTemplate template = r.orElse(null);
             if (template != null) {
-                final LevelStem scratch = ((SpongeWorldTemplate) template).asDimension();
+                final LevelStem scratch = ((SpongeWorldTemplate) template).asLevelStem();
                 ((DimensionBridge) (Object) scratch).bridge$populateFromLevelData((PrimaryLevelData) properties);
 
                 return this.saveTemplate(((DimensionBridge) (Object) scratch).bridge$asTemplate());

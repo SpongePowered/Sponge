@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.entity;
 
 import net.minecraft.world.entity.Entity;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 
 /**
  * Bridge methods designed as hooks for various methods called on an {@link Entity}
@@ -36,7 +37,7 @@ public interface PlatformEntityBridge {
      * Called when the {@link Entity} is to be not marked as removed.
      */
     default void bridge$revive() {
-        ((Entity) this).removed = false;
+        ((EntityAccessor) this).invoker$unsetRemoved();
     }
 
     /**
@@ -45,8 +46,8 @@ public interface PlatformEntityBridge {
      * @param keepData Specify to the platform that it should keep any specific
      * data added to this entity when removing
      */
-    default void bridge$remove(boolean keepData) {
-        ((Entity) this).remove();
+    default void bridge$remove(final Entity.RemovalReason removalReason, final boolean keepData) {
+        ((Entity) this).remove(removalReason);
     }
 
     default boolean bridge$isFakePlayer() {

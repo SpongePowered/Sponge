@@ -48,11 +48,10 @@ public final class ReplaceTileEntityInWorldEffect implements ProcessingSideEffec
     ) {
         final ServerLevel serverWorld = pipeline.getServerWorld();
         final BlockEntity tileEntity = oldState.tileEntity;
-        final BlockPos pos = oldState.pos;
         if (tileEntity == null || tileEntity.isRemoved()) {
             return EffectResult.NULL_RETURN;
         }
-        pipeline.getAffectedChunk().setBlockEntity(pos, tileEntity);
+        pipeline.getAffectedChunk().setBlockEntity(tileEntity);
         serverWorld.addBlockEntity(tileEntity);
         return EffectResult.NULL_RETURN;
     }

@@ -51,9 +51,9 @@ public final class PlayerData {
         registrator
                 .asMutable(Player.class)
                     .create(Keys.CAN_FLY)
-                        .get(h -> h.abilities.mayfly)
+                        .get(h -> h.getAbilities().mayfly)
                         .set((h, v) -> {
-                            h.abilities.mayfly = v;
+                            h.getAbilities().mayfly = v;
                             h.onUpdateAbilities();
                         })
                     .create(Keys.DOMINANT_HAND)
@@ -97,12 +97,12 @@ public final class PlayerData {
                         })
                         .delete(h -> ExperienceHolderUtil.setExperience(h, 0))
                     .create(Keys.FLYING_SPEED)
-                        .get(h -> (double) h.abilities.getFlyingSpeed())
+                        .get(h -> (double) h.getAbilities().getFlyingSpeed())
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            ((AbilitiesAccessor) h.abilities).accessor$flyingSpeed(v.floatValue());
+                            ((AbilitiesAccessor) h.getAbilities()).accessor$flyingSpeed(v.floatValue());
                             h.onUpdateAbilities();
                             return true;
                         })
@@ -116,9 +116,9 @@ public final class PlayerData {
                             return true;
                         })
                     .create(Keys.IS_FLYING)
-                        .get(h -> h.abilities.flying)
+                        .get(h -> h.getAbilities().flying)
                         .set((h, v) -> {
-                            h.abilities.flying = v;
+                            h.getAbilities().flying = v;
                             h.onUpdateAbilities();
                         })
                     .create(Keys.IS_SLEEPING)
@@ -144,9 +144,9 @@ public final class PlayerData {
                         .get(Player::getSleepTimer)
                         .set((p, i) -> ((PlayerAccessor) p).accessor$sleepCounter(i))
                     .create(Keys.WALKING_SPEED)
-                        .get(h -> (double) h.abilities.getWalkingSpeed())
+                        .get(h -> (double) h.getAbilities().getWalkingSpeed())
                         .set((h, v) -> {
-                            ((AbilitiesAccessor) h.abilities).accessor$walkingSpeed(v.floatValue());
+                            ((AbilitiesAccessor) h.getAbilities()).accessor$walkingSpeed(v.floatValue());
                             h.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(v);
                             h.onUpdateAbilities();
                         })
