@@ -31,9 +31,6 @@ import org.cadixdev.atlas.Atlas;
 import org.cadixdev.bombe.asm.jar.JarEntryRemappingTransformer;
 import org.cadixdev.lorenz.MappingSet;
 import org.cadixdev.lorenz.asm.LorenzRemapper;
-import org.cadixdev.lorenz.io.MappingFormats;
-import org.cadixdev.lorenz.io.proguard.ProGuardConstants;
-import org.cadixdev.lorenz.io.proguard.ProGuardFormat;
 import org.cadixdev.lorenz.io.proguard.ProGuardReader;
 import org.spongepowered.vanilla.installer.model.mojang.Version;
 import org.spongepowered.vanilla.installer.model.mojang.VersionManifest;
@@ -51,6 +48,8 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -77,13 +76,21 @@ public final class InstallerMain {
     }
 
     public void run() throws Exception {
+        final Version mcVersion = this.downloadMinecraftManifest();
+        final CompletableFuture<Path> mappingsFuture = this.downloadMappings(mcVersion, LauncherCommandLine.librariesDirectory);
+        final CompletableFuture<Path> originalMcFuture = this.downloadMinecraft(mcVersion, LauncherCommandLine.librariesDirectory);
+        final CompletableFuture<Path> remappedMinecraftJarFuture = mappingsFuture.thenCombineAsync(originalMcFuture, (mappings, minecraft) -> {
+            try {
+                return this.remapMinecraft(LauncherCommandLine.librariesDirectory, minecraft, mappings, this.installer.getLibraryManager().preparationWorker());
+            } catch (final IOException ex) {
+                return AsyncUtils.sneakyThrow(ex);
+            }
+        }, this.installer.getLibraryManager().preparationWorker());
         this.installer.getLibraryManager().validate();
 
-        final Version mcVersion = this.downloadMinecraft(LauncherCommandLine.librariesDirectory);
-        final Path mappings = this.downloadMappings(mcVersion, LauncherCommandLine.librariesDirectory);
-        final Path minecraftJar = this.remapMinecraft(LauncherCommandLine.librariesDirectory, mappings);
-
-        this.installer.getLibraryManager().addLibrary(new LibraryManager.Library("minecraft", minecraftJar));
+        final Path remappedMinecraftJar = remappedMinecraftJarFuture.join();
+        this.installer.getLibraryManager().addLibrary(new LibraryManager.Library("minecraft", remappedMinecraftJar));
+        this.installer.getLibraryManager().finishedProcessing();
 
         this.installer.getLogger().info("Environment has been verified.");
 
@@ -101,7 +108,7 @@ public final class InstallerMain {
                 .map(it -> Paths.get(it).toAbsolutePath().toString())
                 .collect(Collectors.joining(File.pathSeparator));
         final String classpath = launchClasspath + File.pathSeparator + depsClasspath +
-                File.pathSeparator + minecraftJar.toAbsolutePath().normalize().toString();
+                File.pathSeparator + remappedMinecraftJar.toAbsolutePath().normalize().toString();
         final List<String> gameArgs = Arrays.asList(this.installer.getLauncherConfig().args.split(" "));
 
         this.installer.getLogger().debug("Setting classpath to: " + classpath);
@@ -132,14 +139,14 @@ public final class InstallerMain {
         process.waitFor();
     }
 
-    private Version downloadMinecraft(final Path librariesDirectory) throws Exception {
+    private Version downloadMinecraftManifest() throws IOException {
         this.installer.getLogger().info("Downloading the Minecraft versions manifest...");
 
         VersionManifest.Version foundVersionManifest = null;
 
         final Gson gson = new Gson();
         try (final JsonReader reader = new JsonReader(new InputStreamReader(new URL(Constants.Libraries.MINECRAFT_MANIFEST_URL)
-            .openStream()))) {
+                .openStream()))) {
             final VersionManifest manifest = gson.fromJson(reader, VersionManifest.class);
             for (final VersionManifest.Version version : manifest.versions) {
                 if (Constants.Libraries.MINECRAFT_VERSION_TARGET.equals(version.id)) {
@@ -161,77 +168,82 @@ public final class InstallerMain {
 
         if (version == null) {
             throw new IOException(String.format("Failed to download version information for '%s'!",
-                Constants.Libraries.MINECRAFT_VERSION_TARGET));
-        }
-
-        final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX).resolve(
-            Constants.Libraries.MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
-
-        if (Files.notExists(downloadTarget)) {
-            if (!this.installer.getLauncherConfig().autoDownloadLibraries) {
-                throw new IOException(
-                    String.format("The Minecraft jar is not located at '%s' and downloading it has been turned off.", downloadTarget));
-            }
-            InstallerUtils
-                .downloadCheckHash(this.installer.getLogger(), version.downloads.server.url, downloadTarget, MessageDigest.getInstance("SHA-1"),
-                    version.downloads.server.sha1, false);
-        } else {
-            if (this.installer.getLauncherConfig().checkLibraryHashes) {
-                this.installer.getLogger().info("Detected existing Minecraft Server jar, verifying hashes...");
-                final MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
-
-                // Pipe the download stream into the file and compute the SHA-1
-                final byte[] bytes = Files.readAllBytes(downloadTarget);
-                final String fileSha1 = InstallerUtils.toHexString(sha1.digest(bytes));
-
-                if (version.downloads.server.sha1.equals(fileSha1)) {
-                    this.installer.getLogger().info("Minecraft Server jar verified!");
-                } else {
-                    this.installer.getLogger().error("Checksum verification failed: Expected {}, {}. Deleting cached Minecraft Server jar...",
-                        version.downloads.server.sha1, fileSha1);
-                    Files.delete(downloadTarget);
-                    InstallerUtils.downloadCheckHash(this.installer.getLogger(), version.downloads.server.url, downloadTarget,
-                        MessageDigest.getInstance("SHA-1"), version.downloads.server.sha1, false);
-                }
-            } else {
-                this.installer.getLogger().info("Detected existing Minecraft jar. Skipping hash check as that is turned off...");
-            }
+                    Constants.Libraries.MINECRAFT_VERSION_TARGET));
         }
 
         return version;
     }
 
-    private Path downloadMappings(final Version version, final Path librariesDirectory) throws IOException {
-        this.installer.getLogger().info("Setting up names for Minecraft {}", Constants.Libraries.MINECRAFT_VERSION_TARGET);
-        final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_MAPPINGS_PREFIX)
-                .resolve(Constants.Libraries.MINECRAFT_VERSION_TARGET)
-                .resolve(Constants.Libraries.MINECRAFT_MAPPINGS_NAME);
-        if (Files.notExists(downloadTarget)) {
-            final Version.Downloads.Download mappings = version.downloads.server_mappings;
-            if (mappings == null) {
-                throw new IOException(String.format("Mappings were not included in version manifest for %s", Constants.Libraries.MINECRAFT_VERSION_TARGET));
-            }
-            // TODO Figure out how to sha1 check the zip file
-            if (this.installer.getLauncherConfig().autoDownloadLibraries) {
-                InstallerUtils.download(this.installer.getLogger(), mappings.url, downloadTarget, false);
-            } else {
-                throw new IOException(String.format("Mappings were not located at '%s' and downloading them has been turned off.", downloadTarget));
-            }
-        } else {
-            this.installer.getLogger().info("Detected existing mappings, verifying hashes...");
-            // TODO Figure out how to sha1 check the zip file
-            this.installer.getLogger().info("mappings verified!");
-        }
+    private CompletableFuture<Path> downloadMinecraft(final Version version, final Path librariesDirectory) throws Exception {
+        return AsyncUtils.asyncFailableFuture(() -> {
+            final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX)
+                    .resolve(version.id)
+                    .resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
 
-        return downloadTarget;
+            if (Files.notExists(downloadTarget)) {
+                if (!this.installer.getLauncherConfig().autoDownloadLibraries) {
+                    throw new IOException(
+                            String.format("The Minecraft jar is not located at '%s' and downloading it has been turned off.", downloadTarget));
+                }
+                InstallerUtils
+                        .downloadCheckHash(this.installer.getLogger(), version.downloads.server.url, downloadTarget, MessageDigest.getInstance("SHA-1"),
+                                version.downloads.server.sha1, false);
+            } else {
+                if (this.installer.getLauncherConfig().checkLibraryHashes) {
+                    this.installer.getLogger().info("Detected existing Minecraft Server jar, verifying hashes...");
+                    final MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+
+                    // Pipe the download stream into the file and compute the SHA-1
+                    final byte[] bytes = Files.readAllBytes(downloadTarget);
+                    final String fileSha1 = InstallerUtils.toHexString(sha1.digest(bytes));
+
+                    if (version.downloads.server.sha1.equals(fileSha1)) {
+                        this.installer.getLogger().info("Minecraft Server jar verified!");
+                    } else {
+                        this.installer.getLogger().error("Checksum verification failed: Expected {}, {}. Deleting cached Minecraft Server jar...",
+                                version.downloads.server.sha1, fileSha1);
+                        Files.delete(downloadTarget);
+                        InstallerUtils.downloadCheckHash(this.installer.getLogger(), version.downloads.server.url, downloadTarget,
+                                MessageDigest.getInstance("SHA-1"), version.downloads.server.sha1, false);
+                    }
+                } else {
+                    this.installer.getLogger().info("Detected existing Minecraft jar. Skipping hash check as that is turned off...");
+                }
+            }
+            return downloadTarget;
+        }, this.installer.getLibraryManager().preparationWorker());
     }
 
-    private Path remapMinecraft(final Path librariesDirectory, final Path serverMappings) throws IOException {
+    private CompletableFuture<Path> downloadMappings(final Version version, final Path librariesDirectory) {
+        return AsyncUtils.asyncFailableFuture(() -> {
+            this.installer.getLogger().info("Setting up names for Minecraft {}", Constants.Libraries.MINECRAFT_VERSION_TARGET);
+            final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_MAPPINGS_PREFIX)
+                    .resolve(Constants.Libraries.MINECRAFT_VERSION_TARGET)
+                    .resolve(Constants.Libraries.MINECRAFT_MAPPINGS_NAME);
+            if (Files.notExists(downloadTarget)) {
+                final Version.Downloads.Download mappings = version.downloads.server_mappings;
+                if (mappings == null) {
+                    throw new IOException(String.format("Mappings were not included in version manifest for %s", Constants.Libraries.MINECRAFT_VERSION_TARGET));
+                }
+                // TODO Figure out how to sha1 check the zip file
+                if (this.installer.getLauncherConfig().autoDownloadLibraries) {
+                    InstallerUtils.download(this.installer.getLogger(), mappings.url, downloadTarget, false);
+                } else {
+                    throw new IOException(String.format("Mappings were not located at '%s' and downloading them has been turned off.", downloadTarget));
+                }
+            } else {
+                this.installer.getLogger().info("Detected existing mappings, verifying hashes...");
+                // TODO Figure out how to sha1 check the zip file
+                this.installer.getLogger().info("mappings verified!");
+            }
+
+            return downloadTarget;
+        }, this.installer.getLibraryManager().preparationWorker());
+    }
+
+    private Path remapMinecraft(final Path librariesDirectory, final Path inputJar, final Path serverMappings, final ExecutorService service) throws IOException {
         this.installer.getLogger().info("Checking if we need to remap Minecraft...");
-        final Path inputJar = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX).resolve(Constants.Libraries
-            .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
-        final Path outputJar = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX).resolve(Constants.Libraries
-            .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_" + "remapped.jar");
+        final Path outputJar = inputJar.resolveSibling(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_remapped.jar");
 
         if (Files.exists(outputJar)) {
             this.installer.getLogger().info("Remapped Minecraft detected, skipping...");
@@ -244,11 +256,12 @@ public final class InstallerMain {
             new ProGuardReader(reader).read().reverse(mappings);
         }
 
-        final Atlas atlas = new Atlas();
-        atlas.install(ctx -> new JarEntryRemappingTransformer(
-            new LorenzRemapper(mappings, ctx.inheritanceProvider())
-        ));
-        atlas.run(inputJar, outputJar);
+        try (final Atlas atlas = new Atlas(service)) {
+            atlas.install(ctx -> new JarEntryRemappingTransformer(
+                    new LorenzRemapper(mappings, ctx.inheritanceProvider())
+            ));
+            atlas.run(inputJar, outputJar);
+        }
 
         return outputJar;
     }

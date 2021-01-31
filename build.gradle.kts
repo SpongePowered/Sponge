@@ -349,10 +349,6 @@ allprojects {
             name = "sponge v2"
             setUrl("https://repo-new.spongepowered.org/repository/maven-public/")
         }
-        maven("https://libraries.minecraft.net") {
-            name = "mojang"
-            mavenContent { releasesOnly() }
-        }
     }
     val spongeSnapshotRepo: String? by project
     val spongeReleaseRepo: String? by project
@@ -705,7 +701,7 @@ project("SpongeVanilla") {
         vanillaAppLaunchConfig("cpw.mods:grossjava9hacks:1.1.+") {
             exclude(group = "org.apache.logging.log4j")
         }
-        vanillaAppLaunchConfig("net.fabricmc:access-widener:1.0.0") {
+        vanillaAppLaunchConfig("net.fabricmc:access-widener:1.0.2") {
             exclude(group = "org.apache.logging.log4j")
         }
 

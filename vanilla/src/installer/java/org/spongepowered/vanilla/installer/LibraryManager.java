@@ -42,24 +42,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public final class LibraryManager {
 
     private final Installer installer;
     private final Path rootDirectory;
     private final Map<String, Library> libraries;
+    private final ExecutorService preparationWorker;
 
     public LibraryManager(final Installer installer, final Path rootDirectory) {
         this.installer = installer;
         this.rootDirectory = rootDirectory;
 
         this.libraries = new HashMap<>();
+        final int availableCpus = Runtime.getRuntime().availableProcessors();
+        // We'll be performing mostly IO-blocking operations, so more threads will help us for now
+        // It might make sense to make this overridable eventually
+        this.preparationWorker = new ThreadPoolExecutor(
+            Math.max(4, availableCpus), Integer.MAX_VALUE,
+            60L, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(256) // this is the number of tasks allowed to be waiting before the pool will spawn off a new thread
+        );
     }
 
     public Path getRootDirectory() {
@@ -80,7 +89,7 @@ public final class LibraryManager {
 
         final Gson gson = new Gson();
 
-        Libraries dependencies;
+        final Libraries dependencies;
         try (final JsonReader reader = new JsonReader(new InputStreamReader(this.getClass().getResourceAsStream("/libraries.json")))) {
             dependencies = gson.fromJson(reader, Libraries.class);
         }
@@ -88,10 +97,9 @@ public final class LibraryManager {
         final Set<Library> downloadedDeps = ConcurrentHashMap.newKeySet();
         final List<CompletableFuture<?>> operations = new ArrayList<>(dependencies.dependencies.size());
         final Set<String> failures = ConcurrentHashMap.newKeySet();
-        final ExecutorService workerPool = Executors.newFixedThreadPool(4);
 
         for (final Libraries.Dependency dependency : dependencies.dependencies) {
-            operations.add(this.asyncFailableFuture(() -> {
+            operations.add(AsyncUtils.asyncFailableFuture(() -> {
                 final String groupPath = dependency.group.replace(".", "/");
                 final Path depDirectory =
                     this.rootDirectory.resolve(groupPath).resolve(dependency.module).resolve(dependency.version);
@@ -153,11 +161,10 @@ public final class LibraryManager {
 
                 downloadedDeps.add(new Library(dependency.group + "-" + dependency.module, depFile));
                 return null;
-            }, workerPool));
+            }, this.preparationWorker));
         }
 
         CompletableFuture.allOf(operations.toArray(new CompletableFuture<?>[0])).join();
-        workerPool.shutdown();
         if (!failures.isEmpty()) {
             this.installer.getLogger().error("Failed to download some libraries:");
             for (final String message : failures) {
@@ -187,16 +194,23 @@ public final class LibraryManager {
         }
     }
 
-    private <T> CompletableFuture<T> asyncFailableFuture(final Callable<T> action, final Executor executor) {
-        final CompletableFuture<T> future = new CompletableFuture<>();
-        executor.execute(() -> {
-            try {
-                future.complete(action.call());
-            } catch (Exception ex) {
-                future.completeExceptionally(ex);
-            }
-        });
-        return future;
+    public ExecutorService preparationWorker() {
+        return this.preparationWorker;
+    }
+
+    public void finishedProcessing() {
+        this.preparationWorker.shutdown();
+        boolean successful;
+        try {
+            successful = this.preparationWorker.awaitTermination(10L, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            successful = false;
+        }
+
+        if (!successful) {
+            this.installer.getLogger().warn("Failed to shut down library preparation pool in 10 seconds, forcing shutdown now.");
+            this.preparationWorker.shutdownNow();
+        }
     }
 
     public static class Library {
