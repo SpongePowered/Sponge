@@ -1,7 +1,6 @@
 {
     "minVersion": "0.8",
     "package": "org.spongepowered.common.mixin.concurrentcheck",
-    "refmap": "sponge.mixins.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.ConcurrentCheckPlugin",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
