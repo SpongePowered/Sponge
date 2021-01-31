@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import co.aikar.timings.Timing;
 import com.google.inject.Injector;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -75,6 +76,7 @@ import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
@@ -228,7 +230,9 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             this.shadow$getPlayerList().saveAll();
         }
 
-        this.saveAllChunks(true, false, false);
+        try (Timing timing = SpongeTimings.worldSaveTimer.startTiming()) {
+            this.saveAllChunks(true, false, false);
+        }
 
         // force check to fail as we handle everything above
         return this.tickCount + 1;

@@ -208,7 +208,9 @@
         "world.level.dimension.DimensionTypeMixin",
         "commands.arguments.DimensionArgumentMixin",
         "world.level.storage.LevelStorageSourceMixin",
-        "world.level.biome.OverworldBiomeSourceMixin"
+        "world.level.biome.OverworldBiomeSourceMixin",
+        "server.level.ServerLevelMixin_Timings",
+        "world.level.LevelMixin_Timings"
     ],
     "client": [
         "client.MinecraftMixin",
