@@ -29,6 +29,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.SpawnData;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -66,7 +67,7 @@ public final class MobSpawnerData {
                         .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$minSpawnDelay((int) v.getTicks()))
                     .create(Keys.NEXT_ENTITY_TO_SPAWN)
                         .get(h -> MobSpawnerData.getNextEntity((BaseSpawnerAccessor) h.accessor$spawner()))
-                        .set((h, v) -> MobSpawnerData.setNextEntity(h.accessor$spawner(), v))
+                        .set((h, v) -> MobSpawnerData.setNextEntity((SpawnerBlockEntity) h, v))
                     .create(Keys.REMAINING_SPAWN_DELAY)
                         .get(h -> new SpongeTicks(((BaseSpawnerAccessor) h.accessor$spawner()).accessor$spawnDelay()))
                         .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$spawnDelay((int) v.getTicks()))
@@ -84,7 +85,7 @@ public final class MobSpawnerData {
                         .set((h, v) -> {
                             final BaseSpawnerAccessor logic = (BaseSpawnerAccessor) h.accessor$spawner();
                             MobSpawnerData.setEntities(logic, v);
-                            MobSpawnerData.setNextEntity((BaseSpawner) logic, MobSpawnerData.getNextEntity(logic));
+                            MobSpawnerData.setNextEntity((SpawnerBlockEntity) h, MobSpawnerData.getNextEntity(logic));
                         });
     }
     // @formatter:on
@@ -106,7 +107,7 @@ public final class MobSpawnerData {
         return new WeightedSerializableObject<>(archetype, weight);
     }
 
-    private static void setNextEntity(final BaseSpawner logic, final WeightedSerializableObject<EntityArchetype> value) {
+    private static void setNextEntity(final SpawnerBlockEntity entity, final WeightedSerializableObject<EntityArchetype> value) {
         final CompoundTag compound = NBTTranslator.INSTANCE.translate(value.get().getEntityData());
         if (!compound.contains(Constants.Entity.ENTITY_TYPE_ID)) {
             final ResourceKey key = (ResourceKey) (Object) net.minecraft.world.entity.EntityType.getKey((net.minecraft.world.entity.EntityType<?>) value.get()
@@ -114,7 +115,7 @@ public final class MobSpawnerData {
             compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
         }
 
-        logic.setNextSpawnData(new SpawnData((int) value.getWeight(), compound));
+        entity.getSpawner().setNextSpawnData(entity.getLevel(), entity.getBlockPos(), new SpawnData((int) value.getWeight(), compound));
     }
 
     private static WeightedTable<EntityArchetype> getEntities(final BaseSpawner logic) {
