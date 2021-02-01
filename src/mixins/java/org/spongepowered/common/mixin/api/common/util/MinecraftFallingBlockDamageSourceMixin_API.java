@@ -44,7 +44,7 @@ public abstract class MinecraftFallingBlockDamageSourceMixin_API extends EntityD
 
     @Override
     public String toString() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.getType());
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.getType());
 
         return MoreObjects.toStringHelper(this)
             .add("Name", this.shadow$getMsgId())

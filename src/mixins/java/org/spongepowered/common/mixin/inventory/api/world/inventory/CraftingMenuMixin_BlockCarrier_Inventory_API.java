@@ -45,7 +45,7 @@ public abstract class CraftingMenuMixin_BlockCarrier_Inventory_API implements De
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return this.access.evaluate((world, pos) -> (World<?, ?>) world).orElse(null);
     }
 

@@ -48,7 +48,7 @@ public abstract class LoomMenuMixin_BlockCarrier_Inventory_API implements Defaul
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return this.access.evaluate((world, pos) -> (World<?, ?>) world).orElse(null);
     }
 }

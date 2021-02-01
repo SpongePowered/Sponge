@@ -60,13 +60,13 @@ public class SpongePlaceholderContextBuilder implements PlaceholderContext.Build
             return this.setAssociatedObject((Player) associatedObject);
         } else if (associatedObject instanceof ServerWorld) {
             final ResourceKey key = ((ServerWorld) associatedObject).getKey();
-            this.associatedObjectSupplier = () -> SpongeCommon.getGame().getServer().getWorldManager().world(key).orElse(null);
+            this.associatedObjectSupplier = () -> SpongeCommon.getGame().server().getWorldManager().world(key).orElse(null);
         } else if (associatedObject instanceof Entity) {
             final Entity entity = ((Entity) associatedObject);
             final ResourceKey key = entity.getServerLocation().getWorld().getKey();
             final UUID entityUuid = ((Entity) associatedObject).getUniqueId();
             this.associatedObjectSupplier =
-                    () -> SpongeCommon.getGame().getServer().getWorldManager().world(key).flatMap(x -> x.getEntity(entityUuid)).orElse(null);
+                    () -> SpongeCommon.getGame().server().getWorldManager().world(key).flatMap(x -> x.getEntity(entityUuid)).orElse(null);
         } else {
             // We create a weak reference here so we don't hold on to game objects.
             final WeakReference<Object> objectWeakReference = new WeakReference<>(associatedObject);

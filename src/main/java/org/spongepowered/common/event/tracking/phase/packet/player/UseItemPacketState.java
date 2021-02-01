@@ -60,7 +60,7 @@ public final class UseItemPacketState extends BasicPacketState {
     private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> BASIC_PACKET_MODIFIER =
             ((BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER)
                     .andThen((frame, ctx) -> {
-                        frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().getWorld());
+                        frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().world());
                         frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
                         frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
                         final ItemStack itemStack = ctx.getItemUsed();
@@ -94,7 +94,7 @@ public final class UseItemPacketState extends BasicPacketState {
         BasicPacketContext context) {
         ServerPlayer player = context.getSpongePlayer();
         BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getLocation().get());
-        ChunkBridge spongeChunk = (ChunkBridge) ((ServerLevel) player.getWorld()).getChunkAt(pos);
+        ChunkBridge spongeChunk = (ChunkBridge) ((ServerLevel) player.world()).getChunkAt(pos);
         if (blockChange == BlockChange.PLACE) {
             spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player.getUser(), PlayerTracker.Type.CREATOR);
         }

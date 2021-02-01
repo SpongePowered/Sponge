@@ -44,7 +44,7 @@ public final class RegisterBuilderEventImpl extends AbstractLifecycleEvent imple
 
     @Override
     public <T extends Builder<?, @NonNull ? super T>> void register(Class<T> builderClass, Supplier<? super T> supplier) throws DuplicateRegistrationException {
-        ((SpongeBuilderProvider) Sponge.getGame().getBuilderProvider()).register(builderClass, Objects.requireNonNull((Supplier < T >) supplier,
+        ((SpongeBuilderProvider) Sponge.game().getBuilderProvider()).register(builderClass, Objects.requireNonNull((Supplier < T >) supplier,
                 "supplier"));
     }
 

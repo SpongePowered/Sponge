@@ -189,7 +189,7 @@ public abstract class PlayerTeamMixin implements ScorePlayerTeamBridge {
     @Override
     public Audience bridge$getTeamChannel(final ServerPlayer player) {
         return Audience.audience(this.getPlayers().stream()
-                .map(name -> Sponge.getGame().getServer().getPlayer(name))
+                .map(name -> Sponge.game().server().getPlayer(name))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .filter(member -> member != player)
@@ -198,7 +198,7 @@ public abstract class PlayerTeamMixin implements ScorePlayerTeamBridge {
 
     @Override
     public Audience bridge$getNonTeamChannel() {
-        return Audience.audience(Sponge.getGame().getServer().getOnlinePlayers().stream()
+        return Audience.audience(Sponge.game().server().getOnlinePlayers().stream()
                 .filter(player -> ((ServerPlayer) player).getTeam() != (Object) this)
                 .collect(Collectors.toSet()));
     }

@@ -44,7 +44,7 @@ public final class SpongeBlockEntityCarrier implements DefaultSingleBlockCarrier
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return (World<?, ?>) this.inventory.getLevel();
     }
 
@@ -56,7 +56,7 @@ public final class SpongeBlockEntityCarrier implements DefaultSingleBlockCarrier
 
     @Override
     @SuppressWarnings("unchecked")
-    public CarriedInventory<? extends Carrier> getInventory() {
+    public CarriedInventory<? extends Carrier> inventory() {
         return (CarriedInventory) this.container;
     }
 }

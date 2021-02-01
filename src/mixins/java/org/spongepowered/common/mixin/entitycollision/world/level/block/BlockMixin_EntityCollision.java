@@ -47,7 +47,7 @@ public abstract class BlockMixin_EntityCollision implements CollisionCapabilityB
 
     @Override
     public ResourceKey collision$getKey() {
-        return Sponge.getGame().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey((BlockType) this);
+        return Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey((BlockType) this);
     }
 
     @Override
@@ -79,9 +79,9 @@ public abstract class BlockMixin_EntityCollision implements CollisionCapabilityB
         this.collision$setMaxCollisions(worldCollCat.maxEntitiesWithinAABB);
 
         boolean requiresSave = false;
-        Sponge.getGame().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey((BlockType) this);
+        Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey((BlockType) this);
 
-        String[] ids = Sponge.getGame().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey((BlockType) this).toString().split(":");
+        String[] ids = Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey((BlockType) this).toString().split(":");
         String modId = ids[0];
         String name = ids[1];
 

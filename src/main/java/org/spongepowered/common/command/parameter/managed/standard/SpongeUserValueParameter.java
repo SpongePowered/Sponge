@@ -92,7 +92,7 @@ public final class SpongeUserValueParameter extends ResourceKeyedArgumentValuePa
             }
         }
 
-        final UserManager userManager = SpongeCommon.getGame().getServer().getUserManager();
+        final UserManager userManager = SpongeCommon.getGame().server().getUserManager();
         Optional<User> user;
         try {
             final UUID uuid = UUID.fromString(reader.parseString());

@@ -74,7 +74,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
     }
 
     private List<String> complete(final String currentInput) {
-        return SpongeCommon.getGame().getServer().getWorldManager().worlds()
+        return SpongeCommon.getGame().server().getWorldManager().worlds()
                 .stream()
                 .map(ServerWorld::getKey)
                 .map(ResourceKey::getFormatted)
@@ -92,7 +92,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
         ServerWorld serverWorld;
         try {
             final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
-            serverWorld = SpongeCommon.getGame().getServer().getWorldManager()
+            serverWorld = SpongeCommon.getGame().server().getWorldManager()
                     .world(resourceLocation)
                     .orElseThrow(() -> reader.createException(
                             Component.text("Could not get world with key \"" + resourceLocation.toString() + "\"")));

@@ -108,11 +108,11 @@ public final class CommandTest {
                             final Collection<GameProfile> collection;
                             if (result.isPresent()) {
                                 // check to see if the string matches
-                                collection = Sponge.getGame().getServer().getUserManager()
+                                collection = Sponge.game().server().getUserManager()
                                         .streamOfMatches(result.get().toLowerCase(Locale.ROOT))
                                         .collect(Collectors.toList());
                             } else {
-                                collection = Sponge.getGame().getServer().getUserManager()
+                                collection = Sponge.game().server().getUserManager()
                                         .streamAll()
                                         .collect(Collectors.toList());
                             }
@@ -201,7 +201,7 @@ public final class CommandTest {
                         .parameter(
                                 Parameter.registryElement(
                                         typeToken,
-                                        commandContext -> Sponge.getGame().registries(),
+                                        commandContext -> Sponge.game().registries(),
                                         RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER,
                                         "sponge"
                                 ).setKey(commandParameterKey).build())

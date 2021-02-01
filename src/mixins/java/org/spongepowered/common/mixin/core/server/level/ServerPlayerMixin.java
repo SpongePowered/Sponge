@@ -166,7 +166,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
     private Locale impl$language = Locales.EN_US;
-    private Scoreboard impl$scoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
+    private Scoreboard impl$scoreboard = Sponge.game().server().getServerScoreboard().get();
     @Nullable private Boolean impl$keepInventory = null;
     // Used to restore original item received in a packet after canceling an event
     private ItemStack impl$packetItem = ItemStack.EMPTY;
@@ -350,7 +350,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public void bridge$replaceScoreboard(@org.checkerframework.checker.nullness.qual.Nullable Scoreboard scoreboard) {
         if (scoreboard == null) {
-            scoreboard = Sponge.getGame().getServer().getServerScoreboard()
+            scoreboard = Sponge.game().server().getServerScoreboard()
                     .orElseThrow(() -> new IllegalStateException("Server does not have a valid scoreboard"));
         }
         this.impl$scoreboard = scoreboard;
@@ -382,7 +382,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     public Set<SkinPart> bridge$getSkinParts() {
         final int mask = this.shadow$getEntityData().get(DATA_PLAYER_MODE_CUSTOMISATION);
         if (this.impl$skinPartMask != mask) {
-            this.impl$skinParts = Sponge.getGame().registries().registry(RegistryTypes.SKIN_PART).stream()
+            this.impl$skinParts = Sponge.game().registries().registry(RegistryTypes.SKIN_PART).stream()
                     .map(part -> (SpongeSkinPart) part)
                     .filter(part -> part.test(mask))
                     .collect(ImmutableSet.toImmutableSet());
@@ -747,7 +747,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     private User impl$getUserObjectOnConstruction() {
-        final SpongeUserManager manager = (SpongeUserManager) SpongeCommon.getGame().getServer().getUserManager();
+        final SpongeUserManager manager = (SpongeUserManager) SpongeCommon.getGame().server().getUserManager();
         if (this.impl$isFake) {
             return manager.getOrCreate(SpongeUserManager.FAKEPLAYER_PROFILE);
         }
@@ -780,7 +780,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         final ServerboundClientInformationPacketAccessor $packet = (ServerboundClientInformationPacketAccessor) packet;
         final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
 
-        final ImmutableSet<SkinPart> skinParts = Sponge.getGame().registries().registry(RegistryTypes.SKIN_PART).stream()
+        final ImmutableSet<SkinPart> skinParts = Sponge.game().registries().registry(RegistryTypes.SKIN_PART).stream()
                 .map(part -> (SpongeSkinPart) part)
                 .filter(part -> part.test(packet.getModelCustomisation()))
                 .collect(ImmutableSet.toImmutableSet());

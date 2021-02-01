@@ -193,7 +193,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         newCompound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(pos.getX(), pos.getY(), pos.getZ()));
         newCompound.putString(Constants.Sponge.World.WORLD_KEY, location.getWorldKey().getFormatted());
         builder.compound = newCompound;
-        builder.worldKey = location.getWorld().getProperties().getKey();
+        builder.worldKey = location.getWorld().properties().getKey();
         builder.position = pos;
         builder.rotation = this.getRotation();
         builder.scale = Vector3d.ONE;

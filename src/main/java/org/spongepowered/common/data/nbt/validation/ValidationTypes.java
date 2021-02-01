@@ -48,6 +48,6 @@ public final class ValidationTypes {
     }
 
     private static DefaultedRegistryReference<ValidationType> key(final ResourceKey location) {
-        return RegistryKey.of(SpongeRegistryTypes.VALIDATION_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
+        return RegistryKey.of(SpongeRegistryTypes.VALIDATION_TYPE, location).asDefaultedReference(() -> Sponge.game().registries());
     }
 }

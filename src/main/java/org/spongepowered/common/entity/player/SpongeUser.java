@@ -376,13 +376,13 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public UserInventory getInventory() {
+    public UserInventory inventory() {
         return this.loadInventory();
     }
 
     @Override
     public EquipmentInventory getEquipment() {
-        return this.getInventory().getEquipment();
+        return this.inventory().getEquipment();
     }
 
     @Override
@@ -572,7 +572,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     @Override
     public ResourceKey getWorldKey() {
         final Optional<ServerPlayer> player = this.getPlayer();
-        return player.map(serverPlayer -> serverPlayer.getWorld().getKey()).orElseGet(() -> this.worldKey);
+        return player.map(serverPlayer -> serverPlayer.world().getKey()).orElseGet(() -> this.worldKey);
 
     }
 

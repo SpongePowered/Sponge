@@ -99,7 +99,7 @@ public final class SpongeCommon {
     }
 
     public static SpongeGameRegistry getRegistry() {
-        return (SpongeGameRegistry) Sponge.getRegistry();
+        return (SpongeGameRegistry) Sponge.registry();
     }
 
     public static ServerScheduler getServerScheduler() {

@@ -120,7 +120,7 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
 
         @Override
         protected SpongeRegistryHolder getHolder() {
-            return (SpongeRegistryHolder) this.game.getServer().getWorldManager().world(this.worldKey).get().registries();
+            return (SpongeRegistryHolder) this.game.server().getWorldManager().world(this.worldKey).get().registries();
         }
     }
 }

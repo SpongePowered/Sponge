@@ -196,7 +196,7 @@ public final class EntityUtil {
                 }
             });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        ((net.minecraft.world.level.Level) entity.getWorld()).addFreshEntity((Entity) entity);
+        ((net.minecraft.world.level.Level) entity.world()).addFreshEntity((Entity) entity);
         return true;
     }
 

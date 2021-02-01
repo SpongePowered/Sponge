@@ -118,7 +118,7 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
         try {
             if (container.contains(Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME)) {
                 final String rawFluid = container.getString(Constants.Fluids.FLUID_TYPE).get();
-                final Optional<FluidType> type = Sponge.getGame().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
+                final Optional<FluidType> type = Sponge.game().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
                 if (!type.isPresent()) {
                     throw new InvalidDataException("Unknown fluid id found: " + rawFluid);
                 }

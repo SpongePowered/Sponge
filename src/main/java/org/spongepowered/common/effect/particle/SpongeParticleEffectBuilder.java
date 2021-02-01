@@ -37,7 +37,6 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
@@ -62,10 +61,10 @@ public final class SpongeParticleEffectBuilder extends AbstractDataBuilder<Parti
             return Optional.empty();
         }
         ParticleType particleType =
-                container.getRegistryValue(Constants.Particles.PARTICLE_TYPE, RegistryTypes.PARTICLE_TYPE, Sponge.getGame().registries()).get();
+                container.getRegistryValue(Constants.Particles.PARTICLE_TYPE, RegistryTypes.PARTICLE_TYPE, Sponge.game().registries()).get();
         Map<ParticleOption<?>, Object> options = new HashMap<>();
         container.getViewList(Constants.Particles.PARTICLE_OPTIONS).get().forEach(view -> {
-            ParticleOption<?> option = view.getRegistryValue(Constants.Particles.PARTICLE_OPTION_KEY, RegistryTypes.PARTICLE_OPTION, Sponge.getGame().registries()).get();
+            ParticleOption<?> option = view.getRegistryValue(Constants.Particles.PARTICLE_OPTION_KEY, RegistryTypes.PARTICLE_OPTION, Sponge.game().registries()).get();
             Object value;
             if (option.getValueType().isAssignableFrom(DataSerializable.class)) {
                 value = view.getSerializable(Constants.Particles.PARTICLE_OPTION_VALUE, (Class<? extends DataSerializable>) option.getValueType()).get();

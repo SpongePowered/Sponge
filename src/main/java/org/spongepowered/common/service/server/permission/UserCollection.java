@@ -29,7 +29,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.Collection;
@@ -90,7 +89,7 @@ public class UserCollection extends SpongeSubjectCollection {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Subject> getLoadedSubjects() {
-        return (Collection) SpongeCommon.getGame().getServer().getOnlinePlayers();
+        return (Collection) SpongeCommon.getGame().server().getOnlinePlayers();
         /*return ImmutableSet.copyOf(Iterables.concat(
                 Iterables.<Object, Subject>transform(SpongePermissionService.getOps().getValues().values(),
                         new Function<Object, Subject>() {

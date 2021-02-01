@@ -61,7 +61,7 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
     //@formatter:on
 
     @Override
-    public ServerWorld getWorld() {
+    public ServerWorld world() {
         return (ServerWorld) this.shadow$getLevel();
     }
 

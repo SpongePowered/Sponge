@@ -89,7 +89,7 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return (World<?, ?>) this.level;
     }
 

@@ -124,7 +124,7 @@ public final class SpongeGame implements Game {
     }
 
     @Override
-    public GameRegistry getRegistry() {
+    public GameRegistry registry() {
         return this.registry;
     }
 
@@ -203,7 +203,7 @@ public final class SpongeGame implements Game {
     }
 
     @Override
-    public Server getServer() {
+    public Server server() {
         if (this.client != null) {
             return this.client.getServer().orElseThrow(() -> new IllegalStateException("The singleplayer server is not available!"));
         }

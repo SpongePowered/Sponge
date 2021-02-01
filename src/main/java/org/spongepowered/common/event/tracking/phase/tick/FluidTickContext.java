@@ -51,7 +51,7 @@ public class FluidTickContext extends LocationBasedTickContext<FluidTickContext>
             final LocatableBlock locatableBlock = (LocatableBlock) owner;
             final Block block = ((BlockState) locatableBlock.getBlockState()).getBlock();
             this.providesModifier = !(block instanceof LiquidBlock);
-            this.world = locatableBlock.getWorld();
+            this.world = locatableBlock.world();
             if (block instanceof TrackableBridge) {
                 final TrackableBridge trackable = (TrackableBridge) block;
                 this.setBlockEvents(trackable.bridge$allowsBlockEventCreation())

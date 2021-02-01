@@ -44,7 +44,7 @@ public abstract class AnvilMenuMixin_BlockCarrier_Inventory_API implements Defau
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return ((ItemCombinerMenuAccessor) this).accessor$access().evaluate((world, pos) -> (World<?, ?>) world).orElse(null);
     }
 

@@ -92,9 +92,9 @@ public class ChatTest implements LoadableModule {
                 .setPermission("chattest.togglebossbar")
                 .setExecutor(ctx -> {
                     if (this.barVisible) {
-                        this.game.getServer().hideBossBar(ChatTest.INFO_BAR);
+                        this.game.server().hideBossBar(ChatTest.INFO_BAR);
                     } else {
-                        this.game.getServer().showBossBar(ChatTest.INFO_BAR);
+                        this.game.server().showBossBar(ChatTest.INFO_BAR);
                     }
                     this.barVisible = !this.barVisible;
                     return CommandResult.success();
@@ -117,7 +117,7 @@ public class ChatTest implements LoadableModule {
 
         @Listener(order = Order.LAST)
         public void onChat(final PlayerChatEvent event, final @Root ServerPlayer player) {
-            ChatTest.this.game.getServer().sendMessage(Component.translatable("chattest.response.chat",
+            ChatTest.this.game.server().sendMessage(Component.translatable("chattest.response.chat",
                                                                               event.getMessage(),
                                                                               player.require(Keys.DISPLAY_NAME)
                                                                                       .decorate(TextDecoration.BOLD)

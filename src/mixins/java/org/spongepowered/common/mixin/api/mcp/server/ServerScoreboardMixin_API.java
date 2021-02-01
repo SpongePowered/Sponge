@@ -66,7 +66,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
 
     @Override
     public Optional<Objective> getObjective(final DisplaySlot slot) {
-        final MappedRegistry<DisplaySlot> registry = (MappedRegistry<DisplaySlot>) (Object) Sponge.getGame().registries().registry(RegistryTypes.DISPLAY_SLOT);
+        final MappedRegistry<DisplaySlot> registry = (MappedRegistry<DisplaySlot>) (Object) Sponge.game().registries().registry(RegistryTypes.DISPLAY_SLOT);
         final net.minecraft.world.scores.Objective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[registry.getId(slot)];
         if (objective != null) {
             return Optional.of(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());

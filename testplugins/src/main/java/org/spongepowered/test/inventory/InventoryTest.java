@@ -170,7 +170,7 @@ public final class InventoryTest implements LoadableModule {
 
     private static void doFancyStuff(final Player player) {
 
-        final GridInventory inv27Grid = player.getInventory().query(PrimaryPlayerInventory.class).get().getStorage();
+        final GridInventory inv27Grid = player.inventory().query(PrimaryPlayerInventory.class).get().getStorage();
         final Inventory inv27Slots = Inventory.builder().slots(27).completeStructure().build();
         final Inventory inv27Slots2 = Inventory.builder().slots(27).completeStructure().build();
         final ViewableInventory doubleMyInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6.get())

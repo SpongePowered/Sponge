@@ -457,7 +457,7 @@ public final class SpongeCommonEventFactory {
             }
             frame.addContext(EventContextKeys.LIQUID_MIX, (org.spongepowered.api.world.server.ServerWorld) worldIn);
 
-            final WorldProperties world = ((org.spongepowered.api.world.server.ServerWorld) worldIn).getProperties();
+            final WorldProperties world = ((org.spongepowered.api.world.server.ServerWorld) worldIn).properties();
             final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
             final ServerLocation location = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldIn, position);
@@ -485,7 +485,7 @@ public final class SpongeCommonEventFactory {
             frame.pushCause(source);
             frame.addContext(EventContextKeys.LIQUID_BREAK, (org.spongepowered.api.world.server.ServerWorld) worldIn);
 
-            final WorldProperties world = ((org.spongepowered.api.world.server.ServerWorld) worldIn).getProperties();
+            final WorldProperties world = ((org.spongepowered.api.world.server.ServerWorld) worldIn).properties();
             final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
             final SpongeBlockSnapshot from = SpongeBlockSnapshotBuilder.pooled().blockState(fromState).world((ServerLevel) worldIn).position(position).build();
@@ -542,7 +542,7 @@ public final class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, entity, frame);
             final InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(frame.getCurrentCause(), (Entity) entity);
-            if (entity instanceof Player && !((org.spongepowered.api.world.server.ServerWorld) player.getLevel()).getProperties().pvp()) {
+            if (entity instanceof Player && !((org.spongepowered.api.world.server.ServerWorld) player.getLevel()).properties().pvp()) {
                 event.setCancelled(true); // if PvP is disabled for world, cancel
             }
             SpongeCommon.postEvent(event);
@@ -893,7 +893,7 @@ public final class SpongeCommonEventFactory {
         if (!Sponge.getEventManager().post(event)) {
             final Explosion explosion = event.getExplosionBuilder().build();
             if (explosion.getRadius() > 0) {
-                ((TrackedWorldBridge) ((Explosive) explosiveBridge).getWorld())
+                ((TrackedWorldBridge) ((Explosive) explosiveBridge).world())
                     .tracker$triggerInternalExplosion(
                         explosion,
                         e -> GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER).explosion(e)

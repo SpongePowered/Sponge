@@ -106,7 +106,7 @@ public final class SpongeLifecycle {
     }
 
     public void callRegisterDataEvent() {
-        this.game.getEventManager().post(new RegisterDataEventImpl(Cause.of(EventContext.empty(), Sponge.getGame()), Sponge.getGame(),
+        this.game.getEventManager().post(new RegisterDataEventImpl(Cause.of(EventContext.empty(), Sponge.game()), Sponge.game(),
             (SpongeDataManager) this.game.getDataManager()));
     }
 
@@ -141,12 +141,12 @@ public final class SpongeLifecycle {
     }
 
     public void establishServerServices() {
-        ((MinecraftServerBridge) this.game.getServer()).bridge$initServices(this.game, this.injector);
+        ((MinecraftServerBridge) this.game.server()).bridge$initServices(this.game, this.injector);
     }
 
     public void establishServerFeatures() {
         // Yes this looks odd but prevents having to do sided lifecycle solely to always point at the Server
-        ((SpongeServer) this.game.getServer()).getUsernameCache().load();
+        ((SpongeServer) this.game.server()).getUsernameCache().load();
     }
 
     public SpongeCommandManager createCommandManager() {

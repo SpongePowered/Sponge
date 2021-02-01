@@ -54,7 +54,7 @@ public abstract class CraftingContainerMixin_Inventory_API implements CraftingGr
 
     @Override
     public Optional<CraftingRecipe> getRecipe(ServerWorld world) {
-        return Sponge.getRegistry().getRecipeRegistry().findMatchingRecipe((Inventory) this.menu, checkNotNull(world, "world")).map(CraftingRecipe.class::cast);
+        return Sponge.registry().getRecipeRegistry().findMatchingRecipe((Inventory) this.menu, checkNotNull(world, "world")).map(CraftingRecipe.class::cast);
     }
 
     @Override

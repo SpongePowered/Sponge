@@ -97,8 +97,8 @@ public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Run
     }
 
     @Override
-    public Game getGame() {
-        return Sponge.getGame();
+    public Game game() {
+        return Sponge.game();
     }
 
     @Override

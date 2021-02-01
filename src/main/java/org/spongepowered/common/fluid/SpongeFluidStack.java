@@ -106,7 +106,7 @@ public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
             }
             final String rawFluid = container.getString(Constants.Fluids.FLUID_TYPE).get();
             final int volume = container.getInt(Constants.Fluids.FLUID_VOLUME).get();
-            final Optional<FluidType> fluidType = Sponge.getGame().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
+            final Optional<FluidType> fluidType = Sponge.game().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
             if (!fluidType.isPresent()) {
                 throw new InvalidDataException("Unknown FluidType found! Requested: " + rawFluid + "but got none.");
             }
@@ -128,7 +128,7 @@ public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
     @Override
     @NonNull
     public DataContainer toContainer() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.FLUID_TYPE).valueKey(this.fluidType);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.FLUID_TYPE).valueKey(this.fluidType);
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Constants.Fluids.FLUID_TYPE, resourceKey)

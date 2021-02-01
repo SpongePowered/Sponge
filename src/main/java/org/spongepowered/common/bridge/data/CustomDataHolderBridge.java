@@ -116,7 +116,7 @@ public interface CustomDataHolderBridge {
         final ImmutableList.Builder<DataView> failed = ImmutableList.builder();
         for (DataView dataView : updatedDataViews) {
             final Optional<DataStore> dataStore = dataView.getString(Constants.Sponge.DATA_ID)
-                    .flatMap(id -> ((SpongeDataManager) Sponge.getGame().getDataManager()).getDataStore(ResourceKey.resolve(id), typeToken));
+                    .flatMap(id -> ((SpongeDataManager) Sponge.game().getDataManager()).getDataStore(ResourceKey.resolve(id), typeToken));
             if (dataStore.isPresent()) {
                 dataStores.add(dataStore.get());
             } else {
@@ -169,7 +169,7 @@ public interface CustomDataHolderBridge {
     static DataView updateDataViewForDataManipulator(final DataView dataView) {
         final int version = dataView.getInt(Queries.CONTENT_VERSION).orElse(1);
         if (version != Constants.Sponge.CURRENT_CUSTOM_DATA) {
-            final DataContentUpdater contentUpdater = ((SpongeDataManager) Sponge.getGame().getDataManager()).getWrappedCustomContentUpdater(DataManipulator.Mutable.class, version, Constants.Sponge.CURRENT_CUSTOM_DATA)
+            final DataContentUpdater contentUpdater = ((SpongeDataManager) Sponge.game().getDataManager()).getWrappedCustomContentUpdater(DataManipulator.Mutable.class, version, Constants.Sponge.CURRENT_CUSTOM_DATA)
                     .orElseThrow(() -> new IllegalArgumentException("Could not find a content updater for DataManipulator information with version: " + version));
             return contentUpdater.update(dataView);
         }

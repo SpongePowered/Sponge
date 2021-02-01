@@ -90,7 +90,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
         if (registryTypeForValue.isPresent()) {
             return (view, dataQuery)  -> (Optional<T>) registryTypeForValue.flatMap(regType -> view.getRegistryValue(dataQuery, regType));
         }
-        if (Sponge.getGame().getDataManager().getTranslator(rawType).isPresent()) {
+        if (Sponge.game().getDataManager().getTranslator(rawType).isPresent()) {
             return (view, dataQuery)  -> (Optional<T>) view.getObject(dataQuery, rawType);
         }
         if (Set.class.isAssignableFrom(rawType)) {
@@ -119,7 +119,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
             final Function<DataQuery, Optional<?>> keyDeserializer;
             final Optional<RegistryType<Object>> registryTypeForKey = SpongeDataManager.INSTANCE.findRegistryTypeFor((Class) keyType);
             if (registryTypeForKey.isPresent()) {
-                keyDeserializer = key -> registryTypeForKey.flatMap(regType -> Sponge.getGame().registries().findRegistry(regType))
+                keyDeserializer = key -> registryTypeForKey.flatMap(regType -> Sponge.game().registries().findRegistry(regType))
                                                            .flatMap(r -> r.findValue(ResourceKey.resolve(key.toString())));
             } else if (((Class<?>) keyType).isEnum()) {
                 keyDeserializer = key -> Optional.ofNullable(Enum.valueOf(((Class<? extends Enum>) keyType), key.toString()));
@@ -158,7 +158,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
         if (fromRegistry.isPresent()) {
             return (Optional) fromRegistry;
         }
-        if (Sponge.getGame().getDataManager().getTranslator(listType).isPresent()) {
+        if (Sponge.game().getDataManager().getTranslator(listType).isPresent()) {
             return view.getObjectList(dataQuery, listType);
         }
         return (Optional) view.getList(dataQuery);

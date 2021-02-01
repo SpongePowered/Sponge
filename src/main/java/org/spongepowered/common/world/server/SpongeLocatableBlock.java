@@ -78,7 +78,7 @@ public final class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return Objects.requireNonNull(this.worldRef.get(), "World was de-referenced!");
     }
 

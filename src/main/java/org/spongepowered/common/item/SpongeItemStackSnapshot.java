@@ -187,7 +187,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Constants.ItemStack.TYPE, resourceKey)
@@ -260,7 +260,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public String toString() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
 
         return MoreObjects.toStringHelper(this)
                 .add("itemType", resourceKey)
@@ -343,7 +343,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public HoverEvent<HoverEvent.ShowItem> asHoverEvent(final UnaryOperator<HoverEvent.ShowItem> op) {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
         final CompoundTag tag = this.getCompound().orElse(null);
         return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.of(resourceKey, this.getQuantity(), SpongeAdventure.asBinaryTagHolder(tag))));
     }

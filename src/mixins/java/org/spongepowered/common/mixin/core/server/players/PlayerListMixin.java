@@ -182,7 +182,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             event.setCancelled(true);
         }
         if (SpongeCommon.postEvent(event)) {
-            this.impl$disconnectClient(networkManager, event.getMessage(), player.getProfile());
+            this.impl$disconnectClient(networkManager, event.getMessage(), player.profile());
             return null;
         }
 

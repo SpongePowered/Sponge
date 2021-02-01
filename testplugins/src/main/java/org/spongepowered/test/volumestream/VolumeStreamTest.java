@@ -105,7 +105,7 @@ public final class VolumeStreamTest implements LoadableModule {
                     final Vector3i min = data.getPos1().min(data.getPos2());
                     final Vector3i max = data.getPos1().max(data.getPos2());
                     data.setOrigin(player.getBlockPosition());
-                    final ArchetypeVolume archetypeVolume = player.getWorld().createArchetypeVolume(min, max, player.getBlockPosition());
+                    final ArchetypeVolume archetypeVolume = player.world().createArchetypeVolume(min, max, player.getBlockPosition());
                     data.setClipboard(archetypeVolume);
                     player.sendMessage(Identity.nil(), Component.text("Saved to clipboard.", NamedTextColor.GREEN));
                     return CommandResult.success();
@@ -132,26 +132,26 @@ public final class VolumeStreamTest implements LoadableModule {
                         frame.pushCause(this.plugin);
                         volume.getBlockStateStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
                             .apply(VolumeCollectors.of(
-                                player.getWorld(),
+                                player.world(),
                                 VolumePositionTranslators.relativeTo(player.getBlockPosition()),
                                 VolumeApplicators.applyBlocks(BlockChangeFlags.ALL)
                             ));
                         volume.getBiomeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
                             .apply(VolumeCollectors.of(
-                                player.getWorld(),
+                                player.world(),
                                 VolumePositionTranslators.relativeTo(player.getBlockPosition()),
                                 VolumeApplicators.applyBiomes()
                             ));
                         volume.getBlockEntityArchetypeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
                             .apply(VolumeCollectors.of(
-                                player.getWorld(),
+                                player.world(),
                                 VolumePositionTranslators.relativeTo(player.getBlockPosition()),
                                 VolumeApplicators.applyBlockEntityArchetype()
                             ));
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT.get());
                         volume.getEntityArchetypeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
                             .apply(VolumeCollectors.of(
-                                player.getWorld(),
+                                player.world(),
                                 VolumePositionTranslators.relativeTo(player.getBlockPosition()),
                                 VolumeApplicators.applyEntityArchetype()
                             ));

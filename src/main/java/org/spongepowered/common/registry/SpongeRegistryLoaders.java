@@ -274,9 +274,9 @@ public final class SpongeRegistryLoaders {
     public static RegistryLoader<TransactionType<@NonNull ?>> blockTransactionTypes() {
         return RegistryLoader.of(l -> {
             l.add(TransactionTypes.BLOCK, k -> new BlockTransactionType());
-            l.add(TransactionTypes.ENTITY_DEATH_DROPS, k -> new NoOpTransactionType<>(false, k.getValue().toUpperCase(Locale.ROOT)));
-            l.add(TransactionTypes.NEIGHBOR_NOTIFICATION, k -> new NoOpTransactionType<>(false, k.getValue().toUpperCase(Locale.ROOT)));
-            l.add(TransactionTypes.SPAWN_ENTITY, k -> new NoOpTransactionType<>(false, k.getValue().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.ENTITY_DEATH_DROPS, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.NEIGHBOR_NOTIFICATION, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.SPAWN_ENTITY, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
         });
     }
 

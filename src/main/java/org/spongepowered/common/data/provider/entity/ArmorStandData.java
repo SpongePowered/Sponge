@@ -89,7 +89,7 @@ public final class ArmorStandData {
                         .get(h -> VecHelper.toVector3d(h.getHeadPose()))
                         .set((h, v) -> h.setHeadPose(VecHelper.toRotation(v)))
                     .create(Keys.IS_PLACING_DISABLED)
-                        .get(h -> Sponge.getGame().registries().registry(RegistryTypes.EQUIPMENT_TYPE)
+                        .get(h -> Sponge.game().registries().registry(RegistryTypes.EQUIPMENT_TYPE)
                                 .streamEntries()
                                 .map(RegistryEntry::value)
                                 .collect(Collectors.toMap(k -> k, v -> ((ArmorStandAccessor) h).invoker$isDisabled((EquipmentSlot) (Object) v)))

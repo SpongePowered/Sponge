@@ -63,7 +63,7 @@ public abstract class CompoundContainerMixin_Carrier_Inventory_API implements Mu
     }
 
     @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
+    public CarriedInventory<? extends Carrier> inventory() {
         return (CarriedInventory<? extends Carrier>) this;
     }
 
@@ -75,7 +75,7 @@ public abstract class CompoundContainerMixin_Carrier_Inventory_API implements Mu
     @Override
     public Optional<Inventory> getInventory(final ServerLocation at) {
         if (this.getLocations().contains(at)) {
-            return Optional.of(this.getInventory());
+            return Optional.of(this.inventory());
         }
         return Optional.empty();
     }

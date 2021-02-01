@@ -38,7 +38,7 @@ import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
 import org.spongepowered.math.vector.Vector3i;
 
 /**
- * Specifically to implement the {@link #getInventory()} and {@link #getLocation()}
+ * Specifically to implement the {@link #inventory()} and {@link #getLocation()}
  * aspects of {@link SingleBlockCarrier} since the remainder of
  * {@link Inventory} implementation is defaulted in {@link SingleBlockCarrier}
  */
@@ -55,7 +55,7 @@ public abstract class EnchantmentMenuMixin_BlockCarrier_Inventory_API implements
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return this.access.evaluate((world, pos) -> (World<?, ?>) world).orElse(null);
     }
 

@@ -32,12 +32,6 @@ import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.Counter;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.MinuteReport;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.PingRecord;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.RegionData;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.RegionData.RegionId;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.TicksRecord;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
 import org.spongepowered.common.relocate.co.aikar.util.MRUMapCache;
@@ -268,7 +262,7 @@ public class TimingHistory {
         final double avg;
 
         PingRecord() {
-            final Collection<ServerPlayer> onlinePlayers = SpongeCommon.getGame().getServer().getOnlinePlayers();
+            final Collection<ServerPlayer> onlinePlayers = SpongeCommon.getGame().server().getOnlinePlayers();
             int totalPing = 0;
             for (ServerPlayer player : onlinePlayers) {
                 totalPing += player.getConnection().getLatency();

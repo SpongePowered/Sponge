@@ -62,7 +62,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         this(
             new MutableBimapPalette<>(
                 PaletteTypes.BLOCK_STATE_PALETTE.get(),
-                Sponge.getGame().registries().registry(RegistryTypes.BLOCK_TYPE),
+                Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE),
                 RegistryTypes.BLOCK_TYPE
             ),
             BlockTypes.AIR,
@@ -75,7 +75,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         final Vector3i start, final Vector3i size
     ) {
         super(start, size);
-        final Palette.Mutable<BlockState, BlockType> mutablePalette = palette.asMutable(Sponge.getGame().registries());
+        final Palette.Mutable<BlockState, BlockType> mutablePalette = palette.asMutable(Sponge.game().registries());
         this.palette = mutablePalette;
         final int airId = mutablePalette.getOrAssign(ArrayMutableBlockBuffer.AIR);
 
@@ -93,7 +93,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
 
     public ArrayMutableBlockBuffer(final Palette<BlockState, BlockType> palette, final Vector3i start, final Vector3i size, final char[] blocks) {
         super(start, size);
-        this.palette = palette.asMutable(Sponge.getGame().registries());
+        this.palette = palette.asMutable(Sponge.game().registries());
         this.data = new BlockBackingData.CharBackingData(blocks);
         this.defaultState = BlockTypes.AIR;
     }
@@ -108,7 +108,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
      */
     ArrayMutableBlockBuffer(final Palette<BlockState, BlockType> palette, final BlockBackingData blocks, final Vector3i start, final Vector3i size) {
         super(start, size);
-        this.palette = palette.asMutable(Sponge.getGame().registries());
+        this.palette = palette.asMutable(Sponge.game().registries());
         this.data = blocks;
         this.defaultState = BlockTypes.AIR;
     }
@@ -145,7 +145,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
     @Override
     public BlockState getBlock(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        final RegistryHolder registries = Sponge.getGame().registries();
+        final RegistryHolder registries = Sponge.game().registries();
         return this.palette.get(this.data.get(this.getIndex(x, y, z)), registries)
             .orElseGet(() -> this.defaultState.get(registries).getDefaultState());
     }

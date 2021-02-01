@@ -46,7 +46,7 @@ import java.util.Map;
 
 public final class SpongeDataPackManager {
 
-    public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.getGame());
+    public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.game());
 
     private final Game game;
     private final Map<SpongeDataPackType, List<DataPackSerializable>> serializables;

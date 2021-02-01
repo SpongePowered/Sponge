@@ -142,7 +142,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     // ServerWorld
 
     @Override
-    public ServerWorldProperties getProperties() {
+    public ServerWorldProperties properties() {
         return (ServerWorldProperties) this.shadow$getLevelData();
     }
 

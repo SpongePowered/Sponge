@@ -64,7 +64,7 @@ public final class ArchetypeTest implements LoadableModule {
 
     private CommandResult testEntityArchetype(CommandContext context) {
         context.getCause().first(ServerPlayer.class).ifPresent(p -> {
-            final Sheep entity = p.getWorld().createEntity(EntityTypes.SHEEP, p.getPosition());
+            final Sheep entity = p.world().createEntity(EntityTypes.SHEEP, p.getPosition());
             this.testEntityArchetype(entity);
         });
         return CommandResult.success();

@@ -121,7 +121,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return (World<?, ?>) this.level;
     }
 
@@ -202,7 +202,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                     this.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class));
         } else {
             if (!this.shadow$getCommandSenderWorld().isClientSide) { // We can't set the rotation update on client worlds.
-                ((ServerWorldBridge) this.getWorld()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
+                ((ServerWorldBridge) this.world()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
             }
 
             // Let the entity tracker do its job, this just updates the variables
@@ -274,7 +274,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.Entity.CLASS, this.getClass().getName())
-                .set(Queries.WORLD_KEY, ((org.spongepowered.api.world.server.ServerWorld) this.getWorld()).getKey().getFormatted())
+                .set(Queries.WORLD_KEY, ((org.spongepowered.api.world.server.ServerWorld) this.world()).getKey().getFormatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, transform.getPosition().getX())
                 .set(Queries.POSITION_Y, transform.getPosition().getY())

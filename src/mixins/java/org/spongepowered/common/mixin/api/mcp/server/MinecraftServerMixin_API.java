@@ -158,7 +158,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     @Override
     public @NonNull Iterable<? extends Audience> audiences() {
         if (this.audiences == null) {
-            this.audiences = Iterables.concat((List) this.shadow$getPlayerList().getPlayers(), Collections.singleton(Sponge.getGame().getSystemSubject()));
+            this.audiences = Iterables.concat((List) this.shadow$getPlayerList().getPlayers(), Collections.singleton(Sponge.game().getSystemSubject()));
         }
         return this.audiences;
     }
@@ -283,7 +283,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public Component getMOTD() {
+    public Component motd() {
         return SpongeAdventure.legacySection(this.shadow$getMotd());
     }
 
@@ -373,8 +373,8 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public Game getGame() {
-        return Sponge.getGame();
+    public Game game() {
+        return Sponge.game();
     }
 
     @Override

@@ -47,7 +47,7 @@ public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
     }
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    default CarriedInventory<? extends Carrier> getInventory() {
+    default CarriedInventory<? extends Carrier> inventory() {
         if (this instanceof CarriedInventory) {
             return (CarriedInventory) this;
         }
@@ -62,7 +62,7 @@ public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
             int[] slots = ((WorldlyContainer) thisThing).getSlotsForFace(facing);
 
             if (slots.length == 0) {
-                return new EmptyInventoryImpl(thisThing.getInventory());
+                return new EmptyInventoryImpl(thisThing.inventory());
             }
 
             // build query for each slot
@@ -71,8 +71,8 @@ public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
                     .forEach(builder::and);
             Query query = builder.build();
 
-            return thisThing.getInventory().query(query);
+            return thisThing.inventory().query(query);
         }
-        return thisThing.getInventory();
+        return thisThing.inventory();
     }
 }

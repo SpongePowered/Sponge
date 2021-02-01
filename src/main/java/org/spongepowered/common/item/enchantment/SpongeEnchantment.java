@@ -60,7 +60,7 @@ public final class SpongeEnchantment implements Enchantment {
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ENCHANTMENT_TYPE).valueKey(this.enchantmentType);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.ENCHANTMENT_TYPE).valueKey(this.enchantmentType);
 
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())

@@ -48,7 +48,7 @@ public abstract class StonecutterMenuMixin_BlockCarrier_Inventory_API implements
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return this.access.evaluate((world, pos) -> (World<?, ?>) world).orElse(null);
     }
 }

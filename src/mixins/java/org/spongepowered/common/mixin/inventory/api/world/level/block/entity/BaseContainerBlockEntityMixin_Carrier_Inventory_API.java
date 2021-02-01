@@ -37,7 +37,7 @@ public abstract class BaseContainerBlockEntityMixin_Carrier_Inventory_API implem
 
     @SuppressWarnings("unchecked")
     @Override
-    public BlockEntityInventory<CarrierBlockEntity> getInventory() {
+    public BlockEntityInventory<CarrierBlockEntity> inventory() {
         return (BlockEntityInventory<CarrierBlockEntity>) this;
     }
 

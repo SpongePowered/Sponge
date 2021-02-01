@@ -50,7 +50,6 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
-import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
@@ -142,7 +141,7 @@ public final class WorldTest {
                         .setExecutor(context -> {
                             final ServerWorld world = context.requireOne(CommonParameters.WORLD);
                             final WorldType worldType = context.requireOne(worldTypeParameter);
-                            world.getProperties().setWorldType(worldType);
+                            world.properties().setWorldType(worldType);
                             return CommandResult.success();
                         })
                         .build()
@@ -153,8 +152,8 @@ public final class WorldTest {
                         .setPermission(this.plugin.getMetadata().getId() + ".command.location.change")
                         .setExecutor(context -> {
                             final ServerPlayer player = context.getOne(optPlayerParameter).orElse(this.getSourcePlayer(context));
-                            final ServerWorld world = context.getOne(optWorldParameter).orElse(player.getWorld());
-                            final Vector3d position = context.getOne(optPositionParameter).orElse(world.getProperties().spawnPosition().toDouble());
+                            final ServerWorld world = context.getOne(optWorldParameter).orElse(player.world());
+                            final Vector3d position = context.getOne(optPositionParameter).orElse(world.properties().spawnPosition().toDouble());
                             return player.setLocation(ServerLocation.of(world, position)) ? CommandResult.success() : CommandResult.error(Component.text("Could not teleport!"));
                         })
                         .build()
@@ -166,7 +165,7 @@ public final class WorldTest {
                         .setExecutor(context -> {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
 
-                            this.game.getServer().getWorldManager().loadWorld(key).whenComplete((r, t) -> {
+                            this.game.server().getWorldManager().loadWorld(key).whenComplete((r, t) -> {
                                 if (t != null) {
                                     context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
                                 } else {
@@ -196,7 +195,7 @@ public final class WorldTest {
                                     .performsSpawnLogic(true)
                                     .build();
 
-                            this.game.getServer().getWorldManager().loadWorld(template).whenComplete((r, t) -> {
+                            this.game.server().getWorldManager().loadWorld(template).whenComplete((r, t) -> {
                                 if (t != null) {
                                     context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
                                 } else {
@@ -218,7 +217,7 @@ public final class WorldTest {
                         .setExecutor(context -> {
                             final ServerWorld world = context.requireOne(CommonParameters.WORLD);
 
-                            this.game.getServer().getWorldManager().unloadWorld(world).whenComplete((r, t) -> {
+                            this.game.server().getWorldManager().unloadWorld(world).whenComplete((r, t) -> {
                                 if (t != null) {
                                     context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
                                 } else {
@@ -241,7 +240,7 @@ public final class WorldTest {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
                             final ResourceKey copyWorldKey = context.requireOne(copyWorldKeyParameter);
 
-                            this.game.getServer().getWorldManager().copyWorld(key, copyWorldKey).whenComplete((r, t) -> {
+                            this.game.server().getWorldManager().copyWorld(key, copyWorldKey).whenComplete((r, t) -> {
                                 if (t != null) {
                                     context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
                                 } else {
@@ -264,7 +263,7 @@ public final class WorldTest {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
                             final ResourceKey moveWorldKey = context.requireOne(moveWorldKeyParameter);
 
-                            this.game.getServer().getWorldManager().moveWorld(key, moveWorldKey).whenComplete((r, t) -> {
+                            this.game.server().getWorldManager().moveWorld(key, moveWorldKey).whenComplete((r, t) -> {
                                 if (t != null) {
                                     context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
                                 } else {
@@ -286,7 +285,7 @@ public final class WorldTest {
                         .setExecutor(context -> {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
 
-                            this.game.getServer().getWorldManager().deleteWorld(key).whenComplete((r, t) -> {
+                            this.game.server().getWorldManager().deleteWorld(key).whenComplete((r, t) -> {
                                 if (t != null) {
                                     context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
                                 } else {
@@ -309,7 +308,7 @@ public final class WorldTest {
                             final ServerPlayer player = context.getOne(optPlayerParameter).orElse(this.getSourcePlayer(context));
 
                             player.sendMessage(Identity.nil(),
-                                    Component.text("You are in World ").append(player.getWorld().getProperties().displayName().orElseGet(() -> Component.text(player.getWorld().getKey().toString(),
+                                    Component.text("You are in World ").append(player.world().properties().displayName().orElseGet(() -> Component.text(player.world().getKey().toString(),
                                             NamedTextColor.AQUA)))
                                             .append(Component.text(" at (" + player.getPosition().getFloorX() + ", " + player.getPosition().getFloorY() +
                                                     ", " + player.getPosition().getFloorZ() + ")")));
@@ -329,7 +328,7 @@ public final class WorldTest {
         final WorldManager wm = Sponge.getServer().getWorldManager();
         final ServerPlayer player = (ServerPlayer) context.getCause().root();
         final String owner = player.getName();
-        final Random random = player.getWorld().getRandom();
+        final Random random = player.world().getRandom();
 
         final List<RegistryReference<Biome>> allBiomes = Sponge.getServer().registries().registry(RegistryTypes.BIOME)
                 .streamEntries()
@@ -376,8 +375,8 @@ public final class WorldTest {
                     noiseGenConfig))
                 .build();
 
-        if (player.getWorld().getKey().equals(worldKey)) {
-            player.setLocation(ServerLocation.of(wm.defaultWorld(), wm.defaultWorld().getProperties().spawnPosition()));
+        if (player.world().getKey().equals(worldKey)) {
+            player.setLocation(ServerLocation.of(wm.defaultWorld(), wm.defaultWorld().properties().spawnPosition()));
         }
         context.sendMessage(Identity.nil(), Component.text("Generating your world..."));
         wm.deleteWorld(worldKey).thenCompose(b -> wm.loadWorld(customTemplate)).thenAccept(w -> this.transportToWorld(player, w)).exceptionally(e -> {
@@ -392,7 +391,7 @@ public final class WorldTest {
 
     private void transportToWorld(final ServerPlayer player, final ServerWorld world) {
         player.sendMessage(Identity.nil(), Component.text("Teleporting..."));
-        final ServerLocation spawn = world.getLocation(world.getProperties().spawnPosition());
+        final ServerLocation spawn = world.getLocation(world.properties().spawnPosition());
         player.setLocation(Sponge.getServer().getTeleportHelper().getSafeLocation(spawn).orElse(spawn));
         player.showTitle(Title.title(Component.text("Welcome to your world"), Component.text(player.getName())));
     }

@@ -108,24 +108,24 @@ public final class CustomDataTest {
                             stack.offer(this.myDataKey, number);
                             stack.offer(this.mySimpleDataKey, "It works! " + number);
                             stack.offer(this.myItemTypeKey, ItemTypes.PAPER.get());
-                            player.getInventory().offer(stack);
-                            final List<Slot> slots = player.getInventory().query(QueryTypes.ITEM_STACK_CUSTOM.get().of(s -> s.get(this.myDataKey).isPresent())).slots();
+                            player.inventory().offer(stack);
+                            final List<Slot> slots = player.inventory().query(QueryTypes.ITEM_STACK_CUSTOM.get().of(s -> s.get(this.myDataKey).isPresent())).slots();
                             final int itemSum = slots.stream().map(Slot::peek).mapToInt(item -> item.get(this.myDataKey).get()).sum();
                             player.sendActionBar(Component.text(itemSum));
                             slots.stream().map(Slot::peek).map(s -> s.get(this.mySimpleDataKey)).forEach(data -> data.ifPresent(value -> player.sendMessage(Identity.nil(), Component.text(value))));
                             break;
                         case ENTITY:
-                            final Entity entity = player.getWorld().createEntity(EntityTypes.MINECART.get(), player.getPosition().add(0, 3, 0));
+                            final Entity entity = player.world().createEntity(EntityTypes.MINECART.get(), player.getPosition().add(0, 3, 0));
                             entity.offer(this.myDataKey, number);
-                            player.getWorld().spawnEntity(entity);
+                            player.world().spawnEntity(entity);
                             final int entitySum = player.getNearbyEntities(5).stream().filter(e -> e.get(this.myDataKey).isPresent()).mapToInt(e -> e.get(this.myDataKey).get()).sum();
                             player.sendActionBar(Component.text(entitySum));
                             break;
                         case BLOCKENTITY:
-                            player.getWorld().setBlock(player.getBlockPosition(), BlockTypes.DISPENSER.get().getDefaultState());
-                            final BlockEntity blockEntity = player.getWorld().getBlockEntity(player.getBlockPosition()).get();
+                            player.world().setBlock(player.getBlockPosition(), BlockTypes.DISPENSER.get().getDefaultState());
+                            final BlockEntity blockEntity = player.world().getBlockEntity(player.getBlockPosition()).get();
                             blockEntity.offer(this.myDataKey, number);
-                            final int blockEntitySum = player.getWorld().getBlockEntities().stream().filter(e -> e.get(this.myDataKey).isPresent())
+                            final int blockEntitySum = player.world().getBlockEntities().stream().filter(e -> e.get(this.myDataKey).isPresent())
                                     .mapToInt(e -> e.get(this.myDataKey).get()).sum();
                             player.sendActionBar(Component.text(blockEntitySum));
                             break;
@@ -144,9 +144,9 @@ public final class CustomDataTest {
                             break;
                         case BLOCK:
                             // try out custom data-stores
-                            final Integer oldNumber = player.getWorld().get(player.getBlockPosition(), this.myDataKey).orElse(0);
+                            final Integer oldNumber = player.world().get(player.getBlockPosition(), this.myDataKey).orElse(0);
                             player.sendActionBar(Component.text(oldNumber));
-                            player.getWorld().offer(player.getBlockPosition(), this.myDataKey, oldNumber + number);
+                            player.world().offer(player.getBlockPosition(), this.myDataKey, oldNumber + number);
                     }
                     return CommandResult.success();
                 })

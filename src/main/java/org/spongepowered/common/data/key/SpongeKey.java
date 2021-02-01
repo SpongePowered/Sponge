@@ -90,7 +90,7 @@ public final class SpongeKey<V extends Value<E>, E> extends AbstractResourceKeye
     @Override
     public <H extends DataHolder> void registerEvent(final PluginContainer plugin, final Class<H> holderFilter,
             final EventListener<ChangeDataHolderEvent.ValueChange> listener) {
-        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerKeyListener(new KeyBasedDataListener<>(plugin, holderFilter, this, listener));
+        ((SpongeDataManager) Sponge.game().getDataManager()).registerKeyListener(new KeyBasedDataListener<>(plugin, holderFilter, this, listener));
     }
 
     public ValueConstructor<V, E> getValueConstructor() {

@@ -32,7 +32,6 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.ScheduledTask;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduledTask;
 import org.spongepowered.plugin.PluginContainer;
@@ -106,12 +105,12 @@ public final class SpongeTimings {
      * @return The timing
      */
     public static Timing getEntityTiming(EntityType<?> entity) {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ENTITY_TYPE).valueKey((org.spongepowered.api.entity.EntityType<?>) entity);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.ENTITY_TYPE).valueKey((org.spongepowered.api.entity.EntityType<?>) entity);
         return SpongeTimingsFactory.ofSafe("Minecraft", "## entity - " + resourceKey);
     }
 
     public static Timing getTileEntityTiming(final BlockEntity entity) {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(entity.getType());
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(entity.getType());
         return SpongeTimingsFactory.ofSafe("Minecraft", "## tickBlockEntity - " + resourceKey);
     }
 
@@ -140,7 +139,7 @@ public final class SpongeTimings {
     }
 
     public static Timing getBlockTiming(BlockType block) {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey(block);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey(block);
         return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + resourceKey);
     }
 }

@@ -155,7 +155,7 @@ public final class DataTest  {
 
 
     public void testData(final ServerPlayer player) {
-        final ServerWorld world = player.getWorld();
+        final ServerWorld world = player.world();
         final Vector3d position = player.getPosition();
         final Vector3i blockPos = position.toInt();
         final ServerLocation location = world.getLocation(blockPos);
@@ -394,7 +394,7 @@ public final class DataTest  {
         checkOfferData(redFlard, Keys.CUSTOM_MODEL_DATA, 123456);
         redFlard.offer(Keys.CUSTOM_NAME, Component.text("Red FLARD", NamedTextColor.DARK_RED));
         redFlard.offer(Keys.LORE, Arrays.asList(Component.text("May ignite holder! Handle with care", NamedTextColor.GOLD)));
-        player.getInventory().offer(redFlard);
+        player.inventory().offer(redFlard);
 
         // TODO Keys.CUSTOM_ATTACK_DAMAGE
 
@@ -569,7 +569,7 @@ public final class DataTest  {
         player.offer(Keys.GAME_MODE, gameMode);
 
         final ItemStack playerHeadStack = ItemStack.of(ItemTypes.PLAYER_HEAD);
-        this.checkOfferData(playerHeadStack, Keys.GAME_PROFILE, player.getProfile());
+        this.checkOfferData(playerHeadStack, Keys.GAME_PROFILE, player.profile());
         // TODO Block Keys.GAME_PROFILE
 
         this.checkGetData(writtenBookStack, Keys.GENERATION, 0);
@@ -1382,9 +1382,9 @@ public final class DataTest  {
     private static String getHolderName(final DataHolder holder) {
         String value = "";
         if (holder instanceof BlockState) {
-            value = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.getGame().registries(), ((BlockState) holder).getType()).getValue();
+            value = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.game().registries(), ((BlockState) holder).getType()).value();
         } else if (holder instanceof ItemStack) {
-            value = RegistryTypes.ITEM_TYPE.keyFor(Sponge.getGame().registries(), ((ItemStack) holder).getType()).getValue();
+            value = RegistryTypes.ITEM_TYPE.keyFor(Sponge.game().registries(), ((ItemStack) holder).getType()).value();
         }
         return String.format("%s[%s]", holder.getClass().getSimpleName(), value);
     }

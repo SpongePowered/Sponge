@@ -61,12 +61,12 @@ public final class SpongePatternLayerBuilder extends AbstractDataBuilder<BannerP
             return Optional.empty();
         }
         final BannerPatternShape shape = container.getRegistryValue(Constants.TileEntity.Banner.SHAPE, RegistryTypes.BANNER_PATTERN_SHAPE,
-                Sponge.getGame().registries())
+                Sponge.game().registries())
                 .orElseThrow(() -> new InvalidDataException("The provided container has an invalid banner pattern shape entry!"));
 
 
         // Now we need to validate the dye color of course...
-        final DyeColor color = container.getRegistryValue(Constants.TileEntity.Banner.COLOR, RegistryTypes.DYE_COLOR, Sponge.getGame().registries())
+        final DyeColor color = container.getRegistryValue(Constants.TileEntity.Banner.COLOR, RegistryTypes.DYE_COLOR, Sponge.game().registries())
                 .orElseThrow(() -> new InvalidDataException("The provided container has an invalid dye color entry!"));
 
         return Optional.of(new SpongePatternLayer(shape, color));

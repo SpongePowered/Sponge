@@ -289,8 +289,8 @@ public final class RecipeTest implements LoadableModule {
                 .where('b', Ingredient.of(ItemTypes.BOOK))
                 .result(grid -> {
                     final Optional<ServerPlayer> player = Sponge.getServer().getCauseStackManager().getCurrentCause().first(ServerPlayer.class);
-                    final Optional<Biome> biome = player.map(p -> p.getWorld().getBiome(p.getBlockPosition()));
-                    final String name = biome.map(present -> RegistryTypes.BIOME.keyFor(player.get().getWorld().registries(), present)).map(ResourceKey::toString).orElse("Unknown");
+                    final Optional<Biome> biome = player.map(p -> p.world().getBiome(p.getBlockPosition()));
+                    final String name = biome.map(present -> RegistryTypes.BIOME.keyFor(player.get().world().registries(), present)).map(ResourceKey::toString).orElse("Unknown");
                     final Integer biomeTemperature = biome.map(Biome::getTemperature).map(d -> (int) (d*10)).orElse(0);
                     final Integer biomeHumidity = biome.map(Biome::getHumidity).map(d -> (int) (d*10)).orElse(0);
                     final TextComponent temperature = Component.text("Temperature: ").append(Component.text(biomeTemperature));

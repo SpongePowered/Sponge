@@ -42,7 +42,7 @@ public final class RegisterFactoryEventImpl extends AbstractLifecycleEvent imple
     @SuppressWarnings("unchecked")
     @Override
     public <T> T register(final Class<T> factoryClass, final T factory) throws DuplicateRegistrationException {
-        return (T) ((SpongeFactoryProvider) Sponge.getGame().getFactoryProvider()).registerFactory(factoryClass, Objects.requireNonNull(factory,
+        return (T) ((SpongeFactoryProvider) Sponge.game().getFactoryProvider()).registerFactory(factoryClass, Objects.requireNonNull(factory,
                 "factory"));
     }
 

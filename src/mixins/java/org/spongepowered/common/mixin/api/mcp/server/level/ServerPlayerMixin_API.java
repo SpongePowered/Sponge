@@ -121,7 +121,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Nullable private WorldBorder api$worldBorder;
 
     @Override
-    public ServerWorld getWorld() {
+    public ServerWorld world() {
         return (ServerWorld) this.shadow$getLevel();
     }
 
@@ -160,7 +160,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public GameProfile getProfile() {
+    public GameProfile profile() {
         return ((ServerPlayerEntityBridge) this).bridge$getUser().getProfile();
     }
 

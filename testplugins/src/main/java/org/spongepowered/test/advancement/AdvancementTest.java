@@ -59,7 +59,6 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
-import org.spongepowered.api.event.lifecycle.RegisterRegistryEvent;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.BlockCarrier;
@@ -144,7 +143,7 @@ public final class AdvancementTest implements LoadableModule {
                 .dataSerializableConfig(InventoryChangeTriggerConfig.class)
                 .listener(triggerEvent -> {
                     final ItemStack stack = triggerEvent.getTrigger().getConfiguration().stack;
-                    final int found = triggerEvent.getPlayer().getInventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY, stack).totalQuantity();
+                    final int found = triggerEvent.getPlayer().inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY, stack).totalQuantity();
                     triggerEvent.setResult(stack.getQuantity() <= found);
                 })
                 .key(ResourceKey.of(this.plugin, "my_inventory_trigger"))

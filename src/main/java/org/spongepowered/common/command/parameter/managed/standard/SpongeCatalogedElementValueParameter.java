@@ -107,8 +107,8 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
                 .map(x -> {
                     if (x.asString().startsWith(lowerCase)) {
                         return x.asString();
-                    } else if (this.prefixes.contains(x.getNamespace()) && x.getValue().startsWith(lowerCase)) {
-                        return x.getValue();
+                    } else if (this.prefixes.contains(x.namespace()) && x.value().startsWith(lowerCase)) {
+                        return x.value();
                     }
                     return null;
                 }).filter(Objects::nonNull).collect(Collectors.toList());

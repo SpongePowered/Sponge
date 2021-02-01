@@ -73,7 +73,7 @@ public abstract class NoteBlockMixin extends BlockMixin {
         float pitch = (float) Math.pow(2.0D, (double) (param - 12) / 12.0D);
 
         final MappedRegistry<NotePitch> registry =
-                (MappedRegistry<NotePitch>) (Object) Sponge.getGame().registries().registry(RegistryTypes.NOTE_PITCH);
+                (MappedRegistry<NotePitch>) (Object) Sponge.game().registries().registry(RegistryTypes.NOTE_PITCH);
         final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(
                 PhaseTracker.getCauseStackManager().getCurrentCause(), (ServerWorld) worldIn, pos,
                 NoteBlockInstrument.byState(state).getSoundEvent(), instrumentType, registry.byId(param), pitch);

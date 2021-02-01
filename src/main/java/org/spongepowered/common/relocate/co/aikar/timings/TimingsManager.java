@@ -89,7 +89,7 @@ public final class TimingsManager {
                 handler.processTick(violated);
             }
 
-            TimingHistory.playerTicks += SpongeCommon.getGame().getServer().getOnlinePlayers().size();
+            TimingHistory.playerTicks += SpongeCommon.getGame().server().getOnlinePlayers().size();
             TimingHistory.timedTicks++;
             // Generate TPS/Ping/Tick reports every minute
         }

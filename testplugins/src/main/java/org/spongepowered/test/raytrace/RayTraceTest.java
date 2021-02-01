@@ -80,7 +80,7 @@ public final class RayTraceTest {
                         .setExecutor(context -> {
                             final Entity entity = context.requireOne(entityParameter);
                             context.sendMessage(Identity.nil(), Component.text("Location: " + entity.getLocation().toString()));
-                            context.sendMessage(Identity.nil(), Component.text("Entity Type: " + RegistryTypes.ENTITY_TYPE.keyFor(entity.getWorld().registries(), entity.getType()).asString()));
+                            context.sendMessage(Identity.nil(), Component.text("Entity Type: " + RegistryTypes.ENTITY_TYPE.keyFor(entity.world().registries(), entity.getType()).asString()));
                             return CommandResult.success();
                         })
                         .build(),

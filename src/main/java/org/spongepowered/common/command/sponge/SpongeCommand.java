@@ -223,7 +223,7 @@ public class SpongeCommand {
     private Command.Parameterized chunksSubcommand() {
         final Command.Parameterized globalCommand = Command.builder()
                 .setExecutor(context -> {
-                    for (final ServerWorld world : SpongeCommon.getGame().getServer().getWorldManager().worlds()) {
+                    for (final ServerWorld world : SpongeCommon.getGame().server().getWorldManager().worlds()) {
                         context.sendMessage(Identity.nil(), Component.text().content("World ")
                                         .append(Component.text(world.getKey().toString(), Style.style(TextDecoration.BOLD)))
                                         .append(this.getChunksInfo(world))

@@ -59,7 +59,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     public ByteArrayMutableBiomeBuffer(final Palette<Biome, Biome> palette, final byte[] biomes, final Vector3i start, final Vector3i size) {
         super(start, size);
         this.biomes = biomes;
-        this.palette = palette.asMutable(Sponge.getGame().registries());
+        this.palette = palette.asMutable(Sponge.game().registries());
     }
 
     @Override

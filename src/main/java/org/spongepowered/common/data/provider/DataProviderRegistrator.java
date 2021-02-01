@@ -146,7 +146,7 @@ public class DataProviderRegistrator {
         if (!this.dataStoreBuilder.isEmpty()) {
             this.registrationBuilder.store(this.dataStoreBuilder.buildVanillaDataStore());
         }
-        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerDataRegistration((SpongeDataRegistration) this.registrationBuilder.build());
+        ((SpongeDataManager) Sponge.game().getDataManager()).registerDataRegistration((SpongeDataRegistration) this.registrationBuilder.build());
     }
 
     public static final class MutableRegistrator<T> extends DataProviderRegistrator {

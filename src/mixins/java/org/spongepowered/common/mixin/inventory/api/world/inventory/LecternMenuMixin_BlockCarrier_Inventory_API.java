@@ -51,8 +51,8 @@ public abstract class LecternMenuMixin_BlockCarrier_Inventory_API implements Def
     }
 
     @Override
-    public World<?, ?> getWorld() {
-        return ((BlockEntity) this.lectern).getWorld();
+    public World<?, ?> world() {
+        return ((BlockEntity) this.lectern).world();
     }
 
 }

@@ -43,5 +43,6 @@ public interface SpongeServer extends SpongeEngine, Server {
 
     UsernameCache getUsernameCache();
 
+    @Override
     SpongeCommandManager getCommandManager();
 }

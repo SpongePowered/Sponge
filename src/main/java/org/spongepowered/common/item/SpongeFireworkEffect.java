@@ -109,7 +109,7 @@ public class SpongeFireworkEffect implements FireworkEffect {
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.FIREWORK_SHAPE).valueKey(this.shape);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.FIREWORK_SHAPE).valueKey(this.shape);
 
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())

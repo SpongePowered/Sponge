@@ -37,7 +37,7 @@ public abstract class CampfireBlockEntityMixin_Carrier_Inventory_API implements 
 
     @SuppressWarnings("unchecked")
     @Override
-    public BlockEntityInventory<CarrierBlockEntity> getInventory() {
+    public BlockEntityInventory<CarrierBlockEntity> inventory() {
         return (BlockEntityInventory<CarrierBlockEntity>) this;
     }
 
