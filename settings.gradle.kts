@@ -5,10 +5,21 @@ include(":SpongeVanilla")
 project(":SpongeVanilla").projectDir = file("vanilla")
 pluginManagement {
     repositories {
-        maven("https://repo-new.spongepowered.org/repository/maven-public")
+        maven("https://repo.spongepowered.org/repository/maven-public/") {
+            name = "sponge"
+        }
     }
-
 }
+
+dependencyResolutionManagement {
+    // repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS) // TODO: Apply this once SpongeAPI is properly isolated
+    repositories {
+        maven("https://repo.spongepowered.org/repository/maven-public/") {
+            name = "sponge"
+        }
+    }
+}
+
 val testPlugins = file("testplugins.settings.gradle.kts")
 if (testPlugins.exists()) {
     apply(from = testPlugins)

@@ -184,17 +184,6 @@ val mixins by sourceSets.registering {
     }
 }
 
-repositories {
-    maven {
-        name = "sponge v2"
-        setUrl("https://repo-new.spongepowered.org/repository/maven-public/")
-    }
-    maven("https://libraries.minecraft.net") {
-        name = "mojang"
-        mavenContent { releasesOnly() }
-    }
-}
-
 dependencies {
     // api
     api(project(":SpongeAPI"))
@@ -343,12 +332,6 @@ allprojects {
     tasks.withType<AbstractArchiveTask> {
         isPreserveFileTimestamps = false
         isReproducibleFileOrder = true
-    }
-    repositories {
-        maven {
-            name = "sponge v2"
-            setUrl("https://repo-new.spongepowered.org/repository/maven-public/")
-        }
     }
     val spongeSnapshotRepo: String? by project
     val spongeReleaseRepo: String? by project
