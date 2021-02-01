@@ -620,13 +620,13 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
         if (adapter == null) // Slot is not in Lens
         {
             if (slot >= this.inventorySlots.size()) {
-                SpongeImpl.getLogger().warn("Could not find slot #{} in Container {}", slot, getClass().getName());
+                SpongeImpl.getLogger().debug("Could not find slot #{} in Container {}", slot, getClass().getName());
                 return null;
             }
             final Slot mcSlot = this.inventorySlots.get(slot); // Try falling back to vanilla slot
             if (mcSlot == null)
             {
-                SpongeImpl.getLogger().warn("Could not find slot #{} in Container {}", slot, getClass().getName());
+                SpongeImpl.getLogger().debug("Could not find slot #{} in Container {}", slot, getClass().getName());
                 return null;
             }
             return ((org.spongepowered.api.item.inventory.Slot) mcSlot);

@@ -242,7 +242,7 @@ public final class PacketPhase {
 
         final BasicInventoryPacketState inventory = fromState(clickType(windowPacket.getSlotId()) | mode | unpacked);
         if (inventory == PacketPhase.Inventory.INVENTORY) {
-            SpongeImpl.getLogger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
+            SpongeImpl.getLogger().debug(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
         }
         return inventory;
     }
