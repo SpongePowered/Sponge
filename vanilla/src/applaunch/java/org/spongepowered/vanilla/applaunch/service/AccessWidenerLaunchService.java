@@ -59,7 +59,8 @@ public class AccessWidenerLaunchService implements ILaunchPluginService {
 
     @Override
     public int processClassWithFlags(final Phase phase, final ClassNode classNode, final Type classType, final String reason) {
-        if (!this.widener.getTargets().contains(classNode.name) || !reason.equals(ITransformerActivity.CLASSLOADING_REASON)) {
+        if (!this.widener.getTargets().contains(classNode.name.replace('/', '.')) || !reason.equals(ITransformerActivity.CLASSLOADING_REASON)) {
+            AccessWidenerLaunchService.LOGGER.debug("Offered class '{}' in reason {}, but loaded wideners did not contain the class!", classNode.name, reason);
             return ComputeFlags.NO_REWRITE;
         }
 
@@ -90,10 +91,14 @@ public class AccessWidenerLaunchService implements ILaunchPluginService {
     public void offerResource(final Path resource, final String name) {
         if (resource.getFileName().toString().endsWith(AccessWidenerLaunchService.ACCESS_WIDENER_EXTENSION)) {
             try (final BufferedReader reader = Files.newBufferedReader(resource, StandardCharsets.UTF_8)) {
+                AccessWidenerLaunchService.LOGGER.debug("Reading access widener {} from {}", name, resource);
                 this.reader.read(reader);
             } catch (final IOException ex) {
-                LOGGER.error("Failed to load access widener {} from {}", name, resource, ex);
+                AccessWidenerLaunchService.LOGGER.error("Failed to load access widener {} from {}", name, resource, ex);
             }
+        } else {
+            AccessWidenerLaunchService.LOGGER.warn("Offered access widener {} from {} that does not end with expected extension '{}'",
+                name, resource, AccessWidenerLaunchService.ACCESS_WIDENER_EXTENSION);
         }
     }
 
