@@ -27,8 +27,10 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.accessor.world.level.chunk.LevelChunkAccessor;
 import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
@@ -46,6 +48,7 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
         return Holder.INSTANCE;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag, final int limit
@@ -55,12 +58,16 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
         final @Nullable BlockEntity maybeNewTileEntity = chunk.getBlockEntity(oldState.pos, LevelChunk.EntityCreationType.CHECK);
         if (((BlockStateBridge) newState).bridge$hasTileEntity()) {
             if (maybeNewTileEntity == null) {
-                // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world); // Vanilla
+                // var15 = ((EntityBlock)var12).newBlockEntity(var1, var2); // Vanilla
                 // tileentity1 = state.createTileEntity(this.world); // Forge
                 // We cast to our bridge for easy access
-                serverWorld.setBlockEntity(((BlockStateBridge) newState).bridge$createNewTileEntity(serverWorld));
+                @Nullable final BlockEntity newBlockEntity = ((BlockStateBridge) newState).bridge$createNewTileEntity(serverWorld);
+                if (newBlockEntity != null) {
+                    chunk.addAndRegisterBlockEntity(newBlockEntity);
+                }
             } else {
-                maybeNewTileEntity.setBlockState(null);
+                maybeNewTileEntity.setBlockState(newState);
+                ((LevelChunkAccessor) chunk).accessor$updateBlockEntityTicker(maybeNewTileEntity);
             }
         }
         return EffectResult.NULL_PASS;

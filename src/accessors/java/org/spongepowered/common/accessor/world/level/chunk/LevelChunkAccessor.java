@@ -40,4 +40,6 @@ public interface LevelChunkAccessor {
 
     @Accessor("heightmaps") Map<Heightmap.Types, Heightmap> accessor$heightmaps();
 
+    @Accessor("updateBlockEntityTicker") void accessor$updateBlockEntityTicker(BlockEntity blockEntity);
+
 }
