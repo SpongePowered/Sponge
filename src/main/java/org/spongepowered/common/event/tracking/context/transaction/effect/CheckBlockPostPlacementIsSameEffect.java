@@ -48,7 +48,7 @@ public final class CheckBlockPostPlacementIsSameEffect implements ProcessingSide
         final int y = oldState.pos.getY() & 15;
         final int z = oldState.pos.getZ() & 15;
         final BlockState currentState = chunkSection.getBlockState(x, y, z);
-        if (currentState.getBlock() != newState.getBlock()) {
+        if (!currentState.is(newState.getBlock())) {
             return EffectResult.NULL_RETURN;
         }
         return EffectResult.NULL_PASS;

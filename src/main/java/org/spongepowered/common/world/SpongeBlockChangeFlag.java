@@ -58,7 +58,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         this.neighborDrops = (flag & Constants.BlockChangeFlags.NEIGHBOR_DROPS) != 0; // 32
         this.blockMoving = (flag & Constants.BlockChangeFlags.BLOCK_MOVING) != 0; // 64
         this.performBlockPhysics = (flag & Constants.BlockChangeFlags.PHYSICS_MASK) == 0; // sponge
-        this.lighting = (flag & Constants.BlockChangeFlags.LIGHTING_UPDATES) == 0; // sponge
+        this.lighting = (flag & Constants.BlockChangeFlags.LIGHTING_UPDATES) == 0; // 128 vanilla check
         this.pathfindingUpdates = (flag & Constants.BlockChangeFlags.PATHFINDING_UPDATES) == 0; // sponge
         this.rawFlag = flag;
         this.name = name;

@@ -83,7 +83,6 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.Notify
 import org.spongepowered.common.event.tracking.context.transaction.effect.PerformBlockDropsFromDestruction;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveTileEntityFromChunkEffect;
-import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveTileEntityFromWorldEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ReplaceTileEntityInWorldEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.TileOnLoadDuringAddToWorldEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateConnectingBlocksEffect;
@@ -642,7 +641,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         final PhaseContext<@NonNull ?> current = PhaseTracker.SERVER.getPhaseContext();
         if (current.getTransactor().logTileRemoval(tileentity, () -> (ServerLevel) (Object) this)) {
             final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerLevel) (Object) this, immutable)
-                .addEffect(RemoveTileEntityFromWorldEffect.getInstance())
                 .addEffect(RemoveTileEntityFromChunkEffect.getInstance())
                 .build();
             pipeline.processEffects(current, new PipelineCursor(tileentity.getBlockState(), 0,immutable, tileentity, (Entity) null, Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
