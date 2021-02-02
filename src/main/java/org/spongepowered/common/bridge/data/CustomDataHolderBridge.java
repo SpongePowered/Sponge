@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.bridge.data;
 
-import com.google.common.collect.ImmutableList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -33,13 +34,13 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.persistence.NBTTranslator;
+import org.spongepowered.common.data.persistence.datastore.SpongeCustomDataStore;
 import org.spongepowered.common.util.Constants;
 
 import java.lang.reflect.Type;
@@ -48,8 +49,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 
 public interface CustomDataHolderBridge {
 
@@ -68,26 +67,23 @@ public interface CustomDataHolderBridge {
                 .collect(Collectors.toSet());
 
         final DataContainer dataContainer = NBTTranslator.INSTANCE.translate(compound);
-        dataContainer.remove(DataQuery.of(Constants.Forge.FORGE_DATA, Constants.Sponge.SPONGE_DATA, Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST));
-        if (!dataStores.isEmpty()) {
-            for (DataStore dataStore : dataStores) {
-                dataStore.serialize(manipulator, dataContainer);
-            }
-        }
-        final CompoundTag serialized = NBTTranslator.INSTANCE.translate(dataContainer);
-        compound.merge(serialized); // TODO does this work?
 
-        final CompoundTag spongeData = object.data$getSpongeData();
         final List<DataView> failedData = ((CustomDataHolderBridge) object).bridge$getFailedData();
         if (!failedData.isEmpty()) {
-            final ListTag failedList = new ListTag();
-            for (final DataView failedDatum : failedData) {
-                failedList.add(NBTTranslator.INSTANCE.translate(failedDatum));
-            }
-            spongeData.put(Constants.Sponge.FAILED_CUSTOM_DATA, failedList);
-        } else {
-            spongeData.remove(Constants.Sponge.FAILED_CUSTOM_DATA);
+            final DataView forgeData = dataContainer.getView(Constants.Forge.ROOT).orElseGet(() -> dataContainer.createView(Constants.Forge.ROOT));
+            final DataView spongeData = forgeData.getView(Constants.Sponge.SPONGE_ROOT).orElseGet(() -> forgeData.createView(Constants.Sponge.SPONGE_ROOT));
+            final List<DataView> manipulatorsList = spongeData.getViewList(Constants.Sponge.CUSTOM_MANIPULATOR_LIST).orElse(new ArrayList<>());
+            manipulatorsList.clear();
+            manipulatorsList.addAll(failedData);
+            spongeData.set(Constants.Sponge.CUSTOM_MANIPULATOR_LIST, manipulatorsList);
         }
+
+        for (DataStore dataStore : dataStores) {
+            dataStore.serialize(manipulator, dataContainer);
+        }
+
+        final CompoundTag serialized = NBTTranslator.INSTANCE.translate(dataContainer);
+        compound.merge(serialized);
     }
 
     static void deserializeCustomData(final DataCompoundHolder object) {
@@ -111,30 +107,19 @@ public interface CustomDataHolderBridge {
         spongeData.set(Constants.Sponge.CUSTOM_MANIPULATOR_LIST, updatedDataViews);
 
         final Class<? extends DataHolder> typeToken = object.getClass().asSubclass(DataHolder.class);
-        // Find DataStores
-        final List<DataStore> dataStores = new ArrayList<>();
-        final ImmutableList.Builder<DataView> failed = ImmutableList.builder();
-        for (DataView dataView : updatedDataViews) {
-            final Optional<DataStore> dataStore = dataView.getString(Constants.Sponge.DATA_ID)
-                    .flatMap(id -> ((SpongeDataManager) Sponge.getGame().getDataManager()).getDataStore(ResourceKey.resolve(id), typeToken));
-            if (dataStore.isPresent()) {
-                dataStores.add(dataStore.get());
-            } else {
-                // If no datastore was found add this to failed data
-                failed.add(dataView);
-            }
-        }
 
-
-        for (DataStore dataStore : dataStores) {
+        for (DataStore dataStore : SpongeDataManager.getDatastoreRegistry().getDataStoresForType(typeToken)) {
             // Deserialize to Manipulator
             final DataManipulator.Mutable manipulator = dataStore.deserialize(allData);
             // Set data in CustomDataHolderBridge
             ((CustomDataHolderBridge) object).bridge$mergeDeserialized(manipulator);
+            if (dataStore instanceof SpongeCustomDataStore) {
+                final ResourceKey dataStoreKey = ((SpongeCustomDataStore) dataStore).getCustomDataKey();
+                updatedDataViews.removeIf(view -> view.getString(Constants.Sponge.DATA_ID).map(dataId -> dataId.equals(dataStoreKey.asString())).orElse(false));
+            }
         }
 
-        ((CustomDataHolderBridge) object).bridge$addFailedData(failed.build());
-
+        ((CustomDataHolderBridge) object).bridge$addFailedData(updatedDataViews);
         CustomDataHolderBridge.syncCustomToTag(object);
     }
 
@@ -210,7 +195,7 @@ public interface CustomDataHolderBridge {
 
     DataManipulator.Mutable bridge$getManipulator();
 
-    default void bridge$addFailedData(ImmutableList<DataView> failedData) {
+    default void bridge$addFailedData(List<DataView> failedData) {
         this.bridge$getFailedData().addAll(failedData);
     }
 

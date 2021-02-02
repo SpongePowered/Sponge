@@ -34,6 +34,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataStore;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -47,8 +48,11 @@ public final class DataStoreRegistry {
 
     private final DataStore NO_OP_DATASTORE = new SpongeDataStore(Collections.emptyMap(), Collections.emptyList());
     private final Multimap<Key<?>, DataStore> dataStoreByValueKey = HashMultimap.create();
-    private final Map<LookupKey, DataStore> dataStoreCache = new ConcurrentHashMap<>();
     private final Multimap<ResourceKey, DataStore> dataStoreByDataStoreKey = HashMultimap.create();
+    private final List<DataStore> allDataStores = new ArrayList<>();
+
+    private final Map<LookupKey, DataStore> dataStoreCache = new ConcurrentHashMap<>();
+    private final Multimap<Type, DataStore> dataStoreByTokenCache = HashMultimap.create();
 
     public void register(final DataStore dataStore, Iterable<Key<?>> keys) {
         keys.forEach(k -> this.dataStoreByValueKey.put(k, dataStore));
@@ -56,7 +60,9 @@ public final class DataStoreRegistry {
             final ResourceKey customDataKey = ((SpongeCustomDataStore) dataStore).getCustomDataKey();
             this.dataStoreByDataStoreKey.put(customDataKey, dataStore);
         }
+        this.allDataStores.add(dataStore);
         this.dataStoreCache.clear();
+        this.dataStoreByTokenCache.clear();
     }
 
     public Collection<DataStore> getDataStores(Key<?> dataKey) {
@@ -95,6 +101,17 @@ public final class DataStoreRegistry {
         return candidates.stream()
                 .filter(ds -> ds.getSupportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType)))
                 .collect(Collectors.toList());
+    }
+
+    public Collection<DataStore> getDataStoresForType(Class<? extends DataHolder> holderType) {
+        if (!this.dataStoreByTokenCache.containsKey(holderType)) {
+            for (DataStore dataStore : this.allDataStores) {
+                if (dataStore.getSupportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType))) {
+                    this.dataStoreByTokenCache.put(holderType, dataStore);
+                }
+            }
+        }
+        return this.dataStoreByTokenCache.get(holderType);
     }
 
     private static class LookupKey {

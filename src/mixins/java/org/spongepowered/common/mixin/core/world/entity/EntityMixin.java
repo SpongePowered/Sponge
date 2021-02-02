@@ -1121,15 +1121,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Inject(method = "saveWithoutId", at = @At("RETURN"))
     private void impl$WriteSpongeDataToCompound(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> ci) {
         if (this.data$hasSpongeData()) {
-            final CompoundTag forgeCompound = compound.getCompound(Constants.Forge.FORGE_DATA);
-            // If we are in Forge data is already present
-            if (forgeCompound != this.data$getForgeData()) {
-                if (forgeCompound.isEmpty()) { // In vanilla this should be an new detached empty compound
-                    compound.put(Constants.Forge.FORGE_DATA, forgeCompound);
-                }
-                // Get our nbt data and write it to the compound
-                forgeCompound.put(Constants.Sponge.SPONGE_DATA, this.data$getSpongeData());
-            }
+            compound.merge(this.data$getCompound());
         }
     }
 

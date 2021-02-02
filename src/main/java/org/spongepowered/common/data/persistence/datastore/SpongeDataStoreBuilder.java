@@ -264,8 +264,8 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
             final Optional<DataView> existingContainer =
                     viewList.stream().filter(potentialContainer -> potentialContainer.getString(Constants.Sponge.DATA_ID)
                             .map(id -> id.equals(this.key)).orElse(false))
-                    
                     .findFirst();
+
             final DataView manipulatorContainer;
             if (existingContainer.isPresent()) {
                 manipulatorContainer = existingContainer.get();
