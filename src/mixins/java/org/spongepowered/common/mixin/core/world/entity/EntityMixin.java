@@ -859,20 +859,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     */
 
-    /**
-     * Hooks into vanilla's writeToNBT to call {@link #impl$writeToSpongeCompound}.
-     *
-     * <p> This makes it easier for other entity mixins to override writeToNBT
-     * without having to specify the <code>@Inject</code> annotation. </p>
-     *
-     * @param compound The compound vanilla writes to (unused because we write to SpongeData)
-     * @param ci (Unused) callback info
-     */
-    @Inject(method = "saveWithoutId", at = @At("HEAD"))
-    private void impl$spongeWriteToNBT(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> ci) {
-        this.impl$writeToSpongeCompound(this.data$getSpongeData());
-    }
-
 /*
     @Override
     public void bridge$setImplVelocity(final Vector3d velocity) {
@@ -1118,6 +1104,22 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     // @Override CompoundNBT data$hasForgeData()
     // @Override CompoundNBT cleanEmptySpongeData()
 
+    /**
+     * Hooks into vanilla's writeToNBT to call {@link #impl$writeToSpongeCompound}.
+     *
+     * <p> This makes it easier for other entity mixins to override writeToNBT
+     * without having to specify the <code>@Inject</code> annotation. </p>
+     *
+     * @param compound The compound vanilla writes to (unused because we write to SpongeData)
+     * @param ci (Unused) callback info
+     */
+    @Inject(method = "saveWithoutId", at = @At("HEAD"))
+    private void impl$spongeWriteToNBT(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> ci) {
+        CustomDataHolderBridge.syncCustomToTag(this);
+        this.impl$writeToSpongeCompound(this.data$getSpongeData());
+    }
+
+
     @Inject(method = "saveWithoutId", at = @At("RETURN"))
     private void impl$WriteSpongeDataToCompound(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> ci) {
         if (this.data$hasSpongeData()) {
@@ -1127,13 +1129,14 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Inject(method = "load", at = @At("RETURN"))
     private void impl$ReadSpongeDataFromCompound(final CompoundTag compound, final CallbackInfo ci) {
-        // If we are in Forge data is already present
+        // TODO If we are in Forge data is already present
         this.data$setCompound(compound); // For vanilla we set the incoming nbt
         if (this.data$hasSpongeData()) {
-            this.impl$readFromSpongeCompound(this.data$getSpongeData());
-        } else {
-            this.data$setCompound(null); // No data? No need to keep the nbt
+            this.impl$readFromSpongeCompound(this.data$getSpongeData()); // Read extra SpongeData
         }
+        // Deserialize custom data...
+        CustomDataHolderBridge.syncTagToCustom(this);
+        this.data$setCompound(null); // done reading
     }
 
     /**
@@ -1146,9 +1149,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      * @param compound The SpongeData compound to read from
      */
     protected void impl$readFromSpongeCompound(final CompoundTag compound) {
-        // Deserialize our data...
-        CustomDataHolderBridge.syncTagToCustom(this);
-
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.contains(Constants.Sponge.Entity.CAN_GRIEF)) {
             ((GrieferBridge) this).bridge$setCanGrief(compound.getBoolean(Constants.Sponge.Entity.CAN_GRIEF));
         }
@@ -1160,10 +1160,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         if (compound.contains(Constants.Sponge.Entity.IS_INVISIBLE, Constants.NBT.TAG_BYTE)) {
             this.bridge$setInvisible(compound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE));
         }
-
-        this.data$setCompound(null); // For vanilla this will be recreated empty in the next call - for Forge it reuses the existing compound instead
-        // ReSync our data (includes failed data)
-        CustomDataHolderBridge.syncCustomToTag(this);
     }
 
     /**
@@ -1176,8 +1172,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      * @param compound The SpongeData compound to write to
      */
     protected void impl$writeToSpongeCompound(final CompoundTag compound) {
-        CustomDataHolderBridge.syncCustomToTag(this);
-
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && ((GrieferBridge) this).bridge$canGrief()) {
             compound.putBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
         }

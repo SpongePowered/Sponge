@@ -68,15 +68,14 @@ public interface CustomDataHolderBridge {
 
         final DataContainer dataContainer = NBTTranslator.INSTANCE.translate(compound);
 
+        final DataView forgeData = dataContainer.getView(Constants.Forge.ROOT).orElseGet(() -> dataContainer.createView(Constants.Forge.ROOT));
+        final DataView spongeData = forgeData.getView(Constants.Sponge.SPONGE_ROOT).orElseGet(() -> forgeData.createView(Constants.Sponge.SPONGE_ROOT));
+        final List<DataView> manipulatorsList = spongeData.getViewList(Constants.Sponge.CUSTOM_MANIPULATOR_LIST).orElse(new ArrayList<>());
+        manipulatorsList.clear(); // Reset previous serialized data
+
         final List<DataView> failedData = ((CustomDataHolderBridge) object).bridge$getFailedData();
-        if (!failedData.isEmpty()) {
-            final DataView forgeData = dataContainer.getView(Constants.Forge.ROOT).orElseGet(() -> dataContainer.createView(Constants.Forge.ROOT));
-            final DataView spongeData = forgeData.getView(Constants.Sponge.SPONGE_ROOT).orElseGet(() -> forgeData.createView(Constants.Sponge.SPONGE_ROOT));
-            final List<DataView> manipulatorsList = spongeData.getViewList(Constants.Sponge.CUSTOM_MANIPULATOR_LIST).orElse(new ArrayList<>());
-            manipulatorsList.clear();
-            manipulatorsList.addAll(failedData);
-            spongeData.set(Constants.Sponge.CUSTOM_MANIPULATOR_LIST, manipulatorsList);
-        }
+        manipulatorsList.addAll(failedData); // Add back failed data
+        spongeData.set(Constants.Sponge.CUSTOM_MANIPULATOR_LIST, manipulatorsList);
 
         for (DataStore dataStore : dataStores) {
             dataStore.serialize(manipulator, dataContainer);
@@ -120,7 +119,6 @@ public interface CustomDataHolderBridge {
         }
 
         ((CustomDataHolderBridge) object).bridge$addFailedData(updatedDataViews);
-        CustomDataHolderBridge.syncCustomToTag(object);
     }
 
     static void syncTagToCustom(Object dataHolder) {

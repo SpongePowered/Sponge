@@ -106,31 +106,17 @@ public abstract class BlockEntityMixin implements TileEntityBridge, DataCompound
     @Inject(method = "saveMetadata", at = @At("RETURN"))
     private void impl$writeSpongeData(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> ci) {
         if (this.data$hasSpongeData()) {
-            final CompoundTag forgeCompound = compound.getCompound(Constants.Forge.FORGE_DATA);
-            // If we are in Forge data is already present
-            if (forgeCompound != this.data$getForgeData()) {
-                if (forgeCompound.isEmpty()) { // In vanilla this should be an new detached empty compound
-                    compound.put(Constants.Forge.FORGE_DATA, forgeCompound);
-                }
-                // Get our nbt data and write it to the compound
-                forgeCompound.put(Constants.Sponge.SPONGE_DATA, this.data$getSpongeData());
-            }
+            compound.merge(this.data$getCompound());
         }
     }
 
     @Inject(method = "load", at = @At("RETURN"))
     private void impl$readSpongeData(final BlockState p_230337_1_, final CompoundTag compound, final CallbackInfo ci) {
-        // If we are in Forge data is already present
+        // TODO If we are in Forge data is already present
         this.data$setCompound(compound); // For vanilla we set the incoming nbt
-        if (this.data$hasSpongeData()) {
-            // Deserialize our data...
-            CustomDataHolderBridge.syncTagToCustom(this);
-            this.data$setCompound(null);; // For vanilla this will be recreated empty in the next call - for Forge it reuses the existing compound instead
-            // ReSync our data (includes failed data)
-            CustomDataHolderBridge.syncCustomToTag(this);
-        } else {
-            this.data$setCompound(null); // No data? No need to keep the nbt
-        }
+        // Deserialize custom data...
+        CustomDataHolderBridge.syncTagToCustom(this);
+        this.data$setCompound(null); // done reading
     }
 
     @Override
