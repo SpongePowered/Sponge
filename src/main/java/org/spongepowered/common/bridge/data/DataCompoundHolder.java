@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.data;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.util.Constants;
 
@@ -67,6 +68,10 @@ public interface DataCompoundHolder {
 
     default void data$cleanEmptySpongeData() {
         final CompoundTag spongeData = this.data$getSpongeData();
+        final ListTag customDataList = spongeData.getList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
+        if (customDataList.isEmpty()) {
+            spongeData.remove(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
+        }
         if (spongeData.isEmpty()) {
             final CompoundTag spongeCompound = this.data$getForgeData();
             spongeCompound.remove(Constants.Sponge.SPONGE_DATA);
