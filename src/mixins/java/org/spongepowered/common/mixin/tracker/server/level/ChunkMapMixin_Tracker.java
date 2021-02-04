@@ -64,48 +64,45 @@ public abstract class ChunkMapMixin_Tracker {
     }
 
     @Redirect(method = "*",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V"),
         slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/longs/LongSet;add(J)Z", remap = false),
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setFullStatus(Ljava/util/function/Supplier;)V"),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;addAllPendingBlockEntities(Ljava/util/Collection;)V")
         )
     )
-    private void tracker$startLoad(final LevelChunk chunk, final boolean loaded) {
-        try {
-            final boolean isFake = ((WorldBridge) chunk.getLevel()).bridge$isFake();
-            if (isFake) {
-                return;
-            }
-            if (!PhaseTracker.SERVER.onSidedThread()) {
-                new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
+    private void tracker$startLoad(final LevelChunk chunk) {
+        chunk.runPostLoad();
+        final boolean isFake = ((WorldBridge) chunk.getLevel()).bridge$isFake();
+        if (isFake) {
+            return;
+        }
+        if (!PhaseTracker.SERVER.onSidedThread()) {
+            new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
                     .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
-                        + " to the parented world for management. These operations are generally not"
-                        + " threadsafe and shouldn't be considered a \"Sponge bug \". Adding/removing"
-                        + " entities from another thread to the world is never ok.")
+                            + " to the parented world for management. These operations are generally not"
+                            + " threadsafe and shouldn't be considered a \"Sponge bug \". Adding/removing"
+                            + " entities from another thread to the world is never ok.")
                     .add()
                     .add(" %s : %s", "Chunk Pos", chunk.getPos().toString())
                     .add()
                     .add(new Exception("Async Chunk Load Detected"))
                     .log(SpongeCommon.getLogger(), Level.ERROR);
-                return;
-            }
-            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
-                return;
-            }
-            GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.getInstance())
+            return;
+        }
+        if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+            return;
+        }
+        GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.getInstance())
                 .source(chunk)
                 .world((ServerLevel) chunk.getLevel())
                 .chunk(chunk)
                 .buildAndSwitch();
-        } finally {
-            chunk.setLoaded(loaded);
-        }
     }
 
     @Inject(method = "*",
         at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V", shift = At.Shift.BY, by = 2),
         slice = @Slice(
-            from = @At(value = "INVOKE",  target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V")
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V")
         ),
         expect = 1,
         require = 1
