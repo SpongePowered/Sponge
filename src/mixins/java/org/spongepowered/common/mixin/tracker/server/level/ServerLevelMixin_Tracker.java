@@ -174,12 +174,14 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     private void tracker$wrapNormalEntityTick(final ServerLevel serverWorld, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity
     ) {
+        ((ServerWorldBridge) this).bridge$getTimingsHandler().entityTick.startTiming();
         final PhaseContext<@NonNull ?> currentState = PhaseTracker.SERVER.getPhaseContext();
         if (currentState.alreadyCapturingEntityTicks()) {
             this.shadow$guardEntityTick(entityUpdateConsumer, entity);
             return;
         }
         TrackingUtil.tickEntity(entityUpdateConsumer, entity);
+        ((ServerWorldBridge) this).bridge$getTimingsHandler().entityTick.stopTiming();
     }
 
     @Override

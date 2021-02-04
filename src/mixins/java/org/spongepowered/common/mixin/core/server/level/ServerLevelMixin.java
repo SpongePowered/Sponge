@@ -80,6 +80,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
+import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -108,6 +109,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerWorld
     private Map<Entity, Vector3d> impl$rotationUpdates;
 
     private boolean impl$isManualSave = false;
+    protected WorldTimingsHandler impl$timings = new WorldTimingsHandler((ServerLevel) (Object) this);
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$cacheLevelSave(final MinecraftServer p_i241885_1_, final Executor p_i241885_2_, final LevelStorageSource.LevelStorageAccess p_i241885_3_,
@@ -328,6 +330,11 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerWorld
         }
 
         this.impl$isManualSave = false;
+    }
+
+    @Override
+    public WorldTimingsHandler bridge$getTimingsHandler() {
+        return this.impl$timings;
     }
 
     @Override

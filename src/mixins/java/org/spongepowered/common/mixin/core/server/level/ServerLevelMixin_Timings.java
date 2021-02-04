@@ -34,69 +34,60 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin_Timings;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
-import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 
 import java.util.function.BooleanSupplier;
 
 @Mixin(ServerLevel.class)
-public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings {
+public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implements ServerWorldBridge {
 
     // @formatter:off
     @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
     // @formatter:on
 
-    protected WorldTimingsHandler impl$timings = new WorldTimingsHandler((ServerLevel) (Object) this);
 
     @Inject(method = "tick", at = @At(value = "HEAD"))
     private void impl$startWorldTimings(BooleanSupplier var1, CallbackInfo ci) {
-        this.impl$timings.doTick.startTiming();
+        this.bridge$getTimingsHandler().doTick.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "RETURN"))
     private void impl$stopWorldTimings(BooleanSupplier var1, CallbackInfo ci) {
-        this.impl$timings.doTick.stopTiming();
+        this.bridge$getTimingsHandler().doTick.stopTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "CONSTANT", args = "stringValue=entities"))
     private void impl$startEntityGlobalTimings(BooleanSupplier var1, CallbackInfo ci) {
-        this.impl$timings.tickEntities.startTiming();
+        this.bridge$getTimingsHandler().tickEntities.startTiming();
         TimingHistory.entityTicks += this.entitiesById.size();
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.runBlockEvents()V"))
     protected void impl$wrapRunBlockEventsTimings(ServerLevel level) {
-        this.impl$timings.scheduledBlocks.startTiming();
+        this.bridge$getTimingsHandler().scheduledBlocks.startTiming();
         level.tickBlockEntities();
-        this.impl$timings.scheduledBlocks.stopTiming();
+        this.bridge$getTimingsHandler().scheduledBlocks.stopTiming();
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.tickBlockEntities()V"))
     protected void impl$wrapBlockEntitiesTimings(ServerLevel level) {
-        this.impl$timings.tickEntities.stopTiming();
-        this.impl$timings.tileEntityTick.startTiming();
+        this.bridge$getTimingsHandler().tickEntities.stopTiming();
+        this.bridge$getTimingsHandler().tileEntityTick.startTiming();
         level.tickBlockEntities();
-        this.impl$timings.tileEntityTick.stopTiming();
+        this.bridge$getTimingsHandler().tileEntityTick.stopTiming();
         TimingHistory.tileEntityTicks += this.blockEntityList.size();
     }
 
-// TODO fix me
-//    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V"))
-//    protected void impl$wrapEntityTimings(ServerLevel level, Consumer<Entity> var1, Entity var2) {
-//        this.impl$timings.entityTick.startTiming();
-//        level.guardEntityTick(var1, var2);
-//        this.impl$timings.entityTick.stopTiming();
-//    }
-
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.removeFromChunk(Lnet/minecraft/world/entity/Entity;)V"))
     protected void impl$startEntityRemovalTimings(BooleanSupplier var1, CallbackInfo ci) {
-        this.impl$timings.entityRemoval.startTiming();
+        this.bridge$getTimingsHandler().entityRemoval.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.onEntityRemoved(Lnet/minecraft/world/entity/Entity;)V", shift = At.Shift.AFTER))
     protected void impl$stopEntityRemovalTimings(BooleanSupplier var1, CallbackInfo ci) {
-        this.impl$timings.entityRemoval.startTiming();
+        this.bridge$getTimingsHandler().entityRemoval.startTiming();
     }
 
 }
