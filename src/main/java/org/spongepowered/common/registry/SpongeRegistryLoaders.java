@@ -512,25 +512,25 @@ public final class SpongeRegistryLoaders {
 
     public static RegistryLoader<DisplaySlot> displaySlot() {
         return RegistryLoader.of(l -> {
-            l.add(2, DisplaySlots.BELOW_NAME, SpongeDisplaySlot::new);
-            l.add(0, DisplaySlots.LIST, SpongeDisplaySlot::new);
-            l.add(1, DisplaySlots.SIDEBAR_TEAM_NO_COLOR, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.AQUA.getId() + 3, DisplaySlots.SIDEBAR_TEAM_AQUA, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.BLACK.getId() + 3, DisplaySlots.SIDEBAR_TEAM_BLACK, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.BLUE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_BLUE, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_AQUA.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_AQUA, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_BLUE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_BLUE, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_GRAY.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_GRAY, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_GREEN.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_GREEN, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_PURPLE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_PURPLE, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_RED.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_RED, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.GOLD.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GOLD, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.GRAY.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GRAY, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.GREEN.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GREEN, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.LIGHT_PURPLE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_LIGHT_PURPLE, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.RED.getId() + 3, DisplaySlots.SIDEBAR_TEAM_RED, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.WHITE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_WHITE, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.YELLOW.getId() + 3, DisplaySlots.SIDEBAR_TEAM_YELLOW, SpongeDisplaySlot::new);
+            l.add(2, DisplaySlots.BELOW_NAME, k -> new SpongeDisplaySlot(2));
+            l.add(0, DisplaySlots.LIST, k -> new SpongeDisplaySlot(0));
+            l.add(1, DisplaySlots.SIDEBAR, k -> new SpongeDisplaySlot(1));
+            l.add(ChatFormatting.AQUA.getId() + 3, DisplaySlots.SIDEBAR_TEAM_AQUA, k -> new SpongeDisplaySlot(ChatFormatting.AQUA.getId() + 3));
+            l.add(ChatFormatting.BLACK.getId() + 3, DisplaySlots.SIDEBAR_TEAM_BLACK, k -> new SpongeDisplaySlot(ChatFormatting.BLACK.getId() + 3));
+            l.add(ChatFormatting.BLUE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_BLUE, k -> new SpongeDisplaySlot(ChatFormatting.BLUE.getId() + 3));
+            l.add(ChatFormatting.DARK_AQUA.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_AQUA, k -> new SpongeDisplaySlot(ChatFormatting.DARK_AQUA.getId() + 3));
+            l.add(ChatFormatting.DARK_BLUE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_BLUE, k -> new SpongeDisplaySlot(ChatFormatting.DARK_BLUE.getId() + 3));
+            l.add(ChatFormatting.DARK_GRAY.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_GRAY, k -> new SpongeDisplaySlot(ChatFormatting.DARK_GRAY.getId() + 3));
+            l.add(ChatFormatting.DARK_GREEN.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_GREEN, k -> new SpongeDisplaySlot(ChatFormatting.DARK_GREEN.getId() + 3));
+            l.add(ChatFormatting.DARK_PURPLE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_PURPLE, k -> new SpongeDisplaySlot(ChatFormatting.DARK_PURPLE.getId() + 3));
+            l.add(ChatFormatting.DARK_RED.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_RED, k -> new SpongeDisplaySlot(ChatFormatting.DARK_RED.getId() + 3));
+            l.add(ChatFormatting.GOLD.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GOLD, k -> new SpongeDisplaySlot(ChatFormatting.GOLD.getId() + 3));
+            l.add(ChatFormatting.GRAY.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GRAY, k -> new SpongeDisplaySlot(ChatFormatting.GRAY.getId() + 3));
+            l.add(ChatFormatting.GREEN.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GREEN, k -> new SpongeDisplaySlot(ChatFormatting.GREEN.getId() + 3));
+            l.add(ChatFormatting.LIGHT_PURPLE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_LIGHT_PURPLE, k -> new SpongeDisplaySlot(ChatFormatting.LIGHT_PURPLE.getId() + 3));
+            l.add(ChatFormatting.RED.getId() + 3, DisplaySlots.SIDEBAR_TEAM_RED, k -> new SpongeDisplaySlot(ChatFormatting.RED.getId() + 3));
+            l.add(ChatFormatting.WHITE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_WHITE, k -> new SpongeDisplaySlot(ChatFormatting.WHITE.getId() + 3));
+            l.add(ChatFormatting.YELLOW.getId() + 3, DisplaySlots.SIDEBAR_TEAM_YELLOW, k -> new SpongeDisplaySlot(ChatFormatting.YELLOW.getId() + 3));
         });
     }
 

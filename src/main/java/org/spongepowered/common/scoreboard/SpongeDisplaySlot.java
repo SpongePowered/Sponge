@@ -35,16 +35,18 @@ import java.util.function.Function;
 
 public final class SpongeDisplaySlot implements DisplaySlot {
 
+    private final int id;
     private final @Nullable ChatFormatting formatting;
     private final @Nullable Function<ChatFormatting, DisplaySlot> withColorFunction;
 
     private @Nullable NamedTextColor color;
 
-    public SpongeDisplaySlot() {
-        this(null, null);
+    public SpongeDisplaySlot(final int id) {
+        this(id, null, null);
     }
 
-    public SpongeDisplaySlot(@Nullable final ChatFormatting color, @Nullable final Function<ChatFormatting, DisplaySlot> withColorFunction) {
+    public SpongeDisplaySlot(final int id, @Nullable final ChatFormatting color, @Nullable final Function<ChatFormatting, DisplaySlot> withColorFunction) {
+        this.id = id;
         this.withColorFunction = withColorFunction;
         this.formatting = color;
     }
@@ -65,5 +67,9 @@ public final class SpongeDisplaySlot implements DisplaySlot {
             this.color = SpongeAdventure.asAdventureNamed(this.formatting);
         }
         return Optional.ofNullable(this.color);
+    }
+
+    public int getIndex() {
+        return this.id;
     }
 }
