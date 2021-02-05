@@ -105,6 +105,7 @@ public abstract class BlockEntityMixin implements TileEntityBridge, DataCompound
 
     @Inject(method = "saveMetadata", at = @At("RETURN"))
     private void impl$writeSpongeData(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> ci) {
+        CustomDataHolderBridge.syncCustomToTag(this);
         if (this.data$hasSpongeData()) {
             compound.merge(this.data$getCompound());
         }
