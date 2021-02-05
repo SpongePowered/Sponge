@@ -57,7 +57,7 @@ public final class SpongeRange<T extends Number> implements Range<T> {
 
         @Override
         public Range<Float> floatRange(@Nullable Float min, @Nullable Float max) {
-            if (min != null && max != null && max > min) {
+            if (min != null && max != null && max < min) {
                 // nope
                 throw new IllegalArgumentException("min must be smaller or equal to max if both are defined");
             }
@@ -67,7 +67,7 @@ public final class SpongeRange<T extends Number> implements Range<T> {
         @Override
         @NonNull
         public Range<@NonNull Integer> intRange(@Nullable final Integer min, @Nullable final Integer max) {
-            if (min != null && max != null && max > min) {
+            if (min != null && max != null && max < min) {
                 // nope
                 throw new IllegalArgumentException("min must be smaller or equal to max if both are defined");
             }
@@ -77,7 +77,7 @@ public final class SpongeRange<T extends Number> implements Range<T> {
         @Override
         @NonNull
         public Range<@NonNull Double> doubleRange(@Nullable final Double min, @Nullable final Double max) {
-            if (min != null && max != null && max > min) {
+            if (min != null && max != null && max < min) {
                 // nope
                 throw new IllegalArgumentException("min must be smaller or equal to max if both are defined");
             }
