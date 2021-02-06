@@ -45,6 +45,13 @@ public final class BlockAddedEffect implements ProcessingSideEffect {
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag, final int limit
     ) {
+        // Vanilla will check if this is the server
+        // if (!this.level.isClientSide) {
+        //     var2.onPlace(this.level, var1, var11, var3);
+        // }
+        // But we have our own block physics flag we want to support for plugins,
+        // so we wrap the onPlace with the flag check (also, we're always on the
+        // server in this context).
         if (flag.performBlockPhysics()) {
             newState.onPlace(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
         }

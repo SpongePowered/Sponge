@@ -33,15 +33,29 @@ public final class OldBlockOnReplaceEffect implements ProcessingSideEffect {
     private static final class Holder {
         static final OldBlockOnReplaceEffect INSTANCE = new OldBlockOnReplaceEffect();
     }
-    OldBlockOnReplaceEffect() {}
+
+    OldBlockOnReplaceEffect() {
+    }
+
     public static OldBlockOnReplaceEffect getInstance() {
         return Holder.INSTANCE;
     }
 
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
+    public EffectResult processSideEffect(
+        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag, final int limit
     ) {
+        // Normally, vanilla does this:
+        // boolean var14 = var11.hasBlockEntity();
+        // if (!this.level.isClientSide) {
+        //     var11.onRemove(this.level, var1, var2, var3);
+        // } else if (!var11.is(var12) && var14) {
+        //     this.removeBlockEntity(var1);
+        // }
+        // However, since we know we're not on the client (ChunkPipeline is not
+        // used outside of server world context)
+        // we can safely just do oldState.onRemove(this.level, var1, var2, var3).
         oldState.state.onRemove(pipeline.getServerWorld(), oldState.pos, newState, flag.isBlockMoving());
         return EffectResult.NULL_PASS;
     }

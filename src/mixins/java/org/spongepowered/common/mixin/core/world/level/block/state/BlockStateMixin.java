@@ -56,12 +56,12 @@ public abstract class BlockStateMixin extends BlockBehaviour.BlockStateBase impl
     }
 
     @Override
-    public @Nullable BlockEntity bridge$createNewTileEntity(Level world) {
-        return ((EntityBlock) this.getBlock()).newBlockEntity(world);
+    public @Nullable BlockEntity bridge$createNewTileEntity(Level world, BlockPos pos) {
+        return ((EntityBlock) this.getBlock()).newBlockEntity(pos, (BlockState) (Object) this);
     }
 
     @Override
     public int bridge$getLightValue(ServerLevel world, BlockPos pos) {
-        return this.getLightEmission();
+        return this.getLightBlock(world, pos);
     }
 }
