@@ -143,7 +143,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     // @formatting:on
 
 
-    @Inject(method = "add", at = @At("TAIL"))
+    @Inject(method = "addEntity", at = @At("TAIL"))
     private void tracker$setEntityTrackedInWorld(final net.minecraft.world.entity.Entity entityIn, final CallbackInfo ci) {
         if (!this.bridge$isFake()) { // Only set the value if the entity is not fake
             ((TrackableBridge) entityIn).bridge$setWorldTracked(true);
@@ -437,7 +437,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     @Override
     public Optional<WorldPipeline.Builder> bridge$startBlockChange(final BlockPos pos, final BlockState newState, final int flags) {
-        if (net.minecraft.world.level.Level.isOutsideBuildHeight(pos)) {
+        if (((ServerLevel) (Object) this).isOutsideBuildHeight(pos)) {
             return Optional.empty();
         } else if (this.shadow$isDebug()) { // isClientSide is always false since this is WorldServer
             return Optional.empty();
@@ -499,7 +499,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
      */
     @Override
     public boolean setBlock(final BlockPos pos, final net.minecraft.world.level.block.state.BlockState newState, final int flags, final int limit) {
-        if (net.minecraft.world.level.Level.isOutsideBuildHeight(pos)) {
+        if (((ServerLevel) (Object) this).isOutsideBuildHeight(pos)) {
             return false;
         } else if (this.shadow$isDebug()) { // isClientSide is always false since this is WorldServer
             return false;

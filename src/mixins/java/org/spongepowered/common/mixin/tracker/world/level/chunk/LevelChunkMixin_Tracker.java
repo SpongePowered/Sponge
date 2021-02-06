@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level.chunk;
 
+import net.minecraft.core.SectionPos;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -121,21 +122,24 @@ public abstract class LevelChunkMixin_Tracker implements TrackedChunkBridge {
         if (isFake) {
             throw new IllegalStateException("Cannot call ChunkBridge.bridge$buildChunkPipeline in non-Server managed worlds");
         }
+        // int var4 = var1.getY();
+        // LevelChunkSection var6 = this.sections[var5];
         // int i = pos.getX() & 15;
         final int xPos = pos.getX() & 15;
         // int j = pos.getY();
         final int yPos = pos.getY();
         // int k = pos.getZ() & 15;
         final int zPos = pos.getZ() & 15;
+        final int sectionIndex = ((LevelChunk) (Object) this).getSectionIndex(yPos);
         // Sponge - get the moving flag from our flag construct
-        LevelChunkSection chunksection = this.sections[yPos >> 4];
+        LevelChunkSection chunksection = this.sections[sectionIndex];
         if (chunksection == LevelChunkMixin_Tracker.EMPTY_SECTION) {
             if (newState.isAir()) {
                 return ChunkPipeline.nullReturn((LevelChunk) (Object) this, (ServerLevel) this.level);
             }
 
-            chunksection = new LevelChunkSection(yPos >> 4 << 4);
-            this.sections[yPos >> 4] = chunksection;
+            chunksection = new LevelChunkSection(SectionPos.blockToSectionCoord(yPos));
+            this.sections[sectionIndex] = chunksection;
         }
 
         // Sponge Start - Build out the BlockTransaction

@@ -53,7 +53,12 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
         final int originalOpactiy = oldState.opacity;
         final ServerLevel serverWorld = pipeline.getServerWorld();
         final BlockState currentState = pipeline.getAffectedChunk().getBlockState(oldState.pos);
-        if (oldState.state != currentState && (((BlockStateBridge) currentState).bridge$getLightValue(serverWorld, oldState.pos) != originalOpactiy || currentState.useShapeForLightOcclusion() || oldState.state.useShapeForLightOcclusion())) {
+        // Vanilla - We pulled up the update lighting flag above to reduce this if statements length
+        //if ((var3 & 128) == 0 && var8 != var7 && (var8.getLightBlock(this, var1) != var7.getLightBlock(this, var1) || var8.getLightEmission() != var7.getLightEmission() || var8.useShapeForLightOcclusion() || var7.useShapeForLightOcclusion())) {
+        if (oldState.state != currentState
+            // Forge changes this to use the block state itself, vanilla calls state.getLightBlock(Level, BlockPos)
+            && (((BlockStateBridge) currentState).bridge$getLightValue(serverWorld, oldState.pos) != originalOpactiy
+            || currentState.useShapeForLightOcclusion() || oldState.state.useShapeForLightOcclusion())) {
             // this.profiler.startSection("queueCheckLight");
             serverWorld.getProfiler().push("queueCheckLight");
             // this.getChunkProvider().getLightManager().checkBlock(pos);

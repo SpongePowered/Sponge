@@ -34,7 +34,7 @@ public interface BlockStateBridge {
 
     boolean bridge$hasTileEntity();
 
-    @Nullable BlockEntity bridge$createNewTileEntity(Level world);
+    @Nullable BlockEntity bridge$createNewTileEntity(Level world, BlockPos pos);
 
     int bridge$getLightValue(ServerLevel world, BlockPos pos);
 }

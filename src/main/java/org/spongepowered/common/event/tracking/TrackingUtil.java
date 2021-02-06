@@ -79,7 +79,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
 import net.minecraft.world.level.block.RepeaterBlock;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.material.FluidState;
 import java.util.Optional;
 import java.util.Random;
