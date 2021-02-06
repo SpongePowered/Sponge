@@ -41,15 +41,12 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import org.spongepowered.common.accessor.world.level.block.LeavesBlockAccessor;
 
 @Mixin(LeavesBlock.class)
 public abstract class LeavesBlockMixin_DisablePersistentScheduledUpdate {
 
     // @formatter:off
-    @Shadow private static int shadow$getDistanceAt(final BlockState neighbor) {
-        return 0;
-    }
-
     @Shadow @Final public static IntegerProperty DISTANCE;
     @Shadow @Final public static BooleanProperty PERSISTENT;
     // @formatter:on
@@ -65,12 +62,12 @@ public abstract class LeavesBlockMixin_DisablePersistentScheduledUpdate {
     @Overwrite
     public BlockState updateShape(final BlockState stateIn, final Direction facing, final BlockState facingState, final LevelAccessor worldIn,
             final BlockPos currentPos, final BlockPos facingPos) {
-        final int i = LeavesBlockMixin_DisablePersistentScheduledUpdate.shadow$getDistanceAt(facingState) + 1;
+        final int i = LeavesBlockAccessor.invoker$getDistanceAt(facingState) + 1;
 
         if (i != 1 || stateIn.getValue(LeavesBlockMixin_DisablePersistentScheduledUpdate.DISTANCE) != i) {
             // Sponge Start - Directly provide the updated distance instead of scheduling an update
-            if (facingState.getValue(LeavesBlockMixin_DisablePersistentScheduledUpdate.PERSISTENT)) {
-                return facingState.setValue(LeavesBlockMixin_DisablePersistentScheduledUpdate.DISTANCE, i);
+            if (facingState.hasProperty(LeavesBlockMixin_DisablePersistentScheduledUpdate.PERSISTENT) && facingState.getValue(LeavesBlockMixin_DisablePersistentScheduledUpdate.PERSISTENT)) {
+                return facingState.setValue(LeavesBlockMixin_DisablePersistentScheduledUpdate.DISTANCE, Math.min(7, i));
             }
             // Sponge End
             worldIn.getBlockTicks().scheduleTick(currentPos, (LeavesBlock) (Object) this, 1);

@@ -22,33 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.common.accessor.world.level.block;
 
-import com.google.common.collect.Lists;
-import org.spongepowered.asm.mixin.Mixins;
-import org.spongepowered.asm.mixin.connect.IMixinConnector;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-import java.util.List;
+@Mixin(LeavesBlock.class)
+public interface LeavesBlockAccessor {
 
-public abstract class LaunchMixinConnector implements IMixinConnector {
-
-    @Override
-    public final void connect() {
-        for (final String config : this.getMixinConfigs()) {
-            Mixins.addConfiguration(config);
-        }
+    @Invoker("getDistanceAt") static int invoker$getDistanceAt(final BlockState neighbor) {
+        throw new UntransformedInvokerError();
     }
 
-    public List<String> getMixinConfigs() {
-        return Lists.newArrayList(
-            "mixins.sponge.accessors.json",
-            "mixins.sponge.api.json",
-            "mixins.sponge.concurrent.json",
-            "mixins.sponge.core.json",
-            "mixins.sponge.exploit.json",
-            "mixins.sponge.inventory.json",
-            "mixins.sponge.optimization.json",
-            "mixins.sponge.tracker.json"
-        );
-    }
 }

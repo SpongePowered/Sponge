@@ -19,6 +19,7 @@
         "world.level.block.BedBlockAccessor",
         "world.level.block.DispenserBlockAccessor",
         "world.level.block.JukeboxBlockAccessor",
+        "world.level.block.LeavesBlockAccessor",
         "world.level.block.piston.PistonBaseBlockAccessor",
         "commands.CommandSourceStackAccessor",
         "commands.synchronization.EmptyArgumentSerializerAccessor",
