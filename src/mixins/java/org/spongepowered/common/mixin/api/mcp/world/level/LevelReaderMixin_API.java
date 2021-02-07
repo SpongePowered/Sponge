@@ -25,14 +25,11 @@
 package org.spongepowered.common.mixin.api.mcp.world.level;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -43,10 +40,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.HeightType;
-import org.spongepowered.api.world.ProtoWorld;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.biome.Biome;
@@ -59,24 +54,15 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.level.block.entity.BlockEntityAccessor;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.biome.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
 import org.spongepowered.common.world.volume.buffer.blockentity.ObjectArrayMutableBlockEntityBuffer;
-import org.spongepowered.common.world.volume.buffer.entity.ObjectArrayMutableEntityBuffer;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"RedundantTypeArguments", "unchecked", "RedundantCast"})
@@ -154,17 +140,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
         return new Random();
     }
 
-    // EntityVolume
 
-    @Override
-    default Optional<Entity> getEntity(final UUID uuid) {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
-
-    @Override
-    default Collection<? extends Player> getPlayers() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
 
     // ChunkVolume
 
@@ -306,19 +282,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
             // Ref
             (R) this,
             // IdentityFunction
-            shouldCarbonCopy ? (pos, tile) -> {
-                final CompoundTag nbt = tile.save(new CompoundTag());
-                final net.minecraft.world.level.block.entity.@Nullable BlockEntity cloned = tile.getType().create();
-                final net.minecraft.world.level.block.state.BlockState state = tile.getBlockState();
-                Objects.requireNonNull(
-                    cloned,
-                    () -> String.format("TileEntityType[%s] creates a null TileEntity!", BlockEntityType.getKey(tile.getType()))
-                ).load(state, nbt);
-                if (this instanceof Level) {
-                    ((BlockEntityAccessor) cloned).accessor$level((Level) this);
-                }
-                backingVolume.addBlockEntity(pos.getX(), pos.getY(), pos.getZ(), (BlockEntity) cloned);
-            } : (pos, tile) -> {},
+            VolumeStreamUtils.getBlockEntityOrCloneToBackingVolume(shouldCarbonCopy, backingVolume, this instanceof Level ? (Level) (Object) this : null),
             // ChunkAccessor
             VolumeStreamUtils.getChunkAccessorByStatus((LevelReader) (Object) this, options.loadingStyle().generateArea()),
             // TileEntity by block pos
@@ -335,55 +299,4 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
         );
     }
 
-    @Override
-    default VolumeStream<R, Entity> getEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
-        VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
-                Objects.requireNonNull(options, "options"));
-
-        final boolean shouldCarbonCopy = options.carbonCopy();
-        final Vector3i size = max.sub(min).add(1, 1 ,1);
-        final @MonotonicNonNull ObjectArrayMutableEntityBuffer backingVolume;
-        if (shouldCarbonCopy) {
-            backingVolume = new ObjectArrayMutableEntityBuffer(min, size);
-        } else {
-            backingVolume = null;
-        }
-        return VolumeStreamUtils.<R, Entity, net.minecraft.world.entity.Entity, ChunkAccess, UUID>generateStream(
-            min,
-            max,
-            options,
-            // Ref
-            (R) this,
-            // IdentityFunction
-            shouldCarbonCopy ? (pos, entity) -> {
-                final CompoundTag nbt = new CompoundTag();
-                entity.save(nbt);
-                final net.minecraft.world.entity.Entity cloned = entity.getType().create((Level) (LevelReader) (Object) this);
-                Objects.requireNonNull(
-                    cloned,
-                    () -> String.format("EntityType[%s] creates a null Entity!", EntityType.getKey(entity.getType()))
-                ).load(nbt);
-                backingVolume.spawnEntity((Entity) cloned);
-            } : (pos, tile) -> {},
-            // ChunkAccessor
-            VolumeStreamUtils.getChunkAccessorByStatus((LevelReader) (Object) this, options.loadingStyle().generateArea()),
-            // Entity -> UniqueID
-            (key, entity) -> entity.getUUID(),
-            // Entity Accessor
-            (chunk) -> chunk instanceof LevelChunk ? Arrays.stream(((LevelChunk) chunk).getEntitySections())
-                    .flatMap(Collection::stream)
-                    .filter(entity -> VecHelper.inBounds(entity.blockPosition(), min, max))
-                    .filter(entity -> !(entity instanceof net.minecraft.world.entity.player.Player))
-                    .map(entity -> new AbstractMap.SimpleEntry<>(entity.blockPosition(), entity))
-                : Stream.empty()
-            ,
-            // Filtered Position Entity Accessor
-            (entityUuid, world) -> {
-                final net.minecraft.world.entity.Entity tileEntity = shouldCarbonCopy
-                    ? (net.minecraft.world.entity.Entity) backingVolume.getEntity(entityUuid).orElse(null)
-                    : (net.minecraft.world.entity.Entity) ((ProtoWorld) world).getEntity(entityUuid).orElse(null);
-                return new Tuple<>(tileEntity.blockPosition(), tileEntity);
-            }
-        );
-    }
 }

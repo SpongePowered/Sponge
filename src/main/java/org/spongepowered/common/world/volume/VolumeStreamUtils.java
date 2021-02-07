@@ -25,35 +25,48 @@
 package org.spongepowered.common.world.volume;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.world.volume.Volume;
 import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
+import org.spongepowered.common.accessor.world.level.block.entity.BlockEntityAccessor;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.volume.buffer.blockentity.ObjectArrayMutableBlockEntityBuffer;
+import org.spongepowered.common.world.volume.buffer.entity.ObjectArrayMutableEntityBuffer;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.lang.ref.WeakReference;
 import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -161,6 +174,62 @@ public final class VolumeStreamUtils {
         }
     }
 
+    @NotNull
+    public static Stream<Map.Entry<BlockPos, net.minecraft.world.entity.Entity>> getEntitiesFromChunk(
+        Vector3i min, Vector3i max, LevelChunk chunk
+    ) {
+        return Arrays.stream(chunk.getEntitySections())
+            .flatMap(Collection::stream)
+            .filter(entity -> VecHelper.inBounds(entity.blockPosition(), min, max))
+            .filter(entity -> !(entity instanceof net.minecraft.world.entity.player.Player))
+            .map(entity -> new AbstractMap.SimpleEntry<>(
+                entity.blockPosition(), entity));
+    }
+
+    @NotNull
+    public static BiConsumer<UUID, net.minecraft.world.entity.Entity> getOrCloneEntityWithVolume(
+        final boolean shouldCarbonCopy,
+        final ObjectArrayMutableEntityBuffer backingVolume,
+        final Level level
+    ) {
+        return shouldCarbonCopy ? (pos, entity) -> {
+            final CompoundTag nbt = new CompoundTag();
+            entity.save(nbt);
+            final net.minecraft.world.entity.@Nullable Entity cloned = entity.getType().create(level);
+            Objects.requireNonNull(
+                cloned,
+                () -> String.format(
+                    "EntityType[%s] creates a null Entity!",
+                    net.minecraft.world.entity.EntityType.getKey(entity.getType())
+                )
+            ).load(nbt);
+            backingVolume.spawnEntity((Entity) cloned);
+        } : (pos, tile) -> {
+        };
+    }
+
+    @NotNull
+    public static BiConsumer<BlockPos, net.minecraft.world.level.block.entity.BlockEntity> getBlockEntityOrCloneToBackingVolume(
+        boolean shouldCarbonCopy, ObjectArrayMutableBlockEntityBuffer backingVolume, final @Nullable Level level
+    ) {
+        return shouldCarbonCopy ? (pos, tile) -> {
+            final CompoundTag nbt = tile.save(new CompoundTag());
+            final net.minecraft.world.level.block.entity.@Nullable BlockEntity cloned = tile.getType().create();
+            final BlockState state = tile.getBlockState();
+            Objects.requireNonNull(
+                cloned,
+                () -> String.format(
+                    "TileEntityType[%s] creates a null TileEntity!", BlockEntityType.getKey(tile.getType()))
+            ).load(state, nbt);
+
+            if (level != null) {
+                ((BlockEntityAccessor) cloned).accessor$level(level);
+            }
+            backingVolume.addBlockEntity(pos.getX(), pos.getY(), pos.getZ(), (BlockEntity) cloned);
+        } : (pos, tile) -> {
+        };
+    }
+
     private interface TriFunction<A, B, C, Out> {
         Out apply(A a, B b, C c);
     }
@@ -257,7 +326,6 @@ public final class VolumeStreamUtils {
         };
     }
 
-    @SuppressWarnings({"unchecked"})
     public static <R extends Volume, API, MC, Section, KeyReference> VolumeStream<R, API> generateStream(
         final Vector3i min,
         final Vector3i max,
@@ -275,10 +343,51 @@ public final class VolumeStreamUtils {
 
         // Generate the chunk position stream to iterate on, whether they're accessed immediately
         // or lazily is up to the stream options.
-        final Stream<ChunkPos> chunkPosStream = IntStream.range(chunkMin.getX(), chunkMax.getX() + 1)
+        final Stream<Section> sectionStream = IntStream.range(chunkMin.getX(), chunkMax.getX() + 1)
             .mapToObj(x -> IntStream.range(chunkMin.getZ(), chunkMax.getZ() + 1).mapToObj(z -> new ChunkPos(x, z)))
-            .flatMap(Function.identity());
+            .flatMap(Function.identity())
+            .map(pos -> chunkAccessor.apply(ref, pos));
 
+        return VolumeStreamUtils.generateStreamInternal(
+            options, ref, identityFunction, entityToKey, entityAccessor, filteredPositionEntityAccessor, worldSupplier,
+            sectionStream
+        );
+    }
+
+
+    public static <R extends Volume, API, MC, Section, KeyReference> VolumeStream<R, API> generateStream(
+        final StreamOptions options,
+        final R ref,
+        final Section section,
+        final Function<Section, Stream<Map.Entry<BlockPos, MC>>> entityAccessor,
+        final BiConsumer<KeyReference, MC> identityFunction,
+        final BiFunction<BlockPos, MC, KeyReference> entityToKey,
+        final BiFunction<KeyReference, R, Tuple<BlockPos, MC>> filteredPositionEntityAccessor
+
+    ) {
+        final Supplier<R> worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier(ref, "World");
+        // Generate the chunk position stream to iterate on, whether they're accessed immediately
+        // or lazily is up to the stream options.
+        final Stream<Section> sectionStream = Stream.of(section);
+        return VolumeStreamUtils.generateStreamInternal(
+            options,
+            ref,
+            identityFunction,
+            entityToKey,
+            entityAccessor,
+            filteredPositionEntityAccessor,
+            worldSupplier,
+            sectionStream
+        );
+    }
+
+    private static <R extends Volume, API, MC, Section, KeyReference> SpongeVolumeStream<R, API> generateStreamInternal(
+        StreamOptions options, R ref, BiConsumer<KeyReference, MC> identityFunction,
+        BiFunction<BlockPos, MC, KeyReference> entityToKey,
+        Function<Section, Stream<Map.Entry<BlockPos, MC>>> entityAccessor,
+        BiFunction<KeyReference, R, Tuple<BlockPos, MC>> filteredPositionEntityAccessor, Supplier<R> worldSupplier,
+        Stream<Section> sectionStream
+    ) {
         // This effectively creates a weakly referenced object supplier casting the MC variant to the API variant
         // without consideration, assuming the MC variant is always mixed in to implement the API variant.
         // Then constructs the VolumeElement
@@ -307,8 +416,7 @@ public final class VolumeStreamUtils {
         final Stream<KeyReference> filteredPosStream;
         if (options.loadingStyle().immediateLoading()) {
             final Set<KeyReference> availableTileEntityPositions = new LinkedHashSet<>();
-            chunkPosStream
-                .map(pos -> chunkAccessor.apply(ref, pos))
+            sectionStream
                 .map(entityAccessor)
                 .forEach((map) -> map.forEach(entry -> entryConsumer.accept(entry, availableTileEntityPositions)));
             filteredPosStream = availableTileEntityPositions.stream();
@@ -316,10 +424,10 @@ public final class VolumeStreamUtils {
             // This is where the entirety of stream lazy evaluation occurs:
             // Since we're operating on the chunk positions, we generate the Stream of keys
             // for each position, which in turn generate their filtered lists on demand.
-            filteredPosStream = chunkPosStream
-                .flatMap(chunkPos -> {
+            filteredPosStream = sectionStream
+                .flatMap(chunk -> {
                     final Set<KeyReference> blockEntityPoses = new LinkedHashSet<>();
-                    entityAccessor.apply(chunkAccessor.apply(ref, chunkPos))
+                    entityAccessor.apply(chunk)
                         .forEach(entry -> entryConsumer.accept(entry, blockEntityPoses));
                     return blockEntityPoses.stream();
                 });

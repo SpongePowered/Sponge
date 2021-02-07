@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.server.level;
 
+import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -83,6 +84,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -216,7 +218,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public Collection<ServerPlayer> getPlayers() {
-        return Collections.unmodifiableCollection((Collection<ServerPlayer>) (Collection<?>) this.shadow$players());
+        return Collections.unmodifiableCollection((Collection<ServerPlayer>) (Collection<?>) ImmutableList.copyOf(this.shadow$players()));
     }
 
     @Override
