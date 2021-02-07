@@ -123,15 +123,6 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
         }
     }
 
-    @Redirect(method = "removeTagKey",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundTag;remove(Ljava/lang/String;)V"))
-    private void impl$nullStackCompoundIfEmptyAfterRemoval(final CompoundTag compound, final String key) {
-        compound.remove(key);
-        if (compound.isEmpty()) {
-            this.tag = null;
-        }
-    }
-
     @Inject(method = "setTag", at = @At("RETURN"))
     private void impl$onSet(final CompoundTag compound, final CallbackInfo callbackInfo) {
         if (this.shadow$getTag() != compound) {
