@@ -116,34 +116,57 @@ public final class Constants {
 
     public static final class Sponge {
 
-        public static final int SPONGE_DATA_VERSION = 1;
+        public static final class Data {
+
+            /**
+             * Class based custom data.
+             */
+            @Deprecated
+            public static final class V1 {
+                public static final String CUSTOM_DATA_CLASS = "DataClass";
+                public static final DataQuery DATA_CLASS = DataQuery.of(CUSTOM_DATA_CLASS);
+                public static final String DATA_VERSION = "DataVersion";
+            }
+
+            /**
+             * Data Manipulator with DataId based custom data
+             */
+            @Deprecated
+            public static final class V2 {
+                public static final DataQuery MANIPULATOR_DATA = DataQuery.of("ManipulatorData");
+                public static final DataQuery MANIPULATOR_ID = DataQuery.of("ManipulatorId");
+
+                public static final String FAILED_CUSTOM_DATA = "FailedData";
+
+                public static final String CUSTOM_MANIPULATOR_TAG_LIST = "CustomManipulators";
+                public static final DataQuery CUSTOM_MANIPULATOR_LIST = of(V2.CUSTOM_MANIPULATOR_TAG_LIST);
+
+                public static final String SPONGE_DATA = "SpongeData";
+                public static final DataQuery SPONGE_DATA_ROOT = of(V2.SPONGE_DATA);
+            }
+
+            /**
+             * {@link org.spongepowered.api.data.persistence.DataStore} based data
+             */
+            public static final class V3 {
+                public static final DataQuery SPONGE_DATA_ROOT = DataQuery.of("sponge-data");
+                public static final DataQuery CONTENT_VERSION = DataQuery.of("version");
+                public static final DataQuery CONTENT = DataQuery.of("content");
+            }
+        }
+
         public static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
-        public static final String DATA_VERSION = "DataVersion";
-        public static final String CUSTOM_DATA_CLASS = "DataClass";
-        public static final String CUSTOM_DATA = "ManipulatorData";
-        public static final String FAILED_CUSTOM_DATA = "FailedData";
-        // These are Sponge's NBT tag keys
-        public static final String SPONGE_DATA = "SpongeData";
-        public static final DataQuery SPONGE_ROOT = of(Sponge.SPONGE_DATA);
+
         public static final String SPONGE_ENTITY_CREATOR = "Creator";
         public static final String SPONGE_ENTITY_NOTIFIER = "Notifier";
         public static final String SPONGE_BLOCK_POS_TABLE = "BlockPosTable";
         public static final String SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
-        public static final String CUSTOM_MANIPULATOR_TAG_LIST = "CustomManipulators";
-        public static final DataQuery CUSTOM_MANIPULATOR_LIST = of(Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
-        public static final String MANIPULATOR_ID = "ManipulatorId";
         // General DataQueries
         public static final DataQuery UNSAFE_NBT = of("UnsafeData");
         public static final DataQuery DATA_MANIPULATORS = of("Data");
-        @Deprecated public static final DataQuery DATA_CLASS = DataQuery.of(Constants.Sponge.CUSTOM_DATA_CLASS);
-        public static final DataQuery DATA_ID = DataQuery.of(Constants.Sponge.MANIPULATOR_ID);
-        public static final DataQuery MANIPULATOR_DATA = DataQuery.of(Constants.Sponge.CUSTOM_DATA);
         // Snapshots
         public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
         public static final DataQuery SNAPSHOT_TILE_DATA = of("TileEntityData");
-        public static final int CLASS_BASED_CUSTOM_DATA = 1;
-        public static final int CUSTOM_DATA_WITH_DATA_IDS = 2;
-        public static final int CURRENT_CUSTOM_DATA = Sponge.CUSTOM_DATA_WITH_DATA_IDS;
 
         /**
          * Modifies bits in an integer.
@@ -965,22 +988,22 @@ public final class Constants {
         public static CompoundTag filterSpongeCustomData(final CompoundTag rootCompound) {
             if (rootCompound.contains(Forge.FORGE_DATA, NBT.TAG_COMPOUND)) {
                 final CompoundTag forgeCompound = rootCompound.getCompound(Forge.FORGE_DATA);
-                if (forgeCompound.contains(Sponge.SPONGE_DATA, NBT.TAG_COMPOUND)) {
+                if (forgeCompound.contains(Sponge.Data.V2.SPONGE_DATA, NBT.TAG_COMPOUND)) {
                     NBT.cleanseInnerCompound(forgeCompound);
                 }
                 if (forgeCompound.isEmpty()) {
                     rootCompound.remove(Forge.FORGE_DATA);
                 }
-            } else if (rootCompound.contains(Sponge.SPONGE_DATA, NBT.TAG_COMPOUND)) {
+            } else if (rootCompound.contains(Sponge.Data.V2.SPONGE_DATA, NBT.TAG_COMPOUND)) {
                 NBT.cleanseInnerCompound(rootCompound);
             }
             return rootCompound;
         }
 
         private static void cleanseInnerCompound(final CompoundTag compound) {
-            final CompoundTag inner = compound.getCompound(Sponge.SPONGE_DATA);
+            final CompoundTag inner = compound.getCompound(Sponge.Data.V2.SPONGE_DATA);
             if (inner.isEmpty()) {
-                compound.remove(Sponge.SPONGE_DATA);
+                compound.remove(Sponge.Data.V2.SPONGE_DATA);
             }
         }
 
@@ -1035,7 +1058,7 @@ public final class Constants {
 
         public static final String PERSISTED_NBT_TAG = "PlayerPersisted";
         public static final String FORGE_DATA = "ForgeData";
-        public static final DataQuery ROOT = of(Forge.FORGE_DATA);
+        public static final DataQuery FORGE_DATA_ROOT = of(Forge.FORGE_DATA);
         public static final String FORGE_CAPS = "ForgeCaps";
         /**
          * Cross compatibility so that Sponge's multi-world format is in sync

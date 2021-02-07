@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.entity.item.BoatBridge;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
@@ -50,35 +51,9 @@ public abstract class BoatMixin extends EntityMixin implements BoatBridge {
         return this.impl$maxSpeed;
     }
 
-    @Override
-    public void impl$readFromSpongeCompound(final CompoundTag compound) {
-        super.impl$readFromSpongeCompound(compound);
-        if (compound.contains(Constants.Entity.Boat.BOAT_MAX_SPEED)) {
-            this.impl$maxSpeed = compound.getFloat(Constants.Entity.Boat.BOAT_MAX_SPEED);
-        }
-        if (compound.contains(Constants.Entity.Boat.BOAT_MOVE_ON_LAND)) {
-            this.impl$moveOnLand = compound.getBoolean(Constants.Entity.Boat.BOAT_MOVE_ON_LAND);
-        }
-        if (compound.contains(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED)) {
-            this.impl$occupiedDecelerationSpeed = compound.getDouble(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED);
-        }
-        if (compound.contains(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED)) {
-            this.impl$unoccupiedDecelerationSpeed = compound.getDouble(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED);
-        }
-    }
-
     @Redirect(method = "getGroundFriction", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;getFriction()F"))
     private float impl$getBlockSlipperinessIfBoatIsNotOverridingMovingOnLand(final Block block) {
         return this.impl$moveOnLand ? Blocks.ICE.getFriction() : block.getFriction();
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundTag compound) {
-        super.impl$writeToSpongeCompound(compound);
-        compound.putFloat(Constants.Entity.Boat.BOAT_MAX_SPEED, this.impl$maxSpeed);
-        compound.putBoolean(Constants.Entity.Boat.BOAT_MOVE_ON_LAND, this.impl$moveOnLand);
-        compound.putDouble(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED, this.impl$occupiedDecelerationSpeed);
-        compound.putDouble(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED, this.impl$unoccupiedDecelerationSpeed);
     }
 
     @Override
@@ -99,6 +74,11 @@ public abstract class BoatMixin extends EntityMixin implements BoatBridge {
     @Override
     public void bridge$setMoveOnLand(boolean impl$moveOnLand) {
         this.impl$moveOnLand = impl$moveOnLand;
+        if (impl$moveOnLand) {
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.CAN_MOVE_ON_LAND, true);
+        } else {
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.CAN_MOVE_ON_LAND);
+        }
     }
 
     @Override
@@ -109,6 +89,11 @@ public abstract class BoatMixin extends EntityMixin implements BoatBridge {
     @Override
     public void bridge$setOccupiedDecelerationSpeed(double impl$occupiedDecelerationSpeed) {
         this.impl$occupiedDecelerationSpeed = impl$occupiedDecelerationSpeed;
+        if (impl$occupiedDecelerationSpeed == Constants.Entity.Boat.OCCUPIED_DECELERATION_SPEED) {
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.OCCUPIED_DECELERATION);
+        } else {
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.OCCUPIED_DECELERATION, impl$occupiedDecelerationSpeed);
+        }
     }
 
     @Override
@@ -119,5 +104,10 @@ public abstract class BoatMixin extends EntityMixin implements BoatBridge {
     @Override
     public void bridge$setUnoccupiedDecelerationSpeed(double impl$unoccupiedDecelerationSpeed) {
         this.impl$unoccupiedDecelerationSpeed = impl$unoccupiedDecelerationSpeed;
+        if (impl$unoccupiedDecelerationSpeed == Constants.Entity.Boat.UNOCCUPIED_DECELERATION_SPEED) {
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.UNOCCUPIED_DECELERATION);
+        } else {
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.UNOCCUPIED_DECELERATION, impl$unoccupiedDecelerationSpeed);
+        }
     }
 }

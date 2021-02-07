@@ -22,31 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.persistence.datastore;
+package org.spongepowered.common.data;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.util.Tuple;
+import org.spongepowered.api.data.value.Value;
 
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public final class SpongeCustomDataStore extends SpongeDataStore {
+public final class ByteToBooleanContentUpdater implements DataContentUpdater {
 
-    private ResourceKey key;
+    private final int from;
+    private final int to;
+    private final List<DataQuery> queries;
 
-    public SpongeCustomDataStore(ResourceKey key, final Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> queriesByKey,
-            final Collection<Type> tokens) {
-        super(queriesByKey, tokens);
-        this.key = key;
+    public ByteToBooleanContentUpdater(int from, int to, Key<Value<Boolean>>... booleanKeys) {
+        this.from = from;
+        this.to = to;
+        this.queries = Arrays.stream(booleanKeys).map(k -> DataQuery.of(k.getKey().getValue())).collect(Collectors.toList());
     }
 
-    public ResourceKey getCustomDataKey() {
-        return this.key;
+    @Override
+    public int getInputVersion() {
+        return this.from;
+    }
+
+    @Override
+    public int getOutputVersion() {
+        return this.to;
+    }
+
+    @Override
+    public DataView update(DataView content) {
+        for (DataQuery query : this.queries) {
+            final byte aByte = content.getByte(query).orElse((byte) 1);
+            content.remove(query); // Delete boolean saved as byte
+            content.set(query, aByte == 1);
+        }
+        return content;
     }
 }

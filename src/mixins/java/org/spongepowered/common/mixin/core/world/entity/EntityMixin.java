@@ -52,6 +52,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.Team;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -78,18 +79,18 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
-import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.event.ShouldFire;
@@ -98,7 +99,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.hooks.PlatformHooks;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.NetherPortalType;
@@ -192,12 +192,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     // @formatter:on
 
+    @Shadow @Final private EntityType<?> type;
     private boolean impl$isConstructing = true;
-    private boolean impl$untargetable = false;
+    private boolean impl$vanishPreventsTargeting = false;
     private boolean impl$isVanished = false;
     private boolean impl$pendingVisibilityUpdate = false;
     private int impl$visibilityTicks = 0;
-    private boolean impl$collision = true;
+    private boolean impl$vanishIgnoresCollision = true;
     private boolean impl$invulnerable = false;
     private boolean impl$transient = false;
     private boolean impl$shouldFireRepositionEvent = true;
@@ -342,12 +343,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     public void bridge$setInvisible(final boolean invisible) {
         this.shadow$setInvisible(invisible);
         if (invisible) {
-            final CompoundTag spongeData = this.data$getSpongeData();
-            spongeData.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.IS_INVISIBLE, true);
         } else {
-            if (this.data$hasSpongeData()) {
-                this.data$getSpongeData().remove(Constants.Sponge.Entity.IS_INVISIBLE);
-            }
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.IS_INVISIBLE);
         }
     }
 
@@ -362,36 +360,42 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         this.impl$pendingVisibilityUpdate = true;
         this.impl$visibilityTicks = 20;
         if (vanished) {
-            final CompoundTag spongeData = this.data$getSpongeData();
-            spongeData.putBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.VANISH, true);
         } else {
-            if (this.data$hasSpongeData()) {
-                final CompoundTag spongeData = this.data$getSpongeData();
-                spongeData.remove(Constants.Sponge.Entity.IS_VANISHED);
-                spongeData.remove(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
-                spongeData.remove(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
-            }
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH);
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH_IGNORES_COLLISION);
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH_PREVENTS_TARGETING);
         }
     }
 
     @Override
-    public boolean bridge$isUncollideable() {
-        return this.impl$collision;
+    public boolean bridge$isVanishIgnoresCollision() {
+        return this.impl$vanishIgnoresCollision;
     }
 
     @Override
-    public void bridge$setUncollideable(final boolean prevents) {
-        this.impl$collision = prevents;
+    public void bridge$setVanishIgnoresCollision(final boolean vanishIgnoresCollision) {
+        this.impl$vanishIgnoresCollision = vanishIgnoresCollision;
+        if (vanishIgnoresCollision) {
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH_IGNORES_COLLISION);
+        } else {
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.VANISH_IGNORES_COLLISION, false);
+        }
     }
 
     @Override
-    public boolean bridge$isUntargetable() {
-        return this.impl$untargetable;
+    public boolean bridge$isVanishPreventsTargeting() {
+        return this.impl$vanishPreventsTargeting;
     }
 
     @Override
-    public void bridge$setUntargetable(final boolean untargetable) {
-        this.impl$untargetable = untargetable;
+    public void bridge$setVanishPreventsTargeting(final boolean vanishPreventsTargeting) {
+        this.impl$vanishPreventsTargeting = vanishPreventsTargeting;
+        if (vanishPreventsTargeting) {
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.VANISH_PREVENTS_TARGETING, true);
+        } else {
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH_PREVENTS_TARGETING);
+        }
     }
 
     @Override
@@ -402,6 +406,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Override
     public void bridge$setInvulnerable(final boolean value) {
         this.impl$invulnerable = value;
+        if (value) {
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.INVULNERABLE, true);
+        } else {
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.INVULNERABLE);
+        }
     }
 
     @Override
@@ -1097,32 +1106,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
-    // TODO overrides for ForgeData
-    // @Shadow private CompoundNBT customEntityData;
-    // @Override CompoundNBT data$getForgeData()
-    // @Override CompoundNBT data$getForgeData()
-    // @Override CompoundNBT data$hasForgeData()
-    // @Override CompoundNBT cleanEmptySpongeData()
-
-    /**
-     * Hooks into vanilla's writeToNBT to call {@link #impl$writeToSpongeCompound}.
-     *
-     * <p> This makes it easier for other entity mixins to override writeToNBT
-     * without having to specify the <code>@Inject</code> annotation. </p>
-     *
-     * @param compound The compound vanilla writes to (unused because we write to SpongeData)
-     * @param ci (Unused) callback info
-     */
-    @Inject(method = "saveWithoutId", at = @At("HEAD"))
-    private void impl$spongeWriteToNBT(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> ci) {
-        CustomDataHolderBridge.syncCustomToTag(this);
-        this.impl$writeToSpongeCompound(this.data$getSpongeData());
-    }
-
-
     @Inject(method = "saveWithoutId", at = @At("RETURN"))
     private void impl$WriteSpongeDataToCompound(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> ci) {
-        if (this.data$hasSpongeData()) {
+        if (DataUtil.syncDataToTag(this)) {
             compound.merge(this.data$getCompound());
         }
     }
@@ -1131,58 +1117,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private void impl$ReadSpongeDataFromCompound(final CompoundTag compound, final CallbackInfo ci) {
         // TODO If we are in Forge data is already present
         this.data$setCompound(compound); // For vanilla we set the incoming nbt
-        if (this.data$hasSpongeData()) {
-            this.impl$readFromSpongeCompound(this.data$getSpongeData()); // Read extra SpongeData
-        }
         // Deserialize custom data...
-        CustomDataHolderBridge.syncTagToCustom(this);
+        DataUtil.syncTagToData(this);
         this.data$setCompound(null); // done reading
-    }
-
-    /**
-     * Read extra data (SpongeData) from the entity's NBT tag. This is
-     * meant to be overridden for each impl based mixin that has to store
-     * custom fields based on it's implementation. Examples can include:
-     * vanishing booleans, maximum air, maximum boat speeds and modifiers,
-     * etc.
-     *
-     * @param compound The SpongeData compound to read from
-     */
-    protected void impl$readFromSpongeCompound(final CompoundTag compound) {
-        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.contains(Constants.Sponge.Entity.CAN_GRIEF)) {
-            ((GrieferBridge) this).bridge$setCanGrief(compound.getBoolean(Constants.Sponge.Entity.CAN_GRIEF));
-        }
-        if (compound.contains(Constants.Sponge.Entity.IS_VANISHED, Constants.NBT.TAG_BYTE)) {
-            this.bridge$setVanished(compound.getBoolean(Constants.Sponge.Entity.IS_VANISHED));
-            this.bridge$setUncollideable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE));
-            this.bridge$setUntargetable(compound.getBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE));
-        }
-        if (compound.contains(Constants.Sponge.Entity.IS_INVISIBLE, Constants.NBT.TAG_BYTE)) {
-            this.bridge$setInvisible(compound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE));
-        }
-    }
-
-    /**
-     * Write extra data (SpongeData) to the entity's NBT tag. This is
-     * meant to be overridden for each impl based mixin that has to store
-     * custom fields based on it's implementation. Examples can include:
-     * vanishing booleans, maximum air, maximum boat speeds and modifiers,
-     * etc.
-     *
-     * @param compound The SpongeData compound to write to
-     */
-    protected void impl$writeToSpongeCompound(final CompoundTag compound) {
-        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && ((GrieferBridge) this).bridge$canGrief()) {
-            compound.putBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
-        }
-        if (this.bridge$isVanished()) {
-            compound.putBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
-            compound.putBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, this.bridge$isUncollideable());
-            compound.putBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, this.bridge$isUntargetable());
-        }
-        if (this.shadow$isInvisible()) {
-            compound.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
-        }
     }
 
     /**

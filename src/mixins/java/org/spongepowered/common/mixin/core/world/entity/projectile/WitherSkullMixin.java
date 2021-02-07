@@ -55,6 +55,8 @@ import net.minecraft.world.level.Explosion.BlockInteraction;
 public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin implements WitherSkullEntityBridge, ExplosiveBridge {
 
     private int impl$explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
+
+    // TODO Key not implemented
     private float impl$damage = 0.0f;
     private boolean impl$damageSet = false;
 
@@ -68,25 +70,6 @@ public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin im
             return Constants.Entity.WitherSkull.DEFAULT_WITHER_CREATED_SKULL_DAMAGE;
         }
         return Constants.Entity.WitherSkull.DEFAULT_NO_SOURCE_SKULL_DAMAGE;
-    }
-
-    @Override
-    public void impl$readFromSpongeCompound(final CompoundTag compound) {
-        super.impl$readFromSpongeCompound(compound);
-        if (compound.contains(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.impl$damage = compound.getFloat(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
-            this.impl$damageSet = true;
-        }
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundTag compound) {
-        super.impl$writeToSpongeCompound(compound);
-        if (this.impl$damageSet) {
-            compound.putFloat(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damage);
-        } else {
-            compound.remove(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
-        }
     }
 
     // Explosive Impl

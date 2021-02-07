@@ -27,15 +27,22 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
+import org.spongepowered.common.data.ByteToBooleanContentUpdater;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.Constants;
 
 public final class AbstractMinecartData {
 
     private AbstractMinecartData() {
     }
+
+    private static final DataContentUpdater MINECART_UPDATER_BYTE_TO_BOOL_FIX = new ByteToBooleanContentUpdater(1, 2, Keys.SLOWS_UNOCCUPIED);
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
@@ -72,6 +79,13 @@ public final class AbstractMinecartData {
                         .get(MinecartEntityBridge::bridge$getMaxSpeed)
                         .set(MinecartEntityBridge::bridge$setMaxSpeed)
                     ;
+        final ResourceKey minecartDataStoreKey = ResourceKey.sponge("minecart");
+        registrator.spongeDataStore(minecartDataStoreKey, 2, new DataContentUpdater[]{AbstractMinecartData.MINECART_UPDATER_BYTE_TO_BOOL_FIX}, MinecartEntityBridge.class,
+                Keys.POTENTIAL_MAX_SPEED, Keys.SLOWS_UNOCCUPIED, Keys.AIRBORNE_VELOCITY_MODIFIER, Keys.DERAILED_VELOCITY_MODIFIER);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Minecart.MAX_SPEED, minecartDataStoreKey, Keys.POTENTIAL_MAX_SPEED);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Minecart.SLOW_WHEN_EMPTY, minecartDataStoreKey, Keys.SLOWS_UNOCCUPIED);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Minecart.AIRBORNE_MODIFIER, minecartDataStoreKey, Keys.AIRBORNE_VELOCITY_MODIFIER);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Minecart.DERAILED_MODIFIER, minecartDataStoreKey, Keys.DERAILED_VELOCITY_MODIFIER);
     }
     // @formatter:on
 

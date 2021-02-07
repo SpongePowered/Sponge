@@ -49,7 +49,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
@@ -96,7 +96,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         final ImmutableList.Builder<DataManipulator.Immutable> builder = ImmutableList.builder();
         final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
-        final DataManipulator.Mutable customData = ((CustomDataHolderBridge) itemStack).bridge$getManipulator();
+        final DataManipulator.Mutable customData = ((SpongeDataHolderBridge) itemStack).bridge$getManipulator();
         builder.add(customData.asImmutable());
         keyBuilder.addAll(customData.getKeys());
         valueBuilder.addAll(customData.getValues());
@@ -111,10 +111,10 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             compound = compound.copy();
         }
         if (compound != null) {
-            if (compound.contains(Constants.Sponge.SPONGE_DATA)) {
-                final CompoundTag spongeCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
-                if (spongeCompound.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
-                    spongeCompound.remove(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
+            if (compound.contains(Constants.Sponge.Data.V2.SPONGE_DATA)) {
+                final CompoundTag spongeCompound = compound.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);
+                if (spongeCompound.contains(Constants.Sponge.Data.V2.CUSTOM_MANIPULATOR_TAG_LIST)) {
+                    spongeCompound.remove(Constants.Sponge.Data.V2.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
             Constants.NBT.filterSpongeCustomData(compound);

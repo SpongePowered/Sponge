@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 public final class DataStoreRegistry {
 
-    private final DataStore NO_OP_DATASTORE = new SpongeDataStore(Collections.emptyMap(), Collections.emptyList());
+    private final DataStore NO_OP_DATASTORE = new VanillaDataStore(Collections.emptyMap(), Collections.emptyList());
     private final Multimap<Key<?>, DataStore> dataStoreByValueKey = HashMultimap.create();
     private final Multimap<ResourceKey, DataStore> dataStoreByDataStoreKey = HashMultimap.create();
     private final List<DataStore> allDataStores = new ArrayList<>();
@@ -56,8 +56,8 @@ public final class DataStoreRegistry {
 
     public void register(final DataStore dataStore, Iterable<Key<?>> keys) {
         keys.forEach(k -> this.dataStoreByValueKey.put(k, dataStore));
-        if (dataStore instanceof SpongeCustomDataStore) {
-            final ResourceKey customDataKey = ((SpongeCustomDataStore) dataStore).getCustomDataKey();
+        if (dataStore instanceof SpongeDataStore) {
+            final ResourceKey customDataKey = ((SpongeDataStore) dataStore).getDataStoreKey();
             this.dataStoreByDataStoreKey.put(customDataKey, dataStore);
         }
         this.allDataStores.add(dataStore);

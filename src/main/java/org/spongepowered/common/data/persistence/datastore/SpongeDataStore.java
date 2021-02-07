@@ -24,11 +24,14 @@
  */
 package org.spongepowered.common.data.persistence.datastore;
 
-import org.spongepowered.api.data.DataManipulator;
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.persistence.DataStore;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.data.DataUpdaterDelegate;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -37,39 +40,52 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class SpongeDataStore implements DataStore {
+public final class SpongeDataStore extends VanillaDataStore {
 
-    private Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>>  queriesByKey;
-    private Collection<Type> tokens;
+    private ResourceKey key;
+    private int version;
+    private DataContentUpdater[] updaters;
 
-    public SpongeDataStore(final Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> queriesByKey,
-            final Collection<Type> tokens) {
-        this.queriesByKey = queriesByKey;
-        this.tokens = tokens;
+    public SpongeDataStore(ResourceKey key, final Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> queriesByKey,
+            final Collection<Type> tokens, int version, DataContentUpdater[] updaters) {
+        super(queriesByKey, tokens);
+        this.key = key;
+        this.version = version;
+        this.updaters = updaters;
     }
 
-    @Override
-    public Collection<Type> getSupportedTypes() {
-        return this.tokens;
+    public ResourceKey getDataStoreKey() {
+        return this.key;
     }
 
-    @Override
-    @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public DataView serialize(DataManipulator dataManipulator, DataView view) {
-        for (Map.Entry<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> entry : this.queriesByKey.entrySet()) {
-            final BiConsumer serializer = entry.getValue().getFirst();
-            dataManipulator.get((Key) entry.getKey()).ifPresent(value -> serializer.accept(view, value));
+    public int getVersion() {
+        return version;
+    }
+
+    public Optional<DataContentUpdater> getUpdaterFor(Integer fromVersion) {
+        int toVersion = this.version;
+        ImmutableList.Builder<DataContentUpdater> builder = ImmutableList.builder();
+        int version = fromVersion;
+        for (DataContentUpdater updater : this.updaters) {
+            if (updater.getInputVersion() == version) {
+                if (updater.getOutputVersion() > toVersion) {
+                    continue;
+                }
+                version = updater.getOutputVersion();
+                builder.add(updater);
+            }
         }
-        return view;
-    }
-
-    @Override
-    @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public void deserialize(DataManipulator.Mutable dataManipulator, DataView view) {
-        for (Map.Entry<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> entry : this.queriesByKey.entrySet()) {
-            final Function<DataView, Optional<?>> deserializer = entry.getValue().getSecond();
-            deserializer.apply(view).ifPresent(value -> dataManipulator.set((Key) entry.getKey(), value));
+        if (version < toVersion || version > toVersion) { // There wasn't a registered updater for the version being requested
+            final String message = "Failed to update content for datastore: " + this.key.asString()
+                    + "\nUpdating from " + fromVersion + " to " + toVersion + " is impossible."
+                    + "\nPlease notify the plugin author of this error.";
+            SpongeCommon.getLogger().warn(message);
+            return Optional.empty();
         }
+        final ImmutableList<DataContentUpdater> updatersList = builder.build();
+        if (updatersList.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(new DataUpdaterDelegate(updatersList, fromVersion, toVersion));
     }
-
 }

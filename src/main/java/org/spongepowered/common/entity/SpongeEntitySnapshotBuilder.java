@@ -39,7 +39,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.data.holder.SimpleNBTDataHolder;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
@@ -118,7 +118,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         this.scale = entity.getTransform().getScale();
         this.entityType = entity.getType();
         this.uniqueId = entity.getUniqueId();
-        this.manipulator = ((CustomDataHolderBridge) entity).bridge$getManipulator().copy();
+        this.manipulator = ((SpongeDataHolderBridge) entity).bridge$getManipulator().copy();
         this.compound = new CompoundTag();
         ((net.minecraft.world.entity.Entity) entity).saveWithoutId(this.compound);
         return this;

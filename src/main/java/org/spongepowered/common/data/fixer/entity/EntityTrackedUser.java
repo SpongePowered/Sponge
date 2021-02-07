@@ -45,10 +45,10 @@ public final class EntityTrackedUser extends DataFix {
     protected TypeRewriteRule makeRule() {
         final Type<?> entityType = this.getInputSchema().getType(References.ENTITY);
         final Type<?> forgeDataType = entityType.findFieldType(Constants.Forge.FORGE_DATA);
-        final Type<?> spongeDataType = forgeDataType.findFieldType(Constants.Sponge.SPONGE_DATA);
+        final Type<?> spongeDataType = forgeDataType.findFieldType(Constants.Sponge.Data.V2.SPONGE_DATA);
 
         final OpticFinder<?> forgeDataFinder = DSL.fieldFinder(Constants.Forge.FORGE_DATA, forgeDataType);
-        final OpticFinder<?> spongeDataFinder = DSL.fieldFinder(Constants.Sponge.SPONGE_DATA, spongeDataType);
+        final OpticFinder<?> spongeDataFinder = DSL.fieldFinder(Constants.Sponge.Data.V2.SPONGE_DATA, spongeDataType);
 
         return TypeRewriteRule.seq(this.fixTracked(forgeDataFinder, spongeDataFinder, spongeDataType, Constants.Sponge.SPONGE_ENTITY_CREATOR),
                                    this.fixTracked(forgeDataFinder, spongeDataFinder, spongeDataType, Constants.Sponge.SPONGE_ENTITY_NOTIFIER));

@@ -34,11 +34,11 @@ public interface VanishableBridge {
 
     void bridge$setVanished(boolean vanished);
 
-    boolean bridge$isUncollideable();
+    boolean bridge$isVanishIgnoresCollision();
 
-    void bridge$setUncollideable(boolean uncollideable);
+    void bridge$setVanishIgnoresCollision(boolean uncollideable);
 
-    boolean bridge$isUntargetable();
+    boolean bridge$isVanishPreventsTargeting();
 
-    void bridge$setUntargetable(boolean untargetable);
+    void bridge$setVanishPreventsTargeting(boolean untargetable);
 }
