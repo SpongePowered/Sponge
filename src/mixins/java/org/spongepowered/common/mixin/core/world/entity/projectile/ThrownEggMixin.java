@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.projectile.ThrownEgg;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.common.util.Constants;
 
 @Mixin(ThrownEgg.class)
 public abstract class ThrownEggMixin extends ThrowableProjectileMixin {
 
+    // TODO Key not implemented
     public double impl$damageAmount;
 
     @ModifyArg(method = "onHitEntity",
@@ -44,17 +43,4 @@ public abstract class ThrownEggMixin extends ThrowableProjectileMixin {
         return (float) this.impl$damageAmount;
     }
 
-    @Override
-    public void impl$readFromSpongeCompound(final CompoundTag compound) {
-        super.impl$readFromSpongeCompound(compound);
-        if (compound.contains(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.impl$damageAmount = compound.getDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
-        }
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundTag compound) {
-        super.impl$writeToSpongeCompound(compound);
-        compound.putDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damageAmount);
-    }
 }

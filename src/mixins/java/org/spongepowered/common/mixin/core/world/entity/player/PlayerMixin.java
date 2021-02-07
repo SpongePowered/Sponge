@@ -153,7 +153,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerEnt
 
     @Override
     public boolean bridge$affectsSpawning() {
-        return this.impl$affectsSpawning && !this.shadow$isSpectator() && !this.bridge$isUntargetable();
+        return this.impl$affectsSpawning && !this.shadow$isSpectator() && !this.bridge$isVanishPreventsTargeting();
     }
 
     @Override

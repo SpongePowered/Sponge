@@ -52,22 +52,22 @@ public abstract class AbstractClientPlayerMixin extends PlayerMixin {
     }
 
     @Override
-    public boolean bridge$isUncollideable() {
+    public boolean bridge$isVanishIgnoresCollision() {
         return false;
     }
 
     @Override
-    public void bridge$setUncollideable(boolean uncollideable) {
+    public void bridge$setVanishIgnoresCollision(boolean uncollideable) {
 
     }
 
     @Override
-    public boolean bridge$isUntargetable() {
+    public boolean bridge$isVanishPreventsTargeting() {
         return false;
     }
 
     @Override
-    public void bridge$setUntargetable(boolean untargetable) {
+    public void bridge$setVanishPreventsTargeting(boolean untargetable) {
 
     }
 }

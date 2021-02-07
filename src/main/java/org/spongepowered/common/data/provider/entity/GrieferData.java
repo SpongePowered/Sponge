@@ -25,10 +25,16 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.data.ByteToBooleanContentUpdater;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.Constants;
 
 public final class GrieferData {
+
+    private static final DataContentUpdater CAN_GRIEF_UPDATER_BYTE_TO_BOOL_FIX = new ByteToBooleanContentUpdater(1, 2, Keys.CAN_GRIEF);
 
     private GrieferData() {
     }
@@ -41,6 +47,8 @@ public final class GrieferData {
                         .get(GrieferBridge::bridge$canGrief)
                         .set(GrieferBridge::bridge$setCanGrief)
                         .supports(GrieferBridge::bridge$isGriefer);
+        registrator.spongeDataStore(Keys.CAN_GRIEF.getKey(), 2, new DataContentUpdater[]{GrieferData.CAN_GRIEF_UPDATER_BYTE_TO_BOOL_FIX}, GrieferBridge.class, Keys.CAN_GRIEF);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.CAN_GRIEF, Keys.CAN_GRIEF.getKey(), Keys.CAN_GRIEF);
     }
     // @formatter:on
 }

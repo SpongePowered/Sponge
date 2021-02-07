@@ -186,8 +186,8 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
 
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final CompoundTag compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
-            if (compound.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-                compound.remove(Constants.Sponge.SPONGE_DATA);
+            if (compound.contains(Constants.Sponge.Data.V2.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+                compound.remove(Constants.Sponge.Data.V2.SPONGE_DATA);
             }
             if (!compound.isEmpty()) {
                 this.compound = compound;

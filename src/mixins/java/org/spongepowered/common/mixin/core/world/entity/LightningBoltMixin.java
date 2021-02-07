@@ -25,6 +25,10 @@
 package org.spongepowered.common.mixin.core.world.entity;
 
 import com.google.common.collect.Lists;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -41,22 +45,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(LightningBolt.class)
 public abstract class LightningBoltMixin extends EntityMixin {
 
     private final List<Entity> impl$struckEntities = Lists.newArrayList();
-    private boolean impl$effect = false;
+    private boolean impl$effect = false; // TODO never set?
 
     @Redirect(method = "spawnFire",
         at = @At(value = "INVOKE",
@@ -119,18 +117,5 @@ public abstract class LightningBoltMixin extends EntityMixin {
         }
     }
 
-    @Override
-    public void impl$readFromSpongeCompound(final CompoundTag compound) {
-        super.impl$readFromSpongeCompound(compound);
-        if (compound.contains(Constants.Entity.LIGHTNING_EFFECT)) {
-            this.impl$effect = compound.getBoolean(Constants.Entity.LIGHTNING_EFFECT);
-        }
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundTag compound) {
-        super.impl$writeToSpongeCompound(compound);
-        compound.putBoolean(Constants.Entity.LIGHTNING_EFFECT, this.impl$effect);
-    }
 
 }

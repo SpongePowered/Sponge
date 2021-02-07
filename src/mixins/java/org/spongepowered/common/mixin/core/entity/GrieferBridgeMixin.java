@@ -24,15 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.WitherSkull;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.util.Constants;
 
 @Mixin({LivingEntity.class, LargeFireball.class, WitherSkull.class, SmallFireball.class})
 public abstract class GrieferBridgeMixin implements GrieferBridge {
@@ -47,12 +46,11 @@ public abstract class GrieferBridgeMixin implements GrieferBridge {
     @Override
     public void bridge$setCanGrief(final boolean grief) {
         this.griefer$canGrief = grief;
-        if (grief) {
-            final CompoundTag spongeData = ((DataCompoundHolder) this).data$getSpongeData();
-            spongeData.putBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
-        } else {
-            if (((DataCompoundHolder) this).data$hasSpongeData()) {
-                ((DataCompoundHolder) this).data$getSpongeData().remove(Constants.Sponge.Entity.CAN_GRIEF);
+        if (this instanceof SpongeDataHolderBridge) {
+            if (!grief) {
+                ((SpongeDataHolderBridge) this).bridge$offer(Keys.CAN_GRIEF, false);
+            } else {
+                ((SpongeDataHolderBridge) this).bridge$remove(Keys.CAN_GRIEF);
             }
         }
     }

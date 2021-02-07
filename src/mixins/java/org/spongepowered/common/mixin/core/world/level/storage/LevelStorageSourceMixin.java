@@ -70,7 +70,7 @@ public abstract class LevelStorageSourceMixin {
     )
     private static CompoundTag impl$createSpongeLevelData(final CompoundTag compoundNBT, final String path, final DynamicOps<Tag> ops,
             final DataPackConfig p_237270_1s) {
-        LevelStorageSourceMixin.impl$spongeLevelData = new Dynamic<>(ops, compoundNBT.getCompound(Constants.Sponge.SPONGE_DATA));
+        LevelStorageSourceMixin.impl$spongeLevelData = new Dynamic<>(ops, compoundNBT.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA));
         return compoundNBT.getCompound(path);
     }
 

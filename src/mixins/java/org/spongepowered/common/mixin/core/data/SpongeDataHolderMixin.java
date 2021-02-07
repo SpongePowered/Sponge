@@ -24,58 +24,76 @@
  */
 package org.spongepowered.common.mixin.core.data;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataProvider;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
+import org.spongepowered.common.data.DataUtil;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.holder.SimpleNBTDataHolder;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.entity.player.SpongeUser;
-
-import java.util.List;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 @Mixin({BlockEntity.class, Entity.class, SpongeUser.class, ItemStack.class,
         SpongeEntityArchetype.class,
         SpongeEntitySnapshot.class,
         SpongeBlockSnapshot.class,
         SimpleNBTDataHolder.class})
-public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
+public abstract class SpongeDataHolderMixin implements SpongeDataHolderBridge {
 
     private DataManipulator.Mutable impl$manipulator;
-    private List<DataView> impl$failedData = Lists.newArrayList();
+    private Multimap<DataQuery, DataView> impl$failedData = HashMultimap.create();
 
     @Override
     public DataManipulator.Mutable bridge$getManipulator() {
         if (this.impl$manipulator == null) {
             this.impl$manipulator = DataManipulator.mutableOf();
-            CustomDataHolderBridge.syncTagToCustom(this);
+            DataUtil.syncTagToData(this);
         }
         return this.impl$manipulator;
     }
 
     @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void bridge$mergeDeserialized(DataManipulator.Mutable manipulator) {
         if (this.impl$manipulator == null) {
             this.impl$manipulator = DataManipulator.mutableOf();
         }
-        this.impl$manipulator.copyFrom(manipulator);
+
+        if (this instanceof DataHolder.Mutable) {
+            for (Value.Immutable<?> value : manipulator.getValues()) {
+                final DataProvider provider = SpongeDataManager.getProviderRegistry().getProvider(value.getKey(), this.getClass());
+                provider.offerValue((DataHolder.Mutable) this, value);
+            }
+        } else {
+            this.impl$manipulator.copyFrom(manipulator);
+        }
     }
 
     @Override
-    public void bridge$clearCustomData() {
+    public void bridge$clear() {
         this.impl$manipulator = null;
-        this.impl$failedData = Lists.newArrayList();
+        this.impl$failedData = HashMultimap.create();
     }
 
     @Override
-    public List<DataView> bridge$getFailedData() {
+    public Multimap<DataQuery, DataView> bridge$getFailedData() {
         return this.impl$failedData;
     }
 
+    @Override
+    public void bridge$addFailedData(DataQuery nameSpace, DataView keyedData) {
+        this.impl$failedData.put(nameSpace, keyedData);
+    }
 }

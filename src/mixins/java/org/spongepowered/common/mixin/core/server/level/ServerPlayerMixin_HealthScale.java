@@ -24,22 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityHealthScaleBridge;
-import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
-import org.spongepowered.common.util.Constants;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,6 +32,21 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.food.FoodData;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityHealthScaleBridge;
+import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
 
 
 @Mixin(ServerPlayer.class)
@@ -60,22 +59,6 @@ public abstract class ServerPlayerMixin_HealthScale extends PlayerMixin implemen
 
     private Double impl$healthScale = null;
     private float impl$cachedModifiedHealth = -1;
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundTag compound) {
-        super.impl$writeToSpongeCompound(compound);
-        if (this.bridge$isHealthScaled()) {
-            compound.putDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE, this.impl$healthScale);
-        }
-    }
-
-    @Override
-    public void impl$readFromSpongeCompound(final CompoundTag compound) {
-        super.impl$readFromSpongeCompound(compound);
-        if (compound.contains(Constants.Sponge.Entity.Player.HEALTH_SCALE, Constants.NBT.TAG_DOUBLE)) {
-            this.impl$healthScale = compound.getDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE);
-        }
-    }
 
     @Inject(method = "doTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getArmorValue()I", ordinal = 1))
     private void updateHealthPriorToArmor(final CallbackInfo ci) {
@@ -94,11 +77,9 @@ public abstract class ServerPlayerMixin_HealthScale extends PlayerMixin implemen
         this.lastSentHealth = -1.0F;
 
         if (scale == null) {
-            if (this.data$hasSpongeData()) {
-                this.data$getSpongeData().remove(Constants.Sponge.Entity.Player.HEALTH_SCALE);
-            }
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.HEALTH_SCALE);
         } else {
-            this.data$getSpongeData().putDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE, scale);
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.HEALTH_SCALE, scale);
         }
         this.bridge$refreshScaledHealth();
     }

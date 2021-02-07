@@ -42,7 +42,7 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 import org.spongepowered.common.data.persistence.NBTTranslator;
@@ -76,7 +76,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
         this.compound = builder.compound == null ? null : builder.compound.copy();
         if (builder.manipulator != null) {
-            ((CustomDataHolderBridge) this).bridge$getManipulator().copyFrom(builder.manipulator);
+            ((SpongeDataHolderBridge) this).bridge$getManipulator().copyFrom(builder.manipulator);
         }
 
         this.worldKey = builder.worldKey;

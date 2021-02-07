@@ -25,16 +25,23 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.vehicle.Boat;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.type.BoatType;
 import org.spongepowered.common.accessor.world.entity.vehicle.BoatAccessor;
 import org.spongepowered.common.bridge.entity.item.BoatBridge;
+import org.spongepowered.common.data.ByteToBooleanContentUpdater;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.Constants;
 
 public final class BoatData {
 
     private BoatData() {
     }
+
+    private static final DataContentUpdater BOAT_UPDATER_BYTE_TO_BOOL_FIX = new ByteToBooleanContentUpdater(1, 2, Keys.CAN_MOVE_ON_LAND);
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
@@ -63,6 +70,13 @@ public final class BoatData {
                         .get(BoatBridge::bridge$getUnoccupiedDecelerationSpeed)
                         .set(BoatBridge::bridge$setUnoccupiedDecelerationSpeed)
         ;
+        final ResourceKey boatDataStoreKey = ResourceKey.sponge("boat");
+        registrator.spongeDataStore(boatDataStoreKey, 2, new DataContentUpdater[]{BoatData.BOAT_UPDATER_BYTE_TO_BOOL_FIX}, BoatBridge.class,
+                Keys.MAX_SPEED, Keys.CAN_MOVE_ON_LAND, Keys.OCCUPIED_DECELERATION, Keys.UNOCCUPIED_DECELERATION);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Boat.BOAT_MAX_SPEED, boatDataStoreKey, Keys.MAX_SPEED);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Boat.BOAT_MOVE_ON_LAND, boatDataStoreKey, Keys.CAN_MOVE_ON_LAND);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED, boatDataStoreKey, Keys.OCCUPIED_DECELERATION);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED, boatDataStoreKey, Keys.UNOCCUPIED_DECELERATION);
     }
     // @formatter:on
 }
