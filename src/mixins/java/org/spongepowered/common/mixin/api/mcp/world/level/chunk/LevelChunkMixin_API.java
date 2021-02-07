@@ -34,7 +34,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
@@ -56,6 +55,7 @@ import org.spongepowered.common.world.volume.buffer.blockentity.ObjectArrayMutab
 import org.spongepowered.common.world.volume.buffer.entity.ObjectArrayMutableEntityBuffer;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -218,7 +218,7 @@ public abstract class LevelChunkMixin_API implements Chunk {
             (Chunk) this,
             (LevelChunk) (Object) this,
             // Entity Accessor
-            (chunk) -> chunk instanceof LevelChunk ? ((LevelChunk) chunk).getBlockEntities().entrySet().stream() : Stream.empty(),
+            this::impl$getBlockEntitiesStream,
             // IdentityFunction
             VolumeStreamUtils.getBlockEntityOrCloneToBackingVolume(shouldCarbonCopy, backingVolume, this.level),
             // Biome by block position
@@ -232,6 +232,10 @@ public abstract class LevelChunkMixin_API implements Chunk {
                 return new Tuple<>(blockPos, tileEntity);
             }
         );
+    }
+
+    private Stream<Map.Entry<BlockPos, net.minecraft.world.level.block.entity.BlockEntity>> impl$getBlockEntitiesStream(ChunkAccess chunk) {
+        return chunk instanceof LevelChunk ? ((LevelChunk) chunk).getBlockEntities().entrySet().stream() : Stream.empty();
     }
 
     @Override
