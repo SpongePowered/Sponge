@@ -35,9 +35,9 @@ public interface TrackableBridge {
     boolean bridge$isWorldTracked();
 
     /**
-     * Sets an entity to be tracked or untracked. Specifically used in
-     * {@link net.minecraft.world.level.Level#addEntity(Entity)} (Entity)} and
-     * {@link net.minecraft.server.level.ServerLevel#removeEntity(Entity)}.
+     * Sets an entity to be tracked or untracked. Handy as a callback function
+     * to track some fields that otherwise are difficult to inject ensuring
+     * closure (like EffectTransactors).
      *
      * @param tracked Tracked
      */

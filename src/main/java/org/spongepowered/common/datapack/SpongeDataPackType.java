@@ -112,13 +112,15 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                 new DataPackSerializer<>("Dimension Types", "dimension_type"),
                 s -> {
                     final OptionalLong fixedTime = !s.fixedTime().isPresent() ? OptionalLong.empty() : OptionalLong.of(s.fixedTime().get().asTicks().getTicks());
-                    final DimensionType type =
-                            DimensionTypeAccessor.invoker$new(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
-                                    s.coordinateMultiplier(),
-                                    s.createDragonFight(), s.piglinSafe(), s.bedsUsable(), s.respawnAnchorsUsable(), s.hasRaids(), s.logicalHeight(),
-                                    (BiomeZoomer) s.biomeSampler(), (ResourceLocation) (Object) ((SpongeWorldTypeTemplate) s).infiniburn,
-                                    (ResourceLocation) (Object) s.effect().getKey(), s.ambientLighting());
-                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), type).getOrThrow(false, e -> {});
+                    // TODO - Zidane!!!
+                    throw new UnsupportedOperationException("Zidane, fix this");
+//                    final DimensionType type =
+//                            DimensionTypeAccessor.invoker$new(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
+//                                    s.coordinateMultiplier(),
+//                                    s.createDragonFight(), s.piglinSafe(), s.bedsUsable(), s.respawnAnchorsUsable(), s.hasRaids(), s.logicalHeight(),
+//                                    (BiomeZoomer) s.biomeSampler(), (ResourceLocation) (Object) ((SpongeWorldTypeTemplate) s).infiniburn,
+//                                    (ResourceLocation) (Object) s.effect().getKey(), s.ambientLighting());
+//                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), type).getOrThrow(false, e -> {});
                 },
                 (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
                 true

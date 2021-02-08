@@ -67,6 +67,7 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     @Shadow public abstract CompoundTag shadow$save(CompoundTag compound);
     //@formatter:on
 
+    @Shadow @Final protected BlockPos worldPosition;
     @Nullable private LocatableBlock api$LocatableBlock;
 
     @Override

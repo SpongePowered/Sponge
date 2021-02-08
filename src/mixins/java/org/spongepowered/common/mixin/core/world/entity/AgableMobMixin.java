@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.BreedingEvent;
@@ -36,13 +36,14 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-@Mixin(AgableMob.class)
+@Mixin(AgeableMob.class)
 public abstract class AgableMobMixin extends MobMixin {
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "setAge", at = @At("RETURN"))
     private void impl$callReadyToMateOnAgeUp(final int age, final CallbackInfo ci) {
         if (age == 0 && ShouldFire.BREEDING_EVENT_READY_TO_MATE) {
-            if (((AgableMob) (Object) this) instanceof net.minecraft.world.entity.animal.Animal) {
+            if (((AgeableMob) (Object) this) instanceof net.minecraft.world.entity.animal.Animal) {
                 final BreedingEvent.ReadyToMate event = SpongeEventFactory.createBreedingEventReadyToMate(PhaseTracker.getCauseStackManager().getCurrentCause(), (Animal) this);
                 SpongeCommon.postEvent(event);
             }

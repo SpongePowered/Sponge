@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.level.chunk;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.DifficultyInstance;
@@ -34,7 +35,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
@@ -70,16 +70,17 @@ public abstract class LevelChunkMixin_API implements Chunk {
     @Shadow @Final private Level level;
 
     @Shadow public abstract void shadow$setInhabitedTime(long p_177415_1_);
+    @Shadow public abstract int shadow$getMinBuildHeight();
+    @Shadow public abstract int shadow$getHeight();
     //@formatter:on
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
         final net.minecraft.world.level.biome.Biome[] biomes = ((ChunkBiomeContainerAccessor) this.biomes).accessor$biomes();
 
-        int maskedX = x & ChunkBiomeContainer.HORIZONTAL_MASK;
-        int maskedY = Mth.clamp(y, 0, ChunkBiomeContainer.VERTICAL_MASK);
-        int maskedZ = z & ChunkBiomeContainer.HORIZONTAL_MASK;
-
+        int maskedX = x & ChunkBiomeContainerAccessor.accessor$HORIZONTAL_MASK();
+        int maskedY = Mth.clamp(y - QuartPos.fromBlock(this.shadow$getMinBuildHeight()), 0, this.shadow$getHeight());
+        int maskedZ = z & ChunkBiomeContainerAccessor.accessor$HORIZONTAL_MASK();
         final int WIDTH_BITS = ChunkBiomeContainerAccessor.accessor$WIDTH_BITS();
         final int posKey = maskedY << WIDTH_BITS + WIDTH_BITS | maskedZ << WIDTH_BITS | maskedX;
         biomes[posKey] = (net.minecraft.world.level.biome.Biome) (Object) biome;

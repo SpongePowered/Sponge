@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.world.volume;
 
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -38,20 +42,23 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.minecraft.world.level.entity.EntitySection;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.world.volume.Volume;
 import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
+import org.spongepowered.common.accessor.client.multiplayer.ClientLevelAccessor;
+import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.BlockEntityAccessor;
+import org.spongepowered.common.accessor.world.level.entity.PersistentEntitySectionManagerAccessor;
+import org.spongepowered.common.accessor.world.level.entity.TransientEntitySectionManagerAccessor;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.volume.buffer.blockentity.ObjectArrayMutableBlockEntityBuffer;
 import org.spongepowered.common.world.volume.buffer.entity.ObjectArrayMutableEntityBuffer;
@@ -61,7 +68,6 @@ import org.spongepowered.math.vector.Vector3i;
 import java.lang.ref.WeakReference;
 import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -174,16 +180,25 @@ public final class VolumeStreamUtils {
         }
     }
 
-    @NotNull
+    @SuppressWarnings("unchecked")
     public static Stream<Map.Entry<BlockPos, net.minecraft.world.entity.Entity>> getEntitiesFromChunk(
         Vector3i min, Vector3i max, LevelChunk chunk
     ) {
-        return Arrays.stream(chunk.getEntitySections())
-            .flatMap(Collection::stream)
-            .filter(entity -> VecHelper.inBounds(entity.blockPosition(), min, max))
-            .filter(entity -> !(entity instanceof net.minecraft.world.entity.player.Player))
-            .map(entity -> new AbstractMap.SimpleEntry<>(
-                entity.blockPosition(), entity));
+        if (chunk.getLevel() instanceof ServerLevel) {
+            return ((PersistentEntitySectionManagerAccessor<Entity>) ((ServerLevelAccessor) chunk.getLevel()).accessor$getEntityManager()).accessor$getSectionStorage()
+                .getExistingSectionsInChunk(SectionPos.of(chunk.getPos(), 0).asLong())
+                .flatMap(EntitySection::getEntities)
+                .filter(entity -> VecHelper.inBounds(entity.blockPosition(), min, max))
+                .map(entity -> new AbstractMap.SimpleEntry<>(entity.blockPosition(), entity));
+        } else if (Sponge.isClientAvailable() && chunk.getLevel() instanceof ClientLevel) {
+            return ((TransientEntitySectionManagerAccessor<Entity>) ((ClientLevelAccessor) chunk.getLevel()).accessor$getEntityStorage())
+                .accessor$getSectionStorage()
+                .getExistingSectionsInChunk(SectionPos.of(chunk.getPos(), 0).asLong())
+                .flatMap(EntitySection::getEntities)
+                .filter(entity -> VecHelper.inBounds(entity.blockPosition(), min, max))
+                .map(entity -> new AbstractMap.SimpleEntry<>(entity.blockPosition(), entity));
+        }
+        throw new UnsupportedOperationException("Unknown Chunk Level Type");
     }
 
     @NotNull
@@ -203,7 +218,7 @@ public final class VolumeStreamUtils {
                     net.minecraft.world.entity.EntityType.getKey(entity.getType())
                 )
             ).load(nbt);
-            backingVolume.spawnEntity((Entity) cloned);
+            backingVolume.spawnEntity((org.spongepowered.api.entity.Entity) cloned);
         } : (pos, tile) -> {
         };
     }
@@ -214,13 +229,13 @@ public final class VolumeStreamUtils {
     ) {
         return shouldCarbonCopy ? (pos, tile) -> {
             final CompoundTag nbt = tile.save(new CompoundTag());
-            final net.minecraft.world.level.block.entity.@Nullable BlockEntity cloned = tile.getType().create();
             final BlockState state = tile.getBlockState();
+            final net.minecraft.world.level.block.entity.@Nullable BlockEntity cloned = tile.getType().create(pos, state);
             Objects.requireNonNull(
                 cloned,
                 () -> String.format(
                     "TileEntityType[%s] creates a null TileEntity!", BlockEntityType.getKey(tile.getType()))
-            ).load(state, nbt);
+            ).load(nbt);
 
             if (level != null) {
                 ((BlockEntityAccessor) cloned).accessor$level(level);

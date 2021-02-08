@@ -27,6 +27,7 @@ package org.spongepowered.common.accessor.world.level.block.entity;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,6 +50,11 @@ public interface HopperBlockEntityAccessor {
 
     @Invoker("isEmptyContainer")
     static boolean invoker$isEmptyContainer(final Container inventory, final Direction side) {
+        throw new UntransformedInvokerError();
+    }
+
+    @Invoker("getContainerAt")
+    static Container invoker$getContainerAt(Level var0, double var1, double var3, double var5) {
         throw new UntransformedInvokerError();
     }
 

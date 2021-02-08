@@ -37,8 +37,6 @@ import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 @Mixin(AbstractMinecartContainer.class)
 public abstract class AbstractMinecartContainerMixin extends AbstractMinecartMixin {
 
-    @Shadow private boolean dropEquipment;
-
     /**
      * @author Zidane - June 2019 - 1.12.2
      * @author i509VCB - Feb 2020 - 1.14.4
@@ -50,10 +48,6 @@ public abstract class AbstractMinecartContainerMixin extends AbstractMinecartMix
     public Entity bridge$changeDimension(final ServerLevel world, final PlatformTeleporter platformTeleporter) {
         final Entity entity = super.bridge$changeDimension(world, platformTeleporter);
 
-        if (entity instanceof AbstractMinecartContainer) {
-            // We actually teleported so...
-            this.dropEquipment = false;
-        }
 
         return entity;
     }

@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.tracker.server.players;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -39,13 +40,15 @@ public class PlayerListMixin_Tracker {
 
     @Redirect(method = "remove",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/server/level/ServerLevel;removePlayerImmediately(Lnet/minecraft/server/level/ServerPlayer;)V"))
-    private void tracker$trackPlayerLogoutThroughPhaseTracker(final ServerLevel world, final ServerPlayer player) {
+                    target = "Lnet/minecraft/server/level/ServerLevel;removePlayerImmediately(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/entity/Entity$RemovalReason;)V"))
+    private void tracker$trackPlayerLogoutThroughPhaseTracker(final ServerLevel world, final ServerPlayer player,
+        final Entity.RemovalReason reason
+    ) {
         try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT
                 .createPhaseContext(PhaseTracker.SERVER)
                 .source(player)) {
             context.buildAndSwitch();
-            world.removePlayerImmediately(player);
+            world.removePlayerImmediately(player, reason);
         }
     }
 

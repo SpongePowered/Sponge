@@ -47,7 +47,7 @@ public abstract class ItemFrameMixin_Optimization_Map extends HangingEntityMixin
             return;
         }
 
-        final OptimizedMapDataBridge mapData = (OptimizedMapDataBridge) MapItem.getOrCreateSavedData(stack, this.level);
+        final OptimizedMapDataBridge mapData = (OptimizedMapDataBridge) MapItem.getSavedData(stack, this.level);
         if (stack.getItem() instanceof MapItem) {
             mapData.mapOptimizationBridge$updateItemFrameDecoration((ItemFrame) (Object) this);
         } else if (this.shadow$getItem().getItem() instanceof MapItem && stack.isEmpty()) {

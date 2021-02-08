@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
 import net.minecraft.world.level.block.Block;
-import org.spongepowered.api.block.BlockType;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,11 +34,11 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class BlockEntityTypeMixin_API implements BlockEntityType {
 
     // @formatter:off
-    @Shadow public abstract boolean shadow$isValid(final Block block);
+    @Shadow public abstract boolean shadow$isValid(final BlockState block);
     // @formatter:on
 
     @Override
-    public boolean isValidBlock(final BlockType block) {
-        return this.shadow$isValid((Block) block);
+    public boolean isValidBlock(final org.spongepowered.api.block.BlockState block) {
+        return this.shadow$isValid((BlockState) block);
     }
 }

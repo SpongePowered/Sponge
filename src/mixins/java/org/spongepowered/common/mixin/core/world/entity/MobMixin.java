@@ -272,7 +272,7 @@ public abstract class MobMixin extends LivingEntityMixin {
         Player result = null;
 
         for (final Player player : world.players()) {
-            if (player == null || player.removed || !((PlayerEntityBridge) player).bridge$affectsSpawning()) {
+            if (player == null || player.isRemoved() || !((PlayerEntityBridge) player).bridge$affectsSpawning()) {
                 continue;
             }
 

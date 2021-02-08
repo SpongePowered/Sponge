@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.dimension;
 
+import net.minecraft.core.Registry;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.context.Context;
@@ -43,6 +44,7 @@ import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import net.minecraft.resources.ResourceLocation;
@@ -77,7 +79,9 @@ public abstract class DimensionTypeMixin_API implements WorldType {
     @Override
     public Context getContext() {
         if (this.api$context == null) {
-            final ResourceLocation key = SpongeCommon.getServer().registryAccess().dimensionTypes().getKey((DimensionType) (Object) this);
+            final ResourceLocation key = Objects.requireNonNull(SpongeCommon.getServer().registryAccess()
+                .registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY)
+                .getKey((DimensionType) (Object) this), "DimensionType is not registered: " + this);
             this.api$context = new Context(Context.DIMENSION_KEY, key.getPath());
         }
 
@@ -154,7 +158,12 @@ public abstract class DimensionTypeMixin_API implements WorldType {
 
     @Override
     public WorldTypeTemplate asTemplate() {
-        return new SpongeWorldTypeTemplate((ResourceKey) (Object) SpongeCommon.getServer().registryAccess().dimensionTypes().getKey((DimensionType) (Object) this), (DimensionType) (Object) this);
+        return new SpongeWorldTypeTemplate((ResourceKey) (Object) Objects.requireNonNull(SpongeCommon.getServer()
+            .registryAccess()
+            .registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY)
+            .getKey((DimensionType) (Object) this),
+            "Registry type is not registered: " + this
+        ), (DimensionType) (Object) this);
     }
 
     @Intrinsic

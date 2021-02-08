@@ -24,6 +24,16 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.WritableLevelData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,18 +44,6 @@ import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.storage.WritableLevelData;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -56,20 +54,13 @@ public abstract class LevelMixin_Tracker implements WorldBridge {
     // @formatter:off
     @Shadow @Final public Random random;
     @Shadow @Final protected WritableLevelData levelData;
-    @Shadow protected boolean updatingBlockEntities;
-    @Shadow @Final protected List<BlockEntity> pendingBlockEntities;
-    @Shadow @Final public List<BlockEntity> blockEntityList;
-    @Shadow @Final public List<BlockEntity> tickableBlockEntities;
 
-    @Shadow public abstract LevelChunk shadow$getChunk(int chunkX, int chunkZ);
-    @Shadow public abstract ChunkAccess shadow$getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull);
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos pos);
     @Shadow public abstract void shadow$guardEntityTick(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
     @Shadow public boolean setBlock(final BlockPos pos, final BlockState state, final int flags, final int limit) { throw new IllegalStateException("Untransformed shadow!"); }
     @Shadow public void shadow$removeBlockEntity(final BlockPos pos) { } // shadowed
-    @Shadow public boolean shadow$addBlockEntity(final BlockEntity tile) { return false; }
     @Shadow @Nullable public abstract BlockEntity shadow$getBlockEntity(BlockPos pos);
-    @Shadow public void shadow$setBlockEntity(final BlockPos pos, @Nullable final BlockEntity tileEntity) { } // Shadowed
+    @Shadow public void shadow$setBlockEntity(final BlockEntity tileEntity) { } // Shadowed
     @Shadow public void shadow$neighborChanged(final BlockPos pos, final Block blockIn, final BlockPos fromPos) { } // Shadowed
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
     @Shadow public abstract boolean shadow$isDebug();
@@ -89,7 +80,7 @@ public abstract class LevelMixin_Tracker implements WorldBridge {
     @Redirect(method = "tickBlockEntities",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/entity/TickableBlockEntity;tick()V"))
-    protected void tracker$wrapTileEntityTick(final TickableBlockEntity tileEntity) {
+    protected void tracker$wrapTileEntityTick(final TickingBlockEntity tileEntity) {
         tileEntity.tick();
     }
 

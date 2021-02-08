@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.projectile;
 
+import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.GameRules;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,9 +34,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.projectile.FireballEntityBridge;
 
 import java.util.Set;
-import net.minecraft.world.entity.projectile.LargeFireball;
-import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.GameRules;
 
 @Mixin(LargeFireball.class)
 public abstract class LargeFireballMixin_API extends FireballMixin_API implements ExplosiveFireball {
@@ -46,7 +46,7 @@ public abstract class LargeFireballMixin_API extends FireballMixin_API implement
         final Explosion.BlockInteraction mode = flag ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
         ((FireballEntityBridge) this).bridge$throwExplosionEventAndExplode(this.shadow$getCommandSenderWorld(), null, this.shadow$getX(),
                 this.shadow$getY(), this.shadow$getZ(), this.explosionPower, flag, mode);
-        this.shadow$remove();
+        this.shadow$discard();
     }
 
     @Override

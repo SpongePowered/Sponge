@@ -167,9 +167,8 @@ public abstract class FishingHookMixin extends EntityMixin {
                     playerEntity.level.addFreshEntity(new ExperienceOrb(playerEntity.level, playerEntity.getX(), playerEntity.getY() + 0.5D,
                             playerEntity.getZ() + 0.5D,
                             this.random.nextInt(6) + 1));
-                    Item item = itemstack.getItem();
 
-                    if (item.is(ItemTags.FISHES)) {
+                    if (itemstack.is(ItemTags.FISHES)) {
                         playerEntity.awardStat(Stats.FISH_CAUGHT, 1);
                     }
                 }
@@ -182,7 +181,7 @@ public abstract class FishingHookMixin extends EntityMixin {
                 i = 2;
             }
 
-            this.shadow$remove();
+            this.shadow$discard();
             return i;
         } else {
             return 0;
@@ -198,7 +197,7 @@ public abstract class FishingHookMixin extends EntityMixin {
 
         if (SpongeCommonEventFactory.handleCollideImpactEvent((FishingHook) (Object) this,
                 ((Projectile) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
-            this.shadow$remove();
+            this.shadow$discard();
             ci.cancel();
         }
     }

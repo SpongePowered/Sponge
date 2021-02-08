@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.server.level;
 
 import com.google.common.collect.ImmutableList;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
@@ -37,10 +36,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
 import org.spongepowered.api.ResourceKey;
@@ -82,18 +81,18 @@ import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
@@ -103,7 +102,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     // @formatter:off
     @Shadow @Final private ServerTickList<Block> blockTicks;
     @Shadow @Final private ServerTickList<Fluid> liquidTicks;
-    @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
+    @Shadow @Final private PersistentEntitySectionManager<Entity> entityManager;
 
     @Shadow public abstract void shadow$save(@Nullable ProgressListener p_217445_1_, boolean p_217445_2_, boolean p_217445_3_);
     @Shadow public abstract void shadow$unload(LevelChunk p_217466_1_);
@@ -223,7 +222,10 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public Collection<org.spongepowered.api.entity.Entity> getEntities() {
-        return (Collection< org.spongepowered.api.entity.Entity>) (Object) Collections.unmodifiableCollection(this.entitiesById.values());
+        final Iterable<Entity> all = this.entityManager.getEntityGetter().getAll();
+
+        final List<Entity> returningList = StreamSupport.stream(all.spliterator(), false).collect(Collectors.toList());
+        return (Collection< org.spongepowered.api.entity.Entity>) (Object) Collections.unmodifiableCollection(returningList);
     }
 
     @Override
@@ -240,7 +242,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public boolean containsBlock(final int x, final int y, final int z) {
-        return Level.isInWorldBounds(new BlockPos(x, y, z));
+        return ((ServerLevel) (Object) this).isInWorldBounds(new BlockPos(x, y, z));
     }
 
     // EntityVolume

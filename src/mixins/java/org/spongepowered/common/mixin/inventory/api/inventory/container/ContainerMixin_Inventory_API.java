@@ -93,14 +93,14 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
         }
         ItemStack nativeStack = ItemStackUtil.toNative(item);
         this.listeners().stream().findFirst()
-                .ifPresent(p -> p.inventory.setCarried(nativeStack));
+                .ifPresent(p -> p.getInventory().setCarried(nativeStack));
         return true;
     }
 
     @Override
     public Optional<org.spongepowered.api.item.inventory.ItemStack> getCursor() {
         return this.listeners().stream().findFirst()
-                .map(p -> p.inventory.getCarried())
+                .map(p -> p.getInventory().getCarried())
                 .map(ItemStackUtil::fromNative);
     }
 

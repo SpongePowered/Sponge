@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.world.level;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.resources.ResourceKey;
@@ -41,6 +40,7 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
@@ -78,7 +78,6 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.archetype.SpongeArchetypeVolume;
@@ -86,9 +85,7 @@ import org.spongepowered.common.world.volume.buffer.entity.ObjectArrayMutableEnt
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -104,16 +101,17 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     // @formatter:off
     @Shadow public @Final Random random;
-    @Shadow @Final public List<net.minecraft.world.level.block.entity.BlockEntity> blockEntityList;
+    @Shadow @Final protected List<TickingBlockEntity> blockEntityTickers;
 
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos p_180495_1_);
     @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable net.minecraft.world.entity.player.Player p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundSource p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow public abstract LevelData shadow$getLevelData();
-    @Shadow public abstract void shadow$setBlockEntity(BlockPos pos, @javax.annotation.Nullable net.minecraft.world.level.block.entity.BlockEntity tileEntityIn);
     @Shadow public abstract void shadow$removeBlockEntity(BlockPos pos);
     @Shadow public abstract ResourceKey<net.minecraft.world.level.Level> shadow$dimension();
     // @formatter:on
+
+    @Shadow public abstract void shadow$setBlockEntity(net.minecraft.world.level.block.entity.BlockEntity var1);
 
     private Context impl$context;
 
@@ -264,12 +262,13 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Collection<? extends BlockEntity> getBlockEntities() {
-        return (Collection) Collections.unmodifiableCollection(this.blockEntityList);
+        // TODO - Figure out a clean way to gather tickable block entities
+        return Collections.emptyList();
     }
 
     @Override
     public void addBlockEntity(final int x, final int y, final int z, final BlockEntity blockEntity) {
-        this.shadow$setBlockEntity(new BlockPos(x, y, z), (net.minecraft.world.level.block.entity.BlockEntity) Objects.requireNonNull(blockEntity, "blockEntity"));
+        this.shadow$setBlockEntity((net.minecraft.world.level.block.entity.BlockEntity) Objects.requireNonNull(blockEntity, "blockEntity"));
     }
 
     // MutableEntityVolume

@@ -22,31 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.mixin.tracker.server.level;
 
-import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockEventData;
-import net.minecraft.world.level.entity.PersistentEntitySectionManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedAccessorError;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.TrackableBridge;
 
-import java.util.Queue;
+@Mixin(ServerLevel.EntityCallbacks.class)
+public abstract class ServerLevel$EntityCallbackMixin_Tracker {
 
-@Mixin(ServerLevel.class)
-public interface ServerLevelAccessor {
-
-    @Accessor("LOGGER")
-    static Logger accessor$LOGGER() {
-        throw new UntransformedAccessorError();
+    @Inject(method = "onTrackingStart", at = @At("TAIL"))
+    private void tracker$setEntityTracked(Entity var1, CallbackInfo ci) {
+        ((TrackableBridge) var1).bridge$setWorldTracked(true);
     }
 
-    @Accessor("blockEvents") ObjectLinkedOpenHashSet<BlockEventData> accessor$blockEvents();
-
-    @Accessor("entityManager") PersistentEntitySectionManager<Entity> accessor$getEntityManager();
+    @Inject(method = "onTrackingEnd", at = @At("TAIL"))
+    private void tracker$setEntityUntracked(Entity var1, CallbackInfo ci) {
+        ((TrackableBridge) var1).bridge$setWorldTracked(false);
+    }
 
 }

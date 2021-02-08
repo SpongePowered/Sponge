@@ -99,7 +99,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
             if (!TrackingUtil.processBlockCaptures(currentContext)) {
                 // So, it's been cancelled, we want to absolutely remove this entity.
                 // And we want to stop the entity update at this point.
-                this.remove();
+                this.remove(RemovalReason.DISCARDED);
                 ci.cancel();
             }
 
@@ -110,7 +110,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
             // that means that single event was cancelled, so, the block needs to remain
             // and this entity needs to die.
         } else if (this.level.getBlockState(pos) != Blocks.AIR.defaultBlockState()) {
-            this.remove();
+            this.remove(RemovalReason.DISCARDED);
             ci.cancel();
         }
     }

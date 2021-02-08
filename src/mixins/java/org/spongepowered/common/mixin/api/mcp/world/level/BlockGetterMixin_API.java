@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level;
 
+import net.minecraft.world.level.LevelHeightAccessor;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.volume.game.PrimitiveGameVolume;
@@ -52,7 +53,6 @@ public interface BlockGetterMixin_API extends PrimitiveGameVolume {
     @Shadow net.minecraft.world.level.material.FluidState shadow$getFluidState(BlockPos p_204610_1_);
     @Shadow int shadow$getLightEmission(BlockPos p_217298_1_);
     @Shadow int shadow$getMaxLightLevel();
-    @Shadow int shadow$getMaxBuildHeight();
     //@formatter:on
 
     @Override
@@ -72,7 +72,7 @@ public interface BlockGetterMixin_API extends PrimitiveGameVolume {
 
     @Intrinsic
     default int primitive$getHeight() {
-        return this.shadow$getMaxBuildHeight();
+        return ((LevelHeightAccessor) this).getMaxBuildHeight();
     }
 
     @Override

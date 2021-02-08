@@ -22,31 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.accessor.world.level.entity;
 
-import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockEventData;
+import net.minecraft.world.level.entity.EntityAccess;
+import net.minecraft.world.level.entity.EntitySectionStorage;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedAccessorError;
 
-import java.util.Queue;
+@Mixin(PersistentEntitySectionManager.class)
+public interface PersistentEntitySectionManagerAccessor<T extends EntityAccess> {
 
-@Mixin(ServerLevel.class)
-public interface ServerLevelAccessor {
-
-    @Accessor("LOGGER")
-    static Logger accessor$LOGGER() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("blockEvents") ObjectLinkedOpenHashSet<BlockEventData> accessor$blockEvents();
-
-    @Accessor("entityManager") PersistentEntitySectionManager<Entity> accessor$getEntityManager();
+    @Accessor("sectionStorage") EntitySectionStorage<T> accessor$getSectionStorage();
 
 }

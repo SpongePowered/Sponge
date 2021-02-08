@@ -49,7 +49,7 @@ public abstract class LlamaSpitMixin extends EntityMixin {
 
         if (SpongeCommonEventFactory.handleCollideImpactEvent((LlamaSpit) (Object) this,
                 ((Projectile) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
-            this.shadow$remove();
+            this.shadow$discard();
             ci.cancel();
         }
     }
@@ -62,7 +62,7 @@ public abstract class LlamaSpitMixin extends EntityMixin {
 
         if (SpongeCommonEventFactory.handleCollideImpactEvent((LlamaSpit) (Object) this,
                 ((Projectile) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
-            this.shadow$remove();
+            this.shadow$discard();
             ci.cancel();
         }
     }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity;
 
 import co.aikar.timings.Timing;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -106,9 +107,7 @@ import org.spongepowered.common.world.portal.PlatformTeleporter;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
-
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -121,7 +120,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public float yRot;
     @Shadow public float xRot;
     @Shadow public int invulnerableTime;
-    @Shadow public boolean removed;
     @Shadow public float walkDistO;
     @Shadow public float walkDist;
     @Shadow @Final protected Random random;
@@ -129,7 +127,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public float yRotO;
     @Shadow protected int portalTime;
     @Shadow @Nullable private Entity vehicle;
-    @Shadow @Final private List<Entity> passengers;
+    @Shadow @Final private ImmutableList<Entity> passengers;
     @Shadow protected boolean onGround;
     @Shadow public float fallDistance;
     @Shadow protected BlockPos portalEntrancePos;
@@ -139,11 +137,15 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public double yo;
     @Shadow public double zo;
 
+    @Shadow public abstract void shadow$unsetRemoved();
+    @Shadow public abstract void shadow$setRemoved(Entity.RemovalReason reason);
     @Shadow public abstract void shadow$setPos(double x, double y, double z);
     @Shadow public abstract double shadow$getX();
     @Shadow public abstract double shadow$getY();
     @Shadow public abstract double shadow$getZ();
-    @Shadow public abstract void shadow$remove();
+    @Shadow public abstract void shadow$remove(Entity.RemovalReason reason);
+    @Shadow public abstract void shadow$discard();
+    @Shadow public abstract boolean shadow$isRemoved();
     @Shadow public abstract void shadow$setCustomName(@Nullable Component name);
     @Shadow public abstract boolean shadow$hurt(DamageSource source, float amount);
     @Shadow public abstract int shadow$getId();
@@ -163,7 +165,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract Level shadow$getCommandSenderWorld();
     @Shadow public abstract net.minecraft.world.phys.Vec3 shadow$position();
     @Shadow public abstract MinecraftServer shadow$getServer();
-    @Shadow public abstract void shadow$setLevel(Level worldIn);
     @Shadow @Nullable public abstract ItemEntity shadow$spawnAtLocation(ItemStack stack, float offsetY);
     @Shadow protected abstract void shadow$setRot(float yaw, float pitch);
     @Shadow @Nullable public abstract Entity shadow$getVehicle();
@@ -224,7 +225,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public boolean bridge$setLocation(final ServerLocation location) {
-        if (this.removed || ((WorldBridge) location.getWorld()).bridge$isFake()) {
+        if (this.shadow$isRemoved() || ((WorldBridge) location.getWorld()).bridge$isFake()) {
             return false;
         }
 
@@ -283,10 +284,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             ((Entity) (Object) this).unRide();
 
             final net.minecraft.server.level.ServerLevel originalWorld = (net.minecraft.server.level.ServerLevel) this.shadow$getCommandSenderWorld();
-            ((PlatformServerWorldBridge) this.shadow$getCommandSenderWorld()).bridge$removeEntity((Entity) (Object) this, true);
+            ((PlatformServerWorldBridge) this.shadow$getCommandSenderWorld()).bridge$removeEntity((Entity) (Object) this, Entity.RemovalReason.CHANGED_DIMENSION, true);
             this.bridge$revive();
-            this.shadow$setLevel(destinationWorld);
-            destinationWorld.addFromAnotherDimension((Entity) (Object) this);
+            // TODO - Zidane, you want to take a look at this.
+//            this.shadow$setLevel(destinationWorld);
+            destinationWorld.addDuringTeleport((Entity) (Object) this);
 
             originalWorld.resetEmptyTime();
             destinationWorld.resetEmptyTime();
@@ -452,7 +454,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             entity.restoreFrom((Entity) (Object) this);
             entity.moveTo(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z, portalinfo.yRot, entity.xRot);
             entity.setDeltaMovement(portalinfo.speed);
-            targetWorld.addFromAnotherDimension(entity);
+            targetWorld.addDuringTeleport(entity);
             if (createEndPlatform && targetWorld.dimension() == Level.END) {
                 net.minecraft.server.level.ServerLevel.makeObsidianPlatform(targetWorld);
             }
@@ -484,7 +486,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @org.checkerframework.checker.nullness.qual.Nullable
     public Entity bridge$changeDimension(final net.minecraft.server.level.ServerLevel originalDestinationWorld, final PlatformTeleporter platformTeleporter) {
         // Sponge Start
-        if (this.shadow$getCommandSenderWorld().isClientSide || this.removed) {
+        if (this.shadow$getCommandSenderWorld().isClientSide || this.shadow$isRemoved()) {
             return null;
         }
 
@@ -762,8 +764,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      */
     @Overwrite
     public void stopRiding() {
-        if (this.shadow$getVehicle() != null) {
-            if (this.shadow$getVehicle().removed) {
+        final Entity vehicle = this.shadow$getVehicle();
+        if (vehicle != null) {
+            if (vehicle.isRemoved()) {
                 this.bridge$dismountRidingEntity(DismountTypes.DEATH.get());
             } else {
                 this.bridge$dismountRidingEntity(DismountTypes.PLAYER.get());

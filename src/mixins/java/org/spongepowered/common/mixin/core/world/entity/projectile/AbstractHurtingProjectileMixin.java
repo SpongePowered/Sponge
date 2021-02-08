@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.api.data.Keys;
@@ -45,7 +46,7 @@ public abstract class AbstractHurtingProjectileMixin extends ProjectileMixin {
         }
 
         if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((DamagingProjectile) this).get(Keys.SHOOTER).orElse(null), result)) {
-            this.shadow$remove();
+            this.shadow$remove(Entity.RemovalReason.DISCARDED);
         } else {
             this.shadow$onHit(result);
         }

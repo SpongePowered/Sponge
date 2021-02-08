@@ -37,7 +37,6 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 @Mixin(ExperienceOrb.class)
 public abstract class ExperienceOrbMixin_RealTime extends EntityMixin_RealTime {
 
-    @Shadow public int throwTime;
     @Shadow public int age;
 
     @Redirect(
@@ -60,11 +59,11 @@ public abstract class ExperienceOrbMixin_RealTime extends EntityMixin_RealTime {
     )
     private void realTimeImpl$adjustForRealTimePickupDelay(final ExperienceOrb self, final int modifier) {
         if (((WorldBridge) this.level).bridge$isFake()) {
-            this.throwTime = modifier;
+            this.age = modifier;
             return;
         }
         final int ticks = (int) ((RealTimeTrackingBridge) this.level).realTimeBridge$getRealTimeTicks();
-        this.throwTime = Math.max(0, this.throwTime - ticks);
+        this.age = Math.max(0, this.age - ticks);
     }
 
     @Redirect(

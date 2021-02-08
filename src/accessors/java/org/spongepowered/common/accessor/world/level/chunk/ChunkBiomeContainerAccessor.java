@@ -33,6 +33,11 @@ import org.spongepowered.common.UntransformedAccessorError;
 @Mixin(ChunkBiomeContainer.class)
 public interface ChunkBiomeContainerAccessor {
 
+    @Accessor("HORIZONTAL_MASK")
+    static int accessor$HORIZONTAL_MASK() {
+        throw new UntransformedAccessorError();
+    }
+
     @Accessor("WIDTH_BITS")
     static int accessor$WIDTH_BITS() {
         throw new UntransformedAccessorError();

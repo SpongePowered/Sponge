@@ -44,7 +44,7 @@ public abstract class ShulkerBulletMixin extends EntityMixin {
         if (!((WorldBridge) this.level).bridge$isFake() && result.getType() != HitResult.Type.MISS
                 && SpongeCommonEventFactory.handleCollideImpactEvent(
                 (net.minecraft.world.entity.Entity) (Object) this, ((Projectile) this).get(Keys.SHOOTER).orElse(null), result)) {
-            this.shadow$remove(); // TODO do we want to kill the bullet here?
+            this.shadow$discard();
             ci.cancel();
         }
     }

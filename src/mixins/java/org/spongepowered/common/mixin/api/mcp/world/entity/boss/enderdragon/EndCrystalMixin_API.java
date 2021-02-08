@@ -29,6 +29,7 @@ import org.spongepowered.api.entity.explosive.EndCrystal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.entity.item.EnderCrystalEntityBridge;
 import org.spongepowered.common.mixin.api.mcp.world.entity.EntityMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.boss.enderdragon.EndCrystal.class)
@@ -36,7 +37,7 @@ public abstract class EndCrystalMixin_API extends EntityMixin_API implements End
 
     @Override
     public void detonate() {
-        this.shadow$remove();
+        this.shadow$discard();
         ((EnderCrystalEntityBridge) this).bridge$throwExplosionEventAndExplode(this.shadow$getCommandSenderWorld(), null, this.shadow$getX(),
                 this.shadow$getY(), this.shadow$getZ(), true, null);
     }

@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
@@ -38,15 +42,24 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(TheEndGatewayBlockEntity.class)
 public abstract class TheEndGatewayBlockEntityMixin extends TheEndPortalBlockEntity {
 
+    protected TheEndGatewayBlockEntityMixin(
+        BlockEntityType<?> var1, BlockPos var2,
+        BlockState var3
+    ) {
+        super(var1, var2, var3);
+    }
+
     @Redirect(method = "teleportEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleportToWithTicket(DDD)V"))
-    private void impl$createCauseFrameForTeleport(final Entity entity, final double x, final double y, final double z) {
+    private static void impl$createCauseFrameForTeleport(
+        final Entity entity, final double x, final double y, final double z, Level var0, BlockPos var1, BlockState var2, Entity var3, TheEndGatewayBlockEntity var4
+    ) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             // We'll already have the entity in the cause if they are a player and threw their pearl into it. We do not
             // want to re-arrange the cause
             if (!frame.getCurrentCause().containsType(entity.getClass())) {
                 frame.pushCause(entity);
             }
-            frame.pushCause(this);
+            frame.pushCause(var4);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.END_GATEWAY.get());
 
             entity.teleportToWithTicket(x, y, z);

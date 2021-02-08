@@ -16,4 +16,4 @@ extendable method net/minecraft/world/item/crafting/Ingredient <init> (Ljava/uti
 accessible field net/minecraft/world/item/crafting/Ingredient values [Lnet/minecraft/world/item/crafting/Ingredient$Value;
 accessible class net/minecraft/world/item/crafting/Ingredient$Value
 accessible class net/minecraft/world/level/biome/MultiNoiseBiomeSource$NoiseParameters
-
+accessible class net/minecraft/server/level/ServerLevel$EntityCallbacks

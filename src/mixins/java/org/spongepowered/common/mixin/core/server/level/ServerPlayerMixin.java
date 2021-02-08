@@ -161,7 +161,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow protected abstract void shadow$tellNeutralMobsThatIDied();
     @Shadow protected abstract void shadow$createEndPlatform(ServerLevel p_241206_1_, BlockPos blockPos);
     @Shadow protected abstract void shadow$triggerDimensionChangeTriggers(ServerLevel serverworld);
+    @Shadow public abstract void shadow$setLevel(ServerLevel var1);
     // @formatter:on
+
 
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
@@ -220,7 +222,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Override
     public boolean bridge$setLocation(final ServerLocation location) {
-        if (this.removed) {
+        if (this.shadow$isRemoved()) {
             return false;
         }
 
@@ -522,7 +524,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public Entity bridge$performGameWinLogic() {
         this.shadow$unRide();
-        this.shadow$getLevel().removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this);
+        this.shadow$getLevel().removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this, Entity.RemovalReason.CHANGED_DIMENSION);
         if (!this.wonGame) {
             this.wonGame = true;
             this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.WIN_GAME, this.seenCredits ? 0.0F : 1.0F));
@@ -541,8 +543,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.connection.send(new ClientboundChangeDifficultyPacket(iworldinfo.getDifficulty(), iworldinfo.isDifficultyLocked()));
         final PlayerList playerlist = this.server.getPlayerList();
         playerlist.sendPlayerPermissionLevel((net.minecraft.server.level.ServerPlayer) (Object) this);
-        currentWorld.removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this);
-        this.removed = false;
+        currentWorld.removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this,
+            Entity.RemovalReason.CHANGED_DIMENSION);
+        this.shadow$unsetRemoved();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -739,9 +742,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         final boolean keep = ((PlayerEntityBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
         if (!keep) {
             // Copy corpse inventory to respawned player
-            this.inventory.replaceWith(corpse.inventory);
+            this.inventory.replaceWith(corpse.getInventory());
             // Clear corpse so that mods do not copy from it again
-            corpse.inventory.clearContent();
+            corpse.getInventory().clearContent();
         }
         return keep;
     }

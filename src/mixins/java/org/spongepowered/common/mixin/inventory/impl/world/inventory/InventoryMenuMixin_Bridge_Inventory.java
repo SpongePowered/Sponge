@@ -39,6 +39,6 @@ public abstract class InventoryMenuMixin_Bridge_Inventory implements PlayerConta
 
     @Override
     public void bridge$markClean() {
-        ((PlayerInventoryBridge) this.owner.inventory).bridge$markClean();
+        ((PlayerInventoryBridge) this.owner.getInventory()).bridge$markClean();
     }
 }

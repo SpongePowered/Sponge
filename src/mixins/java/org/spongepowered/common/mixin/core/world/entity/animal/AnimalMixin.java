@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity.animal;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.animal.Animal;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -49,7 +49,7 @@ public abstract class AnimalMixin extends AgableMobMixin {
                     target = "Lnet/minecraft/world/entity/animal/Animal;getLoveCause()Lnet/minecraft/server/level/ServerPlayer;",
                     ordinal = 0),
             cancellable = true)
-    private void impl$cancelSpawnResultIfMarked(ServerLevel p_234177_1_, Animal partner, final CallbackInfo ci, AgableMob offspring) {
+    private void impl$cancelSpawnResultIfMarked(ServerLevel p_234177_1_, Animal partner, final CallbackInfo ci, AgeableMob offspring) {
         if (ShouldFire.BREEDING_EVENT_BREED) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.arrow.ArrowEntity;
 import org.spongepowered.api.projectile.source.ProjectileSource;
@@ -118,7 +119,7 @@ public abstract class AbstractArrowMixin extends ProjectileMixin {
                         this.shadow$spawnAtLocation(this.shadow$getPickupItem(), 0.1F);
                     }
 
-                    this.shadow$remove();
+                    this.shadow$discard();
                 }
                 ci.cancel();
             }

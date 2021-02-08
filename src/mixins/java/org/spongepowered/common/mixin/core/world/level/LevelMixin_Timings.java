@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.level;
 
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,9 +35,10 @@ import java.util.List;
 
 @Mixin(Level.class)
 public abstract class LevelMixin_Timings {
-
     // @formatter: off
-    @Shadow @Final public List<BlockEntity> blockEntityList;
+    @Shadow @Final protected List<TickingBlockEntity> blockEntityTickers;
+
+    @Shadow protected abstract void shadow$tickBlockEntities();
     // @formatter on
 
 }

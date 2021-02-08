@@ -55,7 +55,7 @@ public abstract class FallingBlockEntityMixin extends EntityMixin {
         if (entity.level.isClientSide) {
             return entity.hurt(source, damage);
         }
-        final boolean isAnvil = this.blockState.getBlock().is(BlockTags.ANVIL);
+        final boolean isAnvil = this.blockState.is(BlockTags.ANVIL);
         try {
             if (isAnvil) {
                 final MinecraftFallingBlockDamageSource anvil = new MinecraftFallingBlockDamageSource("anvil", (FallingBlockEntity) (Object) this);

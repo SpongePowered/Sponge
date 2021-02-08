@@ -46,6 +46,7 @@ import org.spongepowered.common.bridge.server.management.PlayerInteractionManage
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
@@ -70,6 +71,7 @@ public abstract class ServerGamePacketListenerImplMixin_Tracker {
              final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.SERVER).source(player)) {
             context.buildAndSwitch();
             frame.pushCause(player);
+            PhaseTracker.LOGGER.trace(TrackingUtil.PLAYER_TICK, () -> "Wrapping Player Tick: " + player.toString());
             player.doTick();
         }
     }

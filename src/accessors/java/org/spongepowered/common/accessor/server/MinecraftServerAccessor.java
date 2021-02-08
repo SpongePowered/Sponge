@@ -52,7 +52,7 @@ public interface MinecraftServerAccessor {
     }
 
     @Invoker("setInitialSpawn") static void invoker$setInitialSpawn(final ServerLevel serverWorld, final ServerLevelData levelData, final boolean generateBonusChest,
-            final boolean isDebugGeneration, final boolean nonDebugSpawn) {
+        final boolean nonDebugSpawn) {
         throw new UntransformedInvokerError();
     }
 

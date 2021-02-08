@@ -165,7 +165,8 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
         at = @At("RETURN"))
     private void impL$postExplode(final CallbackInfo ci) {
         if (this.impl$detonationCancelled) {
-            this.impl$detonationCancelled = this.removed = false;
+            this.impl$detonationCancelled = false;
+            this.shadow$unsetRemoved();
         }
     }
 

@@ -67,7 +67,6 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     // @formatter:off
     @Shadow @Final private EntityType<?> type;
     @Shadow public Level level;
-    @Shadow public boolean removed;
     @Shadow private Vec3 position;
     @Shadow public float yRot;
     @Shadow public float xRot;
@@ -115,7 +114,6 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
 //        }
 //    }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(
         method = "spawnAtLocation(Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;",
         at = @At("HEAD")
@@ -140,8 +138,8 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
 
     protected @MonotonicNonNull EffectTransactor tracker$dropsTransactor = null;
 
-    @Inject(method = "remove()V", at = @At("RETURN"))
-    private void tracker$ensureDropEffectCompleted(final CallbackInfo ci) {
+    @Inject(method = "setRemoved(Lnet/minecraft/world/entity/Entity$RemovalReason;)V", at = @At("RETURN"))
+    private void tracker$ensureDropEffectCompleted(final Entity.RemovalReason reason, final CallbackInfo ci) {
         final PhaseTracker instance = PhaseTracker.SERVER;
         if (!instance.onSidedThread()) {
             return;

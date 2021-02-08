@@ -129,7 +129,7 @@ public abstract class LivingEntityMixin_Inventory {
         final Inventory slotAdapter;
         if (((Object) this) instanceof net.minecraft.server.level.ServerPlayer) {
             final SlotLens slotLens;
-            final PlayerInventoryBridge inventory = (PlayerInventoryBridge) ((net.minecraft.server.level.ServerPlayer) (Object) this).inventory;
+            final PlayerInventoryBridge inventory = (PlayerInventoryBridge) ((net.minecraft.server.level.ServerPlayer) (Object) this).getInventory();
             final Lens inventoryLens = ((InventoryAdapter) inventory).inventoryAdapter$getRootLens();
             final Fabric fabric = ((InventoryAdapter) inventory).inventoryAdapter$getFabric();
             if (inventoryLens instanceof PlayerInventoryLens) {

@@ -97,7 +97,7 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
                     VecHelper.toVector3d(this.shadow$position()), VecHelper.toVector3d(this.shadow$position()));
             if (SpongeCommon.postEvent(event)) {
                 // Eventhough the event is made, the pearl was still created so remove it anyways
-                this.shadow$remove();
+                this.shadow$discard();
                 return;
             }
 

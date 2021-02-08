@@ -241,7 +241,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerWorld
     public BlockSnapshot bridge$createSnapshot(final int x, final int y, final int z) {
         final BlockPos pos = new BlockPos(x, y, z);
 
-        if (!Level.isInWorldBounds(pos)) {
+        if (!((ServerLevel) (Object) this).isInWorldBounds(pos)) {
             return BlockSnapshot.empty();
         }
 

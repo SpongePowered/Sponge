@@ -39,7 +39,7 @@ import org.spongepowered.common.bridge.world.BossInfoBridge;
 public abstract class BossEventMixin implements BossInfoBridge {
 
     @Shadow protected Component name;
-    @Shadow protected float percent;
+    @Shadow protected float progress;
     @Shadow protected BossEvent.BossBarColor color;
     @Shadow protected BossEvent.BossBarOverlay overlay;
     @Shadow protected boolean darkenScreen;
@@ -51,7 +51,7 @@ public abstract class BossEventMixin implements BossInfoBridge {
     @Override
     public void bridge$copyAndAssign(final BossBar adventure) {
         this.impl$adventure = adventure;
-        this.percent = adventure.progress();
+        this.progress = adventure.progress();
         this.darkenScreen = adventure.hasFlag(BossBar.Flag.DARKEN_SCREEN);
         this.playBossMusic = adventure.hasFlag(BossBar.Flag.PLAY_BOSS_MUSIC);
         this.createWorldFog = adventure.hasFlag(BossBar.Flag.CREATE_WORLD_FOG);
@@ -62,7 +62,7 @@ public abstract class BossEventMixin implements BossInfoBridge {
         if (this.impl$adventure == null) {
             this.bridge$setAdventure(BossBar.bossBar(
                 SpongeAdventure.asAdventure(this.name),
-                this.percent,
+                this.progress,
                 SpongeAdventure.asAdventure(this.color),
                 SpongeAdventure.asAdventure(this.overlay),
                 SpongeAdventure.asAdventureFlags(this.darkenScreen, this.playBossMusic, this.createWorldFog)
@@ -87,7 +87,7 @@ public abstract class BossEventMixin implements BossInfoBridge {
         this.bridge$asAdventure().name(SpongeAdventure.asAdventure(name));
     }
 
-    @Redirect(method = "setPercent", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossEvent;percent:F"))
+    @Redirect(method = "setProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossEvent;progress:F"))
     private void adventurePercent(final BossEvent $this, final float percent) {
         this.bridge$asAdventure().progress(percent);
     }
@@ -136,7 +136,7 @@ public abstract class BossEventMixin implements BossInfoBridge {
         return SpongeAdventure.asVanilla(this.bridge$asAdventure().name());
     }
 
-    @Redirect(method = "getPercent", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossEvent;percent:F"))
+    @Redirect(method = "getProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/world/BossEvent;progress:F"))
     private float percentRead(final BossEvent $this) {
         return this.bridge$asAdventure().progress();
     }

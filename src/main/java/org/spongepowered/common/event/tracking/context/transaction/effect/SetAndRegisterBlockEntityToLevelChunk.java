@@ -24,31 +24,39 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class ReplaceTileEntityInWorldEffect implements ProcessingSideEffect {
+public final class SetAndRegisterBlockEntityToLevelChunk implements ProcessingSideEffect {
+
     private static final class Holder {
-        static final ReplaceTileEntityInWorldEffect INSTANCE = new ReplaceTileEntityInWorldEffect();
+        static final SetAndRegisterBlockEntityToLevelChunk INSTANCE = new SetAndRegisterBlockEntityToLevelChunk();
     }
-    public static ReplaceTileEntityInWorldEffect getInstance() {
+
+    public static SetAndRegisterBlockEntityToLevelChunk getInstance() {
         return Holder.INSTANCE;
     }
-    ReplaceTileEntityInWorldEffect() {}
+
+    SetAndRegisterBlockEntityToLevelChunk() {}
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag,
         final int limit
     ) {
-        final BlockEntity blockEntity = oldState.tileEntity;
-        if (blockEntity == null || blockEntity.isRemoved()) {
+        final ServerLevel serverWorld = pipeline.getServerWorld();
+        final @Nullable BlockEntity blockEntity = oldState.tileEntity;
+        final BlockPos pos = oldState.pos;
+        if (serverWorld.isOutsideBuildHeight(pos)) {
             return EffectResult.NULL_RETURN;
         }
-        pipeline.getAffectedChunk().setBlockEntity(blockEntity);
-        return EffectResult.NULL_RETURN;
+        pipeline.getAffectedChunk().addAndRegisterBlockEntity(blockEntity);
+        return EffectResult.NULL_PASS;
     }
 }

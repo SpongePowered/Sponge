@@ -68,8 +68,6 @@ public abstract class LevelChunkMixin implements ChunkBridge, CacheKeyBridge {
     // @formatter:off
     @Shadow @Final private Level level;
     @Shadow @Final private ChunkPos chunkPos;
-    @Shadow @Final private ClassInstanceMultiMap<Entity>[] entitySections;
-    @Shadow @Final private Map<BlockPos, BlockEntity> blockEntities;
     @Shadow private boolean loaded;
     @Shadow private boolean unsaved;
 

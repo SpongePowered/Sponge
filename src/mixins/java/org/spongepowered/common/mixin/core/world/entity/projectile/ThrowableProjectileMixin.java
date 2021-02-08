@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.projectile.source.ProjectileSource;
@@ -52,14 +55,15 @@ public abstract class ThrowableProjectileMixin extends ProjectileMixin {
         }
 
         if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, (ProjectileSource) this.shadow$getOwner(), movingObjectPosition)) {
-            this.shadow$remove();
+            this.shadow$discard();
         } else {
             this.shadow$onHit(movingObjectPosition);
         }
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/TheEndGatewayBlockEntity;teleportEntity(Lnet/minecraft/world/entity/Entity;)V"))
-    private void impl$createCauseFrameForGatewayTeleport(TheEndGatewayBlockEntity endGatewayTileEntity, Entity entityIn) {
+    private void impl$createCauseFrameForGatewayTeleport(TheEndGatewayBlockEntity endGatewayTileEntity,
+        Level var0, BlockPos var1, BlockState var2, Entity entityIn, TheEndGatewayBlockEntity var4) {
         if (this.shadow$getCommandSenderWorld().isClientSide) {
             return;
         }
@@ -67,7 +71,7 @@ public abstract class ThrowableProjectileMixin extends ProjectileMixin {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(endGatewayTileEntity);
             frame.pushCause(entityIn);
-            endGatewayTileEntity.teleportEntity(entityIn);
+            TheEndGatewayBlockEntity.teleportEntity(var0, var1, var2, entityIn, var4);
         }
     }
 

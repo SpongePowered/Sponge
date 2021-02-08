@@ -976,7 +976,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 final boolean hasSpawnAlready = ((ServerWorldInfoBridge) world.getLevelData()).bridge$customSpawnPosition();
                 if (!hasSpawnAlready) {
                     if (isDefaultWorld || ((ServerWorldProperties) world.getLevelData()).performsSpawnLogic()) {
-                        MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(), isDebugGeneration, !isDebugGeneration);
+                        MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(), !isDebugGeneration);
                     } else if (Level.END.equals(world.dimension())) {
                         ((PrimaryLevelData) world.getLevelData()).setSpawn(ServerLevel.END_SPAWN_POINT, 0);
                     }
@@ -1099,7 +1099,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     private void updateForcedChunks(final ServerLevel world, final ServerChunkCache serverChunkProvider) {
-        final ForcedChunksSavedData forcedChunksSaveData = world.getDataStorage().get(ForcedChunksSavedData::new, "chunks");
+        final ForcedChunksSavedData forcedChunksSaveData = world.getDataStorage().get(ForcedChunksSavedData::load, "chunks");
         if (forcedChunksSaveData != null) {
             final LongIterator longIterator = forcedChunksSaveData.getChunks().iterator();
 

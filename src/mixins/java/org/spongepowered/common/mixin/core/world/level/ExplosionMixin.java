@@ -259,7 +259,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                         entity.setDeltaMovement(entity.getDeltaMovement().add(d5 * d11 * this.impl$knockback, d7 * d11 * this.impl$knockback, d9 * d11 * this.impl$knockback));
                         if (entity instanceof Player) {
                             final Player playerentity = (Player)entity;
-                            if (!playerentity.isSpectator() && (!playerentity.isCreative() || !playerentity.abilities.flying)) {
+                            if (!playerentity.isSpectator() && (!playerentity.isCreative() || !playerentity.getAbilities().flying)) {
                                 this.hitPlayers.put(playerentity, new Vec3(d5 * d10 * this.impl$knockback,
                                         d7 * d10 * this.impl$knockback, d9 * d10 * this.impl$knockback));
                             }

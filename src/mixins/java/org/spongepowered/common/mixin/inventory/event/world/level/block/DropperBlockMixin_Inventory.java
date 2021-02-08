@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.accessor.world.level.block.entity.HopperBlockEntityAccessor;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
@@ -46,7 +47,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.DropperBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
-import net.minecraft.world.level.block.entity.HopperBlockEntity;
 
 @Mixin(DropperBlock.class)
 public abstract class DropperBlockMixin_Inventory {
@@ -89,7 +89,7 @@ public abstract class DropperBlockMixin_Inventory {
                 SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
                 final Direction enumfacing = worldIn.getBlockState(pos).getValue(DispenserBlock.FACING);
                 final BlockPos blockpos = pos.relative(enumfacing);
-                final Container iinventory = HopperBlockEntity.getContainerAt(worldIn, blockpos.getX(), blockpos.getY(), blockpos.getZ());
+                final Container iinventory = HopperBlockEntityAccessor.invoker$getContainerAt(worldIn, blockpos.getX(), blockpos.getY(), blockpos.getZ());
                 InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
             }
         }

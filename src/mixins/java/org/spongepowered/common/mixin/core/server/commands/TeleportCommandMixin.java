@@ -183,8 +183,8 @@ public abstract class TeleportCommandMixin {
                     result.moveTo(posEvent.getDestinationPosition().getX(), posEvent.getDestinationPosition().getY(),
                             posEvent.getDestinationPosition().getZ(), (float) actualYaw, (float) actualPitch);
                     result.setYHeadRot((float) actualYaw);
-                    worldIn.addFromAnotherDimension(result);
-                    entityIn.removed = true;
+                    worldIn.addDuringTeleport(result);
+                    entityIn.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
 
                     PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost(result, fromWorld,
                             (ServerLevel) preEvent.getOriginalDestinationWorld());

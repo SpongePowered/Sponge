@@ -254,13 +254,13 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         }
         if (entityItem == null) {
             ItemStack original;
-            if (player.inventory.getCarried().isEmpty()) {
+            if (player.getInventory().getCarried().isEmpty()) {
                 original = itemStackIn;
             } else {
-                player.inventory.getCarried().grow(1);
-                original = player.inventory.getCarried();
+                player.getInventory().getCarried().grow(1);
+                original = player.getInventory().getCarried();
             }
-            player.inventory.setCarried(original);
+            player.getInventory().setCarried(original);
             ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, original));
         }
         ((PlayerEntityBridge) player).bridge$shouldRestoreInventory(false);
@@ -318,7 +318,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;grow(I)V", ordinal = 1))
     private void beforeOnTakeClickWithItem(
             final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<Integer> cir) {
-        this.bridge$setPreviousCursor(player.inventory.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
+        this.bridge$setPreviousCursor(player.getInventory().getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
     }
 
     // Called when setting the cursor item (pickup with empty cursor)
@@ -327,7 +327,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;setCarried(Lnet/minecraft/world/item/ItemStack;)V", ordinal = 3))
     private void beforeOnTakeClick(
             final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<Integer> cir) {
-        this.bridge$setPreviousCursor(player.inventory.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
+        this.bridge$setPreviousCursor(player.getInventory().getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
     }
 
     // ClickType.THROW (for Crafting) -------------------------
@@ -413,7 +413,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     }
 
     @Final @Shadow private NonNullList<ItemStack> lastSlots;
-    @Final @Shadow public List<Slot> slots;
+    @Final @Shadow public NonNullList<Slot> slots;
     @Final @Shadow private List<ContainerListener> containerListeners;
     @Final @Shadow private List<DataSlot> dataSlots;
 
@@ -453,7 +453,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 // Revert item in hand
                 for (ContainerListener listener : this.containerListeners) {
                     if (listener instanceof ServerPlayer) {
-                        ((ServerPlayer) listener).inventory.setCarried(menu.getOldCursor());
+                        ((ServerPlayer) listener).getInventory().setCarried(menu.getOldCursor());
                         ((ServerPlayer) listener).broadcastCarriedItem();
                     }
                 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import net.minecraft.core.NonNullList;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,7 +54,7 @@ import net.minecraft.world.inventory.Slot;
 @Mixin(AbstractContainerMenu.class)
 public abstract class AbstractContainerMenuMixin_Adapter_Inventory implements InventoryBridge, LensGeneratorBridge, InventoryAdapter, ContainerBridge {
 
-    @Shadow @Final public List<Slot> slots;
+    @Shadow @Final public NonNullList<Slot> slots;
 
     private boolean impl$isLensInitialized;
     private boolean impl$spectatorChest;

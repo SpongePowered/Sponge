@@ -35,7 +35,7 @@ public abstract class ServerPlayerMixin_Carrier_Inventory_API implements Carrier
 
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) ((Player) (Object)this).inventory;
+        return (CarriedInventory<? extends Carrier>) ((Player) (Object)this).getInventory();
     }
 
 }

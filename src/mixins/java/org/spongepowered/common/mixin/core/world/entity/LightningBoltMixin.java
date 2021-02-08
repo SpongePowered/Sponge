@@ -103,7 +103,7 @@ public abstract class LightningBoltMixin extends EntityMixin {
 
     @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LightningBolt;remove()V"))
     private void impl$ThrowEventAndProcess(final CallbackInfo ci) {
-        if (this.removed || this.level.isClientSide) {
+        if (this.shadow$isRemoved() || this.level.isClientSide) {
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {

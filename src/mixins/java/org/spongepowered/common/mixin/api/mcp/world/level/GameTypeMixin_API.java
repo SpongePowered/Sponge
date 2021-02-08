@@ -36,11 +36,11 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 public abstract class GameTypeMixin_API implements GameMode {
 
     // @formatter:off
-    @Shadow public abstract net.minecraft.network.chat.Component getDisplayName();
+    @Shadow public abstract net.minecraft.network.chat.Component getLongDisplayName();
     // @formatter:on
 
     @Override
     public @NonNull Component asComponent() {
-        return SpongeAdventure.asAdventure(this.getDisplayName());
+        return SpongeAdventure.asAdventure(this.getLongDisplayName());
     }
 }

@@ -65,7 +65,7 @@ public abstract class ServerBossEventMixin extends BossEventMixin implements Bos
 
             // Apply invalid data where possible, avoid sameness checks
             this.name = null;
-            this.percent = Float.MIN_VALUE;
+            this.progress = Float.MIN_VALUE;
             this.color = null;
             this.overlay = null;
             // flags have to be done separately
@@ -112,7 +112,7 @@ public abstract class ServerBossEventMixin extends BossEventMixin implements Bos
     public void bossBarProgressChanged(final BossBar bar, final float oldProgress, final float newProgress) {
         if (Math.abs(newProgress - this.impl$lastSentProgress) > ServerBossEventMixin.EPSILON) {
             this.impl$lastSentProgress = newProgress;
-            this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_PCT);
+            this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_PROGRESS);
         }
     }
 

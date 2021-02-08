@@ -33,11 +33,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.entity.EntityInLevelCallback;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
@@ -60,13 +60,13 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Optional;
@@ -75,8 +75,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
-import javax.annotation.Nullable;
-
 @Mixin(net.minecraft.world.entity.Entity.class)
 @Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$"))
 public abstract class EntityMixin_API implements org.spongepowered.api.entity.Entity {
@@ -84,12 +82,12 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     // @formatter:off
     @Shadow public float yRot;
     @Shadow public float xRot;
-    @Shadow public boolean removed;
     @Final @Shadow protected Random random;
     @Shadow public int tickCount;
     @Shadow protected UUID uuid;
     @Shadow @Final private net.minecraft.world.entity.EntityType<?> type;
     @Shadow public net.minecraft.world.level.Level level;
+    @Shadow private EntityInLevelCallback levelCallback;
 
     @Shadow public abstract double shadow$getX();
     @Shadow public abstract double shadow$getY();
@@ -97,7 +95,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract net.minecraft.world.level.Level shadow$getCommandSenderWorld();
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract void shadow$setPos(double x, double y, double z);
-    @Shadow public abstract void shadow$remove();
+    @Shadow public abstract boolean shadow$isRemoved();
     @Shadow public abstract UUID shadow$getUUID();
     @Shadow public abstract void shadow$setRemainingFireTicks(int ticks);
     @Shadow public abstract boolean shadow$hurt(DamageSource source, float amount);
@@ -108,7 +106,11 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract boolean shadow$saveAsPassenger(CompoundTag compound);
     @Shadow @Nullable public abstract Component shadow$getCustomName();
     @Shadow public abstract Component shadow$getDisplayName();
+    @Shadow public abstract void shadow$setRemoved(Entity.RemovalReason var1);
+    @Shadow public abstract void shadow$discard();
     // @formatter:on
+
+
 
     @Override
     public Random getRandom() {
@@ -170,9 +172,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         this.shadow$setPos(position.getX(), position.getY(), position.getZ());
         this.setRotation(transform.getRotation());
         this.setScale(transform.getScale());
-        if (!((WorldBridge) this.shadow$getCommandSenderWorld()).bridge$isFake()) {
-            ((ServerLevel) this.shadow$getCommandSenderWorld()).updateChunkPos((Entity) (Object) this);
-        }
 
         return true;
     }
@@ -224,20 +223,20 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
     }
 
-    @Override
-    public boolean isRemoved() {
-        return this.removed;
+    @Intrinsic
+    public boolean entity$isRemoved() {
+        return this.shadow$isRemoved();
     }
 
     @Override
     public boolean isLoaded() {
         // TODO - add flag for entities loaded/unloaded into world
-        return !this.isRemoved();
+        return !this.shadow$isRemoved();
     }
 
     @Intrinsic
     public void entity$remove() {
-        this.shadow$remove();
+        this.shadow$setRemoved(Entity.RemovalReason.DISCARDED);
     }
 
     @Override

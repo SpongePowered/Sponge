@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity;
 
+import net.minecraft.world.entity.AgeableMob;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
-import net.minecraft.world.entity.AgableMob;
 
-@Mixin(AgableMob.class)
+@Mixin(AgeableMob.class)
 public abstract class AgableMobMixin_API extends PathfinderMobMixin_API implements Ageable {
 
     @Override

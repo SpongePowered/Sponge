@@ -116,7 +116,6 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     @Shadow public abstract int shadow$getPlayerIdleTimeout();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
     @Shadow public abstract boolean shadow$isHardcore();
-    @Shadow public abstract boolean shadow$getForceGameType();
     @Shadow public abstract boolean shadow$isPvpAllowed();
     @Shadow public abstract boolean shadow$isCommandBlockEnabled();
     @Shadow protected abstract boolean shadow$isSpawningMonsters();
@@ -219,7 +218,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
 
     @Override
     public boolean isGameModeEnforced() {
-        return this.shadow$getForceGameType();
+        throw new UnsupportedOperationException("Seemingly this disappeared from being possible???");
     }
 
     @Override

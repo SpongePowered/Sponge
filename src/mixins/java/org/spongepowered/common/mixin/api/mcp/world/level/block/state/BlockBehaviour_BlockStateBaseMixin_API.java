@@ -43,7 +43,9 @@ public abstract class BlockBehaviour_BlockStateBaseMixin_API extends StateHolder
     @Shadow public abstract FluidState shadow$getFluidState();
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$rotate(net.minecraft.world.level.block.Rotation rotation);
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$mirror(net.minecraft.world.level.block.Mirror rotation);
+    @Shadow public abstract boolean shadow$hasBlockEntity();
     // @formatter:on
+
 
     @Override
     public BlockType getType() {

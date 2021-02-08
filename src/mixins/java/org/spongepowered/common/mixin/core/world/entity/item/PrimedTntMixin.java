@@ -54,7 +54,8 @@ import java.util.Optional;
 public abstract class PrimedTntMixin extends EntityMixin implements EntityTNTPrimedBridge, FusedExplosiveBridge, ExplosiveBridge {
 
     // @formatter:off
-    @Shadow private int life;
+    @Shadow public abstract int shadow$getFuse();
+    @Shadow public abstract void shadow$setFuse(int var1);
     // @formatter:on
 
     @Nullable private LivingEntity impl$detonator;
@@ -68,7 +69,7 @@ public abstract class PrimedTntMixin extends EntityMixin implements EntityTNTPri
 
     @Override
     public boolean bridge$isExploding() {
-        return this.removed && this.life <= 0;
+        return this.shadow$isRemoved() && this.shadow$getFuse() <= 0;
     }
 
     @Override
@@ -93,12 +94,12 @@ public abstract class PrimedTntMixin extends EntityMixin implements EntityTNTPri
 
     @Override
     public int bridge$getFuseTicksRemaining() {
-        return this.life;
+        return this.shadow$getFuse();
     }
 
     @Override
     public void bridge$setFuseTicksRemaining(final int fuseTicks) {
-        this.life = fuseTicks;
+        this.shadow$setFuse(fuseTicks);
     }
 
     @Nullable
@@ -127,7 +128,7 @@ public abstract class PrimedTntMixin extends EntityMixin implements EntityTNTPri
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$updateTNTPushPrime(final CallbackInfo ci) {
-        if (this.life == this.bridge$fuseDuration - 1 && !this.level.isClientSide) {
+        if (this.shadow$getFuse() == this.bridge$fuseDuration - 1 && !this.level.isClientSide) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 if (this.impl$detonator != null) {
                     frame.pushCause(this.impl$detonator);

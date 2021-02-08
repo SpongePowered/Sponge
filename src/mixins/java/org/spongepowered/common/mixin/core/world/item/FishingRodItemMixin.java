@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.entity.projectile.FishingBobber;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -73,7 +74,7 @@ public abstract class FishingRodItemMixin {
         FishingHook fishHook = new FishingHook(player, world, j, k);
         PhaseTracker.getCauseStackManager().pushCause(player);
         if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStart(PhaseTracker.getCauseStackManager().getCurrentCause(), (FishingBobber) fishHook))) {
-            fishHook.remove(); // Bye
+            fishHook.remove(Entity.RemovalReason.DISCARDED); // Bye
             cir.setReturnValue(new InteractionResultHolder<>(InteractionResult.SUCCESS, player.getItemInHand(hand)));
         } else {
             this.impl$fishHook = fishHook;

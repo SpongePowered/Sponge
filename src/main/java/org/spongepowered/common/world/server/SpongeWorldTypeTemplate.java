@@ -110,9 +110,11 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
                     .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15) -> {
                         final BiomeZoomer biomeMagnifier = f15.isPresent() ? (BiomeZoomer) BiomeSamplerProvider.INSTANCE.get((ResourceKey) (Object) f15.get().biomeSampler) : FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE;
                         final boolean createDragonFight = f15.isPresent() && f15.get().createDragonFight;
-
-                        return DimensionTypeAccessor.invoker$new(f1, f2, f3, f4, f5, f6, createDragonFight, f7, f8, f9, f10, f11,
-                                biomeMagnifier, f12, f13, f14);
+                        // TODO - Zidane!
+                        throw new UnsupportedOperationException("Needs some updating");
+//
+//                        return DimensionType.invoker$new(f1, f2, f3, f4, f5, f6, createDragonFight, f7, f8, f9, f10, f11,
+//                                biomeMagnifier, f12, f13, f14);
                     })
             );
 

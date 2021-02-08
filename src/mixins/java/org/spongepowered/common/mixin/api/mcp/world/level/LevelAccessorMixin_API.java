@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level;
 
+import net.minecraft.core.QuartPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -85,19 +86,18 @@ public interface LevelAccessorMixin_API {
     default boolean protoWorld$setBiome(final int x, final int y, final int z, final org.spongepowered.api.world.biome.Biome biome) {
         Objects.requireNonNull(biome, "biome");
 
-        final ChunkAccess iChunk = ((LevelReader) this).getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
-        if (iChunk == null) {
+        final ChunkAccess chunkAccess = ((LevelReader) this).getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
+        if (chunkAccess == null) {
             return false;
         }
-        if (iChunk instanceof ProtoChunk) {
-            return ((ProtoChunk) iChunk).setBiome(x, y, z, biome);
+        if (chunkAccess instanceof ProtoChunk) {
+            return ((ProtoChunk) chunkAccess).setBiome(x, y, z, biome);
         } else {
-            final Biome[] biomes = ((ChunkBiomeContainerAccessor) iChunk.getBiomes()).accessor$biomes();
+            final Biome[] biomes = ((ChunkBiomeContainerAccessor) chunkAccess.getBiomes()).accessor$biomes();
 
-            final int maskedX = x & ChunkBiomeContainer.HORIZONTAL_MASK;
-            final int maskedY = Mth.clamp(y, 0, ChunkBiomeContainer.VERTICAL_MASK);
-            final int maskedZ = z & ChunkBiomeContainer.HORIZONTAL_MASK;
-
+            int maskedX = x & ChunkBiomeContainerAccessor.accessor$HORIZONTAL_MASK();
+            int maskedY = Mth.clamp(y - QuartPos.fromBlock(chunkAccess.getMinBuildHeight()), 0, chunkAccess.getHeight());
+            int maskedZ = z & ChunkBiomeContainerAccessor.accessor$HORIZONTAL_MASK();
             final int WIDTH_BITS = ChunkBiomeContainerAccessor.accessor$WIDTH_BITS();
             final int posKey = maskedY << WIDTH_BITS + WIDTH_BITS | maskedZ << WIDTH_BITS | maskedX;
             biomes[posKey] = (Biome) (Object) biome;
@@ -172,7 +172,7 @@ public interface LevelAccessorMixin_API {
         Objects.requireNonNull(blockState, "blockState");
         Objects.requireNonNull(flag, "flag");
 
-        if (!Level.isInWorldBounds(new BlockPos(x, y, z))) {
+        if (!((Level) (Object) this).isInWorldBounds(new BlockPos(x, y, z))) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
         }
         try (final @Nullable PhaseContext<@NonNull ?> context = PluginPhase.State.BLOCK_WORKER.switchIfNecessary(PhaseTracker.SERVER)) {

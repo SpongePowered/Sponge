@@ -28,6 +28,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.BlockEventData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RedstoneLampBlock;
+import net.minecraft.world.level.block.RedstoneTorchBlock;
+import net.minecraft.world.level.block.RepeaterBlock;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
+import net.minecraft.world.level.material.FluidState;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
@@ -71,20 +81,10 @@ import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.BlockEventData;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RedstoneLampBlock;
-import net.minecraft.world.level.block.RedstoneTorchBlock;
-import net.minecraft.world.level.block.RepeaterBlock;
-import net.minecraft.world.level.material.FluidState;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -95,24 +95,11 @@ import java.util.function.Supplier;
 public final class TrackingUtil {
 
     public static final Marker ENTITY_TICK = MarkerManager.getMarker("ENTITY TICK");
-    public static final Marker TILE_ENTITY_TICK = MarkerManager.getMarker("TILE ENTITY TICK");
+    public static final Marker BLOCK_ENTITY_TICK = MarkerManager.getMarker("TILE ENTITY TICK");
     public static final Marker PLAYER_TICK = MarkerManager.getMarker("PLAYER TICK");
     public static final Marker BLOCK_TICK = MarkerManager.getMarker("BLOCK TICK");
     public static final Marker FLUID_TICK = MarkerManager.getMarker("FLUID TICK");
-    public static final Marker NEIGHBOR_UPDATE = MarkerManager.getMarker("NEIGHBOR UPDATE");
 
-
-    public static final int BREAK_BLOCK_INDEX = BlockChange.BREAK.ordinal();
-    public static final int PLACE_BLOCK_INDEX = BlockChange.PLACE.ordinal();
-    public static final int DECAY_BLOCK_INDEX = BlockChange.DECAY.ordinal();
-    public static final int CHANGE_BLOCK_INDEX = BlockChange.MODIFY.ordinal();
-    private static final int MULTI_CHANGE_INDEX = BlockChange.values().length;
-    static final Function<SpongeBlockSnapshot, Optional<Transaction<BlockSnapshot>>> TRANSACTION_CREATION =
-        (blockSnapshot) -> blockSnapshot.getServerWorld().map(worldServer -> {
-            final BlockPos targetPos = blockSnapshot.getBlockPos();
-            final SpongeBlockSnapshot replacement = ((TrackedWorldBridge) worldServer).bridge$createSnapshot(targetPos, BlockChangeFlags.NONE);
-            return new Transaction<>(blockSnapshot, replacement);
-        });
     public static final int WIDTH = 40;
 
     public static void tickEntity(final Consumer<net.minecraft.world.entity.Entity> consumer, final net.minecraft.world.entity.Entity entity) {
@@ -134,6 +121,7 @@ public final class TrackingUtil {
             }
             context.buildAndSwitch();
             entityTiming.startTiming();
+            PhaseTracker.LOGGER.trace(TrackingUtil.ENTITY_TICK, () -> "Wrapping Entity Tick: " + entity.toString());
             consumer.accept(entity);
             if (ShouldFire.MOVE_ENTITY_EVENT) {
                 SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
@@ -146,46 +134,14 @@ public final class TrackingUtil {
         }
     }
 
-    public static void tickRidingEntity(final net.minecraft.world.entity.Entity entity) {
-        checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
-        checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        if (!((TrackableBridge) entity).bridge$shouldTick()) {
-            return;
-        }
-
-        final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
-        try (
-             final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
-             ) {
-            entityTiming.startTiming();
-            if (entity instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
-                    .ifPresent(context::notifier);
-                ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
-                    .ifPresent(context::creator);
-            }
-            context.buildAndSwitch();
-            entity.rideTick();
-            if (ShouldFire.MOVE_ENTITY_EVENT) {
-                SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
-            }
-            if (ShouldFire.ROTATE_ENTITY_EVENT) {
-                SpongeCommonEventFactory.callNaturalRotateEntityEvent(entity);
-            }
-        } catch (final Exception e) {
-            PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
-        }
-    }
-
     @SuppressWarnings({"unused", "try"})
-    public static void tickTileEntity(final TrackedWorldBridge mixinWorldServer, final TickableBlockEntity tile) {
-        checkArgument(tile instanceof BlockEntity, "ITickable %s is not a TileEntity!", tile);
+    public static void tickTileEntity(final TrackedWorldBridge mixinWorldServer, final TickingBlockEntity tile) {
+        checkArgument(tile instanceof BlockEntity, "TickingBlockEntity %s is not a BlockEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
         final net.minecraft.world.level.block.entity.BlockEntity tileEntity = (net.minecraft.world.level.block.entity.BlockEntity) tile;
         final TileEntityBridge mixinTileEntity = (TileEntityBridge) tile;
         final BlockPos pos = tileEntity.getBlockPos();
-        final ChunkBridge chunk = ((ActiveChunkReferantBridge) tile).bridge$getActiveChunk();
+        final @Nullable ChunkBridge chunk = ((ActiveChunkReferantBridge) tile).bridge$getActiveChunk();
         if (!((TrackableBridge) tileEntity).bridge$shouldTick()) {
             return;
         }
@@ -194,7 +150,7 @@ public final class TrackingUtil {
         }
 
         final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext(PhaseTracker.SERVER).source(mixinTileEntity);
-        try (final PhaseContext<?> phaseContext = context) {
+        try (final PhaseContext<@NonNull ?> phaseContext = context) {
 
             if (tile instanceof CreatorTrackedBridge) {
                 // Add notifier and owner so we don't have to perform lookups during the phases and other processing
@@ -209,6 +165,7 @@ public final class TrackingUtil {
             phaseContext.buildAndSwitch();
 
             try (final Timing timing = ((TimingBridge) tileEntity).bridge$getTimingsHandler().startTiming()) {
+                PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_ENTITY_TICK, () -> "Wrapping Entity Tick: " + tile.toString());
                 tile.tick();
             }
         } catch (final Exception e) {
@@ -220,7 +177,6 @@ public final class TrackingUtil {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     public static void updateTickBlock(
             final TrackedWorldBridge mixinWorld, final net.minecraft.world.level.block.state.BlockState block, final BlockPos pos, final Random random) {
         final ServerLevel world = (ServerLevel) mixinWorld;
@@ -293,7 +249,6 @@ public final class TrackingUtil {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     public static void randomTickBlock(final TrackedWorldBridge mixinWorld,
                                        final net.minecraft.world.level.block.state.BlockState state, final BlockPos pos, final Random random) {
         final ServerLevel world = (ServerLevel) mixinWorld;
@@ -329,7 +284,7 @@ public final class TrackingUtil {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
         }
     }
-    @SuppressWarnings("rawtypes")
+
     public static void randomTickFluid(final TrackedWorldBridge mixinWorld,
         final FluidState state, final BlockPos pos, final Random random) {
         final ServerLevel world = (ServerLevel) mixinWorld;
@@ -436,7 +391,7 @@ public final class TrackingUtil {
         };
     }
 
-    public static boolean processBlockCaptures(final PhaseContext<?> context) {
+    public static boolean processBlockCaptures(final PhaseContext<@NonNull ?> context) {
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         // Fail fast and check if it's empty.
         if (transactor.isEmpty()) {

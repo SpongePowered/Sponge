@@ -242,7 +242,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public void sendResourcePack(final ResourcePack pack) {
-        this.connection.send(new ClientboundResourcePackPacket(((SpongeResourcePack) Objects.requireNonNull(pack, "pack")).getUrlString(), pack.getHash().orElse("")));
+        this.connection.send(new ClientboundResourcePackPacket(((SpongeResourcePack) Objects.requireNonNull(pack, "pack")).getUrlString(), pack.getHash().orElse(""), false));
     }
 
     @Override

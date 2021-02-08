@@ -40,85 +40,86 @@ import org.spongepowered.common.mixin.core.world.level.block.entity.Randomizable
 
 @Mixin(ChestBlockEntity.class)
 public abstract class ChestBlockEntityMixin_Optimization_TileEntity extends RandomizableContainerBlockEntityMixin {
-
-    @Shadow protected float openness;
-    @Shadow protected int openCount;
-    @Shadow private int tickInterval;
-    @Shadow protected float oOpenness; // old openness
-
-    @Shadow protected abstract void shadow$playSound(SoundEvent soundIn);
-    @Shadow public static int shadow$getOpenCount(final Level p_213977_0_, final BaseContainerBlockEntity p_213977_1_, final int p_213977_2_,
-            final int p_213977_3_, final int p_213977_4_, final int p_213977_5_, final int p_213977_6_) {
-        throw new UnsupportedOperationException("Shadowed getOpenCount");
-    }
-
-    /**
-     * @author bloodmc - July 21st, 2016
-     *
-     * @reason Overwritten in case chests ever attempt to tick
-     */
-    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
-    private void impl$DisableTickingChestsOnServer(final CallbackInfo ci) {
-        ++this.tickInterval;
-        ci.cancel();
-    }
-
-    @Inject(method = "playSound", at = @At("HEAD"), cancellable = true)
-    private void impl$onPlaySound(final SoundEvent soundIn, final CallbackInfo ci) {
-        if (!this.shadow$getBlockState().hasProperty(ChestBlock.TYPE)) {
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "startOpen", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/ChestBlockEntity;signalOpenCount()V"))
-    private void impl$onOpenInventory(final Player player, final CallbackInfo ci) {
-        this.impl$doOpenLogic();
-    }
-
-    @Inject(method = "stopOpen", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/ChestBlockEntity;signalOpenCount()V"))
-    private void impl$onCloseInventory(final Player player, final CallbackInfo ci) {
-        this.impl$doCloseLogic();
-    }
-
-    // Moved out of tick loop
-    private void impl$doOpenLogic() {
-        final int x = this.worldPosition.getX();
-        final int y = this.worldPosition.getY();
-        final int z = this.worldPosition.getZ();
-        ++this.tickInterval;
-        this.openCount = ChestBlockEntityMixin_Optimization_TileEntity.shadow$getOpenCount(this.level, (BaseContainerBlockEntity) (Object) this,
-                this.tickInterval, x, y, z, this.openCount);
-        this.oOpenness = this.openness;
-        // final float lvt_4_1_ = 0.1F; // inlined
-        if (this.openCount > 0 && this.openness == 0.0F) {
-            this.shadow$playSound(SoundEvents.CHEST_OPEN);
-        }
-    }
-
-    // Moved out of tick loop
-    private void impl$doCloseLogic() {
-        if (this.openCount == 0 /*&& this.openness > 0.0F || this.openCount > 0 && this.openness < 1.0F*/) {
-            final float lvt_5_1_ = this.openness;
-            if (this.openCount > 0) {
-                this.openness += 0.1F;
-            } else {
-                this.openness -= 0.1F;
-            }
-
-            if (this.openness > 1.0F) {
-                this.openness = 1.0F;
-            }
-
-            // final float lvt_6_1_ = 0.5F; // inlined
-            if (this.openness < 0.5F && lvt_5_1_ >= 0.5F) {
-                this.shadow$playSound(SoundEvents.CHEST_CLOSE);
-            }
-
-            if (this.openness < 0.0F) {
-                this.openness = 0.0F;
-            }
-        }
-    }
+//  Todo - This all changed
+//
+//    @Shadow protected float openness;
+//    @Shadow protected int openCount;
+//    @Shadow private int tickInterval;
+//    @Shadow protected float oOpenness; // old openness
+//
+//    @Shadow protected abstract void shadow$playSound(SoundEvent soundIn);
+//    @Shadow public static int shadow$getOpenCount(final Level p_213977_0_, final BaseContainerBlockEntity p_213977_1_, final int p_213977_2_,
+//            final int p_213977_3_, final int p_213977_4_, final int p_213977_5_, final int p_213977_6_) {
+//        throw new UnsupportedOperationException("Shadowed getOpenCount");
+//    }
+//
+//    /**
+//     * @author bloodmc - July 21st, 2016
+//     *
+//     * @reason Overwritten in case chests ever attempt to tick
+//     */
+//    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
+//    private void impl$DisableTickingChestsOnServer(final CallbackInfo ci) {
+//        ++this.tickInterval;
+//        ci.cancel();
+//    }
+//
+//    @Inject(method = "playSound", at = @At("HEAD"), cancellable = true)
+//    private void impl$onPlaySound(final SoundEvent soundIn, final CallbackInfo ci) {
+//        if (!this.shadow$getBlockState().hasProperty(ChestBlock.TYPE)) {
+//            ci.cancel();
+//        }
+//    }
+//
+//    @Inject(method = "startOpen", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/ChestBlockEntity;signalOpenCount()V"))
+//    private void impl$onOpenInventory(final Player player, final CallbackInfo ci) {
+//        this.impl$doOpenLogic();
+//    }
+//
+//    @Inject(method = "stopOpen", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/ChestBlockEntity;signalOpenCount()V"))
+//    private void impl$onCloseInventory(final Player player, final CallbackInfo ci) {
+//        this.impl$doCloseLogic();
+//    }
+//
+//    // Moved out of tick loop
+//    private void impl$doOpenLogic() {
+//        final int x = this.worldPosition.getX();
+//        final int y = this.worldPosition.getY();
+//        final int z = this.worldPosition.getZ();
+//        ++this.tickInterval;
+//        this.openCount = ChestBlockEntityMixin_Optimization_TileEntity.shadow$getOpenCount(this.level, (BaseContainerBlockEntity) (Object) this,
+//                this.tickInterval, x, y, z, this.openCount);
+//        this.oOpenness = this.openness;
+//        // final float lvt_4_1_ = 0.1F; // inlined
+//        if (this.openCount > 0 && this.openness == 0.0F) {
+//            this.shadow$playSound(SoundEvents.CHEST_OPEN);
+//        }
+//    }
+//
+//    // Moved out of tick loop
+//    private void impl$doCloseLogic() {
+//        if (this.openCount == 0 /*&& this.openness > 0.0F || this.openCount > 0 && this.openness < 1.0F*/) {
+//            final float lvt_5_1_ = this.openness;
+//            if (this.openCount > 0) {
+//                this.openness += 0.1F;
+//            } else {
+//                this.openness -= 0.1F;
+//            }
+//
+//            if (this.openness > 1.0F) {
+//                this.openness = 1.0F;
+//            }
+//
+//            // final float lvt_6_1_ = 0.5F; // inlined
+//            if (this.openness < 0.5F && lvt_5_1_ >= 0.5F) {
+//                this.shadow$playSound(SoundEvents.CHEST_CLOSE);
+//            }
+//
+//            if (this.openness < 0.0F) {
+//                this.openness = 0.0F;
+//            }
+//        }
+//    }
 
 }
 

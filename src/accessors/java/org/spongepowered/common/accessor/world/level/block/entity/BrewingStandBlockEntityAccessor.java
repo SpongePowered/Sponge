@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(BrewingStandBlockEntity.class)
 public interface BrewingStandBlockEntityAccessor {
@@ -40,6 +43,10 @@ public interface BrewingStandBlockEntityAccessor {
 
     @Accessor("fuel") void accessor$fuel(final int fuel);
 
-    @Invoker("isBrewable") boolean invoker$isBrewable();
+    @Accessor("items") NonNullList<ItemStack> accessor$items();
+
+    @Invoker("isBrewable") static boolean invoker$isBrewable(NonNullList<ItemStack> var0) {
+        throw new UntransformedInvokerError();
+    }
 
 }

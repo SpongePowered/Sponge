@@ -25,6 +25,12 @@
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.StringUtil;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfileManager;
@@ -37,21 +43,18 @@ import org.spongepowered.common.bridge.tileentity.SkullTileEntityBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.concurrent.CompletableFuture;
-import net.minecraft.util.StringUtil;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
 
 @Mixin(SkullBlockEntity.class)
-public abstract class SkullBlockEntityMixin extends BlockEntity implements TickableBlockEntity, SkullTileEntityBridge {
+public abstract class SkullBlockEntityMixin extends BlockEntity implements SkullTileEntityBridge {
 
     @Shadow private GameProfile owner;
 
     private @Nullable CompletableFuture<?> impl$currentProfileFuture;
 
-    public SkullBlockEntityMixin(final BlockEntityType<?> type) {
-        super(type);
+    private SkullBlockEntityMixin(
+        BlockEntityType<?> var1, BlockPos var2, BlockState var3
+    ) {
+        super(var1, var2, var3);
     }
 
     private void cancelResolveFuture() {

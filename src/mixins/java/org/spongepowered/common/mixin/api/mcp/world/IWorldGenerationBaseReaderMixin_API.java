@@ -40,7 +40,6 @@ public interface IWorldGenerationBaseReaderMixin_API extends GenerationVolume {
 
     //@formatter:off
     @Shadow boolean shadow$isStateAtPosition(BlockPos p_217375_1_, Predicate<net.minecraft.world.level.block.state.BlockState> p_217375_2_);
-    @Shadow BlockPos shadow$getHeightmapPos(Heightmap.Types p_205770_1_, BlockPos p_205770_2_);
     //@formatter:on
 
     @Override

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
+import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.api.block.entity.MobSpawner;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,7 +51,9 @@ public abstract class SpawnerBlockEntityMixin_API extends BlockEntityMixin_API i
             bridge.bridge$setMaxNearbyEntities(Short.MAX_VALUE);
 
             bridge.bridge$setSpawnDelay(0);
-            this.shadow$getSpawner().tick();
+            if (!this.level.isClientSide) {
+                this.shadow$getSpawner().serverTick((ServerLevel) this.level, this.worldPosition);
+            }
 
             bridge.bridge$setMaxNearbyEntities(oldMaxNearby);
         } else {
