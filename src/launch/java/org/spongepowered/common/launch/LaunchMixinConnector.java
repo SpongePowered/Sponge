@@ -47,6 +47,7 @@ public abstract class LaunchMixinConnector implements IMixinConnector {
             "mixins.sponge.core.json",
             "mixins.sponge.exploit.json",
             "mixins.sponge.inventory.json",
+            "mixins.sponge.movementcheck.json",
             "mixins.sponge.tracker.json"
         );
     }

@@ -46,7 +46,7 @@ public abstract class ServerGamePacketListenerImplMixin_MovementCheck {
         if (SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.player.movedTooQuickly) {
             return player.isChangingDimension();
         }
-        return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
+        return true; // The 'moved too quickly' check only executes if isChangingDimension return false
     }
 
     @Redirect(method = "handleMovePlayer",
@@ -55,12 +55,12 @@ public abstract class ServerGamePacketListenerImplMixin_MovementCheck {
         if (SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedWrongly) {
             return player.isChangingDimension();
         }
-        return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
+        return true; // The 'moved too quickly' check only executes if isChangingDimension return false
     }
 
     @ModifyConstant(method = "handleMoveVehicle", constant = @Constant(doubleValue = 100, ordinal = 0), slice =
         @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;lengthSqr()D", ordinal = 1),
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;lengthSqr()D", ordinal = 0),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;isSingleplayerOwner()Z", ordinal = 0))
     )
     private double movementCheck$onVehicleMovedTooQuicklyCheck(final double val) {
