@@ -120,6 +120,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public net.minecraft.world.level.Level level;
     @Shadow public float yRot;
     @Shadow public float xRot;
+    @Shadow private boolean invulnerable;
     @Shadow public int invulnerableTime;
     @Shadow public boolean removed;
     @Shadow public float walkDistO;
@@ -189,10 +190,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected abstract void shadow$removeAfterChangingDimensions();
     @Shadow public abstract void shadow$absMoveTo(double p_242281_1_, double p_242281_3_, double p_242281_5_);
     @Shadow protected abstract int shadow$getPermissionLevel();
-
     // @formatter:on
 
-    @Shadow @Final private EntityType<?> type;
     private boolean impl$isConstructing = true;
     private boolean impl$vanishPreventsTargeting = false;
     private boolean impl$isVanished = false;
@@ -406,6 +405,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Override
     public void bridge$setInvulnerable(final boolean value) {
         this.impl$invulnerable = value;
+        this.invulnerable = value;
         if (value) {
             ((SpongeDataHolderBridge) this).bridge$offer(Keys.INVULNERABLE, true);
         } else {
