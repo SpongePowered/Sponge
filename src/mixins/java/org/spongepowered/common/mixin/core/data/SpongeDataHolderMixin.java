@@ -71,7 +71,8 @@ public abstract class SpongeDataHolderMixin implements SpongeDataHolderBridge {
             this.impl$manipulator = DataManipulator.mutableOf();
         }
 
-        if (this instanceof DataHolder.Mutable) {
+        if (this instanceof DataHolder.Mutable && !(this instanceof org.spongepowered.api.item.inventory.ItemStack)) {
+            // Does not work when adding ItemStacks to inventory because the Item may be empty (see Inventory#addResource)
             for (Value.Immutable<?> value : manipulator.getValues()) {
                 final DataProvider provider = SpongeDataManager.getProviderRegistry().getProvider(value.getKey(), this.getClass());
                 provider.offerValue((DataHolder.Mutable) this, value);

@@ -66,6 +66,30 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
     // @formatter:on
 
     @Override
+    public <E> DataTransactionResult bridge$offer(final Key<@NonNull ? extends Value<E>> key, final E value) {
+        if (this.emptyCacheFlag) {
+            return DataTransactionResult.failNoData();
+        }
+        return SpongeDataHolderBridge.super.bridge$offer(key, value);
+    }
+
+    @Override
+    public <E> Optional<E> bridge$get(final Key<@NonNull ? extends Value<E>> key) {
+        if (this.emptyCacheFlag) {
+            return Optional.empty();
+        }
+        return SpongeDataHolderBridge.super.bridge$get(key);
+    }
+
+    @Override
+    public <E> DataTransactionResult bridge$remove(final Key<@NonNull ? extends Value<E>> key) {
+        if (this.emptyCacheFlag) {
+            return DataTransactionResult.failNoData();
+        }
+        return SpongeDataHolderBridge.super.bridge$remove(key);
+    }
+
+    @Override
     public CompoundTag data$getCompound() {
         return this.shadow$getTag();
     }
