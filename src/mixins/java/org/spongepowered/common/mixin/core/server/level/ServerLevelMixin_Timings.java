@@ -45,8 +45,8 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
 
     // @formatter:off
     @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
+    @Shadow protected abstract void shadow$runBlockEvents();
     // @formatter:on
-
 
     @Inject(method = "tick", at = @At(value = "HEAD"))
     private void impl$startWorldTimings(BooleanSupplier var1, CallbackInfo ci) {
@@ -67,7 +67,7 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.runBlockEvents()V"))
     protected void impl$wrapRunBlockEventsTimings(ServerLevel level) {
         this.bridge$getTimingsHandler().scheduledBlocks.startTiming();
-        level.tickBlockEntities();
+        this.shadow$runBlockEvents();
         this.bridge$getTimingsHandler().scheduledBlocks.stopTiming();
     }
 
