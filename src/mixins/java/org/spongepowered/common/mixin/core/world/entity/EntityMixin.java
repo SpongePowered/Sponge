@@ -81,7 +81,6 @@ import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
@@ -113,14 +112,12 @@ import java.util.Optional;
 import java.util.Random;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, InvulnerableTrackedBridge,
-        TimingBridge, CommandSourceProviderBridge, DataCompoundHolder {
+public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, TimingBridge, CommandSourceProviderBridge, DataCompoundHolder {
 
     // @formatter:off
     @Shadow public net.minecraft.world.level.Level level;
     @Shadow public float yRot;
     @Shadow public float xRot;
-    @Shadow private boolean invulnerable;
     @Shadow public int invulnerableTime;
     @Shadow public boolean removed;
     @Shadow public float walkDistO;
@@ -198,7 +195,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private boolean impl$pendingVisibilityUpdate = false;
     private int impl$visibilityTicks = 0;
     private boolean impl$vanishIgnoresCollision = true;
-    private boolean impl$invulnerable = false;
     private boolean impl$transient = false;
     private boolean impl$shouldFireRepositionEvent = true;
     private WeakReference<ServerWorld> impl$originalDestinationWorld = null;
@@ -329,11 +325,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Override
-    public boolean bridge$getIsInvulnerable() {
-        return this.impl$invulnerable;
-    }
-
-    @Override
     public boolean bridge$isInvisible() {
         return this.shadow$isInvisible();
     }
@@ -400,17 +391,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Override
     public Timing bridge$getTimingsHandler() {
         return ((EntityTypeBridge) this.shadow$getType()).bridge$getTimings();
-    }
-
-    @Override
-    public void bridge$setInvulnerable(final boolean value) {
-        this.impl$invulnerable = value;
-        this.invulnerable = value;
-        if (value) {
-            ((SpongeDataHolderBridge) this).bridge$offer(Keys.INVULNERABLE, true);
-        } else {
-            ((SpongeDataHolderBridge) this).bridge$remove(Keys.INVULNERABLE);
-        }
     }
 
     @Override
