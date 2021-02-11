@@ -38,8 +38,11 @@ import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityHealthScaleBridge;
 import org.spongepowered.common.bridge.stats.StatisticsManagerBridge;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.Constants;
 
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public final class ServerPlayerData {
@@ -96,6 +99,9 @@ public final class ServerPlayerData {
                         .get(ServerPlayerEntityBridge::bridge$getViewDistance)
                     .create(Keys.SKIN_PARTS)
                         .get(ServerPlayerEntityBridge::bridge$getSkinParts);
+
+        registrator.spongeDataStore(Keys.HEALTH_SCALE.getKey(), ServerPlayerEntityHealthScaleBridge.class, Keys.HEALTH_SCALE);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Player.HEALTH_SCALE, Keys.HEALTH_SCALE.getKey(), Keys.HEALTH_SCALE);
     }
     // @formatter:on
 }

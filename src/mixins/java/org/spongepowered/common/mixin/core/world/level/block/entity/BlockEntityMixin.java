@@ -37,13 +37,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.TimingBridge;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
-import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -75,27 +74,16 @@ public abstract class BlockEntityMixin implements TileEntityBridge, DataCompound
         return this.impl$timing;
     }
 
-    // When changing custom data it is serialized on to this.
-    // On writeInternal the SpongeData tag is added to the new CompoundNBT accordingly
-    // In a Forge environment the ForgeData tag is managed by forge
-    // Structure: tileNbt - ForgeData - SpongeData - customdata
-    private CompoundTag impl$nbt;
-
-    // TODO overrides for ForgeData
-    // @Shadow private CompoundNBT customTileData;
-    // @Override CompoundNBT data$getForgeData()
-    // @Override CompoundNBT data$getForgeData()
-    // @Override CompoundNBT data$hasForgeData()
-    // @Override CompoundNBT cleanEmptySpongeData()
+    private CompoundTag impl$customData;
 
     @Override
     public CompoundTag data$getCompound() {
-        return this.impl$nbt;
+        return this.impl$customData;
     }
 
     @Override
     public void data$setCompound(CompoundTag nbt) {
-        this.impl$nbt = nbt;
+        this.impl$customData = nbt;
     }
 
     @Override
@@ -105,8 +93,7 @@ public abstract class BlockEntityMixin implements TileEntityBridge, DataCompound
 
     @Inject(method = "saveMetadata", at = @At("RETURN"))
     private void impl$writeSpongeData(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> ci) {
-        CustomDataHolderBridge.syncCustomToTag(this);
-        if (this.data$hasSpongeData()) {
+        if (DataUtil.syncDataToTag(this)) {
             compound.merge(this.data$getCompound());
         }
     }
@@ -116,7 +103,7 @@ public abstract class BlockEntityMixin implements TileEntityBridge, DataCompound
         // TODO If we are in Forge data is already present
         this.data$setCompound(compound); // For vanilla we set the incoming nbt
         // Deserialize custom data...
-        CustomDataHolderBridge.syncTagToCustom(this);
+        DataUtil.syncTagToData(this);
         this.data$setCompound(null); // done reading
     }
 

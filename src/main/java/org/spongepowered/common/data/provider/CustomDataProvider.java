@@ -31,7 +31,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 
 import java.lang.reflect.Type;
 import java.util.Optional;
@@ -49,18 +49,18 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     @Override
     public Optional<E> get(DataHolder dataHolder) {
         if (this.isSupported(dataHolder)) {
-            final CustomDataHolderBridge customDataHolder = CustomDataProvider.getCustomDataHolder(dataHolder);
-            return customDataHolder.bridge$getCustom(this.getKey());
+            final SpongeDataHolderBridge customDataHolder = CustomDataProvider.getCustomDataHolder(dataHolder);
+            return customDataHolder.bridge$get(this.getKey());
         }
         return Optional.empty();
     }
 
-    private static CustomDataHolderBridge getCustomDataHolder(DataHolder dataHolder) {
-        final CustomDataHolderBridge customDataHolder;
+    private static SpongeDataHolderBridge getCustomDataHolder(DataHolder dataHolder) {
+        final SpongeDataHolderBridge customDataHolder;
         if (dataHolder instanceof ServerLocation) {
-            customDataHolder = (CustomDataHolderBridge) ((ServerLocation) dataHolder).getBlockEntity().get();
+            customDataHolder = (SpongeDataHolderBridge) ((ServerLocation) dataHolder).getBlockEntity().get();
         } else {
-            customDataHolder = (CustomDataHolderBridge) dataHolder;
+            customDataHolder = (SpongeDataHolderBridge) dataHolder;
         }
         return customDataHolder;
     }
@@ -78,7 +78,7 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
             }
             return false;
         }
-        if (!(dataHolder instanceof CustomDataHolderBridge)) {
+        if (!(dataHolder instanceof SpongeDataHolderBridge)) {
             return false;
         }
         for (final Type type : this.supportedTokens) {
@@ -91,7 +91,7 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
 
     @Override
     public boolean isSupported(final Type dataHolder) {
-        if (!CustomDataHolderBridge.class.isAssignableFrom(GenericTypeReflector.erase(dataHolder))) {
+        if (!SpongeDataHolderBridge.class.isAssignableFrom(GenericTypeReflector.erase(dataHolder))) {
             return true;
         }
         for (final Type token : this.supportedTokens) {
@@ -105,7 +105,7 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     @Override
     public DataTransactionResult offer(DataHolder.Mutable dataHolder, E element) {
         if (this.isSupported(dataHolder)) {
-            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$offerCustom(this.getKey(),  element);
+            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$offer(this.getKey(),  element);
         }
         return DataTransactionResult.failNoData();
     }
@@ -113,7 +113,7 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     @Override
     public DataTransactionResult remove(DataHolder.Mutable dataHolder) {
         if (this.isSupported(dataHolder)) {
-            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$removeCustom(this.getKey());
+            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$remove(this.getKey());
         }
         return DataTransactionResult.failNoData();
     }

@@ -40,6 +40,7 @@ public final class InvulnerableData {
                     .create(Keys.INVULNERABLE)
                         .get(InvulnerableTrackedBridge::bridge$getIsInvulnerable)
                         .set(InvulnerableTrackedBridge::bridge$setInvulnerable);
+        registrator.spongeDataStore(Keys.INVULNERABLE.getKey(), InvulnerableTrackedBridge.class, Keys.INVULNERABLE);
     }
     // @formatter:on
 }

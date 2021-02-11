@@ -39,7 +39,7 @@
         "server.commands.SaveAllCommandMixin",
         "server.commands.SpreadPlayersCommandMixin",
         "server.commands.TeleportCommandMixin",
-        "data.CustomDataHolderMixin",
+        "data.SpongeDataHolderMixin",
         "core.dispenser.AbstractProjectileDispenseBehaviorMixin",
         "entity.ActiveChunkReferentMixin",
         "world.entity.AgableMobMixin",

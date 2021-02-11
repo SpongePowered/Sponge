@@ -35,9 +35,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -54,7 +55,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Optional;
 
 @Mixin(net.minecraft.world.item.ItemStack.class)
-public abstract class ItemStackMixin implements CustomDataHolderBridge, DataCompoundHolder {
+public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataCompoundHolder {
 
     // @formatter:off
     @Shadow private boolean emptyCacheFlag;
@@ -65,27 +66,27 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
     // @formatter:on
 
     @Override
-    public <E> DataTransactionResult bridge$offerCustom(final Key<@NonNull ? extends Value<E>> key, final E value) {
+    public <E> DataTransactionResult bridge$offer(final Key<@NonNull ? extends Value<E>> key, final E value) {
         if (this.emptyCacheFlag) {
             return DataTransactionResult.failNoData();
         }
-        return CustomDataHolderBridge.super.bridge$offerCustom(key, value);
+        return SpongeDataHolderBridge.super.bridge$offer(key, value);
     }
 
     @Override
-    public <E> Optional<E> bridge$getCustom(final Key<@NonNull ? extends Value<E>> key) {
+    public <E> Optional<E> bridge$get(final Key<@NonNull ? extends Value<E>> key) {
         if (this.emptyCacheFlag) {
             return Optional.empty();
         }
-        return CustomDataHolderBridge.super.bridge$getCustom(key);
+        return SpongeDataHolderBridge.super.bridge$get(key);
     }
 
     @Override
-    public <E> DataTransactionResult bridge$removeCustom(final Key<@NonNull ? extends Value<E>> key) {
+    public <E> DataTransactionResult bridge$remove(final Key<@NonNull ? extends Value<E>> key) {
         if (this.emptyCacheFlag) {
             return DataTransactionResult.failNoData();
         }
-        return CustomDataHolderBridge.super.bridge$removeCustom(key);
+        return SpongeDataHolderBridge.super.bridge$remove(key);
     }
 
     @Override
@@ -102,20 +103,21 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "copy", at = @At("RETURN"))
     private void impl$onCopy(final CallbackInfoReturnable<ItemStack> info) {
-        ((CustomDataHolderBridge) (Object) info.getReturnValue()).bridge$mergeDeserialized(this.bridge$getManipulator());
+        ((SpongeDataHolderBridge) (Object) info.getReturnValue()).bridge$mergeDeserialized(this.bridge$getManipulator());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "split", at = @At("RETURN"))
     private void impl$onSplit(final int amount, final CallbackInfoReturnable<net.minecraft.world.item.ItemStack> info) {
-        ((CustomDataHolderBridge) (Object) info.getReturnValue()).bridge$mergeDeserialized(this.bridge$getManipulator());
+        ((SpongeDataHolderBridge) (Object) info.getReturnValue()).bridge$mergeDeserialized(this.bridge$getManipulator());
     }
 
     // Read custom data from nbt
     @Inject(method = "<init>(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("RETURN"))
     private void impl$onRead(final CompoundTag compound, final CallbackInfo info) {
         if (!this.emptyCacheFlag) {
-            CustomDataHolderBridge.syncCustomToTag(this);
+            DataUtil.syncTagToData(this); // Deserialize
+            DataUtil.syncDataToTag(this); // Sync back after reading
         }
         // Prune empty stack tag compound if its empty to enable stacking.
         if (this.tag != null && this.tag.isEmpty()) {
@@ -123,21 +125,15 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
         }
     }
 
-    @Redirect(method = "removeTagKey",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundTag;remove(Ljava/lang/String;)V"))
-    private void impl$nullStackCompoundIfEmptyAfterRemoval(final CompoundTag compound, final String key) {
-        compound.remove(key);
-        if (compound.isEmpty()) {
-            this.tag = null;
-        }
-    }
-
     @Inject(method = "setTag", at = @At("RETURN"))
     private void impl$onSet(final CompoundTag compound, final CallbackInfo callbackInfo) {
         if (this.shadow$getTag() != compound) {
-            this.bridge$clearCustomData();
+            this.bridge$clear();
         }
-        CustomDataHolderBridge.syncTagToCustom(this);
+        if (compound != null && !compound.isEmpty()) {
+            DataUtil.syncTagToData(this); // Deserialize
+            DataUtil.syncDataToTag(this); // Sync back after reading
+        }
     }
 
 

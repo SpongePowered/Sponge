@@ -53,6 +53,7 @@ import net.minecraft.world.phys.HitResult;
 @Mixin(ThrownEnderpearl.class)
 public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
 
+    // TODO Key not implemented
     private double impl$damageAmount;
 
     @ModifyArg(method = "onHit",
@@ -60,20 +61,6 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
                 target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     private float impl$onAttackEntityFromWithDamage(final float damage) {
         return (float) this.impl$damageAmount;
-    }
-
-    @Override
-    public void impl$readFromSpongeCompound(final CompoundTag compound) {
-        super.impl$readFromSpongeCompound(compound);
-        if (compound.contains(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.impl$damageAmount = compound.getDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
-        }
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundTag compound) {
-        super.impl$writeToSpongeCompound(compound);
-        compound.putDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damageAmount);
     }
 
     @Inject(

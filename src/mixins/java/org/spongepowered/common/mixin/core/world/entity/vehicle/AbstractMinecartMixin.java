@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartLike;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -36,28 +40,24 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.ArrayList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.phys.Vec3;
 
 @Mixin(AbstractMinecart.class)
 public abstract class AbstractMinecartMixin extends EntityMixin implements MinecartEntityBridge {
 
     protected double impl$maxSpeed = Constants.Entity.Minecart.DEFAULT_MAX_SPEED;
     private boolean impl$slowWhenEmpty = true;
-    private org.spongepowered.math.vector.Vector3d impl$airborneMod = new org.spongepowered.math.vector.Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
+    private Vector3d impl$airborneMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
         Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
         Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD);
-    private org.spongepowered.math.vector.Vector3d
-        impl$derailedMod = new org.spongepowered.math.vector.Vector3d(Constants.Entity.Minecart.DEFAULT_DERAILED_MOD,
+    private Vector3d impl$derailedMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_DERAILED_MOD,
         Constants.Entity.Minecart.DEFAULT_DERAILED_MOD,
         Constants.Entity.Minecart.DEFAULT_DERAILED_MOD);
 
@@ -127,32 +127,6 @@ public abstract class AbstractMinecartMixin extends EntityMixin implements Minec
     }
 
     @Override
-    public void impl$readFromSpongeCompound(final CompoundTag compound) {
-        super.impl$readFromSpongeCompound(compound);
-        if (compound.contains(Constants.Entity.Minecart.MAX_SPEED)) {
-            this.impl$maxSpeed = compound.getDouble(Constants.Entity.Minecart.MAX_SPEED);
-        }
-        if (compound.contains(Constants.Entity.Minecart.SLOW_WHEN_EMPTY)) {
-            this.impl$slowWhenEmpty = compound.getBoolean(Constants.Entity.Minecart.SLOW_WHEN_EMPTY);
-        }
-        if (compound.contains(Constants.Entity.Minecart.AIRBORNE_MODIFIER)) {
-            this.impl$airborneMod = VecHelper.fromCompound(compound.getCompound(Constants.Entity.Minecart.AIRBORNE_MODIFIER));
-        }
-        if (compound.contains(Constants.Entity.Minecart.DERAILED_MODIFIER)) {
-            this.impl$derailedMod = VecHelper.fromCompound(compound.getCompound(Constants.Entity.Minecart.DERAILED_MODIFIER));
-        }
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundTag compound) {
-        super.impl$writeToSpongeCompound(compound);
-        compound.putDouble(Constants.Entity.Minecart.MAX_SPEED, this.impl$maxSpeed);
-        compound.putBoolean(Constants.Entity.Minecart.SLOW_WHEN_EMPTY, this.impl$slowWhenEmpty);
-        compound.put(Constants.Entity.Minecart.AIRBORNE_MODIFIER, VecHelper.toCompound(this.impl$airborneMod));
-        compound.put(Constants.Entity.Minecart.DERAILED_MODIFIER, VecHelper.toCompound(this.impl$derailedMod));
-    }
-
-    @Override
     public double bridge$getMaxSpeed() {
         return this.impl$maxSpeed;
     }
@@ -160,6 +134,11 @@ public abstract class AbstractMinecartMixin extends EntityMixin implements Minec
     @Override
     public void bridge$setMaxSpeed(double impl$maxSpeed) {
         this.impl$maxSpeed = impl$maxSpeed;
+        if (impl$maxSpeed == Constants.Entity.Minecart.DEFAULT_MAX_SPEED) {
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.POTENTIAL_MAX_SPEED);
+        } else {
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.POTENTIAL_MAX_SPEED, impl$maxSpeed);
+        }
     }
 
     @Override
@@ -170,25 +149,44 @@ public abstract class AbstractMinecartMixin extends EntityMixin implements Minec
     @Override
     public void bridge$setSlowWhenEmpty(final boolean impl$slowWhenEmpty) {
         this.impl$slowWhenEmpty = impl$slowWhenEmpty;
+        if (impl$slowWhenEmpty) {
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.SLOWS_UNOCCUPIED);
+        } else {
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.SLOWS_UNOCCUPIED, false);
+        }
     }
 
     @Override
-    public org.spongepowered.math.vector.Vector3d bridge$getAirborneMod() {
+    public Vector3d bridge$getAirborneMod() {
         return this.impl$airborneMod;
     }
 
     @Override
-    public void bridge$setAirborneMod(final org.spongepowered.math.vector.Vector3d impl$airborneMod) {
+    public void bridge$setAirborneMod(final Vector3d impl$airborneMod) {
         this.impl$airborneMod = impl$airborneMod;
+        if (impl$airborneMod.equals(new Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
+                                                 Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
+                                                 Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD))) {
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.AIRBORNE_VELOCITY_MODIFIER);
+        } else {
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.AIRBORNE_VELOCITY_MODIFIER, impl$airborneMod);
+        }
     }
 
     @Override
-    public org.spongepowered.math.vector.Vector3d bridge$getDerailedMod() {
+    public Vector3d bridge$getDerailedMod() {
         return this.impl$derailedMod;
     }
     
     @Override
-    public void bridge$setDerailedMod(final org.spongepowered.math.vector.Vector3d impl$derailedMod) {
+    public void bridge$setDerailedMod(final Vector3d impl$derailedMod) {
         this.impl$derailedMod = impl$derailedMod;
+        if (impl$derailedMod.equals(new Vector3d(Constants.Entity.Minecart.DEFAULT_DERAILED_MOD,
+                                                 Constants.Entity.Minecart.DEFAULT_DERAILED_MOD,
+                                                 Constants.Entity.Minecart.DEFAULT_DERAILED_MOD))) {
+            ((SpongeDataHolderBridge) this).bridge$remove(Keys.DERAILED_VELOCITY_MODIFIER);
+        } else {
+            ((SpongeDataHolderBridge) this).bridge$offer(Keys.DERAILED_VELOCITY_MODIFIER, impl$derailedMod);
+        }
     }
 }

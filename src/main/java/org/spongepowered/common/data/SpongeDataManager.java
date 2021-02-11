@@ -35,12 +35,12 @@ import org.spongepowered.api.data.DataHolderBuilder;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataProvider;
-import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataTranslator;
@@ -48,8 +48,6 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -62,9 +60,9 @@ import org.spongepowered.common.data.key.KeyBasedDataListener;
 import org.spongepowered.common.data.persistence.datastore.DataStoreRegistry;
 import org.spongepowered.common.data.provider.CustomDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.data.value.MutableSpongeMapValue;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.event.lifecycle.RegisterDataEventImpl;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.registry.provider.DataTranslatorProvider;
 import org.spongepowered.common.util.Constants;
@@ -83,6 +81,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 @Singleton
 public final class SpongeDataManager implements DataManager {
 
@@ -94,8 +94,9 @@ public final class SpongeDataManager implements DataManager {
     private final Map<Class<? extends DataHolder.Immutable<?>>, DataHolderBuilder.Immutable<?, ?>> immutableDataBuilderMap;
     private final Map<Class<? extends DataSerializable>, List<DataContentUpdater>> updatersMap;
     private final List<DataContentUpdater> customDataUpdaters;
-    private final Map<String, SpongeDataRegistration> legacyRegistrations;
+    private final Map<String, ResourceKey> legacyRegistrations;
     private final List<KeyBasedDataListener<?>> keyListeners;
+    private final Map<String, DataQuery> legacySpongeData = new HashMap<>();
 
     @Inject
     private SpongeDataManager() {
@@ -231,17 +232,17 @@ public final class SpongeDataManager implements DataManager {
     }
 
     @Override
-    public void registerLegacyManipulatorIds(final String legacyId, final DataRegistration registration) {
+    public void registerLegacyManipulatorIds(final String legacyId, final ResourceKey dataStoreKey) {
         Objects.requireNonNull(legacyId);
-        Objects.requireNonNull(registration);
+        Objects.requireNonNull(dataStoreKey);
 
-        final SpongeDataRegistration previous = this.legacyRegistrations.putIfAbsent(legacyId, (SpongeDataRegistration) registration);
+        final ResourceKey previous = this.legacyRegistrations.putIfAbsent(legacyId, dataStoreKey);
         if (previous != null) {
-            throw new IllegalStateException("Legacy registration id already registered: id" + legacyId + " for registration: " + registration);
+            throw new IllegalStateException("Legacy registration id already registered: id" + legacyId + " for registration: " + dataStoreKey);
         }
     }
 
-    public Optional<DataRegistration> getRegistrationForLegacyId(final String id) {
+    public Optional<ResourceKey> getLegacyRegistration(final String id) {
         return Optional.ofNullable(this.legacyRegistrations.get(id));
     }
 
@@ -349,5 +350,14 @@ public final class SpongeDataManager implements DataManager {
             }
         }
         return Optional.empty();
+    }
+
+    public void registerLegacySpongeData(String nbtKey, ResourceKey dataStoreKey, Key<? extends Value<?>> dataKey) {
+        this.legacySpongeData.put(nbtKey, DataQuery.of(dataStoreKey.getNamespace(), dataStoreKey.getValue()).then(Constants.Sponge.Data.V3.CONTENT)
+                .then(dataKey.getKey().getValue()));
+    }
+
+    public @Nullable DataQuery legacySpongeDataQuery(String nbtKey) {
+        return this.legacySpongeData.get(nbtKey);
     }
 }

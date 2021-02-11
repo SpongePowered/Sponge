@@ -238,7 +238,7 @@ public final class EntityUtil {
 
 
     public static boolean isUntargetable(Entity from, Entity target) {
-        if (((VanishableBridge) target).bridge$isVanished() && ((VanishableBridge) target).bridge$isUntargetable()) {
+        if (((VanishableBridge) target).bridge$isVanished() && ((VanishableBridge) target).bridge$isVanishPreventsTargeting()) {
             return true;
         }
         // Temporary fix for https://bugs.mojang.com/browse/MC-149563

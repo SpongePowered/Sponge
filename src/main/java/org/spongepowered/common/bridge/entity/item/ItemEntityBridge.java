@@ -31,10 +31,12 @@ public interface ItemEntityBridge {
     int bridge$getPickupDelay();
 
     void bridge$setPickupDelay(int delay, boolean infinite);
+    void bridge$setPrevPickupDelay(int delay);
 
     boolean bridge$infiniteDespawnDelay();
 
     int bridge$getDespawnDelay();
 
     void bridge$setDespawnDelay(int delay, boolean infinite);
+    void bridge$setPrevDespawnDelay(int delay);
 }

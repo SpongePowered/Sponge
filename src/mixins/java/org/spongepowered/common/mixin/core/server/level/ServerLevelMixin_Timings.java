@@ -48,8 +48,6 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
     @Shadow protected abstract void shadow$runBlockEvents();
     // @formatter:on
 
-
-
     @Inject(method = "tick", at = @At(value = "HEAD"))
     private void impl$startWorldTimings(BooleanSupplier var1, CallbackInfo ci) {
         this.bridge$getTimingsHandler().doTick.startTiming();

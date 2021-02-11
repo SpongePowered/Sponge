@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.data;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.util.Constants;
 
@@ -54,35 +53,16 @@ public interface DataCompoundHolder {
     }
 
     default boolean data$hasSpongeData() {
-        return this.data$hasForgeData() && this.data$getForgeData().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
+        return this.data$hasForgeData() && this.data$getForgeData().contains(Constants.Sponge.Data.V2.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
     }
 
     default CompoundTag data$getSpongeData() {
         final CompoundTag spongeCompound = this.data$getForgeData();
-        final CompoundTag dataCompound = spongeCompound.getCompound(Constants.Sponge.SPONGE_DATA);
+        final CompoundTag dataCompound = spongeCompound.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);
         if (dataCompound.isEmpty()) {
-            spongeCompound.put(Constants.Sponge.SPONGE_DATA, dataCompound);
+            spongeCompound.put(Constants.Sponge.Data.V2.SPONGE_DATA, dataCompound);
         }
         return dataCompound;
-    }
-
-    default void data$cleanEmptySpongeData() {
-        final CompoundTag spongeData = this.data$getSpongeData();
-        final ListTag customDataList = spongeData.getList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
-        if (customDataList.isEmpty()) {
-            spongeData.remove(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
-        }
-        if (spongeData.isEmpty()) {
-            final CompoundTag spongeCompound = this.data$getForgeData();
-            spongeCompound.remove(Constants.Sponge.SPONGE_DATA);
-            if (spongeCompound.isEmpty()) {
-                final CompoundTag nbt = this.data$getCompound();
-                nbt.remove(Constants.Forge.FORGE_DATA);
-                if (nbt.isEmpty()) {
-                    this.data$setCompound(null);
-                }
-            }
-        }
     }
 
     /**

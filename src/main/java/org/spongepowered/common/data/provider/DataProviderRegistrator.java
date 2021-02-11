@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider;
 
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
@@ -36,6 +37,7 @@ import org.spongepowered.api.data.ImmutableDataProviderBuilder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.MutableDataProviderBuilder;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
@@ -50,6 +52,10 @@ import org.spongepowered.common.util.CopyHelper;
 import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -84,6 +90,21 @@ public class DataProviderRegistrator {
         this.dataStoreBuilder.reset();
         this.dataStoreBuilder.holder(dataHolders);
         return this;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public void spongeDataStore(final ResourceKey datastoreKey, final Class dataHolder, final Key<? extends Value<?>>... dataKeys) {
+        this.spongeDataStore(datastoreKey, 1, new DataContentUpdater[0], dataHolder, dataKeys);
+    }
+
+    public void spongeDataStore(final ResourceKey datastoreKey, final int version, final DataContentUpdater[] contentUpdater, final Class dataHolder, final Key<? extends Value<?>>... dataKeys) {
+        final SpongeDataStoreBuilder builder = ((SpongeDataStoreBuilder) DataStore.builder()).pluginData(datastoreKey, version);
+        builder.updater(contentUpdater);
+        builder.holder(dataHolder);
+        for (Key dataKey : dataKeys) {
+            builder.key(dataKey, dataKey.getKey().getValue());
+        }
+        SpongeDataManager.getDatastoreRegistry().register(builder.build(), Arrays.asList(dataKeys));
     }
 
     public <K, V extends Value<K>> DataProviderRegistrator dataStore(final Key<V> key, final BiConsumer<DataView, K> serializer,
@@ -148,6 +169,7 @@ public class DataProviderRegistrator {
         }
         ((SpongeDataManager) Sponge.getGame().getDataManager()).registerDataRegistration((SpongeDataRegistration) this.registrationBuilder.build());
     }
+
 
     public static final class MutableRegistrator<T> extends DataProviderRegistrator {
 
@@ -230,7 +252,7 @@ public class DataProviderRegistrator {
     @SuppressWarnings("unchecked")
     private static class MutableRegistrationBase<H, E, R extends MutableRegistrationBase<H, E, R>> {
 
-        private final Key<? extends Value<E>> key;
+        final Key<? extends Value<E>> key;
         @Nullable private BiFunction<H, E, Value<E>> constructValue;
         @Nullable private Function<H, E> get;
         @Nullable private BiFunction<H, E, Boolean> setAnd;

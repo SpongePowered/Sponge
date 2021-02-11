@@ -38,7 +38,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import java.util.ArrayList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.decoration.HangingEntity;
 
@@ -49,7 +48,7 @@ public abstract class HangingEntityMixin extends EntityMixin {
     @Shadow public abstract boolean shadow$survives();
     // @formatter:on
 
-    private boolean impl$ignorePhysics = false;
+    private boolean impl$ignorePhysics = false; // TODO missing data key?
 
     /**
      * Called to update the entity's position/logic.
@@ -59,20 +58,6 @@ public abstract class HangingEntityMixin extends EntityMixin {
             target = "Lnet/minecraft/world/entity/decoration/HangingEntity;survives()Z"))
     private boolean impl$checkIfOnValidSurfaceAndIgnoresPhysics(final HangingEntity entityHanging) {
         return this.shadow$survives() && !this.impl$ignorePhysics;
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundTag compound) {
-        super.impl$writeToSpongeCompound(compound);
-        compound.putBoolean("ignorePhysics", this.impl$ignorePhysics);
-    }
-
-    @Override
-    public void impl$readFromSpongeCompound(final CompoundTag compound) {
-        super.impl$readFromSpongeCompound(compound);
-        if (compound.contains("ignorePhysics")) {
-            this.impl$ignorePhysics = compound.getBoolean("ignorePhysics");
-        }
     }
 
     @Inject(method = "hurt",

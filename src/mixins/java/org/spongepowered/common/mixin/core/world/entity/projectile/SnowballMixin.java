@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
-import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.api.entity.projectile.Snowball;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.common.util.Constants;
 
 @Mixin(net.minecraft.world.entity.projectile.Snowball.class)
 public abstract class SnowballMixin extends ThrowableProjectileMixin implements Snowball {
 
+    // TODO Key not implemented
     private double impl$damageAmount = 0;
     private boolean impl$damageSet = false;
 
@@ -41,25 +40,6 @@ public abstract class SnowballMixin extends ThrowableProjectileMixin implements 
             target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     private float impl$onAttackEntityFromUseCustomDamage(float damage) {
         return this.impl$damageSet ? (float) this.impl$damageAmount : damage;
-    }
-
-    @Override
-    public void impl$readFromSpongeCompound(CompoundTag compound) {
-        super.impl$readFromSpongeCompound(compound);
-        if (compound.contains(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.impl$damageAmount = compound.getDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
-            this.impl$damageSet = true;
-        }
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(CompoundTag compound) {
-        super.impl$writeToSpongeCompound(compound);
-        if (this.impl$damageSet) {
-            compound.putDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damageAmount);
-        } else {
-            compound.remove(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
-        }
     }
 
 }

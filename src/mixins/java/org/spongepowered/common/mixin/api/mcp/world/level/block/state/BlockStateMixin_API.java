@@ -38,7 +38,7 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.block.BlockStateSerializerDeserializer;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -71,7 +71,7 @@ public abstract class BlockStateMixin_API extends BlockBehaviour_BlockStateBaseM
         if (this.shadow$hasBlockEntity() && location.getBlock().getType().equals(this.shadow$getBlock())) {
             final BlockEntity blockEntity = location.getBlockEntity()
                     .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
-            builder.add(((CustomDataHolderBridge) blockEntity).bridge$getManipulator());
+            builder.add(((SpongeDataHolderBridge) blockEntity).bridge$getManipulator());
             final CompoundTag compound = new CompoundTag();
             ((net.minecraft.world.level.block.entity.BlockEntity) blockEntity).save(compound);
             builder.addUnsafeCompound(compound);

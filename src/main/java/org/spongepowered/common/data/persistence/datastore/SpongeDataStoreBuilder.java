@@ -33,19 +33,18 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.configurate.util.Types;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -64,12 +63,15 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Builder.HolderStep, DataStore.Builder.SerializersStep,
-        DataStore.Builder.EndStep {
+import javax.annotation.Nullable;
+
+public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Builder.UpdaterStep, DataStore.Builder.HolderStep, DataStore.Builder.SerializersStep, DataStore.Builder.EndStep {
 
     private final Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> serializers = new IdentityHashMap<>();
     private final List<Type> dataHolderTypes = new ArrayList<>();
     @Nullable private ResourceKey key;
+    private int version = 1;
+    private DataContentUpdater[] updaters = new DataContentUpdater[0];
 
     @Override
     public <T, V extends Value<T>> SpongeDataStoreBuilder key(final Key<V> key, final DataQuery dataQuery) {
@@ -127,6 +129,8 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
                 keyDeserializer = key -> Optional.of(key.toString());
             } else if (keyType == UUID.class) {
                 keyDeserializer = key -> Optional.of(UUID.fromString(key.toString()));
+            } else if (keyType == ResourceKey.class) {
+                keyDeserializer = key -> Optional.of(ResourceKey.resolve(key.toString()));
             } else {
                 throw new UnsupportedOperationException("Unsupported map-key type " + keyType);
             }
@@ -180,7 +184,10 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
     @SuppressWarnings("rawtypes")
     public <T, V extends Value<T>> SpongeDataStoreBuilder key(final Key<V> key, final BiConsumer<DataView, T> serializer, final Function<DataView, Optional<T>> deserializer) {
         if (this.key != null) {
-            this.serializers.put(key, (Tuple) Tuple.of(new CustomDataSerializer<>(serializer, this.key.toString()), new CustomDataDeserializer<>(deserializer, this.key.toString())));
+            final DataQuery query = DataQuery.of(this.key.getNamespace(), this.key.getValue());
+            final SpongeDataSerializer<T> customSerializer = new SpongeDataSerializer<>(serializer, this.version, query);
+            final SpongeDataDeserializer<T> customDeserializer = new SpongeDataDeserializer<>(deserializer, this.version, query);
+            this.serializers.put(key, (Tuple) Tuple.of(customSerializer, customDeserializer));
         } else {
             this.serializers.put(key, (Tuple) Tuple.of(serializer, deserializer));
         }
@@ -189,10 +196,22 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
     }
 
     @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public EndStep keys(Key<?> key, Key<?>... moreKeys) {
+        this.key((Key) key, key.getKey().getValue());
+        for (Key<?> moreKey : moreKeys) {
+            this.key((Key) moreKey, moreKey.getKey().getValue());
+        }
+        return this;
+    }
+
+    @Override
     public DataStore.Builder reset() {
         this.serializers.clear();
         this.dataHolderTypes.clear();
         this.key = null;
+        this.version = 1;
+        this.updaters = new DataContentUpdater[0];
         return this;
     }
 
@@ -219,6 +238,19 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
     }
 
     @Override
+    public SpongeDataStoreBuilder pluginData(ResourceKey key, int version) {
+        this.pluginData(key);
+        this.version = version;
+        return this;
+    }
+
+    @Override
+    public HolderStep updater(DataContentUpdater... updaters) {
+        this.updaters = updaters;
+        return this;
+    }
+
+    @Override
     public SpongeDataStoreBuilder vanillaData() {
         this.key = null;
         return this;
@@ -226,82 +258,51 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
 
     @Override
     public DataStore build() {
-        return new SpongeCustomDataStore(this.key, ImmutableMap.copyOf(this.serializers), ImmutableList.copyOf(this.dataHolderTypes));
+        return new SpongeDataStore(this.key, ImmutableMap.copyOf(this.serializers), ImmutableList.copyOf(this.dataHolderTypes), this.version, this.updaters);
     }
 
     public DataStore buildVanillaDataStore() {
-        return new SpongeDataStore(Collections.unmodifiableMap(this.serializers), this.dataHolderTypes);
+        return new VanillaDataStore(Collections.unmodifiableMap(this.serializers), this.dataHolderTypes);
     }
 
-    private static class CustomDataSerializer<T> implements BiConsumer<DataView, T> {
+    private static class SpongeDataSerializer<T> implements BiConsumer<DataView, T> {
 
         private final BiConsumer<DataView, T> serializer;
-        private final String key;
+        private final DataQuery key;
+        private final int version;
 
-        public CustomDataSerializer(BiConsumer<DataView, T> serializer, String key) {
+        public SpongeDataSerializer(BiConsumer<DataView, T> serializer, int version, DataQuery key) {
             this.serializer = serializer;
             this.key = key;
+            this.version = version;
         }
 
         @Override
         public void accept(DataView view, T v) {
-
-            final DataContainer internalData = DataContainer.createNew();
-            this.serializer.accept(internalData, v);
-
-            if (internalData.isEmpty()) {
+            final DataView data = DataUtil.getSpongeData(view, this.key, this.version).orElse(DataContainer.createNew());
+            this.serializer.accept(data, v);
+            if (data.isEmpty()) {
                 return;
             }
-
-            final DataView forgeData = view.getView(Constants.Forge.ROOT).orElseGet(() -> view.createView(Constants.Forge.ROOT));
-            final DataView spongeData = forgeData.getView(Constants.Sponge.SPONGE_ROOT).orElseGet(() -> forgeData.createView(Constants.Sponge.SPONGE_ROOT));
-
-            List<DataView> viewList = spongeData.getViewList(Constants.Sponge.CUSTOM_MANIPULATOR_LIST).orElse(null);
-            if (viewList == null) {
-                viewList = new ArrayList<>();
-                spongeData.set(Constants.Sponge.CUSTOM_MANIPULATOR_LIST, viewList);
-            }
-            final Optional<DataView> existingContainer =
-                    viewList.stream().filter(potentialContainer -> potentialContainer.getString(Constants.Sponge.DATA_ID)
-                            .map(id -> id.equals(this.key)).orElse(false))
-                    .findFirst();
-
-            final DataView manipulatorContainer;
-            if (existingContainer.isPresent()) {
-                manipulatorContainer = existingContainer.get();
-            } else {
-                manipulatorContainer = DataContainer.createNew();
-                viewList.add(manipulatorContainer);
-            }
-
-            manipulatorContainer.set(Queries.CONTENT_VERSION, Constants.Sponge.CURRENT_CUSTOM_DATA)
-                    .set(Constants.Sponge.DATA_ID, this.key)
-                    .set(Constants.Sponge.MANIPULATOR_DATA, internalData);
-
-            spongeData.set(Constants.Sponge.CUSTOM_MANIPULATOR_LIST, viewList);
+            DataUtil.setSpongeData(view, this.key, data, this.version);
         }
     }
 
-    private static class CustomDataDeserializer<T> implements Function<DataView, Optional<T>> {
+    private static class SpongeDataDeserializer<T> implements Function<DataView, Optional<T>> {
 
         private final Function<DataView, Optional<T>> deserializer;
-        private final String key;
+        private final DataQuery key;
+        private int version;
 
-        public CustomDataDeserializer(Function<DataView, Optional<T>> deserializer, String key) {
+        public SpongeDataDeserializer(Function<DataView, Optional<T>> deserializer, int version, DataQuery key) {
             this.deserializer = deserializer;
             this.key = key;
+            this.version = version;
         }
 
         @Override
         public Optional<T> apply(DataView view) {
-            return view.getView(Constants.Forge.ROOT)
-                    .flatMap(v -> v.getView(Constants.Sponge.SPONGE_ROOT))
-                    .flatMap(v -> v.getViewList(Constants.Sponge.CUSTOM_MANIPULATOR_LIST))
-                    .flatMap(manipulators -> manipulators.stream().filter(v -> v.getString(Constants.Sponge.DATA_ID)
-                            .map(id -> id.equals(this.key.toString())).orElse(false))
-                            .findFirst()
-                            .map(v -> v.getView(Constants.Sponge.MANIPULATOR_DATA).orElse(DataContainer.createNew()))
-                            .flatMap(this.deserializer));
+            return DataUtil.getSpongeData(view, this.key, this.version).flatMap(this.deserializer);
         }
     }
 }

@@ -63,7 +63,7 @@ public final class PrepareBlockDropsTransaction extends BlockEventBasedTransacti
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
         @Nullable GameTransaction<@NonNull ?> parent
     ) {
-        return Optional.empty();
+        return Optional.of((context, frame) -> frame.pushCause(this.originalState));
     }
 
     @Override

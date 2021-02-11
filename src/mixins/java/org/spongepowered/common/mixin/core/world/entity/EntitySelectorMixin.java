@@ -49,7 +49,7 @@ public abstract class EntitySelectorMixin {
     @Shadow @Final @Mutable public static Predicate<Entity> ATTACK_ALLOWED = entity ->{
         if (entity instanceof VanishableBridge
             && ((VanishableBridge) entity).bridge$isVanished()
-            && ((VanishableBridge) entity).bridge$isUntargetable()) {
+            && ((VanishableBridge) entity).bridge$isVanishPreventsTargeting()) {
             // Sponge: Take into account untargetability from vanishing
             return false;
         }
