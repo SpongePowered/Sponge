@@ -214,7 +214,7 @@ public abstract class ServerGamePacketListenerImplMixin implements NetworkManage
             method = "handleInteract",
             constant = @Constant(doubleValue = 36.0D)
     )
-    private double impl$getPlatformReach(final double thirtySix, ServerboundInteractPacket p_147340_1_) {
+    private double impl$getPlatformReach(final double thirtySix, final ServerboundInteractPacket p_147340_1_) {
         return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, p_147340_1_.getTarget(this.player.getLevel()));
     }
 
@@ -412,7 +412,7 @@ public abstract class ServerGamePacketListenerImplMixin implements NetworkManage
                 if (ShouldFire.INTERACT_ITEM_EVENT_PRIMARY) {
                     final Vec3 startPos = this.player.getEyePosition(1);
                     final Vec3 endPos = startPos.add(this.player.getLookAngle().scale(5d)); // TODO hook for blockReachDistance?
-                    HitResult result = this.player.getLevel().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.player));
+                    final HitResult result = this.player.getLevel().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.player));
                     if (result.getType() == HitResult.Type.MISS) {
                         final ItemStack heldItem = this.player.getItemInHand(packetIn.getHand());
                         SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, heldItem, packetIn.getHand());
@@ -445,7 +445,7 @@ public abstract class ServerGamePacketListenerImplMixin implements NetworkManage
     @Redirect(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;handleBlockBreakAction(Lnet/minecraft/core/BlockPos;Lnet/minecraft/network/protocol/game/ServerboundPlayerActionPacket$Action;Lnet/minecraft/core/Direction;I)V"))
     public void impl$callInteractBlockPrimaryEvent(final ServerPlayerGameMode playerInteractionManager, final BlockPos p_225416_1_,
             final ServerboundPlayerActionPacket.Action p_225416_2_, final Direction p_225416_3_, final int p_225416_4_) {
-        final ServerLevel level = ((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$getLevel();
+        final ServerLevel level = ((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$level();
         final BlockSnapshot snapshot = ((org.spongepowered.api.world.server.ServerWorld) level)
             .createSnapshot(VecHelper.toVector3i(p_225416_1_));
         final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(p_225416_2_, this.player, this.player.getItemInHand(
@@ -501,7 +501,7 @@ public abstract class ServerGamePacketListenerImplMixin implements NetworkManage
 
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"))
-    public void impl$handlePlayerDisconnect(final PlayerList playerList, final net.minecraft.network.chat.Component component, final ChatType chatType, UUID uuid) {
+    public void impl$handlePlayerDisconnect(final PlayerList playerList, final net.minecraft.network.chat.Component component, final ChatType chatType, final UUID uuid) {
         // If this happens, the connection has not been fully established yet so we've kicked them during ClientConnectionEvent.Login,
         // but FML has created this handler earlier to send their handshake. No message should be sent, no disconnection event should
         // be fired either.
@@ -513,7 +513,7 @@ public abstract class ServerGamePacketListenerImplMixin implements NetworkManage
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
             final Component message = SpongeAdventure.asAdventure(component);
-            Audience audience = Sponge.getServer().getBroadcastAudience();
+            final Audience audience = Sponge.getServer().getBroadcastAudience();
             final ServerSideConnectionEvent.Disconnect event = SpongeEventFactory.createServerSideConnectionEventDisconnect(
                     PhaseTracker.getCauseStackManager().getCurrentCause(), audience, Optional.of(audience), message, message,
                     spongePlayer.getConnection(), spongePlayer);
@@ -525,7 +525,7 @@ public abstract class ServerGamePacketListenerImplMixin implements NetworkManage
     }
 
     @Redirect(method = "handleSignUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;filterTextPacket(Ljava/util/List;Ljava/util/function/Consumer;)V"))
-    private void impl$switchToSignPhaseState(ServerGamePacketListenerImpl serverPlayNetHandler, List<String> p_244537_1_, Consumer<List<String>> p_244537_2_) {
+    private void impl$switchToSignPhaseState(final ServerGamePacketListenerImpl serverPlayNetHandler, final List<String> p_244537_1_, final Consumer<List<String>> p_244537_2_) {
         try (final BasicPacketContext context = PacketPhase.General.UPDATE_SIGN.createPhaseContext(PhaseTracker.getInstance())
                 .packetPlayer(this.player)
                 .buildAndSwitch()
@@ -536,7 +536,7 @@ public abstract class ServerGamePacketListenerImplMixin implements NetworkManage
     }
 
     @Redirect(method = "updateSignText", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
-    private int impl$callChangeSignEvent(final List<String> list, ServerboundSignUpdatePacket p_244542_1_, List<String> p_244542_2_) {
+    private int impl$callChangeSignEvent(final List<String> list, final ServerboundSignUpdatePacket p_244542_1_, final List<String> p_244542_2_) {
         final SignBlockEntity blockEntity = (SignBlockEntity) this.player.level.getBlockEntity(p_244542_1_.getPos());
         final ListValue<Component> originalLinesValue = ((Sign) blockEntity).getValue(Keys.SIGN_LINES)
                 .orElseGet(() -> new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.of()));

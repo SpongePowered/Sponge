@@ -93,7 +93,7 @@ public abstract class BaseSpawnerMixin implements AbstractSpawnerBridge {
         return this.spawnRange;
     }
 
-    @Redirect(method = "isNearPlayer()Z",
+    @Redirect(method = "isNearPlayer",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/Level;hasNearbyAlivePlayer(DDDD)Z"))
     public boolean impl$checkPlayerSpawningStateForActivation(final Level world, final double x, final double y, final double z, final double distance) {

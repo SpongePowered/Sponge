@@ -25,6 +25,9 @@
 package org.spongepowered.common.mixin.core.world.level.biome;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.OverworldBiomeSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -32,13 +35,11 @@ import org.spongepowered.common.world.biome.provider.SpongeLayeredBiomeProviderH
 
 import java.util.List;
 import java.util.function.Function;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.biome.OverworldBiomeSource;
 
 @Mixin(OverworldBiomeSource.class)
 public abstract class OverworldBiomeSourceMixin extends BiomeSource {
 
+    @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(
         method = "*",
         at = @At(

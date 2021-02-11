@@ -63,11 +63,12 @@ public abstract class ChunkMapMixin_Tracker {
         return exception;
     }
 
-    @Redirect(method = "*",
+    @SuppressWarnings("UnresolvedMixinReference")
+    @Redirect(method = "lambda$null$26(Lnet/minecraft/server/level/ChunkHolder;Lnet/minecraft/world/level/chunk/ChunkAccess;)Lnet/minecraft/world/level/chunk/ChunkAccess;",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V"),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setFullStatus(Ljava/util/function/Supplier;)V"),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;addAllPendingBlockEntities(Ljava/util/Collection;)V")
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V")
         )
     )
     private void tracker$startLoad(final LevelChunk chunk) {
@@ -99,8 +100,9 @@ public abstract class ChunkMapMixin_Tracker {
                 .buildAndSwitch();
     }
 
-    @Inject(method = "*",
-        at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V", shift = At.Shift.BY, by = 2),
+    @SuppressWarnings("UnresolvedMixinReference")
+    @Inject(method = "lambda$null$26(Lnet/minecraft/server/level/ChunkHolder;Lnet/minecraft/world/level/chunk/ChunkAccess;)Lnet/minecraft/world/level/chunk/ChunkAccess;",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V", shift = At.Shift.BY, by = 2),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V")
         ),

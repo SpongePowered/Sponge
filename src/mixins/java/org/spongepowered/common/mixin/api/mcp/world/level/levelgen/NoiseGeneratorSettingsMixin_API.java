@@ -48,6 +48,8 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Shadow public abstract int shadow$seaLevel();
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getDefaultBlock();
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getDefaultFluid();
+    @Shadow protected abstract boolean shadow$isAquifersEnabled();
+    @Shadow protected abstract boolean shadow$isNoiseCavesEnabled();
     // @formatter:on
 
     @Override
@@ -83,5 +85,15 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Intrinsic
     public int noiseGeneratorConfig$seaLevel() {
         return this.shadow$seaLevel();
+    }
+
+    @Override
+    public boolean aquifers() {
+        return this.shadow$isAquifersEnabled();
+    }
+
+    @Override
+    public boolean noiseCaves() {
+        return this.shadow$isNoiseCavesEnabled();
     }
 }

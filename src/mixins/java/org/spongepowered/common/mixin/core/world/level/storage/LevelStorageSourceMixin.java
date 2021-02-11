@@ -28,14 +28,6 @@ import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
-import org.spongepowered.common.util.Constants;
-
-import java.util.UUID;
 import net.minecraft.core.SerializableUUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -45,12 +37,21 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelVersion;
 import net.minecraft.world.level.storage.PrimaryLevelData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.util.Constants;
+
+import java.util.UUID;
 
 @Mixin(LevelStorageSource.class)
 public abstract class LevelStorageSourceMixin {
 
     private static Dynamic<Tag> impl$spongeLevelData;
 
+    @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(
             method = "*",
             slice = @Slice(
@@ -74,6 +75,7 @@ public abstract class LevelStorageSourceMixin {
         return compoundNBT.getCompound(path);
     }
 
+    @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(
             method = "*",
             slice = @Slice(

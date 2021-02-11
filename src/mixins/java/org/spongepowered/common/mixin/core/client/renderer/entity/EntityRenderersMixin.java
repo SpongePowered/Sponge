@@ -22,38 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.entity.item;
+package org.spongepowered.common.mixin.core.client.renderer.entity;
 
-import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.world.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 
-@Mixin(FallingBlockEntity.class)
-public interface FallingBlockEntityAccessor {
+import java.util.Map;
 
-    @Accessor("blockState") BlockState accessor$blockState();
-
-    @Accessor("blockState") void accessor$blockState(final BlockState blockState);
-
-    @Accessor("time") int accessor$time();
-
-    @Accessor("time") void accessor$time(final int fallTime);
-
-    @Accessor("cancelDrop") boolean accessor$cancelDrop();
-
-    @Accessor("cancelDrop") void accessor$cancelDrop(final boolean cancelDrop);
-
-    @Accessor("hurtEntities") boolean accessor$hurtEntities();
-
-    @Accessor("hurtEntities") void accessor$hurtEntities(final boolean hurtEntities);
-
-    @Accessor("fallDamageMax") int accessor$fallDamageMax();
-
-    @Accessor("fallDamageMax") void accessor$fallDamageMax(final int fallDamageMax);
-
-    @Accessor("fallDamagePerDistance") float accessor$fallDamagePerDistance();
-
-    @Accessor("fallDamagePerDistance") void accessor$fallDamagePerDistance(final float fallDamageAmount);
-
+@Mixin(EntityRenderers.class)
+public class EntityRenderersMixin {
+    @Redirect(
+        method = "validateRegistrations",
+        at = @At(
+            value = "INVOKE",
+            target = "Ljava/util/Map;containsKey(Ljava/lang/Object;)Z",
+            remap = false
+        )
+    )
+    @SuppressWarnings("SuspiciousMethodCalls")
+    // second parameter is Object, map keys are EntityType
+    private static boolean impl$humanRequiresNoRenderer(final Map<EntityType<?>, EntityRendererProvider<?>> renderers,
+        final Object type) {
+        // sponge:human renders as minecraft:player on the client, which
+        // means we do not need to register a custom renderer
+        return !(type != HumanEntity.TYPE && !renderers.containsKey(type));
+    }
 }

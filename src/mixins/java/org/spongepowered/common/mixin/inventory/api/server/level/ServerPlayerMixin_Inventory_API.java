@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.inventory.api.server.level;
 
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -45,6 +45,7 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.mixin.inventory.api.world.entity.player.PlayerMixin_Inventory_API;
+
 import java.util.Optional;
 
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
@@ -104,7 +105,7 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
                 // intentionally missing the lastCursor to not double throw close event
         ) {
             ctx.buildAndSwitch();
-            final net.minecraft.world.entity.player.Inventory inventory = this.inventory;
+            final net.minecraft.world.entity.player.Inventory inventory = this.shadow$getInventory();
             final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(inventory.getCarried());
             return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(openContainer, (net.minecraft.server.level.ServerPlayer) (Object) this, cursor, cursor, false).isCancelled();
         }

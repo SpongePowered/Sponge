@@ -116,12 +116,12 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
     }
 
     @Override
-    public void bridge$setPrevPickupDelay(int delay) {
+    public void bridge$setPrevPickupDelay(final int delay) {
         this.impl$previousPickupDelay = delay;
     }
 
     @Override
-    public void bridge$setPrevDespawnDelay(int delay) {
+    public void bridge$setPrevDespawnDelay(final int delay) {
         this.impl$previousDespawnDelay = delay;
     }
 
@@ -157,7 +157,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
 
     @Inject(
         method = "tick()V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;remove()V"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;discard()V"),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;updateInWaterStateAndDoFluidPushing()Z"),
             to = @At("TAIL")

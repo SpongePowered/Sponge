@@ -25,6 +25,14 @@
 package org.spongepowered.common.mixin.core.world.damagesource;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.IndirectEntityDamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Explosion;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
@@ -45,17 +53,8 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 import org.spongepowered.common.util.MemoizedSupplier;
 
-import java.util.function.Supplier;
-
 import javax.annotation.Nullable;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Explosion;
+import java.util.function.Supplier;
 
 @Mixin(DamageSource.class)
 public abstract class DamageSourceMixin implements DamageSourceBridge {
@@ -68,6 +67,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Shadow @Final @Mutable public static DamageSource ANVIL;
     @Shadow @Final @Mutable public static DamageSource FALLING_BLOCK;
     @Shadow @Final @Mutable public static DamageSource CACTUS;
+    @Shadow @Final @Mutable public static DamageSource FALLING_STALACTITE;
 
     @Shadow @Final public String msgId;
 
@@ -155,6 +155,11 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Override
     public void bridge$setAnvilSource() {
         DamageSourceMixin.ANVIL = (DamageSource) (Object) this;
+    }
+
+    @Override
+    public void bridge$setFallingStalactite() {
+        DamageSourceMixin.FALLING_STALACTITE = (DamageSource) (Object) this;
     }
 
     @Override

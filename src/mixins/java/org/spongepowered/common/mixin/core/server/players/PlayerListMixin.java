@@ -84,13 +84,12 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.net.SocketAddress;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin implements PlayerListBridge {
@@ -265,7 +264,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             final long p_i242082_4_, final boolean p_i242082_6_, final Set<ResourceKey<Level>> p_i242082_7_,
             final RegistryAccess.RegistryHolder p_i242082_8_, final DimensionType p_i242082_9_, final ResourceKey<Level> p_i242082_10_,
             final int p_i242082_11_, final int p_i242082_12_, final boolean p_i242082_13_, final boolean p_i242082_14_,
-            final boolean p_i242082_15_, final boolean p_i242082_16_, Connection p_72355_1_, net.minecraft.server.level.ServerPlayer player) {
+            final boolean p_i242082_15_, final boolean p_i242082_16_, final Connection p_72355_1_, final net.minecraft.server.level.ServerPlayer player) {
 
         return new ClientboundLoginPacket(p_i242082_1_, p_i242082_2_, p_i242082_3_, p_i242082_4_, p_i242082_6_, p_i242082_7_, p_i242082_8_, p_i242082_9_,
                 p_i242082_10_, p_i242082_11_, ((ServerWorldInfoBridge) player.getLevel().getLevelData()).bridge$viewDistance().orElse(this.viewDistance),
@@ -343,7 +342,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Ljava/util/Optional;empty()Ljava/util/Optional;", remap = false),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isDemo()Z")
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;")
         )
     )
     private boolean impl$flagIfRespawnLocationIsGameMechanic(final Optional<?> optional) {

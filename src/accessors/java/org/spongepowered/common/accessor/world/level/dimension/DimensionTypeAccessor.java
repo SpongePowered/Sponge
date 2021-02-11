@@ -24,6 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.level.dimension;
 
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -31,21 +37,13 @@ import org.spongepowered.common.UntransformedAccessorError;
 import org.spongepowered.common.UntransformedInvokerError;
 
 import java.util.OptionalLong;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeZoomer;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
 @Mixin(DimensionType.class)
 public interface DimensionTypeAccessor {
 
-    @Invoker("<init>") static DimensionType invoker$new(final OptionalLong p_i241973_1_, final boolean p_i241973_2_, final boolean p_i241973_3_,
-            final boolean p_i241973_4_, final boolean p_i241973_5_, final double p_i241973_6_, final boolean p_i241973_8_, final boolean p_i241973_9_, final boolean p_i241973_10_,
-            final boolean p_i241973_11_, final boolean p_i241973_12_, final int p_i241973_13_, final BiomeZoomer p_i241973_14_, final ResourceLocation p_i241973_15_,
-            final ResourceLocation p_i241973_16_, final float p_i241973_17_
+    @Invoker("<init>") static DimensionType invoker$new(final OptionalLong var1, final boolean var2, final boolean var3, final boolean var4,
+        final boolean var5, final double var6, final boolean var8, final boolean var9, final boolean var10, final boolean var11, final int var12, final int var13,
+        final int var14, final ResourceLocation var15, final ResourceLocation var16, final float var17
     ) {
         throw new UntransformedInvokerError();
     }

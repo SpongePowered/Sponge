@@ -33,5 +33,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(EntityTickList.class)
 public interface EntityTickListAccessor {
 
-    @Accessor("active") Int2ObjectMap<Entity> accessor$getActive();
+    @Accessor("active") Int2ObjectMap<Entity> accessor$active();
 }

@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.servernet.minecraft.server.level;
 
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.ServerPlayerConnection;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,10 +40,6 @@ import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
 import java.util.stream.Stream;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.world.entity.Entity;
 
 @Mixin(targets = "net/minecraft/server/level/ChunkMap$TrackedEntity")
 public abstract class ChunkMap_TrackedEntityMixin {
@@ -55,13 +56,14 @@ public abstract class ChunkMap_TrackedEntityMixin {
      *  3) This achieves the same functionality without adding new accessors etc.
      */
     @Redirect(method = "broadcast(Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
-    private void impl$sendQueuedHumanPackets(ServerGamePacketListenerImpl serverPlayNetHandler, Packet<?> packetIn) {
+            target = "Lnet/minecraft/server/network/ServerPlayerConnection;send(Lnet/minecraft/network/protocol/Packet;)V"))
+    private void impl$sendQueuedHumanPackets(final ServerPlayerConnection serverPlayNetHandler, final Packet<?> packetIn) {
         serverPlayNetHandler.send(packetIn);
 
-        if (this.entity instanceof HumanEntity) {
-            Stream<Packet<?>> packets = ((HumanEntity) this.entity).popQueuedPackets(serverPlayNetHandler.player);
-            packets.forEach(serverPlayNetHandler.player.connection::send);
+        if (this.entity instanceof HumanEntity && serverPlayNetHandler instanceof ServerGamePacketListenerImpl) {
+            final ServerPlayer player = ((ServerGamePacketListenerImpl) serverPlayNetHandler).player;
+            final Stream<Packet<?>> packets = ((HumanEntity) this.entity).popQueuedPackets(player);
+            packets.forEach(player.connection::send);
         }
     }
 

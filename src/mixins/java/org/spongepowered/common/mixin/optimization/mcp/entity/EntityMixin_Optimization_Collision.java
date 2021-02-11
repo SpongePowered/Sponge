@@ -25,31 +25,15 @@
 package org.spongepowered.common.mixin.optimization.mcp.entity;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.Fluid;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 
 @Mixin(value = Entity.class, priority = 1500)
 public abstract class EntityMixin_Optimization_Collision {
-
-    // Use active chunk cache to replace the call to hasChunksAt
-    @Inject(method = "checkInsideBlocks", at = @At("HEAD"), cancellable = true)
-    private void activeCollision$checkForNeighboringChunkIfAvailable(final CallbackInfo ci) {
-        final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
-        if (activeChunk == null || !activeChunk.bridge$areNeighborsLoaded() || activeChunk.bridge$isQueuedForUnload()) {
-            ci.cancel();
-        }
-    }
 
     @Redirect(method = "checkInsideBlocks",
         at = @At(
@@ -60,15 +44,6 @@ public abstract class EntityMixin_Optimization_Collision {
     }
 
     // Replace area loaded call in fluid pushing handler with cached value
-
-    @Inject(method = "updateFluidHeightAndDoFluidPushing", at = @At("HEAD"), cancellable = true)
-    private void activeCollision$BailIfNeighborsAreInactive(final Tag<Fluid> p_210500_1_,
-            final double p_201500_2_, final CallbackInfoReturnable<Boolean> cir) {
-        final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
-        if (activeChunk == null || activeChunk.bridge$isQueuedForUnload() || !activeChunk.bridge$areNeighborsLoaded()) {
-            cir.setReturnValue(false);
-        }
-    }
 
     @SuppressWarnings("deprecation")
     @Redirect(method = "updateFluidHeightAndDoFluidPushing",

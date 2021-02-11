@@ -722,8 +722,12 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         }
     }
 
-    @Inject(method = "addEntity(Lnet/minecraft/world/entity/Entity;)Z",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getX()D"),
+    @Inject(
+        method = "addEntity(Lnet/minecraft/world/entity/Entity;)Z",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/level/entity/PersistentEntitySectionManager;addNewEntity(Lnet/minecraft/world/level/entity/EntityAccess;)Z"
+        ),
         cancellable = true
     )
     private void tracker$throwPreEventAndRecord(final Entity entityIn, final CallbackInfoReturnable<Boolean> cir) {

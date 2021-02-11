@@ -25,12 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.world.entity.player;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Abilities;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemCooldowns;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -46,8 +43,6 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API {
     // @formatter:off
     @Shadow public AbstractContainerMenu containerMenu;
     @Shadow public float experienceProgress;
-    @Shadow @Final public Abilities abilities;
-    @Shadow @Final public Inventory inventory;
     @Shadow public abstract ItemCooldowns shadow$getCooldowns();
     @Shadow public abstract Component shadow$getDisplayName();
     @Shadow public abstract Component shadow$getName();

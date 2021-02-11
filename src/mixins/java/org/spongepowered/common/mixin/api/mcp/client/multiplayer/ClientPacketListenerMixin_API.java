@@ -28,6 +28,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import org.spongepowered.api.entity.living.player.client.LocalPlayer;
 import org.spongepowered.api.network.LocalPlayerConnection;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -35,7 +36,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class ClientPacketListenerMixin_API implements LocalPlayerConnection {
 
     // @formatter:off
-    @Shadow private Minecraft minecraft;
+    @Shadow @Final private Minecraft minecraft;
     // @formatter:on
 
     @Override

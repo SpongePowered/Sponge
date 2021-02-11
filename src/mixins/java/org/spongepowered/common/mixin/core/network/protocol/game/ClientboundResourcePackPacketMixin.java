@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.network.protocol.game;
 
+import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,7 +35,6 @@ import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPack
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import java.net.URISyntaxException;
-import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 
 @Mixin(ClientboundResourcePackPacket.class)
 public abstract class ClientboundResourcePackPacketMixin implements SSendResourcePackPacketBridge {
@@ -44,11 +44,11 @@ public abstract class ClientboundResourcePackPacketMixin implements SSendResourc
 
     private ResourcePack impl$pack;
 
-    @Inject(method = "<init>(Ljava/lang/String;Ljava/lang/String;)V", at = @At("RETURN") , remap = false)
-    private void impl$setResourcePackOrThrowException(final String url, final String hash, final CallbackInfo ci) {
+    @Inject(method = "<init>(Ljava/lang/String;Ljava/lang/String;Z)V", at = @At("RETURN") , remap = false)
+    private void impl$setResourcePackOrThrowException(final String url, final String hash, final boolean required, final CallbackInfo ci) {
         try {
             this.impl$pack = SpongeResourcePack.create(url, hash);
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
     }

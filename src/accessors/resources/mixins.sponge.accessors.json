@@ -5,7 +5,8 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "client": [
-        "client.gui.components.AbstractSelectionListAccessor"
+        "client.gui.components.AbstractSelectionListAccessor",
+        "world.level.entity.TransientEntitySectionManagerAccessor"
     ],
     "mixins": [
         "ChatFormattingAccessor",
@@ -148,7 +149,6 @@
         "world.level.ExplosionAccessor",
         "world.level.GameRules_ValueAccessor",
         "world.level.GameRulesAccessor",
-        "world.level.LevelAccessor",
         "world.level.LevelSettingsAccessor",
         "world.level.NaturalSpawner_SpawnStateAccessor",
         "world.level.NaturalSpawnerAccessor",
@@ -181,11 +181,12 @@
         "world.level.block.state.StateHolderAccessor",
         "world.level.border.WorldBorderAccessor",
         "world.level.chunk.ChunkBiomeContainerAccessor",
+        "world.level.chunk.LevelChunk$BoundTickingBlockEntityAccessor",
+        "world.level.chunk.LevelChunk$RebindableTickingBlockEntityWrapperAccessor",
         "world.level.chunk.LevelChunkAccessor",
         "world.level.dimension.DimensionTypeAccessor",
         "world.level.entity.EntityTickListAccessor",
         "world.level.entity.PersistentEntitySectionManagerAccessor",
-        "world.level.entity.TransientEntitySectionManagerAccessor",
         "world.level.levelgen.NoiseGeneratorSettingsAccessor",
         "world.level.levelgen.flat.FlatLayerInfoAccessor",
         "world.level.levelgen.flat.FlatLevelGeneratorSettingsAccessor",

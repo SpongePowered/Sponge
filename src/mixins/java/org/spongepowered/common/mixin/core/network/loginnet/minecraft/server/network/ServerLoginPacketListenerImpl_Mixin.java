@@ -41,6 +41,7 @@ public abstract class ServerLoginPacketListenerImpl_Mixin extends Thread {
     @Final
     private ServerLoginPacketListenerImpl handler;
 
+    @SuppressWarnings("UnresolvedMixinReference")
     @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
             remap = false, cancellable = true)
     private void impl$fireAuthEvent(final CallbackInfo ci) {

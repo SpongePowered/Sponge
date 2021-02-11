@@ -40,10 +40,12 @@ import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 @Mixin(RegistryAccess.class)
 public abstract class RegistryAccessMixin {
 
-    @Shadow private static <E> void put(ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistryAccess> p_243602_0_,
-            ResourceKey<? extends Registry<E>> p_243602_1_, Codec<E> p_243602_2_, Codec<E> p_243602_3_) {
+    @Shadow private static <E> void put(
+        final ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistryAccess> p_243602_0_,
+            final ResourceKey<? extends Registry<E>> p_243602_1_, final Codec<E> p_243602_2_, final Codec<E> p_243602_3_) {
     }
 
+    @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(
             method = "*",
             at = @At(

@@ -35,8 +35,15 @@ import org.spongepowered.common.UntransformedInvokerError;
 @Mixin(NoiseGeneratorSettings.class)
 public interface NoiseGeneratorSettingsAccessor {
 
-    @Invoker("<init>") static NoiseGeneratorSettings invoker$new(final StructureSettings structureSettings, final NoiseSettings noiseSettings,
-            final BlockState defaultBlock, final BlockState defaultFluid, final int bedrockRoofY, final int bedrockFloorY, final int seaLevel, final boolean disableMobGeneration) {
+    @Invoker("<init>") static NoiseGeneratorSettings invoker$new(
+        final StructureSettings structureSettings,
+        final NoiseSettings noiseSettings,
+        final BlockState defaultBlock,
+        final BlockState defaultFluid,
+        final int bedrockRoofPosition,
+        final int bedrockFloorPosition,
+        final int seaLevel, final boolean disableMobGeneration, final boolean aquifersEnabled, final boolean noiseCavesEnabled
+    ) {
         throw new UntransformedInvokerError();
     }
 }

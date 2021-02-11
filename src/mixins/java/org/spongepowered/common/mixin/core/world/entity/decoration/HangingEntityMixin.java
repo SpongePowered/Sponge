@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.decoration;
 
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.decoration.HangingEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -37,9 +39,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
+
 import java.util.ArrayList;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.decoration.HangingEntity;
 
 @Mixin(HangingEntity.class)
 public abstract class HangingEntityMixin extends EntityMixin {
@@ -62,7 +63,7 @@ public abstract class HangingEntityMixin extends EntityMixin {
 
     @Inject(method = "hurt",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/decoration/HangingEntity;remove()V"
+            target = "Lnet/minecraft/world/entity/decoration/HangingEntity;kill()V"
         ),
         cancellable = true
     )

@@ -49,30 +49,30 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
     // @formatter:on
 
     @Inject(method = "tick", at = @At(value = "HEAD"))
-    private void impl$startWorldTimings(BooleanSupplier var1, CallbackInfo ci) {
+    private void impl$startWorldTimings(final BooleanSupplier var1, final CallbackInfo ci) {
         this.bridge$getTimingsHandler().doTick.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "RETURN"))
-    private void impl$stopWorldTimings(BooleanSupplier var1, CallbackInfo ci) {
+    private void impl$stopWorldTimings(final BooleanSupplier var1, final CallbackInfo ci) {
         this.bridge$getTimingsHandler().doTick.stopTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "CONSTANT", args = "stringValue=entities"))
-    private void impl$startEntityGlobalTimings(BooleanSupplier var1, CallbackInfo ci) {
+    private void impl$startEntityGlobalTimings(final BooleanSupplier var1, final CallbackInfo ci) {
         this.bridge$getTimingsHandler().tickEntities.startTiming();
-        TimingHistory.entityTicks += ((EntityTickListAccessor) this.entityTickList).accessor$getActive().size();
+        TimingHistory.entityTicks += ((EntityTickListAccessor) this.entityTickList).accessor$active().size();
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.runBlockEvents()V"))
-    protected void impl$wrapRunBlockEventsTimings(ServerLevel level) {
+    protected void impl$wrapRunBlockEventsTimings(final ServerLevel level) {
         this.bridge$getTimingsHandler().scheduledBlocks.startTiming();
         this.shadow$runBlockEvents();
         this.bridge$getTimingsHandler().scheduledBlocks.stopTiming();
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.tickBlockEntities()V"))
-    protected void impl$wrapBlockEntitiesTimings(ServerLevel level) {
+    protected void impl$wrapBlockEntitiesTimings(final ServerLevel level) {
         this.bridge$getTimingsHandler().tickEntities.stopTiming();
         this.bridge$getTimingsHandler().tileEntityTick.startTiming();
         this.shadow$tickBlockEntities();
@@ -80,14 +80,16 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
         TimingHistory.tileEntityTicks += this.blockEntityTickers.size();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.removeFromChunk(Lnet/minecraft/world/entity/Entity;)V"))
-    protected void impl$startEntityRemovalTimings(BooleanSupplier var1, CallbackInfo ci) {
+    @SuppressWarnings("UnresolvedMixinReference")
+    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;discard()V"))
+    protected void impl$startEntityRemovalTimings(final CallbackInfo ci) {
         this.bridge$getTimingsHandler().entityRemoval.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.onEntityRemoved(Lnet/minecraft/world/entity/Entity;)V", shift = At.Shift.AFTER))
-    protected void impl$stopEntityRemovalTimings(BooleanSupplier var1, CallbackInfo ci) {
-        this.bridge$getTimingsHandler().entityRemoval.startTiming();
+    @SuppressWarnings("UnresolvedMixinReference")
+    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;discard()V", shift = At.Shift.AFTER))
+    protected void impl$stopEntityRemovalTimings(final CallbackInfo ci) {
+        this.bridge$getTimingsHandler().entityRemoval.stopTiming();
     }
 
 }

@@ -37,7 +37,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 @Mixin(ExperienceOrb.class)
 public abstract class ExperienceOrbMixin_RealTime extends EntityMixin_RealTime {
 
-    @Shadow public int age;
+    @Shadow private int age;
 
     @Redirect(
         method = "tick",

@@ -24,27 +24,11 @@
  */
 package org.spongepowered.vanilla.mixin.core.world.entity.vehicle;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
-
-import javax.annotation.Nullable;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 
 @Mixin(AbstractMinecartContainer.class)
 public abstract class AbstractMinecartContainerMixin_Vanilla implements EntityBridge {
-
-    /**
-     * @author dualspiral - 21 December 2020
-     * @reason Redirect to our platform teleporter method
-     */
-    @Overwrite
-    @Nullable
-    public Entity changeDimension(final ServerLevel serverWorld) {
-        return this.bridge$changeDimension(serverWorld, VanillaPortalPlatformTeleporter.getNetherInstance());
-    }
 
 }

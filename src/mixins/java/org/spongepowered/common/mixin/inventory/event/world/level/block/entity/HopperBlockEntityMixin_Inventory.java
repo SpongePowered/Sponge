@@ -24,6 +24,15 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.level.block.entity;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.Hopper;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,24 +50,21 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.Direction;
-import net.minecraft.world.Container;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.Hopper;
-import net.minecraft.world.level.block.entity.HopperBlockEntity;
 
 @Mixin(HopperBlockEntity.class)
 public abstract class HopperBlockEntityMixin_Inventory {
 
-    @Shadow protected abstract boolean shadow$isFullContainer(Container inventoryIn, Direction side);
+    @Shadow
+    private static boolean shadow$isFullContainer(final Container inventoryIn, final Direction side) {
+        return false;
+    }
 
     // Call PreEvents
 
     @Redirect(method = "suckInItems",
             at = @At(value = "INVOKE",
                      target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;isEmptyContainer(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z"))
-    private static boolean impl$throwTransferPreIfNotEmpty(final Container inventory, final Direction facing, final Hopper hopper) {
+    private static boolean impl$throwTransferPreIfNotEmpty(final Container inventory, final Direction facing, final Level level, final Hopper hopper) {
         final boolean result = HopperBlockEntityAccessor.invoker$isEmptyContainer(inventory, facing);
         if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
             return result;
@@ -69,12 +75,14 @@ public abstract class HopperBlockEntityMixin_Inventory {
     @Redirect(method = "ejectItems",
             at = @At(value = "INVOKE",
                      target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;isFullContainer(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z"))
-    private boolean impl$throwTransferPreIfNotFull(final HopperBlockEntity hopper, final Container inventory, final Direction enumfacing) {
-        final boolean result = this.shadow$isFullContainer(inventory, enumfacing);
+    private static boolean impl$throwTransferPreIfNotFull(
+        final Container var0, final Direction direction, final Level level, final BlockPos pos, final BlockState state, final Container container
+    ) {
+        final boolean result = HopperBlockEntityMixin_Inventory.shadow$isFullContainer(container, direction);
         if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
             return result;
         }
-        return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(hopper), InventoryUtil.toInventory(inventory)).isCancelled();
+        return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(container), InventoryUtil.toInventory(container)).isCancelled();
     }
 
     // Capture Transactions
@@ -105,15 +113,17 @@ public abstract class HopperBlockEntityMixin_Inventory {
             at = @At(value = "INVOKE",
                      target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z",
                      ordinal = 1))
-    private void impl$afterPutStackInSlots(final CallbackInfoReturnable<Boolean> cir, final Container iInventory, final Direction enumFacing,
-            final int i, final ItemStack itemStack, ItemStack itemStack1) {
+    private static void impl$afterPutStackInSlots(final Level var0, final BlockPos var1, final BlockState var2, final Container var3,
+        final CallbackInfoReturnable<Boolean> cir, final Container iInventory, final Direction enumFacing,
+        final int i, final ItemStack itemStack, final ItemStack itemStack1
+    ) {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack1.isEmpty()) {
             // Capture Insert in Origin
-            final TrackedInventoryBridge capture = HopperBlockEntityMixin_Inventory.impl$forCapture(this);
-            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) this, i, itemStack);
+            final TrackedInventoryBridge capture = HopperBlockEntityMixin_Inventory.impl$forCapture(iInventory);
+            final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) iInventory, i, itemStack);
             // Call event
-            InventoryEventFactory.callTransferPost(capture, (Inventory) this, InventoryUtil.toInventory(iInventory), itemStack, sourceSlotTransaction);
+            InventoryEventFactory.callTransferPost(capture, (Inventory) iInventory, InventoryUtil.toInventory(iInventory), itemStack, sourceSlotTransaction);
         }
     }
 
@@ -124,12 +134,12 @@ public abstract class HopperBlockEntityMixin_Inventory {
                      ordinal = 1))
     private static void imlp$throwTransferEventsWhenPullingItems(final Hopper hopper, final Container iInventory, final int index,
             final Direction direction,
-            final CallbackInfoReturnable<Boolean> cir, final ItemStack itemStack, ItemStack itemStack1, final ItemStack itemStack2) {
+            final CallbackInfoReturnable<Boolean> cir, final ItemStack itemStack, final ItemStack itemStack1, final ItemStack itemStack2) {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack2.isEmpty()) {
             // Capture Insert in Origin
             final TrackedInventoryBridge capture = HopperBlockEntityMixin_Inventory.impl$forCapture(hopper);
-            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
+            final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
             // Call event
             InventoryEventFactory.callTransferPost(capture, InventoryUtil.toInventory(iInventory), InventoryUtil.toInventory(hopper), itemStack1, sourceSlotTransaction);
         }

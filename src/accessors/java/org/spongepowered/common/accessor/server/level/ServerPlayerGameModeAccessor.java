@@ -37,6 +37,6 @@ public interface ServerPlayerGameModeAccessor {
 
     @Accessor("destroyPos") BlockPos accessor$destroyPos();
 
-    @Accessor("level") ServerLevel accessor$getLevel();
+    @Accessor("level") ServerLevel accessor$level();
 
 }

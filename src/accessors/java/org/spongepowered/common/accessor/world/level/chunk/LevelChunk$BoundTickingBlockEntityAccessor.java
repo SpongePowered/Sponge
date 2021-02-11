@@ -22,20 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level;
+package org.spongepowered.common.accessor.world.level.chunk;
 
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.List;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
+@Mixin(targets = "net/minecraft/world/level/chunk/LevelChunk$BoundTickingBlockEntity")
+public interface LevelChunk$BoundTickingBlockEntityAccessor {
 
-@Mixin(Level.class)
-public interface LevelAccessor {
+    @Accessor("blockEntity") BlockEntity accessor$blockEntity();
 
-    @Accessor("pendingBlockEntities") List<BlockEntity> accessor$pendingBlockEntities();
-
-    @Accessor("updatingBlockEntities") boolean accessor$updatingBlockEntities();
+    @Accessor("ticker") BlockEntityTicker accessor$ticker();
 
 }

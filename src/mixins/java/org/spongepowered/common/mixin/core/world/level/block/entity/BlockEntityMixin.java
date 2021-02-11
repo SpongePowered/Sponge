@@ -26,6 +26,11 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -45,11 +50,6 @@ import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
 public abstract class BlockEntityMixin implements TileEntityBridge, DataCompoundHolder, TimingBridge {
@@ -58,7 +58,7 @@ public abstract class BlockEntityMixin implements TileEntityBridge, DataCompound
     @Shadow @Final private BlockEntityType<?> type;
     @Shadow @Nullable private BlockState blockState;
     @Shadow protected net.minecraft.world.level.Level level;
-    @Shadow protected BlockPos worldPosition;
+    @Shadow @Final protected BlockPos worldPosition;
     @Nullable private Timing impl$timing;
 
     @Shadow public abstract BlockPos shadow$getBlockPos();
@@ -82,7 +82,7 @@ public abstract class BlockEntityMixin implements TileEntityBridge, DataCompound
     }
 
     @Override
-    public void data$setCompound(CompoundTag nbt) {
+    public void data$setCompound(final CompoundTag nbt) {
         this.impl$customData = nbt;
     }
 
@@ -99,7 +99,7 @@ public abstract class BlockEntityMixin implements TileEntityBridge, DataCompound
     }
 
     @Inject(method = "load", at = @At("RETURN"))
-    private void impl$readSpongeData(final BlockState p_230337_1_, final CompoundTag compound, final CallbackInfo ci) {
+    private void impl$readSpongeData(final CompoundTag compound, final CallbackInfo ci) {
         // TODO If we are in Forge data is already present
         this.data$setCompound(compound); // For vanilla we set the incoming nbt
         // Deserialize custom data...

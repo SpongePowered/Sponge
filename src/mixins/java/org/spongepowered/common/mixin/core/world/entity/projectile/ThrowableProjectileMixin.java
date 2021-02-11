@@ -61,17 +61,22 @@ public abstract class ThrowableProjectileMixin extends ProjectileMixin {
         }
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/TheEndGatewayBlockEntity;teleportEntity(Lnet/minecraft/world/entity/Entity;)V"))
-    private void impl$createCauseFrameForGatewayTeleport(TheEndGatewayBlockEntity endGatewayTileEntity,
-        Level var0, BlockPos var1, BlockState var2, Entity entityIn, TheEndGatewayBlockEntity var4) {
+    @Redirect(method = "tick",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/block/entity/TheEndGatewayBlockEntity;teleportEntity(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/block/entity/TheEndGatewayBlockEntity;)V"
+        )
+    )
+    private void impl$createCauseFrameForGatewayTeleport(
+        final Level level, final BlockPos pos, final BlockState state, final Entity self, final TheEndGatewayBlockEntity gateway
+    ) {
         if (this.shadow$getCommandSenderWorld().isClientSide) {
             return;
         }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(endGatewayTileEntity);
-            frame.pushCause(entityIn);
-            TheEndGatewayBlockEntity.teleportEntity(var0, var1, var2, entityIn, var4);
+            frame.pushCause(gateway);
+            frame.pushCause(self);
+            TheEndGatewayBlockEntity.teleportEntity(level, pos, state, self, gateway);
         }
     }
 

@@ -54,8 +54,8 @@ public final class FallingBlockData {
                         .get(FallingBlockEntityAccessor::accessor$hurtEntities)
                         .set(FallingBlockEntityAccessor::accessor$hurtEntities)
                     .create(Keys.DAMAGE_PER_BLOCK)
-                        .get(h -> (double) h.accessor$fallDamageAmount())
-                        .set((h, v) -> h.accessor$fallDamageAmount(v.floatValue()))
+                        .get(h -> (double) h.accessor$fallDamagePerDistance())
+                        .set((h, v) -> h.accessor$fallDamagePerDistance(v.floatValue()))
                     .create(Keys.FALL_TIME)
                         .get(x -> new SpongeTicks(x.accessor$time()))
                         .setAnd((h, v) -> {

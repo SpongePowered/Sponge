@@ -33,6 +33,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(PersistentEntitySectionManager.class)
 public interface PersistentEntitySectionManagerAccessor<T extends EntityAccess> {
 
-    @Accessor("sectionStorage") EntitySectionStorage<T> accessor$getSectionStorage();
+    @Accessor("sectionStorage") EntitySectionStorage<T> accessor$sectionStorage();
 
 }

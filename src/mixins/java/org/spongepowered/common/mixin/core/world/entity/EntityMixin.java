@@ -80,9 +80,9 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
-import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
@@ -128,7 +128,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public float yRotO;
     @Shadow protected int portalTime;
     @Shadow @Nullable private Entity vehicle;
-    @Shadow @Final private ImmutableList<Entity> passengers;
+    @Shadow private ImmutableList<Entity> passengers;
     @Shadow protected boolean onGround;
     @Shadow public float fallDistance;
     @Shadow protected BlockPos portalEntrancePos;
@@ -138,7 +138,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public double yo;
     @Shadow public double zo;
 
-    @Shadow public abstract void shadow$unsetRemoved();
+    @Shadow protected abstract void shadow$unsetRemoved();
     @Shadow public abstract void shadow$setRemoved(Entity.RemovalReason reason);
     @Shadow public abstract void shadow$setPos(double x, double y, double z);
     @Shadow public abstract double shadow$getX();

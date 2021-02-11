@@ -24,12 +24,17 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity.player;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,34 +49,32 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
 
 @Mixin(value = Player.class)
-public class PlayerEntityMixin_Inventory {
+public abstract class PlayerEntityMixin_Inventory {
 
-    @Final @Shadow public net.minecraft.world.entity.player.Inventory inventory;
     @Shadow public AbstractContainerMenu containerMenu;
+
+    @Shadow public abstract Inventory shadow$getInventory();
 
     @Inject(method = "setItemSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
     private void onSetItemStackToSlot(final EquipmentSlot slotIn, final ItemStack stack, final CallbackInfo ci)
     {
-        if (((TrackedInventoryBridge) this.inventory).bridge$capturingInventory()) {
-            List<SlotTransaction> slotTransactions = ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions();
+        final Inventory inventory = this.shadow$getInventory();
+        if (((TrackedInventoryBridge) inventory).bridge$capturingInventory()) {
+            final List<SlotTransaction> slotTransactions = ((TrackedInventoryBridge) inventory).bridge$getCapturedSlotTransactions();
             if (slotIn == EquipmentSlot.MAINHAND) {
-                final ItemStack orig = this.inventory.items.get(this.inventory.selected);
-                final Slot slot = ((PlayerInventory) this.inventory).getPrimary().getHotbar().getSlot(this.inventory.selected).get();
+                final ItemStack orig = inventory.items.get(inventory.selected);
+                final Slot slot = ((PlayerInventory) inventory).getPrimary().getHotbar().getSlot(
+                    inventory.selected).get();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn == EquipmentSlot.OFFHAND) {
-                final ItemStack orig = this.inventory.offhand.get(0);
-                final Slot slot = ((PlayerInventory) this.inventory).getOffhand();
+                final ItemStack orig = inventory.offhand.get(0);
+                final Slot slot = ((PlayerInventory) inventory).getOffhand();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
-                final ItemStack orig = this.inventory.armor.get(slotIn.getIndex());
-                final Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(slotIn.getIndex()).get();
+                final ItemStack orig = inventory.armor.get(slotIn.getIndex());
+                final Slot slot = ((PlayerInventory) inventory).getEquipment().getSlot(slotIn.getIndex()).get();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             }
         }
@@ -97,7 +100,7 @@ public class PlayerEntityMixin_Inventory {
                     .openContainer(container)) {
                 // intentionally missing the lastCursor to not double throw close event
                 ctx.buildAndSwitch();
-                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getCarried());
+                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.shadow$getInventory().getCarried());
                 container.removed(player);
                 SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.containerMenu, serverPlayer, cursor, ItemStackSnapshot.empty(), false);
             }

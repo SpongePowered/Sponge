@@ -43,7 +43,7 @@ public abstract class AbstractFurnaceTileEntityMixin_RealTime extends BlockEntit
     @Shadow private int cookingProgress;
     @Shadow private int cookingTotalTime;
 
-    @Redirect(method = "tick",
+    @Redirect(method = "serverTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;)V",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;litTime:I",
@@ -63,17 +63,17 @@ public abstract class AbstractFurnaceTileEntityMixin_RealTime extends BlockEntit
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeBurnTime(final AbstractFurnaceBlockEntity self, final int modifier) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
-            this.litTime = modifier;
+    private static void realTimeImpl$adjustForRealTimeBurnTime(final AbstractFurnaceBlockEntity entity, final int modifier) {
+        if (((WorldBridge) ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).level).bridge$isFake()) {
+            ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).litTime = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.level).realTimeBridge$getRealTimeTicks();
-        this.litTime = Math.max(0, this.litTime - Math.max(1, ticks - 1));
+        final int ticks = (int) ((RealTimeTrackingBridge) ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).level).realTimeBridge$getRealTimeTicks();
+        ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).litTime = Math.max(0, ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).litTime - Math.max(1, ticks - 1));
     }
 
     @Redirect(
-        method = "tick",
+        method = "serverTick",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;cookingProgress:I",
@@ -93,17 +93,17 @@ public abstract class AbstractFurnaceTileEntityMixin_RealTime extends BlockEntit
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeCookTime(final AbstractFurnaceBlockEntity self, final int modifier) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
-            this.cookingProgress = modifier;
+    private static void realTimeImpl$adjustForRealTimeCookTime(final AbstractFurnaceBlockEntity entity, final int modifier) {
+        if (((WorldBridge) ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).level).bridge$isFake()) {
+            ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).cookingProgress = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.level).realTimeBridge$getRealTimeTicks();
-        this.cookingProgress = Math.min(this.cookingTotalTime, this.cookingProgress + ticks);
+        final int ticks = (int) ((RealTimeTrackingBridge) ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).level).realTimeBridge$getRealTimeTicks();
+        ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).cookingProgress = Math.min(((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).cookingTotalTime, ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).cookingProgress + ticks);
     }
 
     @Redirect(
-        method = "tick",
+        method = "serverTick",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;cookingProgress:I",
@@ -120,13 +120,13 @@ public abstract class AbstractFurnaceTileEntityMixin_RealTime extends BlockEntit
             )
         )
     )
-    private void realTimeImpl$adjustForRealTimeCookTimeCooldown(final AbstractFurnaceBlockEntity self, final int modifier) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
-            this.cookingProgress = modifier;
+    private static void realTimeImpl$adjustForRealTimeCookTimeCooldown(final AbstractFurnaceBlockEntity entity, final int modifier) {
+        if (((WorldBridge) ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).level).bridge$isFake()) {
+            ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).cookingProgress = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) this.level).realTimeBridge$getRealTimeTicks();
-        this.cookingProgress = Mth.clamp(this.cookingProgress - (2 * ticks), 0, this.cookingTotalTime);
+        final int ticks = (int) ((RealTimeTrackingBridge) ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).level).realTimeBridge$getRealTimeTicks();
+        ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).cookingProgress = Mth.clamp(((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).cookingProgress - (2 * ticks), 0, ((AbstractFurnaceTileEntityMixin_RealTime) (Object) entity).cookingTotalTime);
     }
 
 }

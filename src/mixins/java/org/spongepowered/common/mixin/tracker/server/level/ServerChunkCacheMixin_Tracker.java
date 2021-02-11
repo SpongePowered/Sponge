@@ -38,7 +38,8 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 
 @Mixin(ServerChunkCache.class)
 public abstract class ServerChunkCacheMixin_Tracker {
-    
+
+    @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(
         method = "*",
         at = @At(

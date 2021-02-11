@@ -51,6 +51,7 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Abilities;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -116,8 +117,8 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerEnt
     @Shadow public int experienceLevel;
     @Shadow public int totalExperience;
     @Shadow public float experienceProgress;
-    @Shadow @Final public Abilities abilities;
-    @Shadow @Final public net.minecraft.world.entity.player.Inventory inventory;
+    @Shadow @Final private Abilities abilities;
+    @Shadow @Final private net.minecraft.world.entity.player.Inventory inventory;
     @Shadow public AbstractContainerMenu containerMenu;
     @Shadow @Final public InventoryMenu inventoryMenu;
     @Shadow @Final private GameProfile gameProfile;
@@ -145,6 +146,8 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerEnt
     @Shadow public abstract Component shadow$getDisplayName();
     @Shadow protected abstract void shadow$removeEntitiesOnShoulder();
     @Shadow public abstract void shadow$awardStat(ResourceLocation stat);
+    @Shadow public abstract Abilities shadow$getAbilities();
+    @Shadow public abstract Inventory shadow$getInventory();
     // @formatter: on
 
     private boolean impl$affectsSpawning = true;

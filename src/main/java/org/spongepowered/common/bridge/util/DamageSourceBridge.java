@@ -44,5 +44,7 @@ public interface DamageSourceBridge {
 
     void bridge$setAnvilSource();
 
+    void bridge$setFallingStalactite();
+
     void bridge$setCactusSource();
 }

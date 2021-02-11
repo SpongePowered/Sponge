@@ -26,12 +26,15 @@ package org.spongepowered.common.accessor.world.level.chunk;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-
-import java.util.Map;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
+
+import java.util.Map;
 
 @Mixin(LevelChunk.class)
 public interface LevelChunkAccessor {
@@ -40,6 +43,12 @@ public interface LevelChunkAccessor {
 
     @Accessor("heightmaps") Map<Heightmap.Types, Heightmap> accessor$heightmaps();
 
-    @Accessor("updateBlockEntityTicker") void accessor$updateBlockEntityTicker(BlockEntity blockEntity);
+    // This is matching, just the MCDev plugin being dumb
+    @Invoker("updateBlockEntityTicker") <T extends BlockEntity> void accessor$updateBlockEntityTicker(T blockEntity);
+
+    @Accessor("NULL_TICKER")
+    static TickingBlockEntity accessor$NULL_TICKER() {
+        throw new UntransformedAccessorError();
+    }
 
 }

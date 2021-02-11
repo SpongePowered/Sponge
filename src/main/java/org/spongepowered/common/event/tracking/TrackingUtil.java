@@ -36,6 +36,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
 import net.minecraft.world.level.block.RepeaterBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.material.FluidState;
 import org.apache.logging.log4j.Level;
@@ -44,7 +45,6 @@ import org.apache.logging.log4j.MarkerManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -54,6 +54,9 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.level.chunk.LevelChunk$BoundTickingBlockEntityAccessor;
+import org.spongepowered.common.accessor.world.level.chunk.LevelChunk$RebindableTickingBlockEntityWrapperAccessor;
+import org.spongepowered.common.accessor.world.level.chunk.LevelChunkAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
@@ -134,37 +137,53 @@ public final class TrackingUtil {
         }
     }
 
+    private static Optional<net.minecraft.world.level.block.entity.BlockEntity> getTickingBlockEntity(
+        final TickingBlockEntity ticker) {
+        final net.minecraft.world.level.block.entity.BlockEntity tickingBlockEntity;
+        if (ticker instanceof LevelChunk$BoundTickingBlockEntityAccessor) {
+            return Optional.of(((LevelChunk$BoundTickingBlockEntityAccessor) ticker).accessor$blockEntity());
+        } else if (ticker instanceof LevelChunk$RebindableTickingBlockEntityWrapperAccessor) {
+            return getTickingBlockEntity(((LevelChunk$RebindableTickingBlockEntityWrapperAccessor) ticker).accessor$ticker());
+        } else if (ticker == LevelChunkAccessor.accessor$NULL_TICKER()){
+            return Optional.empty();
+        }
+        return Optional.empty();
+    }
+
     @SuppressWarnings({"unused", "try"})
     public static void tickTileEntity(final TrackedWorldBridge mixinWorldServer, final TickingBlockEntity tile) {
-        checkArgument(tile instanceof BlockEntity, "TickingBlockEntity %s is not a BlockEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
-        final net.minecraft.world.level.block.entity.BlockEntity tileEntity = (net.minecraft.world.level.block.entity.BlockEntity) tile;
-        final TileEntityBridge mixinTileEntity = (TileEntityBridge) tile;
-        final BlockPos pos = tileEntity.getBlockPos();
-        final @Nullable ChunkBridge chunk = ((ActiveChunkReferantBridge) tile).bridge$getActiveChunk();
-        if (!((TrackableBridge) tileEntity).bridge$shouldTick()) {
+        final Optional<BlockEntity> tickingBlockEntity = getTickingBlockEntity(tile);
+        if (!tickingBlockEntity.isPresent()) {
+            return;
+        }
+        final net.minecraft.world.level.block.entity.BlockEntity blockEntity = tickingBlockEntity.get();
+        final TileEntityBridge mixinTileEntity = (TileEntityBridge) tickingBlockEntity.get();
+        final BlockPos pos = blockEntity.getBlockPos();
+        final @Nullable ChunkBridge chunk = ((ActiveChunkReferantBridge) blockEntity).bridge$getActiveChunk();
+        if (!((TrackableBridge) blockEntity).bridge$shouldTick()) {
             return;
         }
         if (chunk == null) {
-            ((ActiveChunkReferantBridge) tile).bridge$setActiveChunk((TrackedChunkBridge) tileEntity.getLevel().getChunkAt(tileEntity.getBlockPos()));
+            ((ActiveChunkReferantBridge) blockEntity).bridge$setActiveChunk((TrackedChunkBridge) blockEntity.getLevel().getChunkAt(blockEntity.getBlockPos()));
         }
 
         final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext(PhaseTracker.SERVER).source(mixinTileEntity);
         try (final PhaseContext<@NonNull ?> phaseContext = context) {
 
-            if (tile instanceof CreatorTrackedBridge) {
+            if (blockEntity instanceof CreatorTrackedBridge) {
                 // Add notifier and owner so we don't have to perform lookups during the phases and other processing
-                ((CreatorTrackedBridge) tile).tracked$getNotifierReference().ifPresent(phaseContext::notifier);
+                ((CreatorTrackedBridge) blockEntity).tracked$getNotifierReference().ifPresent(phaseContext::notifier);
                 // Allow the tile entity to validate the owner of itself. As long as the tile entity
                 // chunk is already loaded and activated, and the tile entity has already loaded
                 // the owner of itself.
-                ((CreatorTrackedBridge) tile).tracked$getCreatorReference().ifPresent(phaseContext::creator);
+                ((CreatorTrackedBridge) blockEntity).tracked$getCreatorReference().ifPresent(phaseContext::creator);
             }
 
             // Finally, switch the context now that we have the owner and notifier
             phaseContext.buildAndSwitch();
 
-            try (final Timing timing = ((TimingBridge) tileEntity).bridge$getTimingsHandler().startTiming()) {
+            try (final Timing timing = ((TimingBridge) blockEntity).bridge$getTimingsHandler().startTiming()) {
                 PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_ENTITY_TICK, () -> "Wrapping Entity Tick: " + tile.toString());
                 tile.tick();
             }
@@ -172,8 +191,8 @@ public final class TrackingUtil {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }
         // We delay clearing active chunk if TE is invalidated during tick so we must remove it after
-        if (tileEntity.isRemoved()) {
-            ((ActiveChunkReferantBridge) tileEntity).bridge$setActiveChunk(null);
+        if (blockEntity.isRemoved()) {
+            ((ActiveChunkReferantBridge) blockEntity).bridge$setActiveChunk(null);
         }
     }
 
@@ -205,7 +224,7 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, () -> "Wrapping Block Tick: " + block.toString());
             block.tick(world, pos, random);
-        } catch (Exception | NoClassDefFoundError e) {
+        } catch (final Exception | NoClassDefFoundError e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
 
         }

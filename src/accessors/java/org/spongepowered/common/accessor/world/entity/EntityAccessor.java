@@ -24,13 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.entity;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedAccessorError;
-
-import java.util.List;
-import java.util.Random;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,6 +33,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
+
+import java.util.Random;
 
 @Mixin(Entity.class)
 public interface EntityAccessor {
@@ -89,7 +89,7 @@ public interface EntityAccessor {
 
     @Accessor("portalEntrancePos") void accessor$portalEntrancePos(final BlockPos portalEntrancePos);
 
-    @Accessor("passengers") List<Entity> accessor$passengers();
+    @Accessor("passengers") ImmutableList<Entity> accessor$passengers();
 
     @Invoker("setRot") void invoker$setRot(final float yRot, final float xRot);
 

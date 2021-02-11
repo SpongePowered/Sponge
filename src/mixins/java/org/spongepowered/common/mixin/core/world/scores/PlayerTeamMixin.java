@@ -83,6 +83,7 @@ public abstract class PlayerTeamMixin implements ScorePlayerTeamBridge {
         this.bridge$Color = SpongeAdventure.asAdventureNamed(this.color);
     }
 
+    @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(method = "*",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/scores/Scoreboard;onTeamChanged(Lnet/minecraft/world/scores/PlayerTeam;)V"))

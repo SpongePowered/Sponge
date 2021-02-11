@@ -39,12 +39,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -79,21 +76,10 @@ public abstract class LevelMixin_Tracker implements WorldBridge {
      */
     @Redirect(method = "tickBlockEntities",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/TickableBlockEntity;tick()V"))
+            target = "Lnet/minecraft/world/level/block/entity/TickingBlockEntity;tick()V"))
     protected void tracker$wrapTileEntityTick(final TickingBlockEntity tileEntity) {
         tileEntity.tick();
     }
 
-    @Redirect(method = "addBlockEntity",
-        at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false),
-        slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/level/Level;tickableBlockEntities:Ljava/util/List;"),
-            to = @At(value = "FIELD", target = "Lnet/minecraft/world/level/Level;isClientSide:Z")))
-    private boolean tracker$onlyAddTileEntitiesToTickIfEnabled(final List<? super BlockEntity> list, final Object tile) {
-        if (!this.bridge$isFake() && !((TrackableBridge) tile).bridge$shouldTick()) {
-            return false;
-        }
-
-        return list.add((BlockEntity) tile);
-    }
 
 }

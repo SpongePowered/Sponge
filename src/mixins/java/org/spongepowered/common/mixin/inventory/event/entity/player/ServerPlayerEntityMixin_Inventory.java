@@ -24,27 +24,24 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity.player;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 
 import java.util.OptionalInt;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
 
 @Mixin(value = ServerPlayer.class)
-public class ServerPlayerEntityMixin_Inventory extends PlayerEntityMixin_Inventory {
+public abstract class ServerPlayerEntityMixin_Inventory extends PlayerEntityMixin_Inventory {
 
     @Inject(method = "openMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;addSlotListener(Lnet/minecraft/world/inventory/ContainerListener;)V"))
-    private void impl$onOpenMenu(final MenuProvider containerProvider, CallbackInfoReturnable<OptionalInt> cir) {
+    private void impl$onOpenMenu(final MenuProvider containerProvider, final CallbackInfoReturnable<OptionalInt> cir) {
         ((TrackedContainerBridge) this.containerMenu).bridge$trackViewable(containerProvider);
     }
 

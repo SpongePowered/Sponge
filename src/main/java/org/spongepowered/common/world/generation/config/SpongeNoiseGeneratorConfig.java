@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.world.generation.config;
 
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.StructureSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.common.accessor.world.level.levelgen.NoiseGeneratorSettingsAccessor;
+
 import java.util.Objects;
-import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.StructureSettings;
 
 public final class SpongeNoiseGeneratorConfig {
 
@@ -43,6 +44,7 @@ public final class SpongeNoiseGeneratorConfig {
         public NoiseConfig noiseConfig;
         public BlockState defaultBlock, defaultFluid;
         public int bedrockRoofY, bedrockFloorY, seaLevel;
+        public boolean aquifers, noiseCaves;
 
         @Override
         public NoiseGeneratorConfig.Builder structureConfig(final StructureGenerationConfig config) {
@@ -87,6 +89,18 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
+        public NoiseGeneratorConfig.Builder aquifers(final boolean enableAquifers) {
+            this.aquifers = enableAquifers;
+            return this;
+        }
+
+        @Override
+        public NoiseGeneratorConfig.Builder noiseCaves(final boolean enableNoiseCaves) {
+            this.noiseCaves = enableNoiseCaves;
+            return this;
+        }
+
+        @Override
         public NoiseGeneratorConfig.Builder reset() {
             this.structureConfig = (StructureGenerationConfig) new StructureSettings(true);
             this.noiseConfig = NoiseConfig.overworld();
@@ -95,6 +109,8 @@ public final class SpongeNoiseGeneratorConfig {
             this.bedrockRoofY = -10;
             this.bedrockFloorY = 0;
             this.seaLevel = 63;
+            this.aquifers = false;
+            this.noiseCaves = false;
             return this;
         }
 
@@ -107,6 +123,8 @@ public final class SpongeNoiseGeneratorConfig {
             this.bedrockRoofY = value.bedrockRoofY();
             this.bedrockFloorY = value.bedrockFloorY();
             this.seaLevel = value.seaLevel();
+            this.aquifers = value.aquifers();
+            this.noiseCaves = value.noiseCaves();
             return this;
         }
 
@@ -114,7 +132,9 @@ public final class SpongeNoiseGeneratorConfig {
         public NoiseGeneratorConfig build() {
             final NoiseGeneratorSettings settings = NoiseGeneratorSettingsAccessor.invoker$new((StructureSettings) this.structureConfig,
                     (net.minecraft.world.level.levelgen.NoiseSettings) this.noiseConfig, (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
-                    (net.minecraft.world.level.block.state.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, false);
+                    (net.minecraft.world.level.block.state.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, false,
+                    this.aquifers, this.noiseCaves
+                );
             return (NoiseGeneratorConfig) (Object) settings;
         }
     }

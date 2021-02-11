@@ -25,7 +25,14 @@
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
@@ -39,6 +46,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
@@ -46,20 +54,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.level.block.entity.AbstractFurnaceBlockEntityAccessor;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Optional;
-import net.minecraft.core.NonNullList;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
-
-import javax.annotation.Nullable;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlockEntityMixin {
@@ -70,14 +71,11 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     @Shadow private int cookingTotalTime;
     @Shadow @Final private RecipeType<? extends AbstractCookingRecipe> recipeType;
 
-    @Shadow private static boolean shadow$canBurn(@Nullable Recipe<?> var0, NonNullList<ItemStack> var1, int var2) {
-        throw new UnsupportedOperationException("Untransformed shadow");
-    }
     // @Formatter:on
 
     // Shrink Fuel
     @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
-    private static void impl$throwFuelEventIfOrShrink(final ItemStack itemStack, final int quantity, Level var0, BlockPos var1, BlockState var2, AbstractFurnaceBlockEntity entity) {
+    private static void impl$throwFuelEventIfOrShrink(final ItemStack itemStack, final int quantity, final Level var0, final BlockPos var1, final BlockState var2, final AbstractFurnaceBlockEntity entity) {
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
 
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(itemStack);
@@ -110,9 +108,14 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     }
 
     // Tick up and Start
-    @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/world/item/crafting/Recipe;)Z", ordinal = 1))
-    private static boolean impl$checkIfCanSmelt(@Nullable Recipe<?> recipe, NonNullList<ItemStack> slots, int maxStackSize, Level level, BlockPos entityPos, BlockState state, AbstractFurnaceBlockEntity entity) {
-        if (!AbstractFurnaceBlockEntityMixin.shadow$canBurn(recipe, slots, maxStackSize)) {
+    @Redirect(method = "serverTick",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/core/NonNullList;I)Z",
+            ordinal = 1
+        )
+    )
+    private static boolean impl$checkIfCanSmelt(@Nullable final Recipe<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entity) {
+        if (!AbstractFurnaceBlockEntityAccessor.invoker$canBurn(recipe, slots, maxStackSize)) {
             return false;
         }
 
@@ -136,7 +139,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     // Tick down
     @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
     private static int impl$resetCookTimeIfCancelled(final int newCookTime, final int zero, final int totalCookTime,
-        Level level, BlockPos entityPos, BlockState state, AbstractFurnaceBlockEntity entity) {
+        final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entity) {
         final int clampedCookTime = Mth.clamp(newCookTime, zero, totalCookTime);
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(((AbstractFurnaceBlockEntityMixin) (Object) entity).items.get(1));
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
@@ -156,7 +159,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         method = "setItem",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;getTotalCookTime()I"
+            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;getTotalCookTime(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/Container;)I"
         )
     )
     private void impl$interruptSmelt(final CallbackInfo ci) {
@@ -164,6 +167,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     }
 
     // Interrupt-Passive - if the currently smelting item was removed in some other way
+    @SuppressWarnings("InvalidInjectorMethodSignature")
     @Inject(method = "serverTick",
         at = @At(
             shift = At.Shift.BEFORE,
@@ -174,7 +178,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;burn(Lnet/minecraft/world/item/crafting/Recipe;)V"
+                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;burn(Lnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/core/NonNullList;I)Z"
             ),
             to = @At(
                 value = "INVOKE",
@@ -182,8 +186,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
             )
         )
     )
-    private static void impl$onResetCookTimePassive(final CallbackInfo ci, Level level, BlockPos entityPos, BlockState state, AbstractFurnaceBlockEntity entity) {
-        ((AbstractFurnaceBlockEntityMixin) (Object) entity).impl$callInteruptSmeltEvent();
+    private static void impl$onResetCookTimePassive(final Level level, final BlockPos pos, final BlockState state,
+        @Coerce final AbstractFurnaceBlockEntityMixin entity, final CallbackInfo ci) {
+        entity.impl$callInteruptSmeltEvent();
     }
 
     private void impl$callInteruptSmeltEvent() {
@@ -203,7 +208,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         locals = LocalCapture.CAPTURE_FAILHARD,
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
     private static void impl$afterSmeltItem(
-        Recipe<?> recipe, NonNullList<ItemStack> slots, int var2, CallbackInfoReturnable<Boolean> cir
+        final Recipe<?> recipe, final NonNullList<ItemStack> slots, final int var2, final CallbackInfoReturnable<Boolean> cir
     ) {
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(slots.get(1));
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();

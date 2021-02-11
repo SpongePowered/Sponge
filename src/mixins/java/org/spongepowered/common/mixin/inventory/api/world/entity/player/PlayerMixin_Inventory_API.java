@@ -29,7 +29,6 @@ import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
@@ -38,14 +37,14 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 @Mixin(net.minecraft.world.entity.player.Player.class)
 public abstract class PlayerMixin_Inventory_API implements Player, InventoryBridge {
 
-    @Shadow @Final public net.minecraft.world.entity.player.Inventory inventory;
     @Shadow public AbstractContainerMenu containerMenu;
 
     @Shadow public abstract PlayerEnderChestContainer shadow$getEnderChestInventory();
+    @Shadow public abstract net.minecraft.world.entity.player.Inventory shadow$getInventory();
 
     @Override
     public org.spongepowered.api.item.inventory.entity.PlayerInventory getInventory() {
-        return (org.spongepowered.api.item.inventory.entity.PlayerInventory) this.inventory;
+        return (org.spongepowered.api.item.inventory.entity.PlayerInventory) this.shadow$getInventory();
     }
 
     @Override
@@ -60,6 +59,6 @@ public abstract class PlayerMixin_Inventory_API implements Player, InventoryBrid
 
     @Override
     public InventoryAdapter bridge$getAdapter() {
-        return (InventoryAdapter) this.inventory;
+        return (InventoryAdapter) this.shadow$getInventory();
     }
 }

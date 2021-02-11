@@ -38,4 +38,9 @@ public final class MinecraftFallingBlockDamageSource extends EntityDamageSource 
         return (FallingBlockEntity) super.getEntity();
     }
 
+    public MinecraftFallingBlockDamageSource setDefaultFallingBlockDamage() {
+        this.damageHelmet();
+        return this;
+    }
+
 }

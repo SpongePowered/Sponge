@@ -40,6 +40,7 @@ public abstract class ServerLoginPacketListenerImpl_Mixin_Vanilla extends Thread
     @Shadow(aliases = {"this$0", "field_151292_a"}, remap = false) @Final private ServerLoginPacketListenerImpl handler;
     // @formatter:on
 
+    @SuppressWarnings("UnresolvedMixinReference")
     @Inject(method = "run()V", at = @At(value = "RETURN"), remap = false)
     private void impl$onReadyToAccept(final CallbackInfo ci) {
         final ServerLoginPacketListenerImplAccessor accessor = (ServerLoginPacketListenerImplAccessor) this.handler;

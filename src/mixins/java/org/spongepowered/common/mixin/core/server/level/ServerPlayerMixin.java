@@ -592,7 +592,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             final boolean isNetherPortal) {
         // Standard vanilla processing
         this.gameMode.setLevel(targetWorld);
-        this.connection.send(new ClientboundPlayerAbilitiesPacket(this.abilities));
+        this.connection.send(new ClientboundPlayerAbilitiesPacket(this.shadow$getAbilities()));
         final PlayerList playerlist = this.server.getPlayerList();
         playerlist.sendLevelInfo((net.minecraft.server.level.ServerPlayer) (Object) this, targetWorld);
         playerlist.sendAllPlayerInfo((net.minecraft.server.level.ServerPlayer) (Object) this);
@@ -742,7 +742,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         final boolean keep = ((PlayerEntityBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
         if (!keep) {
             // Copy corpse inventory to respawned player
-            this.inventory.replaceWith(corpse.getInventory());
+            this.shadow$getInventory().replaceWith(corpse.getInventory());
             // Clear corpse so that mods do not copy from it again
             corpse.getInventory().clearContent();
         }

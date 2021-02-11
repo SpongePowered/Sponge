@@ -188,6 +188,7 @@ public abstract class LevelStemMixin implements DimensionBridge, ResourceKeyBrid
         return new SpongeWorldTemplate((LevelStem) (Object) this);
     }
 
+    @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(
         method = "*",
         at = @At(

@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.mixin.core.world.BossEventMixin;
+
 import java.util.Set;
 
 @Mixin(ServerBossEvent.class)
@@ -97,7 +98,7 @@ public abstract class ServerBossEventMixin extends BossEventMixin implements Bos
 
     // Convert to using BossBar.Listener
 
-    @Redirect(method = {"setPercent", "setColor", "setOverlay", "setDarkenScreen", "setPlayBossMusic", "setCreateWorldFog", "setName"},
+    @Redirect(method = {"setProgress", "setColor", "setOverlay", "setDarkenScreen", "setPlayBossMusic", "setCreateWorldFog", "setName"},
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerBossEvent;broadcast(Lnet/minecraft/network/protocol/game/ClientboundBossEventPacket$Operation;)V"))
     private void redirectUpdatePacket(final ServerBossEvent $this, final ClientboundBossEventPacket.Operation op) {
         // This becomes a no-op, the Adventure BossBar's listener calls this update operation

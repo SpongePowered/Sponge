@@ -22,38 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.entity.item;
+package org.spongepowered.common;
 
-import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-@Mixin(FallingBlockEntity.class)
-public interface FallingBlockEntityAccessor {
+public class MixinTargetHelper {
 
-    @Accessor("blockState") BlockState accessor$blockState();
-
-    @Accessor("blockState") void accessor$blockState(final BlockState blockState);
-
-    @Accessor("time") int accessor$time();
-
-    @Accessor("time") void accessor$time(final int fallTime);
-
-    @Accessor("cancelDrop") boolean accessor$cancelDrop();
-
-    @Accessor("cancelDrop") void accessor$cancelDrop(final boolean cancelDrop);
-
-    @Accessor("hurtEntities") boolean accessor$hurtEntities();
-
-    @Accessor("hurtEntities") void accessor$hurtEntities(final boolean hurtEntities);
-
-    @Accessor("fallDamageMax") int accessor$fallDamageMax();
-
-    @Accessor("fallDamageMax") void accessor$fallDamageMax(final int fallDamageMax);
-
-    @Accessor("fallDamagePerDistance") float accessor$fallDamagePerDistance();
-
-    @Accessor("fallDamagePerDistance") void accessor$fallDamagePerDistance(final float fallDamageAmount);
-
+    @SuppressWarnings("unchecked")
+    public static <Origin, Target> @NonNull Target cast(@NonNull final Origin o) {
+        return (Target) (Object) o;
+    }
 }

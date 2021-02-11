@@ -105,9 +105,9 @@ import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -124,7 +124,6 @@ import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridg
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -142,6 +141,7 @@ import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -154,8 +154,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 public final class SpongeCommonEventFactory {
 
@@ -581,7 +579,8 @@ public final class SpongeCommonEventFactory {
 
     }
 
-    public static InteractBlockEvent.Primary callInteractBlockEventPrimary(ServerboundPlayerActionPacket.Action action,
+    public static InteractBlockEvent.Primary callInteractBlockEventPrimary(
+        final ServerboundPlayerActionPacket.Action action,
             final net.minecraft.world.entity.player.Player player, final ItemStack heldItem, final BlockSnapshot blockSnapshot, final InteractionHand hand,
             @Nullable final net.minecraft.core.Direction side) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -624,8 +623,10 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static void applyCommonInteractContext(net.minecraft.world.entity.player.Player player, ItemStack stack, InteractionHand hand, @Nullable BlockSnapshot targetBlock,
-            @Nullable net.minecraft.world.entity.Entity entity, CauseStackManager.StackFrame frame) {
+    public static void applyCommonInteractContext(
+        final net.minecraft.world.entity.player.Player player, final ItemStack stack, final InteractionHand hand, @Nullable
+    final BlockSnapshot targetBlock,
+            @Nullable final net.minecraft.world.entity.Entity entity, final CauseStackManager.StackFrame frame) {
         if (((PlatformEntityBridge) player).bridge$isFakePlayer()) {
             frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
         } else {
@@ -766,10 +767,7 @@ public final class SpongeCommonEventFactory {
                 if (!pos.equals(spongeEntity.bridge$getLastCollidedBlockPos())) {
                     final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
                     context.applyNotifierIfAvailable(notifier -> {
-                        ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();
-                        if (spongeChunk == null) {
-                            spongeChunk = (ChunkBridge) world.getChunkAt(pos);
-                        }
+                        final ChunkBridge spongeChunk = (ChunkBridge) world.getChunkAt(pos);
                         spongeChunk.bridge$addTrackedBlockPosition(block, pos, notifier, PlayerTracker.Type.NOTIFIER);
 
                     });
@@ -838,7 +836,7 @@ public final class SpongeCommonEventFactory {
                     player.containerMenu = container;
                     final Slot slot = container.getSlot(0);
                     final Container slotInventory = slot.container;
-                    net.minecraft.network.chat.Component title;
+                    final net.minecraft.network.chat.Component title;
                     // TODO get name from last open
                     if (slotInventory instanceof MenuProvider) {
                         title = ((MenuProvider) slotInventory).getDisplayName();

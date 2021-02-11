@@ -182,17 +182,17 @@ public final class VolumeStreamUtils {
 
     @SuppressWarnings("unchecked")
     public static Stream<Map.Entry<BlockPos, net.minecraft.world.entity.Entity>> getEntitiesFromChunk(
-        Vector3i min, Vector3i max, LevelChunk chunk
+        final Vector3i min, final Vector3i max, final LevelChunk chunk
     ) {
         if (chunk.getLevel() instanceof ServerLevel) {
-            return ((PersistentEntitySectionManagerAccessor<Entity>) ((ServerLevelAccessor) chunk.getLevel()).accessor$getEntityManager()).accessor$getSectionStorage()
+            return ((PersistentEntitySectionManagerAccessor<Entity>) ((ServerLevelAccessor) chunk.getLevel()).accessor$getEntityManager()).accessor$sectionStorage()
                 .getExistingSectionsInChunk(SectionPos.of(chunk.getPos(), 0).asLong())
                 .flatMap(EntitySection::getEntities)
                 .filter(entity -> VecHelper.inBounds(entity.blockPosition(), min, max))
                 .map(entity -> new AbstractMap.SimpleEntry<>(entity.blockPosition(), entity));
         } else if (Sponge.isClientAvailable() && chunk.getLevel() instanceof ClientLevel) {
             return ((TransientEntitySectionManagerAccessor<Entity>) ((ClientLevelAccessor) chunk.getLevel()).accessor$getEntityStorage())
-                .accessor$getSectionStorage()
+                .accessor$sectionStorage()
                 .getExistingSectionsInChunk(SectionPos.of(chunk.getPos(), 0).asLong())
                 .flatMap(EntitySection::getEntities)
                 .filter(entity -> VecHelper.inBounds(entity.blockPosition(), min, max))
@@ -225,7 +225,7 @@ public final class VolumeStreamUtils {
 
     @NotNull
     public static BiConsumer<BlockPos, net.minecraft.world.level.block.entity.BlockEntity> getBlockEntityOrCloneToBackingVolume(
-        boolean shouldCarbonCopy, ObjectArrayMutableBlockEntityBuffer backingVolume, final @Nullable Level level
+        final boolean shouldCarbonCopy, final ObjectArrayMutableBlockEntityBuffer backingVolume, final @Nullable Level level
     ) {
         return shouldCarbonCopy ? (pos, tile) -> {
             final CompoundTag nbt = tile.save(new CompoundTag());
@@ -397,11 +397,11 @@ public final class VolumeStreamUtils {
     }
 
     private static <R extends Volume, API, MC, Section, KeyReference> SpongeVolumeStream<R, API> generateStreamInternal(
-        StreamOptions options, R ref, BiConsumer<KeyReference, MC> identityFunction,
-        BiFunction<BlockPos, MC, KeyReference> entityToKey,
-        Function<Section, Stream<Map.Entry<BlockPos, MC>>> entityAccessor,
-        BiFunction<KeyReference, R, Tuple<BlockPos, MC>> filteredPositionEntityAccessor, Supplier<R> worldSupplier,
-        Stream<Section> sectionStream
+        final StreamOptions options, final R ref, final BiConsumer<KeyReference, MC> identityFunction,
+        final BiFunction<BlockPos, MC, KeyReference> entityToKey,
+        final Function<Section, Stream<Map.Entry<BlockPos, MC>>> entityAccessor,
+        final BiFunction<KeyReference, R, Tuple<BlockPos, MC>> filteredPositionEntityAccessor, final Supplier<R> worldSupplier,
+        final Stream<Section> sectionStream
     ) {
         // This effectively creates a weakly referenced object supplier casting the MC variant to the API variant
         // without consideration, assuming the MC variant is always mixed in to implement the API variant.

@@ -46,6 +46,7 @@ import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -64,8 +65,8 @@ import org.spongepowered.math.vector.Vector3i;
 @Mixin(ServerPlayerGameMode.class)
 public abstract class ServerPlayerGameModeMixin_Tracker {
 
-    @Shadow public ServerPlayer player;
-    @Shadow public net.minecraft.server.level.ServerLevel level;
+    @Shadow @Final protected ServerPlayer player;
+    @Shadow protected net.minecraft.server.level.ServerLevel level;
 
     @Shadow private GameType gameModeForPlayer;
 
