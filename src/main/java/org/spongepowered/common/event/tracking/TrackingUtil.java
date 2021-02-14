@@ -108,14 +108,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class TrackingUtil {
 
-    private static final Counter CALL_COUNT = Counter.build()
-            .namespace("sponge")
-            .subsystem("phase_tracker")
-            .name("calls")
-            .help("Number of phase tracker")
-            .labelNames("phase")
-            .register();
-
     private static final Histogram PHASE_TICK_DURATION = Histogram.build()
             .namespace("sponge")
             .subsystem("phase_tracker")
@@ -231,7 +223,6 @@ public final class TrackingUtil {
             final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext(PhaseTracker.SERVER).source(mixinTileEntity);
             try (final PhaseContext<?> phaseContext = context) {
 
-                CALL_COUNT.labels("blockentity").inc();
                 if (tile instanceof CreatorTrackedBridge) {
                     // Add notifier and owner so we don't have to perform lookups during the phases and other processing
                     ((CreatorTrackedBridge) tile).tracked$getNotifierReference().ifPresent(phaseContext::notifier);
