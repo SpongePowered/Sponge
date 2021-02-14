@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
+import io.prometheus.client.Counter;
+import io.prometheus.client.Histogram;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
@@ -94,6 +96,14 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class TrackingUtil {
+
+    private static final Counter TRACKING_COUNTER = Counter.build()
+            .name("sponge_tracking_tileentity_count")
+            .register();
+
+    private static final Histogram TILEENTITY_TICK_TIMER = Histogram.build()
+            .name("sponge_tracking_tileentity_tick_seconds")
+            .register();
 
     public static final Marker ENTITY_TICK = MarkerManager.getMarker("ENTITY TICK");
     public static final Marker TILE_ENTITY_TICK = MarkerManager.getMarker("TILE ENTITY TICK");
@@ -197,6 +207,7 @@ public final class TrackingUtil {
         final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext(PhaseTracker.SERVER).source(mixinTileEntity);
         try (final PhaseContext<?> phaseContext = context) {
 
+            TRACKING_COUNTER.inc();
             if (tile instanceof CreatorTrackedBridge) {
                 // Add notifier and owner so we don't have to perform lookups during the phases and other processing
                 ((CreatorTrackedBridge) tile).tracked$getNotifierReference().ifPresent(phaseContext::notifier);
@@ -209,9 +220,11 @@ public final class TrackingUtil {
             // Finally, switch the context now that we have the owner and notifier
             phaseContext.buildAndSwitch();
 
+        TILEENTITY_TICK_TIMER.time(() -> {
             try (final Timing timing = ((TimingBridge) tileEntity).bridge$getTimingsHandler().startTiming()) {
                 tile.tick();
             }
+        });
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }
