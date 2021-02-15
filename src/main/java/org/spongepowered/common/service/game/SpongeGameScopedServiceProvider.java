@@ -34,7 +34,6 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.service.tracing.TracingService;
 import org.spongepowered.common.event.lifecycle.AbstractProvideServiceEventImpl;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.game.pagination.SpongePaginationService;
@@ -68,10 +67,5 @@ public final class SpongeGameScopedServiceProvider extends SpongeServiceProvider
     @Override
     public final @NonNull PaginationService paginationService() {
         return this.provideUnchecked(PaginationService.class);
-    }
-
-    @Override
-    public TracingService tracingService() {
-        return this.provideUnchecked(TracingService.class);
     }
 }
