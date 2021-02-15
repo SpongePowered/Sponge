@@ -75,6 +75,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     // TrackedContainerBridge
 
     private boolean impl$shiftCraft = false;
+    private ItemStack impl$menuCapture;
 
     @Override
     public void bridge$setShiftCrafting(final boolean flag) {
@@ -99,9 +100,10 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         return this.impl$lastCraft;
     }
 
-    @Nullable private ItemStack impl$previousCursor;
+    @Nullable private ItemStack impl$previousCursor = ItemStack.EMPTY;
 
-    @Override public void bridge$setPreviousCursor(@Nullable ItemStack stack) {
+    @Override
+    public void bridge$setPreviousCursor(@Nullable ItemStack stack) {
         this.impl$previousCursor = stack;
     }
 
@@ -377,9 +379,14 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         return result;
     }
 
+    @Inject(method = "doClick", at = @At("HEAD"))
+    private void impl$onEnter(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<ItemStack> cir) {
+        this.impl$menuCapture = player.inventory.getCarried().copy();
+    }
+
     // cleanup after slot click was captured
     @Inject(method = "doClick", at = @At("RETURN"))
-    private void onReturn(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<ItemStack> cir) {
+    private void impl$onReturn(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<ItemStack> cir) {
         // Reset variables needed for CraftItemEvent.Craft
         this.bridge$setLastCraft(null);
         this.bridge$setPreviousCursor(null);
@@ -395,6 +402,11 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 }
             }
 
+        }
+
+        SpongeInventoryMenu menu = ((MenuBridge)this).bridge$getMenu();
+        if (this.impl$menuCapture != null && menu != null && menu.isReadOnly()) {
+            this.bridge$detectAndSendChanges(false);
         }
     }
 
@@ -434,7 +446,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             ItemStack oldStack = this.lastSlots.get(i);
             if (!ItemStack.matches(oldStack, newStack)) {
                 changes.add(i);
-                if (menu != null && menu.isReadOnly()) { // readonly menu cancels if there is any change outside of the players inventory
+                if (this.impl$menuCapture != null && menu != null && menu.isReadOnly()) { // readonly menu cancels if there is any change outside of the players inventory
                     if (slot.container == menu.getInventory()) {
                         readOnlyCancel = true;
                     }
@@ -450,11 +462,15 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 slot.set(oldStack.copy());
                 // Send reverted slots to clients
                 this.impl$sendSlotContents(i, oldStack);
+            }
+
+            if (this.impl$menuCapture != null) {
                 // Revert item in hand
                 for (ContainerListener listener : this.containerListeners) {
                     if (listener instanceof ServerPlayer) {
-                        ((ServerPlayer) listener).inventory.setCarried(menu.getOldCursor());
+                        ((ServerPlayer) listener).inventory.setCarried(this.impl$menuCapture);
                         ((ServerPlayer) listener).broadcastCarriedItem();
+                        this.impl$menuCapture = null;
                     }
                 }
             }
@@ -466,7 +482,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 ItemStack oldStack = this.lastSlots.get(i);
 
                 // Check for on change menu callbacks
-                if (menu != null && !menu.onChange(newStack, oldStack, (org.spongepowered.api.item.inventory.Container) this, i, slot)) {
+                if (this.impl$menuCapture != null && menu != null && !menu.onChange(newStack, oldStack, (org.spongepowered.api.item.inventory.Container) this, i, slot)) {
                     this.lastSlots.set(i, oldStack.copy());  // revert changes
                     // Send reverted slots to clients
                     this.impl$sendSlotContents(i, oldStack);
@@ -490,9 +506,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             }
         }
 
-        if (menu != null) {
-            menu.setOldCursor(null);
-        }
         // like vanilla send property changes
         this.impl$detectAndSendPropertyChanges();
 

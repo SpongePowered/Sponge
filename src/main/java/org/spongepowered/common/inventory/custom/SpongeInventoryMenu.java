@@ -70,7 +70,6 @@ public class SpongeInventoryMenu implements InventoryMenu {
     @Nullable private CloseHandler closeHandler;
 
     private boolean readonly;
-    private ItemStack oldCursorStack;
 
     public SpongeInventoryMenu(ViewableInventory inventory) {
         this.inventory = inventory;
@@ -353,11 +352,4 @@ public class SpongeInventoryMenu implements InventoryMenu {
         return true;
     }
 
-    public void setOldCursor(ItemStack itemStack) {
-        this.oldCursorStack = itemStack;
-    }
-
-    public ItemStack getOldCursor() {
-        return this.oldCursorStack;
-    }
 }
