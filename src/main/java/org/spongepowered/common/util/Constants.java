@@ -396,7 +396,6 @@ public final class Constants {
         public static final UUID INVALID_WORLD_UUID = java.util.UUID.fromString("00000000-0000-0000-0000-000000000000");
         public static final int DEFAULT_CHUNK_UNLOAD_DELAY = 15000;
         public static final int MAX_CHUNK_UNLOADS = 100;
-        public static final int MAX_CHUNK_LIFETIME = 0;
         public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
         public static final int CHUNK_UNLOAD_DELAY = 30000;
         public static final int END_DIMENSION_ID = 1;

@@ -121,7 +121,6 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     @Shadow private boolean loaded;
     @Shadow private boolean dirty;
     @Shadow public boolean unloadQueued;
-    @Shadow private long lastSaveTime;
 
     @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType p_177424_2_);
     @Shadow public abstract void generateSkylightMap();
@@ -157,18 +156,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
     @Override
-    public boolean bridge$isChunkDirty() {
-        return this.dirty;
-    }
-
-    @Override
     public boolean bridge$isQueuedForUnload() {
         return this.unloadQueued;
-    }
-
-    @Override
-    public long bridge$getLastSaveTime() {
-        return this.lastSaveTime;
     }
 
     @Override
