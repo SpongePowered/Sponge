@@ -69,7 +69,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     @Nullable private SlotChangeHandler changeHandler;
     @Nullable private CloseHandler closeHandler;
 
-    private boolean readonly;
+    private boolean readonly; // TODO make with wrapper slot
 
     public SpongeInventoryMenu(ViewableInventory inventory) {
         this.inventory = inventory;

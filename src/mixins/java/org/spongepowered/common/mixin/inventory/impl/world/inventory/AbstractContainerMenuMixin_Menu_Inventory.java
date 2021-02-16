@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
@@ -36,6 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.inventory.container.MenuBridge;
@@ -90,12 +92,58 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     // Called when a Container is closed
     // InventoryMenu Callback and resetting viewed and menu state
     @Inject(method = "removed", at = @At(value = "HEAD"))
-    private void onOnContainerClosed(Player player, CallbackInfo ci) {
+    private void impl$onOnContainerClosed(Player player, CallbackInfo ci) {
         SpongeInventoryMenu menu = this.bridge$getMenu();
         if (menu != null) {
             menu.onClose(player, (org.spongepowered.api.item.inventory.Container) this);
         }
         this.bridge$setMenu(null);
+    }
+
+    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPlace(Lnet/minecraft/world/item/ItemStack;)Z"))
+    public boolean impl$onMayPlace(final Slot slot, final ItemStack stack) {
+        if (this.bridge$isReadonlyMenu(slot)) {
+            this.bridge$refreshListeners();
+            return false;
+        }
+        return slot.mayPlace(stack);
+    }
+
+    /**
+     * We already have another mixin for the ordinal=4 in {@link org.spongepowered.common.mixin.inventory.event.world.inventory.AbstractContainerMenuMixin_Inventory#onCanTakeStack}
+     */
+    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z"))
+    public boolean impl$onMayPickup(final Slot slot, final Player player) {
+        if (this.bridge$isReadonlyMenu(slot)) {
+            this.bridge$refreshListeners();
+            return false;
+        }
+        return slot.mayPickup(player);
+    }
+
+    @Redirect(method = "moveItemStackTo",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;getItem()Lnet/minecraft/world/item/ItemStack;", ordinal = 0))
+    public ItemStack impl$beforeMergeStack(final Slot slot) {
+        if (this.bridge$isReadonlyMenu(slot)) {
+            this.bridge$refreshListeners();
+            return ItemStack.EMPTY;
+        }
+        return slot.getItem();
+    }
+
+    @Override
+    public boolean bridge$isReadonlyMenu(Slot slot) {
+        return this.impl$menu != null && this.impl$menu.isReadOnly() && slot.container == this.impl$menu.getInventory();
+    }
+
+    @Override
+    public void bridge$refreshListeners() {
+        for (ContainerListener listener : this.containerListeners) {
+            listener.refreshContainer((AbstractContainerMenu) (Object) this, this.lastSlots);
+            if (listener instanceof ServerPlayer) {
+                ((ServerPlayer) listener).broadcastCarriedItem();
+            }
+        }
     }
 
 }
