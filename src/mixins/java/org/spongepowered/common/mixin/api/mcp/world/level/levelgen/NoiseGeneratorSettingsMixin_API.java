@@ -50,9 +50,9 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getDefaultFluid();
     @Shadow protected abstract boolean shadow$isAquifersEnabled();
     @Shadow protected abstract boolean shadow$isNoiseCavesEnabled();
+    @Shadow protected abstract boolean shadow$isGrimstoneEnabled();
     // @formatter:on
 
-    @Shadow protected abstract boolean shadow$isGrimstoneEnabled();
 
     @Override
     public StructureGenerationConfig structureConfig() {

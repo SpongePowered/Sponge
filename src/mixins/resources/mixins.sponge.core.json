@@ -21,7 +21,6 @@
         "authlib.properties.PropertyMixin",
         "block.BlockMixin",
         "block.DyeColorBlockPropertiesMixin",
-        "client.renderer.entity.EntityRenderersMixin",
         "commands.CommandsMixin",
         "commands.CommandSourceMixin",
         "commands.CommandSourceStackMixin",
@@ -220,6 +219,7 @@
         "client.multiplayer.ClientPacketListenerMixin",
         "client.network.chat.TranslatableComponentMixin",
         "client.player.AbstractClientPlayerMixin",
+        "client.renderer.entity.EntityRenderersMixin",
         "server.network.MemoryServerHandshakePacketListenerImplMixin"
     ],
     "server": [

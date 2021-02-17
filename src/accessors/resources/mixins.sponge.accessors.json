@@ -6,6 +6,7 @@
     "compatibilityLevel": "JAVA_8",
     "client": [
         "client.gui.components.AbstractSelectionListAccessor",
+        "client.multiplayer.ClientLevelAccessor",
         "world.level.entity.TransientEntitySectionManagerAccessor"
     ],
     "mixins": [
@@ -14,7 +15,6 @@
         "advancements.CriterionTrigger_ListenerAccessor",
         "advancements.critereon.MinMaxBounds_FloatsAccessor",
         "advancements.critereon.MinMaxBounds_IntsAccessor",
-        "client.multiplayer.ClientLevelAccessor",
         "commands.CommandSourceStackAccessor",
         "commands.arguments.DimensionArgumentAccessor",
         "commands.arguments.selector.EntitySelectorParserAccessor",

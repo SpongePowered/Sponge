@@ -32,11 +32,11 @@ public final class Constants {
 
     public static final class Libraries {
 
-        public static final String MINECRAFT_VERSION_TARGET = "1.16.5";
+        public static final String MINECRAFT_VERSION_TARGET = "21w07a";
         public static final String MINECRAFT_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
         public static final String MINECRAFT_PATH_PREFIX = "net/minecraft";
         public static final String MINECRAFT_SERVER_JAR_NAME = "minecraft_server";
-        public static final String MINECRAFT_MAPPINGS_PREFIX = MINECRAFT_PATH_PREFIX + "/mappings";
+        public static final String MINECRAFT_MAPPINGS_PREFIX = Libraries.MINECRAFT_PATH_PREFIX + "/mappings";
         public static final String MINECRAFT_MAPPINGS_NAME = "server.txt";
 
         public static final String SPONGE_NEXUS_DOWNLOAD_URL = "https://repo-new.spongepowered.org/service/rest/v1/search/assets?md5=%s&maven"
