@@ -31,6 +31,7 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.TextFilter;
 import net.minecraft.server.players.PlayerList;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.PlayerChatRouter;
@@ -56,6 +57,7 @@ import org.spongepowered.vanilla.chat.ChatFormatter;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class ServerGamePacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
@@ -73,16 +75,17 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
         this.server.execute(() -> channelRegistry.handlePlayPayload((EngineConnection) this, packet));
     }
 
-    @Inject(method = "handleChat(Ljava/lang/String;)V",
+    @Inject(method = "handleChat(Lnet/minecraft/server/network/TextFilter$FilteredText;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"),
+                    target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Ljava/util/function/Function;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"),
             cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vanilla$onProcessChatMessage(String p_244548_1_, CallbackInfo ci, net.minecraft.network.chat.Component component) {
-        ChatFormatter.formatChatComponent((net.minecraft.network.chat.TranslatableComponent) component);
+    private void vanilla$onProcessChatMessage(final TextFilter.FilteredText message, final CallbackInfo ci, final String plain, final net.minecraft.network.chat.Component filtered, final net.minecraft.network.chat.Component unfiltered) {
+        // todo(zml): See where mojang takes these chat filtering changes
+        ChatFormatter.formatChatComponent((net.minecraft.network.chat.TranslatableComponent) unfiltered);
         final PlayerChatRouter chatRouter = ((ServerPlayer) this.player).getChatRouter();
-        Component adventure = SpongeAdventure.asAdventure(component);
+        Component adventure = SpongeAdventure.asAdventure(unfiltered);
         adventure = ((TranslatableComponent) adventure).args().get(1);
 
         try (CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
@@ -97,11 +100,11 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
         }
     }
 
-    @Redirect(method = "handleChat(Ljava/lang/String;)V",
+    @Redirect(method = "handleChat(Lnet/minecraft/server/network/TextFilter$FilteredText;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V") )
-    private void vanilla$cancelSendChatMsgImpl(PlayerList playerList, net.minecraft.network.chat.Component p_232641_1_, ChatType p_232641_2_, UUID p_232641_3_) {
+                    target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Ljava/util/function/Function;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V") )
+    private void vanilla$cancelSendChatMsgImpl(final PlayerList playerList, final net.minecraft.network.chat.Component p_232641_1_, final Function<ServerPlayer, Component> messageProvider, final ChatType p_232641_2_, final UUID p_232641_3_) {
         // Do nothing
     }
 }

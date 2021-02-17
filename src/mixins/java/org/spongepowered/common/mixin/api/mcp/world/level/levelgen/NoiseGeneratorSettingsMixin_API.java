@@ -52,6 +52,8 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Shadow protected abstract boolean shadow$isNoiseCavesEnabled();
     // @formatter:on
 
+    @Shadow protected abstract boolean shadow$isGrimstoneEnabled();
+
     @Override
     public StructureGenerationConfig structureConfig() {
         return (StructureGenerationConfig) this.shadow$structureSettings();
@@ -96,4 +98,10 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     public boolean noiseCaves() {
         return this.shadow$isNoiseCavesEnabled();
     }
+
+    @Override
+    public boolean grimstone() {
+        return this.shadow$isGrimstoneEnabled();
+    }
+
 }
