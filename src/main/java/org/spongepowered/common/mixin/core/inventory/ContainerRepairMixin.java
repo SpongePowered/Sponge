@@ -92,7 +92,8 @@ public abstract class ContainerRepairMixin extends ContainerMixin implements Len
         final ItemStack itemstack = this.inputSlots.getStackInSlot(0);
         final ItemStack itemstack2 = this.inputSlots.getStackInSlot(1);
         final ItemStack result = this.outputSlot.getStackInSlot(0);
-        final UpdateAnvilEvent event = SpongeCommonEventFactory.callUpdateAnvilEvent((ContainerRepair) (Object) this, itemstack, itemstack2, result, this.repairedItemName, this.maximumCost, this.materialCost);
+
+        final UpdateAnvilEvent event = SpongeCommonEventFactory.callUpdateAnvilEvent((ContainerRepair) (Object) this, itemstack, itemstack2, result, this.repairedItemName == null ? "" : this.repairedItemName, this.maximumCost, this.materialCost);
 
         final ItemStackSnapshot finalItem = event.getResult().getFinal();
         if (event.isCancelled() || finalItem.isEmpty()) {
