@@ -44,7 +44,6 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API {
     @Shadow public AbstractContainerMenu containerMenu;
     @Shadow public float experienceProgress;
     @Shadow public abstract ItemCooldowns shadow$getCooldowns();
-    @Shadow public abstract Component shadow$getDisplayName();
     @Shadow public abstract Component shadow$getName();
     // @formatter:on
 

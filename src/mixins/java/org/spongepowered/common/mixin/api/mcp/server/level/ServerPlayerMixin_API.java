@@ -34,9 +34,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
@@ -104,6 +104,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
 public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements ServerPlayer {
@@ -114,6 +115,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Shadow public ServerGamePacketListenerImpl connection;
 
     @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$getLevel();
+    @Shadow public abstract void shadow$sendMessage(final net.minecraft.network.chat.Component var1, final ChatType var2, final UUID var3);
     // @formatter:on
 
     private final TabList api$tabList = new SpongeTabList((net.minecraft.server.level.ServerPlayer) (Object) this);
@@ -388,8 +390,8 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        this.connection.send(new ClientboundChatPacket(SpongeAdventure.asVanilla(Objects.requireNonNull(message, "message")),
-                SpongeAdventure.asVanilla(Objects.requireNonNull(type, "type")), Objects.requireNonNull(identity, "identity").uuid()));
+        this.shadow$sendMessage(SpongeAdventure.asVanilla(Objects.requireNonNull(message, "message")),
+            SpongeAdventure.asVanilla(Objects.requireNonNull(type, "type")), Objects.requireNonNull(identity, "identity").uuid());
     }
 
     @Override
