@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.buffer.archetype.blockentity;
 
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.world.volume.archetype.block.entity.BlockEntityArchetypeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
@@ -33,7 +34,7 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.Map;
 import java.util.Optional;
 
-public class MutableArrayBasedBlockEntityArchetypeBuffer extends AbstractMutableBlockEntityArchetypeBuffer<MutableArrayBasedBlockEntityArchetypeBuffer> {
+public class MutableArrayBasedBlockEntityArchetypeBuffer extends AbstractMutableBlockEntityArchetypeBuffer {
 
     protected MutableArrayBasedBlockEntityArchetypeBuffer(Vector3i start, Vector3i size) {
         super(start, size);
@@ -66,7 +67,7 @@ public class MutableArrayBasedBlockEntityArchetypeBuffer extends AbstractMutable
     }
 
     @Override
-    public VolumeStream<MutableArrayBasedBlockEntityArchetypeBuffer, BlockEntityArchetype> blockEntityArchetypeStream(Vector3i min,
+    public VolumeStream<BlockEntityArchetypeVolume.Mutable, BlockEntityArchetype> blockEntityArchetypeStream(Vector3i min,
         Vector3i max, StreamOptions options
     ) {
         return null;

@@ -43,7 +43,7 @@ import org.spongepowered.math.vector.Vector3i;
 public class SpongeBlockVolumeFactory implements BlockVolumeFactory {
 
     @Override
-    public BlockVolume.Mutable<@NonNull ?> empty(
+    public BlockVolume.Mutable empty(
         final Palette<BlockState, BlockType> palette,
         final RegistryReference<BlockType> defaultState,
         final Vector3i min,
@@ -53,7 +53,7 @@ public class SpongeBlockVolumeFactory implements BlockVolumeFactory {
     }
 
     @Override
-    public BlockVolume.Mutable<@NonNull ?> copyFromRange(
+    public BlockVolume.Mutable copyFromRange(
         final BlockVolume.Streamable<@NonNull ?> existing, final Vector3i newMin, final Vector3i newMax
     ) {
         final ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(newMin, newMax.sub(newMin));
@@ -63,7 +63,7 @@ public class SpongeBlockVolumeFactory implements BlockVolumeFactory {
     }
 
     @Override
-    public BlockVolume.Mutable<@NonNull ?> copy(final BlockVolume.Streamable<@NonNull ?> existing
+    public BlockVolume.Mutable copy(final BlockVolume.Streamable<@NonNull ?> existing
     ) {
         final ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(existing.blockMin(), existing.blockSize());
         existing.blockStateStream(existing.blockMin(), existing.blockMax(), StreamOptions.lazily())

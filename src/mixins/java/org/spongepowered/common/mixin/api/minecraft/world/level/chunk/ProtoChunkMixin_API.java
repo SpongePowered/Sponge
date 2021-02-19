@@ -32,8 +32,9 @@ import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.generation.PrimitiveChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.ChunkUtil;
+import org.spongepowered.common.accessor.world.level.chunk.ChunkBiomeContainerAccessor;
 import org.spongepowered.common.util.SpongeTicks;
+import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
 @Mixin(ProtoChunk.class)
 public abstract class ProtoChunkMixin_API implements PrimitiveChunk {
@@ -46,7 +47,7 @@ public abstract class ProtoChunkMixin_API implements PrimitiveChunk {
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return ChunkUtil.setBiome(this.biomes, x, y, z, biome);
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.biomes, () -> {});
     }
 
     @Override

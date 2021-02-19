@@ -52,6 +52,7 @@ import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.biome.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
@@ -181,123 +182,17 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default VolumeStream<R, Biome> biomeStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
-        VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
-                Objects.requireNonNull(options, "options"));
-
-        final boolean shouldCarbonCopy = options.carbonCopy();
-        final Vector3i size = max.sub(min).add(1, 1 ,1);
-        final @MonotonicNonNull ObjectArrayMutableBiomeBuffer backingVolume;
-        if (shouldCarbonCopy) {
-            backingVolume = new ObjectArrayMutableBiomeBuffer(min, size);
-        } else {
-            backingVolume = null;
-        }
-        return VolumeStreamUtils.<R, Biome, net.minecraft.world.level.biome.Biome, ChunkAccess, BlockPos>generateStream(
-            min,
-            max,
-            options,
-            // Ref
-            (R) this,
-            // IdentityFunction
-            (pos, biome) -> {
-                if (shouldCarbonCopy) {
-                    backingVolume.setBiome(pos, biome);
-                }
-            },
-            // ChunkAccessor
-            VolumeStreamUtils.getChunkAccessorByStatus((LevelReader) (Object) this, options.loadingStyle().generateArea()),
-            // Biome by key
-            (key, biome) -> key,
-            // Entity Accessor
-            VolumeStreamUtils.getBiomesForChunkByPos((LevelReader) (Object) this, min, max)
-            ,
-            // Filtered Position Entity Accessor
-            (blockPos, world) -> {
-                final net.minecraft.world.level.biome.Biome biome = shouldCarbonCopy
-                    ? backingVolume.getNativeBiome(blockPos.getX(), blockPos.getY(), blockPos.getZ())
-                    : ((LevelReader) world).getBiome(blockPos);
-                return new Tuple<>(blockPos, biome);
-            }
-        );
+        return VolumeStreamUtils.<R>getBiomeStream((LevelReader) (Object) this, min, max, options);
     }
 
     @Override
     default VolumeStream<R, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
-        VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
-                Objects.requireNonNull(options, "options"));
-
-        final boolean shouldCarbonCopy = options.carbonCopy();
-        final Vector3i size = max.sub(min).add(1, 1 ,1);
-        final @MonotonicNonNull ArrayMutableBlockBuffer backingVolume;
-        if (shouldCarbonCopy) {
-            backingVolume = new ArrayMutableBlockBuffer(min, size);
-        } else {
-            backingVolume = null;
-        }
-        return VolumeStreamUtils.<R, BlockState, net.minecraft.world.level.block.state.BlockState, ChunkAccess, BlockPos>generateStream(
-            min,
-            max,
-            options,
-            // Ref
-            (R) this,
-            // IdentityFunction
-            (pos, blockState) -> {
-                if (shouldCarbonCopy) {
-                    backingVolume.setBlock(pos, blockState);
-                }
-            },
-            // ChunkAccessor
-            VolumeStreamUtils.getChunkAccessorByStatus((LevelReader) (Object) this, options.loadingStyle().generateArea()),
-            // Biome by block position
-            (key, biome) -> key,
-            // Entity Accessor
-            VolumeStreamUtils.getBlockStatesForSections(min, max),
-            // Filtered Position Entity Accessor
-            (blockPos, world) -> {
-                final net.minecraft.world.level.block.state.BlockState tileEntity = shouldCarbonCopy
-                    ? backingVolume.getBlock(blockPos)
-                    : ((LevelReader) world).getBlockState(blockPos);
-                return new Tuple<>(blockPos, tileEntity);
-            }
-        );
+        return VolumeStreamUtils.<R>generateBlockStream((LevelReader) (Object) this, min, max, options);
     }
 
     @Override
     default VolumeStream<R, BlockEntity> blockEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
-        VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
-                Objects.requireNonNull(options, "options"));
-
-        final boolean shouldCarbonCopy = options.carbonCopy();
-        final Vector3i size = max.sub(min).add(1, 1 ,1);
-        final @MonotonicNonNull ObjectArrayMutableBlockEntityBuffer backingVolume;
-        if (shouldCarbonCopy) {
-            backingVolume = new ObjectArrayMutableBlockEntityBuffer(min, size);
-        } else {
-            backingVolume = null;
-        }
-
-        return VolumeStreamUtils.<R, BlockEntity, net.minecraft.world.level.block.entity.BlockEntity, ChunkAccess, BlockPos>generateStream(
-            min,
-            max,
-            options,
-            // Ref
-            (R) this,
-            // IdentityFunction
-            VolumeStreamUtils.getBlockEntityOrCloneToBackingVolume(shouldCarbonCopy, backingVolume, this instanceof Level ? (Level) (Object) this : null),
-            // ChunkAccessor
-            VolumeStreamUtils.getChunkAccessorByStatus((LevelReader) (Object) this, options.loadingStyle().generateArea()),
-            // TileEntity by block pos
-            (key, tileEntity) -> key,
-            // TileEntity Accessor
-            (chunk) -> chunk instanceof LevelChunk ? ((LevelChunk) chunk).getBlockEntities().entrySet().stream() : Stream.empty(),
-            // Filtered Position TileEntity Accessor
-            (blockPos, world) -> {
-                final net.minecraft.world.level.block.entity.@Nullable BlockEntity tileEntity = shouldCarbonCopy
-                    ? backingVolume.getTileEntity(blockPos)
-                    : ((LevelReader) world).getBlockEntity(blockPos);
-                return new Tuple<>(blockPos, tileEntity);
-            }
-        );
+        return VolumeStreamUtils.<R>getBlockEntityStream((LevelReader) (Object) this, min, max, options);
     }
 
 }

@@ -24,6 +24,16 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.storage.LevelData;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -31,7 +41,6 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ProtoWorld;
-import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -46,21 +55,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
+import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3i;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkBiomeContainer;
-import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.storage.LevelData;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -79,33 +75,21 @@ public interface LevelAccessorMixin_API {
     @Shadow boolean shadow$hasChunk(int p_217354_1_, int p_217354_2_);
     @Shadow Random shadow$getRandom();
     @Shadow LevelData shadow$getLevelData();
+    @Shadow ChunkSource shadow$getChunkSource();
     //@formatter:on
 
     // MutableBiomeVolume
 
-    @SuppressWarnings({"rawtypes", "ConstantConditions"})
+    @SuppressWarnings({"ConstantConditions"})
     default boolean protoWorld$setBiome(final int x, final int y, final int z, final org.spongepowered.api.world.biome.Biome biome) {
         Objects.requireNonNull(biome, "biome");
 
-        final ChunkAccess iChunk = ((LevelReader) this).getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
+        final ChunkAccess iChunk = ((LevelReader) this).getChunk(new BlockPos(x, y, z));
         if (iChunk == null) {
             return false;
         }
-        if (iChunk instanceof ProtoChunk) {
-            return ((ProtoChunk) iChunk).setBiome(x, y, z, biome);
-        } else {
-            final Biome[] biomes = ((ChunkBiomeContainerAccessor) iChunk.getBiomes()).accessor$biomes();
 
-            final int maskedX = x & ChunkBiomeContainer.HORIZONTAL_MASK;
-            final int maskedY = Mth.clamp(y, 0, ChunkBiomeContainer.VERTICAL_MASK);
-            final int maskedZ = z & ChunkBiomeContainer.HORIZONTAL_MASK;
-
-            final int WIDTH_BITS = ChunkBiomeContainerAccessor.accessor$WIDTH_BITS();
-            final int posKey = maskedY << WIDTH_BITS + WIDTH_BITS | maskedZ << WIDTH_BITS | maskedX;
-            biomes[posKey] = (Biome) (Object) biome;
-
-            return true;
-        }
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> ((ChunkBiomeContainerAccessor) iChunk.getBiomes()), () -> iChunk.setUnsaved(true));
     }
 
     // Volume

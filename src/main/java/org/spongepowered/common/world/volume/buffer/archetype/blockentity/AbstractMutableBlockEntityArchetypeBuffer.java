@@ -29,6 +29,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.volume.archetype.block.entity.BlockEntityArchetypeVolume;
+import org.spongepowered.api.world.volume.block.entity.BlockEntityVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -43,7 +44,7 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public abstract class AbstractMutableBlockEntityArchetypeBuffer<M extends AbstractMutableBlockEntityArchetypeBuffer<M>> extends AbstractBlockBuffer implements BlockEntityArchetypeVolume.Mutable<M> {
+public abstract class AbstractMutableBlockEntityArchetypeBuffer extends AbstractBlockBuffer implements BlockEntityArchetypeVolume.Mutable {
 
     // This is our backing block buffer
     private final ArrayMutableBlockBuffer blockBuffer;
@@ -99,7 +100,7 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer<M extends Abstra
 
     @SuppressWarnings("unchecked")
     @Override
-    public VolumeStream<M, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
+    public VolumeStream<BlockEntityArchetypeVolume.Mutable, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
         final StreamOptions options) {
         final Vector3i blockMin = this.blockMin();
         final Vector3i blockMax = this.blockMax();
@@ -110,12 +111,12 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer<M extends Abstra
         } else {
             buffer = this.blockBuffer;
         }
-        final Stream<VolumeElement<M, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
+        final Stream<VolumeElement<BlockEntityArchetypeVolume.Mutable, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
             .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
                 .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
-                    .mapToObj(y -> VolumeElement.of((M) this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
+                    .mapToObj(y -> VolumeElement.of((BlockEntityArchetypeVolume.Mutable) this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
-        return new SpongeVolumeStream<>(stateStream, () -> (M) this);
+        return new SpongeVolumeStream<>(stateStream, () -> this);
     }
 }

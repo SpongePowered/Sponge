@@ -61,8 +61,10 @@ import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.ProtoWorld;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
+import org.spongepowered.api.world.volume.biome.BiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeApplicators;
 import org.spongepowered.api.world.volume.stream.VolumeCollectors;
@@ -72,10 +74,12 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -110,6 +114,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @Shadow public abstract void shadow$setBlockEntity(BlockPos pos, @javax.annotation.Nullable net.minecraft.world.level.block.entity.BlockEntity tileEntityIn);
     @Shadow public abstract void shadow$removeBlockEntity(BlockPos pos);
     @Shadow public abstract ResourceKey<net.minecraft.world.level.Level> shadow$dimension();
+    @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos param0);
     // @formatter:on
 
     private Context impl$context;
@@ -303,7 +308,8 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         final Vector3i rawVolMin = Objects.requireNonNull(min, "min").min(Objects.requireNonNull(max, "max"));
         final Vector3i adjustedVolMin = rawVolMin.sub(Objects.requireNonNull(origin, "origin"));
         final Vector3i volMax = max.max(min);
-        final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(adjustedVolMin, volMax.sub(rawVolMin).add(1, 1, 1), this.registries());
+        final Vector3i size = volMax.sub(rawVolMin).add(1, 1, 1);
+        final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(adjustedVolMin, size, this.registries());
 
         this.blockStateStream(min, max, StreamOptions.lazily())
             .apply(VolumeCollectors.of(
@@ -328,6 +334,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             ));
 
         this.entityStream(min, max, StreamOptions.lazily())
+            .filter((world, entity, x, y, z) -> ((EntityAccessor) entity.get()).invoker$getEncodeId() != null || entity.get().type() == HumanEntity.TYPE)
             .map((world, entity, x, y, z) -> entity.get().createArchetype())
             .apply(VolumeCollectors.of(
                 volume,
@@ -395,5 +402,17 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
                 return new Tuple<>(entity.blockPosition(), entity);
             }
         );
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
+        if (!((Level) (Object) this).hasChunk(x << 4, z << 4)) {
+            return false;
+        }
+        final LevelChunk levelChunk = this.shadow$getChunkAt(new BlockPos(x, y, z));
+        // technically we don't like to forward to the api, but this
+        // is implemented by LevelChunkMixin_API
+        return ((BiomeVolume.Modifiable) levelChunk).setBiome(x, y, z, biome);
     }
 }

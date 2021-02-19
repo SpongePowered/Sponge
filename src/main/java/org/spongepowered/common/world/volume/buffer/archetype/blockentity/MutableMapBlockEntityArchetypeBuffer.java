@@ -26,6 +26,7 @@ package org.spongepowered.common.world.volume.buffer.archetype.blockentity;
 
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.world.volume.archetype.block.entity.BlockEntityArchetypeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -40,7 +41,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class MutableMapBlockEntityArchetypeBuffer extends AbstractMutableBlockEntityArchetypeBuffer<MutableMapBlockEntityArchetypeBuffer> {
+public class MutableMapBlockEntityArchetypeBuffer extends AbstractMutableBlockEntityArchetypeBuffer {
 
     private final Map<Vector3i, BlockEntityArchetype> blockEntities;
 
@@ -95,7 +96,7 @@ public class MutableMapBlockEntityArchetypeBuffer extends AbstractMutableBlockEn
     }
 
     @Override
-    public VolumeStream<MutableMapBlockEntityArchetypeBuffer, BlockEntityArchetype> blockEntityArchetypeStream(final Vector3i min,
+    public VolumeStream<BlockEntityArchetypeVolume.Mutable, BlockEntityArchetype> blockEntityArchetypeStream(final Vector3i min,
         final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
@@ -107,7 +108,7 @@ public class MutableMapBlockEntityArchetypeBuffer extends AbstractMutableBlockEn
         } else {
             entryStream = this.blockEntities.entrySet().stream();
         }
-        final Stream<VolumeElement<MutableMapBlockEntityArchetypeBuffer, BlockEntityArchetype>> volumeElementStream = entryStream
+        final Stream<VolumeElement<BlockEntityArchetypeVolume.Mutable, BlockEntityArchetype>> volumeElementStream = entryStream
             .filter(VolumeStreamUtils.blockEntityArchetypePositionFilter(min, max))
             .map(entry -> VolumeElement.of(this, entry.getValue(), entry.getKey()));
 

@@ -120,6 +120,11 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     }
 
     @Override
+    public Collection<EntityArchetypeEntry> entityArchetypesByPosition() {
+        return this.volume.entityArchetypesByPosition();
+    }
+
+    @Override
     public Collection<EntityArchetype> entityArchetypes(final Predicate<EntityArchetype> filter) {
         return this.volume.entityArchetypes(filter);
     }
@@ -194,7 +199,7 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     }
 
     @Override
-    public boolean supports(final int x, final int y, final int z, final Key<?> key) {
+    public boolean supports(final int x, final int y, final int z, final Key<@NonNull ?> key) {
         final Stream<Supplier<Boolean>> dataRetrievalStream = Stream.of(
             () -> this.block(x, y, z).supports(key),
             () -> this.fluid(x, y, z).supports(key),
@@ -341,7 +346,7 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
 
     @Override
     public Biome biome(final int x, final int y, final int z) {
-        return this.biome(x, y, z);
+        return this.volume.biome(x, y, z);
     }
 
     @Override
@@ -352,6 +357,7 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return this.setBiome(x, y, z, biome);
+        return this.volume.setBiome(x, y, z, biome);
     }
+
 }

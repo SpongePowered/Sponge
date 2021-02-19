@@ -296,8 +296,8 @@ public final class Constants {
         public static final class Schematic {
 
             public static final DataQuery NAME = of("Name");
-            public static final int CURRENT_VERSION = 2;
-            public static final int MAX_SIZE = 65535;
+            public static final int CURRENT_VERSION = 3;
+            public static final int MAX_SIZE = Integer.MAX_VALUE;
             public static final DataQuery VERSION = of("Version");
             public static final DataQuery DATA_VERSION = of("DataVersion");
             public static final DataQuery METADATA = of("Metadata");
@@ -306,23 +306,34 @@ public final class Constants {
             public static final DataQuery HEIGHT = of("Height");
             public static final DataQuery LENGTH = of("Length");
             public static final DataQuery OFFSET = of("Offset");
+            public static final DataQuery BLOCK_PALETTE = of("Palette");
+            public static final DataQuery BLOCK_CONTAINER = of("Blocks");
+            public static final DataQuery BIOME_CONTAINER = of("Biomes");
             public static final DataQuery PALETTE = of("Palette");
-            public static final DataQuery PALETTE_MAX = of("PaletteMax");
-            public static final DataQuery BLOCK_DATA = of("BlockData");
-            public static final DataQuery BIOME_DATA = of("BiomeData");
-            public static final DataQuery BLOCKENTITY_DATA = of("BlockEntities");
+            public static final DataQuery BLOCK_DATA = of("Data");
+            public static final DataQuery BIOME_DATA = of("Data");
+            public static final DataQuery BLOCKENTITY_CONTAINER = of("BlockEntities");
+            public static final DataQuery BLOCKENTITY_DATA = of("Data");
             public static final DataQuery BLOCKENTITY_ID = of("Id");
             public static final DataQuery BLOCKENTITY_POS = of("Pos");
             public static final DataQuery ENTITIES = of("Entities");
             public static final DataQuery ENTITIES_ID = of("Id");
             public static final DataQuery ENTITIES_POS = of("Pos");
-            public static final DataQuery BIOME_PALETTE = of("BiomePalette");
-            public static final DataQuery BIOME_PALETTE_MAX = of("BiomePaletteMax");
+            public static final DataQuery BIOME_PALETTE = of("Palette");
 
             public static final class Versions {
 
                 public static final DataQuery V1_TILE_ENTITY_DATA = of("TileEntities");
                 public static final DataQuery V1_TILE_ENTITY_ID = of("id");
+
+                public static final DataQuery V1_BLOCK_PALETTE = of("Palette");
+                public static final DataQuery V1_BLOCK_PALETTE_MAX = of("Palette");
+                public static final DataQuery V2_BLOCK_PALETTE = of("BlockPalette");
+                public static final DataQuery V2_BIOME_PALETTE = of("BiomePalette");
+                public static final DataQuery V2_BLOCK_DATA = of("BlockData");
+                public static final DataQuery V2_BIOME_DATA = of("BiomeData");
+                public static final DataQuery V2_BLOCK_ENTITIES = of("BlockEntities");
+
             }
 
             /**

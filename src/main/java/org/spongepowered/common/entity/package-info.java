@@ -22,49 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.schematic;
+@DefaultQualifier(NonNull.class)
+package org.spongepowered.common.entity;
 
-import org.spongepowered.api.registry.RegistryType;
-import org.spongepowered.api.world.schematic.PaletteReference;
-
-import java.util.Objects;
-
-public final class SpongePaletteReference<T, R> implements PaletteReference<T, R> {
-
-    private final RegistryType<R> registry;
-    private final String value;
-
-    SpongePaletteReference(final RegistryType<R> registry, final String value) {
-        this.registry = registry;
-        this.value = value;
-    }
-
-
-    @Override
-    public RegistryType<R> registry() {
-        return this.registry;
-    }
-
-    @Override
-    public String value() {
-        return this.value;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
-        final SpongePaletteReference<?, ?> that = (SpongePaletteReference<?, ?>) o;
-        return this.registry.equals(that.registry) && this.value.equals(that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.registry, this.value);
-    }
-
-}
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.framework.qual.DefaultQualifier;

@@ -41,7 +41,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
 
-public class ImmutableBimapPalette<T, R> implements Palette.Immutable<T, R> {
+public final class ImmutableBimapPalette<T, R> implements Palette.Immutable<T, R> {
 
     private final ImmutableBiMap<Integer, PaletteReference<T, R>> ids;
     private final ImmutableBiMap<PaletteReference<T, R>, Integer> idsr;

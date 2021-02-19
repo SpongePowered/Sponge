@@ -58,7 +58,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implements EntityVolume.Mutable<ObjectArrayMutableEntityBuffer> {
+public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implements EntityVolume.Mutable {
     // This is our backing block buffer
     private final ArrayMutableBlockBuffer blockBuffer;
     private final List<Entity> entities;
@@ -98,17 +98,17 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public VolumeStream<ObjectArrayMutableEntityBuffer, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
+    public VolumeStream<EntityVolume.Mutable, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
         final StreamOptions options
     ) {
-        final Stream<VolumeElement<ObjectArrayMutableEntityBuffer, BlockState>> stateStream = IntStream.range(
+        final Stream<VolumeElement<EntityVolume.Mutable, BlockState>> stateStream = IntStream.range(
             this.blockMin().x(),
             this.blockMax().x() + 1
         )
             .mapToObj(x -> IntStream.range(this.blockMin().z(), this.blockMax().z() + 1)
                 .mapToObj(z -> IntStream.range(this.blockMin().y(), this.blockMax().y() + 1)
                     .mapToObj(y -> VolumeElement.of(
-                        this,
+                        (EntityVolume.Mutable) this,
                         () -> this.blockBuffer.block(x, y, z),
                         new Vector3i(x, y, z)
                     ))
@@ -225,11 +225,11 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public VolumeStream<ObjectArrayMutableEntityBuffer, Entity> entityStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<EntityVolume.Mutable, Entity> entityStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
         // Normally, we'd be able to shadow-copy, but we can't copy entities, and we're only using a list, so we can iterate only on the list.
-        final Stream<VolumeElement<ObjectArrayMutableEntityBuffer, Entity>> backingStream = this.entities.stream()
+        final Stream<VolumeElement<EntityVolume.Mutable, Entity>> backingStream = this.entities.stream()
             .map(entity -> VolumeElement.of(this, entity, entity.blockPosition()));
         return new SpongeVolumeStream<>(backingStream, () -> this);
     }

@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.level.ChunkPos;
@@ -52,7 +54,7 @@ import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.ChunkUtil;
+import org.spongepowered.common.accessor.world.level.chunk.ChunkBiomeContainerAccessor;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -80,6 +82,7 @@ public abstract class LevelChunkMixin_API implements Chunk {
 
     @Shadow public abstract boolean shadow$isEmpty();
     @Shadow public abstract int shadow$getHeight(Heightmap.Types param0, int param1, int param2);
+    @Shadow public abstract void shadow$setUnsaved(boolean unsaved);
     //@formatter:on
 
     private Vector3i api$blockMin;
@@ -87,7 +90,7 @@ public abstract class LevelChunkMixin_API implements Chunk {
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return ChunkUtil.setBiome(this.biomes, x, y, z, biome);
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.biomes, () -> this.shadow$setUnsaved(true));
     }
 
     @Override
@@ -260,7 +263,10 @@ public abstract class LevelChunkMixin_API implements Chunk {
         final Vector3i size = max.sub(min).add(1, 1 ,1);
         final @MonotonicNonNull ObjectArrayMutableBiomeBuffer backingVolume;
         if (shouldCarbonCopy) {
-            backingVolume = new ObjectArrayMutableBiomeBuffer(min, size);
+            final Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = this.level.registryAccess().registry(Registry.BIOME_REGISTRY)
+                .map(wr -> ((Registry<net.minecraft.world.level.biome.Biome>) wr))
+                .orElse(BuiltinRegistries.BIOME);
+            backingVolume = new ObjectArrayMutableBiomeBuffer(min, size, VolumeStreamUtils.nativeToSpongeRegistry(biomeRegistry));
         } else {
             backingVolume = null;
         }

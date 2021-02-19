@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.volume.buffer.archetype;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
@@ -62,7 +61,7 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
 
     private final ByteArrayMutableBiomeBuffer biomes;
     private final ArrayMutableBlockBuffer blocks;
-    private final BlockEntityArchetypeVolume.Mutable<@NonNull ?> blockEntities;
+    private final BlockEntityArchetypeVolume.Mutable blockEntities;
     private final ObjectArrayMutableEntityArchetypeBuffer entities;
 
     public SpongeArchetypeVolume(final Vector3i start, final Vector3i size, final RegistryHolder registries) {
@@ -105,6 +104,11 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     @Override
     public Collection<EntityArchetype> entityArchetypes() {
         return this.entities.entityArchetypes();
+    }
+
+    @Override
+    public Collection<EntityArchetypeEntry> entityArchetypesByPosition() {
+        return this.entities.entityArchetypesByPosition();
     }
 
     @Override
@@ -222,4 +226,5 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
         return this.biomes.setBiome(x, y, z, biome);
     }
+
 }

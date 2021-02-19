@@ -42,7 +42,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
 
-public class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
+public final class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
 
     private static final int DEFAULT_ALLOCATION_SIZE = 64;
 

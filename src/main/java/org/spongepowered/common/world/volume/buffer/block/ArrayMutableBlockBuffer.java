@@ -50,7 +50,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 
-public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements BlockVolume.Mutable<ArrayMutableBlockBuffer> {
+public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements BlockVolume.Mutable {
 
     private static final BlockState AIR = BlockTypes.AIR.get().defaultState();
 
@@ -186,7 +186,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
     }
 
     @Override
-    public VolumeStream<ArrayMutableBlockBuffer, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
+    public VolumeStream<BlockVolume.Mutable, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         final Vector3i blockMin = this.blockMin();
         final Vector3i blockMax = this.blockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
@@ -196,10 +196,10 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         } else {
             buffer = this;
         }
-        final Stream<VolumeElement<ArrayMutableBlockBuffer, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
+        final Stream<VolumeElement<BlockVolume.Mutable, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
             .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
                 .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
-                    .mapToObj(y -> VolumeElement.of(this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
+                    .mapToObj(y -> VolumeElement.of((BlockVolume.Mutable) this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);
