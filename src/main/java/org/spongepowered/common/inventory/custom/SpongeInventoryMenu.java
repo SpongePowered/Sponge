@@ -69,8 +69,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     @Nullable private SlotChangeHandler changeHandler;
     @Nullable private CloseHandler closeHandler;
 
-    private boolean readonly;
-    private ItemStack oldCursorStack;
+    private boolean readonly; // TODO make with wrapper slot
 
     public SpongeInventoryMenu(ViewableInventory inventory) {
         this.inventory = inventory;
@@ -353,11 +352,4 @@ public class SpongeInventoryMenu implements InventoryMenu {
         return true;
     }
 
-    public void setOldCursor(ItemStack itemStack) {
-        this.oldCursorStack = itemStack;
-    }
-
-    public ItemStack getOldCursor() {
-        return this.oldCursorStack;
-    }
 }

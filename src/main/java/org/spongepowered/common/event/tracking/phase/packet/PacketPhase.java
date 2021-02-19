@@ -93,7 +93,9 @@ import org.spongepowered.common.event.tracking.phase.packet.player.InteractionPa
 import org.spongepowered.common.event.tracking.phase.packet.player.InteractionPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.InvalidPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.MovementPacketState;
+import org.spongepowered.common.event.tracking.phase.packet.player.PacketCommandState;
 import org.spongepowered.common.event.tracking.phase.packet.player.PlaceBlockPacketState;
+import org.spongepowered.common.event.tracking.phase.packet.player.PlayerCommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.player.ResourcePackState;
 import org.spongepowered.common.event.tracking.phase.packet.player.StopSleepingPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.UnknownPacketState;
@@ -134,6 +136,7 @@ public final class PacketPhase {
         static final IPhaseState<BasicPacketContext> STOP_RIDING_JUMP = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> HANDLED_EXTERNALLY = new UnknownPacketState();
         static final IPhaseState<BasicPacketContext> START_FALL_FLYING = new BasicPacketState();
+        static final IPhaseState<PlayerCommandPhaseContext> CHAT_COMMAND = new PacketCommandState();
     }
 
     public static final class Inventory {
@@ -280,7 +283,7 @@ public final class PacketPhase {
 
     private void setupPacketToStateMapping() {
         this.packetTranslationMap.put(ServerboundKeepAlivePacket.class, packet -> PacketPhase.General.IGNORED);
-        this.packetTranslationMap.put(ServerboundChatPacket.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(ServerboundChatPacket.class, packet -> PacketPhase.General.CHAT_COMMAND);
         this.packetTranslationMap.put(ServerboundInteractPacket.class, packet -> {
             final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packet;
             final ServerboundInteractPacket.Action action = useEntityPacket.getAction();

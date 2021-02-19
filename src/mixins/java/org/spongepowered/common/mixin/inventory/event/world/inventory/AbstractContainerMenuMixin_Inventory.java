@@ -75,6 +75,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     // TrackedContainerBridge
 
     private boolean impl$shiftCraft = false;
+    private ItemStack impl$menuCapture;
 
     @Override
     public void bridge$setShiftCrafting(final boolean flag) {
@@ -99,9 +100,10 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         return this.impl$lastCraft;
     }
 
-    @Nullable private ItemStack impl$previousCursor;
+    @Nullable private ItemStack impl$previousCursor = ItemStack.EMPTY;
 
-    @Override public void bridge$setPreviousCursor(@Nullable ItemStack stack) {
+    @Override
+    public void bridge$setPreviousCursor(@Nullable ItemStack stack) {
         this.impl$previousCursor = stack;
     }
 
@@ -278,7 +280,12 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z",
             ordinal = 4))
     public boolean onCanTakeStack(final Slot slot, final Player playerIn) {
-        final boolean result = slot.mayPickup(playerIn);
+        boolean readonly = false;
+        if (((MenuBridge) this).bridge$isReadonlyMenu(slot)) {
+            ((MenuBridge) this).bridge$refreshListeners();
+            readonly = true;
+        }
+        final boolean result = !readonly && slot.mayPickup(playerIn);
         if (result) {
             this.impl$itemStackSnapshot = ItemStackUtil.snapshotOf(slot.getItem());
             this.impl$lastSlotUsed = slot;
@@ -379,7 +386,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     // cleanup after slot click was captured
     @Inject(method = "doClick", at = @At("RETURN"))
-    private void onReturn(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<ItemStack> cir) {
+    private void impl$onReturn(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<ItemStack> cir) {
         // Reset variables needed for CraftItemEvent.Craft
         this.bridge$setLastCraft(null);
         this.bridge$setPreviousCursor(null);
@@ -425,7 +432,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
         SpongeInventoryMenu menu = ((MenuBridge)this).bridge$getMenu();
         // We first collect all differences and check if cancelled for readonly menu changes
-        boolean readOnlyCancel = false;
         List<Integer> changes = new ArrayList<>();
 
         for (int i = 0; i < this.slots.size(); ++i) {
@@ -434,65 +440,39 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             ItemStack oldStack = this.lastSlots.get(i);
             if (!ItemStack.matches(oldStack, newStack)) {
                 changes.add(i);
-                if (menu != null && menu.isReadOnly()) { // readonly menu cancels if there is any change outside of the players inventory
-                    if (slot.container == menu.getInventory()) {
-                        readOnlyCancel = true;
-                    }
-                }
             }
         }
 
-        if (readOnlyCancel) {
-            // revert all changes if readonly
-            for (Integer i : changes) {
-                final Slot slot = this.slots.get(i);
-                final ItemStack oldStack = this.lastSlots.get(i);
-                slot.set(oldStack.copy());
+        // For each change
+        for (Integer i : changes) {
+            final Slot slot = this.slots.get(i);
+            ItemStack newStack = slot.getItem();
+            ItemStack oldStack = this.lastSlots.get(i);
+
+            // Check for on change menu callbacks
+            if (this.impl$menuCapture != null && menu != null && !menu.onChange(newStack, oldStack, (org.spongepowered.api.item.inventory.Container) this, i, slot)) {
+                this.lastSlots.set(i, oldStack.copy());  // revert changes
                 // Send reverted slots to clients
                 this.impl$sendSlotContents(i, oldStack);
-                // Revert item in hand
+            } else {
+                // Capture changes for inventory events
+                this.impl$capture(i, newStack, oldStack);
+
+                // This flag is set only when the client sends an invalid CPacketWindowClickItem packet.
+                // We simply capture in order to send the proper changes back to client.
+                if (captureOnly) {
+                    continue;
+                }
+                // Perform vanilla logic - updating inventory stack - notify listeners
+                oldStack = newStack.isEmpty() ? ItemStack.EMPTY : newStack.copy();
+                this.lastSlots.set(i, oldStack);
+                // TODO forge checks !itemstack1.equals(itemstack, true) before doing this
                 for (ContainerListener listener : this.containerListeners) {
-                    if (listener instanceof ServerPlayer) {
-                        ((ServerPlayer) listener).getInventory().setCarried(menu.getOldCursor());
-                        ((ServerPlayer) listener).broadcastCarriedItem();
-                    }
-                }
-            }
-        } else {
-            // For each change
-            for (Integer i : changes) {
-                final Slot slot = this.slots.get(i);
-                ItemStack newStack = slot.getItem();
-                ItemStack oldStack = this.lastSlots.get(i);
-
-                // Check for on change menu callbacks
-                if (menu != null && !menu.onChange(newStack, oldStack, (org.spongepowered.api.item.inventory.Container) this, i, slot)) {
-                    this.lastSlots.set(i, oldStack.copy());  // revert changes
-                    // Send reverted slots to clients
-                    this.impl$sendSlotContents(i, oldStack);
-                } else {
-                    // Capture changes for inventory events
-                    this.impl$capture(i, newStack, oldStack);
-
-                    // This flag is set only when the client sends an invalid CPacketWindowClickItem packet.
-                    // We simply capture in order to send the proper changes back to client.
-                    if (captureOnly) {
-                        continue;
-                    }
-                    // Perform vanilla logic - updating inventory stack - notify listeners
-                    oldStack = newStack.isEmpty() ? ItemStack.EMPTY : newStack.copy();
-                    this.lastSlots.set(i, oldStack);
-                    // TODO forge checks !itemstack1.equals(itemstack, true) before doing this
-                    for (ContainerListener listener : this.containerListeners) {
-                        listener.slotChanged(((AbstractContainerMenu) (Object) this), i, oldStack);
-                    }
+                    listener.slotChanged(((AbstractContainerMenu) (Object) this), i, oldStack);
                 }
             }
         }
 
-        if (menu != null) {
-            menu.setOldCursor(null);
-        }
         // like vanilla send property changes
         this.impl$detectAndSendPropertyChanges();
 

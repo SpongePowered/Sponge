@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.inventory.container;
 
+import net.minecraft.world.inventory.Slot;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 
@@ -32,5 +33,9 @@ public interface MenuBridge {
     void bridge$setMenu(@Nullable SpongeInventoryMenu menu);
 
     @Nullable SpongeInventoryMenu bridge$getMenu();
+
+    boolean bridge$isReadonlyMenu(Slot slot);
+
+    void bridge$refreshListeners();
 
 }

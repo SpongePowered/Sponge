@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.servernet.minecraft.server.level;
+package org.spongepowered.common.mixin.core.server.level;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,7 +42,7 @@ import org.spongepowered.common.entity.living.human.HumanEntity;
 import java.util.stream.Stream;
 
 @Mixin(targets = "net/minecraft/server/level/ChunkMap$TrackedEntity")
-public abstract class ChunkMap_TrackedEntityMixin {
+public abstract class ChunkMap$TrackedEntityMixin {
 
     @Shadow @Final private Entity entity;
 

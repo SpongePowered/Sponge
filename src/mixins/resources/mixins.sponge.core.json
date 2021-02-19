@@ -64,6 +64,7 @@
         "server.commands.SpreadPlayersCommandMixin",
         "server.commands.TeleportCommandMixin",
         "server.dedicated.DedicatedPlayerListMixin",
+        "server.level.ChunkMap$TrackedEntityMixin",
         "server.level.ChunkMapMixin",
         "server.level.ServerBossEventMixin",
         "server.level.ServerChunkCacheMixin",
@@ -209,8 +210,7 @@
         "world.scores.ObjectiveMixin",
         "world.scores.PlayerTeamMixin",
         "world.scores.ScoreboardMixin",
-        "world.scores.ScoreMixin",
-        "world.servernet.minecraft.server.level.ChunkMap_TrackedEntityMixin"
+        "world.scores.ScoreMixin"
     ],
     "client": [
         "client.MinecraftMixin",

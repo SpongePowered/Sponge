@@ -47,6 +47,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerLevel;
@@ -100,6 +102,13 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         final Player player = unwindingContext.getSpongePlayer();
         final LevelChunk chunk = minecraftWorld.getChunkAt(notifyPos);
         ((ChunkBridge) chunk).bridge$setBlockNotifier(notifyPos, player.getUniqueId());
+    }
+
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final P context, final net.minecraft.world.entity.Entity entityToSpawn
+    ) {
+        return SpawnTypes.PLACEMENT;
     }
 
     public void populateContext(final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet, final P context) {

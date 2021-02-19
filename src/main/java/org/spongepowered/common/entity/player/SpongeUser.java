@@ -59,7 +59,6 @@ import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
@@ -98,7 +97,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 
 public final class SpongeUser implements User, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder, BridgeSubject, SubjectBridge,
-        DataCompoundHolder, InvulnerableTrackedBridge, VanishableBridge, GameProfileHolderBridge {
+        DataCompoundHolder, VanishableBridge, GameProfileHolderBridge {
 
     public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
     public static final Set<SpongeUser> initializedUsers = ConcurrentHashMap.newKeySet();
@@ -160,7 +159,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.inventory = null;
         this.enderChest = null;
 
-        ((SpongeDataHolderBridge) (Object) this).bridge$getFailedData().clear();
+        ((SpongeDataHolderBridge) (Object) this).bridge$invalidateFailedData();
         SpongeUser.initializedUsers.remove(this);
     }
 
@@ -603,27 +602,6 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public void bridge$setInvulnerable(final boolean value) {
-        final Optional<ServerPlayer> playerOpt = this.getPlayer();
-        if (playerOpt.isPresent()) {
-            ((InvulnerableTrackedBridge) playerOpt.get()).bridge$setInvulnerable(value);
-            return;
-        }
-        this.invulnerable = value;
-        this.markDirty();
-        if (value) {
-            ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.INVULNERABLE, true);
-        } else {
-            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.INVULNERABLE);
-        }
-    }
-
-    @Override
-    public boolean bridge$getIsInvulnerable() {
-        return this.invulnerable;
-    }
-
-    @Override
     public void bridge$setVanished(final boolean vanished) {
         final Optional<ServerPlayer> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
@@ -751,4 +729,17 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         return this.profile;
     }
 
+    public Boolean isInvulnerable() {
+        return this.getPlayer().map(player -> ((net.minecraft.world.entity.Entity) player).isInvulnerable()).orElse(this.invulnerable);
+    }
+
+    public void setInvulnerable(boolean invulnerable) {
+        final Optional<ServerPlayer> playerOpt = this.getPlayer();
+        if (playerOpt.isPresent()) {
+            ((net.minecraft.world.entity.Entity) playerOpt.get()).setInvulnerable(invulnerable);
+            return;
+        }
+        this.invulnerable = invulnerable;
+        this.markDirty();
+    }
 }
