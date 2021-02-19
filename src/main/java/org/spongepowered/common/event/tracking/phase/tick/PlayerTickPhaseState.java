@@ -33,7 +33,14 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
+import java.util.function.BiConsumer;
+
 class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
+
+    private final BiConsumer<CauseStackManager.StackFrame, PlayerTickContext> FRAME_MODIFIER = super.getFrameModifier()
+        .andThen((frame, context) -> {
+            context.getSource(Player.class).ifPresent(frame::pushCause);
+        });
 
     @Override
     protected PlayerTickContext createNewContext(final PhaseTracker tracker) {
@@ -41,6 +48,11 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
                 .addCaptures()
                 .addEntityDropCaptures()
                 ;
+    }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, PlayerTickContext> getFrameModifier() {
+        return this.FRAME_MODIFIER;
     }
 
     @Override

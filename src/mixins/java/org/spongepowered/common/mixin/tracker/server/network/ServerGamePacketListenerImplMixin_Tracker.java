@@ -66,10 +66,8 @@ public abstract class ServerGamePacketListenerImplMixin_Tracker {
             player.doTick();
             return;
         }
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
-             final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.SERVER).source(player)) {
+        try (final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.SERVER).source(player)) {
             context.buildAndSwitch();
-            frame.pushCause(player);
             player.doTick();
         }
     }
