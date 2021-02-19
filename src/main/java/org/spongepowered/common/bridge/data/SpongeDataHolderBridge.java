@@ -75,5 +75,7 @@ public interface SpongeDataHolderBridge {
 
     Multimap<DataQuery, DataView> bridge$getFailedData();
 
+    void bridge$invalidateFailedData();
+
     void bridge$addFailedData(DataQuery nameSpace, DataView keyedData);
 }

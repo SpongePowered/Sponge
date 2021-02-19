@@ -159,7 +159,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.inventory = null;
         this.enderChest = null;
 
-        ((SpongeDataHolderBridge) (Object) this).bridge$getFailedData().clear();
+        ((SpongeDataHolderBridge) (Object) this).bridge$invalidateFailedData();
         SpongeUser.initializedUsers.remove(this);
     }
 

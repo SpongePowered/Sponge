@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -53,7 +54,7 @@ import org.spongepowered.common.entity.player.SpongeUser;
 public abstract class SpongeDataHolderMixin implements SpongeDataHolderBridge {
 
     private DataManipulator.Mutable impl$manipulator;
-    private Multimap<DataQuery, DataView> impl$failedData = HashMultimap.create();
+    private Multimap<DataQuery, DataView> impl$failedData;
 
     @Override
     public DataManipulator.Mutable bridge$getManipulator() {
@@ -66,14 +67,14 @@ public abstract class SpongeDataHolderMixin implements SpongeDataHolderBridge {
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void bridge$mergeDeserialized(DataManipulator.Mutable manipulator) {
+    public void bridge$mergeDeserialized(final DataManipulator.Mutable manipulator) {
         if (this.impl$manipulator == null) {
             this.impl$manipulator = DataManipulator.mutableOf();
         }
 
         if (this instanceof DataHolder.Mutable && !(this instanceof org.spongepowered.api.item.inventory.ItemStack)) {
             // Does not work when adding ItemStacks to inventory because the Item may be empty (see Inventory#addResource)
-            for (Value.Immutable<?> value : manipulator.getValues()) {
+            for (final Value.Immutable<?> value : manipulator.getValues()) {
                 final DataProvider provider = SpongeDataManager.getProviderRegistry().getProvider(value.getKey(), this.getClass());
                 provider.offerValue((DataHolder.Mutable) this, value);
             }
@@ -90,11 +91,22 @@ public abstract class SpongeDataHolderMixin implements SpongeDataHolderBridge {
 
     @Override
     public Multimap<DataQuery, DataView> bridge$getFailedData() {
+        if (this.impl$failedData == null) {
+            return ImmutableMultimap.of();
+        }
         return this.impl$failedData;
     }
 
     @Override
-    public void bridge$addFailedData(DataQuery nameSpace, DataView keyedData) {
+    public void bridge$invalidateFailedData() {
+        this.impl$failedData = null;
+    }
+
+    @Override
+    public void bridge$addFailedData(final DataQuery nameSpace, final DataView keyedData) {
+        if (this.impl$failedData == null) {
+            this.impl$failedData  = HashMultimap.create();
+        }
         this.impl$failedData.put(nameSpace, keyedData);
     }
 }

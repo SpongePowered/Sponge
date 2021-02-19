@@ -25,20 +25,6 @@
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.util.Direction;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.chunk.CacheKeyBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.entity.PlayerTracker;
-
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ClassInstanceMultiMap;
 import net.minecraft.world.entity.Entity;
@@ -53,6 +39,20 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.material.Fluid;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.chunk.CacheKeyBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.entity.PlayerTracker;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,7 +77,6 @@ public abstract class LevelChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Shadow public abstract BlockState getBlockState(BlockPos pos);
     // @formatter:on
-
     private long impl$scheduledForUnload = -1; // delay chunk unloads
     private boolean impl$persistedChunk = false;
     private boolean impl$isSpawning = false;
@@ -245,4 +244,5 @@ public abstract class LevelChunkMixin implements ChunkBridge, CacheKeyBridge {
     public long bridge$getCacheKey() {
         return this.impl$cacheKey;
     }
+
 }
