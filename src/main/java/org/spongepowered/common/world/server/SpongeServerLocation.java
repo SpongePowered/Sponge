@@ -421,14 +421,14 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
             return false;
         }
         final SpongeServerLocation that = (SpongeServerLocation) o;
-        return this.worldRef.equals(that.worldRef) &&
+        return this.worldRef.get().equals(that.worldRef.get()) &&
                    this.getPosition().equals(that.getPosition()) &&
                    this.getBlockPosition().equals(that.getBlockPosition());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.worldRef, this.getPosition(), this.getBlockPosition());
+        return Objects.hash(this.worldRef.get(), this.getPosition(), this.getBlockPosition());
     }
 
     @Override
