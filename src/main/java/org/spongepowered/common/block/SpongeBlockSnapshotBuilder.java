@@ -26,6 +26,7 @@ package org.spongepowered.common.block;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator;
@@ -265,9 +266,20 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
     @Override
     @NonNull
     protected Optional<BlockSnapshot> buildContent(final DataView container) throws InvalidDataException {
-        if (!container.contains(Constants.Block.BLOCK_STATE, Queries.WORLD_KEY, Constants.Sponge.SNAPSHOT_WORLD_POSITION)) {
+
+        if (!container.contains(Constants.Block.BLOCK_STATE, Constants.Sponge.SNAPSHOT_WORLD_POSITION)) {
             return Optional.empty();
         }
+
+        // if we have no world-key check if we can find by uuid
+        if (!container.contains(Queries.WORLD_KEY)) {
+            if (!container.contains(Constants.Sponge.BlockSnapshot.WORLD_UUID)) {
+                return Optional.empty();
+            }
+            final UUID uuid = UUID.fromString(container.getString(Constants.Sponge.BlockSnapshot.WORLD_UUID).get());
+            Sponge.getServer().getWorldManager().worldKey(uuid).ifPresent(worldKey -> container.set(Queries.WORLD_KEY, worldKey));
+        }
+
         DataUtil.checkDataExists(container, Constants.Block.BLOCK_STATE);
         DataUtil.checkDataExists(container, Queries.WORLD_KEY);
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
@@ -276,24 +288,15 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
         final Optional<String> creatorUuid = container.getString(Queries.CREATOR_ID);
         final Optional<String> notifierUuid = container.getString(Queries.NOTIFIER_ID);
 
-        // We now reconstruct the custom data and all extra data.
         final BlockState blockState = container.getSerializable(Constants.Block.BLOCK_STATE, BlockState.class).get();
 
-        builder
-            .blockState(blockState)
-            .world(worldKey)
-            .position(coordinate)
-        ;
+        builder.blockState(blockState).world(worldKey).position(coordinate);
 
         creatorUuid.ifPresent(s -> builder.creator(UUID.fromString(s)));
         notifierUuid.ifPresent(s -> builder.notifier(UUID.fromString(s)));
         container.getView(Constants.Sponge.UNSAFE_NBT)
                 .map(dataView -> NBTTranslator.INSTANCE.translate(dataView))
                 .ifPresent(builder::addUnsafeCompound);
-        if (container.contains(Constants.Sponge.SNAPSHOT_TILE_DATA)) {
-            final List<DataView> dataViews = container.getViewList(Constants.Sponge.SNAPSHOT_TILE_DATA).get();
-//            DataUtil.deserializeImmutableManipulatorList(dataViews).forEach(builder::add);
-        }
         return Optional.of(builder.build());
     }
 
