@@ -70,6 +70,7 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
             final ListMultimap<BlockPos, SpongeBlockSnapshot> positions = LinkedListMultimap.create();
             // Gather transactions that were valid
             events.stream()
+                .filter(event -> !event.isCancelled())
                 .flatMap(event -> event.getTransactions().stream())
                 .filter(BlockTransaction::isValid)
                 .forEach(transactions -> {
