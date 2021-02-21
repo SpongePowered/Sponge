@@ -24,14 +24,11 @@
  */
 package org.spongepowered.common.mixin.ipforward.velocity.network;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.mojang.authlib.GameProfile;
-import io.netty.buffer.Unpooled;
 import net.minecraft.network.Connection;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.asm.mixin.Final;
@@ -40,15 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.accessor.network.ConnectionAccessor;
-import org.spongepowered.common.accessor.network.protocol.login.ClientboundCustomQueryPacketAccessor;
-import org.spongepowered.common.accessor.network.protocol.login.ServerboundCustomQueryPacketAccessor;
 import org.spongepowered.common.ipforward.velocity.VelocityForwardingInfo;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.ThreadLocalRandom;
-
-import static com.google.common.base.Preconditions.checkState;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin_Velocity {
@@ -56,55 +45,17 @@ public abstract class ServerLoginPacketListenerImplMixin_Velocity {
     // @formatter:off
     @Shadow @Final private MinecraftServer server;
     @Shadow @Final public Connection connection;
-    @Shadow private GameProfile gameProfile;
-    @Shadow private ServerLoginPacketListenerImpl.State state;
-
-    @Shadow public abstract void shadow$disconnect(Component reason);
     // @formatter:on
 
-    private int velocityInfoId = Integer.MAX_VALUE;
+    private boolean ipForward$sentForwardingRequest;
 
     @Inject(method = "handleHello", at = @At("HEAD"), cancellable = true)
     private void velocity$sendVelocityIndicator(final CallbackInfo info) {
         if (!this.server.usesAuthentication()) {
-            checkState(this.velocityInfoId == Integer.MAX_VALUE, "Sent additional login start message!");
-            this.velocityInfoId = ThreadLocalRandom.current().nextInt();
+            checkState(!this.ipForward$sentForwardingRequest, "Sent additional login start message!");
+            this.ipForward$sentForwardingRequest = true;
 
-            final ClientboundCustomQueryPacket playerInfoRequest = new ClientboundCustomQueryPacket();
-            final ClientboundCustomQueryPacketAccessor accessor = (ClientboundCustomQueryPacketAccessor) playerInfoRequest;
-            accessor.accessor$identifier(VelocityForwardingInfo.PLAYER_INFO_CHANNEL);
-            accessor.accessor$transactionId(this.velocityInfoId);
-            accessor.accessor$data(new FriendlyByteBuf(Unpooled.EMPTY_BUFFER));
-
-            this.connection.send(playerInfoRequest);
-            info.cancel();
-        }
-    }
-
-    @Inject(method = "handleCustomQueryPacket", at = @At("HEAD"), cancellable = true)
-    private void velocity$processPlayerInfoMessage(final ServerboundCustomQueryPacket packet, final CallbackInfo info) {
-        final ServerboundCustomQueryPacketAccessor packetAccessor = (ServerboundCustomQueryPacketAccessor) packet;
-        if (packetAccessor.accessor$transactionId() == this.velocityInfoId) {
-            final FriendlyByteBuf buf = packetAccessor.accessor$data();
-            if (buf == null) {
-                this.shadow$disconnect(new TextComponent("This server requires you to connect with Velocity."));
-                info.cancel();
-                return;
-            }
-
-            if (!VelocityForwardingInfo.checkIntegrity(buf)) {
-                this.shadow$disconnect(new TextComponent("Unable to verify player details"));
-                info.cancel();
-                return;
-            }
-
-            final ConnectionAccessor networkManagerAccessor = (ConnectionAccessor) this.connection;
-            networkManagerAccessor.accessor$address(new InetSocketAddress(VelocityForwardingInfo.readAddress(buf), ((InetSocketAddress) this.connection
-                .getRemoteAddress()).getPort()));
-
-            this.gameProfile = VelocityForwardingInfo.createProfile(buf);
-            this.state = ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT;
-            info.cancel();
+            VelocityForwardingInfo.sendQuery((ServerLoginPacketListenerImpl) (Object) this);
         }
     }
 

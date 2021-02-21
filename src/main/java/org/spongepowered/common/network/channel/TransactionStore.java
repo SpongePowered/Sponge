@@ -32,8 +32,8 @@ import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.channel.TimeoutException;
 
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
@@ -43,7 +43,6 @@ public final class TransactionStore {
 
     private final Supplier<EngineConnection> connection;
 
-    private final AtomicInteger counter = new AtomicInteger();
     private final ConcurrentMap<Integer, Entry> lookup = Caffeine.newBuilder()
             .expireAfterAccess(15, TimeUnit.SECONDS)
             .removalListener((RemovalListener<Integer, Entry>) (key, value, cause) -> {
@@ -93,7 +92,12 @@ public final class TransactionStore {
      */
     public int nextId() {
         // TODO: Hook into forge to avoid id overlap
-        return this.counter.getAndIncrement();
+        int id;
+        final ThreadLocalRandom random = ThreadLocalRandom.current();
+        do {
+            id = random.nextInt();
+        } while (this.lookup.containsKey(id));
+        return id;
     }
 
     /**

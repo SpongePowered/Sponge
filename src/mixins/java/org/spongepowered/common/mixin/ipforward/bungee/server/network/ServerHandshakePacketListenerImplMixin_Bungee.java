@@ -51,7 +51,7 @@ import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
 @Mixin(ServerHandshakePacketListenerImpl.class)
 public abstract class ServerHandshakePacketListenerImplMixin_Bungee {
 
-    private static final Gson gson = new Gson();
+    private static final Gson impl$GSON = new Gson();
 
     @Shadow @Final private Connection connection;
 
@@ -68,7 +68,7 @@ public abstract class ServerHandshakePacketListenerImplMixin_Bungee {
                 ((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
 
                 if (split.length == 4) {
-                    ((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$setSpoofedProfile(ServerHandshakePacketListenerImplMixin_Bungee.gson
+                    ((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$setSpoofedProfile(ServerHandshakePacketListenerImplMixin_Bungee.impl$GSON
                         .fromJson(split[3], Property[].class));
                 }
             } else {

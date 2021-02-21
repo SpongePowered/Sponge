@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.bridge.network;
 
-import org.spongepowered.common.entity.player.ClientType;
-
 public interface ServerLoginNetHandlerBridge {
 
     boolean bridge$fireAuthEvent();
