@@ -30,6 +30,8 @@ import org.spongepowered.asm.util.Constants;
 
 public final class MixinServiceVanillaModLauncher extends MixinServiceModLauncher {
 
+    private final ContainerHandleModLauncher rootContainer = new ContainerHandleVanillaModLauncher(this.getName());
+
     @Override
     public boolean isValid() {
         return true;
@@ -37,7 +39,7 @@ public final class MixinServiceVanillaModLauncher extends MixinServiceModLaunche
 
     @Override
     public ContainerHandleModLauncher getPrimaryContainer() {
-        return new ContainerHandleVanillaModLauncher(this.getName());
+        return this.rootContainer;
     }
 
     private static final class ContainerHandleVanillaModLauncher extends ContainerHandleModLauncher {

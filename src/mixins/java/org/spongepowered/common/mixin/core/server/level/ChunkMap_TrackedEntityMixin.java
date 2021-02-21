@@ -41,7 +41,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.Entity;
 
 @Mixin(targets = "net/minecraft/server/level/ChunkMap$TrackedEntity")
-public abstract class ChunkMap$TrackedEntityMixin {
+public abstract class ChunkMap_TrackedEntityMixin {
 
     @Shadow @Final private Entity entity;
 

@@ -591,6 +591,7 @@ project("SpongeVanilla") {
         runs {
             server {
                 workingDirectory().set(vanillaProject.file("run/"))
+                jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml")
                 args("nogui", "--launchTarget", "sponge_server_dev")
                 mainClass().set("org.spongepowered.vanilla.applaunch.Main")
                 classpath().from(vanillaAppLaunch.runtimeClasspath, vanillaAppLaunch.output)
@@ -599,6 +600,7 @@ project("SpongeVanilla") {
 
             client {
                 workingDirectory().set(vanillaProject.file("run/"))
+                jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml")
                 args("--launchTarget", "sponge_client_dev")
                 mainClass().set("org.spongepowered.vanilla.applaunch.Main")
                 classpath().from(vanillaAppLaunch.runtimeClasspath, vanillaAppLaunch.output)

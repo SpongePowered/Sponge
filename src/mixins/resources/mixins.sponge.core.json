@@ -157,7 +157,7 @@
         "world.level.biome.BiomeMixin",
         "world.level.chunk.LevelChunkMixin",
         "world.level.levelgen.structure.LegacyStructureDataHandlerMixin",
-        "world.servernet.minecraft.server.level.ChunkMap_TrackedEntityMixin",
+        "server.level.ChunkMap_TrackedEntityMixin",
         "server.level.ChunkMapMixin",
         "server.level.ServerBossEventMixin",
         "server.level.ServerChunkCacheMixin",
