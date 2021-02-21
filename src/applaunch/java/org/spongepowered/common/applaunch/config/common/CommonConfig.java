@@ -27,6 +27,7 @@ package org.spongepowered.common.applaunch.config.common;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.common.applaunch.config.core.Config;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 
 import java.util.HashMap;
 import java.util.List;
@@ -92,6 +93,10 @@ public final class CommonConfig implements Config {
 
     @Setting
     public final WorldCategory world = new WorldCategory();
+
+    public static ConfigurationTransformation transformation() {
+        return ConfigurationTransformation.empty();
+    }
 
     /* TODO(zml): Reimplement this when bringing in SpongeContextCalculator from invalid
     public Map<String, Predicate<InetAddress>> getIpSets() {

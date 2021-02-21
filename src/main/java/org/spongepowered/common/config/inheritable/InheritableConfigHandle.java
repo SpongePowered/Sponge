@@ -30,9 +30,11 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<T> {
 
@@ -46,15 +48,18 @@ public final class InheritableConfigHandle<T extends BaseConfig> extends ConfigH
      */
     private CommentedConfigurationNode mergedNode;
 
-    public InheritableConfigHandle(final T instance, final @Nullable InheritableConfigHandle<?> parent) {
-        super(instance);
+    public InheritableConfigHandle(final Class<T> instanceType, final @Nullable InheritableConfigHandle<?> parent) {
+        super(instanceType);
         this.parent = parent;
     }
 
-    public InheritableConfigHandle(final T instance,
+    public InheritableConfigHandle(
+        final Class<T> instanceType,
+        final @Nullable Supplier<ConfigurationTransformation> versionUpdater,
         final ConfigurationLoader<? extends CommentedConfigurationNode> loader,
-        final @Nullable InheritableConfigHandle<?> parent) {
-        super(instance, loader);
+        final @Nullable InheritableConfigHandle<?> parent
+    ) {
+        super(instanceType, versionUpdater, loader);
         this.parent = parent;
     }
 
@@ -80,35 +85,41 @@ public final class InheritableConfigHandle<T extends BaseConfig> extends ConfigH
     }
 
     public void load() throws ConfigurateException {
+        final CommentedConfigurationNode node;
+        final CommentedConfigurationNode mergedNode;
         if (this.isAttached()) {
             // store "what's in the file" separately in memory
-            this.node = this.loader.load();
+            node = this.loader.load();
             // and perform any necessary version updates
-            this.doVersionUpdate();
+            this.doVersionUpdate(node);
 
             // make a copy of the file data
-            this.mergedNode = this.node.copy();
+            mergedNode = node.copy();
         } else {
-            this.mergedNode = CommentedConfigurationNode.root(SpongeConfigs.OPTIONS);
+            node = null;
+            mergedNode = CommentedConfigurationNode.root(SpongeConfigs.OPTIONS);
         }
 
         // merge with settings from parent
         if (this.parent != null && this.parent.mergedNode != null) {
-            this.mergedNode.mergeFrom(this.parent.mergedNode);
+            mergedNode.mergeFrom(this.parent.mergedNode);
         }
 
         // populate the config object
-        this.mapper.load(this.instance, this.mergedNode);
+        this.instance = mergedNode.get(this.instanceType);
+        this.node = node;
+        this.mergedNode = mergedNode;
         this.doSave();
     }
 
+    @Override
     public void doSave() throws ConfigurateException {
         if (!this.isAttached()) {
             return;
         }
 
         // save from the mapped object --> node
-        this.mapper.save(this.instance, this.node);
+        this.node.set(this.instanceType, this.instance);
 
         // before saving this config, remove any values already declared with the same value on the parent
         if (this.parent != null) {

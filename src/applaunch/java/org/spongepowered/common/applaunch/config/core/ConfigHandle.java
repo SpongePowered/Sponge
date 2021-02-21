@@ -31,13 +31,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
-import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -46,6 +47,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 
@@ -89,35 +91,27 @@ public class ConfigHandle<T extends Config> {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> ObjectMapper.Mutable<T> mutableMapper(final T instance) {
+    protected final @Nullable ConfigurationLoader<? extends CommentedConfigurationNode> loader;
+    protected final Class<T> instanceType;
+    protected volatile T instance;
+    protected @MonotonicNonNull CommentedConfigurationNode node;
+    private final @Nullable Supplier<ConfigurationTransformation> transformer;
+
+    protected ConfigHandle(final Class<T> type) {
         try {
-            final ObjectMapper<?> mapper = SpongeConfigs.OBJECT_MAPPERS.get(instance.getClass());
-            if (mapper instanceof ObjectMapper.Mutable<?>) {
-                return (ObjectMapper.Mutable<T>) mapper;
-            }
+            this.instance = BasicConfigurationNode.root(SpongeConfigs.OPTIONS).get(type);
         } catch (final SerializationException ex) {
             throw new AssertionError(ex);
         }
-        // object mapper classes are constant from compile onwards, this failure will always happen.
-        throw new AssertionError("Object mapper for " + instance + " was not mutable");
-    }
-
-    protected final @Nullable ConfigurationLoader<? extends CommentedConfigurationNode> loader;
-    protected final ObjectMapper.Mutable<T> mapper;
-    protected final T instance;
-    protected @MonotonicNonNull CommentedConfigurationNode node;
-
-    protected ConfigHandle(final T instance) {
-        this.mapper = ConfigHandle.mutableMapper(instance);
-        this.instance = instance;
+        this.instanceType = type;
         this.loader = null;
+        this.transformer = null;
     }
 
-    protected ConfigHandle(final T instance, final @Nullable ConfigurationLoader<? extends CommentedConfigurationNode> loader) {
-        this.mapper = ConfigHandle.mutableMapper(instance);
-        this.instance = instance;
+    protected ConfigHandle(final Class<T> instanceType, final @Nullable Supplier<ConfigurationTransformation> versionUpdater, final @Nullable ConfigurationLoader<? extends CommentedConfigurationNode> loader) {
+        this.instanceType = instanceType;
         this.loader = loader;
+        this.transformer = versionUpdater;
     }
 
     /**
@@ -149,28 +143,34 @@ public class ConfigHandle<T extends Config> {
             return;
         }
 
-        this.node = this.loader.load();
-        this.doVersionUpdate();
-        this.mapper.load(this.instance, this.node);
+        final CommentedConfigurationNode node = this.loader.load();
+        this.doVersionUpdate(node);
+        this.node = node;
+        this.instance = node.get(this.instanceType);
         this.doSave();
     }
 
-    protected final void doVersionUpdate() throws ConfigurateException {
-        final boolean wasEmpty = this.node.empty();
-        final CommentedConfigurationNode versionNode = this.node.node(ConfigHandle.VERSION_PATH);
-        final int existingVersion = versionNode.getInt(-1);
-        this.instance.<CommentedConfigurationNode>getTransformation().apply(this.node);
-        final int newVersion = versionNode.getInt(-1);
-        if (!wasEmpty && newVersion > existingVersion) {
-            ConfigHandle.LOGGER.info("Updated {} from version {} to {}", this.instance, existingVersion, newVersion);
+    protected final void doVersionUpdate(final CommentedConfigurationNode node) throws ConfigurateException {
+        if (this.transformer != null) {
+            final boolean wasEmpty = node.empty();
+            final CommentedConfigurationNode versionNode = node.node(ConfigHandle.VERSION_PATH);
+            final int existingVersion = versionNode.getInt(-1);
+            this.transformer.get().apply(node);
+            final int newVersion = versionNode.getInt(-1);
+            if (!wasEmpty && newVersion > existingVersion) {
+                ConfigHandle.LOGGER.info("Updated {} from version {} to {}", this.instance, existingVersion, newVersion);
+            }
+            versionNode.commentIfAbsent(ConfigHandle.VERSION_COMMENT);
+            node.node(ConfigHandle.VERSION_PATH).set(versionNode);
         }
-        versionNode.commentIfAbsent(ConfigHandle.VERSION_COMMENT);
-        this.node.node(ConfigHandle.VERSION_PATH).set(versionNode);
     }
 
-    public void reload() throws ConfigurateException {
+    public CompletableFuture<?> reload() {
         // TODO: Something nicer?
-        this.load();
+        return ConfigHandle.asyncFailableFuture(() -> {
+            this.load();
+            return null;
+        }, ForkJoinPool.commonPool());
     }
 
     public final void save() {
@@ -194,8 +194,12 @@ public class ConfigHandle<T extends Config> {
             this.node = this.loader.createNode();
         }
 
-        this.mapper.save(this.instance, this.node);
-        this.loader.save(this.node);
+        final T instance = this.instance;
+        final CommentedConfigurationNode node = this.node;
+        if (instance != null && node != null) {
+            node.set(this.instanceType, instance);
+        }
+        this.loader.save(node);
     }
 
     private @Nullable CommentedConfigurationNode getSetting(final String key) {
@@ -214,7 +218,7 @@ public class ConfigHandle<T extends Config> {
         return ConfigHandle.asyncFailableFuture(() -> {
             final CommentedConfigurationNode upd = this.getSetting(key);
             upd.set(value);
-            this.mapper.load(this.instance, this.node);
+            this.instance = this.node.get(this.instanceType);
             this.save();
             return upd;
         }, ForkJoinPool.commonPool());
@@ -224,7 +228,7 @@ public class ConfigHandle<T extends Config> {
         return ConfigHandle.asyncFailableFuture(() -> {
             final CommentedConfigurationNode upd = this.getSetting(key);
             upd.set(token, value);
-            this.mapper.load(this.instance, this.node);
+            this.instance = this.node.get(this.instanceType);
             this.save();
             return upd;
         }, ForkJoinPool.commonPool());

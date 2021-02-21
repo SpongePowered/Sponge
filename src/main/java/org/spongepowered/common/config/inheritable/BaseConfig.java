@@ -58,22 +58,21 @@ public abstract class BaseConfig implements Config {
     @Setting
     public final WorldCategory world = new WorldCategory();
 
-    @Override
-    public ConfigurationTransformation getTransformation() {
+    public static ConfigurationTransformation transformation() {
         return ConfigurationTransformation.versionedBuilder()
-            .addVersion(2, this.buildOneToTwo())
+            .addVersion(2, BaseConfig.buildOneToTwo())
             // move everything out of sponge subcategory
-            .addVersion(1, this.buildInitialToOne())
+            .addVersion(1, BaseConfig.buildInitialToOne())
             .build();
     }
 
-    protected ConfigurationTransformation buildOneToTwo() {
+    static ConfigurationTransformation buildOneToTwo() {
         return ConfigurationTransformation.builder()
             .addAction(NodePath.path("world", "portal-agents"), TransformAction.remove())
             .build();
     }
 
-    protected ConfigurationTransformation buildInitialToOne() {
+    static ConfigurationTransformation buildInitialToOne() {
         return ConfigurationTransformation.builder()
             .addAction(NodePath.path("sponge"), (path, value) -> new Object[0])
             .build();
