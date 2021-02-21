@@ -2,7 +2,7 @@
 <Configuration status="warn">
   <Appenders>
     <Console name="SysOut" target="SYSTEM_OUT">
-      <PatternLayout pattern="%highlight{[%d{HH:mm:ss}] [%t/%level] [%c{1.3}/%markerSimpleName]: %msg%n}"/>
+      <PatternLayout pattern="%highlight{[%d{HH:mm:ss}] [%t/%level] [%c{1.3}/%markerSimpleName]: %msg%n}{INFO=default}"/>
     </Console>
     <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
       <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level]: %msg%n"/>
