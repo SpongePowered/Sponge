@@ -22,17 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.config.common;
+package org.spongepowered.common.bridge.network;
 
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Comment;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
+import com.mojang.authlib.properties.Property;
 
-@ConfigSerializable
-public class VelocityCategory {
+import java.net.SocketAddress;
+import java.util.UUID;
 
-    @Setting
-    @Comment("Enter the player info forwarding secret from your Velocity configuration.")
-    public String secret = "";
+public interface ConnectionBridge_IpForward {
 
+    UUID bungeeBridge$getSpoofedUUID();
+
+    void bungeeBridge$setSpoofedUUID(UUID uuid);
+
+    Property[] bungeeBridge$getSpoofedProfile();
+
+    void bungeeBridge$setSpoofedProfile(Property[] profile);
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.ipforward.bungee.server.network;
+package org.spongepowered.common.mixin.ipforward.server.network;
 
 import com.google.gson.Gson;
 import com.mojang.authlib.properties.Property;
@@ -38,8 +38,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.network.protocol.handshake.ClientIntentionPacketAccessor;
+import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge_IpForward;
+import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
 
 import java.net.InetSocketAddress;
 import net.minecraft.network.Connection;
@@ -49,15 +50,16 @@ import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
 
 @Mixin(ServerHandshakePacketListenerImpl.class)
-public abstract class ServerHandshakePacketListenerImplMixin_Bungee {
+public abstract class ServerHandshakePacketListenerImplMixin_IpForward {
 
-    private static final Gson impl$GSON = new Gson();
+    private static final Gson ipForward$GSON = new Gson();
 
     @Shadow @Final private Connection connection;
 
     @Inject(method = "handleIntention", at = @At("HEAD"), cancellable = true)
     private void bungee$patchHandshake(final ClientIntentionPacket packet, final CallbackInfo ci) {
-        if (SpongeConfigs.getCommon().get().bungeecord.ipForwarding && packet.getIntention() == ConnectionProtocol.LOGIN) {
+        if (SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.LEGACY
+            && packet.getIntention() == ConnectionProtocol.LOGIN) {
             final String ip = ((ClientIntentionPacketAccessor) packet).accessor$hostName();
             final String[] split = ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
@@ -65,11 +67,11 @@ public abstract class ServerHandshakePacketListenerImplMixin_Bungee {
                 ((ClientIntentionPacketAccessor) packet).accessor$hostName(split[0]);
                 ((ConnectionAccessor) this.connection).accessor$address(new InetSocketAddress(split[1],
                         ((InetSocketAddress) this.connection.getRemoteAddress()).getPort()));
-                ((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
+                ((ConnectionBridge_IpForward) this.connection).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
 
                 if (split.length == 4) {
-                    ((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$setSpoofedProfile(ServerHandshakePacketListenerImplMixin_Bungee.impl$GSON
-                        .fromJson(split[3], Property[].class));
+                    ((ConnectionBridge_IpForward) this.connection).bungeeBridge$setSpoofedProfile(
+                        ServerHandshakePacketListenerImplMixin_IpForward.ipForward$GSON.fromJson(split[3], Property[].class));
                 }
             } else {
                 this.connection.setProtocol(ConnectionProtocol.LOGIN);

@@ -49,8 +49,7 @@ public abstract class LaunchMixinConnector implements IMixinConnector {
             "mixins.sponge.inventory.json",
             "mixins.sponge.movementcheck.json",
             "mixins.sponge.tracker.json",
-            "mixins.sponge.bungeecord.json",
-            "mixins.sponge.velocity.json"
+            "mixins.sponge.ipforward.json"
         );
     }
 }

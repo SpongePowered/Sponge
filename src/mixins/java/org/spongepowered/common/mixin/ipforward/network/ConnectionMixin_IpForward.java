@@ -27,14 +27,14 @@ package org.spongepowered.common.mixin.ipforward.network;
 import com.mojang.authlib.properties.Property;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge_IpForward;
+import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
 
 import java.util.UUID;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 
 @Mixin(Connection.class)
-public abstract class ConnectionMixin_IpForward extends SimpleChannelInboundHandler<Packet<?>> implements NetworkManagerBridge_IpForward {
+public abstract class ConnectionMixin_IpForward extends SimpleChannelInboundHandler<Packet<?>> implements ConnectionBridge_IpForward {
 
     private UUID ipForward$spoofedUUID;
     private Property[] ipForward$spoofedProfile;

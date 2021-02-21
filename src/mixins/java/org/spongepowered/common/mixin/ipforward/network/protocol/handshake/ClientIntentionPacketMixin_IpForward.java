@@ -22,16 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.config.common;
+package org.spongepowered.common.mixin.ipforward.network.protocol.handshake;
 
-import org.spongepowered.configurate.objectmapping.meta.Comment;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
-@ConfigSerializable
-public final class BungeeCordCategory {
+@Mixin(ClientIntentionPacket.class)
+public abstract class ClientIntentionPacketMixin_IpForward {
 
-    @Setting("ip-forwarding")
-    @Comment("If 'true', allows BungeeCord to forward IP address, UUID, and Game Profile to this server.")
-    public boolean ipForwarding = false;
+    @Redirect(method = "read",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;readUtf(I)Ljava/lang/String;"))
+    private String bungee$patchReadStringForPortForwarding(final FriendlyByteBuf buf, final int value) {
+        if (SpongeConfigs.getCommon().get().ipForwarding.mode != IpForwardingCategory.Mode.LEGACY) {
+            return buf.readUtf(255);
+        }
+        return buf.readUtf(Short.MAX_VALUE);
+    }
 }

@@ -32,10 +32,10 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import java.util.List;
 import java.util.Set;
 
-public class BungeeCordPlugin implements IMixinConfigPlugin {
+public class IpForwardPlugin implements IMixinConfigPlugin {
 
     @Override
-    public void onLoad(String mixinPackage) {
+    public void onLoad(final String mixinPackage) {
     }
 
     @Override
@@ -44,14 +44,12 @@ public class BungeeCordPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        final boolean useBungee = SpongeConfigs.getCommon().get().modules.bungeecord;
-        final boolean contains = mixinClassName.contains("ipforward.bungee") || mixinClassName.endsWith("Mixin_IpForward");
-        return useBungee && contains;
+    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
+        return SpongeConfigs.getCommon().get().modules.ipForwarding;
     }
 
     @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
+    public void acceptTargets(final Set<String> myTargets, final Set<String> otherTargets) {
     }
 
     @Override
@@ -60,11 +58,11 @@ public class BungeeCordPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+    public void preApply(final String targetClassName, final ClassNode targetClass, final String mixinClassName, final IMixinInfo mixinInfo) {
     }
 
     @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+    public void postApply(final String targetClassName, final ClassNode targetClass, final String mixinClassName, final IMixinInfo mixinInfo) {
     }
 
 }

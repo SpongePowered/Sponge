@@ -78,15 +78,14 @@ public class VelocityForwardingInfo {
             .sendTo(conn, cbuf -> {})
             .whenComplete((response, error) -> {
                 if (error != null) {
-                    VelocityForwardingInfo.LOGGER.error("While responding to message", error);
                     if (error instanceof NoResponseException) {
                         conn.close(Component.text("This server requires you to connect with Velocity."));
                     }
-                    return ;
+                    return;
                 }
 
                 if (!VelocityForwardingInfo.checkIntegrity(response)) {
-                    conn.close(Component.text("Unable to verify player details"));
+                    conn.close(Component.text("Unable to verify player details. Is your forwarding secret correct?"));
                     return;
                 }
 
@@ -96,8 +95,10 @@ public class VelocityForwardingInfo {
 
                 ((ServerLoginPacketListenerImplAccessor) mcConn).accessor$gameProfile(VelocityForwardingInfo.createProfile(response));
         }).exceptionally(err -> {
-            VelocityForwardingInfo.LOGGER.error("Failed to process velocity forwarding info", err);
-            conn.close(Component.text("Invalid forwarding information received!"));
+            if (!(err instanceof NoResponseException)) { // Handled above
+                VelocityForwardingInfo.LOGGER.error("Failed to process velocity forwarding info", err);
+                conn.close(Component.text("Invalid forwarding information received!"));
+            }
             return null;
         });
     }
@@ -109,7 +110,7 @@ public class VelocityForwardingInfo {
 
         try {
             final Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(SpongeConfigs.getCommon().get().velocity.secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            mac.init(new SecretKeySpec(SpongeConfigs.getCommon().get().ipForwarding.secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
             final byte[] mySignature = mac.doFinal(data);
             if (!MessageDigest.isEqual(signature, mySignature)) {
                 return false;

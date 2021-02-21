@@ -32,14 +32,9 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 public final class ModuleCategory {
 
     @Setting
-    @Comment("Enables support for legacy BungeeCord-style IP forwarding.\n" +
-        "Its use is not recommended due to security problems.")
-    public boolean bungeecord = false;
-
-    @Setting
-    @Comment("Enables support for modern Velocity player info forwarding.\n" +
-        "Make sure to also configure the secret.")
-    public boolean velocity = false;
+    @Comment("Enables support for BungeeCord and Velocity IP forwarding.\n" +
+        "Additional options must be configured in the 'ip-forwarding' configuration section.")
+    public boolean ipForwarding = false;
 
     @Setting("entity-activation-range")
     public boolean entityActivationRange = true;

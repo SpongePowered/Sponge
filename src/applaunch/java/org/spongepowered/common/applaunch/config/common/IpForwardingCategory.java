@@ -22,24 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.ipforward.bungee.network.protocol.handshake;
+package org.spongepowered.common.applaunch.config.common;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-@Mixin(ClientIntentionPacket.class)
-public abstract class ClientIntentionPacketMixin_Bungee {
+@ConfigSerializable
+public class IpForwardingCategory {
 
-    @Redirect(method = "read",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;readUtf(I)Ljava/lang/String;"))
-    private String bungee$patchReadStringForPortForwarding(final FriendlyByteBuf buf, final int value) {
-        if (!SpongeConfigs.getCommon().get().modules.bungeecord) {
-            return buf.readUtf(255);
-        }
-        return buf.readUtf(Short.MAX_VALUE);
+    @Setting
+    @Comment(
+        "The IP forwarding mode to use with a proxy. Supported values:\n"
+             + "  - NONE: Do not forward IP addresses\n"
+             + "  - LEGACY: Use the BungeeCord/pre-1.13 protocol for IP forwarding (CAUTION: This protocol is insecure)\n"
+             + "  - MODERN: Use the Velocity protocol for IP forwarding\n"
+            + "When any forwarding mode but NONE is selected, the server will be "
+            + "put into offline mode and will only accept connections from proxies."
+    )
+    public Mode mode = Mode.NONE;
+
+    @Setting
+    @Comment("The player info forwarding secret from your Velocity configuration.\n"
+                 + "Only used with 'MODERN' forwarding mode.")
+    public String secret = "";
+
+    public enum Mode {
+        NONE,
+        LEGACY,
+        MODERN
     }
+
 }

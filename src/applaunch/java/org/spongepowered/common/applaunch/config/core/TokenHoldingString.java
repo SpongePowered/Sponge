@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.applaunch.config.core;
 
-import org.spongepowered.common.applaunch.config.core.TokenHoldingString.Serializer;
 import org.spongepowered.configurate.serialize.ScalarSerializer;
 import org.spongepowered.plugin.Blackboard;
 import org.spongepowered.plugin.PluginEnvironment;

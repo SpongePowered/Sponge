@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
+import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.common.applaunch.config.core.Config;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
+import org.spongepowered.configurate.transformation.TransformAction;
 
 import java.util.HashMap;
 import java.util.List;
@@ -66,10 +68,7 @@ public final class CommonConfig implements Config {
     public final Map<String, List<String>> ipSets = new HashMap<>();
 
     @Setting
-    public final VelocityCategory velocity = new VelocityCategory();
-
-    @Setting
-    public final BungeeCordCategory bungeecord = new BungeeCordCategory();
+    public final IpForwardingCategory ipForwarding = new IpForwardingCategory();
 
     @Setting
     public final ExploitCategory exploits = new ExploitCategory();
@@ -98,7 +97,20 @@ public final class CommonConfig implements Config {
     public final WorldCategory world = new WorldCategory();
 
     public static ConfigurationTransformation transformation() {
-        return ConfigurationTransformation.empty();
+        return ConfigurationTransformation.versionedBuilder()
+            .makeVersion(1, builder -> {
+                // Update IP forwarding
+                builder.addAction(NodePath.path("modules", "bungeecord"), TransformAction.rename("ip-forwarding"))
+                    .addAction(NodePath.path("bungeecord"), TransformAction.rename("ip-forwarding"))
+                    .addAction(NodePath.path("bungeecord", "ip-forwarding"), (path, value) -> {
+                        if (value.getBoolean()) {
+                            value.parent().node("mode").set(IpForwardingCategory.Mode.LEGACY);
+                        }
+                        value.set(null);
+                        return null;
+                    });
+            })
+            .build();
     }
 
     /* TODO(zml): Reimplement this when bringing in SpongeContextCalculator from invalid

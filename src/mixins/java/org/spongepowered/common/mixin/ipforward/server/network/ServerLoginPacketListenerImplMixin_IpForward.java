@@ -22,7 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.ipforward.bungee.server.network;
+package org.spongepowered.common.mixin.ipforward.server.network;
+
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Charsets;
 import com.mojang.authlib.GameProfile;
@@ -37,17 +39,36 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge_IpForward;
+import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
+import org.spongepowered.common.ipforward.velocity.VelocityForwardingInfo;
 
 import java.util.UUID;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
-public abstract class ServerLoginPacketListenerImplMixin_Bungee {
+public abstract class ServerLoginPacketListenerImplMixin_IpForward {
 
+    // @formatter:off
     @Shadow @Final private MinecraftServer server;
     @Shadow @Final public Connection connection;
     @Shadow private GameProfile gameProfile;
+    // @formatter:on
 
+    private boolean ipForward$sentVelocityForwardingRequest;
+
+    // Velocity
+    @Inject(method = "handleHello", at = @At("HEAD"), cancellable = true)
+    private void ipForward$sendVelocityIndicator(final CallbackInfo info) {
+        if (!this.server.usesAuthentication() && SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.MODERN) {
+            checkState(!this.ipForward$sentVelocityForwardingRequest, "Sent additional login start message!");
+            this.ipForward$sentVelocityForwardingRequest = true;
+
+            VelocityForwardingInfo.sendQuery((ServerLoginPacketListenerImpl) (Object) this);
+        }
+    }
+
+    // Bungee
     @Inject(method = "handleHello",
         at = @At(
             value = "FIELD",
@@ -56,18 +77,18 @@ public abstract class ServerLoginPacketListenerImplMixin_Bungee {
             ordinal = 0,
             shift = At.Shift.AFTER))
     private void bungee$initUuid(final CallbackInfo ci) {
-        if (!this.server.usesAuthentication()) {
+        if (!this.server.usesAuthentication() && SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.LEGACY) {
             final UUID uuid;
-            if (((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID() != null) {
-                uuid = ((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID();
+            if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID() != null) {
+                uuid = ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID();
             } else {
                 uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.gameProfile.getName()).getBytes(Charsets.UTF_8));
             }
 
             this.gameProfile = new GameProfile(uuid, this.gameProfile.getName());
 
-            if (((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile() != null) {
-                for (final Property property : ((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile()) {
+            if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile() != null) {
+                for (final Property property : ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile()) {
                     this.gameProfile.getProperties().put(property.getName(), property);
                 }
             }
