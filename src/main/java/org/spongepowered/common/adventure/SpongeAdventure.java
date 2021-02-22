@@ -36,6 +36,7 @@ import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.KeybindComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -48,7 +49,9 @@ import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.Codec;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.core.Registry;
+import net.minecraft.locale.Language;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -58,16 +61,20 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.common.accessor.client.KeyMappingAccessor;
 import org.spongepowered.common.accessor.network.chat.HoverEvent_ItemStackInfoAccessor;
 import org.spongepowered.common.accessor.network.chat.TextColorAccessor;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
 import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
+import org.spongepowered.common.launch.Launch;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -124,6 +131,28 @@ public final class SpongeAdventure {
             .build();
 
     private static final Set<ServerBossEvent> ACTIVE_BOSS_BARS = ConcurrentHashMap.newKeySet();
+    private static final PlainComponentSerializer PLAIN = new PlainComponentSerializer(
+        keybind -> {
+            if (!Launch.getInstance().isDedicatedServer()) {
+                return SpongeAdventure.resolveKeybind(keybind);
+            } else {
+                return keybind.keybind();
+            }
+        },
+        translatable -> String.format(
+            Language.getInstance().getOrDefault(translatable.key()),
+            translatable.args().stream().map(SpongeAdventure.PLAIN::serialize).toArray(Object[]::new)
+        )
+    );
+
+    @OnlyIn(Dist.CLIENT)
+    private static String resolveKeybind(final KeybindComponent component) {
+        final KeyMapping mapping = KeyMappingAccessor.accessor$ALL().get(component.keybind());
+        if (mapping != null) {
+            return mapping.getTranslatedKeyMessage().getString();
+        }
+        return component.keybind();
+    }
 
     // -------------
     // ---- Key ----
@@ -621,6 +650,34 @@ public final class SpongeAdventure {
 
             final UUID key = SpongeAdventure.CALLBACK_COMMAND.registerCallback(callback);
             return ClickEvent.runCommand("/sponge:callback " + key.toString());
+        }
+
+        // TODO: Implement 'flattening' of components using server info
+        // once Adventure exposes support
+
+        @Override
+        public LegacyComponentSerializer legacySectionSerializer() {
+            return LegacyComponentSerializer.legacySection();
+        }
+
+        @Override
+        public LegacyComponentSerializer legacyAmpersandSerializer() {
+            return LegacyComponentSerializer.legacyAmpersand();
+        }
+
+        @Override
+        public LegacyComponentSerializer legacySerializer(final char formatChar) {
+            return LegacyComponentSerializer.legacy(formatChar);
+        }
+
+        @Override
+        public GsonComponentSerializer gsonSerializer() {
+            return SpongeAdventure.GSON;
+        }
+
+        @Override
+        public PlainComponentSerializer plainSerializer() {
+            return SpongeAdventure.PLAIN;
         }
     }
 
