@@ -121,7 +121,7 @@ public final class LibraryManager {
                     final String fileMd5 = InstallerUtils.toHexString(md5.digest(bytes));
 
                     if (dependency.md5.equals(fileMd5)) {
-                        Logger.info("'{}' verified!", depFile);
+                        Logger.debug("'{}' verified!", depFile);
                     } else {
                         Logger.error("Checksum verification failed: Expected {}, {}. Deleting cached '{}'...",
                             dependency.md5, fileMd5, depFile);
