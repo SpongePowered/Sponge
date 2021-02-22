@@ -592,7 +592,7 @@ project("SpongeVanilla") {
             server {
                 workingDirectory().set(vanillaProject.file("run/"))
                 jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml")
-                args("nogui", "--launchTarget", "sponge_server_dev")
+                args("--nogui", "--launchTarget", "sponge_server_dev")
                 mainClass().set("org.spongepowered.vanilla.applaunch.Main")
                 classpath().from(vanillaAppLaunch.runtimeClasspath, vanillaAppLaunch.output)
                 // ideaModule("${rootProject.name}.${project.name}.applaunch")
@@ -635,8 +635,8 @@ project("SpongeVanilla") {
         vanillaInstallerConfig("org.spongepowered:configurate-hocon:4.0.0")
         vanillaInstallerConfig("org.spongepowered:configurate-core:4.0.0")
         vanillaInstallerConfig("net.sf.jopt-simple:jopt-simple:5.0.3")
-        vanillaInstallerConfig("org.apache.logging.log4j:log4j-api:2.11.2")
-        vanillaInstallerConfig("org.apache.logging.log4j:log4j-core:2.11.2")
+        vanillaInstallerConfig("org.tinylog:tinylog-api:2.2.1")
+        vanillaInstallerConfig("org.tinylog:tinylog-impl:2.2.1")
         // Override ASM versions, and explicitly declare dependencies so ASM is excluded from the manifest.
         val asmExclusions = sequenceOf("-commons", "-tree", "-analysis", "")
                 .map { "asm$it" }
@@ -778,6 +778,11 @@ project("SpongeVanilla") {
 
         val installerResources = vanillaProject.layout.buildDirectory.dir("generated/resources/installer")
         vanillaInstaller.resources.srcDir(installerResources)
+        val dependencyExclusions by project.configurations.registering {
+            isVisible = false
+            extendsFrom(vanillaInstallerConfig)
+            extendsFrom(minecraftClasspathConfig)
+        }
         val emitDependencies by registering(OutputDependenciesToJson::class) {
             group = "sponge"
             // everything in applaunch
@@ -942,7 +947,7 @@ abstract class OutputDependenciesToJson: DefaultTask() {
     @org.gradle.api.tasks.TaskAction
     fun generateDependenciesJson() {
         val foundConfig = if (this.excludeConfiguration.isPresent) {
-            val config = project.configurations.detachedConfiguration(*this.configuration.get().allDependencies.toTypedArray())
+            val config = this.configuration.get().copyRecursive()
             val excludes = this.excludeConfiguration.get()
             excludes.allDependencies.forEach {
                 config.exclude(group = it.group, module = it.name)

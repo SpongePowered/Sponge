@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import org.spongepowered.vanilla.installer.model.sponge.Libraries;
 import org.spongepowered.vanilla.installer.model.sponge.SonatypeResponse;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -38,7 +39,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +61,7 @@ public final class LibraryManager {
         this.installer = installer;
         this.rootDirectory = rootDirectory;
 
-        this.libraries = new HashMap<>();
+        this.libraries = new LinkedHashMap<>();
         final int availableCpus = Runtime.getRuntime().availableProcessors();
         // We'll be performing mostly IO-blocking operations, so more threads will help us for now
         // It might make sense to make this overridable eventually
@@ -84,7 +85,7 @@ public final class LibraryManager {
     }
 
     public void validate() throws Exception {
-        this.installer.getLogger().info("Scanning and verifying libraries in '{}'. Please wait, this may take a moment...",
+        Logger.info("Scanning and verifying libraries in '{}'. Please wait, this may take a moment...",
             LauncherCommandLine.librariesDirectory.toAbsolutePath());
 
         final Gson gson = new Gson();
@@ -111,7 +112,7 @@ public final class LibraryManager {
 
                 if (Files.exists(depFile)) {
                     if (!checkHashes) {
-                        this.installer.getLogger().info("Detected existing '{}', skipping hash checks...", depFile);
+                        Logger.info("Detected existing '{}', skipping hash checks...", depFile);
                         return null;
                     }
 
@@ -120,9 +121,9 @@ public final class LibraryManager {
                     final String fileMd5 = InstallerUtils.toHexString(md5.digest(bytes));
 
                     if (dependency.md5.equals(fileMd5)) {
-                        this.installer.getLogger().info("'{}' verified!", depFile);
+                        Logger.info("'{}' verified!", depFile);
                     } else {
-                        this.installer.getLogger().error("Checksum verification failed: Expected {}, {}. Deleting cached '{}'...",
+                        Logger.error("Checksum verification failed: Expected {}, {}. Deleting cached '{}'...",
                             dependency.md5, fileMd5, depFile);
                         Files.delete(depFile);
 
@@ -137,7 +138,7 @@ public final class LibraryManager {
                         final SonatypeResponse.Item item = response.items.get(0);
                         final URL url = item.downloadUrl;
 
-                        InstallerUtils.downloadCheckHash(this.installer.getLogger(), url, depFile, md5, item.checksum.md5, true);
+                        InstallerUtils.downloadCheckHash(url, depFile, md5, item.checksum.md5, true);
                     }
                 } else {
                     final SonatypeResponse response = this.getResponseFor(gson, dependency);
@@ -153,9 +154,9 @@ public final class LibraryManager {
                     final URL url = item.downloadUrl;
 
                     if (checkHashes) {
-                        InstallerUtils.downloadCheckHash(this.installer.getLogger(), url, depFile, md5, item.checksum.md5, true);
+                        InstallerUtils.downloadCheckHash(url, depFile, md5, item.checksum.md5, true);
                     } else {
-                        InstallerUtils.download(this.installer.getLogger(), url, depFile, true);
+                        InstallerUtils.download(url, depFile, true);
                     }
                 }
 
@@ -166,9 +167,9 @@ public final class LibraryManager {
 
         CompletableFuture.allOf(operations.toArray(new CompletableFuture<?>[0])).join();
         if (!failures.isEmpty()) {
-            this.installer.getLogger().error("Failed to download some libraries:");
+            Logger.error("Failed to download some libraries:");
             for (final String message : failures) {
-                this.installer.getLogger().error(message);
+                Logger.error(message);
             }
             System.exit(-1);
         }
@@ -208,7 +209,7 @@ public final class LibraryManager {
         }
 
         if (!successful) {
-            this.installer.getLogger().warn("Failed to shut down library preparation pool in 10 seconds, forcing shutdown now.");
+            Logger.warn("Failed to shut down library preparation pool in 10 seconds, forcing shutdown now.");
             this.preparationWorker.shutdownNow();
         }
     }
