@@ -25,6 +25,7 @@
 package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Stage;
+import org.fusesource.jansi.AnsiConsole;
 import org.spongepowered.common.applaunch.plugin.PluginEngine;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;

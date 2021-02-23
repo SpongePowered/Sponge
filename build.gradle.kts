@@ -517,9 +517,12 @@ project("SpongeVanilla") {
     version = generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
     println("SpongeVanilla Version $version")
 
+    val vanillaLibrariesConfig by configurations.register("libraries") {
+    }
     val vanillaMinecraftConfig by configurations.named("minecraft")
     val vanillaMinecraftClasspathConfig by configurations.named("minecraftClasspath")
     val vanillaAppLaunchConfig by configurations.register("applaunch") {
+        extendsFrom(vanillaLibrariesConfig)
     }
     val vanillaInstallerConfig by configurations.register("installer") {
     }
@@ -532,6 +535,9 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        configurations.named(implementationConfigurationName) {
+            extendsFrom(vanillaLibrariesConfig)
+        }
     }
     val vanillaLaunch by sourceSets.register("launch") {
         // implementation (compile) dependencies
@@ -621,6 +627,7 @@ project("SpongeVanilla") {
     }
 
     dependencies {
+        val jlineVersion: String by project
         api(launch.map { it.output })
         implementation(accessors.map { it.output })
         implementation(project(commonProject.path)) {
@@ -676,6 +683,11 @@ project("SpongeVanilla") {
             exclude(group = "org.spongepowered", module = "configurate-core")
             exclude(group = "org.checkerframework", module = "checker-qual")
         }
+
+        vanillaLibrariesConfig("net.minecrell:terminalconsoleappender:1.2.0")
+        vanillaLibrariesConfig("org.jline:jline-terminal:$jlineVersion")
+        vanillaLibrariesConfig("org.jline:jline-reader:$jlineVersion")
+        vanillaLibrariesConfig("org.jline:jline-terminal-jansi:$jlineVersion")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer

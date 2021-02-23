@@ -25,13 +25,11 @@
 package org.spongepowered.vanilla.applaunch.util;
 
 import cpw.mods.modlauncher.TransformingClassLoader;
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.impl.ContextAnchor;
 import org.apache.logging.log4j.core.selector.ClassLoaderContextSelector;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.util.Transform;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
