@@ -22,20 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.network;
+package org.spongepowered.common.mixin.ipforward.server;
 
-import com.mojang.authlib.properties.Property;
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
-import java.net.SocketAddress;
-import java.util.UUID;
+@Mixin(MinecraftServer.class)
+public class MinecraftServerMixin_IpForward {
 
-public interface NetworkManagerBridge_Bungee {
+    @Inject(method = "usesAuthentication", at = @At("HEAD"), cancellable = true)
+    private void ipForward$AlwaysOfflineWhenUsingProxy(final CallbackInfoReturnable<Boolean> cir) {
+        if (SpongeConfigs.getCommon().get().ipForwarding.mode != IpForwardingCategory.Mode.NONE) {
+            cir.setReturnValue(false);
+        }
+    }
 
-    UUID bungeeBridge$getSpoofedUUID();
-
-    void bungeeBridge$setSpoofedUUID(UUID uuid);
-
-    Property[] bungeeBridge$getSpoofedProfile();
-
-    void bungeeBridge$setSpoofedProfile(Property[] profile);
 }

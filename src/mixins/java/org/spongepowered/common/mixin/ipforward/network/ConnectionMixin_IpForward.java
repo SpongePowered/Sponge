@@ -22,19 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.network;
+package org.spongepowered.common.mixin.ipforward.network;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import com.mojang.authlib.properties.Property;
+import io.netty.channel.SimpleChannelInboundHandler;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
 
-@Mixin(ServerLoginPacketListenerImpl.class)
-public interface ServerLoginPacketListenerImplAccessor {
+import java.util.UUID;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
 
-    @Accessor("state") ServerLoginPacketListenerImpl.State accessor$state();
+@Mixin(Connection.class)
+public abstract class ConnectionMixin_IpForward extends SimpleChannelInboundHandler<Packet<?>> implements ConnectionBridge_IpForward {
 
-    @Accessor("state") void accessor$state(ServerLoginPacketListenerImpl.State state);
+    private UUID ipForward$spoofedUUID;
+    private Property[] ipForward$spoofedProfile;
 
-    @Accessor("gameProfile") void accessor$gameProfile(final GameProfile profile);
+    @Override
+    public UUID bungeeBridge$getSpoofedUUID() {
+        return this.ipForward$spoofedUUID;
+    }
+
+    @Override
+    public void bungeeBridge$setSpoofedUUID(final UUID uuid) {
+        this.ipForward$spoofedUUID = uuid;
+    }
+
+    @Override
+    public Property[] bungeeBridge$getSpoofedProfile() {
+        return this.ipForward$spoofedProfile;
+    }
+
+    @Override
+    public void bungeeBridge$setSpoofedProfile(final Property[] profile) {
+        this.ipForward$spoofedProfile = profile;
+    }
 }

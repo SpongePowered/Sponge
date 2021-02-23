@@ -22,49 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin;
+package org.spongepowered.common.mixin.ipforward.network.protocol.handshake;
 
-import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
-import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
-import java.util.List;
-import java.util.Set;
+@Mixin(ClientIntentionPacket.class)
+public abstract class ClientIntentionPacketMixin_IpForward {
 
-public class BungeeCordPlugin implements IMixinConfigPlugin {
-
-    @Override
-    public void onLoad(String mixinPackage) {
+    @Redirect(method = "read",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;readUtf(I)Ljava/lang/String;"))
+    private String bungee$patchReadStringForPortForwarding(final FriendlyByteBuf buf, final int value) {
+        if (SpongeConfigs.getCommon().get().ipForwarding.mode != IpForwardingCategory.Mode.LEGACY) {
+            return buf.readUtf(255);
+        }
+        return buf.readUtf(Short.MAX_VALUE);
     }
-
-    @Override
-    public String getRefMapperConfig() {
-        return null;
-    }
-
-    @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        final boolean useBunge = SpongeConfigs.getCommon().get().modules.bungeecord;
-        final boolean contains = mixinClassName.contains("mixin.bungee");
-        return !(!useBunge && contains);
-    }
-
-    @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-    }
-
-    @Override
-    public List<String> getMixins() {
-        return null;
-    }
-
-    @Override
-    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-    }
-
-    @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-    }
-
 }

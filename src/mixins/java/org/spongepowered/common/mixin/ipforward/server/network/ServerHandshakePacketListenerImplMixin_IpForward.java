@@ -22,11 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.bungee.server.network;
+package org.spongepowered.common.mixin.ipforward.server.network;
 
 import com.google.gson.Gson;
 import com.mojang.authlib.properties.Property;
 import com.mojang.util.UUIDTypeAdapter;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,8 +38,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.network.protocol.handshake.ClientIntentionPacketAccessor;
+import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
+import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
 
 import java.net.InetSocketAddress;
 import net.minecraft.network.Connection;
@@ -46,15 +50,16 @@ import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
 
 @Mixin(ServerHandshakePacketListenerImpl.class)
-public abstract class ServerHandshakePacketListenerImplMixin_Bungee {
+public abstract class ServerHandshakePacketListenerImplMixin_IpForward {
 
-    private static final Gson gson = new Gson();
+    private static final Gson ipForward$GSON = new Gson();
 
     @Shadow @Final private Connection connection;
 
-    @Inject(method = "handleIntention", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "handleIntention", at = @At("HEAD"), cancellable = true)
     private void bungee$patchHandshake(final ClientIntentionPacket packet, final CallbackInfo ci) {
-        if (SpongeConfigs.getCommon().get().bungeecord.ipForwarding && packet.getIntention().equals(ConnectionProtocol.LOGIN)) {
+        if (SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.LEGACY
+            && packet.getIntention() == ConnectionProtocol.LOGIN) {
             final String ip = ((ClientIntentionPacketAccessor) packet).accessor$hostName();
             final String[] split = ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
@@ -62,16 +67,18 @@ public abstract class ServerHandshakePacketListenerImplMixin_Bungee {
                 ((ClientIntentionPacketAccessor) packet).accessor$hostName(split[0]);
                 ((ConnectionAccessor) this.connection).accessor$address(new InetSocketAddress(split[1],
                         ((InetSocketAddress) this.connection.getRemoteAddress()).getPort()));
-                ((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
+                ((ConnectionBridge_IpForward) this.connection).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
 
                 if (split.length == 4) {
-                    ((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$setSpoofedProfile(ServerHandshakePacketListenerImplMixin_Bungee.gson
-                        .fromJson(split[3], Property[].class));
+                    ((ConnectionBridge_IpForward) this.connection).bungeeBridge$setSpoofedProfile(
+                        ServerHandshakePacketListenerImplMixin_IpForward.ipForward$GSON.fromJson(split[3], Property[].class));
                 }
             } else {
-                final TextComponent chatcomponenttext =
-                        new TextComponent("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
-                this.connection.disconnect(chatcomponenttext);
+                this.connection.setProtocol(ConnectionProtocol.LOGIN);
+                final Component error = new TextComponent("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!")
+                            .withStyle(ChatFormatting.RED);
+                this.connection.send(new ClientboundLoginDisconnectPacket(error));
+                this.connection.disconnect(error);
             }
         }
     }

@@ -22,29 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.network.loginnet.minecraft.server.network;
+package org.spongepowered.common.mixin.ipforward.server.dedicated;
 
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import net.minecraft.server.dedicated.DedicatedServer;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.accessor.server.network.ServerLoginPacketListenerImplAccessor;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
-@Mixin(targets = "net/minecraft/server/network/ServerLoginPacketListenerImpl$1")
-public abstract class ServerLoginPacketListenerImpl_Mixin_Vanilla extends Thread {
+@Mixin(DedicatedServer.class)
+public class DedicatedServerMixin_IpForward {
 
-    // @formatter:off
-    @Shadow(aliases = {"this$0", "field_151292_a"}, remap = false) @Final private ServerLoginPacketListenerImpl handler;
-    // @formatter:on
+    @Shadow @Final private static Logger LOGGER;
 
-    @Inject(method = "run()V", at = @At(value = "RETURN"), remap = false)
-    private void impl$onReadyToAccept(final CallbackInfo ci) {
-        final ServerLoginPacketListenerImplAccessor accessor = (ServerLoginPacketListenerImplAccessor) this.handler;
-        if (accessor.accessor$getState() == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
-            accessor.accessor$setState(ServerLoginPacketListenerImpl.State.NEGOTIATING);
+    @Inject(method = "initServer", at = @At(value = "INVOKE_STRING", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;)V",
+                                            args = "ldc=**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!"))
+    private void ipForward$logEnabled(final CallbackInfoReturnable<Boolean> ci) {
+        final IpForwardingCategory.Mode mode = SpongeConfigs.getCommon().get().ipForwarding.mode;
+        if (mode != IpForwardingCategory.Mode.NONE) {
+            DedicatedServerMixin_IpForward.LOGGER.warn("Sponge is delegating authentication to a proxy using the {} method, placing the server itself into offline mode.", mode);
+            DedicatedServerMixin_IpForward.LOGGER.warn("Consult your proxy's documentation for advice on how to ensure this is configured securely.");
         }
     }
+
 }

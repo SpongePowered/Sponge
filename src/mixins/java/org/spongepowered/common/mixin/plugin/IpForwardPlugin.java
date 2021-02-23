@@ -22,34 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.common.mixin.plugin;
 
-import com.google.common.collect.Lists;
-import org.spongepowered.asm.mixin.Mixins;
-import org.spongepowered.asm.mixin.connect.IMixinConnector;
+import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
+import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
 import java.util.List;
+import java.util.Set;
 
-public abstract class LaunchMixinConnector implements IMixinConnector {
+public class IpForwardPlugin implements IMixinConfigPlugin {
 
     @Override
-    public final void connect() {
-        for (final String config : this.getMixinConfigs()) {
-            Mixins.addConfiguration(config);
-        }
+    public void onLoad(final String mixinPackage) {
     }
 
-    public List<String> getMixinConfigs() {
-        return Lists.newArrayList(
-            "mixins.sponge.accessors.json",
-            "mixins.sponge.api.json",
-            "mixins.sponge.concurrent.json",
-            "mixins.sponge.core.json",
-            "mixins.sponge.exploit.json",
-            "mixins.sponge.inventory.json",
-            "mixins.sponge.movementcheck.json",
-            "mixins.sponge.tracker.json",
-            "mixins.sponge.ipforward.json"
-        );
+    @Override
+    public String getRefMapperConfig() {
+        return null;
     }
+
+    @Override
+    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
+        return SpongeConfigs.getCommon().get().modules.ipForwarding;
+    }
+
+    @Override
+    public void acceptTargets(final Set<String> myTargets, final Set<String> otherTargets) {
+    }
+
+    @Override
+    public List<String> getMixins() {
+        return null;
+    }
+
+    @Override
+    public void preApply(final String targetClassName, final ClassNode targetClass, final String mixinClassName, final IMixinInfo mixinInfo) {
+    }
+
+    @Override
+    public void postApply(final String targetClassName, final ClassNode targetClass, final String mixinClassName, final IMixinInfo mixinInfo) {
+    }
+
 }
