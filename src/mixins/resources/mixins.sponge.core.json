@@ -211,8 +211,7 @@
         "world.level.biome.OverworldBiomeSourceMixin",
         "server.level.ServerLevelMixin_Timings",
         "world.level.LevelMixin_Timings",
-        "network.protocol.status.ClientboundStatusResponsePacketMixin",
-        "world.scores.TeamMixin"
+        "network.protocol.status.ClientboundStatusResponsePacketMixin"
     ],
     "client": [
         "client.MinecraftMixin",
