@@ -50,7 +50,7 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getDefaultFluid();
     @Shadow protected abstract boolean shadow$isAquifersEnabled();
     @Shadow protected abstract boolean shadow$isNoiseCavesEnabled();
-    @Shadow protected abstract boolean shadow$isGrimstoneEnabled();
+    @Shadow protected abstract boolean shadow$isDeepslateEnabled();
     // @formatter:on
 
 
@@ -101,7 +101,7 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
 
     @Override
     public boolean grimstone() {
-        return this.shadow$isGrimstoneEnabled();
+        return this.shadow$isDeepslateEnabled();
     }
 
 }

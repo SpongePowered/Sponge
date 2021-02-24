@@ -100,37 +100,37 @@ public abstract class ServerBossEventMixin extends BossEventMixin implements Bos
     // Convert to using BossBar.Listener
 
     @Redirect(method = {"setProgress", "setColor", "setOverlay", "setDarkenScreen", "setPlayBossMusic", "setCreateWorldFog", "setName"},
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerBossEvent;broadcast(Lnet/minecraft/network/protocol/game/ClientboundBossEventPacket$Operation;)V"))
-    private void redirectUpdatePacket(final ServerBossEvent $this, final ClientboundBossEventPacket.Operation op) {
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerBossEvent;broadcast(Ljava/util/function/Function;)V"))
+    private void redirectUpdatePacket(final ServerBossEvent self, final Function<BossEvent, ClientboundBossEventPacket> var1) {
         // This becomes a no-op, the Adventure BossBar's listener calls this update operation
     }
 
     @Override
     public void bossBarNameChanged(final BossBar bar, final Component oldName, final Component newName) {
-        this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_NAME);
+        this.broadcast(ClientboundBossEventPacket::createUpdateNamePacket);
     }
 
     @Override
     public void bossBarProgressChanged(final BossBar bar, final float oldProgress, final float newProgress) {
         if (Math.abs(newProgress - this.impl$lastSentProgress) > ServerBossEventMixin.EPSILON) {
             this.impl$lastSentProgress = newProgress;
-            this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_PROGRESS);
+            this.broadcast(ClientboundBossEventPacket::createUpdateProgressPacket);
         }
     }
 
     @Override
     public void bossBarColorChanged(final BossBar bar, final BossBar.Color oldColor, final BossBar.Color newColor) {
-        this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_STYLE);
+        this.broadcast(ClientboundBossEventPacket::createUpdateStylePacket);
     }
 
     @Override
     public void bossBarOverlayChanged(final BossBar bar, final BossBar.Overlay oldOverlay, final BossBar.Overlay newOverlay) {
-        this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_STYLE);
+        this.broadcast(ClientboundBossEventPacket::createUpdateStylePacket);
     }
 
     @Override
     public void bossBarFlagsChanged(final BossBar bar, final Set<BossBar.Flag> flagsAdded, final Set<BossBar.Flag> flagsRemoved) {
-        this.broadcast(ClientboundBossEventPacket.Operation.UPDATE_PROPERTIES);
+        this.broadcast(ClientboundBossEventPacket::createUpdatePropertiesPacket);
     }
 
     // Tracking for registration (designed for localization handling)
