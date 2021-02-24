@@ -24,11 +24,17 @@
  */
 package org.spongepowered.vanilla.chat.console;
 
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.launch.Launch;
+
+import java.util.function.Supplier;
 
 public final class VanillaConsole extends SimpleTerminalConsole {
 
@@ -40,9 +46,17 @@ public final class VanillaConsole extends SimpleTerminalConsole {
 
     @Override
     protected LineReader buildReader(LineReaderBuilder builder) {
+        final Supplier<@Nullable CommandDispatcher<CommandSourceStack>> dispatcherProvider = () -> {
+            final SpongeCommandManager manager = SpongeCommandManager.get(this.server);
+            return manager == null ? null : manager.getDispatcher();
+        };
+        final Supplier<CommandSourceStack> commandSourceProvider = this.server::createCommandSourceStack;
+
         return super.buildReader(builder
-                .appName(Launch.getInstance().getPlatformPlugin().getMetadata().getName().get())
-                .completer(new ConsoleCommandCompleter(this.server)));
+            .appName(Launch.getInstance().getPlatformPlugin().getMetadata().getName().get())
+            .completer(new BrigadierJLineCompleter<>(dispatcherProvider, commandSourceProvider))
+            .highlighter(new BrigadierHighlighter<>(dispatcherProvider, commandSourceProvider))
+            .option(LineReader.Option.COMPLETE_IN_WORD, true)); // Seems to fix trying to complete at the beginning of a word
     }
 
     @Override

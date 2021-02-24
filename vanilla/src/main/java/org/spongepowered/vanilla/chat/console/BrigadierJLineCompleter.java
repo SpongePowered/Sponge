@@ -24,52 +24,46 @@
  */
 package org.spongepowered.vanilla.chat.console;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.Message;
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.dedicated.DedicatedServer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
 import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
-import org.spongepowered.common.command.manager.SpongeCommandManager;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
-final class ConsoleCommandCompleter implements Completer {
+final class BrigadierJLineCompleter<S> implements Completer {
 
-    private final DedicatedServer server;
+    private final Supplier<@Nullable CommandDispatcher<S>> dispatcherProvider;
+    private final Supplier<S> commandSourceProvider;
 
-    ConsoleCommandCompleter(DedicatedServer server) {
-        this.server = checkNotNull(server, "server");
+    public BrigadierJLineCompleter(final Supplier<@Nullable CommandDispatcher<S>> dispatcherProvider, final Supplier<S> commandSourceProvider) {
+        this.dispatcherProvider = dispatcherProvider;
+        this.commandSourceProvider = commandSourceProvider;
     }
 
     @Override
     public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
-        /* String buffer = line.line();
-        boolean prefix;
-        if (buffer.isEmpty() || buffer.charAt(0) != '/') {
-            buffer = '/' + buffer;
-            prefix = false;
-        } else {
-            prefix = true;
-        }*/
+        final CommandDispatcher<S> dispatcher = this.dispatcherProvider.get();
+        if (dispatcher == null) {
+            return;
+        }
 
         final String input = line.line();
-        final CommandDispatcher<CommandSourceStack> dispatcher = SpongeCommandManager.get(this.server).getDispatcher();
+        final ParseResults<S> parseResult = dispatcher.parse(input, this.commandSourceProvider.get());
         final CompletableFuture<Suggestions> suggestions = dispatcher.getCompletionSuggestions(
-                dispatcher.parse(input, this.server.createCommandSourceStack()),
-                line.cursor()
-            );
+            parseResult,
+            line.cursor()
+        );
 
         try {
             final Suggestions result = suggestions.get();
@@ -78,7 +72,7 @@ final class ConsoleCommandCompleter implements Completer {
                     continue;
                 }
 
-                candidates.add(ConsoleCommandCompleter.candidateFromSuggestion(input, completion));
+                candidates.add(BrigadierJLineCompleter.candidateFromSuggestion(parseResult, completion));
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -87,9 +81,17 @@ final class ConsoleCommandCompleter implements Completer {
         }
     }
 
-    private static Candidate candidateFromSuggestion(final String input, final Suggestion suggestion) {
+    private static Candidate candidateFromSuggestion(final ParseResults<?> result, final Suggestion suggestion) {
         final Message tooltip = suggestion.getTooltip();
-        return new Candidate(suggestion.getText(), suggestion.getText(), null, tooltip == null ? null : tooltip.getString(), null, null, true);
+        return new Candidate(
+            suggestion.getText(),
+            suggestion.getText(),
+            null,
+            tooltip == null ? null : tooltip.getString(),
+            null,
+            null,
+            result.getExceptions().isEmpty()
+        );
     }
 
 }
