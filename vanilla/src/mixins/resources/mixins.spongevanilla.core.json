@@ -14,7 +14,8 @@
         "client.server.IntegratedServerMixin_Vanilla"
     ],
     "server": [
-        "server.dedicated.DedicatedServerMixin_Vanilla"
+        "server.dedicated.DedicatedServerMixin_Vanilla",
+        "server.dedicated.DedicatedServer_1_Mixin_Vanilla"
     ],
     "mixins": [
         "CrashReportMixin_Vanilla",

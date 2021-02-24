@@ -141,6 +141,7 @@ public abstract class VanillaLaunch extends Launch {
         return (VanillaPluginEngine) this.pluginEngine;
     }
 
+    @Override
     public VanillaPluginManager getPluginManager() {
         return (VanillaPluginManager) this.pluginManager;
     }

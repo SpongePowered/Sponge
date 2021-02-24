@@ -131,7 +131,7 @@ public final class SpongeAdventure {
             .build();
 
     private static final Set<ServerBossEvent> ACTIVE_BOSS_BARS = ConcurrentHashMap.newKeySet();
-    private static final PlainComponentSerializer PLAIN = new PlainComponentSerializer(
+    public static final PlainComponentSerializer PLAIN = new PlainComponentSerializer(
         keybind -> {
             if (!Launch.getInstance().isDedicatedServer()) {
                 return SpongeAdventure.resolveKeybind(keybind);

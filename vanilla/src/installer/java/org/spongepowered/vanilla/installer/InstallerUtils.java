@@ -24,7 +24,7 @@
  */
 package org.spongepowered.vanilla.installer;
 
-import org.apache.logging.log4j.Logger;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -63,13 +63,13 @@ public final class InstallerUtils {
      * @param path The local path
      * @throws IOException If there is a problem while downloading the file
      */
-    public static void download(final Logger logger, final URL url, final Path path, final boolean requiresRequest) throws IOException {
+    public static void download(final URL url, final Path path, final boolean requiresRequest) throws IOException {
         Files.createDirectories(path.getParent());
 
         final String name = path.getFileName().toString();
 
-        logger.info("Downloading {}. This may take a while...", name);
-        logger.info("URL -> <{}>", url);
+        Logger.info("Downloading {}. This may take a while...", name);
+        Logger.info("URL -> <{}>", url);
 
         if (!requiresRequest) {
             try (final ReadableByteChannel in = Channels.newChannel(url.openStream()); final FileChannel out = FileChannel.open(path,
@@ -99,14 +99,14 @@ public final class InstallerUtils {
      * @param expected The SHA-1 expected digest
      * @throws IOException If there is a problem while downloading the file
      */
-    public static void downloadCheckHash(final Logger logger, final URL url, final Path path, final MessageDigest digest, final String expected,
+    public static void downloadCheckHash(final URL url, final Path path, final MessageDigest digest, final String expected,
         boolean requiresRequest) throws IOException {
         Files.createDirectories(path.getParent());
 
         final String name = path.getFileName().toString();
 
-        logger.info("Downloading {}. This may take a while...", name);
-        logger.info("URL -> <{}>", url);
+        Logger.info("Downloading {}. This may take a while...", name);
+        Logger.info("URL -> <{}>", url);
 
         if (!requiresRequest) {
             // Pipe the download stream into the file and compute the hash
@@ -132,7 +132,7 @@ public final class InstallerUtils {
         final String fileSha1 = InstallerUtils.toHexString(digest.digest());
 
         if (expected.equalsIgnoreCase(fileSha1)) {
-            logger.info("Successfully downloaded {} and verified checksum!", name);
+            Logger.info("Successfully downloaded {} and verified checksum!", name);
         } else {
             Files.delete(path);
             throw new IOException(String.format("Checksum verification failed: Expected '%s', got '%s'.", expected, fileSha1));

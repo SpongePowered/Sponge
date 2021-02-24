@@ -22,30 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.installer;
+package org.spongepowered.vanilla.chat;
 
-import org.objectweb.asm.Opcodes;
+import org.apache.logging.log4j.spi.LoggerContext;
 
-public final class Constants {
+import java.net.URI;
+import java.util.function.BiFunction;
 
-    public static final int ASM_VERSION = Opcodes.ASM9;
+// Accessed from applaunch/org.spongepowered.vanilla.applaunch.util.ComponentAwareContextSelector
+public class VanillaLoggerContextProvider implements BiFunction<String, URI, LoggerContext> {
 
-    public static final class Libraries {
-
-        public static final String MINECRAFT_VERSION_TARGET = "1.16.5";
-        public static final String MINECRAFT_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-        public static final String MINECRAFT_PATH_PREFIX = "net/minecraft";
-        public static final String MINECRAFT_SERVER_JAR_NAME = "minecraft_server";
-        public static final String MINECRAFT_MAPPINGS_PREFIX = Libraries.MINECRAFT_PATH_PREFIX + "/mappings";
-        public static final String MINECRAFT_MAPPINGS_NAME = "server.txt";
-
-        public static final String SPONGE_NEXUS_DOWNLOAD_URL = "https://repo-new.spongepowered.org/service/rest/v1/search/assets?md5=%s&maven"
-            + ".groupId=%s&maven.artifactId=%s&maven.baseVersion=%s&maven.extension=jar";
-    }
-
-    public static final class ManifestAttributes {
-
-        public static final String ACCESS_WIDENER = "Access-Widener";
-        public static final String LAUNCH_TARGET = "Launch-Target";
+    @Override
+    public LoggerContext apply(final String name, final URI configLog) {
+        return new VanillaLoggerContext(name, null, configLog);
     }
 }

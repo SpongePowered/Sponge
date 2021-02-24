@@ -24,7 +24,6 @@
  */
 package org.spongepowered.vanilla.installer;
 
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -38,14 +37,12 @@ import java.nio.file.Paths;
 
 public final class Installer {
 
-    private final Logger logger;
     private final Path directory;
     private final LibraryManager libraryManager;
     private final ConfigurationLoader<CommentedConfigurationNode> loader;
     private final LauncherConfig config;
 
-    public Installer(final Logger logger, final Path directory) throws ConfigurateException {
-        this.logger = logger;
+    public Installer(final Path directory) throws ConfigurateException {
         this.directory = directory;
         final Path launcherConfigFile = this.directory.resolve("launcher.conf");
         this.loader = HoconConfigurationLoader.builder()
@@ -70,10 +67,6 @@ public final class Installer {
         // Write back to apply any additions to the file
         this.loader.save(node);
         return ret;
-    }
-
-    public Logger getLogger() {
-        return this.logger;
     }
 
     public Path getDirectory() {

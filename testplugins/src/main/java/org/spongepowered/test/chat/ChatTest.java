@@ -34,6 +34,8 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
@@ -57,6 +59,9 @@ import java.util.ResourceBundle;
 
 @Plugin("chattest")
 public class ChatTest implements LoadableModule {
+
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private static final BossBar INFO_BAR = BossBar.bossBar(Component.translatable("chattest.bars.info"), 1f, BossBar.Color.PINK,
                                                       BossBar.Overlay.PROGRESS);
 
@@ -113,11 +118,11 @@ public class ChatTest implements LoadableModule {
                       }).build(), "sendbook");
     }
 
-    public class Listeners {
+    public static class Listeners {
 
         @Listener(order = Order.LAST)
         public void onChat(final PlayerChatEvent event, final @Root ServerPlayer player) {
-            ChatTest.this.game.getServer().sendMessage(Component.translatable("chattest.response.chat",
+            ChatTest.LOGGER.info(Component.translatable("chattest.response.chat",
                                                                               event.getMessage(),
                                                                               player.require(Keys.DISPLAY_NAME)
                                                                                       .decorate(TextDecoration.BOLD)

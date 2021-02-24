@@ -22,30 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.installer;
+package org.spongepowered.vanilla.mixin.core.server.dedicated;
 
-import org.objectweb.asm.Opcodes;
+import net.minecraft.server.dedicated.DedicatedServer;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.vanilla.chat.console.VanillaConsole;
 
-public final class Constants {
+@Mixin(targets = "net.minecraft.server.dedicated.DedicatedServer$1")
+public abstract class DedicatedServer_1_Mixin_Vanilla implements Runnable {
 
-    public static final int ASM_VERSION = Opcodes.ASM9;
+    @Shadow(aliases = "this$0") @Final private DedicatedServer server;
 
-    public static final class Libraries {
-
-        public static final String MINECRAFT_VERSION_TARGET = "1.16.5";
-        public static final String MINECRAFT_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-        public static final String MINECRAFT_PATH_PREFIX = "net/minecraft";
-        public static final String MINECRAFT_SERVER_JAR_NAME = "minecraft_server";
-        public static final String MINECRAFT_MAPPINGS_PREFIX = Libraries.MINECRAFT_PATH_PREFIX + "/mappings";
-        public static final String MINECRAFT_MAPPINGS_NAME = "server.txt";
-
-        public static final String SPONGE_NEXUS_DOWNLOAD_URL = "https://repo-new.spongepowered.org/service/rest/v1/search/assets?md5=%s&maven"
-            + ".groupId=%s&maven.artifactId=%s&maven.baseVersion=%s&maven.extension=jar";
+    @Override
+    public void run() {
+        new VanillaConsole(this.server).start();
     }
 
-    public static final class ManifestAttributes {
-
-        public static final String ACCESS_WIDENER = "Access-Widener";
-        public static final String LAUNCH_TARGET = "Launch-Target";
-    }
 }
