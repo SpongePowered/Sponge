@@ -17,3 +17,5 @@ accessible field net/minecraft/world/item/crafting/Ingredient values [Lnet/minec
 accessible class net/minecraft/world/item/crafting/Ingredient$Value
 accessible class net/minecraft/world/level/biome/MultiNoiseBiomeSource$NoiseParameters
 accessible class net/minecraft/server/level/ServerLevel$EntityCallbacks
+accessible class net/minecraft/network/protocol/game/ServerboundInteractPacket$Action
+accessible class net/minecraft/network/protocol/game/ServerboundInteractPacket$ActionType

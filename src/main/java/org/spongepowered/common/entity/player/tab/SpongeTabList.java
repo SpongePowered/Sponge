@@ -46,6 +46,7 @@ import org.spongepowered.common.accessor.network.protocol.game.ClientboundTabLis
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -187,9 +188,8 @@ public final class SpongeTabList implements TabList {
      */
     @SuppressWarnings("ConstantConditions")
     void sendUpdate(final TabListEntry entry, final ClientboundPlayerInfoPacket.Action action) {
-        final ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket();
-        ((ClientboundPlayerInfoPacketAccessor) packet).accessor$action(action);
-        final ClientboundPlayerInfoPacket.PlayerUpdate data = packet.new PlayerUpdate(SpongeGameProfile.toMcProfile(entry.getProfile()),
+        final ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(action, new ArrayList<>());
+        final ClientboundPlayerInfoPacket.PlayerUpdate data = new ClientboundPlayerInfoPacket.PlayerUpdate(SpongeGameProfile.toMcProfile(entry.getProfile()),
             entry.getLatency(), (GameType) (Object) entry.getGameMode(),
             entry.getDisplayName().isPresent() ? SpongeAdventure.asVanilla(entry.getDisplayName().get()) : null);
         ((ClientboundPlayerInfoPacketAccessor) packet).accessor$entries().add(data);

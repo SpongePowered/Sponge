@@ -59,6 +59,7 @@ import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacketAccessor;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryAddSlotState;
@@ -286,12 +287,12 @@ public final class PacketPhase {
         this.packetTranslationMap.put(ServerboundChatPacket.class, packet -> PacketPhase.General.CHAT_COMMAND);
         this.packetTranslationMap.put(ServerboundInteractPacket.class, packet -> {
             final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packet;
-            final ServerboundInteractPacket.Action action = useEntityPacket.getAction();
-            if (action == ServerboundInteractPacket.Action.INTERACT) {
+            final ServerboundInteractPacket.ActionType action = ((ServerboundInteractPacketAccessor) useEntityPacket).accessor$action().getType();
+            if (action == ServerboundInteractPacket.ActionType.INTERACT) {
                 return PacketPhase.General.INTERACT_ENTITY;
-            } else if (action == ServerboundInteractPacket.Action.ATTACK) {
+            } else if (action == ServerboundInteractPacket.ActionType.ATTACK) {
                 return PacketPhase.General.ATTACK_ENTITY;
-            } else if (action == ServerboundInteractPacket.Action.INTERACT_AT) {
+            } else if (action == ServerboundInteractPacket.ActionType.INTERACT_AT) {
                 return PacketPhase.General.INTERACT_AT_ENTITY;
             } else {
                 return PacketPhase.General.INVALID;

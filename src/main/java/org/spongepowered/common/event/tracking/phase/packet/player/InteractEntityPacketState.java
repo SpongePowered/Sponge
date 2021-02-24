@@ -29,6 +29,9 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacketAccessor;
+import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacket_InteractionActionAccessor;
+import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacket_InteractionAtLocationActionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -56,11 +59,12 @@ public final class InteractEntityPacketState extends BasicPacketState {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packet;
         net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget((ServerLevel) player.level);
         if (entity != null) {
-            final ItemStack stack = ItemStackUtil.cloneDefensive(player.getItemInHand(useEntityPacket.getHand()));
+            final ServerboundInteractPacket_InteractionActionAccessor accessor = (ServerboundInteractPacket_InteractionActionAccessor) ((ServerboundInteractPacketAccessor) useEntityPacket).accessor$action();
+            final ItemStack stack = ItemStackUtil.cloneDefensive(player.getItemInHand(accessor.accessor$hand()));
             if (stack != null) {
                 context.itemUsed(stack);
             }
-            final HandType handType = (HandType) (Object) useEntityPacket.getHand();
+            final HandType handType = (HandType) (Object) accessor.accessor$hand();
             context.handUsed(handType);
         }
 

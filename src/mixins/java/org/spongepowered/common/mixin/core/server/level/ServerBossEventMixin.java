@@ -42,6 +42,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.mixin.core.world.BossEventMixin;
 
 import java.util.Set;
+import java.util.function.Function;
 
 @Mixin(ServerBossEvent.class)
 public abstract class ServerBossEventMixin extends BossEventMixin implements BossBar.Listener {
@@ -50,7 +51,7 @@ public abstract class ServerBossEventMixin extends BossEventMixin implements Bos
 
     private float impl$lastSentProgress = 0f;
 
-    @Shadow protected abstract void broadcast(final ClientboundBossEventPacket.Operation operation);
+    @Shadow protected abstract void broadcast(Function<BossEvent, ClientboundBossEventPacket> var1);
     @Shadow @Final private Set<ServerPlayer> players;
     @Shadow private boolean visible;
 
