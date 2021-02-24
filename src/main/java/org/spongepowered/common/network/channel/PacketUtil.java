@@ -46,11 +46,7 @@ import net.minecraft.resources.ResourceLocation;
 public final class PacketUtil {
 
     public static net.minecraft.network.protocol.Packet<?> createLoginPayloadResponse(final @Nullable ChannelBuf payload, final int transactionId) {
-        final ServerboundCustomQueryPacket packet = new ServerboundCustomQueryPacket();
-        final ServerboundCustomQueryPacketAccessor accessor = (ServerboundCustomQueryPacketAccessor) packet;
-        accessor.accessor$transactionId(transactionId);
-        accessor.accessor$data((FriendlyByteBuf) payload);
-        return packet;
+        return new ServerboundCustomQueryPacket(transactionId, (FriendlyByteBuf) payload);
     }
 
     public static net.minecraft.network.protocol.Packet<?> createLoginPayloadRequest(final ResourceKey channel, final ChannelBuf payload, final int transactionId) {
@@ -64,15 +60,9 @@ public final class PacketUtil {
 
     public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final ResourceKey channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
         if (side == EngineConnectionSide.CLIENT) {
-            final ServerboundCustomPayloadPacketAccessor packet = (ServerboundCustomPayloadPacketAccessor) new ServerboundCustomPayloadPacket();
-            packet.accessor$identifier((ResourceLocation) (Object) channel);
-            packet.accessor$data((FriendlyByteBuf) payload);
-            return (net.minecraft.network.protocol.Packet<?>) packet;
+            return new ServerboundCustomPayloadPacket((ResourceLocation) (Object) channel, (FriendlyByteBuf) payload);
         } else if (side == EngineConnectionSide.SERVER) {
-            final ClientboundCustomPayloadPacketAccessor packet = (ClientboundCustomPayloadPacketAccessor) new ClientboundCustomPayloadPacket();
-            packet.accessor$identifier((ResourceLocation) (Object) channel);
-            packet.accessor$data((FriendlyByteBuf) payload);
-            return (net.minecraft.network.protocol.Packet<?>) packet;
+            return new ClientboundCustomPayloadPacket((ResourceLocation) (Object) channel, (FriendlyByteBuf) payload);
         } else {
             throw new UnsupportedOperationException();
         }

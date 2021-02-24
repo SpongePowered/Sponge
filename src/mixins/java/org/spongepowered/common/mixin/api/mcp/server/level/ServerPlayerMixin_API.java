@@ -37,10 +37,14 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
-import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesPacket;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.server.MinecraftServer;
@@ -118,6 +122,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Shadow public abstract void shadow$sendMessage(final net.minecraft.network.chat.Component var1, final ChatType var2, final UUID var3);
     // @formatter:on
 
+    @Shadow private int containerCounter;
     private final TabList api$tabList = new SpongeTabList((net.minecraft.server.level.ServerPlayer) (Object) this);
     @Nullable private PlayerChatRouter api$chatRouter;
     @Nullable private WorldBorder api$worldBorder;
@@ -351,12 +356,9 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             if (this.api$worldBorder != null) {
                 ((net.minecraft.world.level.border.WorldBorder) this.api$worldBorder).addListener(
                         ((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener());
-                this.connection.send(
-                        new ClientboundSetBorderPacket((net.minecraft.world.level.border.WorldBorder) this.api$worldBorder,
-                                ClientboundSetBorderPacket.Type.INITIALIZE));
+                this.connection.send(new ClientboundInitializeBorderPacket((net.minecraft.world.level.border.WorldBorder) this.api$worldBorder));
             } else { //unset the border if null
-                this.connection.send(
-                        new ClientboundSetBorderPacket(this.shadow$getCommandSenderWorld().getWorldBorder(), ClientboundSetBorderPacket.Type.INITIALIZE));
+                this.connection.send(new ClientboundInitializeBorderPacket(this.shadow$getCommandSenderWorld().getWorldBorder()));
             }
         }
     }
@@ -399,7 +401,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        this.connection.send(new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.ACTIONBAR, SpongeAdventure.asVanilla(Objects.requireNonNull(message, "message"))));
+        this.connection.send(new ClientboundSetActionBarTextPacket(SpongeAdventure.asVanilla(Objects.requireNonNull(message, "message"))));
     }
 
     @Override
@@ -424,10 +426,14 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         }
         final Title.Times times = Objects.requireNonNull(title, "title").times();
         if (times != null) {
-            this.connection.send(new ClientboundSetTitlesPacket(this.api$durationToTicks(times.fadeIn()), this.api$durationToTicks(times.stay()), this.api$durationToTicks(times.fadeOut())));
+            this.connection.send(new ClientboundSetTitlesAnimationPacket(
+                this.api$durationToTicks(times.fadeIn()),
+                this.api$durationToTicks(times.stay()),
+                this.api$durationToTicks(times.fadeOut())
+            ));
         }
-        this.connection.send(new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.SUBTITLE, SpongeAdventure.asVanilla(title.subtitle())));
-        this.connection.send(new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.TITLE, SpongeAdventure.asVanilla(title.title())));
+        this.connection.send(new ClientboundSetSubtitleTextPacket(SpongeAdventure.asVanilla(title.subtitle())));
+        this.connection.send(new ClientboundSetTitleTextPacket(SpongeAdventure.asVanilla(title.title())));
     }
 
     @Override
@@ -435,7 +441,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        this.connection.send(new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.CLEAR, null));
+        this.connection.send(new ClientboundClearTitlesPacket(false));
     }
 
     @Override
@@ -443,7 +449,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        this.connection.send(new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.RESET, null));
+        this.connection.send(new ClientboundClearTitlesPacket(true));
     }
 
     @Override

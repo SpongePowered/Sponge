@@ -35,10 +35,6 @@ public interface ServerboundCustomQueryPacketAccessor {
 
     @Accessor("transactionId") int accessor$transactionId();
 
-    @Accessor("transactionId") void accessor$transactionId(final int transactionId);
-
     @Accessor("data") @Nullable FriendlyByteBuf accessor$data();
-
-    @Accessor("data") void accessor$data(final @Nullable FriendlyByteBuf data);
 
 }

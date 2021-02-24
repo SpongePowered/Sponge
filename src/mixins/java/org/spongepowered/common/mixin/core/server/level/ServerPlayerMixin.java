@@ -41,7 +41,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerCombatPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
@@ -668,15 +668,15 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         final boolean flag = this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !event.isMessageCancelled();
         if (flag) {
-            final net.minecraft.network.chat.Component itextcomponent = this.shadow$getCombatTracker().getDeathMessage();
-            this.connection.send(new ClientboundPlayerCombatPacket(this.shadow$getCombatTracker(), ClientboundPlayerCombatPacket.Event.ENTITY_DIED, itextcomponent), (p_212356_2_) -> {
+            final net.minecraft.network.chat.Component component = this.shadow$getCombatTracker().getDeathMessage();
+            this.connection.send(new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), component), (p_212356_2_) -> {
                 if (!p_212356_2_.isSuccess()) {
                     final int i = 256;
-                    final String s = itextcomponent.getString(256);
+                    final String s = component.getString(256);
                     final net.minecraft.network.chat.Component itextcomponent1 = new TranslatableComponent("death.attack.message_too_long", (new TextComponent(s)).withStyle(ChatFormatting.YELLOW));
                     final net.minecraft.network.chat.Component itextcomponent2 = new TranslatableComponent("death.attack.even_more_magic", this.shadow$getDisplayName())
                                     .withStyle((p_212357_1_) -> p_212357_1_.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, itextcomponent1)));
-                    this.connection.send(new ClientboundPlayerCombatPacket(this.shadow$getCombatTracker(), ClientboundPlayerCombatPacket.Event.ENTITY_DIED, itextcomponent2));
+                    this.connection.send(new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), itextcomponent2));
                 }
 
             });
@@ -684,10 +684,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             if (team != null && team.getDeathMessageVisibility() != Team.Visibility.ALWAYS) {
                 if (team.getDeathMessageVisibility() == Team.Visibility.HIDE_FOR_OTHER_TEAMS) {
                     this.server.getPlayerList().broadcastToTeam(
-                            (net.minecraft.server.level.ServerPlayer) (Object) this, itextcomponent);
+                            (net.minecraft.server.level.ServerPlayer) (Object) this, component);
                 } else if (team.getDeathMessageVisibility() == Team.Visibility.HIDE_FOR_OWN_TEAM) {
                     this.server.getPlayerList().broadcastToAllExceptTeam(
-                            (net.minecraft.server.level.ServerPlayer) (Object) this, itextcomponent);
+                            (net.minecraft.server.level.ServerPlayer) (Object) this, component);
                 }
             } else {
                 final Component message = event.getMessage();
@@ -700,7 +700,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             }
         } else {
             this.connection.send(
-                    new ClientboundPlayerCombatPacket(this.shadow$getCombatTracker(), ClientboundPlayerCombatPacket.Event.ENTITY_DIED));
+                    new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), TextComponent.EMPTY));
         }
 
         this.shadow$removeEntitiesOnShoulder();
@@ -814,7 +814,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         // Update locale on Channel, used for sending localized messages
         final Channel channel = ((ConnectionAccessor) this.connection.connection).accessor$channel();
         channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(newLocale);
-        SpongeAdventure.forEachBossBar(bar -> this.connection.send(new ClientboundBossEventPacket(ClientboundBossEventPacket.Operation.UPDATE_NAME, bar)));
+        SpongeAdventure.forEachBossBar(bar -> this.connection.send(ClientboundBossEventPacket.createUpdateNamePacket(bar)));
 
         // Update the fields we track ourselves
         this.impl$viewDistance = viewDistance;

@@ -25,8 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.world.entity.player;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemCooldowns;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -46,6 +48,8 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API {
     @Shadow public abstract ItemCooldowns shadow$getCooldowns();
     @Shadow public abstract Component shadow$getName();
     // @formatter:on
+
+    @Shadow protected abstract Vec3 maybeBackOffFromEdge(final Vec3 var1, final MoverType var2);
 
     public final boolean impl$isFake = ((PlatformEntityBridge) (net.minecraft.world.entity.player.Player) (Object) this).bridge$isFakePlayer();
 
