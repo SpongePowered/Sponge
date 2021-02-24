@@ -44,7 +44,7 @@ public final class SpongeNoiseGeneratorConfig {
         public NoiseConfig noiseConfig;
         public BlockState defaultBlock, defaultFluid;
         public int bedrockRoofY, bedrockFloorY, seaLevel;
-        public boolean aquifers, noiseCaves, grimstone;
+        public boolean aquifers, noiseCaves, deepslate;
 
         @Override
         public NoiseGeneratorConfig.Builder structureConfig(final StructureGenerationConfig config) {
@@ -101,8 +101,8 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
-        public NoiseGeneratorConfig.Builder grimstone(final boolean enableGrimstone) {
-            this.grimstone = enableGrimstone;
+        public NoiseGeneratorConfig.Builder deepslate(final boolean enableDeepslate) {
+            this.deepslate = enableDeepslate;
             return this;
         }
 
@@ -117,7 +117,7 @@ public final class SpongeNoiseGeneratorConfig {
             this.seaLevel = 63;
             this.aquifers = false;
             this.noiseCaves = false;
-            this.grimstone = false;
+            this.deepslate = false;
             return this;
         }
 
@@ -132,7 +132,7 @@ public final class SpongeNoiseGeneratorConfig {
             this.seaLevel = value.seaLevel();
             this.aquifers = value.aquifers();
             this.noiseCaves = value.noiseCaves();
-            this.grimstone = value.grimstone();
+            this.deepslate = value.deepslate();
             return this;
         }
 
@@ -141,7 +141,7 @@ public final class SpongeNoiseGeneratorConfig {
             final NoiseGeneratorSettings settings = NoiseGeneratorSettingsAccessor.invoker$new((StructureSettings) this.structureConfig,
                     (net.minecraft.world.level.levelgen.NoiseSettings) this.noiseConfig, (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
                     (net.minecraft.world.level.block.state.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, false,
-                    this.aquifers, this.noiseCaves, this.grimstone
+                    this.aquifers, this.noiseCaves, this.deepslate
                 );
             return (NoiseGeneratorConfig) (Object) settings;
         }

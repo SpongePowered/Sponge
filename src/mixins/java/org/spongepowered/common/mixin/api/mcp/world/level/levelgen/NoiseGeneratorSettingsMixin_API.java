@@ -100,7 +100,7 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     }
 
     @Override
-    public boolean grimstone() {
+    public boolean deepslate() {
         return this.shadow$isDeepslateEnabled();
     }
 
