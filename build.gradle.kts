@@ -1,3 +1,4 @@
+import java.nio.file.Files
 import java.security.MessageDigest
 import java.util.Locale
 
@@ -8,7 +9,6 @@ plugins {
     eclipse
     id("org.cadixdev.licenser") version "0.5.0"
     id("com.github.johnrengelman.shadow") version "6.1.0"
-    // id("org.spongepowered.mixin")
 }
 
 val apiProject = project.project("SpongeAPI")
@@ -468,6 +468,21 @@ project("SpongeVanilla") {
     val vanillaInstaller by sourceSets.register("installer") {
     }
 
+    val vanillaInstallerJava9 by sourceSets.register("installerJava9") {
+        this.java.setSrcDirs(setOf("src/installer/java9"))
+        compileClasspath += vanillaInstaller.compileClasspath
+        compileClasspath += vanillaInstaller.runtimeClasspath
+
+        tasks.named(compileJavaTaskName, JavaCompile::class) {
+            options.release.set(9)
+            if (JavaVersion.current() < JavaVersion.VERSION_11) {
+                javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(11)) })
+            }
+        }
+
+        dependencies.add(implementationConfigurationName, objects.fileCollection().from(vanillaInstaller.output.classesDirs))
+    }
+
     val vanillaMain by sourceSets.named("main") {
         // implementation (compile) dependencies
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
@@ -534,21 +549,30 @@ project("SpongeVanilla") {
         injectRepositories().set(false)
         runs {
             server {
-                workingDirectory().set(vanillaProject.file("run/"))
-                jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml")
                 args("--nogui", "--launchTarget", "sponge_server_dev")
-                mainClass().set("org.spongepowered.vanilla.applaunch.Main")
-                classpath().from(vanillaAppLaunch.runtimeClasspath, vanillaAppLaunch.output)
                 // ideaModule("${rootProject.name}.${project.name}.applaunch")
             }
 
             client {
+                args("--launchTarget", "sponge_client_dev")
+                // ideaModule("${rootProject.name}.${project.name}.applaunch")
+            }
+
+            configureEach {
                 workingDirectory().set(vanillaProject.file("run/"))
                 jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml")
-                args("--launchTarget", "sponge_client_dev")
+                allJvmArgumentProviders() += CommandLineArgumentProvider {
+                    if (JavaVersion.current() >= JavaVersion.VERSION_1_9) {
+                        listOf(
+                                "--add-opens=java.base/java.util.jar=ALL-UNNAMED", // ModLauncher
+                                "--add-opens=java.base/java.lang=ALL-UNNAMED" // Guice
+                        )
+                    } else {
+                        listOf()
+                    }
+                }
                 mainClass().set("org.spongepowered.vanilla.applaunch.Main")
                 classpath().from(vanillaAppLaunch.runtimeClasspath, vanillaAppLaunch.output)
-                // ideaModule("${rootProject.name}.${project.name}.applaunch")
             }
         }
         commonProject.sourceSets["main"].resources
@@ -665,9 +689,21 @@ project("SpongeVanilla") {
         }
         val vanillaInstallerJar by registering(Jar::class) {
             archiveClassifier.set("installer")
-            manifest.from(vanillaManifest)
+            manifest{
+                from(vanillaManifest)
+                attributes(
+                    "Premain-Class" to "org.spongepowered.vanilla.installer.Agent",
+                    "Agent-Class" to "org.spongepowered.vanilla.installer.Agent",
+                    "Launcher-Agent-Class" to "org.spongepowered.vanilla.installer.Agent",
+                    "Multi-Release" to true
+                )
+            }
             from(vanillaInstaller.output)
+            into("META-INF/versions/9/") {
+                from(vanillaInstallerJava9.output)
+            }
         }
+
         val vanillaAppLaunchJar by registering(Jar::class) {
             archiveClassifier.set("applaunch")
             manifest.from(vanillaManifest)
@@ -707,10 +743,13 @@ project("SpongeVanilla") {
             archiveClassifier.set("universal")
             manifest {
                 attributes(mapOf(
-                        "Access-Widener" to "common.accesswidener",
-                        "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
-                        "Launch-Target" to "sponge_server_prod",
-                        "Multi-Release" to true
+                    "Access-Widener" to "common.accesswidener",
+                    "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
+                    "Launch-Target" to "sponge_server_prod",
+                    "Multi-Release" to true,
+                    "Premain-Class" to "org.spongepowered.vanilla.installer.Agent",
+                    "Agent-Class" to "org.spongepowered.vanilla.installer.Agent",
+                    "Launcher-Agent-Class" to "org.spongepowered.vanilla.installer.Agent"
                 ))
                 from(vanillaManifest)
             }
@@ -729,6 +768,10 @@ project("SpongeVanilla") {
                 include(project(":"))
                 include(project(":SpongeAPI"))
             }
+
+            // We cannot have modules in a shaded jar
+            exclude("META-INF/versions/*/module-info.class")
+            exclude("module-info.class")
         }
         assemble {
             dependsOn(shadowJar)

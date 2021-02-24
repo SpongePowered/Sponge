@@ -102,6 +102,8 @@ public class BrigadierHighlighter<S> implements Highlighter {
         }
     }
 
+    // TODO(zml): not sure what these methods are used for, but seems fine to have them unimplemented?
+
     @Override
     public void setErrorPattern(final Pattern errorPattern) {
     }

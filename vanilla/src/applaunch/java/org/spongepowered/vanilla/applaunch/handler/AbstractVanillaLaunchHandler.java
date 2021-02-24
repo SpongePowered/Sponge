@@ -87,7 +87,9 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             // terminal console bits
             "org.jline.",
             "org.fusesource.",
-            "net.minecrell.terminalconsole."
+            "net.minecrell.terminalconsole.",
+            // Guice (for easier opening to reflection)
+            "com.google.inject."
     );
 
     /**

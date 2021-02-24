@@ -36,26 +36,21 @@ import org.spongepowered.vanilla.installer.model.mojang.VersionManifest;
 import org.tinylog.Logger;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public final class InstallerMain {
-
-    private static final Pattern CLASSPATH_SPLITTER = Pattern.compile(File.pathSeparator, Pattern.LITERAL);
 
     private final Installer installer;
 
@@ -87,49 +82,31 @@ public final class InstallerMain {
 
         Logger.info("Environment has been verified.");
 
-        final String javaBin = this.installer.getLauncherConfig().jvmDirectory.replace("${JAVA_HOME}", System.getProperty("java.home")) +
-            File.separator + "bin" + File.separator + "java";
-        final List<String> jvmArgs;
-        if (!this.installer.getLauncherConfig().jvmArgs.isEmpty()) {
-            jvmArgs = Arrays.asList(this.installer.getLauncherConfig().jvmArgs.split(" "));
-        } else {
-            jvmArgs = null;
-        }
-        final String depsClasspath = this.installer.getLibraryManager().getAll().values().stream().map(LibraryManager.Library::getFile).
-            map(Path::toAbsolutePath).map(Path::normalize).map(Path::toString).collect(Collectors.joining(File.pathSeparator));
-        final String launchClasspath = InstallerMain.CLASSPATH_SPLITTER.splitAsStream(System.getProperty("java.class.path"))
-                .map(it -> Paths.get(it).toAbsolutePath().toString())
-                .collect(Collectors.joining(File.pathSeparator));
-        final String classpath = launchClasspath + File.pathSeparator + depsClasspath;
-                // File.pathSeparator + remappedMinecraftJar.toAbsolutePath().normalize().toString();
-        final List<String> gameArgs = Arrays.asList(this.installer.getLauncherConfig().args.split(" "));
+        this.installer.getLibraryManager().getAll().values().stream()
+            .map(LibraryManager.Library::getFile)
+            .forEach(path -> {
+                Logger.debug("Adding jar {} to classpath", path);
+                Agent.addJarToClasspath(path);
+            });
 
-        Logger.debug("Setting classpath to: {}", classpath);
+        final List<String> gameArgs = new ArrayList<>(LauncherCommandLine.remainingArgs);
+        Collections.addAll(gameArgs, this.installer.getLauncherConfig().args.split(" "));
+
+        // Suppress illegal reflection warnings on newer java
+        Agent.crackModules();
 
         final String className = "org.spongepowered.vanilla.applaunch.Main";
-        final List<String> command = new ArrayList<>();
-        command.add(javaBin);
-        if (jvmArgs != null) {
-            command.addAll(jvmArgs);
-        }
-        command.add("-cp");
-        command.add(classpath);
-        command.add(className);
-        command.addAll(gameArgs);
+        InstallerMain.invokeMain(className, gameArgs.toArray(new String[0]));
+    }
 
-        final ProcessBuilder processBuilder = new ProcessBuilder(command);
-        final Process process = processBuilder.inheritIO().start();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                if (process.isAlive()) {
-                    process.destroy();
-                    process.waitFor();
-                }
-            } catch (final InterruptedException e) {
-                Logger.error("Waiting for server termination failed!", e);
-            }
-        }));
-        process.waitFor();
+    private static void invokeMain(final String className, final String[] args) {
+        try {
+            Class.forName(className)
+                .getMethod("main", String[].class)
+                .invoke(null, (Object) args);
+        } catch (final ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+            Logger.error(ex, "Failed to invoke main class {} due to an error", className);
+        }
     }
 
     private Version downloadMinecraftManifest() throws IOException {

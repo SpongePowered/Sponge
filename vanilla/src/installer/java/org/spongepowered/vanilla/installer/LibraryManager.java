@@ -113,6 +113,7 @@ public final class LibraryManager {
                 if (Files.exists(depFile)) {
                     if (!checkHashes) {
                         Logger.info("Detected existing '{}', skipping hash checks...", depFile);
+                        downloadedDeps.add(new Library(dependency.group + "-" + dependency.module, depFile));
                         return null;
                     }
 

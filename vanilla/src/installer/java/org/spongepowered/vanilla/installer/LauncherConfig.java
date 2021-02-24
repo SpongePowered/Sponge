@@ -31,10 +31,6 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 @ConfigSerializable
 public final class LauncherConfig {
 
-    @Setting("jvm-directory")
-    public String jvmDirectory = "${JAVA_HOME}";
-    @Setting("jvm-args")
-    public String jvmArgs = "";
     @Setting("args")
     public String args = "--nogui";
     @Setting("libraries-directory")
