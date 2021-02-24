@@ -25,7 +25,7 @@
 package org.spongepowered.vanilla.chat;
 
 import org.apache.logging.log4j.core.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.async.AsyncLoggerContext;
 import org.apache.logging.log4j.message.MessageFactory;
 
 import java.net.URI;
@@ -34,7 +34,7 @@ import java.net.URI;
  * A custom logger context that overrides the message factory for loggers
  * created within the ModLauncher class loader.
  */
-public class VanillaLoggerContext extends LoggerContext {
+public class VanillaLoggerContext extends AsyncLoggerContext {
 
     public VanillaLoggerContext(final String name, final Object externalContext, final URI configLocn) {
         super(name, externalContext, configLocn);

@@ -669,6 +669,7 @@ project("SpongeVanilla") {
         vanillaAppLaunchConfig("javax.inject:javax.inject:1")
         vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
+        vanillaAppLaunchConfig("com.lmax:disruptor:3.4.2")
         vanillaAppLaunchConfig("com.zaxxer:HikariCP:2.6.3")
         vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
         vanillaAppLaunchConfig(platform("org.spongepowered:configurate-bom:4.0.0"))

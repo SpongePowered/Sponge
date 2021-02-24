@@ -26,6 +26,7 @@ package org.spongepowered.vanilla.applaunch.util;
 
 import cpw.mods.modlauncher.TransformingClassLoader;
 import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.async.AsyncLoggerContextSelector;
 import org.apache.logging.log4j.core.impl.ContextAnchor;
 import org.apache.logging.log4j.core.selector.ClassLoaderContextSelector;
 import org.apache.logging.log4j.util.StackLocatorUtil;
@@ -45,7 +46,7 @@ import java.util.function.BiFunction;
  * deliver a different context within the transformed environment than
  * outside it.</p>
  */
-public class VanillaLoggerContextSelector extends ClassLoaderContextSelector {
+public class VanillaLoggerContextSelector extends AsyncLoggerContextSelector {
 
     private static final String CONTEXT_PROVIDER_CLASS = "org.spongepowered.vanilla.chat.VanillaLoggerContextProvider";
 
