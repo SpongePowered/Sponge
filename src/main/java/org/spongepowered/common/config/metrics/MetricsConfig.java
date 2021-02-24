@@ -56,8 +56,7 @@ public final class MetricsConfig implements Config {
         return pluginState == null ? Tristate.UNDEFINED : pluginState;
     }
 
-    @Override
-    public ConfigurationTransformation getTransformation() {
+    public static ConfigurationTransformation transformation() {
         return ConfigurationTransformation.versionedBuilder()
                 .makeVersion(1, b ->
                         b.addAction(NodePath.path("metrics"), (path, value) -> new Object[0]))

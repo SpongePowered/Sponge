@@ -47,7 +47,7 @@ public final class SpongeMetricsConfigManager implements MetricsConfigManager {
         // is loaded. That load is performed by the sponge non-inheritable
         // configuration which is loaded way earlier in the lifecycle since it
         // is used to configure mixin plugins.
-        this.metrics = SpongeConfigs.create(new MetricsConfig(), MetricsConfig.FILE_NAME);
+        this.metrics = SpongeConfigs.create(MetricsConfig.class, MetricsConfig::transformation, MetricsConfig.FILE_NAME);
     }
 
     public CompletableFuture<CommentedConfigurationNode> savePluginsInConfig(final Map<String, Tristate> entries) {

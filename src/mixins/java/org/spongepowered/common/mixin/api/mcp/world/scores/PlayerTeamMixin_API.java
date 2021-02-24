@@ -40,7 +40,6 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
-import org.spongepowered.common.bridge.scoreboard.TeamBridge;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -89,7 +88,7 @@ public abstract class PlayerTeamMixin_API implements Team {
 
     @Override
     public NamedTextColor getColor() {
-        return ((TeamBridge) this).bridge$getColor();
+        return ((ScorePlayerTeamBridge) this).bridge$getColor();
     }
 
     @Override
@@ -111,8 +110,6 @@ public abstract class PlayerTeamMixin_API implements Team {
     public Component getSuffix() {
         return ((ScorePlayerTeamBridge) this).bridge$getSuffix();
     }
-
-    @Shadow public abstract void setColor(ChatFormatting color);
 
     @Override
     public void setSuffix(final Component suffix) {

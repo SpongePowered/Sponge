@@ -65,7 +65,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
 
     private int impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_NOT_STARTED;
 
-    @Inject(method = "handleCustomQueryPacket", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "handleCustomQueryPacket", at = @At("HEAD"), cancellable = true)
     private void onResponsePayload(final ServerboundCustomQueryPacket packet, final CallbackInfo ci) {
         ci.cancel();
 
@@ -109,7 +109,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
         ((SpongeChannelRegistry) Sponge.getChannelRegistry()).sendChannelRegistrations(connection);
     }
 
-    @Inject(method = "handleHello", at = @At(value = "RETURN"))
+    @Inject(method = "handleHello", at = @At("RETURN"))
     private void impl$onProcessLoginStart(final ServerboundHelloPacket packet, final CallbackInfo ci) {
         if (this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
             this.state = ServerLoginPacketListenerImpl.State.NEGOTIATING;

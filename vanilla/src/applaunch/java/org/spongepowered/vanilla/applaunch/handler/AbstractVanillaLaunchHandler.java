@@ -83,7 +83,13 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             "org.spongepowered.vanilla.applaunch.",
             // configurate 4
             "io.leangen.geantyref.",
-            "org.spongepowered.configurate."
+            "org.spongepowered.configurate.",
+            // terminal console bits
+            "org.jline.",
+            "org.fusesource.",
+            "net.minecrell.terminalconsole.",
+            // Guice (for easier opening to reflection)
+            "com.google.inject."
     );
 
     /**

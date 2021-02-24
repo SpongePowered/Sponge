@@ -43,6 +43,8 @@ public interface ScorePlayerTeamBridge {
 
     void bridge$setSuffix(Component suffix);
 
+    NamedTextColor bridge$getColor();
+
     void bridge$setColor(NamedTextColor color);
 
     Audience bridge$getTeamChannel(ServerPlayer player);

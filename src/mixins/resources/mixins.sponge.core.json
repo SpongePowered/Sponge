@@ -64,7 +64,7 @@
         "server.commands.SpreadPlayersCommandMixin",
         "server.commands.TeleportCommandMixin",
         "server.dedicated.DedicatedPlayerListMixin",
-        "server.level.ChunkMap$TrackedEntityMixin",
+        "server.level.ChunkMap_TrackedEntityMixin",
         "server.level.ChunkMapMixin",
         "server.level.ServerBossEventMixin",
         "server.level.ServerChunkCacheMixin",

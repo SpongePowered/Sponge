@@ -286,14 +286,14 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
             return false;
         }
         final SpongeLocation<?, ?> that = (SpongeLocation<?, ?>) o;
-        return this.worldRef.equals(that.worldRef) &&
+        return this.worldRef.get().equals(that.worldRef.get()) &&
                    this.position.equals(that.position) &&
                    this.blockPosition.equals(that.blockPosition);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.worldRef, this.position, this.blockPosition);
+        return Objects.hash(this.worldRef.get(), this.position, this.blockPosition);
     }
 
     @Override

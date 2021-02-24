@@ -180,6 +180,11 @@ public abstract class PlayerTeamMixin implements ScorePlayerTeamBridge {
     }
 
     @Override
+    public NamedTextColor bridge$getColor() {
+        return this.bridge$Color;
+    }
+
+    @Override
     public void bridge$setColor(final NamedTextColor color) {
         this.bridge$Color = color;
         this.color = SpongeAdventure.asVanilla(color);

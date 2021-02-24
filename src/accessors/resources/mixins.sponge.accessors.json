@@ -5,6 +5,7 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "client": [
+        "client.KeyMappingAccessor",
         "client.gui.components.AbstractSelectionListAccessor",
         "client.multiplayer.ClientLevelAccessor",
         "world.level.entity.TransientEntitySectionManagerAccessor"

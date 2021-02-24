@@ -32,6 +32,7 @@ import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
 import org.spongepowered.common.config.customdata.CustomDataConfig;
+import org.spongepowered.common.config.inheritable.BaseConfig;
 import org.spongepowered.common.config.inheritable.GlobalConfig;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
@@ -63,14 +64,14 @@ public final class SpongeGameConfigs {
 
     public static ConfigHandle<CustomDataConfig> getCustomData() {
         if (SpongeGameConfigs.customDataConfigAdapter == null) {
-            SpongeGameConfigs.customDataConfigAdapter = SpongeConfigs.create(new CustomDataConfig(), CustomDataConfig.FILE_NAME);
+            SpongeGameConfigs.customDataConfigAdapter = SpongeConfigs.create(CustomDataConfig.class, null, CustomDataConfig.FILE_NAME);
         }
         return SpongeGameConfigs.customDataConfigAdapter;
     }
 
     public static ConfigHandle<TrackerConfig> getTracker() {
         if (SpongeGameConfigs.trackerConfigAdapter == null) {
-            SpongeGameConfigs.trackerConfigAdapter = SpongeConfigs.create(new TrackerConfig(), TrackerConfig.FILE_NAME);
+            SpongeGameConfigs.trackerConfigAdapter = SpongeConfigs.create(TrackerConfig.class, null, TrackerConfig.FILE_NAME);
         }
         return SpongeGameConfigs.trackerConfigAdapter;
     }
@@ -114,7 +115,7 @@ public final class SpongeGameConfigs {
             }
         }
         try {
-            final InheritableConfigHandle<WorldConfig> config = new InheritableConfigHandle<>(new WorldConfig(), SpongeConfigs.createLoader(configPath),
+            final InheritableConfigHandle<WorldConfig> config = new InheritableConfigHandle<>(WorldConfig.class, BaseConfig::transformation, SpongeConfigs.createLoader(configPath),
                     SpongeGameConfigs.getGlobalInheritable());
             config.load();
             return config;
@@ -152,13 +153,14 @@ public final class SpongeGameConfigs {
             try {
                 if (SpongeGameConfigs.global == null) {
                     try {
-                        SpongeGameConfigs.global = new InheritableConfigHandle<>(new GlobalConfig(),
+                        SpongeGameConfigs.global = new InheritableConfigHandle<>(GlobalConfig.class,
+                                BaseConfig::transformation,
                                 SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(GlobalConfig.FILE_NAME)), null);
                         SpongeGameConfigs.global.load();
                     } catch (final IOException e) {
                         SpongeGameConfigs.LOGGER.error("Unable to load global world configuration in {}. Sponge will run with default settings",
                                             GlobalConfig.FILE_NAME, e);
-                        SpongeGameConfigs.global = new InheritableConfigHandle<>(new GlobalConfig(), null);
+                        SpongeGameConfigs.global = new InheritableConfigHandle<>(GlobalConfig.class, null);
                     }
                 }
             } finally {
@@ -169,6 +171,6 @@ public final class SpongeGameConfigs {
     }
 
     public static InheritableConfigHandle<WorldConfig> createDetached() {
-        return new InheritableConfigHandle<>(new WorldConfig(), SpongeGameConfigs.getGlobalInheritable());
+        return new InheritableConfigHandle<>(WorldConfig.class, SpongeGameConfigs.getGlobalInheritable());
     }
 }

@@ -27,6 +27,7 @@ package org.spongepowered.vanilla.applaunch;
 import cpw.mods.modlauncher.Launcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fusesource.jansi.AnsiConsole;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
@@ -41,6 +42,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class Main {
+
+    static {
+        AnsiConsole.systemInstall();
+    }
 
     private static Main instance;
 

@@ -31,5 +31,6 @@ public final class GenericDataProviders extends DataProviderRegistratorBuilder {
     @Override
     public void registerProviders() {
         INameableData.register(this.registrator);
+        CreatorTrackedData.register(this.registrator);
     }
 }

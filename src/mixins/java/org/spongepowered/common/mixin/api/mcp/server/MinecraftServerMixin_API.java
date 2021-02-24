@@ -121,9 +121,8 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     @Shadow protected abstract boolean shadow$isSpawningMonsters();
     @Shadow public abstract boolean shadow$isSpawningAnimals();
     @Shadow public abstract boolean shadow$isNetherEnabled();
+    @Shadow public abstract Commands shadow$getCommands();
     // @formatter:on
-
-    @Shadow public abstract Commands getCommands();
 
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
@@ -341,7 +340,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
 
     @Override
     public SpongeCommandManager getCommandManager() {
-        return ((CommandsBridge) this.getCommands()).bridge$commandManager();
+        return ((CommandsBridge) this.shadow$getCommands()).bridge$commandManager();
     }
 
     public Optional<ResourcePack> server$getResourcePack() {

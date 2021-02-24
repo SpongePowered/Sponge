@@ -24,23 +24,5 @@
  */
 package org.spongepowered.common.applaunch.config.core;
 
-import org.spongepowered.configurate.transformation.ConfigurationTransformation;
-
 public interface Config {
-
-    /**
-     * Get a transformation that will be applied to this configuration on load.
-     *
-     * <p>We assume this is a versioned transformation. Configurate 4.0 will be
-     * able to enforce this.</p>
-     *
-     * <p>When determining versions, round to the nearest 100 and add 100 for
-     * every major release. This allows for future minor releases to add
-     * configuration changes in previous major releases.</p>
-     *
-     * @return A transformation instance
-     */
-    default ConfigurationTransformation getTransformation() {
-        return ConfigurationTransformation.empty();
-    }
 }

@@ -28,6 +28,7 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerResources;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
@@ -35,6 +36,8 @@ import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,20 +46,37 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.vanilla.VanillaServer;
 import org.spongepowered.vanilla.hooks.VanillaPacketHooks;
 
 import java.net.Proxy;
+import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
 
     // @formatter:off
+    @Shadow @Final private static Logger LOGGER;
+
     @Shadow protected abstract void shadow$detectBundledResources();
     @Shadow protected abstract void loadLevel();
     @Shadow public abstract boolean shadow$isRunning();
     // @formatter:on
+
+
+    /**
+     * Render localized/formatted chat components
+     *
+     * @param input original component
+     */
+    @Inject(method = "sendMessage", at = @At("HEAD"), cancellable = true)
+    private void impl$useTranslatingLogger(final Component input, final UUID sender, final CallbackInfo ci) {
+        MinecraftServerMixin_Vanilla.LOGGER.info(input);
+        ci.cancel();
+    }
+
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void vanilla$setPacketHooks(Thread p_i232576_1_, RegistryAccess.RegistryHolder p_i232576_2_, LevelStorageSource.LevelStorageAccess p_i232576_3_,

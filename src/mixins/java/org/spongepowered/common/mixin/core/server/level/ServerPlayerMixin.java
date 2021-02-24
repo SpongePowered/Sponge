@@ -113,6 +113,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
+import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.HumanEntity;
@@ -763,10 +764,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         // Copy Sponge data
         if (oldPlayer instanceof DataCompoundHolder) {
             final DataCompoundHolder oldEntity = (DataCompoundHolder) oldPlayer;
-            if (oldEntity.data$hasSpongeData()) {
-                final CompoundTag compound = oldEntity.data$getCompound();
-                ((DataCompoundHolder) this).data$setCompound(compound);
-            }
+            DataUtil.syncDataToTag(oldEntity);
+            final CompoundTag compound = oldEntity.data$getCompound();
+            ((DataCompoundHolder) this).data$setCompound(compound);
+            DataUtil.syncTagToData(this);
         }
 
         // Update boss bars

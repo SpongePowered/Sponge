@@ -34,37 +34,6 @@ public interface DataCompoundHolder {
 
     void data$setCompound(CompoundTag nbt);
 
-    default boolean data$hasForgeData() {
-        if (this.data$getCompound() == null) {
-            return false;
-        }
-        return this.data$getCompound().contains(Constants.Forge.FORGE_DATA);
-    }
-
-    default CompoundTag data$getForgeData() {
-        if (this.data$getCompound() == null) {
-            this.data$setCompound(new CompoundTag());
-        }
-        CompoundTag forgeCompound = this.data$getCompound().getCompound(Constants.Forge.FORGE_DATA);
-        if (forgeCompound.isEmpty()) {
-            this.data$getCompound().put(Constants.Forge.FORGE_DATA, forgeCompound);
-        }
-        return forgeCompound;
-    }
-
-    default boolean data$hasSpongeData() {
-        return this.data$hasForgeData() && this.data$getForgeData().contains(Constants.Sponge.Data.V2.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
-    }
-
-    default CompoundTag data$getSpongeData() {
-        final CompoundTag spongeCompound = this.data$getForgeData();
-        final CompoundTag dataCompound = spongeCompound.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);
-        if (dataCompound.isEmpty()) {
-            spongeCompound.put(Constants.Sponge.Data.V2.SPONGE_DATA, dataCompound);
-        }
-        return dataCompound;
-    }
-
     /**
      * Gets the {@link NBTDataType} which this
      * nbt data holder contains data for.

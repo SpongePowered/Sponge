@@ -14,13 +14,14 @@
         "client.server.IntegratedServerMixin_Vanilla"
     ],
     "server": [
-        "server.dedicated.DedicatedServerMixin_Vanilla"
+        "server.dedicated.DedicatedServerMixin_Vanilla",
+        "server.dedicated.DedicatedServer_1_Mixin_Vanilla"
     ],
     "mixins": [
         "CrashReportMixin_Vanilla",
         "entity.player.EntityMixin_Vanilla",
         "server.level.ServerPlayerMixin_Vanilla",
-        "network.loginnet.minecraft.server.network.ServerLoginPacketListenerImpl_Mixin_Vanilla",
+        "server.network.ServerLoginPacketListenerImpl_1_Mixin_Vanilla",
         "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",

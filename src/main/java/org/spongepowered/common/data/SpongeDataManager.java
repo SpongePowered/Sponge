@@ -30,6 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataHolderBuilder;
 import org.spongepowered.api.data.DataManager;
@@ -55,12 +56,12 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotDataBuilder;
 import org.spongepowered.common.data.key.KeyBasedDataListener;
 import org.spongepowered.common.data.persistence.datastore.DataStoreRegistry;
 import org.spongepowered.common.data.provider.CustomDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
-import org.spongepowered.common.data.value.MutableSpongeMapValue;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
@@ -322,6 +323,7 @@ public final class SpongeDataManager implements DataManager {
         this.registerBuilder(EntitySnapshot.class, new SpongeEntitySnapshotBuilder());
         this.registerBuilder(EntityArchetype.class, new SpongeEntityArchetypeBuilder());
         this.registerBuilder(SpongePlayerData.class, new SpongePlayerDataBuilder());
+        this.registerBuilder(BlockState.class, new SpongeBlockStateBuilder());
     }
 
     public Optional<DataStore> getDataStore(ResourceKey key, Class<? extends DataHolder> typeToken) {

@@ -31,6 +31,7 @@ import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.registry.RegistryTypes;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -91,7 +92,7 @@ public class SpongeItemStackComparatorFactory implements ItemStackComparators.Fa
 
         @Override
         public int compare(ItemStack o1, ItemStack o2) {
-            final Set<Value.Immutable<?>> values = o2.getValues();
+            final Set<Value.Immutable<?>> values = new HashSet<>(o2.getValues());
             for (Value.Immutable<?> value : o1.getValues()) {
                 if (values.contains(value)) {
                     values.remove(value);

@@ -35,6 +35,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.util.Mth;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.manager.CommandMapping;
@@ -45,7 +46,9 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
@@ -80,6 +83,7 @@ public class SpongeCommand {
 
     private final Parameter.Key<PluginContainer> pluginContainerKey = Parameter.key("plugin", PluginContainer.class);
     private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", CommandMapping.class);
+    private final Parameter.Key<ServerWorld> worldKey = Parameter.key("world", ServerWorld.class);
 
     @Nullable private Component versionText = null;
 
@@ -155,6 +159,26 @@ public class SpongeCommand {
                 .setExecutor(this::whichExecutor)
                 .build();
 
+        // /sponge reload global|world [id]
+        final Command.Parameterized reloadGlobalCommand = Command.builder()
+            .setPermission("sponge.command.reload.global")
+            .setShortDescription(Component.text("Reload Sponge's common configuration"))
+            .setExecutor(this::reloadGlobalExecutor)
+            .build();
+
+        final Command.Parameterized reloadWorldCommand = Command.builder()
+            .setPermission("sponge.command.reload.world")
+            .parameter(Parameter.world().setKey(this.worldKey).build())
+            .setShortDescription(Component.text("Reload Sponge's configuration for a single world"))
+            .setExecutor(this::reloadWorldExecutor)
+            .build();
+
+        final Command.Parameterized reloadCommand = Command.builder()
+            .child(reloadGlobalCommand, "global")
+            .child(reloadWorldCommand, "world")
+            .build();
+
+
         // /sponge
         final Command.Builder commandBuilder = Command.builder()
                 .setPermission("sponge.command.root")
@@ -166,7 +190,8 @@ public class SpongeCommand {
                 .child(timingsCommand, "timings")
                 .child(tpsCommand, "tps")
                 .child(versionCommand, "version")
-                .child(whichCommand, "which");
+                .child(whichCommand, "which")
+                .child(reloadCommand, "reload");
 
         this.additionalActions(commandBuilder);
         return commandBuilder.build();
@@ -498,6 +523,40 @@ public class SpongeCommand {
                 this.title("Owned by: "),
                 this.hl(mapping.getPlugin().getMetadata().getName().orElseGet(() -> mapping.getPlugin().getMetadata().getId())))
                 .build());
+        return CommandResult.success();
+    }
+
+    private @NonNull CommandResult reloadGlobalExecutor(final CommandContext context) {
+        SpongeConfigs.getCommon().reload()
+            .whenComplete(($, error) -> {
+                if (error != null) {
+                    context.sendMessage(Identity.nil(), Component.text("Failed to reload global configuration. See the console for details.", NamedTextColor.RED));
+                    SpongeCommon.getLogger().error("Failed to reload global configuration", error);
+                } else {
+                    context.sendMessage(Identity.nil(), Component.text("Successfully reloaded global configuration!", NamedTextColor.GREEN));
+                }
+            });
+        return CommandResult.success();
+    }
+
+    private @NonNull CommandResult reloadWorldExecutor(final CommandContext context) {
+        final ServerWorld target = context.requireOne(this.worldKey);
+        final ResourceKey worldId = target.getKey();
+        SpongeGameConfigs.getForWorld(target).reload()
+            .whenComplete(($, error) -> {
+            if (error != null) {
+                context.sendMessage(Identity.nil(), Component.text(b ->
+                    b.content("Failed to reload configuration for world ")
+                        .append(Component.text(worldId.toString(), Style.style(TextDecoration.BOLD)))
+                        .append(Component.text(". See the console for details."))
+                        .color(NamedTextColor.RED)));
+                SpongeCommon.getLogger().error("Failed to reload configuration of world '{}'", worldId, error);
+            } else {
+                context.sendMessage(Identity.nil(), Component.text("Successfully reloaded configuration for world ", NamedTextColor.GREEN)
+                    .append(Component.text(worldId.toString(), Style.style(TextDecoration.BOLD)))
+                    .append(Component.text("!")));
+            }
+        });
         return CommandResult.success();
     }
 

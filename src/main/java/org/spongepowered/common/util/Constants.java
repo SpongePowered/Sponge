@@ -166,7 +166,6 @@ public final class Constants {
         public static final DataQuery DATA_MANIPULATORS = of("Data");
         // Snapshots
         public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
-        public static final DataQuery SNAPSHOT_TILE_DATA = of("TileEntityData");
 
         /**
          * Modifies bits in an integer.
@@ -356,6 +355,7 @@ public final class Constants {
             public static final String TILE_ENTITY_POSITION_X = "x";
             public static final String TILE_ENTITY_POSITION_Y = "y";
             public static final String TILE_ENTITY_POSITION_Z = "z";
+            public static final DataQuery WORLD_UUID = DataQuery.of("WorldUuid"); // legacy data
         }
 
 

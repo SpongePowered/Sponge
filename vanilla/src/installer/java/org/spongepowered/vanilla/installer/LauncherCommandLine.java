@@ -25,13 +25,16 @@
 package org.spongepowered.vanilla.installer;
 
 import joptsimple.ArgumentAcceptingOptionSpec;
+import joptsimple.NonOptionArgumentSpec;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.util.PathConverter;
 import joptsimple.util.PathProperties;
+import org.spongepowered.configurate.util.UnmodifiableCollections;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 public final class LauncherCommandLine {
 
@@ -42,8 +45,14 @@ public final class LauncherCommandLine {
     private static final ArgumentAcceptingOptionSpec<Path> LIBRARIES_DIRECTORY_ARG = LauncherCommandLine.PARSER.accepts("librariesDir",
         "Alternative libraries directory").withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING))
         .defaultsTo(Paths.get("libraries"));
+    private static final NonOptionArgumentSpec<String> REMAINDER = LauncherCommandLine.PARSER.nonOptions().ofType(String.class);
+
+    static {
+        LauncherCommandLine.PARSER.allowsUnrecognizedOptions();
+    }
 
     public static Path installerDirectory, librariesDirectory;
+    public static List<String> remainingArgs;
 
     private LauncherCommandLine() {
     }
@@ -52,5 +61,6 @@ public final class LauncherCommandLine {
         final OptionSet options = LauncherCommandLine.PARSER.parse(args);
         LauncherCommandLine.installerDirectory = options.valueOf(LauncherCommandLine.INSTALLER_DIRECTORY_ARG);
         LauncherCommandLine.librariesDirectory = options.valueOf(LauncherCommandLine.LIBRARIES_DIRECTORY_ARG);
+        LauncherCommandLine.remainingArgs = UnmodifiableCollections.copyOf(options.valuesOf(LauncherCommandLine.REMAINDER));
     }
 }

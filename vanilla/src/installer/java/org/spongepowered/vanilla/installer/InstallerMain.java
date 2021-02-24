@@ -26,7 +26,6 @@ package org.spongepowered.vanilla.installer;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import org.apache.logging.log4j.LogManager;
 import org.cadixdev.atlas.Atlas;
 import org.cadixdev.bombe.asm.jar.JarEntryRemappingTransformer;
 import org.cadixdev.lorenz.MappingSet;
@@ -34,41 +33,30 @@ import org.cadixdev.lorenz.asm.LorenzRemapper;
 import org.cadixdev.lorenz.io.proguard.ProGuardReader;
 import org.spongepowered.vanilla.installer.model.mojang.Version;
 import org.spongepowered.vanilla.installer.model.mojang.VersionManifest;
+import org.tinylog.Logger;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public final class InstallerMain {
-
-    private static final Pattern CLASSPATH_SPLITTER = Pattern.compile(File.pathSeparator, Pattern.LITERAL);
-
-    static {
-        final String log4jConfig = System.getProperty("log4j.configurationFile");
-        if (log4jConfig == null || log4jConfig.isEmpty()) {
-            System.setProperty("log4j.configurationFile", "log4j2_launcher.xml");
-        }
-    }
 
     private final Installer installer;
 
     public InstallerMain(final String[] args) throws Exception {
         LauncherCommandLine.configure(args);
-        this.installer = new Installer(LogManager.getLogger("Installer"), LauncherCommandLine.installerDirectory);
+        this.installer = new Installer(LauncherCommandLine.installerDirectory);
     }
 
     public static void main(final String[] args) throws Exception {
@@ -92,55 +80,37 @@ public final class InstallerMain {
         this.installer.getLibraryManager().addLibrary(new LibraryManager.Library("minecraft", remappedMinecraftJar));
         this.installer.getLibraryManager().finishedProcessing();
 
-        this.installer.getLogger().info("Environment has been verified.");
+        Logger.info("Environment has been verified.");
 
-        final String javaBin = this.installer.getLauncherConfig().jvmDirectory.replace("${JAVA_HOME}", System.getProperty("java.home")) +
-            File.separator + "bin" + File.separator + "java";
-        final List<String> jvmArgs;
-        if (!this.installer.getLauncherConfig().jvmArgs.isEmpty()) {
-            jvmArgs = Arrays.asList(this.installer.getLauncherConfig().jvmArgs.split(" "));
-        } else {
-            jvmArgs = null;
-        }
-        final String depsClasspath = this.installer.getLibraryManager().getAll().values().stream().map(LibraryManager.Library::getFile).
-            map(Path::toAbsolutePath).map(Path::normalize).map(Path::toString).collect(Collectors.joining(File.pathSeparator));
-        final String launchClasspath = CLASSPATH_SPLITTER.splitAsStream(System.getProperty("java.class.path"))
-                .map(it -> Paths.get(it).toAbsolutePath().toString())
-                .collect(Collectors.joining(File.pathSeparator));
-        final String classpath = launchClasspath + File.pathSeparator + depsClasspath +
-                File.pathSeparator + remappedMinecraftJar.toAbsolutePath().normalize().toString();
-        final List<String> gameArgs = Arrays.asList(this.installer.getLauncherConfig().args.split(" "));
+        this.installer.getLibraryManager().getAll().values().stream()
+            .map(LibraryManager.Library::getFile)
+            .forEach(path -> {
+                Logger.debug("Adding jar {} to classpath", path);
+                Agent.addJarToClasspath(path);
+            });
 
-        this.installer.getLogger().debug("Setting classpath to: " + classpath);
+        final List<String> gameArgs = new ArrayList<>(LauncherCommandLine.remainingArgs);
+        Collections.addAll(gameArgs, this.installer.getLauncherConfig().args.split(" "));
+
+        // Suppress illegal reflection warnings on newer java
+        Agent.crackModules();
 
         final String className = "org.spongepowered.vanilla.applaunch.Main";
-        final List<String> command = new ArrayList<>();
-        command.add(javaBin);
-        if (jvmArgs != null) {
-            command.addAll(jvmArgs);
-        }
-        command.add("-cp");
-        command.add(classpath);
-        command.add(className);
-        command.addAll(gameArgs);
+        InstallerMain.invokeMain(className, gameArgs.toArray(new String[0]));
+    }
 
-        final ProcessBuilder processBuilder = new ProcessBuilder(command);
-        final Process process = processBuilder.inheritIO().start();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                if (process.isAlive()) {
-                    process.destroy();
-                    process.waitFor();
-                }
-            } catch (final InterruptedException e) {
-                this.installer.getLogger().error("Waiting for server termination failed!", e);
-            }
-        }));
-        process.waitFor();
+    private static void invokeMain(final String className, final String[] args) {
+        try {
+            Class.forName(className)
+                .getMethod("main", String[].class)
+                .invoke(null, (Object) args);
+        } catch (final ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+            Logger.error(ex, "Failed to invoke main class {} due to an error", className);
+        }
     }
 
     private Version downloadMinecraftManifest() throws IOException {
-        this.installer.getLogger().info("Downloading the Minecraft versions manifest...");
+        Logger.info("Downloading the Minecraft versions manifest...");
 
         VersionManifest.Version foundVersionManifest = null;
 
@@ -186,11 +156,11 @@ public final class InstallerMain {
                             String.format("The Minecraft jar is not located at '%s' and downloading it has been turned off.", downloadTarget));
                 }
                 InstallerUtils
-                        .downloadCheckHash(this.installer.getLogger(), version.downloads.server.url, downloadTarget, MessageDigest.getInstance("SHA-1"),
+                        .downloadCheckHash(version.downloads.server.url, downloadTarget, MessageDigest.getInstance("SHA-1"),
                                 version.downloads.server.sha1, false);
             } else {
                 if (this.installer.getLauncherConfig().checkLibraryHashes) {
-                    this.installer.getLogger().info("Detected existing Minecraft Server jar, verifying hashes...");
+                    Logger.info("Detected existing Minecraft Server jar, verifying hashes...");
                     final MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
 
                     // Pipe the download stream into the file and compute the SHA-1
@@ -198,16 +168,16 @@ public final class InstallerMain {
                     final String fileSha1 = InstallerUtils.toHexString(sha1.digest(bytes));
 
                     if (version.downloads.server.sha1.equals(fileSha1)) {
-                        this.installer.getLogger().info("Minecraft Server jar verified!");
+                        Logger.info("Minecraft Server jar verified!");
                     } else {
-                        this.installer.getLogger().error("Checksum verification failed: Expected {}, {}. Deleting cached Minecraft Server jar...",
+                        Logger.error("Checksum verification failed: Expected {}, {}. Deleting cached Minecraft Server jar...",
                                 version.downloads.server.sha1, fileSha1);
                         Files.delete(downloadTarget);
-                        InstallerUtils.downloadCheckHash(this.installer.getLogger(), version.downloads.server.url, downloadTarget,
+                        InstallerUtils.downloadCheckHash(version.downloads.server.url, downloadTarget,
                                 MessageDigest.getInstance("SHA-1"), version.downloads.server.sha1, false);
                     }
                 } else {
-                    this.installer.getLogger().info("Detected existing Minecraft jar. Skipping hash check as that is turned off...");
+                    Logger.info("Detected existing Minecraft jar. Skipping hash check as that is turned off...");
                 }
             }
             return downloadTarget;
@@ -216,7 +186,7 @@ public final class InstallerMain {
 
     private CompletableFuture<Path> downloadMappings(final Version version, final Path librariesDirectory) {
         return AsyncUtils.asyncFailableFuture(() -> {
-            this.installer.getLogger().info("Setting up names for Minecraft {}", Constants.Libraries.MINECRAFT_VERSION_TARGET);
+            Logger.info("Setting up names for Minecraft {}", Constants.Libraries.MINECRAFT_VERSION_TARGET);
             final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_MAPPINGS_PREFIX)
                     .resolve(Constants.Libraries.MINECRAFT_VERSION_TARGET)
                     .resolve(Constants.Libraries.MINECRAFT_MAPPINGS_NAME);
@@ -227,14 +197,14 @@ public final class InstallerMain {
                 }
                 // TODO Figure out how to sha1 check the zip file
                 if (this.installer.getLauncherConfig().autoDownloadLibraries) {
-                    InstallerUtils.download(this.installer.getLogger(), mappings.url, downloadTarget, false);
+                    InstallerUtils.download(mappings.url, downloadTarget, false);
                 } else {
                     throw new IOException(String.format("Mappings were not located at '%s' and downloading them has been turned off.", downloadTarget));
                 }
             } else {
-                this.installer.getLogger().info("Detected existing mappings, verifying hashes...");
+                Logger.info("Detected existing mappings, verifying hashes...");
                 // TODO Figure out how to sha1 check the zip file
-                this.installer.getLogger().info("mappings verified!");
+                Logger.info("mappings verified!");
             }
 
             return downloadTarget;
@@ -242,15 +212,15 @@ public final class InstallerMain {
     }
 
     private Path remapMinecraft(final Path librariesDirectory, final Path inputJar, final Path serverMappings, final ExecutorService service) throws IOException {
-        this.installer.getLogger().info("Checking if we need to remap Minecraft...");
+        Logger.info("Checking if we need to remap Minecraft...");
         final Path outputJar = inputJar.resolveSibling(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_remapped.jar");
 
         if (Files.exists(outputJar)) {
-            this.installer.getLogger().info("Remapped Minecraft detected, skipping...");
+            Logger.info("Remapped Minecraft detected, skipping...");
             return outputJar;
         }
 
-        this.installer.getLogger().info("Remapping Minecraft. This may take a while...");
+        Logger.info("Remapping Minecraft. This may take a while...");
         final MappingSet mappings = MappingSet.create();
         try (final BufferedReader reader = Files.newBufferedReader(serverMappings, StandardCharsets.UTF_8)) {
             new ProGuardReader(reader).read().reverse(mappings);

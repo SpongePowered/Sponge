@@ -120,6 +120,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         }
     }
 
+    @Override
     public int execute(final ParseResults<CommandSourceStack> parse) throws CommandSyntaxException {
         if (parse.getReader().canRead()) {
             // TODO plugin exception handling here

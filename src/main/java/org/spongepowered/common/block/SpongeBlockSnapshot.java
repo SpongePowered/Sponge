@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.block;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -37,6 +41,7 @@ import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
@@ -50,6 +55,7 @@ import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -61,10 +67,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 @DefaultQualifier(NonNull.class)
 public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutableDataHolder<BlockSnapshot>, DataContainerHolder.Immutable<BlockSnapshot>, DataCompoundHolder {
@@ -227,12 +229,12 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
     @Override
     public BlockSnapshot withRawData(final DataView container) throws InvalidDataException {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+        return SpongeBlockSnapshotBuilder.pooled().buildContent(container).orElseThrow(InvalidDataException::new);
     }
 
     @Override
     public boolean validateRawData(final DataView container) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+        return SpongeBlockSnapshotBuilder.pooled().buildContent(container).isPresent();
     }
 
     @Override
@@ -242,12 +244,24 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
     @Override
     public int getContentVersion() {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+        return 1;
     }
 
     @Override
     public DataContainer toContainer() {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+        final DataContainer container = DataContainer.createNew()
+                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.WORLD_KEY, this.worldKey.asString())
+                .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
+                .set(Queries.POSITION_X, this.pos.getX())
+                .set(Queries.POSITION_Y, this.pos.getY())
+                .set(Queries.POSITION_Z, this.pos.getZ())
+                .getContainer()
+                .set(Constants.Block.BLOCK_STATE, this.blockState);
+        if (this.compound != null) {
+            container.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.INSTANCE.translateFrom(this.compound));
+        }
+        return container;
     }
 
     public Optional<ServerLevel> getServerWorld() {
@@ -262,7 +276,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     }
 
     public Optional<CompoundTag> getCompound() {
-        return this.compound == null ? Optional.<CompoundTag>empty() : Optional.of(this.compound.copy());
+        return this.compound == null ? Optional.empty() : Optional.of(this.compound.copy());
     }
 
     public SpongeBlockSnapshotBuilder createBuilder() {

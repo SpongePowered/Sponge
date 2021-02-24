@@ -25,16 +25,18 @@
 package org.spongepowered.common.applaunch.config.core;
 
 import com.google.common.collect.ImmutableSet;
+import io.leangen.geantyref.GenericTypeReflector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.objectmapping.meta.NodeResolver;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
@@ -42,7 +44,6 @@ import org.spongepowered.plugin.Blackboard;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -51,6 +52,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -77,7 +79,10 @@ public final class SpongeConfigs {
     public static final ConfigurationOptions OPTIONS = ConfigurationOptions.defaults()
             .header(SpongeConfigs.HEADER)
             .serializers(collection -> collection.register(TokenHoldingString.SERIALIZER)
-                    .registerAnnotatedObjects(SpongeConfigs.OBJECT_MAPPERS));
+                    .register(type -> {
+                        final Class<?> erasure = GenericTypeReflector.erase(type);
+                        return erasure.isAnnotationPresent(ConfigSerializable.class) || Config.class.isAssignableFrom(erasure);
+                    }, SpongeConfigs.OBJECT_MAPPERS.asTypeSerializer()));
 
     static final Logger LOGGER = LogManager.getLogger();
 
@@ -125,7 +130,7 @@ public final class SpongeConfigs {
                     // Load global config first so we can migrate over old settings
                     SpongeConfigs.splitFiles();
                     // Then load the actual configuration based on the new file
-                    SpongeConfigs.sponge = SpongeConfigs.create(new CommonConfig(), CommonConfig.FILE_NAME);
+                    SpongeConfigs.sponge = SpongeConfigs.create(CommonConfig.class, CommonConfig::transformation, CommonConfig.FILE_NAME);
                 }
             } finally {
                 SpongeConfigs.initLock.unlock();
@@ -157,10 +162,10 @@ public final class SpongeConfigs {
             .build();
     }
 
-    public static <T extends Config> ConfigHandle<T> create(final T instance, final String fileName) {
+    public static <T extends Config> ConfigHandle<T> create(final Class<T> instance, final @Nullable Supplier<ConfigurationTransformation> versionModifier, final String fileName) {
         try {
             final HoconConfigurationLoader loader = SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(fileName));
-            final ConfigHandle<T> handle = new ConfigHandle<>(instance, loader);
+            final ConfigHandle<T> handle = new ConfigHandle<>(instance, versionModifier, loader);
             handle.load();
             return handle;
         } catch (final IOException ex) {

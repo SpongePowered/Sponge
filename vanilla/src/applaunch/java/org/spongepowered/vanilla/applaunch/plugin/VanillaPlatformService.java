@@ -31,6 +31,8 @@ import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.asm.launch.MixinLaunchPlugin;
+import org.spongepowered.asm.service.modlauncher.MixinServiceModLauncher;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
@@ -69,8 +71,8 @@ public final class VanillaPlatformService implements ITransformationService {
     public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
         VanillaPlatformService.pluginEngine.locatePluginResources();
         VanillaPlatformService.pluginEngine.createPluginCandidates();
-        final ILaunchPluginService accessWidener = environment.findLaunchPlugin(AccessWidenerLaunchService.NAME)
-                .orElse(null);
+        final ILaunchPluginService accessWidener = environment.findLaunchPlugin(AccessWidenerLaunchService.NAME).orElse(null);
+        final ILaunchPluginService mixin = environment.findLaunchPlugin(MixinLaunchPlugin.NAME).orElse(null);
 
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
@@ -80,18 +82,32 @@ public final class VanillaPlatformService implements ITransformationService {
             for (final PluginResource resource : resources) {
 
                 // Handle Access Transformers
-                if (accessWidener != null && resource instanceof JVMPluginResource) {
-                    ((JVMPluginResource) resource).getManifest().ifPresent(manifest -> {
-                        final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.ACCESS_WIDENER);
-                        if (atFiles != null) {
-                            for (final String atFile : atFiles.split(",")) {
-                                if (!atFile.endsWith(".accesswidener")) {
-                                    continue;
+                if ((accessWidener != null || mixin != null) && resource instanceof JVMPluginResource) {
+                    if (mixin != null) {
+                        // Offer jar to the Mixin service
+                        mixin.offerResource(resource.getPath(), resource.getPath().getFileName().toString());
+                    }
+
+                    // Offer jar to the AW service
+                        ((JVMPluginResource) resource).getManifest().ifPresent(manifest -> {
+                            if (accessWidener != null) {
+                                final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.ACCESS_WIDENER);
+                                if (atFiles != null) {
+                                    for (final String atFile : atFiles.split(",")) {
+                                        if (!atFile.endsWith(".accesswidener")) {
+                                            continue;
+                                        }
+                                        accessWidener.offerResource(resource.getFileSystem().getPath(atFile), atFile);
+                                    }
                                 }
-                                accessWidener.offerResource(resource.getFileSystem().getPath(atFile), atFile);
                             }
-                        }
-                    });
+                            if (mixin != null && manifest.getMainAttributes().getValue(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS) != null) {
+                                VanillaPlatformService.pluginEngine.getPluginEnvironment().getLogger().warn(
+                                    "Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the "
+                                    + "problem to Sponge!", resource.getPath()
+                                );
+                            }
+                        });
                 }
 
                 final Map.Entry<String, Path> entry = Maps.immutableEntry(resource.getPath().getFileName().toString(), resource.getPath());
