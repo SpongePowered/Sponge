@@ -24,16 +24,13 @@
  */
 package org.spongepowered.common.map.decoration;
 
-import net.minecraft.world.storage.MapDecoration;
-import org.spongepowered.api.ResourceKey;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import org.spongepowered.api.map.decoration.MapDecorationType;
-import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeMapDecorationType extends SpongeCatalogType implements MapDecorationType {
+public class SpongeMapDecorationType implements MapDecorationType {
     private final MapDecoration.Type type;
 
-    public SpongeMapDecorationType(ResourceKey resourceKey, MapDecoration.Type mapDecorationType) {
-        super(resourceKey);
+    public SpongeMapDecorationType(MapDecoration.Type mapDecorationType) {
         this.type = mapDecorationType;
     }
 

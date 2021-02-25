@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.map;
 
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.MapIdTracker;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.saveddata.maps.MapIndex;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.MapStorage;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
@@ -60,8 +61,11 @@ public final class SpongeMapStorage implements MapStorage {
 	public Collection<MapInfo> getAllMapInfos() {
 		final Set<MapInfo> mapInfos = new HashSet<>();
 
-		final ServerWorld defaultWorld = SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD);
-		final int highestId = ((MapIdTrackerBridge)defaultWorld.getSavedData().getOrCreate(MapIdTracker::new, "idcounts")).bridge$getHighestMapId()
+		final ServerWorld spongeWorld = Sponge.getServer().getWorldManager().defaultWorld();
+		final ServerLevel defaultWorld = (ServerLevel) spongeWorld;
+
+
+		final int highestId = ((MapIdTrackerBridge)defaultWorld.getDataStorage().computeIfAbsent(MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME)).bridge$getHighestMapId()
 				.orElse(-1);
 		for (int i = 0; i <= highestId; i++) {
 			final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + i);
@@ -69,7 +73,6 @@ public final class SpongeMapStorage implements MapStorage {
 				SpongeCommon.getLogger().warn("Missing map with id: " + i);
 				continue;
 			}
-			final UUID mapUUID = mapInfo.getUniqueId();
 			this.addMapInfo(mapInfo);
 			mapInfos.add(mapInfo);
 		}
@@ -86,8 +89,9 @@ public final class SpongeMapStorage implements MapStorage {
 			return Optional.of(cachedInfo);
 		}
 
-		final ServerWorld defaultWorld = SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD);
-		final int highestId = ((MapIdTrackerBridge)defaultWorld.getSavedData().getOrCreate(MapIdTracker::new, "idcounts")).bridge$getHighestMapId()
+		final ServerLevel defaultWorld = (ServerLevel) Sponge.getServer().getWorldManager().defaultWorld();
+
+		final int highestId = ((MapIdTrackerBridge)defaultWorld.getDataStorage().computeIfAbsent(MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME)).bridge$getHighestMapId()
 				.orElse(-1);
 		for (int i = 0; i <= highestId; i++) {
 			final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + i);

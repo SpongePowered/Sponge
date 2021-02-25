@@ -462,7 +462,8 @@
             "dependencies": [{
                 "id": "spongeapi",
                 "version": "8.0.0"
-            }]
+            }],
+            "extra": {}
         },
         {
             "loader": "java_plain",

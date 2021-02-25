@@ -24,21 +24,18 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.server.ServerWorld;
-import org.apache.logging.log4j.LogManager;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.Level;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.map.MapInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 public final class MapInfoItemStackData {
 
@@ -50,15 +47,20 @@ public final class MapInfoItemStackData {
 		registrator
 				.asMutable(ItemStack.class)
 					.create(Keys.MAP_INFO)
-						.supports(item -> item.getItem() instanceof FilledMapItem)
-						.get(itemStack -> itemStack.getTag() == null ? null : (MapInfo) SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD)
-								.getMapData(Constants.Map.MAP_PREFIX + itemStack.getTag().getInt("map"))) // Nullable
-						.set((itemStack, mapInfo) -> {
-							@Nullable CompoundNBT nbt = itemStack.getTag();
-							if (nbt == null) {
-								nbt = new CompoundNBT();
+						.supports(item -> item.getItem() instanceof MapItem)
+						.get(itemStack -> {
+							if (itemStack.getTag() == null) {
+								return null;
 							}
-							nbt.putInt("map", ((MapDataBridge)mapInfo).bridge$getMapId());
+							return (MapInfo) ((Level)Sponge.getServer().getWorldManager().defaultWorld())
+									.getMapData(Constants.Map.MAP_PREFIX + itemStack.getTag().getInt(Constants.Map.MAP_ID));
+						}) // Nullable
+						.set((itemStack, mapInfo) -> {
+							@Nullable CompoundTag nbt = itemStack.getTag();
+							if (nbt == null) {
+								nbt = new CompoundTag();
+							}
+							nbt.putInt(Constants.Map.MAP_ID, ((MapDataBridge)mapInfo).bridge$getMapId());
 							itemStack.setTag(nbt);
 						});
 	}

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.storage;
 
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.storage.MapData;
-import net.minecraft.world.storage.MapDecoration;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,10 +45,10 @@ public class MapDecorationMixin implements MapDecorationBridge {
 	// If should save to disk
 	private boolean impl$isPersistent;
 	private String impl$key = Constants.Map.DECORATION_KEY_PREFIX + UUID.randomUUID().toString();
-	private Set<MapData> impl$attachedMapDatas = new HashSet<>();
+	private Set<MapItemSavedData> impl$attachedMapDatas = new HashSet<>();
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	public void impl$setPersistenceOnInit(MapDecoration.Type typeIn, byte x, byte y, byte rot, ITextComponent name, CallbackInfo ci) {
+	public void impl$setPersistenceOnInit(MapDecoration.Type typeIn, byte x, byte y, byte rot, Component name, CallbackInfo ci) {
 		// All of the below types have no reason to be saved to disk
 		// This is because they can/should be calculated when needed
 		// Furthermore if a sponge plugin adds a MapDecoration, isPersistent
@@ -91,12 +91,12 @@ public class MapDecorationMixin implements MapDecorationBridge {
 
 	@Override
 	public void notifyAddedToMap(MapInfo mapInfo) {
-		this.impl$attachedMapDatas.add((MapData) mapInfo);
+		this.impl$attachedMapDatas.add((MapItemSavedData) mapInfo);
 	}
 
 	@Override
 	public void notifyRemovedFromMap(MapInfo mapInfo) {
-		this.impl$attachedMapDatas.remove((MapData) mapInfo);
+		this.impl$attachedMapDatas.remove((MapItemSavedData) mapInfo);
 	}
 
 	@Override
@@ -104,8 +104,8 @@ public class MapDecorationMixin implements MapDecorationBridge {
 		if (!this.impl$isPersistent) {
 			return;
 		}
-		for (MapData mapData : this.impl$attachedMapDatas) {
-			mapData.markDirty();
+		for (MapItemSavedData mapData : this.impl$attachedMapDatas) {
+			mapData.setDirty();
 		}
 	}
 }

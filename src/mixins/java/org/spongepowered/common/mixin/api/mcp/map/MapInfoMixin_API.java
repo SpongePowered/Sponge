@@ -24,13 +24,20 @@
  */
 package org.spongepowered.common.mixin.api.mcp.map;
 
-import net.minecraft.world.storage.MapData;
-import net.minecraft.world.storage.MapDecoration;
+import com.google.common.base.Preconditions;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.BannerBlock;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.maps.MapBanner;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,13 +50,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@Mixin(MapData.class)
-public class MapInfoMixin_API implements MapInfo, SpongeMutableDataHolder {
+@Mixin(MapItemSavedData.class)
+public abstract class MapInfoMixin_API extends SavedData implements MapInfo, SpongeMutableDataHolder {
+
+    public MapInfoMixin_API(String name) {
+        super(name);
+    }
+
+    @Shadow public abstract void toggleBanner(LevelAccessor p_204269_1_, BlockPos p_204269_2_);
 
     @Override
     public boolean isLinked(final ItemStack itemStack) {
         return itemStack.getType() == ItemTypes.FILLED_MAP.get()
                 && itemStack.get(Keys.MAP_INFO).isPresent() && itemStack.get(Keys.MAP_INFO).get() == this;
+    }
+
+    @Override
+    public void addBannerDecoration(final ServerLocation bannerLocation) throws IllegalArgumentException {
+        final BlockType bannerType = bannerLocation.getBlock().getType();
+
+        Preconditions.checkArgument(bannerType instanceof BannerBlock, "Location must have a banner!");
+        this.toggleBanner((LevelAccessor) bannerLocation.getWorld(), new BlockPos(bannerLocation.getBlockX(), bannerLocation.getBlockY(), bannerLocation.getBlockZ()));
+
+        this.setDirty();
     }
 
     @Override
@@ -70,7 +93,7 @@ public class MapInfoMixin_API implements MapInfo, SpongeMutableDataHolder {
                 .forEach(decorationList::add);
 
         return DataContainer.createNew()
-                .set(Constants.Map.MAP_ID, ((MapDataBridge) this).bridge$getMapId())
+                .set(Constants.Map.MAP_UNSAFE_ID, ((MapDataBridge) this).bridge$getMapId())
                 .set(Constants.Map.MAP_DATA,
                         DataContainer.createNew()
                                 .set(Constants.Map.MAP_LOCATION,            this.require(Keys.MAP_LOCATION)))

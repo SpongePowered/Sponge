@@ -24,24 +24,20 @@
  */
 package org.spongepowered.common.map.color;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.map.color.MapShade;
-import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.util.Constants;
 
-public final class SpongeMapShade extends SpongeCatalogType implements MapShade {
+public final class SpongeMapShade implements MapShade {
 
 	private final int shadeNum;
 	private final int multiplier;
 
 	/**
 	 * Create a SpongeMapShade with given parameters
-	 * @param resourceKey Resource key of this mapshade
 	 * @param shadeNum Number to add to color byte after multiplying by 4
 	 * @param multiplier Number to multiply R,G and B before dividing by {@value Constants.Map#SHADE_DIVIDER}
 	 */
-	public SpongeMapShade(ResourceKey resourceKey, int shadeNum, int multiplier) {
-		super(resourceKey);
+	public SpongeMapShade(int shadeNum, int multiplier) {
 		this.shadeNum = shadeNum;
 		this.multiplier = multiplier;
 	}

@@ -24,22 +24,19 @@
  */
 package org.spongepowered.common.data.provider.map;
 
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.MapData;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.map.MapInfo;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.map.canvas.SpongeMapByteCanvas;
 import org.spongepowered.common.map.canvas.SpongeMapCanvas;
 import org.spongepowered.math.vector.Vector2i;
-
-import javax.annotation.Nullable;
 
 public final class MapInfoData {
 
@@ -48,7 +45,7 @@ public final class MapInfoData {
 
 	// @formatter:off
 	public static void register(final DataProviderRegistrator registrator) {
-		registrator.asMutable(MapData.class)
+		registrator.asMutable(MapItemSavedData.class)
 				.create(Keys.MAP_CANVAS)
 					.get(mapData -> new SpongeMapByteCanvas(mapData.colors))
 					.set((mapData, mapCanvas) -> {
@@ -57,60 +54,57 @@ public final class MapInfoData {
 					})
 				.create(Keys.MAP_DECORATIONS)
 					.get(mapData -> {
-						mapData.markDirty(); // TODO: review, you can change the decorations so we assume they will be changed. Is there a better way?
+						mapData.setDirty(); // TODO: review, you can change the decorations so we assume they will be changed. Is there a better way?
 						return (((MapDataBridge) mapData).bridge$getDecorations());
 					})
 					.set((mapData, mapDecorations) -> ((MapDataBridge) mapData).bridge$setDecorations(mapDecorations))
 				.create(Keys.MAP_LOCATION)
-					.get(mapData -> Vector2i.from(mapData.xCenter, mapData.zCenter))
+					.get(mapData -> Vector2i.from(mapData.x, mapData.z))
 					.set((mapData, vector2i) -> {
-						mapData.calculateMapCenter(vector2i.getX(), vector2i.getY(), mapData.scale);
-						mapData.markDirty();
+						mapData.setOrigin(vector2i.getX(), vector2i.getY(), mapData.scale);
+						mapData.setDirty();
 					})
 				.create(Keys.MAP_LOCKED)
 					.get(mapData -> mapData.locked)
 					.set((mapData, locked) -> {
 						mapData.locked = locked;
-						mapData.markDirty();
+						mapData.setDirty();
 					})
 				.create(Keys.MAP_SCALE)
 					.get(mapData -> (int) mapData.scale)
 					.set((mapData, scale) -> {
 						mapData.scale = scale.byteValue();
-						mapData.calculateMapCenter(mapData.xCenter, mapData.zCenter, mapData.scale);
-						mapData.markDirty();
+						mapData.setOrigin(mapData.x, mapData.z, mapData.scale);
+						mapData.setDirty();
 					})
 				.create(Keys.MAP_TRACKS_PLAYERS)
 					.get(mapData -> mapData.trackingPosition)
 					.set((mapData, tracksPlayers) -> {
 						mapData.trackingPosition = tracksPlayers;
-						mapData.markDirty();
+						mapData.setDirty();
 					})
 				.create(Keys.MAP_UNLIMITED_TRACKING)
 					.get(mapData -> mapData.unlimitedTracking)
 					.set((mapData, unlimitedTracking) -> {
 						mapData.unlimitedTracking = unlimitedTracking;
-						mapData.markDirty();
+						mapData.setDirty();
 					})
 				.create(Keys.MAP_WORLD)
 					.get(mapData -> {
 						final int id = ((MapDataBridge)mapData).bridge$getMapId();
 						if (mapData.dimension == null) {
-							LogManager.getLogger().error("Map with id: {}, uuid: {}. This will probably cause more errors later/on save", id, ((MapInfo)mapData).getUniqueId());
+							LogManager.getLogger().error("Map with id: {}, uuid: {} has an null world. This will probably cause more errors later/on save", id, ((MapInfo)mapData).getUniqueId());
 							return null;
 						}
-						ResourceKey key = ((ResourceKeyBridge)mapData.dimension).bridge$getKey();
-						@Nullable World world = Sponge.getServer().getWorldManager().getWorld(key).orElse(null);
-						if (world == null) {
-							LogManager.getLogger().warn("Map with id: {}, uuid {}, has world: '" + key + "' but that world does not exist (anymore?)", id, ((MapInfo)mapData).getUniqueId());
-						}
-						return null;
+
+						return (ResourceKey) (Object) mapData.dimension.location();
 					})
-					.set((mapData, world) -> {
-						mapData.dimension = ((ServerWorld)world).getDimension().getType();
-						mapData.markDirty();
+					.set((mapData, key) -> {
+						mapData.dimension = ((Level) Sponge.getServer().getWorldManager().world(key).get()).dimension();
+
+						mapData.setDirty();
 					})
-				.build(MapData.class);
+				.build(MapItemSavedData.class);
 	}
 	// @formatter:on
 }

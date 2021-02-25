@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import net.minecraft.world.storage.MapDecoration;
-import org.apache.logging.log4j.LogManager;
-import org.spongepowered.api.ResourceKey;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.map.decoration.MapDecorationType;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationBannerType;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationType;
 
@@ -82,13 +79,13 @@ public class MapDecorationTypeStreamGenerator {
 	}
 
 	private static MapDecorationType addToRegistry(final MapDecoration.Type type) {
-		SpongeMapDecorationType mapDecorationType = new SpongeMapDecorationType(ResourceKey.minecraft(type.name().toLowerCase()), type);
+		SpongeMapDecorationType mapDecorationType = new SpongeMapDecorationType(type);
 		addToRegistry(mapDecorationType);
 		return mapDecorationType;
 	}
 
 	private static MapDecorationType addToRegistry(final MapDecoration.Type type, final Supplier<DyeColor> dyeColor) {
-		SpongeMapDecorationType mapDecorationType = new SpongeMapDecorationBannerType(ResourceKey.minecraft(type.name().toLowerCase()), type, dyeColor);
+		SpongeMapDecorationType mapDecorationType = new SpongeMapDecorationBannerType(/*ResourceKey.minecraft(type.name().toLowerCase()), */type, dyeColor);
 		addToRegistry(mapDecorationType);
 		return mapDecorationType;
 	}

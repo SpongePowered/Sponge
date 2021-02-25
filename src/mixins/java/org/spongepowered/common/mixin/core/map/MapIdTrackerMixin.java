@@ -25,28 +25,29 @@
 package org.spongepowered.common.mixin.core.map;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.world.storage.MapIdTracker;
+import net.minecraft.world.level.saveddata.maps.MapIndex;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-@Mixin(MapIdTracker.class)
+@Mixin(MapIndex.class)
 public abstract class MapIdTrackerMixin implements MapIdTrackerBridge {
 
-	@Shadow @Final private Object2IntMap<String> usedIds;
+	@Shadow @Final private Object2IntMap<String> usedAuxIds;
 
 	@Override
 	public void bridge$setHighestMapId(int id) {
-		this.usedIds.put("map", id);
+		this.usedAuxIds.put(Constants.Map.ID_COUNTS_KEY, id);
 	}
 
 	@Override
 	public Optional<Integer> bridge$getHighestMapId() {
-		int id = usedIds.getInt("map");
-		if (id == usedIds.defaultReturnValue()) {
+		int id = usedAuxIds.getInt(Constants.Map.ID_COUNTS_KEY);
+		if (id == usedAuxIds.defaultReturnValue()) {
 			return Optional.empty(); // Default return value is -1
 		}
 		return Optional.of(id);

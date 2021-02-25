@@ -118,13 +118,13 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
         final byte type = getByteFromContainer(container, Constants.Map.DECORATION_TYPE);
         final byte rot = getByteFromContainer(container, Constants.Map.DECORATION_ROTATION);
 
-        final int possibleTypes = net.minecraft.world.storage.MapDecoration.Type.values().length;
+        final int possibleTypes = net.minecraft.world.level.saveddata.maps.MapDecoration.Type.values().length;
         if (type < 0 || type > possibleTypes) {
             throw new InvalidDataException(Constants.Map.DECORATION_TYPE + ", is out of bounds. Should be 0-" + (possibleTypes-1));
         }
-        final MapDecorationType mapDecorationType = MapDecorationTypeStreamGenerator.getByMcType(net.minecraft.world.storage.MapDecoration.Type.values()[type])
+        final MapDecorationType mapDecorationType = MapDecorationTypeStreamGenerator.getByMcType(net.minecraft.world.level.saveddata.maps.MapDecoration.Type.values()[type])
                 .orElseThrow(() -> new IllegalStateException("Missing a MapDecorationType, could not find one for Minecraft's MapDecoration.Type: "
-                        + net.minecraft.world.storage.MapDecoration.Type.values()[type].toString()));
+                        + net.minecraft.world.level.saveddata.maps.MapDecoration.Type.values()[type].toString()));
 
         this.type(mapDecorationType);
 
@@ -156,7 +156,7 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     @Override
     public MapDecoration build() throws IllegalStateException {
         Preconditions.checkNotNull(this.type, "Type has not been set");
-        MapDecoration decoration = (MapDecoration) new net.minecraft.world.storage.MapDecoration(
+        MapDecoration decoration = (MapDecoration) new net.minecraft.world.level.saveddata.maps.MapDecoration(
                 ((SpongeMapDecorationType)type).getType(),
                 (byte)this.x, (byte)this.y, (byte) ((SpongeMapDecorationOrientation)this.rot).getOrientationNumber(),
                 this.customName == null ? null : SpongeAdventure.asVanilla(this.customName));

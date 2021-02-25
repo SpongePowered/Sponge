@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.map;
 
-import net.minecraft.block.material.MaterialColor;
+import net.minecraft.world.level.material.MaterialColor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,10 +33,10 @@ import org.spongepowered.common.bridge.map.MapColorTypeBridge;
 @Mixin(MaterialColor.class)
 public class MaterialColorMixin implements MapColorTypeBridge {
 
-	@Shadow @Final public int colorIndex;
+	@Shadow @Final public int id;
 
 	@Override
 	public int bridge$getBaseColor() {
-		return this.colorIndex;
+		return this.id;
 	}
 }

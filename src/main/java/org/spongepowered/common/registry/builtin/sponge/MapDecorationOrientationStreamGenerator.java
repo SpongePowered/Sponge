@@ -64,7 +64,7 @@ public class MapDecorationOrientationStreamGenerator {
 	}
 
 	private static MapDecorationOrientation register(final String id, final int orientationNumber) {
-		MapDecorationOrientation orientation = new SpongeMapDecorationOrientation(ResourceKey.sponge(id), orientationNumber);
+		MapDecorationOrientation orientation = new SpongeMapDecorationOrientation(orientationNumber);
 		MapDecorationOrientationStreamGenerator.ORIENTATION_MAP.put(orientationNumber, orientation);
 
 		return orientation;

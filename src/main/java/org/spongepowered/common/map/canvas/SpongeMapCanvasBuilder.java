@@ -30,6 +30,7 @@ import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.map.color.MapShade;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.map.color.SpongeMapColor;
 import org.spongepowered.common.util.Constants;
@@ -125,14 +126,12 @@ public final class SpongeMapCanvasBuilder implements MapCanvas.Builder {
         final int[] pixels = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
         // Get the color palette we are working with
         final Map<Integer, SpongeMapColor> palette = new HashMap<>();
-        for (MapColorType type : Sponge.getRegistry().getCatalogRegistry().getAllOf(MapColorType.class)) {
-            // Put each shade in also.
-
-            for (MapShade shade : Sponge.getRegistry().getCatalogRegistry().getAllOf(MapShade.class)) {
-                SpongeMapColor spongeMapColor = new SpongeMapColor(type, shade);
+        Sponge.getGame().registries().registry(RegistryTypes.MAP_COLOR_TYPE).stream().forEach(color -> {
+            Sponge.getGame().registries().registry(RegistryTypes.MAP_SHADE).stream().forEach(shade -> {
+                SpongeMapColor spongeMapColor = new SpongeMapColor(color, shade);
                 palette.put(spongeMapColor.getColor().getRgb(), spongeMapColor);
-            }
-        }
+            });
+        });
         final byte[] canvas = getCanvas();
         for (int i = 0; i < pixels.length; i++) {
             SpongeMapColor color = palette.get(pixels[i]);
