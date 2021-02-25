@@ -31,9 +31,9 @@ import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.color.MapShades;
-import org.spongepowered.common.registry.builtin.sponge.MapColorTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.MapShadeStreamGenerator;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MapUtil;
 
 import javax.annotation.Nullable;
 
@@ -82,7 +82,7 @@ public class SpongeMapColorBuilder implements MapColor.Builder {
         reset();
         int colorInt = container.getInt(Constants.Map.COLOR_INDEX).get();
 
-        this.color = MapColorTypeStreamGenerator.getByColorIndex(colorInt)
+        this.color = MapUtil.getMapColorTypeByColorIndex(colorInt)
                 .orElseThrow(() -> new InvalidDataException("Invalid map color " + colorInt));
 
         container.getInt(Constants.Map.SHADE_NUM).ifPresent(mapShadeInt -> this.shade = MapShadeStreamGenerator.getByShadeNum(mapShadeInt)

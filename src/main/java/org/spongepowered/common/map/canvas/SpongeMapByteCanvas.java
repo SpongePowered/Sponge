@@ -25,7 +25,7 @@
 package org.spongepowered.common.map.canvas;
 
 import com.google.common.primitives.Bytes;
-import net.minecraft.world.storage.MapData;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
@@ -46,9 +46,9 @@ public final class SpongeMapByteCanvas implements SpongeMapCanvas {
         this.canvas = canvas;
     }
 
-    public void applyToMapData(final MapData mapData) {
+    public void applyToMapData(final MapItemSavedData mapData) {
         mapData.colors = canvas.clone();
-        mapData.markDirty();
+        mapData.setDirty();
     }
 
     @Override
@@ -63,11 +63,11 @@ public final class SpongeMapByteCanvas implements SpongeMapCanvas {
 
     @Override
     public MapColor getColor(final int x, final int y) {
-        if (MapUtil.isInCanvasBounds(x)) {
-            throw new IllegalStateException("x is out of bounds");
+        if (!MapUtil.isInCanvasBounds(x)) {
+            throw new IllegalStateException("x (" + x + ") is out of bounds");
         }
-        if (MapUtil.isInCanvasBounds(y)) {
-            throw new IllegalStateException("y is out of bounds");
+        if (!MapUtil.isInCanvasBounds(y)) {
+            throw new IllegalStateException("y (" + y + ") is out of bounds");
         }
         return this.getColor(y * Constants.Map.MAP_PIXELS + x);
     }
@@ -96,7 +96,7 @@ public final class SpongeMapByteCanvas implements SpongeMapCanvas {
         for (int y = 0; y < Constants.Map.MAP_PIXELS; y++, pos += Constants.Map.MAP_PIXELS) {
             for (int x = 0; x < Constants.Map.MAP_PIXELS; x++, pos++) {
                 final MapColor foundColor = this.getColor(x,y);
-                final Color paintColor = foundColor.getType() == MapColorTypes.AIR ? color
+                final Color paintColor = foundColor.getType() == MapColorTypes.NONE.get() ? color
                         : foundColor.getColor().asJavaColor();
                 image.setRGB(x, y, paintColor.getRGB());
             }

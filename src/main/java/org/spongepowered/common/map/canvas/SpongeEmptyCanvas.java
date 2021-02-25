@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.map.canvas;
 
-import net.minecraft.world.storage.MapData;
-import org.spongepowered.api.data.Keys;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
@@ -48,7 +47,7 @@ public final class SpongeEmptyCanvas implements SpongeMapCanvas {
 
     @Override
     public MapColor getColor(final int x, final int y) {
-        return MapColor.of(MapColorTypes.AIR.get());
+        return MapColor.of(MapColorTypes.NONE.get());
     }
 
     @Override
@@ -82,7 +81,7 @@ public final class SpongeEmptyCanvas implements SpongeMapCanvas {
     }
 
     @Override
-    public void applyToMapData(final MapData mapData) {
+    public void applyToMapData(final MapItemSavedData mapData) {
         Arrays.fill(mapData.colors, (byte) 0);
     }
 }

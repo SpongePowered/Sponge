@@ -24,27 +24,26 @@
  */
 package org.spongepowered.common.map.color;
 
-import net.minecraft.block.material.MaterialColor;
+import net.minecraft.world.level.material.MaterialColor;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeMapColorType extends SpongeCatalogType implements MapColorType {
-    private final int colorIndex;
+public final class SpongeMapColorType implements MapColorType {
 
 
-    public SpongeMapColorType(ResourceKey resourceKey, int colorIndex) {
-        super(resourceKey);
-        this.colorIndex = colorIndex;
+    private final MaterialColor materialColor;
+
+    public SpongeMapColorType(MaterialColor materialColor) {
+        this.materialColor = materialColor;
     }
 
     public int getColorIndex() {
-        return this.colorIndex;
+        return this.materialColor.id;
     }
 
     @Override
     public Color getColor() {
-        return Color.of(new java.awt.Color(MaterialColor.COLORS[colorIndex].colorValue));
+        return Color.of(new java.awt.Color(this.materialColor.col));
     }
 }

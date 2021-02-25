@@ -25,48 +25,39 @@
 package org.spongepowered.common.mixin.api.mcp.map;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.block.BannerBlock;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.storage.MapBanner;
-import net.minecraft.world.storage.MapData;
-import net.minecraft.world.storage.MapDecoration;
-import net.minecraft.world.storage.WorldSavedData;
-import org.spongepowered.api.block.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.BannerBlock;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.maps.MapBanner;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.map.MapInfo;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.api.LocationBridge;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@Mixin(MapData.class)
-public abstract class MapInfoMixin_API extends WorldSavedData implements MapInfo, SpongeMutableDataHolder {
-
-    @Shadow @Final private Map<String, MapBanner> banners;
+@Mixin(MapItemSavedData.class)
+public abstract class MapInfoMixin_API extends SavedData implements MapInfo, SpongeMutableDataHolder {
 
     public MapInfoMixin_API(String name) {
         super(name);
     }
 
-    @Shadow protected abstract void updateDecorations(MapDecoration.Type type, @Nullable IWorld worldIn, String decorationName, double worldX, double worldZ, double rotationIn, @Nullable ITextComponent p_191095_10_);
-
-    @Shadow public abstract void tryAddBanner(IWorld p_204269_1_, BlockPos p_204269_2_);
+    @Shadow public abstract void toggleBanner(LevelAccessor p_204269_1_, BlockPos p_204269_2_);
 
     @Override
     public boolean isLinked(final ItemStack itemStack) {
@@ -75,12 +66,13 @@ public abstract class MapInfoMixin_API extends WorldSavedData implements MapInfo
     }
 
     @Override
-    public void addBannerDecoration(final Location<?> bannerLocation) throws IllegalArgumentException {
+    public void addBannerDecoration(final ServerLocation bannerLocation) throws IllegalArgumentException {
         final BlockType bannerType = bannerLocation.getBlock().getType();
 
         Preconditions.checkArgument(bannerType instanceof BannerBlock, "Location must have a banner!");
-        this.tryAddBanner((IWorld) bannerLocation.getWorld(), ((LocationBridge) bannerLocation).bridge$getBlockPos());
-        this.markDirty();
+        this.toggleBanner((LevelAccessor) bannerLocation.getWorld(), new BlockPos(bannerLocation.getBlockX(), bannerLocation.getBlockY(), bannerLocation.getBlockZ()));
+
+        this.setDirty();
     }
 
     @Override
@@ -101,7 +93,7 @@ public abstract class MapInfoMixin_API extends WorldSavedData implements MapInfo
                 .forEach(decorationList::add);
 
         return DataContainer.createNew()
-                .set(Constants.Map.MAP_ID, ((MapDataBridge) this).bridge$getMapId())
+                .set(Constants.Map.MAP_UNSAFE_ID, ((MapDataBridge) this).bridge$getMapId())
                 .set(Constants.Map.MAP_DATA,
                         DataContainer.createNew()
                                 .set(Constants.Map.MAP_LOCATION,            this.require(Keys.MAP_LOCATION)))

@@ -49,6 +49,8 @@ import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -125,6 +127,14 @@ import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
+import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.map.color.MapColorTypes;
+import org.spongepowered.api.map.color.MapShade;
+import org.spongepowered.api.map.color.MapShades;
+import org.spongepowered.api.map.decoration.MapDecorationType;
+import org.spongepowered.api.map.decoration.MapDecorationTypes;
+import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
+import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.placeholder.PlaceholderParsers;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -138,7 +148,6 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Nameable;
 import org.spongepowered.api.world.Locatable;
-import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.api.world.schematic.PaletteType;
@@ -229,6 +238,10 @@ import org.spongepowered.common.inventory.query.type.SlotLensQuery;
 import org.spongepowered.common.inventory.query.type.TypeQuery;
 import org.spongepowered.common.inventory.query.type.UnionQuery;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
+import org.spongepowered.common.map.color.SpongeMapColorType;
+import org.spongepowered.common.map.color.SpongeMapShade;
+import org.spongepowered.common.map.decoration.SpongeMapDecorationType;
+import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.util.VecHelper;
@@ -845,6 +858,129 @@ public final class SpongeRegistryLoaders {
             l.add(DataFormats.JSON, k -> new JsonDataFormat());
             l.add(DataFormats.HOCON, k -> new HoconDataFormat());
             l.add(DataFormats.NBT, k -> new NBTDataFormat());
+        });
+    }
+
+    public static RegistryLoader<MapColorType> mapColorType() {
+        return RegistryLoader.of(l -> {
+            l.add(MapColorTypes.NONE, k -> new SpongeMapColorType(MaterialColor.NONE));
+            l.add(MapColorTypes.GRASS, k -> new SpongeMapColorType(MaterialColor.GRASS));
+            l.add(MapColorTypes.SAND, k -> new SpongeMapColorType(MaterialColor.SAND));
+            l.add(MapColorTypes.WOOL, k -> new SpongeMapColorType(MaterialColor.WOOL));
+            l.add(MapColorTypes.FIRE, k -> new SpongeMapColorType(MaterialColor.FIRE));
+            l.add(MapColorTypes.ICE, k -> new SpongeMapColorType(MaterialColor.ICE));
+            l.add(MapColorTypes.METAL, k -> new SpongeMapColorType(MaterialColor.METAL));
+            l.add(MapColorTypes.PLANT, k -> new SpongeMapColorType(MaterialColor.PLANT));
+            l.add(MapColorTypes.SNOW, k -> new SpongeMapColorType(MaterialColor.SNOW));
+            l.add(MapColorTypes.CLAY, k -> new SpongeMapColorType(MaterialColor.CLAY));
+            l.add(MapColorTypes.DIRT, k -> new SpongeMapColorType(MaterialColor.DIRT));
+            l.add(MapColorTypes.STONE, k -> new SpongeMapColorType(MaterialColor.STONE));
+            l.add(MapColorTypes.WATER, k -> new SpongeMapColorType(MaterialColor.WATER));
+            l.add(MapColorTypes.WOOD, k -> new SpongeMapColorType(MaterialColor.WOOD));
+            l.add(MapColorTypes.QUARTZ, k -> new SpongeMapColorType(MaterialColor.QUARTZ));
+            l.add(MapColorTypes.COLOR_ORANGE, k -> new SpongeMapColorType(MaterialColor.COLOR_ORANGE));
+            l.add(MapColorTypes.COLOR_MAGENTA, k -> new SpongeMapColorType(MaterialColor.COLOR_MAGENTA));
+            l.add(MapColorTypes.COLOR_LIGHT_BLUE, k -> new SpongeMapColorType(MaterialColor.COLOR_LIGHT_BLUE));
+            l.add(MapColorTypes.COLOR_YELLOW, k -> new SpongeMapColorType(MaterialColor.COLOR_YELLOW));
+            l.add(MapColorTypes.COLOR_LIGHT_GREEN, k -> new SpongeMapColorType(MaterialColor.COLOR_LIGHT_GREEN));
+            l.add(MapColorTypes.COLOR_PINK, k -> new SpongeMapColorType(MaterialColor.COLOR_PINK));
+            l.add(MapColorTypes.COLOR_GRAY, k -> new SpongeMapColorType(MaterialColor.COLOR_GRAY));
+            l.add(MapColorTypes.COLOR_LIGHT_GRAY, k -> new SpongeMapColorType(MaterialColor.COLOR_LIGHT_GRAY));
+            l.add(MapColorTypes.COLOR_CYAN, k -> new SpongeMapColorType(MaterialColor.COLOR_CYAN));
+            l.add(MapColorTypes.COLOR_PURPLE, k -> new SpongeMapColorType(MaterialColor.COLOR_PURPLE));
+            l.add(MapColorTypes.COLOR_BLUE, k -> new SpongeMapColorType(MaterialColor.COLOR_BLUE));
+            l.add(MapColorTypes.COLOR_BROWN, k -> new SpongeMapColorType(MaterialColor.COLOR_BROWN));
+            l.add(MapColorTypes.COLOR_GREEN, k -> new SpongeMapColorType(MaterialColor.COLOR_GREEN));
+            l.add(MapColorTypes.COLOR_RED, k -> new SpongeMapColorType(MaterialColor.COLOR_RED));
+            l.add(MapColorTypes.COLOR_BLACK, k -> new SpongeMapColorType(MaterialColor.COLOR_BLACK));
+            l.add(MapColorTypes.DIAMOND, k -> new SpongeMapColorType(MaterialColor.DIAMOND));
+            l.add(MapColorTypes.LAPIS_LAZULI, k -> new SpongeMapColorType(MaterialColor.LAPIS));
+            l.add(MapColorTypes.EMERALD, k -> new SpongeMapColorType(MaterialColor.EMERALD));
+            l.add(MapColorTypes.PODZOL, k -> new SpongeMapColorType(MaterialColor.PODZOL));
+            l.add(MapColorTypes.NETHER, k -> new SpongeMapColorType(MaterialColor.NETHER));
+            l.add(MapColorTypes.TERRACOTTA_WHITE, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_WHITE));
+            l.add(MapColorTypes.TERRACOTTA_ORANGE, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_ORANGE));
+            l.add(MapColorTypes.TERRACOTTA_MAGENTA, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_MAGENTA));
+            l.add(MapColorTypes.TERRACOTTA_LIGHT_BLUE, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_LIGHT_BLUE));
+            l.add(MapColorTypes.TERRACOTTA_YELLOW, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_YELLOW));
+            l.add(MapColorTypes.TERRACOTTA_LIGHT_GREEN, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_LIGHT_GREEN));
+            l.add(MapColorTypes.TERRACOTTA_PINK, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_PINK));
+            l.add(MapColorTypes.TERRACOTTA_GRAY, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_GRAY));
+            l.add(MapColorTypes.TERRACOTTA_LIGHT_GRAY, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_LIGHT_GRAY));
+            l.add(MapColorTypes.TERRACOTTA_CYAN, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_CYAN));
+            l.add(MapColorTypes.TERRACOTTA_PURPLE, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_PURPLE));
+            l.add(MapColorTypes.TERRACOTTA_BLUE, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_BLUE));
+            l.add(MapColorTypes.TERRACOTTA_BROWN, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_BROWN));
+            l.add(MapColorTypes.TERRACOTTA_GREEN, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_GREEN));
+            l.add(MapColorTypes.TERRACOTTA_RED, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_RED));
+            l.add(MapColorTypes.TERRACOTTA_BLACK, k -> new SpongeMapColorType(MaterialColor.TERRACOTTA_BLACK));
+            l.add(MapColorTypes.CRIMSON_NYLIUM, k -> new SpongeMapColorType(MaterialColor.CRIMSON_NYLIUM));
+            l.add(MapColorTypes.CRIMSON_STEM, k -> new SpongeMapColorType(MaterialColor.CRIMSON_STEM));
+            l.add(MapColorTypes.CRIMSON_HYPHAE, k -> new SpongeMapColorType(MaterialColor.CRIMSON_HYPHAE));
+            l.add(MapColorTypes.WARPED_NYLIUM, k -> new SpongeMapColorType(MaterialColor.WARPED_NYLIUM));
+            l.add(MapColorTypes.WARPED_STEM, k -> new SpongeMapColorType(MaterialColor.WARPED_STEM));
+            l.add(MapColorTypes.WARPED_HYPHAE, k -> new SpongeMapColorType(MaterialColor.WARPED_HYPHAE));
+            l.add(MapColorTypes.WARPED_WART_BLOCK, k -> new SpongeMapColorType(MaterialColor.WARPED_WART_BLOCK));
+        });
+    }
+
+    public static RegistryLoader<MapDecorationOrientation> mapDecorationOrientation() {
+        return RegistryLoader.of(l -> {
+            l.add(MapDecorationOrientations.NORTH, k -> new SpongeMapDecorationOrientation(0));
+            l.add(MapDecorationOrientations.NORTH_NORTHEAST, k -> new SpongeMapDecorationOrientation(1));
+            l.add(MapDecorationOrientations.NORTHEAST, k -> new SpongeMapDecorationOrientation(2));
+            l.add(MapDecorationOrientations.EAST_NORTHEAST, k -> new SpongeMapDecorationOrientation(3));
+            l.add(MapDecorationOrientations.EAST, k -> new SpongeMapDecorationOrientation(4));
+            l.add(MapDecorationOrientations.EAST_SOUTHEAST, k -> new SpongeMapDecorationOrientation(5));
+            l.add(MapDecorationOrientations.SOUTHEAST, k -> new SpongeMapDecorationOrientation(6));
+            l.add(MapDecorationOrientations.SOUTH_SOUTHEAST, k -> new SpongeMapDecorationOrientation(7));
+            l.add(MapDecorationOrientations.SOUTH, k -> new SpongeMapDecorationOrientation(8));
+            l.add(MapDecorationOrientations.SOUTH_SOUTHWEST, k -> new SpongeMapDecorationOrientation(9));
+            l.add(MapDecorationOrientations.SOUTHWEST, k -> new SpongeMapDecorationOrientation(10));
+            l.add(MapDecorationOrientations.WEST_SOUTHWEST, k -> new SpongeMapDecorationOrientation(11));
+            l.add(MapDecorationOrientations.WEST, k -> new SpongeMapDecorationOrientation(12));
+            l.add(MapDecorationOrientations.WEST_NORTHWEST, k -> new SpongeMapDecorationOrientation(13));
+            l.add(MapDecorationOrientations.NORTHWEST, k -> new SpongeMapDecorationOrientation(14));
+            l.add(MapDecorationOrientations.NORTH_NORTHWEST, k -> new SpongeMapDecorationOrientation(15));
+        });
+    }
+
+    public static RegistryLoader<MapDecorationType> mapDecorationType() {
+        return RegistryLoader.of(l -> {
+            l.add(MapDecorationTypes.BLUE_MARKER, k -> new SpongeMapDecorationType(MapDecoration.Type.BLUE_MARKER));
+            l.add(MapDecorationTypes.GREEN_MARKER, k -> new SpongeMapDecorationType(MapDecoration.Type.FRAME));
+            l.add(MapDecorationTypes.MANSION, k -> new SpongeMapDecorationType(MapDecoration.Type.MANSION));
+            l.add(MapDecorationTypes.MONUMENT, k -> new SpongeMapDecorationType(MapDecoration.Type.MONUMENT));
+            l.add(MapDecorationTypes.PLAYER_MARKER, k -> new SpongeMapDecorationType(MapDecoration.Type.PLAYER));
+            l.add(MapDecorationTypes.PLAYER_OFF_LIMITS, k -> new SpongeMapDecorationType(MapDecoration.Type.PLAYER_OFF_LIMITS));
+            l.add(MapDecorationTypes.PLAYER_OFF_MAP, k -> new SpongeMapDecorationType(MapDecoration.Type.PLAYER_OFF_MAP));
+            l.add(MapDecorationTypes.RED_MARKER, k -> new SpongeMapDecorationType(MapDecoration.Type.RED_MARKER));
+            l.add(MapDecorationTypes.TARGET_POINT, k -> new SpongeMapDecorationType(MapDecoration.Type.TARGET_POINT));
+            // TODO: Banner extra data stuffs
+            l.add(MapDecorationTypes.BANNER_WHITE, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_WHITE));
+            l.add(MapDecorationTypes.BANNER_ORANGE, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_ORANGE));
+            l.add(MapDecorationTypes.BANNER_MAGENTA, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_MAGENTA));
+            l.add(MapDecorationTypes.BANNER_LIGHT_BLUE, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_LIGHT_BLUE));
+            l.add(MapDecorationTypes.BANNER_YELLOW, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_YELLOW));
+            l.add(MapDecorationTypes.BANNER_LIME, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_LIME));
+            l.add(MapDecorationTypes.BANNER_PINK, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_PINK));
+            l.add(MapDecorationTypes.BANNER_GRAY, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_GRAY));
+            l.add(MapDecorationTypes.BANNER_LIGHT_GRAY, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_LIGHT_GRAY));
+            l.add(MapDecorationTypes.BANNER_CYAN, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_CYAN));
+            l.add(MapDecorationTypes.BANNER_PURPLE, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_PURPLE));
+            l.add(MapDecorationTypes.BANNER_BROWN, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_BROWN));
+            l.add(MapDecorationTypes.BANNER_GREEN, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_GREEN));
+            l.add(MapDecorationTypes.BANNER_RED, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_RED));
+            l.add(MapDecorationTypes.BANNER_BLACK, k -> new SpongeMapDecorationType(MapDecoration.Type.BANNER_BLACK));
+        });
+    }
+
+    public static RegistryLoader<MapShade> mapShade() {
+        return RegistryLoader.of(l -> {
+            l.add(MapShades.BASE, k -> new SpongeMapShade(0, 180));
+            l.add(MapShades.DARK, k -> new SpongeMapShade(1, 220));
+            l.add(MapShades.DARKER, k -> new SpongeMapShade(2, 255));
+            l.add(MapShades.DARKEST, k -> new SpongeMapShade(3, 135));
         });
     }
 

@@ -24,12 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import net.minecraft.world.storage.MapDecoration;
-import org.apache.logging.log4j.LogManager;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.map.color.MapShade;
-import org.spongepowered.api.map.decoration.MapDecorationType;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.map.color.SpongeMapShade;
 
 import java.util.HashMap;
@@ -42,10 +37,10 @@ public class MapShadeStreamGenerator {
 
 	public static Stream<MapShade> stream() {
 		return Stream.of(
-				addToRegistry(new SpongeMapShade(ResourceKey.sponge("darker"), 	0, 180)),
-				addToRegistry(new SpongeMapShade(ResourceKey.sponge("dark"), 	1, 220)),
-				addToRegistry(new SpongeMapShade(ResourceKey.sponge("base"), 	2, 255)),
-				addToRegistry(new SpongeMapShade(ResourceKey.sponge("darkest"), 3, 135))
+				//addToRegistry(new SpongeMapShade(ResourceKey.sponge("darker"), 	0, 180)),
+				//addToRegistry(new SpongeMapShade(ResourceKey.sponge("dark"), 	1, 220)),
+				//addToRegistry(new SpongeMapShade(ResourceKey.sponge("base"), 	2, 255)),
+				//addToRegistry(new SpongeMapShade(ResourceKey.sponge("darkest"), 3, 135))
 		);
 	}
 

@@ -71,6 +71,10 @@ public final class SpongeRegistries {
         holder.createRegistry(SpongeRegistryTypes.VALIDATION_TYPE, SpongeRegistryLoaders.validationType().values());
         holder.createRegistry(RegistryTypes.WEATHER_TYPE, SpongeRegistryLoaders.weather().values());
         holder.createRegistry(RegistryTypes.DATA_FORMAT, SpongeRegistryLoaders.dataFormat().values());
+        holder.createRegistry(RegistryTypes.MAP_COLOR_TYPE, SpongeRegistryLoaders.mapColorType().values());
+        holder.createRegistry(RegistryTypes.MAP_DECORATION_ORIENTATION, SpongeRegistryLoaders.mapDecorationOrientation().values());
+        holder.createRegistry(RegistryTypes.MAP_DECORATION_TYPE, SpongeRegistryLoaders.mapDecorationType().values());
+        holder.createRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoaders.mapShade().values());
     }
 
     public static void registerServerRegistries(final SpongeRegistryHolder holder) {

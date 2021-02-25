@@ -51,6 +51,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.piston.PistonStructureResolver;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.saveddata.maps.MapIndex;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -111,6 +114,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -125,9 +129,7 @@ import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
@@ -1049,16 +1051,18 @@ public final class SpongeCommonEventFactory {
 	}
 
 	public static Optional<MapInfo> fireCreateMapEvent(final Cause cause, Set<Value<?>> values) {
-		final ServerWorld defaultWorld = SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD);
-		final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getSavedData().getOrCreate(MapIdTracker::new, "idcounts");
+
+		final ServerLevel defaultWorld = (ServerLevel) Sponge.getServer().getWorldManager().defaultWorld();
+		final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getDataStorage().computeIfAbsent(MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME);
 
 		final int id = mapIdTrackerBridge.bridge$getHighestMapId()
 				.map(i -> ++i)
 				.orElse(0);
 
 		final String s = Constants.Map.MAP_PREFIX + id;
-		final MapData mapData = new MapData(s);
-		mapData.dimension = DimensionType.OVERWORLD; // Set default to prevent NPEs
+		final MapItemSavedData mapData = new MapItemSavedData(s);
+
+		mapData.dimension = net.minecraft.world.level.Level.OVERWORLD; // Set default to prevent NPEs
 
 		final MapInfo mapInfo = (MapInfo) mapData;
 
@@ -1073,7 +1077,7 @@ public final class SpongeCommonEventFactory {
 		}
 
 		// Advance map id.
-		final int mcId = defaultWorld.getNextMapId();
+		final int mcId = defaultWorld.getFreeMapId();
 		if (id != mcId) {
 			// TODO: REMOVE OR replace for Integer.MAX_VALUE
 			SpongeCommon.getLogger().warn("Map size corruption, vanilla only allows " + Integer.MAX_VALUE + "! Expected next number was not equal to the true next number.");
@@ -1082,7 +1086,7 @@ public final class SpongeCommonEventFactory {
 			mapIdTrackerBridge.bridge$setHighestMapId(id - 1);
 			return Optional.empty();
 		}
-		defaultWorld.registerMapData(mapData);
+		defaultWorld.setMapData(mapData);
 
 		((SpongeMapStorage) Sponge.getServer().getMapStorage()).addMapInfo(mapInfo);
 

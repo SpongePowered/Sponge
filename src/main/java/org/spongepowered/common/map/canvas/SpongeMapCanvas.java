@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.map.canvas;
 
-import net.minecraft.world.storage.MapData;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.api.map.MapCanvas;
 
 // This interface means that both canvases backed by a byte array
 // and the empty version can be applied
 public interface SpongeMapCanvas extends MapCanvas {
-    void applyToMapData(final MapData mapData);
+    void applyToMapData(final MapItemSavedData mapData);
 }

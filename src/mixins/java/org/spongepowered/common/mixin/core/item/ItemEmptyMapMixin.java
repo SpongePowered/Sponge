@@ -25,14 +25,13 @@
 package org.spongepowered.common.mixin.core.item;
 
 import com.google.common.collect.Sets;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.item.EmptyMapItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.value.Value;
@@ -50,30 +49,31 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector2i;
 
 import java.util.Optional;
 import java.util.Set;
 
-@Mixin(net.minecraft.item.MapItem.class)
+@Mixin(EmptyMapItem.class)
 public abstract class ItemEmptyMapMixin {
 
-    @Redirect(method = "onItemRightClick",
+    @Redirect(method = "use",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/item/FilledMapItem;setupNewMap(Lnet/minecraft/world/World;IIBZZ)Lnet/minecraft/item/ItemStack;"))
-    private ItemStack impl$createMapWithSpongeData(World worldIn, int worldX, int worldZ, byte scale, boolean trackingPosition, boolean unlimitedTracking,
-                                                   World worldIn2, PlayerEntity playerIn, Hand handIn) {
+                    target = "Lnet/minecraft/world/item/MapItem;create(Lnet/minecraft/world/level/Level;IIBZZ)Lnet/minecraft/world/item/ItemStack;"))
+    private ItemStack impl$createMapWithSpongeData(Level level, int x, int y, byte scale, boolean trackingPosition, boolean unlimitedTracking, Level level2,
+                                                   net.minecraft.world.entity.player.Player playerIn, InteractionHand usedHand) {
         final Player player = (Player) playerIn;
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.PLAYER, player);
-            final HandType handType = (HandType) (Object) handIn;
+            final HandType handType = (HandType) (Object) usedHand;
             frame.addContext(EventContextKeys.USED_HAND, handType);
             frame.addContext(EventContextKeys.USED_ITEM, player.getItemInHand(handType).createSnapshot());
 
             final Set<Value<?>> mapValues = Sets.newHashSet(
-                    Value.immutableOf(Keys.MAP_LOCATION.get(), Vector2i.from(worldX, worldZ)),
-                    Value.immutableOf(Keys.MAP_WORLD, ((ServerWorld)worldIn).getKey()),
+                    Value.immutableOf(Keys.MAP_LOCATION, Vector2i.from((int)playerIn.getX(), (int)playerIn.getZ())),
+                    Value.immutableOf(Keys.MAP_WORLD, ((ServerWorld)level).getKey()),
                     Value.immutableOf(Keys.MAP_TRACKS_PLAYERS, trackingPosition),
                     Value.immutableOf(Keys.MAP_UNLIMITED_TRACKING, unlimitedTracking),
                     Value.immutableOf(Keys.MAP_SCALE, (int)scale)
@@ -90,20 +90,21 @@ public abstract class ItemEmptyMapMixin {
             final int id = ((MapDataBridge) optMapInfo.get()).bridge$getMapId();
 
             final ItemStack newMap = new ItemStack(Items.FILLED_MAP, 1);
-            final CompoundNBT nbt = newMap.getOrCreateTag();
-            nbt.putInt("map", id);
+            final CompoundTag nbt = newMap.getOrCreateTag();
+            nbt.putInt(Constants.Map.MAP_ID, id);
 
             return newMap;
         }
     }
 
-    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-            target = "Lnet/minecraft/entity/player/PlayerEntity;getHeldItem(Lnet/minecraft/util/Hand;)Lnet/minecraft/item/ItemStack;"),
+    @Inject(method = "use", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
+            target = "net/minecraft/world/entity/player/Player.getItemInHand (Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"),
             locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    private void impl$returnFailResultIfMapWasNotCreated(World worldIn, PlayerEntity playerIn, Hand handIn, CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack itemstack) {
+    private void impl$returnFailResultIfMapWasNotCreated(Level level, net.minecraft.world.entity.player.Player playerIn, InteractionHand handIn,
+                                                         CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, ItemStack itemstack) {
         if (itemstack.isEmpty()) {
             cir.cancel();
-            cir.setReturnValue(new ActionResult<>(ActionResultType.FAIL, playerIn.getHeldItem(handIn)));
+            cir.setReturnValue(InteractionResultHolder.fail(playerIn.getItemInHand(handIn)));
         }
     }
 

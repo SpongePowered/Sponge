@@ -57,10 +57,13 @@ import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.map.color.MapColorTypes;
 import org.spongepowered.api.map.color.MapShade;
+import org.spongepowered.api.map.color.MapShades;
 import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.map.decoration.MapDecorationTypes;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
+import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
@@ -85,6 +88,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Plugin("maptest")
 public class MapTest implements LoadableModule {
@@ -127,7 +131,7 @@ public class MapTest implements LoadableModule {
                 throw new CommandException(Component.text("You must hold a map in your hand"));
             }
             final ResourceKey netherKey = ResourceKey.minecraft("the_nether");
-            Optional<ServerWorld> nether = Sponge.getServer().getWorldManager().getWorld(netherKey);
+            Optional<ServerWorld> nether = Sponge.getServer().getWorldManager().world(netherKey);
             if (!nether.isPresent()) {
                 final CompletableFuture<ServerWorld> loadedNether = Sponge.getServer().getWorldManager().loadWorld(netherKey);
                 loadedNether.whenComplete((v, e) -> {
@@ -153,7 +157,7 @@ public class MapTest implements LoadableModule {
                 throw new CommandException(Component.text("You must hold a map in your hand"));
             }
             //map.offer(Keys.MAP_LOCATION, new Vector2i(10000,10000));
-            final MapColor color = MapColor.of(MapColorTypes.BLACK_TERRACOTTA);
+            final MapColor color = MapColor.of(MapColorTypes.TERRACOTTA_BLACK);
             final MapInfo mapInfo = map.require(Keys.MAP_INFO);
             mapInfo.offer(Keys.MAP_LOCKED, true);
             mapInfo.offer(Keys.MAP_CANVAS, MapCanvas.builder().paintAll(color).build());
@@ -195,7 +199,7 @@ public class MapTest implements LoadableModule {
                 final MapCanvas.Builder builder = MapCanvas.builder();
 
                 final List<MapColor[]> mapColors = new ArrayList<>();
-                for (final MapColorType mapColorType : Sponge.getRegistry().getCatalogRegistry().getAllOf(MapColorType.class)) {
+                for (MapColorType mapColorType : Sponge.getGame().registries().registry(RegistryTypes.MAP_COLOR_TYPE).stream().collect(Collectors.toList())) {
                     final MapColor[] colors = new MapColor[] {
                             MapColor.of(mapColorType),
                             MapColor.builder().baseColor(mapColorType).darkest().build(),
@@ -281,9 +285,10 @@ public class MapTest implements LoadableModule {
             int x = Byte.MIN_VALUE;
             int y = Byte.MIN_VALUE;
 
-            Collection<MapDecorationOrientation> orientations = Sponge.getRegistry().getCatalogRegistry().getAllOf(MapDecorationOrientation.class);
+
+            Collection<MapDecorationOrientation> orientations = Sponge.getGame().registries().registry(RegistryTypes.MAP_DECORATION_ORIENTATION).stream().collect(Collectors.toList());
             player.sendMessage(Component.text("Number of orientations: " + orientations.size()));
-            player.sendMessage(Component.text("EAST: " + MapDecorationOrientations.EAST.get().getKey().toString()));
+            player.sendMessage(Component.text("EAST: " + MapDecorationOrientations.EAST.get().key(RegistryTypes.MAP_DECORATION_ORIENTATION).toString()));
             for (final MapDecorationOrientation dir : orientations) {
                 decorations.add(
                         MapDecoration.builder()
@@ -386,7 +391,7 @@ public class MapTest implements LoadableModule {
                     .orElseThrow(() -> new CommandException(Component.text("Map creation was cancelled!")));
             final ItemStack itemStack = ItemStack.of(ItemTypes.FILLED_MAP, 1);
             final MapCanvas canvas = MapCanvas.builder()
-                    .paintAll(MapColor.of(MapColorTypes.RED))
+                    .paintAll(MapColor.of(MapColorTypes.COLOR_RED))
                     .build();
             mapInfo.offer(Keys.MAP_CANVAS, canvas);
             mapInfo.offer(Keys.MAP_LOCKED, true);
@@ -415,8 +420,8 @@ public class MapTest implements LoadableModule {
 
         this.createDefaultCommand("testmapshades", ctx -> {
             final Player player = this.requirePlayer(ctx);
-            for (MapShade shade : Sponge.getRegistry().getCatalogRegistry().getAllOf(MapShade.class)) {
-                final MapColor mapColor = MapColor.of(MapColorTypes.GREEN.get(), shade);
+            for (RegistryEntry<MapShade> entry : Sponge.getGame().registries().registry(RegistryTypes.MAP_SHADE)) {
+                final MapColor mapColor = MapColor.of(MapColorTypes.COLOR_GREEN.get(), entry.value());
                 final MapCanvas mapCanvas = MapCanvas.builder().paintAll(mapColor).build();
                 final MapInfo mapInfo = Sponge.getServer().getMapStorage()
                         .createNewMapInfo()
@@ -425,7 +430,7 @@ public class MapTest implements LoadableModule {
                 mapInfo.offer(Keys.MAP_CANVAS, mapCanvas);
                 ItemStack itemStack = ItemStack.of(ItemTypes.FILLED_MAP);
                 itemStack.offer(Keys.MAP_INFO, mapInfo);
-                itemStack.offer(Keys.DISPLAY_NAME, Component.text(shade.getKey().getFormatted()));
+                itemStack.offer(Keys.DISPLAY_NAME, Component.text(entry.key().getFormatted()));
 
                 player.getInventory().getPrimary().offer(itemStack);
             }
@@ -475,7 +480,7 @@ public class MapTest implements LoadableModule {
                     .execute()
                     .orElseThrow(() -> new CommandException(Component.text("You must look at a banner")));
 
-            mapInfo.addBannerDecoration(hit.getSelectedObject().getLocation());
+            mapInfo.addBannerDecoration(hit.getSelectedObject().getServerLocation());
 
             return CommandResult.success();
         }, event);
@@ -554,7 +559,7 @@ public class MapTest implements LoadableModule {
             logger.info("ON MAP CREATE EVENT");
             final MapInfo mapInfo = event.getMapInfo();
             mapInfo.offer(Keys.MAP_CANVAS, MapCanvas.builder()
-                    .paintAll(MapColor.of(MapColorTypes.BLUE))
+                    .paintAll(MapColor.of(MapColorTypes.COLOR_BLUE))
                     .build());
         }
     }

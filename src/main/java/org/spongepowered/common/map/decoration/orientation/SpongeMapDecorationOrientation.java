@@ -24,15 +24,12 @@
  */
 package org.spongepowered.common.map.decoration.orientation;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
-import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeMapDecorationOrientation extends SpongeCatalogType implements MapDecorationOrientation {
+public class SpongeMapDecorationOrientation implements MapDecorationOrientation {
 	private final int orientationNumber;
 
-	public SpongeMapDecorationOrientation(ResourceKey resourceKey, int orientationNumber) {
-		super(resourceKey);
+	public SpongeMapDecorationOrientation(int orientationNumber) {
 		this.orientationNumber = orientationNumber;
 	}
 

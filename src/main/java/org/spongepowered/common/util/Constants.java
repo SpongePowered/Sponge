@@ -1172,8 +1172,10 @@ public final class Constants {
 
     public static final class Map {
         public static final String MAP_INFO_DATA_PROVIDER_NAME = "map_info";
+        public static final String MAP_INDEX_DATA_NAME = "idcounts";
+        public static final String MAP_ID = "map";
 
-        public static final DataQuery MAP_ID = of("UnsafeMapId");
+        public static final DataQuery MAP_UNSAFE_ID = of("UnsafeMapId");
         public static final DataQuery MAP_DATA = of("MapData");
         public static final DataQuery SHADE_NUM = of("shade");
         public static final DataQuery COLOR_INDEX = of("colorIndex");

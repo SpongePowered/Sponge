@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.map;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.world.storage.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.map.decoration.MapDecorationType;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
@@ -46,7 +46,7 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
     @Shadow private byte x;
     @Shadow private byte y;
 
-    @Shadow private byte rotation;
+    @Shadow private byte rot;
 
     @Override
     public MapDecorationType getType() {
@@ -70,13 +70,13 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
 
     @Override
     public void setRotation(MapDecorationOrientation dir) {
-        this.rotation = (byte) ((SpongeMapDecorationOrientation)dir).getOrientationNumber();
+        this.rot = (byte) ((SpongeMapDecorationOrientation)dir).getOrientationNumber();
         ((MapDecorationBridge)this).bridge$markAllDirty();
     }
 
     @Override
     public MapDecorationOrientation getRotation() {
-        int rot = MapUtil.getMapDecorationOrientation(this.rotation);
+        int rot = MapUtil.getMapDecorationOrientation(this.rot);
         return MapDecorationOrientationStreamGenerator.getByInt(rot)
                 .orElseThrow(() -> new IllegalStateException("A map had a rotation that didn't exist!"));
     }
@@ -98,6 +98,6 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
                 .set(Constants.Map.DECORATION_ID, ((MapDecorationBridge) this).bridge$getKey())
                 .set(Constants.Map.DECORATION_X, this.x)
                 .set(Constants.Map.DECORATION_Y, this.y)
-                .set(Constants.Map.DECORATION_ROTATION, (byte) MapUtil.getMapDecorationOrientation(this.rotation));
+                .set(Constants.Map.DECORATION_ROTATION, (byte) MapUtil.getMapDecorationOrientation(this.rot));
     }
 }
