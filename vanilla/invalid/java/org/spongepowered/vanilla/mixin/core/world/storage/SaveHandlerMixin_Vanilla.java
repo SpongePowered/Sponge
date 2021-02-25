@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
+import org.spongepowered.common.bridge.world.level.storage.SaveHandlerBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.vanilla.util.VanillaConstants;

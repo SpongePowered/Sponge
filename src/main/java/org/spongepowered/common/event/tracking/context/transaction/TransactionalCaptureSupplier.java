@@ -39,7 +39,7 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;

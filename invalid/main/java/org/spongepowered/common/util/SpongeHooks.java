@@ -38,7 +38,7 @@ import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;

@@ -36,8 +36,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 
 @Mixin(value = Entity.class, priority = 1500)
 public abstract class EntityMixin_Optimization_Collision {
@@ -45,7 +45,7 @@ public abstract class EntityMixin_Optimization_Collision {
     // Use active chunk cache to replace the call to hasChunksAt
     @Inject(method = "checkInsideBlocks", at = @At("HEAD"), cancellable = true)
     private void activeCollision$checkForNeighboringChunkIfAvailable(final CallbackInfo ci) {
-        final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
+        final LevelChunkBridge activeChunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
         if (activeChunk == null || !activeChunk.bridge$areNeighborsLoaded() || activeChunk.bridge$isQueuedForUnload()) {
             ci.cancel();
         }
@@ -64,7 +64,7 @@ public abstract class EntityMixin_Optimization_Collision {
     @Inject(method = "updateFluidHeightAndDoFluidPushing", at = @At("HEAD"), cancellable = true)
     private void activeCollision$BailIfNeighborsAreInactive(final Tag<Fluid> p_210500_1_,
             final double p_201500_2_, final CallbackInfoReturnable<Boolean> cir) {
-        final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
+        final LevelChunkBridge activeChunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
         if (activeChunk == null || activeChunk.bridge$isQueuedForUnload() || !activeChunk.bridge$areNeighborsLoaded()) {
             cir.setReturnValue(false);
         }

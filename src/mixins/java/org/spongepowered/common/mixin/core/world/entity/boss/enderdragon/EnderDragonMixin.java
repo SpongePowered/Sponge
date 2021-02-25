@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 import org.spongepowered.common.mixin.core.world.entity.MobMixin;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;

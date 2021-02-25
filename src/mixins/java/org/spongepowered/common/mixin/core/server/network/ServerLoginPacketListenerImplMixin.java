@@ -45,13 +45,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
-import org.spongepowered.common.bridge.network.ServerLoginNetHandlerBridge;
+import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
+import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
 
 import java.net.SocketAddress;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
-public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginNetHandlerBridge, NetworkManagerHolderBridge {
+public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge, ConnectionHolderBridge {
 
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public Connection connection;

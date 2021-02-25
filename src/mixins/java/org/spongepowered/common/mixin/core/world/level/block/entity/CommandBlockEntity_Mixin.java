@@ -28,7 +28,7 @@ import net.minecraft.commands.CommandSourceStack;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 
 @Mixin(targets = "net.minecraft.world.level.block.entity.CommandBlockEntity$1")
 public abstract class CommandBlockEntity_Mixin implements CommandSourceProviderBridge {

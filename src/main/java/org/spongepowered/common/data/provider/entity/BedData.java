@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.entity.player.BedLocationHolderBridge;
+import org.spongepowered.common.bridge.world.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class BedData {

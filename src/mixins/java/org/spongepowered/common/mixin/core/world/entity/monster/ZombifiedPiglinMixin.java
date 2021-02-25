@@ -28,7 +28,7 @@ import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.AggressiveEntityBridge;
+import org.spongepowered.common.bridge.world.entity.AggressiveEntityBridge;
 
 @Mixin(ZombifiedPiglin.class)
 public abstract class ZombifiedPiglinMixin extends MonsterMixin implements AggressiveEntityBridge {

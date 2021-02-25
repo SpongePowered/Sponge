@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -56,7 +56,7 @@ public abstract class FireBlockMixin extends BaseFireBlockMixin {
         if (!((WorldBridge) world).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.FIRE_SPREAD, (ServerWorld) world);
-                if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, pos).isCancelled()) {
+                if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
                     return false;
                 }
             }
@@ -75,7 +75,7 @@ public abstract class FireBlockMixin extends BaseFireBlockMixin {
     private void impl$onCatchFirePreCheck(
         final Level world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
         if (!world.isClientSide) {
-            if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, pos).isCancelled()) {
+            if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }
         }
@@ -91,7 +91,7 @@ public abstract class FireBlockMixin extends BaseFireBlockMixin {
     private void impl$onCatchFirePreCheckOther(
         final Level world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
         if (!world.isClientSide) {
-            if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, pos).isCancelled()) {
+            if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }
         }

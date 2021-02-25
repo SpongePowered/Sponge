@@ -26,9 +26,9 @@ package org.spongepowered.common.mixin.core.world.level.portal;
 
 import net.minecraft.world.level.portal.PortalForcer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
+import org.spongepowered.common.bridge.world.level.portal.PlatformPortalForcerBridge;
 
 @Mixin(PortalForcer.class)
-public abstract class PortalForcerMixin implements PlatformITeleporterBridge {
+public abstract class PortalForcerMixin implements PlatformPortalForcerBridge {
 
 }

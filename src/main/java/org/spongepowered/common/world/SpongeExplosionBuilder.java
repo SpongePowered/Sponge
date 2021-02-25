@@ -30,7 +30,7 @@ import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.common.bridge.world.ExplosionBridge;
+import org.spongepowered.common.bridge.world.level.ExplosionBridge;
 import org.spongepowered.math.vector.Vector3d;
 
 public class SpongeExplosionBuilder implements Explosion.Builder {

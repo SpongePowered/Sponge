@@ -41,7 +41,7 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
@@ -51,7 +51,7 @@ public abstract class CommandSourceStackMixin_API implements CommandCause {
 
     @Override
     public Cause getCause() {
-        return ((CommandSourceBridge) this).bridge$getCause();
+        return ((CommandSourceStackBridge) this).bridge$getCause();
     }
 
     @Override

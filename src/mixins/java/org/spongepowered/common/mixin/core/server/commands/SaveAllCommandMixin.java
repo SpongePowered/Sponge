@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 
 @Mixin(SaveAllCommand.class)
 public abstract class SaveAllCommandMixin {
@@ -40,7 +40,7 @@ public abstract class SaveAllCommandMixin {
     @Inject(method = "saveAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;saveAllChunks(ZZZ)Z"))
     private static void impl$markManualSave(final CommandSourceStack source, final boolean flush, final CallbackInfoReturnable<Integer> cir) {
         for (final ServerLevel world : SpongeCommon.getServer().getAllLevels()) {
-            ((ServerWorldBridge) world).bridge$setManualSave(true);
+            ((ServerLevelBridge) world).bridge$setManualSave(true);
         }
     }
 }

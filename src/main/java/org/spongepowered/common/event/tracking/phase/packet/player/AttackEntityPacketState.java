@@ -31,7 +31,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
@@ -85,7 +85,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
         final World spongeWorld = (World) player.level;
         if (entity instanceof CreatorTrackedBridge) {
             // TODO Minecraft 1.14 - How can attacking an Entity mean you created it??
-            ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerEntityBridge) player).bridge$getUser());
+            ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerBridge) player).bridge$getUser());
         } else {
             ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
         }

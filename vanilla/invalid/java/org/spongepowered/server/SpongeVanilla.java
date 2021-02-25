@@ -56,7 +56,7 @@ import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.command.ServerCommandManagerBridge;
+import org.spongepowered.common.bridge.commands.ServerCommandManagerBridge;
 import org.spongepowered.common.entity.ai.SpongeEntityAICommonSuperclass;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inject.SpongeGuice;

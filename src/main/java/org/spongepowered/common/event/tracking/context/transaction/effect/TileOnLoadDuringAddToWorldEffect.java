@@ -27,7 +27,7 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -53,7 +53,7 @@ public final class TileOnLoadDuringAddToWorldEffect implements ProcessingSideEff
         if (tileEntity == null) {
             return EffectResult.NULL_RETURN;
         }
-        ((TileEntityBridge) tileEntity).bridge$onLoad();
+        ((BlockEntityBridge) tileEntity).bridge$onLoad();
         return EffectResult.NULL_PASS;
     }
 }

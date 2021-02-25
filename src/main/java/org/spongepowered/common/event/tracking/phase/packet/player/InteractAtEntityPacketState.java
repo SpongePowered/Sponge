@@ -30,7 +30,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
@@ -74,7 +74,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
         }
         final World spongeWorld = (World) player.level;
         if (entity instanceof CreatorTrackedBridge) {
-            ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerEntityBridge) player).bridge$getUser());
+            ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerBridge) player).bridge$getUser());
         } else {
             ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
         }

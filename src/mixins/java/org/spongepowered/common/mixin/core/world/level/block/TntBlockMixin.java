@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.bridge.entity.item.EntityTNTPrimedBridge;
+import org.spongepowered.common.bridge.world.entity.item.PrimedTntBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -66,7 +66,7 @@ public abstract class TntBlockMixin extends BlockMixin {
     )
     private static void impl$ThrowPrimeAndMaybeCancel(final Level worldIn, final BlockPos pos,
             @Nullable final LivingEntity igniter, final CallbackInfo ci, final PrimedTnt tnt) {
-        ((EntityTNTPrimedBridge) tnt).bridge$setDetonator(igniter);
+        ((PrimedTntBridge) tnt).bridge$setDetonator(igniter);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 if (igniter != null) {

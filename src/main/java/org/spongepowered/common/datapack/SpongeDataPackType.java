@@ -35,7 +35,7 @@ import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
-import org.spongepowered.common.bridge.world.DimensionBridge;
+import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
 import org.spongepowered.common.server.BootstrapProperties;
@@ -127,8 +127,8 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                 new DataPackSerializer<>("Dimensions", "dimension"),
                 s -> {
                     final LevelStem template = new LevelStem(() -> BootstrapProperties.registries.dimensionTypes().get((ResourceLocation) (Object) s.worldType().location()), (ChunkGenerator) s.generator());
-                    ((DimensionBridge) (Object) template).bridge$setFromSettings(false);
-                    ((DimensionBridge) (Object) template).bridge$populateFromTemplate((SpongeWorldTemplate) s);
+                    ((LevelStemBridge) (Object) template).bridge$setFromSettings(false);
+                    ((LevelStemBridge) (Object) template).bridge$populateFromTemplate((SpongeWorldTemplate) s);
                     return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), template).getOrThrow(false, e -> {});
                 },
                 (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),

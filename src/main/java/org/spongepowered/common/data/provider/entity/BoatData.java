@@ -30,7 +30,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.type.BoatType;
 import org.spongepowered.common.accessor.world.entity.vehicle.BoatAccessor;
-import org.spongepowered.common.bridge.entity.item.BoatBridge;
+import org.spongepowered.common.bridge.world.entity.vehicle.BoatBridge;
 import org.spongepowered.common.data.ByteToBooleanContentUpdater;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;

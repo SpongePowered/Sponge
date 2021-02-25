@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.entity;
 import co.aikar.timings.Timing;
 import net.minecraft.world.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.entity.EntityTypeBridge;
+import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
 @Mixin(EntityType.class)

@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.ServerStatusResponseBridge;
+import org.spongepowered.common.bridge.network.protocol.status.ServerStatusBridge;
 import org.spongepowered.common.network.status.SpongeFavicon;
 
 import java.io.IOException;
@@ -43,7 +43,7 @@ import java.io.IOException;
 import javax.annotation.Nullable;
 
 @Mixin(ServerStatus.class)
-public abstract class ServerStatusMixin implements ServerStatusResponseBridge {
+public abstract class ServerStatusMixin implements ServerStatusBridge {
 
     @Shadow @Nullable private net.minecraft.network.chat.Component description;
     @Shadow @Nullable private String favicon;

@@ -37,9 +37,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.ai.GoalBridge;
-import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.entity.ai.GoalBridge;
+import org.spongepowered.common.bridge.world.entity.ai.goal.GoalSelectorBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 

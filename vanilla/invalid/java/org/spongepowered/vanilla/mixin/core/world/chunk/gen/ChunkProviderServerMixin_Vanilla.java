@@ -32,7 +32,7 @@ import net.minecraft.world.gen.IChunkGenerator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ChunkProviderServerBridge;
 
 import javax.annotation.Nullable;
 

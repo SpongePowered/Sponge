@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.level.biome;
 import net.minecraft.world.level.biome.Biome;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.biome.BiomeBridge;
+import org.spongepowered.common.bridge.world.level.biome.BiomeBridge;
 
 @Mixin(Biome.class)
 public abstract class BiomeMixin implements BiomeBridge {

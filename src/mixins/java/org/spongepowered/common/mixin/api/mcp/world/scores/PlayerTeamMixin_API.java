@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.world.scores;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.ChatFormatting;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
@@ -39,7 +38,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
+import org.spongepowered.common.bridge.world.scores.PlayerTeamBridge;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -78,42 +77,42 @@ public abstract class PlayerTeamMixin_API implements Team {
 
     @Override
     public Component getDisplayName() {
-        return ((ScorePlayerTeamBridge) this).bridge$getDisplayName();
+        return ((PlayerTeamBridge) this).bridge$getDisplayName();
     }
 
     @Override
     public void setDisplayName(final Component text) {
-        ((ScorePlayerTeamBridge) this).bridge$setDisplayName(text);
+        ((PlayerTeamBridge) this).bridge$setDisplayName(text);
     }
 
     @Override
     public NamedTextColor getColor() {
-        return ((ScorePlayerTeamBridge) this).bridge$getColor();
+        return ((PlayerTeamBridge) this).bridge$getColor();
     }
 
     @Override
     public void setColor(final NamedTextColor color) {
-        ((ScorePlayerTeamBridge) this).bridge$setColor(color);
+        ((PlayerTeamBridge) this).bridge$setColor(color);
     }
 
     @Override
     public Component getPrefix() {
-        return ((ScorePlayerTeamBridge) this).bridge$getPrefix();
+        return ((PlayerTeamBridge) this).bridge$getPrefix();
     }
 
     @Override
     public void setPrefix(final Component prefix) {
-        ((ScorePlayerTeamBridge) this).bridge$setPrefix(prefix);
+        ((PlayerTeamBridge) this).bridge$setPrefix(prefix);
     }
 
     @Override
     public Component getSuffix() {
-        return ((ScorePlayerTeamBridge) this).bridge$getSuffix();
+        return ((PlayerTeamBridge) this).bridge$getSuffix();
     }
 
     @Override
     public void setSuffix(final Component suffix) {
-        ((ScorePlayerTeamBridge) this).bridge$setSuffix(suffix);
+        ((PlayerTeamBridge) this).bridge$setSuffix(suffix);
     }
 
     @Override

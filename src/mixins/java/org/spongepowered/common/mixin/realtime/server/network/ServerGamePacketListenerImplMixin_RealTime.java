@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
 @Mixin(ServerGamePacketListenerImpl.class)

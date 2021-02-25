@@ -40,7 +40,7 @@ import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.inheritable.EntityCollisionCategory;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
@@ -56,7 +56,7 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void collisions$InjectActivationInformation(net.minecraft.world.entity.EntityType<?> type, net.minecraft.world.level.Level world, CallbackInfo ci) {
-        if (world != null && !((WorldBridge) world).bridge$isFake() && ((ServerWorldInfoBridge) world.getLevelData()).bridge$valid()) {
+        if (world != null && !((WorldBridge) world).bridge$isFake() && ((PrimaryLevelDataBridge) world.getLevelData()).bridge$valid()) {
             if ((net.minecraft.world.entity.Entity) (Object) this instanceof ItemEntity) {
                 final ItemEntity item = (ItemEntity) (Object) this;
                 final ItemStack itemstack = item.getItem();
@@ -90,7 +90,7 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
 
     @Override
     public void collision$initializeCollisionState(final net.minecraft.world.level.Level world) {
-        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((ServerWorldInfoBridge) world.getLevelData()).bridge$configAdapter();
+        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter();
         final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
         final EntityCollisionCategory.ModSubCategory worldCollMod =
                 worldConfigAdapter.getOrCreateValue(s -> s.entityCollision.mods.get(this.entityCollision$key.getNamespace()),

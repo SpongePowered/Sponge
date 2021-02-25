@@ -108,11 +108,11 @@ import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundClientInformationPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
-import org.spongepowered.common.bridge.world.BossInfoBridge;
+import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.entity.EntityUtil;
@@ -138,7 +138,7 @@ import java.util.UUID;
 
 // See also: SubjectMixin_API and SubjectMixin
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
-public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBridge, ServerPlayerEntityBridge {
+public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBridge, ServerPlayerBridge {
 
     // @formatter:off
     @Shadow public ServerGamePacketListenerImpl connection;
@@ -737,7 +737,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z"))
     private boolean tracker$useKeepFromBridge(final GameRules gameRules, final GameRules.Key<?> key,
             final net.minecraft.server.level.ServerPlayer corpse, final boolean keepEverything) {
-        final boolean keep = ((PlayerEntityBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
+        final boolean keep = ((PlayerBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
         if (!keep) {
             // Copy corpse inventory to respawned player
             this.inventory.replaceWith(corpse.inventory);
@@ -768,7 +768,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
 
         // Update boss bars
-        SpongeAdventure.forEachBossBar(bar -> ((BossInfoBridge) bar).bridge$replacePlayer(oldPlayer, (net.minecraft.server.level.ServerPlayer) (Object) this));
+        SpongeAdventure.forEachBossBar(bar -> ((BossEventBridge) bar).bridge$replacePlayer(oldPlayer, (net.minecraft.server.level.ServerPlayer) (Object) this));
     }
 
     @SuppressWarnings({"ConstantConditions", "UnstableApiUsage"})

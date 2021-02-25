@@ -25,8 +25,8 @@
 package org.spongepowered.common.util;
 
 import net.minecraft.world.entity.player.Player;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 
 public final class ExperienceHolderUtil {
 
@@ -120,8 +120,8 @@ public final class ExperienceHolderUtil {
         holder.experienceLevel = level;
         holder.totalExperience = value;
 
-        if (holder instanceof ServerPlayerEntityBridge) {
-            ((ServerPlayerEntityBridge) holder).bridge$refreshExp();
+        if (holder instanceof ServerPlayerBridge) {
+            ((ServerPlayerBridge) holder).bridge$refreshExp();
         }
     }
 
@@ -129,10 +129,10 @@ public final class ExperienceHolderUtil {
         while (value >= holder.getXpNeededForNextLevel()) {
             value -= holder.getXpNeededForNextLevel();
         }
-        ((PlayerEntityBridge) holder).bridge$setExperienceSinceLevel(value);
+        ((PlayerBridge) holder).bridge$setExperienceSinceLevel(value);
 
-        if (holder instanceof ServerPlayerEntityBridge) {
-            ((ServerPlayerEntityBridge) holder).bridge$refreshExp();
+        if (holder instanceof ServerPlayerBridge) {
+            ((ServerPlayerBridge) holder).bridge$refreshExp();
         }
     }
 

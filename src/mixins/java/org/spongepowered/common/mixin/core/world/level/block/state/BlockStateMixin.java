@@ -37,7 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
+import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 
 @Mixin(BlockState.class)
 public abstract class BlockStateMixin extends BlockBehaviour.BlockStateBase implements BlockStateBridge {

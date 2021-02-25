@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.network.syncher;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.bridge.network.datasync.DataParameterBridge;
+import org.spongepowered.common.bridge.network.syncher.EntityDataAccessorBridge;
 
 import java.util.Optional;
 
@@ -34,7 +34,7 @@ import javax.annotation.Nullable;
 import net.minecraft.network.syncher.EntityDataAccessor;
 
 @Mixin(EntityDataAccessor.class)
-public abstract class EntityDataAccessorMixin<T> implements DataParameterBridge<T> {
+public abstract class EntityDataAccessorMixin<T> implements EntityDataAccessorBridge<T> {
 
     @Nullable private DataParameterConverter<T> impl$converter;
 

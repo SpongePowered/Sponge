@@ -36,7 +36,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
+import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 

@@ -31,8 +31,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
-import org.spongepowered.common.bridge.scoreboard.ScoreboardBridge;
+import org.spongepowered.common.bridge.world.scores.ScoreBridge;
+import org.spongepowered.common.bridge.world.scores.ScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeScore;
 
 import javax.annotation.Nullable;

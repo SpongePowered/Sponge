@@ -49,7 +49,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.entity.EntityTrackedBridge;
+import org.spongepowered.common.bridge.world.entity.EntityTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;

@@ -80,9 +80,9 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
@@ -148,7 +148,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public User getUser() {
-        return ((ServerPlayerEntityBridge) this).bridge$getUser();
+        return ((ServerPlayerBridge) this).bridge$getUser();
     }
 
     @Override
@@ -161,7 +161,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public GameProfile getProfile() {
-        return ((ServerPlayerEntityBridge) this).bridge$getUser().getProfile();
+        return ((ServerPlayerBridge) this).bridge$getUser().getProfile();
     }
 
     @Override
@@ -169,7 +169,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        ((ServerPlayerEntityBridge) this).bridge$sendViewerEnvironment((net.minecraft.world.level.dimension.DimensionType) Objects.requireNonNull(worldType,
+        ((ServerPlayerBridge) this).bridge$sendViewerEnvironment((net.minecraft.world.level.dimension.DimensionType) Objects.requireNonNull(worldType,
                 "worldType"));
     }
 
@@ -198,16 +198,16 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public String getIdentifier() {
-        return ((ServerPlayerEntityBridge) this).bridge$getUser().getIdentifier();
+        return ((ServerPlayerBridge) this).bridge$getUser().getIdentifier();
     }
 
     @Override
     public void setScoreboard(final Scoreboard scoreboard) {
         Objects.requireNonNull(scoreboard, "scoreboard");
 
-        ((ServerScoreboardBridge) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).bridge$removePlayer((net.minecraft.server.level.ServerPlayer) (Object) this, true);
-        ((ServerPlayerEntityBridge) this).bridge$replaceScoreboard(scoreboard);
-        ((ServerScoreboardBridge) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).bridge$addPlayer((net.minecraft.server.level.ServerPlayer) (Object) this, true);
+        ((ServerScoreboardBridge) ((ServerPlayerBridge) this).bridge$getScoreboard()).bridge$removePlayer((net.minecraft.server.level.ServerPlayer) (Object) this, true);
+        ((ServerPlayerBridge) this).bridge$replaceScoreboard(scoreboard);
+        ((ServerScoreboardBridge) ((ServerPlayerBridge) this).bridge$getScoreboard()).bridge$addPlayer((net.minecraft.server.level.ServerPlayer) (Object) this, true);
     }
 
     @Override
@@ -217,7 +217,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public Scoreboard getScoreboard() {
-        return ((ServerPlayerEntityBridge) this).bridge$getScoreboard();
+        return ((ServerPlayerBridge) this).bridge$getScoreboard();
     }
 
     @Override
@@ -227,7 +227,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public boolean kick(final Component message) {
-        return ((ServerPlayerEntityBridge) this).bridge$kick(Objects.requireNonNull(message, "message"));
+        return ((ServerPlayerBridge) this).bridge$kick(Objects.requireNonNull(message, "message"));
     }
 
     @Override
@@ -343,12 +343,12 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
                 Optional.ofNullable(this.api$worldBorder), this, Optional.ofNullable(border)))) {
             if (this.api$worldBorder != null) { //is the world border about to be unset?
                 ((WorldBorderAccessor) this.api$worldBorder).accessor$listeners().remove(
-                        ((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
+                        ((ServerPlayerBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
             }
             this.api$worldBorder = border;
             if (this.api$worldBorder != null) {
                 ((net.minecraft.world.level.border.WorldBorder) this.api$worldBorder).addListener(
-                        ((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener());
+                        ((ServerPlayerBridge) this).bridge$getWorldBorderListener());
                 this.connection.send(
                         new ClientboundSetBorderPacket((net.minecraft.world.level.border.WorldBorder) this.api$worldBorder,
                                 ClientboundSetBorderPacket.Type.INITIALIZE));

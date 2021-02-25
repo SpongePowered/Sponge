@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.util.DamageSourceBridge;
+import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 

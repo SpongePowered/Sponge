@@ -60,9 +60,9 @@ import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.DimensionBridge;
-import org.spongepowered.common.bridge.world.gen.DimensionGeneratorSettingsBridge;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
+import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.server.BootstrapProperties;
@@ -76,7 +76,7 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 @Mixin(PrimaryLevelData.class)
-public abstract class PrimaryLevelDataMixin implements WorldData, ServerWorldInfoBridge, ResourceKeyBridge {
+public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDataBridge, ResourceKeyBridge {
 
     // @formatter:off
     @Shadow private LevelSettings settings;
@@ -117,8 +117,8 @@ public abstract class PrimaryLevelDataMixin implements WorldData, ServerWorldInf
         return this.impl$key != null;
     }
 
-    @Nullable
-    public ServerLevel bridge$world() {
+    @Override
+    public @Nullable ServerLevel bridge$world() {
         if (!Sponge.isServerAvailable()) {
             return null;
         }
@@ -259,28 +259,28 @@ public abstract class PrimaryLevelDataMixin implements WorldData, ServerWorldInf
 
     @Override
     public void bridge$populateFromDimension(final LevelStem dimension) {
-        final DimensionBridge dimensionBridge = (DimensionBridge) (Object) dimension;
+        final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) dimension;
         this.impl$key = ((ResourceKeyBridge) (Object) dimension).bridge$getKey();
         this.impl$dimensionType = dimension.type();
-        this.impl$displayName = dimensionBridge.bridge$displayName().orElse(null);
-        dimensionBridge.bridge$difficulty().ifPresent(v -> {
+        this.impl$displayName = levelStemBridge.bridge$displayName().orElse(null);
+        levelStemBridge.bridge$difficulty().ifPresent(v -> {
             ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(RegistryTypes.DIFFICULTY.get().value((ResourceKey) (Object) v));
             this.impl$customDifficulty = true;
         });
-        dimensionBridge.bridge$gameMode().ifPresent(v -> {
+        levelStemBridge.bridge$gameMode().ifPresent(v -> {
             ((LevelSettingsAccessor) (Object) this.settings).accessor$gameType(RegistryTypes.GAME_MODE.get().value((ResourceKey) (Object) v));
             this.impl$customGameType = true;
         });
-        dimensionBridge.bridge$spawnPosition().ifPresent(v -> {
+        levelStemBridge.bridge$spawnPosition().ifPresent(v -> {
             this.setSpawn(VecHelper.toBlockPos(v), this.spawnAngle);
             this.impl$customSpawnPosition = true;
         });
-        dimensionBridge.bridge$hardcore().ifPresent(v -> ((LevelSettingsAccessor) (Object) this.settings).accessor$hardcode(v));
-        this.impl$serializationBehavior = dimensionBridge.bridge$serializationBehavior().orElse(null);
-        this.impl$pvp = dimensionBridge.bridge$pvp().orElse(null);
-        this.impl$loadOnStartup = dimensionBridge.bridge$loadOnStartup();
-        this.impl$performsSpawnLogic = dimensionBridge.bridge$performsSpawnLogic();
-        this.impl$viewDistance = dimensionBridge.bridge$viewDistance().orElse(null);
+        levelStemBridge.bridge$hardcore().ifPresent(v -> ((LevelSettingsAccessor) (Object) this.settings).accessor$hardcode(v));
+        this.impl$serializationBehavior = levelStemBridge.bridge$serializationBehavior().orElse(null);
+        this.impl$pvp = levelStemBridge.bridge$pvp().orElse(null);
+        this.impl$loadOnStartup = levelStemBridge.bridge$loadOnStartup();
+        this.impl$performsSpawnLogic = levelStemBridge.bridge$performsSpawnLogic();
+        this.impl$viewDistance = levelStemBridge.bridge$viewDistance().orElse(null);
     }
 
     @Override
@@ -299,7 +299,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, ServerWorldInf
         if (dimensionGeneratorSettings.dimensions().entrySet().size() == 0) {
             return codec.encodeStart(ops, dimensionGeneratorSettings);
         }
-        dimensionGeneratorSettings = ((DimensionGeneratorSettingsBridge) input).bridge$copy();
+        dimensionGeneratorSettings = ((WorldGenSettingsBridge) input).bridge$copy();
         final MappedRegistry<LevelStem> registry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
         ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) dimensionGeneratorSettings.dimensions()).streamEntries().forEach(entry -> {
             if (Constants.MINECRAFT.equals(entry.key().getNamespace())) {

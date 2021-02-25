@@ -44,9 +44,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.world.entity.GrieferBridge;
+import org.spongepowered.common.bridge.world.entity.ai.goal.GoalSelectorBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -272,7 +272,7 @@ public abstract class MobMixin extends LivingEntityMixin {
         Player result = null;
 
         for (final Player player : world.players()) {
-            if (player == null || player.removed || !((PlayerEntityBridge) player).bridge$affectsSpawning()) {
+            if (player == null || player.removed || !((PlayerBridge) player).bridge$affectsSpawning()) {
                 continue;
             }
 

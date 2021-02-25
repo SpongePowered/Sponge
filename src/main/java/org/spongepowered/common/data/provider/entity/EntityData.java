@@ -24,18 +24,14 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.util.Constants;

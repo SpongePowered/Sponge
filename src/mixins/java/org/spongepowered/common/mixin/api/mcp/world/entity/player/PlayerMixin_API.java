@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.mixin.api.mcp.world.entity.LivingEntityMixin_API;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)

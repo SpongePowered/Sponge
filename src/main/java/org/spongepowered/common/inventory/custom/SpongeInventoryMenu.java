@@ -45,7 +45,7 @@ import org.spongepowered.api.item.inventory.menu.handler.SlotChangeHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.common.accessor.world.inventory.AbstractContainerMenuAccessor;
-import org.spongepowered.common.bridge.inventory.container.MenuBridge;
+import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 

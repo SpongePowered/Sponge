@@ -27,7 +27,7 @@ package org.spongepowered.common.data.datasync;
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.value.Value.Immutable;
-import org.spongepowered.common.bridge.network.datasync.DataParameterBridge;
+import org.spongepowered.common.bridge.network.syncher.EntityDataAccessorBridge;
 
 import java.util.List;
 import java.util.Objects;
@@ -42,7 +42,7 @@ public abstract class DataParameterConverter<E> {
     @SuppressWarnings("unchecked")
     public DataParameterConverter(final EntityDataAccessor<E> parameter) {
         this.parameter = parameter;
-        ((DataParameterBridge<E>) parameter).bridge$setDataConverter(this);
+        ((EntityDataAccessorBridge<E>) parameter).bridge$setDataConverter(this);
     }
 
     public EntityDataAccessor<E> getParameter() {

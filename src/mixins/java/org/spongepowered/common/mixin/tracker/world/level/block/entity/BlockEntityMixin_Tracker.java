@@ -25,17 +25,14 @@
 package org.spongepowered.common.mixin.tracker.world.level.block.entity;
 
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.tileentity.TrackableTileEntityBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.TrackableBlockEntityBridge;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
-public class BlockEntityMixin_Tracker implements TrackableBridge, TrackableTileEntityBridge {
+public class BlockEntityMixin_Tracker implements TrackableBridge, TrackableBlockEntityBridge {
 
     // @formatter:off
     @Shadow @Final private BlockEntityType<?> type;

@@ -31,7 +31,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.item.EnderCrystalEntityBridge;
+import org.spongepowered.common.bridge.world.entity.boss.enderdragon.EndCrystalBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -45,7 +45,7 @@ import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import java.util.Optional;
 
 @Mixin(EndCrystal.class)
-public abstract class EndCrystalMixin extends EntityMixin implements ExplosiveBridge, EnderCrystalEntityBridge {
+public abstract class EndCrystalMixin extends EntityMixin implements ExplosiveBridge, EndCrystalBridge {
 
     private int impl$explosionStrength = Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH;
 

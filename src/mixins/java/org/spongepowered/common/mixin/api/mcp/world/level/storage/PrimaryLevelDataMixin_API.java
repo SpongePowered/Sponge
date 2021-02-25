@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.Objects;
@@ -71,27 +71,27 @@ public abstract class PrimaryLevelDataMixin_API implements ServerWorldProperties
 
     @Override
     public Optional<ServerWorld> world() {
-        return Optional.ofNullable((ServerWorld) ((ServerWorldInfoBridge) this).bridge$world());
+        return Optional.ofNullable((ServerWorld) ((PrimaryLevelDataBridge) this).bridge$world());
     }
 
     @Override
     public Optional<Component> displayName() {
-        return ((ServerWorldInfoBridge) this).bridge$displayName();
+        return ((PrimaryLevelDataBridge) this).bridge$displayName();
     }
 
     @Override
     public void setDisplayName(final Component displayName) {
-        ((ServerWorldInfoBridge) this).bridge$setDisplayName(Objects.requireNonNull(displayName, "displayName"));
+        ((PrimaryLevelDataBridge) this).bridge$setDisplayName(Objects.requireNonNull(displayName, "displayName"));
     }
 
     @Override
     public WorldType worldType() {
-        return (WorldType) ((ServerWorldInfoBridge) this).bridge$dimensionType();
+        return (WorldType) ((PrimaryLevelDataBridge) this).bridge$dimensionType();
     }
 
     @Override
     public void setWorldType(final WorldType worldType) {
-        ((ServerWorldInfoBridge) this).bridge$dimensionType((DimensionType) Objects.requireNonNull(worldType, "worldType"), true);
+        ((PrimaryLevelDataBridge) this).bridge$dimensionType((DimensionType) Objects.requireNonNull(worldType, "worldType"), true);
     }
 
     @Override
@@ -111,37 +111,37 @@ public abstract class PrimaryLevelDataMixin_API implements ServerWorldProperties
 
     @Override
     public boolean pvp() {
-        return ((ServerWorldInfoBridge) this).bridge$pvp().orElse(BootstrapProperties.pvp);
+        return ((PrimaryLevelDataBridge) this).bridge$pvp().orElse(BootstrapProperties.pvp);
     }
 
     @Override
     public void setPvp(final boolean pvp) {
-        ((ServerWorldInfoBridge) this).bridge$setPvp(pvp);
+        ((PrimaryLevelDataBridge) this).bridge$setPvp(pvp);
     }
 
     @Override
     public UUID getUniqueId() {
-        return ((ServerWorldInfoBridge) this).bridge$uniqueId();
+        return ((PrimaryLevelDataBridge) this).bridge$uniqueId();
     }
 
     @Override
     public boolean loadOnStartup() {
-        return ((ServerWorldInfoBridge) this).bridge$loadOnStartup();
+        return ((PrimaryLevelDataBridge) this).bridge$loadOnStartup();
     }
 
     @Override
     public void setLoadOnStartup(final boolean loadOnStartup) {
-        ((ServerWorldInfoBridge) this).bridge$setLoadOnStartup(loadOnStartup);
+        ((PrimaryLevelDataBridge) this).bridge$setLoadOnStartup(loadOnStartup);
     }
 
     @Override
     public boolean performsSpawnLogic() {
-        return ((ServerWorldInfoBridge) this).bridge$performsSpawnLogic();
+        return ((PrimaryLevelDataBridge) this).bridge$performsSpawnLogic();
     }
 
     @Override
     public void setPerformsSpawnLogic(final boolean keepLoaded) {
-        ((ServerWorldInfoBridge) this).bridge$setPerformsSpawnLogic(keepLoaded);
+        ((PrimaryLevelDataBridge) this).bridge$setPerformsSpawnLogic(keepLoaded);
     }
 
     @Override
@@ -151,12 +151,12 @@ public abstract class PrimaryLevelDataMixin_API implements ServerWorldProperties
 
     @Override
     public int viewDistance() {
-        return ((ServerWorldInfoBridge) this).bridge$viewDistance().orElse(BootstrapProperties.viewDistance);
+        return ((PrimaryLevelDataBridge) this).bridge$viewDistance().orElse(BootstrapProperties.viewDistance);
     }
 
     @Override
     public void setViewDistance(@Nullable Integer viewDistance) {
-        ((ServerWorldInfoBridge) this).bridge$setViewDistance(viewDistance);
+        ((PrimaryLevelDataBridge) this).bridge$setViewDistance(viewDistance);
     }
 
     @Override
@@ -166,12 +166,12 @@ public abstract class PrimaryLevelDataMixin_API implements ServerWorldProperties
 
     @Override
     public SerializationBehavior serializationBehavior() {
-        return ((ServerWorldInfoBridge) this).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
+        return ((PrimaryLevelDataBridge) this).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
     }
 
     @Override
     public void setSerializationBehavior(final SerializationBehavior behavior) {
-        ((ServerWorldInfoBridge) this).bridge$setSerializationBehavior(behavior);
+        ((PrimaryLevelDataBridge) this).bridge$setSerializationBehavior(behavior);
     }
 
     @Override

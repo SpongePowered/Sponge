@@ -32,11 +32,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.world.level.BaseSpawnerBridge;
 
 @Mixin(BaseSpawner.class)
-public abstract class BaseSpawnerMixin implements AbstractSpawnerBridge {
+public abstract class BaseSpawnerMixin implements BaseSpawnerBridge {
 
     // @formatter:off
     @Shadow private int spawnDelay;
@@ -101,7 +101,7 @@ public abstract class BaseSpawnerMixin implements AbstractSpawnerBridge {
         for (final Player playerentity : world.players()) {
             if (EntitySelector.NO_SPECTATORS.test(playerentity)
                   && EntitySelector.LIVING_ENTITY_STILL_ALIVE.test(playerentity)
-                  && ((PlayerEntityBridge) playerentity).bridge$affectsSpawning()) {
+                  && ((PlayerBridge) playerentity).bridge$affectsSpawning()) {
                 final double d0 = playerentity.distanceToSqr(x, y, z);
                 if (distance < 0.0D || d0 < distance * distance) {
                     return true;

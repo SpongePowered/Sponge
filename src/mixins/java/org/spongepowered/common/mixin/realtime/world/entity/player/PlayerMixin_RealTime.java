@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.world.entity.LivingEntityMixin_RealTime;
 

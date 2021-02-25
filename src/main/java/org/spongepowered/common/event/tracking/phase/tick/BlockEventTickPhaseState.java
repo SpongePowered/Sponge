@@ -30,8 +30,8 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -77,7 +77,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
                                                final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
-            final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.getChunkAt(notifyPos);
+            final LevelChunkBridge mixinChunk = (LevelChunkBridge) minecraftWorld.getChunkAt(notifyPos);
             mixinChunk.bridge$addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
         });
     }
@@ -89,7 +89,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();
         final BlockPos changedBlockPos = original.getBlockPos();
         original.getServerWorld().ifPresent(worldServer -> {
-            final ChunkBridge changedMixinChunk = (ChunkBridge) worldServer.getChunkAt(changedBlockPos);
+            final LevelChunkBridge changedMixinChunk = (LevelChunkBridge) worldServer.getChunkAt(changedBlockPos);
             changedMixinChunk.bridge$getBlockCreator(changedBlockPos)
                 .ifPresent(owner -> changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.CREATOR));
             changedMixinChunk.bridge$getBlockNotifier(changedBlockPos)

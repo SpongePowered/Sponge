@@ -39,8 +39,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.players.GameProfileCache_GameProfileInfoAccessor;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCache_ProfileEntryBridge;
+import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
+import org.spongepowered.common.bridge.server.players.GameProfileCache_GameProfileInfoBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.Collections;
@@ -53,7 +53,7 @@ import java.util.UUID;
 import net.minecraft.server.players.GameProfileCache;
 
 @Mixin(GameProfileCache.class)
-public abstract class GameProfileCacheMixin implements PlayerProfileCacheBridge {
+public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
 
     @Shadow public void shadow$add(final com.mojang.authlib.GameProfile profile) {}
     @Shadow @Final private Map<UUID, GameProfileCache_GameProfileInfoAccessor> profilesByUUID;
@@ -62,7 +62,7 @@ public abstract class GameProfileCacheMixin implements PlayerProfileCacheBridge 
     private boolean impl$canSave = false;
 
     @Override
-    public Optional<PlayerProfileCache_ProfileEntryBridge> bridge$getEntry(final UUID uniqueId) {
+    public Optional<GameProfileCache_GameProfileInfoBridge> bridge$getEntry(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
 
         final GameProfileCache_GameProfileInfoAccessor accessor = this.profilesByUUID.get(uniqueId);
@@ -76,11 +76,11 @@ public abstract class GameProfileCacheMixin implements PlayerProfileCacheBridge 
             return Optional.empty();
         }
 
-        return Optional.of((PlayerProfileCache_ProfileEntryBridge) accessor);
+        return Optional.of((GameProfileCache_GameProfileInfoBridge) accessor);
     }
 
     @Override
-    public Optional<PlayerProfileCache_ProfileEntryBridge> bridge$getEntry(final String name) {
+    public Optional<GameProfileCache_GameProfileInfoBridge> bridge$getEntry(final String name) {
         Objects.requireNonNull(name, "name");
 
         final String lowerName = name.toLowerCase(Locale.ROOT);
@@ -95,7 +95,7 @@ public abstract class GameProfileCacheMixin implements PlayerProfileCacheBridge 
             return Optional.empty();
         }
 
-        return Optional.of((PlayerProfileCache_ProfileEntryBridge) accessor);
+        return Optional.of((GameProfileCache_GameProfileInfoBridge) accessor);
     }
 
     @Override
@@ -116,7 +116,7 @@ public abstract class GameProfileCacheMixin implements PlayerProfileCacheBridge 
         if (accessor == null || accessor.invoker$getProfile() != profile) {
             return;
         }
-        final PlayerProfileCache_ProfileEntryBridge bridge = (PlayerProfileCache_ProfileEntryBridge) accessor;
+        final GameProfileCache_GameProfileInfoBridge bridge = (GameProfileCache_GameProfileInfoBridge) accessor;
         bridge.bridge$setSigned(signed);
         bridge.bridge$setIsFull(full);
     }
@@ -140,7 +140,7 @@ public abstract class GameProfileCacheMixin implements PlayerProfileCacheBridge 
         if (accessor == null || accessor.invoker$getProfile() != mcProfile) {
             return;
         }
-        ((PlayerProfileCache_ProfileEntryBridge) accessor).bridge$set(profile, full, signed);
+        ((GameProfileCache_GameProfileInfoBridge) accessor).bridge$set(profile, full, signed);
     }
 
     @Override

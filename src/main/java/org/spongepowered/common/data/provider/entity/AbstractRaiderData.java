@@ -28,7 +28,7 @@ import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.entity.raid.Raider;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.raid.RaiderAccessor;
-import org.spongepowered.common.bridge.world.raid.RaidBridge;
+import org.spongepowered.common.bridge.world.entity.raid.RaidBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class AbstractRaiderData {

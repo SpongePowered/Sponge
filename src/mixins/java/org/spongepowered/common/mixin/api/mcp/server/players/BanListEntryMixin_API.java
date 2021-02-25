@@ -30,7 +30,7 @@ import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.server.management.BanUserListEntryBridge;
+import org.spongepowered.common.bridge.server.players.BanListEntryBridge;
 
 import java.time.Instant;
 import java.util.Date;
@@ -46,7 +46,7 @@ public abstract class BanListEntryMixin_API<T> extends StoredUserEntryMixin_API<
 
     @Override
     public Optional<Component> getReason() {
-        return ((BanUserListEntryBridge) this).bridge$getReason();
+        return ((BanListEntryBridge) this).bridge$getReason();
     }
 
     @Override
@@ -56,7 +56,7 @@ public abstract class BanListEntryMixin_API<T> extends StoredUserEntryMixin_API<
 
     @Override
     public Optional<Component> getBanSource() {
-        return ((BanUserListEntryBridge) this).bridge$getSource();
+        return ((BanListEntryBridge) this).bridge$getSource();
     }
 
     @Override

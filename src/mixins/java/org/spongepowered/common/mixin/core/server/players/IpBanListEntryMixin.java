@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.server.management.IPBanEntryBridge;
+import org.spongepowered.common.bridge.server.players.IpBanListEntryBridge;
 
 import javax.annotation.Nullable;
 import net.minecraft.server.players.IpBanListEntry;
@@ -37,7 +37,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 @Mixin(IpBanListEntry.class)
-public abstract class IpBanListEntryMixin extends BanListEntryMixin<String> implements IPBanEntryBridge {
+public abstract class IpBanListEntryMixin extends BanListEntryMixin<String> implements IpBanListEntryBridge {
 
     @Nullable private InetAddress impl$address;
 

@@ -44,9 +44,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.advancement.SpongeFilteredTrigger;
-import org.spongepowered.common.advancement.SpongeTrigger;
+import org.spongepowered.common.advancement.SpongeCriterionTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
-import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
+import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 
@@ -77,7 +77,7 @@ public abstract class CriterionTrigger_ListenerMixin {
         // Sponge filters are always handled in the trigger method
         if (!(this.trigger instanceof SpongeFilteredTrigger)) {
             final FilteredTrigger filteredTrigger = (FilteredTrigger) this.trigger;
-            if (filteredTrigger.getType() instanceof SpongeTrigger) {
+            if (filteredTrigger.getType() instanceof SpongeCriterionTrigger) {
                 final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
                 final ServerPlayer player = ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer();
                 final TypeToken typeToken = TypeToken.get(filteredTrigger.getType().getConfigurationType());

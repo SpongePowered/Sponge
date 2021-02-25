@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
+import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 
 @Mixin(DedicatedServer.class)
@@ -60,9 +60,9 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
     @Redirect(method = "initServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/GameProfileCache;save()V"))
     private void onSave(final GameProfileCache cache) {
-        ((PlayerProfileCacheBridge) cache).bridge$setCanSave(true);
+        ((GameProfileCacheBridge) cache).bridge$setCanSave(true);
         cache.save();
-        ((PlayerProfileCacheBridge) cache).bridge$setCanSave(false);
+        ((GameProfileCacheBridge) cache).bridge$setCanSave(false);
     }
 
     @Inject(method = "stopServer", at = @At("TAIL"))

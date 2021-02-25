@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 
 @Mixin(targets = "net/minecraft/world/entity/monster/Blaze$BlazeAttackGoal")
 public abstract class Blaze_BlazeAttackGoalMixin extends Goal {

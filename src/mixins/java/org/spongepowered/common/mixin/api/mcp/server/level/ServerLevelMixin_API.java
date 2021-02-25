@@ -73,7 +73,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.mixin.api.mcp.world.level.LevelMixin_API;
 import org.spongepowered.common.util.MissingImplementationException;
@@ -84,7 +84,6 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -126,7 +125,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public boolean isLoaded() {
-        return ((ServerWorldBridge) this).bridge$isLoaded();
+        return ((ServerLevelBridge) this).bridge$isLoaded();
     }
 
     // LocationCreator
@@ -175,7 +174,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public BlockSnapshot createSnapshot(final int x, final int y, final int z) {
-        return ((ServerWorldBridge) this).bridge$createSnapshot(x, y, z);
+        return ((ServerLevelBridge) this).bridge$createSnapshot(x, y, z);
     }
 
     @Override
@@ -190,7 +189,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public Path getDirectory() {
-        return ((ServerWorldBridge) this).bridge$getLevelSave().getLevelPath(LevelResource.ROOT);
+        return ((ServerLevelBridge) this).bridge$getLevelSave().getLevelPath(LevelResource.ROOT);
     }
 
     @Override
@@ -200,7 +199,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public boolean save() throws IOException {
-        ((ServerWorldBridge) this).bridge$setManualSave(true);
+        ((ServerLevelBridge) this).bridge$setManualSave(true);
         this.shadow$save(null, false, true);
         return true;
     }
@@ -213,7 +212,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public void triggerExplosion(final org.spongepowered.api.world.explosion.Explosion explosion) {
-        ((ServerWorldBridge) this).bridge$triggerExplosion(Objects.requireNonNull(explosion, "explosion"));
+        ((ServerLevelBridge) this).bridge$triggerExplosion(Objects.requireNonNull(explosion, "explosion"));
     }
 
     @Override
@@ -315,6 +314,6 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public RegistryHolder registries() {
-        return ((ServerWorldBridge) this).bridge$registries();
+        return ((ServerLevelBridge) this).bridge$registries();
     }
 }

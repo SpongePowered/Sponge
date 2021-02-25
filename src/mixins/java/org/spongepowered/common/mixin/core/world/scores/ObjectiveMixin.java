@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
-import org.spongepowered.common.bridge.scoreboard.ScoreboardBridge;
+import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
+import org.spongepowered.common.bridge.world.scores.ScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
 import javax.annotation.Nullable;
@@ -44,7 +44,7 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 @Mixin(Objective.class)
-public abstract class ObjectiveMixin implements ScoreObjectiveBridge {
+public abstract class ObjectiveMixin implements ObjectiveBridge {
 
     @Shadow @Final private Scoreboard scoreboard;
 

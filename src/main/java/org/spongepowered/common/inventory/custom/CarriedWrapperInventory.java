@@ -25,8 +25,8 @@
 package org.spongepowered.common.inventory.custom;
 
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.common.bridge.inventory.CarriedBridge;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.CarriedBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 
 import java.util.Optional;
 import java.util.Set;

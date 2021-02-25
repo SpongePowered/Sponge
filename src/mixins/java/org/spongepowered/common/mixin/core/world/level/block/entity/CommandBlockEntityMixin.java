@@ -33,7 +33,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
 // TODO: dualspiral - should this go on the child CommandBlockLogic?

@@ -30,7 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.customdata.CustomDataConfig;
 import org.spongepowered.common.config.inheritable.BaseConfig;
 import org.spongepowered.common.config.inheritable.GlobalConfig;
@@ -81,7 +81,7 @@ public final class SpongeGameConfigs {
     }
 
     public static InheritableConfigHandle<WorldConfig> getForWorld(final net.minecraft.world.level.Level mcWorld) {
-        return ((ServerWorldInfoBridge) mcWorld.getLevelData()).bridge$configAdapter();
+        return ((PrimaryLevelDataBridge) mcWorld.getLevelData()).bridge$configAdapter();
     }
 
     public static boolean doesWorldConfigExist(final ResourceKey world) {

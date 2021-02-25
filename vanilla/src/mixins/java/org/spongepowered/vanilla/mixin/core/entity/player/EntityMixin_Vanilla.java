@@ -26,7 +26,7 @@ package org.spongepowered.vanilla.mixin.core.entity.player;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.world.portal.PlatformTeleporter;
 import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
 

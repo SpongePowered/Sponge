@@ -26,10 +26,10 @@ package org.spongepowered.common.mixin.optimization.mcp.world.server;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.mixin.optimization.mcp.world.IWorldReaderMixin_Optimization_Collision;
+import org.spongepowered.common.mixin.optimization.mcp.world.level.LevelReaderMixin_Optimization_Collision;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -39,21 +39,21 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 @Mixin(value = ServerLevel.class, priority = 1500)
-public abstract class ServerWorldMixin_Optimization_Collision implements IWorldReaderMixin_Optimization_Collision {
+public abstract class ServerWorldMixin_Optimization_Collision implements LevelReaderMixin_Optimization_Collision {
 
     @Override
     public Stream<BlockState> getBlockStatesIfLoaded(final AABB aabb) {
         if (((WorldBridge) this).bridge$isFake()) {
-            return IWorldReaderMixin_Optimization_Collision.super.getBlockStatesIfLoaded(aabb);
+            return LevelReaderMixin_Optimization_Collision.super.getBlockStatesIfLoaded(aabb);
         }
         final Optional<ActiveChunkReferantBridge> source = PhaseTracker.getInstance().getPhaseContext().getSource(Entity.class)
             .map(entity -> (ActiveChunkReferantBridge) entity);
         if (source.isPresent()) {
-            final ChunkBridge activeChunk = source.get().bridge$getActiveChunk();
+            final LevelChunkBridge activeChunk = source.get().bridge$getActiveChunk();
             if (activeChunk == null || activeChunk.bridge$isQueuedForUnload() || !activeChunk.bridge$areNeighborsLoaded()) {
                 return Stream.empty();
             }
         }
-        return IWorldReaderMixin_Optimization_Collision.super.getBlockStatesIfLoaded(aabb);
+        return LevelReaderMixin_Optimization_Collision.super.getBlockStatesIfLoaded(aabb);
     }
 }

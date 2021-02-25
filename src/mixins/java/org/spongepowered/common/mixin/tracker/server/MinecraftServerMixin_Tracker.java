@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.util.concurrent.TrackedTickDelayedTaskBridge;
+import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -108,7 +108,7 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
             if (phaseContext.isEmpty()) {
                 return;
             }
-            phaseContext.foldContextForThread(((TrackedTickDelayedTaskBridge) returnValue));
+            phaseContext.foldContextForThread(((TickTaskBridge) returnValue));
         }
     }
 
@@ -123,7 +123,7 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
     private void tracker$wrapAndPerformContextSwitch(final ReentrantBlockableEventLoop<?> thisServer, final Runnable runnable) {
         try (final PhaseContext<@NonNull ?> context = PluginPhase.State.DELAYED_TASK.createPhaseContext(PhaseTracker.SERVER)
             .source(runnable)
-            .setDelayedContextPopulator(((TrackedTickDelayedTaskBridge) runnable).bridge$getFrameModifier().orElse(null))
+            .setDelayedContextPopulator(((TickTaskBridge) runnable).bridge$getFrameModifier().orElse(null))
         ) {
             context.buildAndSwitch();
             super.shadow$doRunTask(runnable);

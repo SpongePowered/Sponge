@@ -43,9 +43,9 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -116,7 +116,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                 SpongeCommon.postEvent(dropItemEvent);
                 if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
                     dropItemEvent.getTransactions())) {
-                    ((ServerPlayerEntityBridge) player).bridge$restorePacketItem(InteractionHand.MAIN_HAND);
+                    ((ServerPlayerBridge) player).bridge$restorePacketItem(InteractionHand.MAIN_HAND);
                     PacketPhaseUtil.handleSlotRestore(player, player.containerMenu, dropItemEvent.getTransactions(),
                         true);
                 } else {

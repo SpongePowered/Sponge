@@ -35,7 +35,7 @@ import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
 import org.spongepowered.common.accessor.core.RegistryAccessAccessor;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
-import org.spongepowered.common.bridge.util.registry.MutableRegistryBridge;
+import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 
 import java.util.Map;
 import java.util.Objects;
@@ -179,7 +179,7 @@ public final class SpongeRegistryHolder implements RegistryHolder {
             registry = new CallbackRegistry<>(key, Lifecycle.stable(), callback);
         }
 
-        ((MutableRegistryBridge<T>) registry).bridge$setDynamic(isDynamic);
+        ((WritableRegistryBridge<T>) registry).bridge$setDynamic(isDynamic);
         if (defaultValues != null) {
             for (final Map.Entry<ResourceKey, T> entry : defaultValues.get().entrySet()) {
                 ((MappedRegistry<T>) registry).register(

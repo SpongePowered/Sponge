@@ -53,7 +53,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.advancements.critereon.MinMaxBounds_FloatsAccessor;
 import org.spongepowered.common.accessor.advancements.critereon.MinMaxBounds_IntsAccessor;
-import org.spongepowered.common.bridge.command.arguments.EntitySelectorParserBridge;
+import org.spongepowered.common.bridge.commands.arguments.selector.EntitySelectorParserBridge;
 import org.spongepowered.common.command.selector.SpongeSelectorSortAlgorithm;
 
 import java.io.IOException;

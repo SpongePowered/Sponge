@@ -49,12 +49,12 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -184,14 +184,14 @@ public final class TrackingUtil {
         checkArgument(tile instanceof BlockEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
         final net.minecraft.world.level.block.entity.BlockEntity tileEntity = (net.minecraft.world.level.block.entity.BlockEntity) tile;
-        final TileEntityBridge mixinTileEntity = (TileEntityBridge) tile;
+        final BlockEntityBridge mixinTileEntity = (BlockEntityBridge) tile;
         final BlockPos pos = tileEntity.getBlockPos();
-        final ChunkBridge chunk = ((ActiveChunkReferantBridge) tile).bridge$getActiveChunk();
+        final LevelChunkBridge chunk = ((ActiveChunkReferantBridge) tile).bridge$getActiveChunk();
         if (!((TrackableBridge) tileEntity).bridge$shouldTick()) {
             return;
         }
         if (chunk == null) {
-            ((ActiveChunkReferantBridge) tile).bridge$setActiveChunk((TrackedChunkBridge) tileEntity.getLevel().getChunkAt(tileEntity.getBlockPos()));
+            ((ActiveChunkReferantBridge) tile).bridge$setActiveChunk((TrackedLevelChunkBridge) tileEntity.getLevel().getChunkAt(tileEntity.getBlockPos()));
         }
 
         final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext(PhaseTracker.SERVER).source(mixinTileEntity);
@@ -413,7 +413,7 @@ public final class TrackingUtil {
 
     @Nullable
     public static User getNotifierOrOwnerFromBlock(final ServerLevel world, final BlockPos blockPos) {
-        final ChunkBridge mixinChunk = (ChunkBridge) world.getChunkAt(blockPos);
+        final LevelChunkBridge mixinChunk = (LevelChunkBridge) world.getChunkAt(blockPos);
         final User notifier = mixinChunk.bridge$getBlockNotifier(blockPos).orElse(null);
         if (notifier != null) {
             return notifier;
@@ -463,7 +463,7 @@ public final class TrackingUtil {
         final Block block = ((net.minecraft.world.level.block.state.BlockState) spongeSnapshot.getState()).getBlock();
         spongeSnapshot.getServerWorld()
             .map(world -> world.getChunkAt(pos))
-            .map(chunk -> (ChunkBridge) chunk)
+            .map(chunk -> (LevelChunkBridge) chunk)
             .ifPresent(spongeChunk -> {
             final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.CREATOR : PlayerTracker.Type.NOTIFIER;
             spongeChunk.bridge$addTrackedBlockPosition(block, pos, user, trackerType);

@@ -33,7 +33,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,8 +40,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerGameModeBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -90,13 +89,13 @@ public abstract class ServerGamePacketListenerImplMixin_Tracker {
             // Only do a restore if something actually changed. The client does an identity check ('==')
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            final boolean isInteractionCancelled = ((PlayerInteractionManagerBridge) this.player.gameMode).bridge$isInteractBlockRightClickCancelled();
+            final boolean isInteractionCancelled = ((ServerPlayerGameModeBridge) this.player.gameMode).bridge$isInteractBlockRightClickCancelled();
             if (!ItemStack.matches(itemStack, this.player.getItemInHand(hand)) && isInteractionCancelled) {
                 PacketPhaseUtil.handlePlayerSlotRestore(this.player, itemStack, hand);
             }
         }
         context.interactItemChanged(false);
-        ((PlayerInteractionManagerBridge) this.player.gameMode).bridge$setInteractBlockRightClickCancelled(false);
+        ((ServerPlayerGameModeBridge) this.player.gameMode).bridge$setInteractBlockRightClickCancelled(false);
         return actionResult;
     }
 

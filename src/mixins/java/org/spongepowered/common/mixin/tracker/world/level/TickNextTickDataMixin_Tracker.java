@@ -26,10 +26,10 @@ package org.spongepowered.common.mixin.tracker.world.level;
 
 import net.minecraft.world.level.TickNextTickData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.TrackedNextTickEntryBridge;
+import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 
 @Mixin(TickNextTickData.class)
-public abstract class TickNextTickDataMixin_Tracker implements TrackedNextTickEntryBridge {
+public abstract class TickNextTickDataMixin_Tracker implements TickNextTickDataBridge {
 
     private boolean tracker$isWorldGen = false;
 

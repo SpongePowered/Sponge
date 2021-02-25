@@ -37,14 +37,14 @@ import net.minecraft.network.chat.TranslatableComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.util.text.StyleBridge;
-import org.spongepowered.common.bridge.util.text.TextComponentBridge;
+import org.spongepowered.common.bridge.network.chat.StyleBridge;
+import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(BaseComponent.class)
-public class BaseComponentMixin implements TextComponentBridge {
+public class BaseComponentMixin implements BaseComponentBridge {
     private Component bridge$adventureComponent;
 
     @Override

@@ -31,7 +31,7 @@ import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.stats.StatBridge;
+import org.spongepowered.common.bridge.stats.StatFormatterBridge;
 
 import java.text.NumberFormat;
 import java.util.Optional;
@@ -50,6 +50,6 @@ public abstract class StatMixin_API implements Statistic {
 
     @Override
     public NumberFormat getFormat() {
-        return ((StatBridge) this.formatter).bridge$getFormat();
+        return ((StatFormatterBridge) this.formatter).bridge$getFormat();
     }
 }

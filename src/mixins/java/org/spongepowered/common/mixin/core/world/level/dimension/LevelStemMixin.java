@@ -39,8 +39,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.DimensionBridge;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -48,7 +48,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Mixin(LevelStem.class)
-public abstract class LevelStemMixin implements DimensionBridge, ResourceKeyBridge {
+public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBridge {
 
     private ResourceKey impl$key;
     private ResourceLocation impl$gameMode;
@@ -169,7 +169,7 @@ public abstract class LevelStemMixin implements DimensionBridge, ResourceKeyBrid
 
     @Override
     public void bridge$populateFromLevelData(final PrimaryLevelData levelData) {
-        final ServerWorldInfoBridge levelDataBridge = (ServerWorldInfoBridge) levelData;
+        final PrimaryLevelDataBridge levelDataBridge = (PrimaryLevelDataBridge) levelData;
         this.impl$gameMode = (ResourceLocation) (Object) RegistryTypes.GAME_MODE.get().valueKey((GameMode) (Object) levelData.getGameType());
         this.impl$difficulty = (ResourceLocation) (Object) RegistryTypes.DIFFICULTY.get().valueKey((Difficulty) (Object) levelData.getDifficulty());
         this.impl$serializationBehavior = levelDataBridge.bridge$serializationBehavior().orElse(null);

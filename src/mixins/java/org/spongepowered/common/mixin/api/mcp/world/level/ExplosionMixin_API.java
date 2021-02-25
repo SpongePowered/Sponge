@@ -31,7 +31,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.ExplosionBridge;
+import org.spongepowered.common.bridge.world.level.ExplosionBridge;
 
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.Entity;

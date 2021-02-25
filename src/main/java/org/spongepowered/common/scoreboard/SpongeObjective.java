@@ -37,7 +37,7 @@ import org.spongepowered.common.accessor.world.scores.ObjectiveAccessor;
 import org.spongepowered.common.accessor.world.scores.ScoreAccessor;
 import org.spongepowered.common.accessor.world.scores.ScoreboardAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
+import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -227,7 +227,7 @@ public final class SpongeObjective implements Objective {
         }
         final net.minecraft.world.scores.Objective objective = new net.minecraft.world.scores.Objective(scoreboard, this.name, (ObjectiveCriteria) this.criterion,
             SpongeAdventure.asVanilla(this.displayName), (ObjectiveCriteria.RenderType) (Object) this.displayMode);
-        ((ScoreObjectiveBridge) objective).bridge$setSpongeObjective(this);
+        ((ObjectiveBridge) objective).bridge$setSpongeObjective(this);
         this.objectives.put(scoreboard, objective);
         return objective;
     }

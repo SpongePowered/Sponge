@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.tracker.event;
 
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 
 import java.util.ArrayList;
 import java.util.List;

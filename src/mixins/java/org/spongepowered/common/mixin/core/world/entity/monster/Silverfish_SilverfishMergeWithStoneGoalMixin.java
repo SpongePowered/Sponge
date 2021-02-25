@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 
 @Mixin(targets = "net/minecraft/world/entity/monster/Silverfish$SilverfishMergeWithStoneGoal")
 public abstract class Silverfish_SilverfishMergeWithStoneGoalMixin extends RandomStrollGoal {

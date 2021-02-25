@@ -32,15 +32,14 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
+import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.TickNextTickData;
 
-@Mixin(TickNextTickData.class)
-public abstract class TickNextTickDataMixin implements NextTickListEntryBridge {
+@Mixin(net.minecraft.world.level.TickNextTickData.class)
+public abstract class TickNextTickDataMixin implements TickNextTickDataBridge {
 
     @Shadow @Final public BlockPos pos;
 

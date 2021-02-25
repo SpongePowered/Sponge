@@ -31,7 +31,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
+import org.spongepowered.common.bridge.world.entity.vehicle.AbstractMinecartBridge;
 import org.spongepowered.common.data.ByteToBooleanContentUpdater;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -65,22 +65,22 @@ public final class AbstractMinecartData {
                         .get(AbstractMinecart::getDisplayOffset)
                         .setAnd(AbstractMinecartData::setBlockOffset)
                         .deleteAnd(h -> AbstractMinecartData.setBlockOffset(h, h.getDefaultDisplayOffset()))
-                .asMutable(MinecartEntityBridge.class)
+                .asMutable(AbstractMinecartBridge.class)
                     .create(Keys.AIRBORNE_VELOCITY_MODIFIER)
-                        .get(MinecartEntityBridge::bridge$getAirborneMod)
-                        .set(MinecartEntityBridge::bridge$setAirborneMod)
+                        .get(AbstractMinecartBridge::bridge$getAirborneMod)
+                        .set(AbstractMinecartBridge::bridge$setAirborneMod)
                     .create(Keys.SLOWS_UNOCCUPIED)
-                        .get(MinecartEntityBridge::bridge$getSlowWhenEmpty)
-                        .set(MinecartEntityBridge::bridge$setSlowWhenEmpty)
+                        .get(AbstractMinecartBridge::bridge$getSlowWhenEmpty)
+                        .set(AbstractMinecartBridge::bridge$setSlowWhenEmpty)
                     .create(Keys.DERAILED_VELOCITY_MODIFIER)
-                        .get(MinecartEntityBridge::bridge$getDerailedMod)
-                        .set(MinecartEntityBridge::bridge$setDerailedMod)
+                        .get(AbstractMinecartBridge::bridge$getDerailedMod)
+                        .set(AbstractMinecartBridge::bridge$setDerailedMod)
                     .create(Keys.POTENTIAL_MAX_SPEED)
-                        .get(MinecartEntityBridge::bridge$getMaxSpeed)
-                        .set(MinecartEntityBridge::bridge$setMaxSpeed)
+                        .get(AbstractMinecartBridge::bridge$getMaxSpeed)
+                        .set(AbstractMinecartBridge::bridge$setMaxSpeed)
                     ;
         final ResourceKey minecartDataStoreKey = ResourceKey.sponge("minecart");
-        registrator.spongeDataStore(minecartDataStoreKey, 2, new DataContentUpdater[]{AbstractMinecartData.MINECART_UPDATER_BYTE_TO_BOOL_FIX}, MinecartEntityBridge.class,
+        registrator.spongeDataStore(minecartDataStoreKey, 2, new DataContentUpdater[]{AbstractMinecartData.MINECART_UPDATER_BYTE_TO_BOOL_FIX}, AbstractMinecartBridge.class,
                 Keys.POTENTIAL_MAX_SPEED, Keys.SLOWS_UNOCCUPIED, Keys.AIRBORNE_VELOCITY_MODIFIER, Keys.DERAILED_VELOCITY_MODIFIER);
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Minecart.MAX_SPEED, minecartDataStoreKey, Keys.POTENTIAL_MAX_SPEED);
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Minecart.SLOW_WHEN_EMPTY, minecartDataStoreKey, Keys.SLOWS_UNOCCUPIED);

@@ -35,8 +35,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.storage.WorldInfoBridge;
 import org.spongepowered.common.mixin.invalid.plugin.tileentityactivation.TileEntityActivation;
 
 @Mixin(Chunk.class)

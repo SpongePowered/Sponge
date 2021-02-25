@@ -34,7 +34,7 @@ import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.ServerStatusResponseBridge;
+import org.spongepowered.common.bridge.network.protocol.status.ServerStatusBridge;
 
 import java.util.Optional;
 
@@ -52,12 +52,12 @@ public abstract class ServerStatusMixin_API implements ClientPingServerEvent.Res
 
     @Override
     public Component getDescription() {
-        return ((ServerStatusResponseBridge) this).bridge$getDescription();
+        return ((ServerStatusBridge) this).bridge$getDescription();
     }
 
     @Override
     public void setDescription(final Component description) {
-        ((ServerStatusResponseBridge) this).bridge$setDescription(checkNotNull(description, "description"));
+        ((ServerStatusBridge) this).bridge$setDescription(checkNotNull(description, "description"));
         this.description = SpongeAdventure.asVanilla(description);
     }
 
@@ -70,11 +70,11 @@ public abstract class ServerStatusMixin_API implements ClientPingServerEvent.Res
     public void setHidePlayers(final boolean hide) {
         if ((this.players == null) != hide) {
             if (hide) {
-                ((ServerStatusResponseBridge) this).bridge$setPlayerBackup(this.players);
+                ((ServerStatusBridge) this).bridge$setPlayerBackup(this.players);
                 this.players = null;
             } else {
-                this.players = ((ServerStatusResponseBridge) this).bridge$getPlayerBackup();
-                ((ServerStatusResponseBridge) this).bridge$setPlayerBackup(null);
+                this.players = ((ServerStatusBridge) this).bridge$getPlayerBackup();
+                ((ServerStatusBridge) this).bridge$setPlayerBackup(null);
             }
         }
     }
@@ -86,12 +86,12 @@ public abstract class ServerStatusMixin_API implements ClientPingServerEvent.Res
 
     @Override
     public Optional<Favicon> getFavicon() {
-        return Optional.ofNullable(((ServerStatusResponseBridge) this).bridge$getFavicon());
+        return Optional.ofNullable(((ServerStatusBridge) this).bridge$getFavicon());
     }
 
     @Override
     public void setFavicon(@Nullable final Favicon favicon) {
-        ((ServerStatusResponseBridge) this).setFavicon(favicon);
+        ((ServerStatusBridge) this).setFavicon(favicon);
     }
 
 }

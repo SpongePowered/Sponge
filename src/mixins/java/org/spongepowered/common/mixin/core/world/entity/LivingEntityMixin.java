@@ -71,10 +71,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.entity.EntityTypeBridge;
-import org.spongepowered.common.bridge.entity.LivingEntityBridge;
-import org.spongepowered.common.bridge.entity.PlatformLivingEntityBridge;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
+import org.spongepowered.common.bridge.world.entity.LivingEntityBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformLivingEntityBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.ShouldFire;
@@ -392,7 +392,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             )
     )
     private void tracker$dropInventory(final LivingEntity thisEntity) {
-        if (thisEntity instanceof PlayerEntityBridge && ((PlayerEntityBridge) thisEntity).bridge$keepInventory()) {
+        if (thisEntity instanceof PlayerBridge && ((PlayerBridge) thisEntity).bridge$keepInventory()) {
             return;
         }
         this.shadow$dropEquipment();

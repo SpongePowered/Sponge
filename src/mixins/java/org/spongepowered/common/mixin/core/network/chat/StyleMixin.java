@@ -31,7 +31,7 @@ import net.minecraft.network.chat.Style;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.accessor.network.chat.StyleAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.util.text.StyleBridge;
+import org.spongepowered.common.bridge.network.chat.StyleBridge;
 
 @Mixin(Style.class)
 public class StyleMixin implements StyleBridge {

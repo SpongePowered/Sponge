@@ -31,7 +31,7 @@ import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundResourcePackPacketAccessor;
-import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
+import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
@@ -43,7 +43,7 @@ public final class ResourcePackState extends BasicPacketState {
         final net.minecraft.server.level.ServerPlayer player = phaseContext.getPacketPlayer();
 
         final ServerGamePacketListenerImpl connection = player.connection;
-        final ServerPlayNetHandlerBridge mixinHandler = (ServerPlayNetHandlerBridge) connection;
+        final ServerGamePacketListenerImplBridge mixinHandler = (ServerGamePacketListenerImplBridge) connection;
         final ServerboundResourcePackPacketAccessor resource = phaseContext.getPacket();
         final ResourcePackStatusEvent.ResourcePackStatus status;
         ResourcePack pack;

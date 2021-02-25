@@ -46,9 +46,6 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
-import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
-import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
-import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
@@ -59,8 +56,8 @@ import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.DimensionBridge;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.serialization.EnumCodec;
 import org.spongepowered.common.serialization.MathCodecs;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -115,21 +112,21 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                             SpongeWorldTypeTemplate.CODEC.fieldOf("type").forGetter(LevelStem::typeSupplier),
                             net.minecraft.world.level.chunk.ChunkGenerator.CODEC.fieldOf("generator").forGetter(LevelStem::generator),
                             SpongeWorldTemplate.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> {
-                                final DimensionBridge dimensionBridge = (DimensionBridge) (Object) v;
-                                return Optional.of(new SpongeDataSection(dimensionBridge.bridge$displayName().orElse(null),
-                                    dimensionBridge.bridge$gameMode().orElse(null), dimensionBridge.bridge$difficulty().orElse(null),
-                                    dimensionBridge.bridge$serializationBehavior().orElse(null),
-                                    dimensionBridge.bridge$viewDistance().orElse(null), dimensionBridge.bridge$spawnPosition().orElse(null),
-                                    dimensionBridge.bridge$loadOnStartup(),dimensionBridge.bridge$performsSpawnLogic(),
-                                    dimensionBridge.bridge$hardcore().orElse(null), dimensionBridge.bridge$commands().orElse(null),
-                                    dimensionBridge.bridge$pvp().orElse(null)));
+                                final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) v;
+                                return Optional.of(new SpongeDataSection(levelStemBridge.bridge$displayName().orElse(null),
+                                    levelStemBridge.bridge$gameMode().orElse(null), levelStemBridge.bridge$difficulty().orElse(null),
+                                    levelStemBridge.bridge$serializationBehavior().orElse(null),
+                                    levelStemBridge.bridge$viewDistance().orElse(null), levelStemBridge.bridge$spawnPosition().orElse(null),
+                                    levelStemBridge.bridge$loadOnStartup(), levelStemBridge.bridge$performsSpawnLogic(),
+                                    levelStemBridge.bridge$hardcore().orElse(null), levelStemBridge.bridge$commands().orElse(null),
+                                    levelStemBridge.bridge$pvp().orElse(null)));
                             })
                     )
                     .apply(r, r
                         .stable((f1, f2, f3) ->
                             {
                                 final LevelStem template = new LevelStem(f1, f2);
-                                f3.ifPresent(((DimensionBridge) (Object) template)::bridge$populateFromData);
+                                f3.ifPresent(((LevelStemBridge) (Object) template)::bridge$populateFromData);
                                 return template;
                             }
                         )
@@ -157,7 +154,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     public SpongeWorldTemplate(final ServerLevel world) {
         super((ResourceKey) (Object) world.dimension().location());
         final ServerWorldProperties levelData = (ServerWorldProperties) world.getLevelData();
-        final ServerWorldInfoBridge levelBridge = (ServerWorldInfoBridge) world.getLevelData();
+        final PrimaryLevelDataBridge levelBridge = (PrimaryLevelDataBridge) world.getLevelData();
 
         this.displayName = levelBridge.bridge$displayName().orElse(null);
         this.worldType = ((WorldType) world.dimensionType()).asDefaultedReference(RegistryTypes.WORLD_TYPE);
@@ -177,7 +174,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
     public SpongeWorldTemplate(final LevelStem template) {
         super(((ResourceKeyBridge) (Object) template).bridge$getKey());
-        final DimensionBridge templateBridge = (DimensionBridge) (Object) template;
+        final LevelStemBridge templateBridge = (LevelStemBridge) (Object) template;
         this.displayName = templateBridge.bridge$displayName().orElse(null);
         this.worldType = ((WorldType) template.type()).asDefaultedReference(RegistryTypes.WORLD_TYPE);
         this.generator = (ChunkGenerator) template.generator();
@@ -283,8 +280,8 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         final LevelStem scratch =
                 new LevelStem(() -> BootstrapProperties.registries.dimensionTypes().get((ResourceLocation) (Object) this.worldType.location()),
                         (net.minecraft.world.level.chunk.ChunkGenerator) this.generator);
-        ((DimensionBridge) (Object) scratch).bridge$setFromSettings(false);
-        ((DimensionBridge) (Object) scratch).bridge$populateFromTemplate(this);
+        ((LevelStemBridge) (Object) scratch).bridge$setFromSettings(false);
+        ((LevelStemBridge) (Object) scratch).bridge$populateFromTemplate(this);
         return scratch;
     }
 

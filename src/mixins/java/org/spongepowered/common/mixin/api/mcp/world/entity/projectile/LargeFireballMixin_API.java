@@ -28,7 +28,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.projectile.FireballEntityBridge;
+import org.spongepowered.common.bridge.world.entity.projectile.LargeFireballBridge;
 
 import java.util.Set;
 import net.minecraft.world.entity.projectile.LargeFireball;
@@ -44,7 +44,7 @@ public abstract class LargeFireballMixin_API extends FireballMixin_API implement
     public void detonate() {
         final boolean flag = this.shadow$getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
         final Explosion.BlockInteraction mode = flag ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
-        ((FireballEntityBridge) this).bridge$throwExplosionEventAndExplode(this.shadow$getCommandSenderWorld(), null, this.shadow$getX(),
+        ((LargeFireballBridge) this).bridge$throwExplosionEventAndExplode(this.shadow$getCommandSenderWorld(), null, this.shadow$getX(),
                 this.shadow$getY(), this.shadow$getZ(), this.explosionPower, flag, mode);
         this.shadow$remove();
     }

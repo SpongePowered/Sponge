@@ -39,12 +39,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
-import org.spongepowered.common.bridge.inventory.container.MenuBridge;
-import org.spongepowered.common.bridge.inventory.container.PlayerContainerBridge;
-import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryMenuBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
@@ -216,7 +216,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     private ItemEntity impl$RestoreOnDragDrop(final Player player, final ItemStack itemStackIn, final boolean unused) {
         final ItemStackSnapshot original = ItemStackUtil.snapshotOf(itemStackIn);
         final ItemEntity entityItem = player.drop(itemStackIn, unused);
-        if (!((PlayerEntityBridge) player).bridge$shouldRestoreInventory()) {
+        if (!((PlayerBridge) player).bridge$shouldRestoreInventory()) {
             return entityItem;
         }
         if (entityItem == null) {
@@ -234,10 +234,10 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                     target = "Lnet/minecraft/world/entity/player/Inventory;setCarried(Lnet/minecraft/world/item/ItemStack;)V",
                     ordinal = 1))
     private void impl$ClearOnSlot(final net.minecraft.world.entity.player.Inventory inventoryPlayer, final ItemStack itemStackIn) {
-        if (!this.impl$dropCancelled || !((PlayerEntityBridge) inventoryPlayer.player).bridge$shouldRestoreInventory()) {
+        if (!this.impl$dropCancelled || !((PlayerBridge) inventoryPlayer.player).bridge$shouldRestoreInventory()) {
             inventoryPlayer.setCarried(itemStackIn); // original behaviour
         }
-        ((PlayerEntityBridge) inventoryPlayer.player).bridge$shouldRestoreInventory(false);
+        ((PlayerBridge) inventoryPlayer.player).bridge$shouldRestoreInventory(false);
         this.impl$dropCancelled = false;
     }
 
@@ -251,7 +251,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Nullable
     private ItemEntity impl$restoreOnDragSplit(final Player player, final ItemStack itemStackIn, final boolean unused) {
         final ItemEntity entityItem = player.drop(itemStackIn, unused);
-        if (!((PlayerEntityBridge) player).bridge$shouldRestoreInventory()) {
+        if (!((PlayerBridge) player).bridge$shouldRestoreInventory()) {
             return entityItem;
         }
         if (entityItem == null) {
@@ -265,7 +265,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             player.inventory.setCarried(original);
             ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, original));
         }
-        ((PlayerEntityBridge) player).bridge$shouldRestoreInventory(false);
+        ((PlayerBridge) player).bridge$shouldRestoreInventory(false);
         return entityItem;
     }
 
@@ -304,7 +304,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             ordinal = 3))
     private ItemEntity onThrowClick(final Player player, final ItemStack itemStackIn, final boolean unused) {
         final ItemEntity entityItem = player.drop(itemStackIn, true);
-        if (entityItem == null && ((PlayerEntityBridge) player).bridge$shouldRestoreInventory()) {
+        if (entityItem == null && ((PlayerBridge) player).bridge$shouldRestoreInventory()) {
             final ItemStack original = ItemStackUtil.fromSnapshotToNative(this.impl$itemStackSnapshot);
             this.impl$lastSlotUsed.set(original);
             player.containerMenu.broadcastChanges(); // TODO check if this is needed?
@@ -313,7 +313,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         }
         this.impl$itemStackSnapshot = ItemStackSnapshot.empty();
         this.impl$lastSlotUsed = null;
-        ((PlayerEntityBridge) player).bridge$shouldRestoreInventory(false);
+        ((PlayerBridge) player).bridge$shouldRestoreInventory(false);
         return entityItem;
     }
 
@@ -476,8 +476,8 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         // like vanilla send property changes
         this.impl$detectAndSendPropertyChanges();
 
-        if (this instanceof PlayerContainerBridge) {
-            ((PlayerContainerBridge) this).bridge$markClean();
+        if (this instanceof InventoryMenuBridge) {
+            ((InventoryMenuBridge) this).bridge$markClean();
         }
     }
 

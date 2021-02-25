@@ -91,10 +91,10 @@ import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAcc
 import org.spongepowered.common.accessor.world.level.storage.LevelStorageSource_LevelStorageAccessAccessor;
 import org.spongepowered.common.accessor.world.level.storage.PrimaryLevelDataAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.DimensionBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.gen.DimensionGeneratorSettingsBridge;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
@@ -313,7 +313,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final LevelStem template, WorldGenSettings generatorSettings) {
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
         final LevelSettings defaultLevelSettings = ((PrimaryLevelDataAccessor) defaultLevelData).accessor$settings();
-        final DimensionBridge templateBridge = (DimensionBridge) (Object) template;
+        final LevelStemBridge templateBridge = (LevelStemBridge) (Object) template;
         final ResourceKey worldKey = ((ResourceKeyBridge) templateBridge).bridge$getKey();
 
         final WorldType worldType = (WorldType) template.type();
@@ -356,10 +356,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             levelData = new PrimaryLevelData(levelSettings, generationSettings, Lifecycle.stable());
         }
 
-        ((ServerWorldInfoBridge) levelData).bridge$populateFromDimension(template);
+        ((PrimaryLevelDataBridge) levelData).bridge$populateFromDimension(template);
 
         final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(worldTypeKey, worldKey);
-        ((ServerWorldInfoBridge) levelData).bridge$configAdapter(configAdapter);
+        ((PrimaryLevelDataBridge) levelData).bridge$configAdapter(configAdapter);
 
         levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().isPresent());
         final boolean isDebugGeneration = levelData.worldGenSettings().isDebug();
@@ -427,7 +427,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             try {
                 final LevelStem template = this.loadTemplate0(SpongeWorldManager.createRegistryKey(key), dataPackFile);
                 ((ResourceKeyBridge) (Object) template).bridge$setKey(key);
-                return CompletableFuture.completedFuture(Optional.of(((DimensionBridge) (Object) template).bridge$asTemplate()));
+                return CompletableFuture.completedFuture(Optional.of(((LevelStemBridge) (Object) template).bridge$asTemplate()));
             } catch (final IOException e) {
                 e.printStackTrace();
             }
@@ -491,7 +491,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         return this.loadTemplate(key).thenCompose(r -> {
             r.ifPresent(template -> {
                 final LevelStem scratch = ((SpongeWorldTemplate) template).asDimension();
-                ((ServerWorldInfoBridge) levelData).bridge$populateFromDimension(scratch);
+                ((PrimaryLevelDataBridge) levelData).bridge$populateFromDimension(scratch);
             });
 
             return CompletableFuture.completedFuture(Optional.of((ServerWorldProperties) levelData));
@@ -534,9 +534,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final WorldTemplate template = r.orElse(null);
             if (template != null) {
                 final LevelStem scratch = ((SpongeWorldTemplate) template).asDimension();
-                ((DimensionBridge) (Object) scratch).bridge$populateFromLevelData((PrimaryLevelData) properties);
+                ((LevelStemBridge) (Object) scratch).bridge$populateFromLevelData((PrimaryLevelData) properties);
 
-                return this.saveTemplate(((DimensionBridge) (Object) scratch).bridge$asTemplate());
+                return this.saveTemplate(((LevelStemBridge) (Object) scratch).bridge$asTemplate());
             }
 
             return CompletableFuture.completedFuture(true);
@@ -808,13 +808,13 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         world.getChunkSource().removeRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(spawnPoint), 11, registryKey.location());
 
-        ((ServerWorldInfoBridge) world.getLevelData()).bridge$configAdapter().save();
-        ((ServerWorldBridge) world).bridge$setManualSave(true);
+        ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter().save();
+        ((ServerLevelBridge) world).bridge$setManualSave(true);
 
         try {
             world.save(null, true, world.noSave);
             world.close();
-            ((ServerWorldBridge) world).bridge$getLevelSave().close();
+            ((ServerLevelBridge) world).bridge$getLevelSave().close();
         } catch (final Exception ex) {
             throw new IOException(ex);
         }
@@ -841,7 +841,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         for (final RegistryEntry<LevelStem> entry : ((Registry<LevelStem>) (Object) templates).streamEntries().collect(Collectors.toList())) {
             final ResourceKey worldKey = entry.key();
             final LevelStem template = entry.value();
-            final DimensionBridge templateBridge = (DimensionBridge) (Object) template;
+            final LevelStemBridge templateBridge = (LevelStemBridge) (Object) template;
             ((ResourceKeyBridge) templateBridge).bridge$setKey(worldKey);
 
             final boolean isDefaultWorld = this.isDefaultWorld(worldKey);
@@ -898,7 +898,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                                 templateBridge.bridge$hardcore().orElse(BootstrapProperties.hardcore),
                                 (Difficulty) (Object) BootstrapProperties.difficulty.get(Sponge.getGame().registries()),
                                 templateBridge.bridge$commands().orElse(BootstrapProperties.commands), new GameRules(), defaultLevelData.getDataPackConfig());
-                        generationSettings = ((DimensionGeneratorSettingsBridge) defaultLevelData.worldGenSettings()).bridge$copy();
+                        generationSettings = ((WorldGenSettingsBridge) defaultLevelData.worldGenSettings()).bridge$copy();
                     }
 
                     isDebugGeneration = generationSettings.isDebug();
@@ -912,10 +912,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 }
             }
 
-            ((ServerWorldInfoBridge) levelData).bridge$populateFromDimension(template);
+            ((PrimaryLevelDataBridge) levelData).bridge$populateFromDimension(template);
 
             final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(worldTypeKey, worldKey);
-            ((ServerWorldInfoBridge) levelData).bridge$configAdapter(configAdapter);
+            ((PrimaryLevelDataBridge) levelData).bridge$configAdapter(configAdapter);
 
             levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().isPresent());
             final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
@@ -967,13 +967,13 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             (org.spongepowered.api.world.server.ServerWorld) world, isInitialized));
 
         // Set the view distance back on it's self to trigger the logic
-        ((ServerWorldInfoBridge) world.getLevelData()).bridge$viewDistance().ifPresent(v -> ((ServerWorldInfoBridge) world.getLevelData()).bridge$setViewDistance(v));
+        ((PrimaryLevelDataBridge) world.getLevelData()).bridge$viewDistance().ifPresent(v -> ((PrimaryLevelDataBridge) world.getLevelData()).bridge$setViewDistance(v));
 
         world.getWorldBorder().applySettings(levelData.getWorldBorder());
 
         if (!isInitialized) {
             try {
-                final boolean hasSpawnAlready = ((ServerWorldInfoBridge) world.getLevelData()).bridge$customSpawnPosition();
+                final boolean hasSpawnAlready = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$customSpawnPosition();
                 if (!hasSpawnAlready) {
                     if (isDefaultWorld || ((ServerWorldProperties) world.getLevelData()).performsSpawnLogic()) {
                         MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(), isDebugGeneration, !isDebugGeneration);
@@ -1005,7 +1005,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         this.server.getPlayerList().setLevel(world);
 
         if (levelData.getCustomBossEvents() != null) {
-            ((ServerWorldBridge) world).bridge$getBossBarManager().load(levelData.getCustomBossEvents());
+            ((ServerLevelBridge) world).bridge$getBossBarManager().load(levelData.getCustomBossEvents());
         }
 
         return world;
@@ -1013,7 +1013,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     private CompletableFuture<ServerLevel> postWorldLoad(final ServerLevel world, final boolean blocking) {
         final PrimaryLevelData levelData = (PrimaryLevelData) world.getLevelData();
-        final ServerWorldInfoBridge levelBridge = (ServerWorldInfoBridge) levelData;
+        final PrimaryLevelDataBridge levelBridge = (PrimaryLevelDataBridge) levelData;
         final boolean isDefaultWorld = this.isDefaultWorld((ResourceKey) (Object) world.dimension().location());
         if (isDefaultWorld || levelBridge.bridge$performsSpawnLogic()) {
             MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for world '{}' ({})", world.dimension().location(),
@@ -1060,7 +1060,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             serverChunkProvider.getLightEngine().setTaskPerBatch(5);
 
             // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
-            if (!((ServerWorldInfoBridge) world.getLevelData()).bridge$performsSpawnLogic()) {
+            if (!((PrimaryLevelDataBridge) world.getLevelData()).bridge$performsSpawnLogic()) {
                 serverChunkProvider.removeRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, 11, world.dimension().location());
             }
             return world;
@@ -1070,7 +1070,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     private void loadSpawnChunks(final ServerLevel world) {
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         final ChunkPos chunkPos = new ChunkPos(spawnPoint);
-        final ChunkProgressListener chunkStatusListener = ((ServerWorldBridge) world).bridge$getChunkStatusListener();
+        final ChunkProgressListener chunkStatusListener = ((ServerLevelBridge) world).bridge$getChunkStatusListener();
         chunkStatusListener.updateSpawnPos(chunkPos);
         final ServerChunkCache serverChunkProvider = world.getChunkSource();
         serverChunkProvider.getLightEngine().setTaskPerBatch(500);
@@ -1093,7 +1093,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         serverChunkProvider.getLightEngine().setTaskPerBatch(5);
 
         // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
-        if (!((ServerWorldInfoBridge) world.getLevelData()).bridge$performsSpawnLogic()) {
+        if (!((PrimaryLevelDataBridge) world.getLevelData()).bridge$performsSpawnLogic()) {
             serverChunkProvider.removeRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, 11, world.dimension().location());
         }
     }
@@ -1121,7 +1121,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             settingsAdapter.decodeElements(registry, net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, LevelStem.CODEC);
             final LevelStem template = registry.stream().findAny().orElse(null);
             if (template != null) {
-                ((DimensionBridge) (Object) template).bridge$setFromSettings(false);
+                ((LevelStemBridge) (Object) template).bridge$setFromSettings(false);
             }
             return template;
         }

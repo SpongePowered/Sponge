@@ -34,18 +34,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.network.protocol.handshake.ClientIntentionPacketAccessor;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge;
-import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
+import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.util.NetworkUtil;
 
 @Mixin(ServerHandshakePacketListenerImpl.class)
-public abstract class ServerHandshakePacketListenerImplMixin implements NetworkManagerHolderBridge {
+public abstract class ServerHandshakePacketListenerImplMixin implements ConnectionHolderBridge {
 
     @Shadow @Final private Connection connection;
 
     @Inject(method = "handleIntention", at = @At("HEAD"))
     private void impl$updateVersionAndHost(final ClientIntentionPacket packetIn, final CallbackInfo ci) {
-        final NetworkManagerBridge info = (NetworkManagerBridge) this.connection;
+        final ConnectionBridge info = (ConnectionBridge) this.connection;
         info.bridge$setVersion(packetIn.getProtocolVersion());
         info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(
                 ((ClientIntentionPacketAccessor) packetIn).accessor$hostName()), ((ClientIntentionPacketAccessor) packetIn).accessor$port());

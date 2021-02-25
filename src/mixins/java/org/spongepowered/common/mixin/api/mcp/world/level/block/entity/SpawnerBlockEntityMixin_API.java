@@ -28,7 +28,7 @@ import org.spongepowered.api.block.entity.MobSpawner;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
+import org.spongepowered.common.bridge.world.level.BaseSpawnerBridge;
 
 import java.util.Set;
 import net.minecraft.world.level.BaseSpawner;
@@ -43,7 +43,7 @@ public abstract class SpawnerBlockEntityMixin_API extends BlockEntityMixin_API i
 
     @Override
     public void spawnEntityBatchImmediately(final boolean force) {
-        final AbstractSpawnerBridge bridge = ((AbstractSpawnerBridge) this.shadow$getSpawner());
+        final BaseSpawnerBridge bridge = ((BaseSpawnerBridge) this.shadow$getSpawner());
 
         if (force) {
             final short oldMaxNearby = (short) bridge.bridge$getMaxNearbyEntities();

@@ -101,9 +101,9 @@ import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePl
 import org.spongepowered.common.accessor.server.level.ServerPlayerGameModeAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
-import org.spongepowered.common.bridge.server.management.PlayerListBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
+import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
 import org.spongepowered.common.data.value.ImmutableSpongeListValue;
@@ -127,7 +127,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin implements NetworkManagerHolderBridge {
+public abstract class ServerGamePacketListenerImplMixin implements ConnectionHolderBridge {
 
     private static final String[] IMPL$EMPTY_COMMAND_ARRAY = new String[] { "" };
 
@@ -519,7 +519,7 @@ public abstract class ServerGamePacketListenerImplMixin implements NetworkManage
             event.getAudience().ifPresent(a -> a.sendMessage(spongePlayer, event.getMessage()));
         }
 
-        ((ServerPlayerEntityBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
+        ((ServerPlayerBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
     }
 
     @Redirect(method = "handleSignUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;filterTextPacket(Ljava/util/List;Ljava/util/function/Consumer;)V"))

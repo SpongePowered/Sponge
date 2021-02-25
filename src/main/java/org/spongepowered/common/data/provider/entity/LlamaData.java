@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.world.entity.animal.horse.Llama;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.animal.horse.LlamaAccessor;
-import org.spongepowered.common.bridge.entity.passive.horse.LlamaEntityBridge;
+import org.spongepowered.common.bridge.world.entity.animal.horse.LlamaBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class LlamaData {
@@ -42,10 +42,10 @@ public final class LlamaData {
                     .create(Keys.STRENGTH)
                         .get(Llama::getStrength)
                         .set((h, v) -> ((LlamaAccessor) h).invoker$setStrength(v))
-                .asMutable(LlamaEntityBridge.class)
+                .asMutable(LlamaBridge.class)
                     .create(Keys.LLAMA_TYPE)
-                        .get(LlamaEntityBridge::bridge$getLlamaType)
-                        .set(LlamaEntityBridge::bridge$setLlamaType);
+                        .get(LlamaBridge::bridge$getLlamaType)
+                        .set(LlamaBridge::bridge$setLlamaType);
     }
     // @formatter:on
 }

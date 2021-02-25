@@ -28,16 +28,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.common.adventure.AdventureTextComponent;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
-import org.spongepowered.common.bridge.network.PacketBufferBridge;
+import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
 
 import java.util.Locale;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
 @Mixin(FriendlyByteBuf.class)
-public abstract class FriendlyByteBufMixin implements PacketBufferBridge {
+public abstract class FriendlyByteBufMixin implements FriendlyByteBufBridge {
 
     private @Nullable Locale impl$locale;
 

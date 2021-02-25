@@ -28,7 +28,7 @@ import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.server.management.IPBanEntryBridge;
+import org.spongepowered.common.bridge.server.players.IpBanListEntryBridge;
 
 import java.net.InetAddress;
 import net.minecraft.server.players.IpBanListEntry;
@@ -43,6 +43,6 @@ public abstract class IpBanListEntryMixin_API extends BanListEntryMixin_API<Stri
 
     @Override
     public InetAddress getAddress() {
-        return ((IPBanEntryBridge) this).bridge$getAddress();
+        return ((IpBanListEntryBridge) this).bridge$getAddress();
     }
 }

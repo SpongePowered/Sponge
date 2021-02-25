@@ -25,7 +25,7 @@
 package org.spongepowered.common.inventory.fabric;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 
 import java.util.Arrays;

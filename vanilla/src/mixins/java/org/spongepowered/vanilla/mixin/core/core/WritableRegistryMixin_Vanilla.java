@@ -31,11 +31,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.registry.MutableRegistryBridge;
-import org.spongepowered.common.bridge.util.registry.RegistryBridge;
+import org.spongepowered.common.bridge.core.WritableRegistryBridge;
+import org.spongepowered.common.bridge.core.RegistryBridge;
 
 @Mixin(WritableRegistry.class)
-public abstract class WritableRegistryMixin_Vanilla<T> extends RegistryMixin_Vanilla<T> implements MutableRegistryBridge<T> {
+public abstract class WritableRegistryMixin_Vanilla<T> extends RegistryMixin_Vanilla<T> implements WritableRegistryBridge<T> {
 
     // @formatter:off
     @Shadow public abstract <V extends T> V shadow$register(ResourceKey<T> p_218381_1_, V p_218381_2_, Lifecycle p_218381_3_);

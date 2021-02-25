@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
@@ -52,7 +52,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
-public abstract class BlockEntityMixin implements TileEntityBridge, DataCompoundHolder, TimingBridge {
+public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoundHolder, TimingBridge {
 
     //@formatter:off
     @Shadow @Final private BlockEntityType<?> type;

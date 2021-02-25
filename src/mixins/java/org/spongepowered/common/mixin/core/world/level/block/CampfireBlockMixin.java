@@ -32,8 +32,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.bridge.tileentity.CampfireTileEntityBridge;
-import org.spongepowered.common.bridge.util.DamageSourceBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.CampfireBlockEntityBridge;
+import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;
 
@@ -83,7 +83,7 @@ public abstract class CampfireBlockMixin extends BlockMixin {
     public void impl$placeFood(BlockState p_225533_1_, Level p_225533_2_, BlockPos p_225533_3_, Player p_225533_4_, InteractionHand p_225533_5_,
             BlockHitResult p_225533_6_, CallbackInfoReturnable<InteractionResult> cir,
             BlockEntity tileEntity, CampfireBlockEntity campfire, ItemStack itemStack, Optional<CampfireCookingRecipe> optional) {
-        ((CampfireTileEntityBridge) campfire).bridge$placeRecipe(optional.get());
+        ((CampfireBlockEntityBridge) campfire).bridge$placeRecipe(optional.get());
     }
 
 }

@@ -31,7 +31,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.TypeTokens;
-import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
+import org.spongepowered.common.bridge.world.entity.item.ItemEntityBridge;
 import org.spongepowered.common.data.ByteToBooleanContentUpdater;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;

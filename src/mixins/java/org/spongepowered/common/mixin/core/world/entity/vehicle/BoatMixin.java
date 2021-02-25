@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
-import org.spongepowered.common.bridge.entity.item.BoatBridge;
+import org.spongepowered.common.bridge.world.entity.vehicle.BoatBridge;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 

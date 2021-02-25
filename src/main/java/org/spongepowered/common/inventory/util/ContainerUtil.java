@@ -42,8 +42,8 @@ import org.spongepowered.common.accessor.world.inventory.HorseInventoryMenuAcces
 import org.spongepowered.common.accessor.world.inventory.ItemCombinerMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.MerchantMenuAccessor;
 import org.spongepowered.common.accessor.world.inventory.ResultSlotAccessor;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
-import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.SpongeLocationCarrier;

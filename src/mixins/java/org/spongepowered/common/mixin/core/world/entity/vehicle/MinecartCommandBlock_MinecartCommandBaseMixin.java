@@ -29,7 +29,7 @@ import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 
 @Mixin(MinecartCommandBlock.MinecartCommandBase.class)
 public abstract class MinecartCommandBlock_MinecartCommandBaseMixin implements CommandSourceProviderBridge {

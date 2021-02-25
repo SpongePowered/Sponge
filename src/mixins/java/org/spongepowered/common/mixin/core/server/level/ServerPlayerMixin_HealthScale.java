@@ -41,7 +41,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityHealthScaleBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerEntityHealthScaleBridge;
 import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
 
 import java.util.Collection;

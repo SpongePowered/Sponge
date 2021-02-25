@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.tileentity.CampfireTileEntityBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.CampfireBlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -54,7 +54,7 @@ import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 
 @Mixin(CampfireBlockEntity.class)
-public abstract class CampfireBlockEntityMixin implements CampfireTileEntityBridge {
+public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBridge {
 
     // @Formatter:off
     @Shadow @Final private NonNullList<ItemStack> items;

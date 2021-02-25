@@ -72,8 +72,8 @@ import org.spongepowered.common.accessor.network.chat.HoverEvent_ItemStackInfoAc
 import org.spongepowered.common.accessor.network.chat.TextColorAccessor;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
-import org.spongepowered.common.bridge.util.text.TextComponentBridge;
-import org.spongepowered.common.bridge.world.BossInfoBridge;
+import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
+import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.launch.Launch;
 
 import java.io.IOException;
@@ -215,7 +215,7 @@ public final class SpongeAdventure {
     }
 
     public static Component asAdventure(final net.minecraft.network.chat.Component component) {
-        return ((TextComponentBridge) component).bridge$asAdventureComponent();
+        return ((BaseComponentBridge) component).bridge$asAdventureComponent();
     }
 
     public static net.minecraft.network.chat.Style asVanilla(final Style style) {
@@ -472,7 +472,7 @@ public final class SpongeAdventure {
     // -----------------
 
     public static BossBar asAdventure(final BossEvent bar) {
-        return ((BossInfoBridge) bar).bridge$asAdventure();
+        return ((BossEventBridge) bar).bridge$asAdventure();
     }
 
     public static ServerBossEvent asVanillaServer(final BossBar bar) {

@@ -29,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.PrettyPrinter;
 

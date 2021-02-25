@@ -34,14 +34,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin_Timings;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
 
 import java.util.function.BooleanSupplier;
 
 @Mixin(ServerLevel.class)
-public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implements ServerWorldBridge {
+public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implements ServerLevelBridge {
 
     // @formatter:off
     @Shadow @Final private Int2ObjectMap<Entity> entitiesById;

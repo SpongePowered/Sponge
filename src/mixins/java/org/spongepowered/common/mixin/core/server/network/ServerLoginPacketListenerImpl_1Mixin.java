@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.network.ServerLoginNetHandlerBridge;
+import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
 
 @Mixin(targets = "net/minecraft/server/network/ServerLoginPacketListenerImpl$1")
 public abstract class ServerLoginPacketListenerImpl_1Mixin extends Thread {
@@ -44,7 +44,7 @@ public abstract class ServerLoginPacketListenerImpl_1Mixin extends Thread {
     @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
             remap = false, cancellable = true)
     private void impl$fireAuthEvent(final CallbackInfo ci) {
-        if (((ServerLoginNetHandlerBridge) this.handler).bridge$fireAuthEvent()) {
+        if (((ServerLoginPacketListenerImplBridge) this.handler).bridge$fireAuthEvent()) {
             ci.cancel();
         }
     }

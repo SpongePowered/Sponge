@@ -35,8 +35,8 @@ import org.spongepowered.common.accessor.world.entity.animal.PigAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.WolfAccessor;
 import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -227,7 +227,7 @@ public final class PacketPhaseUtil {
                         // update the reference of player
                         packetPlayer = ((ServerGamePacketListenerImpl) netHandler).player;
                     }
-                    ((ServerPlayerEntityBridge) packetPlayer).bridge$setPacketItem(ItemStack.EMPTY);
+                    ((ServerPlayerBridge) packetPlayer).bridge$setPacketItem(ItemStack.EMPTY);
                 }
             }
         } else { // client

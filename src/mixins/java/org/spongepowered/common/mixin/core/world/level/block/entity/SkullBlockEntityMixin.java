@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.tileentity.SkullTileEntityBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.SkullBlockEntityBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.concurrent.CompletableFuture;
@@ -44,7 +44,7 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
 
 @Mixin(SkullBlockEntity.class)
-public abstract class SkullBlockEntityMixin extends BlockEntity implements TickableBlockEntity, SkullTileEntityBridge {
+public abstract class SkullBlockEntityMixin extends BlockEntity implements TickableBlockEntity, SkullBlockEntityBridge {
 
     @Shadow private GameProfile owner;
 

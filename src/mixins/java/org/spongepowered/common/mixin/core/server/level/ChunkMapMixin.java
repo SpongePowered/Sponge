@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin {
@@ -48,7 +48,7 @@ public abstract class ChunkMapMixin {
 
     @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;flush(Lnet/minecraft/world/level/ChunkPos;)V"))
     private void impl$useSerializationBehaviorForPOI(PoiManager pointOfInterestManager, ChunkPos p_219112_1_) {
-        final ServerWorldInfoBridge infoBridge = (ServerWorldInfoBridge) this.level.getLevelData();
+        final PrimaryLevelDataBridge infoBridge = (PrimaryLevelDataBridge) this.level.getLevelData();
         final SerializationBehavior serializationBehavior = infoBridge.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
         if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
             pointOfInterestManager.flush(p_219112_1_);
@@ -57,7 +57,7 @@ public abstract class ChunkMapMixin {
 
     @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/storage/ChunkSerializer;write(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/ChunkAccess;)Lnet/minecraft/nbt/CompoundTag;"))
     private CompoundTag impl$useSerializationBehaviorForChunkSave(ServerLevel worldIn, ChunkAccess chunkIn) {
-        final ServerWorldInfoBridge infoBridge = (ServerWorldInfoBridge) this.level.getLevelData();
+        final PrimaryLevelDataBridge infoBridge = (PrimaryLevelDataBridge) this.level.getLevelData();
         final SerializationBehavior serializationBehavior = infoBridge.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
         if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
             return ChunkSerializer.write(worldIn, chunkIn);

@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
-import org.spongepowered.common.bridge.util.registry.RegistryBridge;
+import org.spongepowered.common.bridge.core.RegistryBridge;
 import org.spongepowered.common.registry.SpongeRegistryType;
 
 import java.util.Objects;

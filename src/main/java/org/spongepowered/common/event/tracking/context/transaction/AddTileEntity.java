@@ -31,7 +31,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.PrettyPrinter;
 
@@ -67,7 +67,7 @@ public final class AddTileEntity extends BlockEventBasedTransaction {
     @Override
     public void addToPrinter(final PrettyPrinter printer) {
         printer.add("AddTileEntity")
-            .addWrapped(120, " %s : %s", this.affectedPosition, ((TileEntityBridge) this.added).bridge$getPrettyPrinterString());
+            .addWrapped(120, " %s : %s", this.affectedPosition, ((BlockEntityBridge) this.added).bridge$getPrettyPrinterString());
     }
 
     @Override

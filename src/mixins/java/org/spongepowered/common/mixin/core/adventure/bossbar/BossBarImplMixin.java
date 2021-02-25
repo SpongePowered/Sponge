@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.adventure.VanillaBossBarListener;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
-import org.spongepowered.common.bridge.world.BossInfoBridge;
+import org.spongepowered.common.bridge.world.BossEventBridge;
 
 @Mixin(targets = "net.kyori.adventure.bossbar.BossBarImpl")
 public abstract class BossBarImplMixin implements BossBarBridge {
@@ -42,7 +42,7 @@ public abstract class BossBarImplMixin implements BossBarBridge {
         if (this.bridge$vanillaServerBar == null) {
             final BossBar $this = (BossBar) this;
             this.bridge$vanillaServerBar = new ServerBossEvent(SpongeAdventure.asVanilla($this.name()), SpongeAdventure.asVanilla($this.color()), SpongeAdventure.asVanilla($this.overlay()));
-            final BossInfoBridge bridge = (BossInfoBridge) this.bridge$vanillaServerBar;
+            final BossEventBridge bridge = (BossEventBridge) this.bridge$vanillaServerBar;
             bridge.bridge$copyAndAssign($this);
             $this.addListener(new VanillaBossBarListener(this.bridge$vanillaServerBar));
         }

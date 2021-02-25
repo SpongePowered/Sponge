@@ -24,15 +24,12 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity.player;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
-import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 
 import java.util.OptionalInt;
 import net.minecraft.server.level.ServerPlayer;

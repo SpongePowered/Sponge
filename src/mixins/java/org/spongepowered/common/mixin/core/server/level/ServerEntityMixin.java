@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
 import java.util.Collection;
@@ -135,8 +135,8 @@ public abstract class ServerEntityMixin {
     @ModifyArg(method = "sendDirtyEntityData", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ClientboundUpdateAttributesPacket;<init>(ILjava/util/Collection;)V"))
     private Collection<AttributeInstance> impl$injectScaledHealth(Collection<AttributeInstance> set) {
         if (this.entity instanceof ServerPlayer) {
-            if (((ServerPlayerEntityBridge) this.entity).bridge$isHealthScaled()) {
-                ((ServerPlayerEntityBridge) this.entity).bridge$injectScaledHealth(set);
+            if (((ServerPlayerBridge) this.entity).bridge$isHealthScaled()) {
+                ((ServerPlayerBridge) this.entity).bridge$injectScaledHealth(set);
             }
         }
         return set;
@@ -144,10 +144,10 @@ public abstract class ServerEntityMixin {
 
     @Redirect(method = "sendDirtyEntityData", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket"))
     private ClientboundSetEntityDataPacket impl$createSpoofedPacket(int entityId, SynchedEntityData dataManager, boolean p_i46917_3_) {
-        if (!(this.entity instanceof ServerPlayerEntityBridge && ((ServerPlayerEntityBridge) this.entity).bridge$isHealthScaled())) {
+        if (!(this.entity instanceof ServerPlayerBridge && ((ServerPlayerBridge) this.entity).bridge$isHealthScaled())) {
             return new ClientboundSetEntityDataPacket(entityId, dataManager, p_i46917_3_);
         }
-        final float scaledHealth = ((ServerPlayerEntityBridge) this.entity).bridge$getInternalScaledHealth();
+        final float scaledHealth = ((ServerPlayerBridge) this.entity).bridge$getInternalScaledHealth();
         final Float actualHealth = dataManager.get(LivingEntityAccessor.accessor$DATA_HEALTH_ID());
         dataManager.set(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), scaledHealth);
         final ClientboundSetEntityDataPacket spoofed = new ClientboundSetEntityDataPacket(entityId, dataManager, p_i46917_3_);

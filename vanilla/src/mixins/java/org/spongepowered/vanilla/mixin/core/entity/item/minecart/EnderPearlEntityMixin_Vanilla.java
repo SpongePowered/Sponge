@@ -26,7 +26,7 @@ package org.spongepowered.vanilla.mixin.core.entity.item.minecart;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
 
 import javax.annotation.Nullable;

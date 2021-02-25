@@ -30,7 +30,7 @@ import net.minecraft.world.entity.player.ChatVisiblity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.player.ChatVisibilityBridge;
+import org.spongepowered.common.bridge.world.entity.player.ChatVisiblityBridge;
 
 @Mixin(ChatVisiblity.class)
 public abstract class ChatVisiblityMixin_API implements org.spongepowered.api.entity.living.player.chat.ChatVisibility {
@@ -46,6 +46,6 @@ public abstract class ChatVisiblityMixin_API implements org.spongepowered.api.en
 
     @Override
     public boolean isVisible(MessageType type) {
-        return ((ChatVisibilityBridge) this).bridge$getVisibleChatTypes().contains(type);
+        return ((ChatVisiblityBridge) this).bridge$getVisibleChatTypes().contains(type);
     }
 }

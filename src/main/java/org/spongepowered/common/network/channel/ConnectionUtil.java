@@ -26,8 +26,8 @@ package org.spongepowered.common.network.channel;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge;
-import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
+import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 
 import java.util.Set;
 import net.minecraft.network.Connection;
@@ -42,13 +42,13 @@ public final class ConnectionUtil {
     }
 
     public static Set<ResourceKey> getRegisteredChannels(final EngineConnection connection) {
-        final Connection networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
-        return ((NetworkManagerBridge) networkManager).bridge$getRegisteredChannels();
+        final Connection networkManager = ((ConnectionHolderBridge) connection).bridge$getConnection();
+        return ((ConnectionBridge) networkManager).bridge$getRegisteredChannels();
     }
 
     public static TransactionStore getTransactionStore(final EngineConnection connection) {
-        final Connection networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
-        return ((NetworkManagerBridge) networkManager).bridge$getTransactionStore();
+        final Connection networkManager = ((ConnectionHolderBridge) connection).bridge$getConnection();
+        return ((ConnectionBridge) networkManager).bridge$getTransactionStore();
     }
 
     public static void checkHandshakePhase(final EngineConnection connection) {

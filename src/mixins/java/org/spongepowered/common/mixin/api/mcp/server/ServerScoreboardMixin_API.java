@@ -41,8 +41,8 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.accessor.world.scores.ScoreboardAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
-import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
+import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
 import java.util.Collection;
@@ -61,7 +61,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
         Objects.requireNonNull(name);
 
         final net.minecraft.world.scores.Objective objective = ((ScoreboardAccessor) this).accessor$objectivesByName().get(name);
-        return Optional.ofNullable(objective == null ? null : ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
+        return Optional.ofNullable(objective == null ? null : ((ObjectiveBridge) objective).bridge$getSpongeObjective());
     }
 
     @Override
@@ -69,7 +69,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
         final MappedRegistry<DisplaySlot> registry = (MappedRegistry<DisplaySlot>) (Object) Sponge.getGame().registries().registry(RegistryTypes.DISPLAY_SLOT);
         final net.minecraft.world.scores.Objective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[registry.getId(slot)];
         if (objective != null) {
-            return Optional.of(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
+            return Optional.of(((ObjectiveBridge) objective).bridge$getSpongeObjective());
         }
         return Optional.empty();
     }
@@ -78,7 +78,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
     public Set<Objective> getObjectivesByCriterion(final Criterion criterion) {
         if (((ScoreboardAccessor) this).accessor$objectivesByCriteria().containsKey(criterion)) {
             return ((ScoreboardAccessor) this).accessor$objectivesByCriteria().get(criterion).stream()
-                .map(objective -> ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective()).collect(Collectors.toSet());
+                .map(objective -> ((ObjectiveBridge) objective).bridge$getSpongeObjective()).collect(Collectors.toSet());
         }
         return new HashSet<>();
     }
@@ -100,7 +100,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
     @Override
     public Set<Objective> getObjectives() {
         return ((ScoreboardAccessor) this).accessor$objectivesByName().values().stream()
-            .map(objective -> ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective())
+            .map(objective -> ((ObjectiveBridge) objective).bridge$getSpongeObjective())
             .collect(Collectors.toSet());
     }
 
@@ -115,7 +115,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
     public Set<org.spongepowered.api.scoreboard.Score> getScores() {
         final Set<org.spongepowered.api.scoreboard.Score> scores = new HashSet<>();
         for (final net.minecraft.world.scores.Objective objective: ((ScoreboardAccessor) this).accessor$objectivesByName().values()) {
-            scores.addAll(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective().getScores().values());
+            scores.addAll(((ObjectiveBridge) objective).bridge$getSpongeObjective().getScores().values());
         }
         return scores;
     }
@@ -126,7 +126,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
 
         final Set<org.spongepowered.api.scoreboard.Score> scores = new HashSet<>();
         for (final net.minecraft.world.scores.Objective objective: ((ScoreboardAccessor) this).accessor$objectivesByName().values()) {
-            ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective().getScore(name).ifPresent(scores::add);
+            ((ObjectiveBridge) objective).bridge$getSpongeObjective().getScore(name).ifPresent(scores::add);
         }
         return scores;
     }
@@ -136,7 +136,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
         Objects.requireNonNull(name);
 
         for (final net.minecraft.world.scores.Objective objective: ((ScoreboardAccessor) this).accessor$objectivesByName().values()) {
-            final SpongeObjective spongeObjective = ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
+            final SpongeObjective spongeObjective = ((ObjectiveBridge) objective).bridge$getSpongeObjective();
             spongeObjective.getScore(name).ifPresent(spongeObjective::removeScore);
         }
     }

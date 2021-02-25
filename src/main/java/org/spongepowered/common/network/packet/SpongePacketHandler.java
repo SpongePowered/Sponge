@@ -38,7 +38,7 @@ import org.spongepowered.api.network.channel.packet.PacketChannel;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 
 import java.util.Objects;
@@ -64,9 +64,9 @@ public final class SpongePacketHandler {
                         return;
                     }
 
-                    final ChunkBridge chunkBridge = (ChunkBridge) sender.level.getChunkAt(pos);
-                    final Optional<User> owner = chunkBridge.bridge$getBlockCreator(pos);
-                    final Optional<User> notifier = chunkBridge.bridge$getBlockNotifier(pos);
+                    final LevelChunkBridge levelChunkBridge = (LevelChunkBridge) sender.level.getChunkAt(pos);
+                    final Optional<User> owner = levelChunkBridge.bridge$getBlockCreator(pos);
+                    final Optional<User> notifier = levelChunkBridge.bridge$getBlockNotifier(pos);
 
                     response.success(SpongePacketHandler.createTrackerDataResponse(owner, notifier));
                 });
